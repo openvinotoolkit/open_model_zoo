@@ -317,8 +317,13 @@ NATIVE_DEMOS = [
                                       '--mean_values': "104.0 117.0 123.0"}),
                 ]
             ),
-            TestCase(options={'-at': 'retinaface-pytorch',
-                              '-m': ModelArg('retinaface-resnet50-pytorch')}
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'retinaface-pytorch'}),
+                [
+                    TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
+                                      '--mean_values': "104.0 117.0 123.0"}),
+                ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
@@ -890,8 +895,13 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'ctpn',
                               '-m': ModelArg('ctpn')}
             ),
-            TestCase(options={'--architecture_type': 'retinaface-pytorch',
-                              '-m': ModelArg('retinaface-resnet50-pytorch')}
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'retinaface-pytorch'}),
+                [
+                    TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
+                                      '--mean_values': ['104.0', '117.0', '123.0']}),
+                ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),

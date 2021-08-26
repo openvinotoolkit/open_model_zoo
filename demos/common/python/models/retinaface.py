@@ -306,8 +306,8 @@ class RetinaFacePostprocessor:
 
 
 class RetinaFacePyTorch(Model):
-    def __init__(self, ie, model_path, threshold=0.5):
-        super().__init__(ie, model_path)
+    def __init__(self, ie, model_path, input_transform, threshold=0.5):
+        super().__init__(ie, model_path, input_transform)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         expected_outputs_count = (2, 3)
@@ -330,6 +330,7 @@ class RetinaFacePyTorch(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
+        resized_image = self.input_transform(resized_image)
         resized_image = np.expand_dims(resized_image.transpose((2, 0, 1)), axis=0) # Change data layout from HWC to CHW
 
         dict_inputs = {self.image_blob_name: resized_image}

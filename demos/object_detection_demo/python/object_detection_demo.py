@@ -164,8 +164,7 @@ class ColorPalette:
 def get_model(ie, args):
     input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
     common_args = (ie, args.model, input_transform)
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface',
-                                  'retinaface-pytorch') and not input_transform.is_trivial:
+    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial:
         raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
 
     if args.architecture_type == 'ssd':
@@ -189,7 +188,7 @@ def get_model(ie, args):
     elif args.architecture_type == 'ultra_lightweight_face_detection':
         return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFacePyTorch(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'detr':
         return models.DETR(*common_args, labels=args.labels, threshold=args.prob_threshold)
     else:

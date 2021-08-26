@@ -19,15 +19,15 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
 
-ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, InputTransform(), {"Face"}),  // Default label is "Face"
+ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    float boxIOUThreshold, const InputTransform& inputTransform)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, {"Face"}),  // Default label is "Face"
     landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
 }
 
 void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -35,7 +35,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     std::string imageInputName = inputInfo.begin()->first;
     inputsNames.push_back(imageInputName);
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
     if (useAutoResize) {
         input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
         input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
@@ -51,8 +51,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     landmarksNum = 0;
 

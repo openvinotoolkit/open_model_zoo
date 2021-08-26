@@ -23,8 +23,8 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, con
 }
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-    auto& origImg = inputData.asRef<ImageInputData>().inputImage;
-    auto& img = inputTransform.call(origImg);
+    const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
+    const auto& img = inputTransform.call(origImg);
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
