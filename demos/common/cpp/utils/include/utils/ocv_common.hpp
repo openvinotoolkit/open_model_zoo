@@ -215,7 +215,7 @@ class InputTransform {
             }
             std::vector<cv::Mat> channels;
             cv::split(result, channels);
-            for (int i = 0; i < channels.size(); i++) {
+            for (size_t i = 0; i < channels.size(); i++) {
                 channels[i] = (channels[i] - means[i]) / stdScales[i];
             }
             cv::merge(channels, result);

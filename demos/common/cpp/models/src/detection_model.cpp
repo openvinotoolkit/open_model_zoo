@@ -19,7 +19,7 @@
 
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    InputTransform& inputTransform, const std::vector<std::string>& labels) :
+    const InputTransform& inputTransform, const std::vector<std::string>& labels) :
     ImageModel(modelFileName, useAutoResize, inputTransform),
     confidenceThreshold(confidenceThreshold),
     labels(labels) {

@@ -30,7 +30,7 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelSSD(const std::string& modelFileName,
         float confidenceThreshold, bool useAutoResize,
-        InputTransform& inputTransform = InputTransform(),
+        const InputTransform& inputTransform = InputTransform(),
         const std::vector<std::string>& labels = std::vector<std::string>());
 
     std::shared_ptr<InternalModelData> preprocess(

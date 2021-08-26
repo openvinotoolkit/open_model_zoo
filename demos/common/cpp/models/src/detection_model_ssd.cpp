@@ -20,7 +20,7 @@
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
-    InputTransform& inputTransform,
+    const InputTransform& inputTransform,
     const std::vector<std::string>& labels) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, labels) {
 }

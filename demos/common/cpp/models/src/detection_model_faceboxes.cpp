@@ -20,7 +20,7 @@
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
-    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold, InputTransform& inputTransform)
+    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold, const InputTransform& inputTransform)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, {"Face"}),
       maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
       steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {

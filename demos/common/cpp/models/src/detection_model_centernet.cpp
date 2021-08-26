@@ -24,7 +24,7 @@
 
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
-    InputTransform& inputTransform, const std::vector<std::string>& labels)
+    const InputTransform& inputTransform, const std::vector<std::string>& labels)
     : DetectionModel(modelFileName, confidenceThreshold, false, inputTransform, labels) {
 }
 
@@ -108,11 +108,11 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
-    auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
-    resizedImg = inputTransform.call(resizedImg);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg, !inputTransform.isTrivial));
+    const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
+    const auto& normalizedImg = inputTransform.call(resizedImg);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(normalizedImg, !inputTransform.isTrivial));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
+    return std::make_shared<InternalImageMatModelData>(normalizedImg, img.cols, img.rows);
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {

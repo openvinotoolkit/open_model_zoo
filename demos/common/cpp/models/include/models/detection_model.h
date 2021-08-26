@@ -28,7 +28,7 @@ public:
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        InputTransform& inputTransform, const std::vector<std::string>& labels);
+        const InputTransform& inputTransform, const std::vector<std::string>& labels);
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 

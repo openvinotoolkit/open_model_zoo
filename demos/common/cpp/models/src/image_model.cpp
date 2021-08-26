@@ -16,7 +16,7 @@
 
 #include "models/image_model.h"
 
-ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, InputTransform& inputTransform) :
+ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, const InputTransform& inputTransform) :
     ModelBase(modelFileName),
     useAutoResize(useAutoResize),
     inputTransform(inputTransform) {
