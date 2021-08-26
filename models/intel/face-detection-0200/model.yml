@@ -167,6 +167,10 @@ postprocessing:
     replacement: 'openvino:\n    default: false'
     file: model/template.yaml
   - $type: regex_replace
+    pattern: 'pretrained=True'
+    replacement: 'pretrained=False'
+    file: model/model.py
+  - $type: regex_replace
     pattern: 'from yapf'
     replacement: '# \g<0>'
     file: model/lib/mmcv-full-1.3.0/mmcv/utils/config.py

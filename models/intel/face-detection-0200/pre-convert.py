@@ -30,14 +30,14 @@ def main():
     parser.add_argument('input_dir', type=Path)
     parser.add_argument('output_dir', type=Path)
     args = parser.parse_args()
-    
+
     paths = [os.path.join(args.input_dir, "model",),
              os.path.join(args.input_dir, "model", "lib"),
              os.path.join(args.input_dir, "model", "lib", "terminaltables-3.1.0"),
              os.path.join(args.input_dir, "model", "lib", "mmcv-full-1.3.0"),
              os.path.join(args.input_dir, "model", "lib", "mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe")]
     weights = os.path.join(args.input_dir, 'model', 'ckpt', 'snapshot.pth')
-    
+
     # setup.py for mmcv
     work_dir = os.path.join(args.input_dir, "model", "lib", "mmcv-full-1.3.0")
     with cd(work_dir):
