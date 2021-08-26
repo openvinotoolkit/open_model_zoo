@@ -291,7 +291,7 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('object-detection-demo')}),
         [
             *combine_cases(
-                TestCase(options={'--architecture_type': 'centernet'}),
+                TestCase(options={'-at': 'centernet'}),
                 [
                     *single_option_cases('-m',
                         ModelArg('ctdet_coco_dlav0_384'),
@@ -299,8 +299,8 @@ NATIVE_DEMOS = [
                     ),
                     *combine_cases(
                         TestCase(options={
-                            '--mean_values': "104.04 113.985 119.85",
-                            '--scale_values': "73.695 69.87 70.89",
+                            '-mean_values': "104.04 113.985 119.85",
+                            '-scale_values': "73.695 69.87 70.89",
                         }),
                         single_option_cases('-m',
                             ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
@@ -310,25 +310,25 @@ NATIVE_DEMOS = [
                 ]
             ),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'faceboxes'}),
+                TestCase(options={'-at': 'faceboxes'}),
                 [
                     TestCase(options={'-m': ModelArg('faceboxes-pytorch')}),
                     TestCase(options={'-m': ModelFileArg('faceboxes-pytorch', 'faceboxes-pytorch.onnx'),
-                                      '--mean_values': "104.0 117.0 123.0"}),
+                                      '-mean_values': "104.0 117.0 123.0"}),
                 ]
             ),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'retinaface-pytorch'}),
+                TestCase(options={'-at': 'retinaface-pytorch'}),
                 [
                     TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
                     TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
-                                      '--mean_values': "104.0 117.0 123.0"}),
+                                      '-mean_values': "104.0 117.0 123.0"}),
                 ]
             ),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'ssd'}),
+                TestCase(options={'-at': 'ssd'}),
                 [
-                    single_option_cases('-m',
+                    *single_option_cases('-m',
                         ModelArg('efficientdet-d0-tf'),
                         ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-adas-0001'),
@@ -365,9 +365,9 @@ NATIVE_DEMOS = [
                         ModelArg('vehicle-license-plate-detection-barrier-0106'),
                         ModelArg('vehicle-license-plate-detection-barrier-0123')),
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
-                                        '--reverse_input_channels': None,
-                                        '--mean_values': "123.675 116.28 103.53",
-                                        '--scale_values': "58.395 57.12 57.375"}),
+                                        '-reverse_input_channels': None,
+                                        '-mean_values': "123.675 116.28 103.53",
+                                        '-scale_values': "58.395 57.12 57.375"}),
                 ]
             ),
             *combine_cases(
