@@ -16,6 +16,7 @@
 
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
+#include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
 
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
@@ -26,6 +27,7 @@ ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float con
 void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -49,9 +51,12 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     landmarksNum = 0;
 
+    std::vector<uint32_t> outputsSizes[OT_MAX];
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(output.second->getDims().size()==4 ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::CHW);

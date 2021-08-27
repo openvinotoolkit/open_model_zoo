@@ -79,6 +79,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if self.profiler:
             self.summary_helper = ClassificationProfilingSummaryHelper()
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
     def update(self, annotation, prediction):
         if not self.match:
@@ -162,9 +165,12 @@ class ClassificationProfilingSummaryHelper:
                 'precision': precision.mean(),
                 'recall': recall.mean(),
                 'f1_score': f1_score.mean(),
-                'roc_auc': avg_roc_auc,
-                'precision_recall_area': average_pr_area,
-                'charts': {'roc': average_roc.tolist(), 'precision_recall': average_pr_chart.tolist()},
+                'charts': {
+                    'roc': average_roc.tolist(),
+                    'precision_recall': average_pr_chart.tolist(),
+                    'roc_auc': avg_roc_auc,
+                    'precision_recall_area': average_pr_area,
+                },
                 'num_objects': np.sum(cm_horizontal_sum)
             },
             'per_class_result': {}
@@ -176,18 +182,21 @@ class ClassificationProfilingSummaryHelper:
                 'precision': precision[i],
                 'recall': recall[i],
                 'f1_score': f1_score[i],
-                'roc_auc': per_class_auc[i],
-                'precision_recall_area': per_class_pr_area[i],
                 'result_scale': 100,
                 'result_postfix': '%',
                 'num_objects': cm_horizontal_sum[i],
-                'charts': {'roc': per_class_roc[i].tolist(), 'precision_recall': per_class_pr_chart[i].tolist()}
+                'charts': {
+                    'roc': per_class_roc[i].tolist(),
+                    'precision_recall': per_class_pr_chart[i].tolist(),
+                    'roc_auc': per_class_auc[i],
+                    'precision_recall_area': per_class_pr_area[i]
+                }
             }
         summary['per_class_result'].update(per_class_result)
         return summary
 
     def cm(self):
-        num_labels = np.max(self.gt) + 1
+        num_labels = max(np.max(self.gt) + 1, np.max(self.pred) + 1)
         cm = np.zeros((num_labels, num_labels))
         for gt, pred in zip(self.gt, self.pred):
             cm[gt][pred] += 1
@@ -224,19 +233,22 @@ class ClassificationProfilingSummaryHelper:
         threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
         tps = np.cumsum(y_true)[threshold_idxs]
         fps = 1 + threshold_idxs - tps
+        if max(fps) > 0:
+            fps /= fps[-1]
+        if max(tps) > 0:
+            tps /= tps[-1]
         plot = np.array([fps, tps, y_score[threshold_idxs]])
         area = self.roc_auc_score(fps, tps)
         return plot.T, area
 
     def pr_curve(self, gt, pred):
-        chart, area = self.roc_curve(
-            gt, pred
-        )
+        chart, area = self.roc_curve(gt, pred)
         fps, tps, _ = chart.T
 
         precision = tps / (tps + fps)
         precision[np.isnan(precision)] = 0
         recall = tps / tps[-1]
+        recall[np.isnan(recall)] = 0
         last_ind = tps.searchsorted(tps[-1])
         sl = slice(last_ind, None, -1)
         area = self.precision_recall_auc(np.r_[precision[sl], 1], np.r_[recall[sl], 0])
@@ -334,6 +346,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
             self.profiler.reset()
         self.accuracy.reset()
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -459,6 +474,10 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
         if self.profiler:
             self.profiler.reset()
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):

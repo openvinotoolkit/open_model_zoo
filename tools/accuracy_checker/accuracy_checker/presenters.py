@@ -140,7 +140,7 @@ class VectorPrintPresenter(BasePresenter):
         value_names_orig = meta.get('names', list(range(0, len_value)))
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]
         if np.isscalar(value) or np.size(value) <= 1:
-            value_name = value_names[0] if 'names' in meta else name
+            value_name = value_names[0] if value_names and 'names' in meta else name
             value_name_orig = value_names_orig[0] if value_name != name else name
             if isinstance(reference, dict):
                 ref = reference.get(value_name_orig, '')
@@ -174,6 +174,7 @@ class VectorPrintPresenter(BasePresenter):
             target_for_value = target_per_value.get(orig_name, target)
             meta_for_value = deepcopy(meta)
             meta_for_value['target'] = target_for_value
+            meta_for_value['class_name'] = orig_name
             per_value_meta.append(meta_for_value)
         results = []
         for idx, value_item in enumerate(value):

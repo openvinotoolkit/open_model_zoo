@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 from pathlib import Path
+import os
 import numpy as np
 
 import cv2
-import openvino.inference_engine as ie
 
 from ..config import PathField, StringField, ConfigError, ListInputsField, ListField, BoolField
 from ..logging import print_info, warning
@@ -34,6 +34,17 @@ except AttributeError:
     except AttributeError:
         def compile_args(*args):
             return list(map(cv2.GCompileArg, args))
+
+try:
+    from openvino.inference_engine import known_plugins
+except ImportError:
+    known_plugins = []
+
+try:
+    from openvino.inference_engine import IECore
+    _ie_core = IECore()
+except ImportError:
+    _ie_core = None
 
 
 try:
@@ -67,7 +78,7 @@ class GAPILauncherConfigValidator(LauncherConfigValidator):
                         raise ConfigError('input value should have shape field')
                     error_stack.extend(self.build_error(entry, field_uri, 'input value should have shape field'))
         self.create_device_regex(known_plugins)
-        if 'device' not in entry:
+        if 'device' not in entry or entry.get('backend', 'ie') == 'mx':
             return error_stack
         try:
             self.fields['device'].validate(
@@ -100,7 +111,8 @@ class GAPILauncher(Launcher):
             'model': PathField(description="Path to model file.", file_or_directory=True),
             'weights': PathField(description="Path to weights file.",
                                  optional=True, file_or_directory=True),
-            'device': StringField(description="Device name"),
+            'backend': StringField(optional=True, description='backend name', choices=['ie', 'mx'], default='ie'),
+            'device': StringField(description="Device name", optional=True, default='cpu'),
             '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
             'inputs': ListInputsField(optional=False, description="Inputs."),
             'outputs': ListField(value_type=str, allow_empty=False, description='Outputs.')
@@ -112,7 +124,8 @@ class GAPILauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
-        self.device = self.get_value_from_config('device').upper()
+        self.backend = self.get_value_from_config('backend')
+        self.device = self.get_value_from_config('device').upper() if self.backend == 'ie' else ''
         self.comp = None
         self.network_args = None
         self.output_names = self.get_value_from_config('outputs')
@@ -145,7 +158,7 @@ class GAPILauncher(Launcher):
         return GAPILauncherConfigValidator(
             uri_prefix or 'launcher.{}'.format(cls.__provider__),
             fields=cls.parameters(), delayed_model_loading=delayed_model_loading
-        ).validate(config, ie_core=ie.IECore(), fetch_only=fetch_only)
+        ).validate(config, ie_core=_ie_core, fetch_only=fetch_only)
 
     def prepare_net(self):
         inputs = cv2.GInferInputs()
@@ -164,10 +177,19 @@ class GAPILauncher(Launcher):
         if self.weights is not None:
             args.append(str(self.weights))
         args.append(self.device.upper())
-        pp = cv2.gapi.ie.params(*args)
+        if self.backend == 'ie':
+            pp = cv2.gapi.ie.params(*args)
+        else:
+            pp = cv2.gapi.mx.params('net', str(self.model))
         for input_name, value in self._const_inputs.items():
             pp.constInput(input_name, value)
-        self.network_args = compile_args(cv2.gapi.networks(pp))
+        if self.backend == 'ie':
+            self.network_args = compile_args(cv2.gapi.networks(pp))
+        else:
+            mvcmd_file = os.environ.get('MVCMD_FILE', '')
+            self.network_args = compile_args(
+                cv2.gapi.networks(pp), cv2.gapi_mx_mvcmdFile(mvcmd_file)
+            )
 
     @property
     def inputs(self):
@@ -185,12 +207,13 @@ class GAPILauncher(Launcher):
         if self.non_image_inputs:
             return self._fit_to_input(data, layer_name, layout, precision)
         if np.ndim(data) == 4:
-            if data[0].dtype in [float, np.float64]:
-                return data[0].astype(np.float32)
-            return data[0]
-        data = np.array(data)
-        if data.dtype in [float, np.float64]:
+            data = data[0]
+        else:
+            data = np.array(data)
+        if data.dtype in [float, np.float64] and precision is None:
             data = data.astype(np.float32)
+        if precision:
+            data = data.astype(precision)
 
         return data
 
@@ -266,7 +289,7 @@ class GAPILauncher(Launcher):
                     raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
                 print_info('Found model {}'.format(model))
                 return model, model.suffix == '.blob'
-            if model_is_blob:
+            if model_is_blob or self.backend == 'mx':
                 model_list = get_blob(model)
             else:
                 model_list = get_xml(model)

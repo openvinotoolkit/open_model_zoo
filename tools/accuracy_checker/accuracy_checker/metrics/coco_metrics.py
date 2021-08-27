@@ -123,27 +123,117 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
         ]
         precisions = [result[0] for result in per_class_result]
         if self.profiler:
-            for class_match, (precision, recall, all_precisions, all_recalls) in zip(
+            for class_match, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
                     per_class_matching, per_class_result
             ):
                 class_match['result'] = precision
                 class_match['precision'] = precision
                 class_match['recall'] = recall
-                ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
+                max_precision = all_precisions[0] if np.size(all_precisions) else np.array([])
+                max_recall = all_recalls[0] if np.size(all_recalls) else np.array([])
+                ap = average_precision(max_precision, max_recall, APIntegralType.voc_max)
                 class_match['ap'] = ap
             self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(precisions))
         return precisions
 
     def evaluate(self, annotations, predictions):
+        per_class_result = [
+            compute_precision_recall(self.thresholds, self.matching_results[i]) for i, _ in enumerate(self.labels)
+        ]
+        precision = [result[0] for result in per_class_result]
         if self.profiler:
             self.profiler.finish()
-        precision = [
-            compute_precision_recall(self.thresholds, self.matching_results[i])[0]
-            for i, _ in enumerate(self.labels)
-        ]
+            summary = self.prepare_summary(per_class_result)
+            self.profiler.write_summary(summary)
         precision, self.meta['names'] = finalize_metric_result(precision, self.meta['orig_label_names'])
 
         return precision
+
+    @staticmethod
+    def prepare_summary(label_stats):
+        ap, recall_v, recall, precision_v, precision, lamrs = [], [], [], [], [], []
+        per_class_summary = {}
+        tp_fp_rate = []
+        total_objects_cnt = 0
+        approx_pr_recall, approx_fppi_miss_rate = [], []
+        for label_idx, stat in enumerate(label_stats):
+            precision_v_, recall_v_, precisions, recalls, fps, tps, num_img = stat
+            if num_img == 0:
+                lamrs.append(0)
+                tp_fp_rate.append([0, 0])
+                ap.append(np.NAN)
+                continue
+            max_precision = precisions[0] if np.size(precisions) else np.array([])
+            max_recall = recalls[0] if np.size(recalls) else np.array([])
+            ap_v = min(average_precision(max_precision, max_recall, APIntegralType.voc_max), 1)
+            ap.append(ap_v)
+            recall.append(recalls[0] if np.size(recalls) else [])
+            recall_v.append(recall_v_)
+            precision.append(precisions[0] if np.size(precisions) else [])
+            precision_v.append(precision_v_)
+            fppi = 1 - precisions[0]
+            mr = 1 - recalls[0]
+            pr = np.array([precisions[0], recalls[0]]).T
+            fm = np.array([fppi, mr]).T
+            if np.size(recalls[0]) and np.size(precisions[0]):
+                approx_recall = np.linspace(0, 1, 100, endpoint=True)
+                approx_precision = np.interp(approx_recall, recalls[0], precisions[0])
+                approx_pr_recall.append([approx_precision, approx_recall])
+                approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+                approx_mr = np.interp(approx_fppi, fppi, mr)
+                approx_fppi_miss_rate.append([approx_fppi, approx_mr])
+            fppi_tmp = np.insert(fppi, 0, -1.0)
+            mr_tmp = np.insert(mr, 0, 1.0)
+            ref = np.logspace(-2.0, 0.0, num=9)
+            fp = int(np.sum(fps[0]))
+            tp = int(np.sum(tps[0]))
+            tp_fp_rate.append([tp, fp])
+            for i, ref_i in enumerate(ref):
+                j = np.where(fppi_tmp <= ref_i)[-1][-1]
+                ref[i] = mr_tmp[j]
+
+            lamr = np.exp(np.mean(np.log(np.maximum(1e-10, ref))))
+            lamrs.append(lamr)
+            total_objects_cnt += len(recall[-1])
+            per_class_summary[label_idx] = {
+                'precision': precision_v_ if not np.isnan(precision_v_) else -1,
+                'result': precision_v_ if not np.isnan(precision_v_) else -1,
+                'recall': recall_v_ if not np.isnan(recall_v_) else -1,
+                'ap': ap_v if not np.isnan(ap_v) else -1,
+                "scale": 100,
+                "result_postfix": "%",
+                'objects_count': len(recall[-1]),
+                'charts': {
+                    'precision_recall': pr.tolist(),
+                    'fppi_miss_rate': fm.tolist()
+                },
+                'images_count': int(num_img)
+            }
+        ap_res = np.nanmean(ap)
+        recall_res = np.nanmean(recall_v)
+        precision_res = np.nanmean(precision_v)
+        return {
+            'summary_result': {
+                'result': precision_res if not np.isnan(precision_res) else -1,
+                'precision': precision_res if not np.isnan(precision_res) else -1,
+                'recall': recall_res if not np.isnan(recall_res) else -1,
+                'ap': ap_res if not np.isnan(ap_res) else -1,
+                'result_scale': 100,
+                'result_postfix': '%',
+                'charts': {
+                    'ap': [0 if np.isnan(ap_) else ap_ for ap_ in ap],
+                    'log_miss_rate': lamrs,
+                    'tp_fp_rate': tp_fp_rate,
+                    'precision_recall': np.mean(approx_pr_recall, 0).T.tolist() if np.size(approx_pr_recall) else [],
+                    'fppi_miss_rate': (
+                        np.mean(approx_fppi_miss_rate, 0).T.tolist() if np.size(approx_fppi_miss_rate) else []
+                    )
+                },
+                'objects_count': total_objects_cnt
+
+            },
+            'per_class_result': per_class_summary
+        }
 
 
 class MSCOCORecall(MSCOCOBaseMetric):
@@ -156,8 +246,9 @@ class MSCOCORecall(MSCOCOBaseMetric):
         ]
         recalls = [metric[1] for metric in per_class_result]
         if self.profiler:
-            for class_match, (precision, recall, all_precisions, all_recalls) in zip(per_class_matching,
-                                                                                     per_class_result):
+            for class_match, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
+                    per_class_matching, per_class_result
+            ):
                 class_match['result'] = recall
                 class_match['precision'] = precision
                 class_match['recall'] = recall
@@ -179,11 +270,12 @@ class MSCOCORecall(MSCOCOBaseMetric):
 
 
 class MSCOCOKeypointsBaseMetric(MSCOCOBaseMetric):
-    annotation_types = (PoseEstimationAnnotation, )
-    prediction_types = (PoseEstimationPrediction, )
+    annotation_types = (PoseEstimationAnnotation,)
+    prediction_types = (PoseEstimationPrediction,)
 
     def update(self, annotation, prediction):
         per_class_results = []
+
         def _prepare_predictions(prediction, label, max_detections):
             if prediction.size == 0:
                 return [], [], []
@@ -283,8 +375,8 @@ class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
 class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
     __provider__ = 'coco_segm_precision'
 
-    annotation_types = (CoCoInstanceSegmentationAnnotation, )
-    prediction_types = (CoCoInstanceSegmentationPrediction, )
+    annotation_types = (CoCoInstanceSegmentationAnnotation,)
+    prediction_types = (CoCoInstanceSegmentationPrediction,)
 
     def configure(self):
         super().configure()
@@ -295,8 +387,8 @@ class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
 class MSCOCOSegmRecall(MSCOCORecall):
     __provider__ = 'coco_segm_recall'
 
-    annotation_types = (CoCoInstanceSegmentationAnnotation, )
-    prediction_types = (CoCoInstanceSegmentationPrediction, )
+    annotation_types = (CoCoInstanceSegmentationAnnotation,)
+    prediction_types = (CoCoInstanceSegmentationPrediction,)
 
     def configure(self):
         super().configure()
@@ -369,7 +461,7 @@ def prepare_annotations(annotation, label, create_boxes=False):
         return [], [], [], boxes, areas
     difficult_box_mask = np.full(annotation.size, False)
     difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
-    iscrowd = np.array(annotation.metadata.get('iscrowd', [0]*annotation.size))
+    iscrowd = np.array(annotation.metadata.get('iscrowd', [0] * annotation.size))
     difficult_box_mask[difficult_box_indices] = True
     difficult_box_mask[iscrowd > 0] = True
     difficult_label = difficult_box_mask[annotation_ids]
@@ -406,14 +498,18 @@ def compute_precision_recall(thresholds, matching_results):
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
     tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
     fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
+    num_images = np.sum([np.size(e['gt_ignore']) != 0 for e in matching_results])
     if npig == 0:
-        return np.nan, np.nan, np.array([]), np.array([])
+        return np.nan, np.nan, np.array([]), np.array([]), [False], [False], num_images
+    precisions, recalls = [], []
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
         tp = np.array(tp)
         fp = np.array(fp)
         num_detections = len(tp)
         rc = tp / npig
         pr = tp / (fp + tp + np.spacing(1))
+        precisions.append(pr)
+        recalls.append(rc)
         q = np.zeros(num_rec_thresholds)
         if num_detections:
             recall[t] = rc[-1]
@@ -440,7 +536,12 @@ def compute_precision_recall(thresholds, matching_results):
     mean_precision = 0 if np.size(precision[precision > -1]) == 0 else np.mean(precision[precision > -1])
     mean_recall = 0 if np.size(recall[recall > -1]) == 0 else np.mean(recall[recall > -1])
 
-    return mean_precision, mean_recall, precision[precision > -1], recall[recall > -1]
+    return (
+        mean_precision, mean_recall,
+        np.array(precisions),
+        np.array(recalls),
+        fps, tps, num_images
+    )
 
 
 def compute_iou_boxes(annotation, prediction, *args, **kwargs):
@@ -459,8 +560,8 @@ def compute_oks(annotation_points, prediction_points, annotation_boxes, annotati
     if np.size(prediction_points) == 0 or np.size(annotation_points) == 0:
         return []
     oks = np.zeros((len(prediction_points), len(annotation_points)))
-    sigmas = np.array([.26, .25, .25, .35, .35, .79, .79, .72, .72, .62, .62, 1.07, 1.07, .87, .87, .89, .89])/10.0
-    variance = (sigmas * 2)**2
+    sigmas = np.array([.26, .25, .25, .35, .35, .79, .79, .72, .72, .62, .62, 1.07, 1.07, .87, .87, .89, .89]) / 10.0
+    variance = (sigmas * 2) ** 2
     # compute oks between each detection and ground truth object
     for gt_idx, gt_points in enumerate(annotation_points):
         # create bounds for ignore regions(double the gt bbox)
@@ -518,7 +619,7 @@ def evaluate_image(
         for tind, t in enumerate(thresholds):
             for dtind, _ in enumerate(detections):
                 # information about best match so far (matched_id = -1 -> unmatched)
-                iou_current = min([t, 1-1e-10])
+                iou_current = min([t, 1 - 1e-10])
                 matched_id = -1
                 for gtind, _ in enumerate(ground_truth):
                     # if this gt already matched, and not a crowd, continue

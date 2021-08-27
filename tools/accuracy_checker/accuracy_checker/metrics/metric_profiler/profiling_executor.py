@@ -21,18 +21,47 @@ from .base_profiler import PROFILERS_MAPPING, MetricProfiler, PROFILERS_WITH_DAT
 PorfilerID = namedtuple('ProfilerID', ['type', 'annotation_source', 'prediction_source', 'name'])
 
 
-def write_summary_result(result, meta, out_path):
-    summary = {
-        'metric_name': result['name'], 'result': result['value'], 'metric_type': result['type'],
-        'result_scale': meta.get('scale', 100), 'result_postfix': meta.get('postfix', '%'),
-        'metric_target': meta['target']
+def write_summary_result(result, meta, out_path, label_map):
+    summary = {}
+    if isinstance(result, list):
+        reversed_label_map = {v: k for k, v in label_map.items()} if label_map else {}
+        mean_res, mean_meta, per_class_result = {}, {}, {}
+        if meta[0].get('calculate_mean', True):
+            for res, r_meta in zip(result, meta):
+                if res['name'].endswith("@mean"):
+                    mean_res = res
+                    mean_meta = r_meta
+                    continue
+                class_name = r_meta.get('class_name', res['name'])
+                class_id = reversed_label_map.get(class_name, class_name)
+                per_class_result[str(class_id)] = {
+                    'result': res['value'],
+                    'result_scale': r_meta.get('scale', 100), 'result_postfix': r_meta.get('postfix', '%'),
+                    'metric_target': r_meta['target']
+                }
+            summary['per_class_result'] = per_class_result
+            if not mean_res:
+                mean_res, mean_meta = result[0], meta[0]
+        else:
+            mean_res, mean_meta = result[0], meta[0]
+    else:
+        mean_res, mean_meta = result, meta
+
+    summary['summary_result'] = {
+        'metric_name': mean_res['name'], 'result': mean_res['value'], 'metric_type': mean_res['type'],
+        'result_scale': mean_meta.get('scale', 100), 'result_postfix': mean_meta.get('postfix', '%'),
+        'metric_target': mean_meta['target']
     }
     with open(str(out_path), 'r') as f:
         out_dict = json.load(f)
 
     final_summary = out_dict.get('summary_result', {})
-    final_summary.update(summary)
+    final_summary.update(summary['summary_result'])
     out_dict['summary_result'] = final_summary
+    if 'per_class_result' in summary:
+        per_class_res = out_dict.get('per_class_result', {})
+        per_class_res.update(summary['per_class_result'])
+        out_dict['per_class_result'] = per_class_res
 
     with open(str(out_path), 'w') as f:
         json.dump(out_dict, f)

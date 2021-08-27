@@ -343,8 +343,20 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    ModelArg('yolo-v1-tiny-tf'),
+                    ModelArg('yolo-v2-ava-0001'),
+                    ModelArg('yolo-v2-ava-sparse-35-0001'),
+                    ModelArg('yolo-v2-ava-sparse-70-0001'),
+                    ModelArg('yolo-v2-tiny-ava-0001'),
+                    ModelArg('yolo-v2-tiny-ava-sparse-30-0001'),
+                    ModelArg('yolo-v2-tiny-ava-sparse-60-0001'),
+                    ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
+                    ModelArg('yolo-v2-tf'),
+                    ModelArg('yolo-v2-tiny-tf'),
                     ModelArg('yolo-v3-tf'),
-                    ModelArg('yolo-v3-tiny-tf'))),
+                    ModelArg('yolo-v3-tiny-tf'),
+                    ModelArg('yolo-v4-tf'),
+                    ModelArg('yolo-v4-tiny-tf'))),
         ],
     )),
 
@@ -692,6 +704,15 @@ PYTHON_DEMOS = [
             TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
                               '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
         ],
+    )),
+
+    PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': ['The poem was written by'],
+            '-m': ModelArg('gpt-2'),
+            '-v': ModelFileArg('gpt-2', 'gpt2/vocab.json'),
+            '--merges': ModelFileArg('gpt-2', 'gpt2/merges.txt'),
+        }),
     )),
 
     PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(

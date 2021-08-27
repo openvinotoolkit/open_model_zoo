@@ -63,6 +63,7 @@
 | googlenet-v3 | YES | YES | YES |
 | googlenet-v3-pytorch | YES | YES | YES |
 | googlenet-v4-tf | YES | YES | YES |
+| gpt-2 | YES | YES | |
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-0.5 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |
@@ -131,6 +132,7 @@
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-101 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
+| shufflenet-v2-x0.5 | YES | YES | YES |
 | shufflenet-v2-x1.0 | YES | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES | YES |
 | Sphereface | YES | YES | YES |
@@ -145,6 +147,7 @@
 | ssd_mobilenet_v2_coco | YES | YES | YES |
 | ssd_resnet50_v1_fpn_coco | YES | YES | YES |
 | ssdlite_mobilenet_v2 | YES | YES | YES |
+| swin-tiny-patch4-window7-224 | YES | YES | YES |
 | text-recognition-resnet-fc | YES | YES | YES |
 | ultra-lightweight-face-detection-rfb-320 | YES | YES | YES |
 | ultra-lightweight-face-detection-slim-320 | YES | YES | YES |

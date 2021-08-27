@@ -624,6 +624,58 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
 
 
+class YolorAdapter(Adapter):
+    __provider__ = 'yolor'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal objectiveness score value for valid detections."),
+            'num': NumberField(value_type=int, optional=True, min_value=1, default=5,
+                               description="Num parameter from DarkNet configuration file."),
+            'output_name': StringField(optional=True, default=None, description="Name of output.")
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+        self.num = self.get_value_from_config('num')
+        self.output_name = self.get_value_from_config('output_name')
+        if self.output_name is None:
+            self.output_name = self.output_blob
+
+    @staticmethod
+    def xywh2xyxy(x):
+        y = np.copy(x)
+        y[:, 0] = x[:, 0] - x[:, 2] / 2
+        y[:, 1] = x[:, 1] - x[:, 3] / 2
+        y[:, 2] = x[:, 0] + x[:, 2] / 2
+        y[:, 3] = x[:, 1] + x[:, 3] / 2
+        return y
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_name], frame_meta):
+            valid_predictions = output[output[..., 4] > self.threshold]
+            valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
+
+            boxes = self.xywh2xyxy(valid_predictions[:, :4])
+
+            i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
+            x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
+            scores = valid_predictions[i, j + self.num]
+
+            result.append(DetectionPrediction(
+                identifier, j, scores, x_mins, y_mins, x_maxs, y_maxs, meta
+            ))
+        return result
+
+
 class YolofAdapter(YoloV3Adapter):
     __provider__ = 'yolof'
 
