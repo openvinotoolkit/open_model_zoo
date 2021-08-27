@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import glob
-from pathlib import PosixPath
+from pathlib import Path
 import re
 import shutil
 
@@ -41,7 +41,7 @@ class PostprocRegexReplace(Postproc):
     def apply(self, reporter, output_dir):
         postproc_files = glob.glob(str(output_dir / self.file), recursive=True)
         for postproc_file in postproc_files:
-            postproc_file = PosixPath(postproc_file)
+            postproc_file = Path(postproc_file)
             reporter.print_section_heading('Replacing text in {}', postproc_file)
 
             postproc_file_text = postproc_file.read_text(encoding='utf-8')
