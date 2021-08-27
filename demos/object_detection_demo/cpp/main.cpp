@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
         ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
         InputTransform inputTransform = InputTransform(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
-        if ((FLAGS_at == "retinaface" || FLAGS_at == "yolo") && !inputTransform.isTrivial) {
+        if ((FLAGS_at == "retinaface" || FLAGS_at == "yolo") && !inputTransform.isTrivial()) {
             throw std::runtime_error(FLAGS_at + " model doesn't support input transforms.");
         }
 

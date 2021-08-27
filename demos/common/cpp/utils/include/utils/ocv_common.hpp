@@ -175,15 +175,19 @@ class OutputTransform {
 
 class InputTransform {
     public:
-        InputTransform() : isTrivial(true), reverseInputChannels(false) {}
+        InputTransform() : trivial(true), reverseInputChannels(false) {}
 
         InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
-            reverseInputChannels = reverseInputChannels;
-            isTrivial = !reverseInputChannels && meanValues.empty() && scaleValues.empty();
-            if (!isTrivial) {
+            this->reverseInputChannels = reverseInputChannels;
+            trivial = !reverseInputChannels && meanValues.empty() && scaleValues.empty();
+            if (!isTrivial()) {
                 means = meanValues.empty() ? std::vector<float>({0, 0, 0}) : string2Vec(meanValues);
                 stdScales = scaleValues.empty() ? std::vector<float>({1, 1, 1}) : string2Vec(scaleValues);
             }
+        }
+
+        const bool isTrivial() {
+            return trivial;
         }
 
         std::vector<float> string2Vec(const std::string &string) {
@@ -202,12 +206,12 @@ class InputTransform {
         }
 
         void setPrecision(const InferenceEngine::InputInfo::Ptr& input) {
-            const auto precision = isTrivial ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
+            const auto precision = isTrivial() ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
             input->setPrecision(precision);
         }
 
         cv::Mat call(const cv::Mat& inputs) {
-            if (isTrivial) { return inputs; }
+            if (isTrivial()) { return inputs; }
             cv::Mat result;
             inputs.convertTo(result, CV_32F);
             if (reverseInputChannels) {
@@ -222,9 +226,8 @@ class InputTransform {
             return result;
         }
 
-        bool isTrivial;
-
     private:
+        bool trivial;
         bool reverseInputChannels;
         std::vector<float> means;
         std::vector<float> stdScales;
