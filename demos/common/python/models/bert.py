@@ -88,7 +88,7 @@ class BertNamedEntityRecognition(Bert):
 
         self.output_names = list(self.net.outputs)
         if len(self.output_names) != 1:
-            raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only with 1 output")
+            raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only 1 output")
 
     def form_request(self, inputs):
         c_tokens_id = inputs

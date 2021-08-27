@@ -57,7 +57,7 @@ def build_argparser():
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
                       default=0, type=int)
     args.add_argument('-nstreams', '--num_streams',
                       help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '

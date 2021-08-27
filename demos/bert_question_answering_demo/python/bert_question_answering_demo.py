@@ -72,7 +72,7 @@ def build_argparser():
     args.add_argument('-c', '--colors', action='store_true',
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
-    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
                       default=0, type=int)
     args.add_argument('-nstreams', '--num_streams',
                       help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
