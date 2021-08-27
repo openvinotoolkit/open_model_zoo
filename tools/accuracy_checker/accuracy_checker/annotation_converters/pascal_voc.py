@@ -21,7 +21,7 @@ from ..utils import get_path, read_txt, read_xml, check_file_existence, read_jso
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _SYG_CLASSES_DETECTION = (
-    'motor', 'truck', 'bus', 'car'
+    'motor','truck', 'bus','car'
 )
 
 _VOC_CLASSES_DETECTION = (
