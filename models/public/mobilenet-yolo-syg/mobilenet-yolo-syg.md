@@ -19,12 +19,12 @@
 
 ## Accuracy
 
-Accuracy metrics obtained on [VOCdevkit](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/VOCdevkit0829.zip)
+Accuracy metrics obtained on [SYGDate0829](https://hub.fastgit.org/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
 which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
 | ------ | -------|
-| mAP    | 81.42% |
+| mAP    | 84.81% |
 
 ## Input：
 
@@ -55,11 +55,11 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `separable_conv2d_22`,  shape - `1,52,52,42`. The anchor values are `12,16,  19,36,  40,28`.
+1. The array of detection summary info, name - `separable_conv2d_22/BiasAdd`,  shape - `1,52,52,27`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30`,  shape - `1,26,26,42`. The anchor values are `36,75,  76,55,  72,146`.
+2. The array of detection summary info, name - `separable_conv2d_30/BiasAdd`,  shape - `1,26,26,27`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38`,  shape - `1,13,13,42`. The anchor values are `142,110,  192,243,  459,401`.
+3. The array of detection summary info, name - `separable_conv2d_38/BiasAdd`,  shape - `1,13,13,27`. The anchor values are `142,110,  192,243,  459,401`.
 
 For each case format is `B,Cx,Cy,N*14,`, where
     - `B` - batch size
@@ -75,11 +75,11 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 ### Converted model
 
-1. The array of detection summary info, name - `separable_conv2d_22/BiasAdd/YoloRegion`,  shape - `1,42,52,52`. The anchor values are `12,16,  19,36,  40,28`.
+1. The array of detection summary info, name - `separable_conv2d_22/separable_conv2d/YoloRegion`,  shape - `1,27,52,52`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30/BiasAdd/YoloRegion`,  shape - `1,42,26,26`. The anchor values are `36,75,  76,55,  72,146`.
+2. The array of detection summary info, name - `separable_conv2d_30/separable_conv2d/YoloRegion`,  shape - `1,27,26,26`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38/BiasAdd/YoloRegion`,  shape - `1,42,13,13`. The anchor values are `142,110,  192,243,  459,401`.
+3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1,27,13,13`. The anchor values are `142,110,  192,243,  459,401`.
 
 Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_9`], where:
 - (`x`,`y`) - coordinates of box center relative to the cell
