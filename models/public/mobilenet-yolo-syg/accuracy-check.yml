@@ -10,9 +10,6 @@ models:
             type: INPUT
             shape: 1,416,416,3
         output_names:
-          #- reshape_1/Reshape
-          #- reshape_2/Reshape
-          #- reshape_3/Reshape
           
           - separable_conv2d_22/BiasAdd
           - separable_conv2d_30/BiasAdd
@@ -28,29 +25,15 @@ models:
           output_format: HWB
           do_reshape: True
           cells: [52, 26, 13]
-          outputs:         
-          #- reshape_1/Reshape/shape
-          #- reshape_2/Reshape/shape
-          #- reshape_3/Reshape/shape          
+          outputs:                 
             - separable_conv2d_22/BiasAdd
             - separable_conv2d_30/BiasAdd
             - separable_conv2d_38/BiasAdd
-             #- reshape_1/Reshape
-             #- reshape_2/Reshape
-             #- reshape_3/Reshape
+
             
           raw_output: True
     datasets: 
       - name: SYGData0829
-        # data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
-        # annotation: voc_detection.pickle
-        # dataset_meta: voc_detection.json
-        # annotation_conversion:
-          # converter: voc_detection
-          # annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
-          # images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
-          # imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
-          # dataset_meta_file: SYGData0829/voc_label.json 
         
         preprocessing:
           - type: bgr_to_rgb
@@ -79,8 +62,6 @@ models:
             max_detections: 100
             threshold: 0.5
             presenter:  print_scalar    
-          #- type: recall
-          #- type: detection_accuracy
 
             
   - name: mobilenet-yolo-syg
@@ -105,31 +86,12 @@ models:
             - separable_conv2d_22/separable_conv2d/YoloRegion
             - separable_conv2d_30/separable_conv2d/YoloRegion
             - separable_conv2d_38/separable_conv2d/YoloRegion
-         # raw_output: True
-        # batch: 1
 
     datasets: 
       - name: SYGData0829
-        # data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
-        # annotation: voc_detection.pickle
-        # dataset_meta: voc_detection.json
-        # annotation_conversion:
-          # converter: voc_detection
-          # annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
-          # images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
-          # imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
-          # dataset_meta_file: SYGData0829/voc_label.json
-                        
-        # annotation_conversion:
-         # - converter: voc_detection
-         # - imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
-         # - annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
-         # - images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
-         # - has_background: False
-         # - dataset_meta_file: SYGData0829/voc_label.json
+
 
         preprocessing:
-          #- type: bgr_to_rgb
           - type: resize
             size: 416
 
@@ -153,7 +115,5 @@ models:
             max_detections: 100
             threshold: 0.5
             presenter:  print_scalar
-          #- type: recall
-          #- type: detection_accuracy
 
-# global_definitions: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/accuracy_checker/dataset_definitions.yml
+
