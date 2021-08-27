@@ -52,12 +52,15 @@ Channel order is `BGR`.
 
 ### Original model
 
-The detected boxes, scores and labels for each box. The postprocessing is implemented inside the model and is performed while inference of model.
+The list of instances. The postprocessing is implemented inside the model and is performed while inference of model. So each instance it is a object with next fields:
+- `detection box`
+- `label` - predicted class ID
+- `score` - onfidence for the predicted class
 
-Detection box has format [`x1`, `y1`, `x2`, `y2`], where:
+Detection box has format [`x_min`, `y_min`, `x_max`, `y_max`], where:
 
-- (`x1`, `y1`) - left-bottom corner
-- (`x2`, `y2`) - right-top corner
+- (`x_min`, `y_min`) - coordinates of the top left bounding box corner
+- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
 
 ### Converted model
 
@@ -71,9 +74,9 @@ For each case format is `B, N*Cx*Cy, 84`, where
 
 Detection box has format [`x`, `y`, `h`, `w`, `class_no_1`, ..., `class_no_80`], where:
 
-- (`x`, `y`) - coordinates of box center relative to the cell
+- (`x`, `y`) - raw coordinates of box center, multiply by corresponding anchors to get relative to the cell coordinates
 - `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
+- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence of each class
 
 The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 

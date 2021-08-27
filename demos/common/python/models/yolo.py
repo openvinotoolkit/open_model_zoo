@@ -367,7 +367,7 @@ class YOLOF(YOLO):
                 col = (obj_ind - row * params.cells * params.num) // params.num
                 n = (obj_ind - row * params.cells * params.num) % params.num
 
-                # Get relative coords
+                # Get absolute coords of center
                 anchor_x = params.anchors[2 * n] / input_size[1]
                 anchor_y = params.anchors[2 * n + 1] / input_size[0]
                 x = x * anchor_x + col / params.cells
