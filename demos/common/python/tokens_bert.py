@@ -18,13 +18,34 @@ import unicodedata
 import string
 
 
-# Small class to store context as text, its tokens and embedding vector
+# small class to store context as text, its tokens and embedding vector
 class ContextData:
-    def __init__(self, c_tokens_id, c_tokens_se, context=None, c_emb=None):
-        self.c_tokens_id = c_tokens_id
-        self.c_tokens_se = c_tokens_se
+    def __init__(self, tokens_id, tokens_se, context=None, emb=None):
+        self.c_tokens_id = tokens_id
+        self.c_tokens_se = tokens_se
         self.context = context
-        self.c_emb = c_emb
+        self.emb = emb
+
+
+class ContextWindow:
+    def __init__(self, window_len, tokens_id, tokens_se):
+        self.tokens_id = tokens_id
+        self.tokens_se = tokens_se
+        self.window_len = window_len
+        self.stride = self.window_len // 2 # overlap by half
+        self.total_len = len(self.tokens_id)
+        self.s, self.e = 0, min(self.window_len, self.total_len)
+
+    def move(self):
+        self.s = min(self.s + self.stride, self.total_len)
+        self.e = min(self.s + self.window_len, self.total_len)
+
+    def is_over(self):
+        return self.e - self.s < self.stride
+
+    def get_context_data(self, context=None):
+        return ContextData(self.tokens_id[self.s:self.e], self.tokens_se[self.s:self.e],
+                           context=context)
 
 
 # load vocabulary file for encoding

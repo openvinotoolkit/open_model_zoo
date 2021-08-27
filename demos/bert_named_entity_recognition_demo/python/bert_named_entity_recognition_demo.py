@@ -30,6 +30,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 from models import BertNamedEntityRecognition
+from pipelines import get_user_config, parse_devices, AsyncPipeline
+from helpers import log_runtime_settings
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -55,7 +57,33 @@ def build_argparser():
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
                            "Default value is CPU", default="CPU", type=str)
+    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+                      default=0, type=int)
+    args.add_argument('-nstreams', '--num_streams',
+                      help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                           'mode (for HETERO and MULTI device cases use format '
+                           '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                      default='', type=str)
+    args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                      help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
     return parser
+
+
+def print_raw_results(score, filtered_labels_id, meta):
+    if not filtered_labels_id:
+        return
+    sentence, c_token_s_e = meta['sentence'], meta['c_token_s_e']
+    log.info('\t\tSentence: \n\t{}'.format(sentence))
+    visualized = set()
+    for id, label_id in filtered_labels_id:
+        word_s, word_e = c_token_s_e[id - 1]
+        if (word_s, word_e) in visualized:
+            continue
+        visualized.add((word_s, word_e))
+        word = sentence[word_s:word_e]
+        confidence = score[id][label_id]
+        tag = label_to_tag[label_id]
+        log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, confidence, tag))
 
 
 def main():
@@ -67,45 +95,60 @@ def main():
     vocab = load_vocab_file(args.vocab)
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
-    # Get context as a string (as we might need it's length for the sequence reshape)
+    # get context as a string (as we might need it's length for the sequence reshape)
     context = '\n'.join(paragraphs)
     sentences = re.split(sentence_splitter, context)
     preprocessed_sentences = [text_to_tokens(sentence, vocab) for sentence in sentences]
     max_sentence_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
     preprocessing_total_time = (perf_counter() - preprocessing_start_time) * 1e3
+    source = tuple(zip(sentences, preprocessed_sentences))
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Reading model {}'.format(args.model))
     model = BertNamedEntityRecognition(ie, args.model, vocab, args.input_names)
     if max_sentence_length > model.max_length:
         model.reshape(max_sentence_length)
 
-    model_exec = ie.load_network(model.net, args.device)
+    pipeline = AsyncPipeline(ie, model, plugin_config,
+                             device=args.device, max_num_requests=args.num_infer_requests)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
+    next_sentence_id = 0
+    next_sentence_id_to_show = 0
     start_time = perf_counter()
-    for sentence, (c_tokens_id, c_token_s_e) in zip(sentences, preprocessed_sentences):
-        inputs, meta = model.preprocess(c_tokens_id)
-        raw_result = model_exec.infer(inputs)
-        score, filtered_labels_id = model.postprocess(raw_result, meta)
 
-        if not filtered_labels_id:
+    while True:
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
+        results = pipeline.get_result(next_sentence_id_to_show)
+        if results:
+            (score, filtered_labels_id), meta = results
+            next_sentence_id_to_show += 1
+            print_raw_results(score, filtered_labels_id, meta)
             continue
 
-        log.info('\t\tSentence: \n\t{}'.format(sentence))
-        visualized = set()
-        for idx, label_idx in filtered_labels_id:
-            word_s, word_e = c_token_s_e[idx - 1]
-            if (word_s, word_e) in visualized:
-                continue
-            visualized.add((word_s, word_e))
-            word = sentence[word_s:word_e]
-            confidence = score[idx][label_idx]
-            tag = label_to_tag[label_idx]
-            log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, confidence, tag))
+        if pipeline.is_ready():
+            if next_sentence_id == len(source):
+                break
+            sentence, (c_tokens_id, c_token_s_e) = source[next_sentence_id]
+            pipeline.submit_data(c_tokens_id, next_sentence_id, {'sentence': sentence, 'c_token_s_e': c_token_s_e})
+            next_sentence_id += 1
+        else:
+            pipeline.await_any()
+
+    pipeline.await_all()
+    for sentence_id in range(next_sentence_id_to_show, next_sentence_id):
+        results = pipeline.get_result(sentence_id)
+        while results is None:
+            results = pipeline.get_result(sentence_id)
+        (score, filtered_labels_id), meta = results
+        print_raw_results(score, filtered_labels_id, meta)
 
     total_latency = (perf_counter() - start_time) * 1e3 + preprocessing_total_time
     log.info("Metrics report:")

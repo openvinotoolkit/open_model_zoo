@@ -90,6 +90,17 @@ Options:
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
                         console)
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests.
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases).
 
 ```
 
