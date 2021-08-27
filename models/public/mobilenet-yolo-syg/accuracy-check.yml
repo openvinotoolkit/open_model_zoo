@@ -9,8 +9,7 @@ models:
           - name: 'input_1'
             type: INPUT
             shape: 1,416,416,3
-        output_names:
-          
+        output_names:     
           - separable_conv2d_22/BiasAdd
           - separable_conv2d_30/BiasAdd
           - separable_conv2d_38/BiasAdd
@@ -28,13 +27,12 @@ models:
           outputs:                 
             - separable_conv2d_22/BiasAdd
             - separable_conv2d_30/BiasAdd
-            - separable_conv2d_38/BiasAdd
-
-            
+            - separable_conv2d_38/BiasAdd            
           raw_output: True
+          
     datasets: 
       - name: SYGData0829
-        
+      
         preprocessing:
           - type: bgr_to_rgb
           - type: resize
@@ -68,8 +66,7 @@ models:
   
     launchers:
       - framework: dlsdk
-        tags:
-          - FP16
+        tags: - FP16
         model: mobilenet-yolo-syg.xml
         weights: mobilenet-yolo-syg.bin
         device: CPU
@@ -89,7 +86,6 @@ models:
 
     datasets: 
       - name: SYGData0829
-
 
         preprocessing:
           - type: resize
