@@ -18,7 +18,7 @@ import unicodedata
 import string
 
 
-# small class to store context as text, its tokens and embedding vector
+# A class to store context as text, its tokens and embedding vector
 class ContextData:
     def __init__(self, tokens_id, tokens_se, context=None, emb=None):
         self.c_tokens_id = tokens_id

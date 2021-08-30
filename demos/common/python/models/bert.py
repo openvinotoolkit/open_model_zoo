@@ -22,20 +22,11 @@ class Bert(Model):
         self.token_cls = [vocab['[CLS]']]
         self.token_sep = [vocab['[SEP]']]
         self.token_pad = [vocab['[PAD]']]
-        self.check_input_names(input_names)
-
-    def check_input_names(self, input_names):
         self.input_names = [i.strip() for i in input_names.split(',')]
         if self.net.input_info.keys() != set(self.input_names):
             raise RuntimeError('The demo expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.net.input_info.keys())))
         self.max_length = self.net.input_info[self.input_names[0]].input_data.shape[1]
-
-    def check_output_names(self, output_names):
-        self.output_names = [o.strip() for o in output_names.split(',')]
-        if self.net.outputs.keys() != set(self.output_names):
-            raise RuntimeError('The demo expects output names: {}, actual network output names: {}'.format(
-                self.output_names, list(self.net.outputs.keys())))
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
@@ -43,7 +34,7 @@ class Bert(Model):
         pad_len = self.pad_input(input_ids, attention_mask, token_type_ids)
         meta = {'pad_len': pad_len, 'inputs': inputs}
 
-        return self.create_input_array(input_ids, attention_mask, token_type_ids), meta
+        return self.create_input_dict(input_ids, attention_mask, token_type_ids), meta
 
     def form_request():
         raise NotImplementedError
@@ -58,7 +49,7 @@ class Bert(Model):
         attention_mask += [0] * pad_len
         return pad_len
 
-    def create_input_array(self, input_ids, attention_mask, token_type_ids):
+    def create_input_dict(self, input_ids, attention_mask, token_type_ids):
         inputs = {
             self.input_names[0]: np.array([input_ids], dtype=np.int32),
             self.input_names[1]: np.array([attention_mask], dtype=np.int32),
@@ -73,13 +64,10 @@ class Bert(Model):
         new_shapes = {}
         for input_name, input_info in self.net.input_info.items():
             new_shapes[input_name] = [1, new_length]
-        try:
             default_input_shape = input_info.input_data.shape
             self.net.reshape(new_shapes)
             self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
             self.max_length = new_length
-        except RuntimeError:
-            raise RuntimeError("Failed to reshape the model")
 
 
 class BertNamedEntityRecognition(Bert):
@@ -137,7 +125,10 @@ class BertQuestionAnswering(Bert):
 
         self.max_answer_token_num = max_answer_token_num
         self.squad_ver = squad_ver
-        self.check_output_names(output_names)
+        self.output_names = [o.strip() for o in output_names.split(',')]
+        if self.net.outputs.keys() != set(self.output_names):
+            raise RuntimeError('The demo expects output names: {}, actual network output names: {}'.format(
+                self.output_names, list(self.net.outputs.keys())))
 
     def form_request(self, inputs):
         c_data, q_tokens_id = inputs

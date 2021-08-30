@@ -173,7 +173,10 @@ def main():
         # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
         new_length = min(model.max_length, int(np.ceil((len(c_tokens[0]) + args.max_question_token_num) / 64) * 64))
         if new_length < model.max_length:
-            model.reshape(new_length)
+            try:
+                model.reshape(new_length)
+            except:
+                raise RuntimeError("Failed to reshape the network, please retry the demo without '-r' option")
         else:
             log.debug("\tSkipping network reshaping,"
                       " as (context length + max question length) exceeds the current (input) network sequence length")
@@ -216,7 +219,7 @@ def main():
             if pipeline.is_ready():
                 if source.is_over():
                     break
-                pipeline.submit_data(source.get_data(), next_window_id, {})
+                pipeline.submit_data(source.get_data(), next_window_id, None)
                 next_window_id += 1
             else:
                 pipeline.await_any()
