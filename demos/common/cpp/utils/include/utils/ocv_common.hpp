@@ -186,7 +186,7 @@ class InputTransform {
             }
         }
 
-        const bool isTrivial() {
+        bool isTrivial() const {
             return trivial;
         }
 
