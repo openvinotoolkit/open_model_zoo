@@ -175,8 +175,9 @@ def main():
         if new_length < model.max_length:
             try:
                 model.reshape(new_length)
-            except:
-                raise RuntimeError("Failed to reshape the network, please retry the demo without '-r' option")
+            except RuntimeError:
+                log.error("Failed to reshape the network, please retry the demo without '-r' option")
+                sys.exit(-1)
         else:
             log.debug("\tSkipping network reshaping,"
                       " as (context length + max question length) exceeds the current (input) network sequence length")
