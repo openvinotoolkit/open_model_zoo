@@ -48,12 +48,6 @@ class ImageModel(Model):
     def preprocess(self, inputs):
         image = inputs
         meta = {'original_shape': image.shape}
-
-
-        # for image in inputs:
-        #     resized_image, meta = self._preprocess_single_image(image)
-
-
         resized_image = self.resize(image, (self.w, self.h))
         meta.update({'resized_shape': resized_image.shape})
         if self.resize_type == 'keep_aspect_ratio':
@@ -63,15 +57,6 @@ class ImageModel(Model):
         resized_image = self._change_layout(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
-
-    def _preprocess_single_image(self, image):
-        meta = {'original_shape': image.shape}
-        resized_image = self.resize(image, (self.w, self.h))
-        resized_image = self.input_transform(resized_image)
-        resized_image = self._change_layout(resized_image)
-        meta.update({'resized_shape': resized_image.shape})
-        dict_inputs = {self.image_blob_name: image}
-        return resized_image, meta
 
     def _change_layout(self, image):
         if self.image_layout == 'CHW':
