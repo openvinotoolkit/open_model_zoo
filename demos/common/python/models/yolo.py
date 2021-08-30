@@ -77,10 +77,10 @@ class YOLO(DetectionModel):
 
         if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-            self.image_layout = 'CHW'
+            self.image_layout = 'NCHW'
         else:
             self.n, self.h, self.w, self.c = self.net.input_info[self.image_blob_name].input_data.shape
-            self.image_layout = 'HWС'
+            self.image_layout = 'NHWС'
 
         self.yolo_layer_params = self._get_output_info()
 

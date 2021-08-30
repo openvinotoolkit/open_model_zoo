@@ -29,7 +29,7 @@ class ImageModel(Model):
         self.image_blob_name = self._get_image_input()
         if self.image_blob_name:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        self.image_layout = 'CHW'
+        self.image_layout = 'NCHW'
         self.resize_type = resize_type
         self.resize = self.RESIZE_TYPES[self.resize_type]
 
@@ -59,9 +59,9 @@ class ImageModel(Model):
         return dict_inputs, meta
 
     def _change_layout(self, image):
-        if self.image_layout == 'CHW':
+        if self.image_layout == 'NCHW':
             image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-            image = image.reshape((self.n, self.c, self.h, self.w))
+            image = image.reshape((1, self.c, self.h, self.w))
         else:
-            image = image.reshape((self.n, self.h, self.w, self.c))
+            image = image.reshape((1, self.h, self.w, self.c))
         return image
