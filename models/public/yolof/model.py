@@ -15,18 +15,13 @@
 import torch
 from torch import nn
 
+from addict import Dict
 from cvpods.modeling.backbone import Backbone
 from models.cspdarknet import build_darknet_backbone
 from yolof_base import build_encoder, build_decoder
 
 
 def build_backbone(cfg, input_shape=None):
-    """
-    Build a backbone from `cfg.MODEL.BACKBONE.NAME`.
-    Returns:
-        an instance of :class:`Backbone`
-    """
-
     backbone = build_darknet_backbone(cfg, input_shape)
     assert isinstance(backbone, Backbone)
     return backbone
@@ -87,54 +82,34 @@ class YOLOF(nn.Module):
 
         return result
 
-class ConfigDict(dict):
-    def __init__(self, d={}):
-        if d == {}:
-            d = {
-                'MODEL': {
-                    'DARKNET': {
-                        'DEPTH': 53,
-                        'WITH_CSP': True,
-                        'NORM': "BN",
-                        'OUT_FEATURES': ["res5"],
-                        'RES5_DILATION': 2
-                    },
-                    'YOLOF': {
-                        'ENCODER': {
-                            'IN_FEATURES': ["res5"],
-                            'NUM_CHANNELS': 512,
-                            'BLOCK_MID_CHANNELS': 128,
-                            'NUM_RESIDUAL_BLOCKS': 8,
-                            'BLOCK_DILATIONS': [1, 2, 3, 4, 5, 6, 7, 8],
-                            'NORM': "BN",
-                            'ACTIVATION': "LeakyReLU"
-                        },
-                        'DECODER': {
-                            'IN_CHANNELS': 512,
-                            'NUM_CLASSES': 80,
-                            'NUM_ANCHORS': 6,
-                            'CLS_NUM_CONVS': 2,
-                            'REG_NUM_CONVS': 4,
-                            'NORM': "BN",
-                            'ACTIVATION': "LeakyReLU",
-                            'PRIOR_PROB': 0.01
-                        }
-                    }
-                }
-            }
-        for k, v in d.items():
-            setattr(self, k, v)
 
-    def __setattr__(self, name, value):
-        if isinstance(value, (list, tuple)):
-            value = [self.__class__(x) if isinstance(x, dict) else x for x in value]
-        elif isinstance(value, dict) and not isinstance(value, self.__class__):
-            value = self.__class__(value)
-        super().__setattr__(name, value)
-        super().__setitem__(name, value)
+ConfigDict = Dict()
+ConfigDict.MODEL.DARKNET.DEPTH = 53
+ConfigDict.MODEL.DARKNET.WITH_CSP = True
+ConfigDict.MODEL.DARKNET.NORM = 'BN'
+ConfigDict.MODEL.DARKNET.OUT_FEATURES = ['res5']
+ConfigDict.MODEL.DARKNET.RES5_DILATION = 2
+
+ConfigDict.MODEL.YOLOF.ENCODER.IN_FEATURES = ['res5']
+ConfigDict.MODEL.YOLOF.ENCODER.NUM_CHANNELS = 512
+ConfigDict.MODEL.YOLOF.ENCODER.BLOCK_MID_CHANNELS = 128
+ConfigDict.MODEL.YOLOF.ENCODER.NUM_RESIDUAL_BLOCKS = 8
+ConfigDict.MODEL.YOLOF.ENCODER.BLOCK_DILATIONS = [1, 2, 3, 4, 5, 6, 7, 8]
+ConfigDict.MODEL.YOLOF.ENCODER.NORM = 'BN'
+ConfigDict.MODEL.YOLOF.ENCODER.ACTIVATION = 'LeakyReLU'
+
+ConfigDict.MODEL.YOLOF.DECODER.IN_CHANNELS = 512
+ConfigDict.MODEL.YOLOF.DECODER.NUM_CLASSES = 80
+ConfigDict.MODEL.YOLOF.DECODER.NUM_ANCHORS = 6
+ConfigDict.MODEL.YOLOF.DECODER.CLS_NUM_CONVS = 2
+ConfigDict.MODEL.YOLOF.DECODER.REG_NUM_CONVS = 4
+ConfigDict.MODEL.YOLOF.DECODER.NORM = 'BN'
+ConfigDict.MODEL.YOLOF.DECODER.ACTIVATION = 'LeakyReLU'
+ConfigDict.MODEL.YOLOF.DECODER.PRIOR_PROB = 0.01
+
 
 def get_model(weights):
-    cfg = ConfigDict()
+    cfg = ConfigDict
     cfg.build_backbone = build_backbone
     cfg.build_encoder = build_encoder
     cfg.build_decoder = build_decoder
