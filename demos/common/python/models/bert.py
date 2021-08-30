@@ -36,7 +36,7 @@ class Bert(Model):
 
         return self.create_input_dict(input_ids, attention_mask, token_type_ids), meta
 
-    def form_request():
+    def form_request(self, inputs):
         raise NotImplementedError
 
     def pad_input(self, input_ids, attention_mask, token_type_ids):
@@ -64,10 +64,10 @@ class Bert(Model):
         new_shapes = {}
         for input_name, input_info in self.net.input_info.items():
             new_shapes[input_name] = [1, new_length]
-            default_input_shape = input_info.input_data.shape
-            self.net.reshape(new_shapes)
-            self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
-            self.max_length = new_length
+        default_input_shape = input_info.input_data.shape
+        self.net.reshape(new_shapes)
+        self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
+        self.max_length = new_length
 
 
 class BertNamedEntityRecognition(Bert):

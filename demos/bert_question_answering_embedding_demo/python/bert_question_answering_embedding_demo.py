@@ -147,7 +147,10 @@ class ContextSource:
     def get_next_paragraph(self):
         self.par_id += 1
         if not self.is_over():
-            self.window = ContextWindow(self.c_window_len, *self.c_tokens[self.par_id])
+            if self.c_tokens[self.par_id][0]:
+                self.window = ContextWindow(self.c_window_len, *self.c_tokens[self.par_id])
+            else:
+                self.get_next_paragraph()
 
     def is_over(self):
         return self.par_id == len(self.paragraphs)
@@ -174,20 +177,18 @@ def main():
     model_emb = BertEmbedding(ie, args.model_emb, vocab, args.input_names_emb)
 
     # reshape BertEmbedding model to infer short questions and long contexts
-    model_emb_exec_dict = {}
     max_len_context = 384
     max_len_question = 32
 
     for new_length in [max_len_question, max_len_context]:
         model_emb.reshape(new_length)
         if new_length == max_len_question:
-            model_emb_exec_dict[new_length] = ie.load_network(model_emb.net, args.device)
+            emb_exec_net = ie.load_network(model_emb.net, args.device)
         else:
-            model_emb_exec_dict[new_length] = AsyncPipeline(
+            emb_pipeline = AsyncPipeline(
                 ie, model_emb, plugin_config, device=args.device, max_num_requests=args.num_infer_requests
             )
     log.info('The Bert Embedding model {} is loaded to {}'.format(args.model_emb, args.device))
-    emb_pipeline = model_emb_exec_dict[max_len_context]
     log_runtime_settings(emb_pipeline.exec_net, set(parse_devices(args.device)))
 
     if args.model_qa:
@@ -215,8 +216,8 @@ def main():
     def calc_question_embedding(tokens_id):
         num = min(max_len_question - 2, len(tokens_id))
         inputs, _ = model_emb.preprocess((tokens_id[:num], max_len_question))
-        raw_result = model_emb_exec_dict[max_len_question].infer(inputs)
-        return model_emb.postprocess(raw_result, {})
+        raw_result = emb_exec_net.infer(inputs)
+        return model_emb.postprocess(raw_result, None)
 
     source = ContextSource(paragraphs, vocab, c_window_len)
     next_window_id = 0
