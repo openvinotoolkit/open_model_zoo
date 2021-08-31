@@ -61,7 +61,7 @@ Output tensor, name: `logits`, shape: `1, 25, 96` in the format `B, W, L`, where
 
 - `B` - batch size
 - `W` - output sequence length
-- `L` - confidence distribution across characters, listed in enclosed file `vocab.txt`, where [s] - special end of sequence character for decoder, [GO] - special start token for decoder.
+- `L` - confidence distribution across [GO] - special start token for decoder, [s] - special end of sequence character for decoder and characters, listed in enclosed file `vocab.txt`.
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
@@ -71,7 +71,7 @@ Output tensor, name: `logits`, shape: `1, 25, 96` in the format `B, W, L`, where
 
 - `B` - batch size
 - `W` - output sequence length
-- `L` - confidence distribution across characters, listed in enclosed file `vocab.txt`, where [s] - special end of sequence character for decoder, [GO] - special start token for decoder.
+- `L` - confidence distribution across [GO] - special start token for decoder, [s] - special end of sequence character for decoder and characters, listed in enclosed file `vocab.txt`.
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
