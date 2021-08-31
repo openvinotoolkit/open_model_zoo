@@ -2,10 +2,9 @@
 
 ## Use Case and High-Level Description
 
-  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection
-  on FFmpeg-OpenVINO. It can realize illegal lane change detection and speed detection by developing FFmpeg.
+  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
+  For details see repository <https://github.com/ermubuzhiming/OMZ-model-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>                                                                                
 
 ## Specification
@@ -19,7 +18,7 @@
 
 ## Accuracy
 
-Accuracy metrics obtained on [SYGDate0829](https://hub.fastgit.org/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+Accuracy metrics obtained on [SYGDate0829](https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/SYGData0829.rar)
 which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
@@ -66,7 +65,7 @@ For each case format is `B,Cx,Cy,N*14,`, where
     - `Cx`, `Cy` - cell index
     - `N` - number of detection boxes for cell
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_9`], where:
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_4`], where:
 - (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
@@ -97,8 +96,7 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 ## Legal Information
 
 The original model is distributed under the following
-[license1](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE):
-[license2](https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE):
+[license1](https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE):
 
 ```
 MIT License

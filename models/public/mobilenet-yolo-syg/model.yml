@@ -1,4 +1,4 @@
-# Copyright © 2018-2019 Intel Corporation
+# Copyright © 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,9 @@
 # limitations under the License.
 
 description: >-
-  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection
-  on FFmpeg-OpenVINO. It can realize illegal lane change detection and speed detection by developing FFmpeg.
+  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
+  For details see repository <https://github.com/ermubuzhiming/OMZ-model-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 task_type: detection
 
@@ -36,11 +35,8 @@ model_optimizer_args:
   - --input=input_1
   - --scale_values=input_1[255]
   - --transformations_config=$dl_dir/yolo_pb2ir.json
-  - --data_type=FP16
   - --reverse_input_channels
-  - --output_dir=$dl_dir/
 
 framework: tf
 quantizable: yes
-license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
-         https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

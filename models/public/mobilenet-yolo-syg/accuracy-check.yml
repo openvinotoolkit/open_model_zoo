@@ -4,7 +4,6 @@ models:
     launchers:
       - framework: tf
         model: mobilenet-yolo-syg.pb
-        device: CPU
         inputs:
           - name: 'input_1'
             type: INPUT
@@ -65,12 +64,8 @@ models:
   - name: mobilenet-yolo-syg
   
     launchers:
-      - framework: dlsdk
-        tags: - FP16
-        model: mobilenet-yolo-syg.xml
-        weights: mobilenet-yolo-syg.bin
+      - framework: dlsdk  
         device: CPU
-     
         adapter:
           type: yolo_v3
           classes: 4
