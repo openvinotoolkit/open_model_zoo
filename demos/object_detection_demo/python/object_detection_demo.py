@@ -164,7 +164,6 @@ class ColorPalette:
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
         return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio,
-                          threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
