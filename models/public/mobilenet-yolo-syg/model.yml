@@ -18,17 +18,15 @@ description: >-
   For details see repository <https://github.com/ermubuzhiming/OMZ-model-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 task_type: detection
-
 files:
   - name: mobilenet-yolo-syg.pb
-    size: 42004202 
+    size: 42004202
     sha256: 7ff7e6b81996362f8f7ba5f9fbbb8225cf27db257eeeaa3ad655bfc8cf53a302 
     source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/mobilenet-yolo-syg.pb
   - name: yolo_pb2ir.json
     size: 414
     sha256: 0014370f7236a59cacdbc74bfea83327e0e99f1811f97a1ff6e2b9c70ce67618
-    source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/yolo_pb2ir.json
-
+    source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/yolo_pb2ir.json  
 model_optimizer_args:
   - --input_model=$dl_dir/mobilenet-yolo-syg.pb
   - --input_shape=[1,416,416,3]
@@ -36,7 +34,6 @@ model_optimizer_args:
   - --scale_values=input_1[255]
   - --transformations_config=$dl_dir/yolo_pb2ir.json
   - --reverse_input_channels
-
 framework: tf
 quantizable: yes
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

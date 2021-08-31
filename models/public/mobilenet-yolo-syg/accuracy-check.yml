@@ -8,7 +8,7 @@ models:
           - name: 'input_1'
             type: INPUT
             shape: 1,416,416,3
-        output_names:     
+        output_names:
           - separable_conv2d_22/BiasAdd
           - separable_conv2d_30/BiasAdd
           - separable_conv2d_38/BiasAdd
@@ -23,15 +23,15 @@ models:
           output_format: HWB
           do_reshape: True
           cells: [52, 26, 13]
-          outputs:                 
+          outputs:
             - separable_conv2d_22/BiasAdd
             - separable_conv2d_30/BiasAdd
             - separable_conv2d_38/BiasAdd            
           raw_output: True
-          
-    datasets: 
+
+    datasets:
       - name: SYGData0829
-      
+
         preprocessing:
           - type: bgr_to_rgb
           - type: resize
@@ -58,14 +58,13 @@ models:
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
-            presenter:  print_scalar    
+            presenter:  print_scalar  
 
-            
+
   - name: mobilenet-yolo-syg
-  
+
     launchers:
-      - framework: dlsdk  
-        device: CPU
+      - framework: dlsdk
         adapter:
           type: yolo_v3
           classes: 4
@@ -79,7 +78,7 @@ models:
             - separable_conv2d_30/separable_conv2d/YoloRegion
             - separable_conv2d_38/separable_conv2d/YoloRegion
 
-    datasets: 
+    datasets:
       - name: SYGData0829
 
         preprocessing:
@@ -106,5 +105,3 @@ models:
             max_detections: 100
             threshold: 0.5
             presenter:  print_scalar
-
-

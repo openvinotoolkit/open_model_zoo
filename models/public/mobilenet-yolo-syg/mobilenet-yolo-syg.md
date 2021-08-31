@@ -5,7 +5,7 @@
   This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
   For details see repository <https://github.com/ermubuzhiming/OMZ-model-download/>,
-  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>                                                                                
+  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 
 ## Specification
 
@@ -69,8 +69,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_9` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) 
-								  and multiply by obtained confidence value to get confidence of each class
+- `class_no_1`,...,`class_no_9` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
 ### Converted model
 
@@ -80,7 +79,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1,27,13,13`. The anchor values are `142,110,  192,243,  459,401`.
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_9`], where:
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_4`], where:
 - (`x`,`y`) - coordinates of box center relative to the cell
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box in [0,1] range
