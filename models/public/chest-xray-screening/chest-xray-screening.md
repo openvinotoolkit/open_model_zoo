@@ -69,30 +69,6 @@ Outputs the prediction scores in the range of [0,1] for the three disease classe
 ## **Acknowledgement**
 This work is undertaken as part of Intel India Grand Challenge 2016 Project MIRIAD: Many Incarnations of Screening of Radiology for High Throughput Disease Screening via Multiple Instance Reinforcement Learning with Adversarial Deep Neural Networks, sponsored by Intel Technology India Pvt. Ltd., Bangalore, India.
 
-**Contributor**
-
-The codes/model was contributed to the OpenVINO project by
-
-<a href="https://www.linkedin.com/in/rakshith-sathish/">Rakshith Sathish</a>, </br>
-Advanced Technology Development Centre, </br>
-Indian Institute of Technology Kharagpur</br>
-email: rakshith.sathish@kgpian.iitkgp.ac.in</br>
-Github username: Rakshith2597
-
-
-**Principal Investigators**
-
-<a href="https://www.linkedin.com/in/debdoot/">Dr Debdoot Sheet</a>, <a href="">Dr Nirmalya Ghosh</a>,</br>
-Department of Electrical Engineering,</br>
-Indian Institute of Technology Kharagpur</br>
-email: debdoot@ee.iitkgp.ac.in, nirmalya@ee.iitkgp.ac.in
-
-<a href="https://www.linkedin.com/in/ramanathan-sethuraman-27a12aba/">Dr Ramanathan Sethuraman</a>,</br>
-Intel Technology India Pvt. Ltd.
-email: ramanathan.sethuraman@intel.com
-
-</br>
-
 ## **References**
 
 <div id="densenet">
@@ -116,25 +92,15 @@ email: ramanathan.sethuraman@intel.com
 </br> 
 
 ## **Legal Information**
-
+```
 The model is distributed under theApache License, Version 2.0
-
 Copyright (c) 2020 Debdoot Sheet, Ramanathan Sethuraman
+Contact details:
+debdoot@ee.iitkgp.ac.in
+ramanathan.sethuraman@intel.com 
 
-Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-you may not use this file except in compliance with the License.
-
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-
-distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-
-See the License for the specific language governing permissions and
-
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.
+```

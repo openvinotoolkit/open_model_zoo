@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- description: DenseNet CNN architecture adapted and trained to identify
+description: DenseNet CNN architecture adapted and trained to identify
     the 3 classes in 2D Chest radiograph images. 
-- task_type: classification
-- files:
+task_type: classification
+files:
   - name: chest_xray_screening.onnx
     sha256: d6b318f3ee6ddeb4173dad7cf7eb597efd0a7ad1042b3197bc5baaf88a6f443e
     size: 28272878
     source:
-    - $type: google_drive
+      $type: google_drive
       id: 1Ie3umeL7oOjqV78xmQL8PAtlW7ryX-7p
-- model_optimizer_args:
+model_optimizer_args:
   - --input_shape=[1,3,1024,1024]
   - --input_model=$dl_dir/chest_xray_screening.onnx
-- framework: onnx
-- license: apache2
+framework: onnx
+license: apache2
