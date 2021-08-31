@@ -1,6 +1,5 @@
 models:
   - name: mobilenet-yolo-syg
-
     launchers:
       - framework: tf
         model: mobilenet-yolo-syg.pb
@@ -28,17 +27,14 @@ models:
             - separable_conv2d_30/BiasAdd
             - separable_conv2d_38/BiasAdd
           raw_output: True
-
     datasets:
       - name: SYGData0829
-
         preprocessing:
           - type: bgr_to_rgb
           - type: resize
             size: 416
           - type: normalization
             std: 255.0
-
         postprocessing:
           - type: resize_prediction_boxes
           - type: filter
@@ -49,7 +45,6 @@ models:
             overlap: 0.5
           - type: clip_boxes
             apply_to: prediction
-
         metrics:
           - type: map
             integral: 11point
@@ -60,9 +55,7 @@ models:
             threshold: 0.5
             presenter:  print_scalar
 
-
   - name: mobilenet-yolo-syg
-
     launchers:
       - framework: dlsdk
         adapter:
@@ -77,14 +70,11 @@ models:
             - separable_conv2d_22/separable_conv2d/YoloRegion
             - separable_conv2d_30/separable_conv2d/YoloRegion
             - separable_conv2d_38/separable_conv2d/YoloRegion
-
     datasets:
       - name: SYGData0829
-
         preprocessing:
           - type: resize
             size: 416
-
         postprocessing:
           - type: resize_prediction_boxes
           - type: filter
@@ -95,7 +85,6 @@ models:
             overlap: 0.5
           - type: clip_boxes
             apply_to: prediction
-
         metrics:
           - type: map
             integral: 11point
