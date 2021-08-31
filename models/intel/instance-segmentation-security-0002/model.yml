@@ -13,33 +13,107 @@
 # limitations under the License.
 
 description: >-
-  General purpose instance segmentation model. Mask R-CNN with ResNet50 backbone -  FPN
-  -  RPN -  detection and segmentation heads.
+  This model is an instance segmentation network for 80 classes of objects. It is
+  a Mask R-CNN with ResNet50 backbone, FPN, RPN, detection and segmentation heads.
 task_type: instance_segmentation
 files:
-  - name: FP32/instance-segmentation-security-0002.xml
-    size: 840711
-    sha256: 27bb8cbba8139f7757e1d0e8ff9badf8e388f61d9b1ae2d3d7fe61d21647cfd4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP32/instance-segmentation-security-0002.xml
-  - name: FP32/instance-segmentation-security-0002.bin
-    size: 177479928
-    sha256: 43df120a06790f0d623645d6cc7d8e410fca005cb8ede7f3495a972f9d701ec6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP32/instance-segmentation-security-0002.bin
-  - name: FP16/instance-segmentation-security-0002.xml
-    size: 840311
-    sha256: cd516194b08132248c06e1e149eaa700fd25cd44dd32a7b233de970bd4407ba0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP16/instance-segmentation-security-0002.xml
-  - name: FP16/instance-segmentation-security-0002.bin
-    size: 88740226
-    sha256: aa238d4d7a4f3f0aa98786942138a7d98672d0bb8261c6c1adfde5bb5faa7a82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP16/instance-segmentation-security-0002.bin
-  - name: FP16-INT8/instance-segmentation-security-0002.xml
-    size: 1186837
-    sha256: 574d3c33a1638ff69a3d7cfc1ef65e82cc86cc4836a8c713dee15e2475ba94e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP16-INT8/instance-segmentation-security-0002.xml
-  - name: FP16-INT8/instance-segmentation-security-0002.bin
-    size: 70485480
-    sha256: 749264cfd5e7fc925f6d96b329e48ec5d4d147f2984cb3b0c64837b8cc98346b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0002/FP16-INT8/instance-segmentation-security-0002.bin
-framework: dldt
-license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
+  # download ote repo as package
+  - name: model/develop.zip
+    size: 71997236
+    sha256: 2e5f60ab42428987a0614f6a4fa71c9a3b083b4b13b812f0b866c013d1921f1d
+    source: https://github.com/openvinotoolkit/training_extensions/archive/refs/heads/develop.zip
+  # requirments libs
+  - name: model/lib/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
+  - name: model/lib/packaging-21.0-py3-none-any.whl
+    size: 40357
+    sha256: c86254f9220d55e31cc94d69bade760f0847da8000def4dfe1c6b872fd14ff14
+    source: https://files.pythonhosted.org/packages/3c/77/e2362b676dc5008d81be423070dd9577fa03be5da2ba1105811900fda546/packaging-21.0-py3-none-any.whl
+  - name: model/lib/terminaltables-3.1.0.tar.gz
+    size: 12478
+    sha256: f3eb0eb92e3833972ac36796293ca0906e998dc3be91fbe1f8615b331b853b81
+    source: https://files.pythonhosted.org/packages/9b/c4/4a21174f32f8a7e1104798c445dacdc1d4df86f2f26722767034e4de4bff/terminaltables-3.1.0.tar.gz
+  - name: model/lib/mmcv-full-1.3.0.tar.gz
+    size: 253880
+    sha256: 4103a74604c06b51dae82b96d6d796336aa6c5c38b68235e64b412f9154a901b
+    source: https://files.pythonhosted.org/packages/9b/d1/6201ac4b55cd5252a35c9890b65d7629629ca37eed09a072dcbfc96a2817/mmcv-full-1.3.0.tar.gz
+  - name: model/training_extensions-develop/external/mmdetection.zip
+    size: 7741695
+    sha256: 27a96172f28349ff199eb1393dcb8623c621dbe94213ebe5ea17a1a64a2bcd83
+    source: https://github.com/openvinotoolkit/mmdetection/archive/4856591efb5c60a1380e574a6c7f8566a9b31dfe.zip
+  - name: model/lib/pytorchcv-0.0.55-py2.py3-none-any.whl
+    size: 390793
+    sha256: 7093a5ba90080f2b20606db34a44d3c1416c716926ffeeb9f7f52133b6284b5b
+    source: https://files.pythonhosted.org/packages/a3/66/c8a8bc74e7d5434238c07e083e65212dd1eae10eefa2409285f8aefc1432/pytorchcv-0.0.55-py2.py3-none-any.whl
+  # weights
+  - name: model/ckpt/snapshot.pth
+    size: 177867103
+    sha256: 42aa3d0009d2ed454406c1270bba9da70f6e5c7a6a96fa447fd568302bf700d1
+    source: https://download.01.org/opencv/openvino_training_extensions/models/instance_segmentation/v2/instance-segmentation-0002.pth
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: model/develop.zip
+  - $type: unpack_archive
+    format: zip
+    file: model/lib/addict-2.4.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: model/lib/pytorchcv-0.0.55-py2.py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: model/lib/packaging-21.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: gztar
+    file: model/lib/mmcv-full-1.3.0.tar.gz
+  - $type: unpack_archive
+    format: gztar
+    file: model/lib/terminaltables-3.1.0.tar.gz
+  - $type: unpack_archive
+    format: zip
+    file: model/training_extensions-develop/external/mmdetection.zip
+
+  - $type: regex_replace
+    pattern: 'openvino:\n    default: true'
+    replacement: 'openvino:\n    default: false'
+    file: model/training_extensions-develop/models/instance_segmentation/model_templates/coco-instance-segmentation/instance-segmentation-0002/template.yaml
+  - $type: regex_replace
+    pattern: 'pretrained=''.*'''
+    replacement: 'pretrained=False'
+    file: model/training_extensions-develop/models/instance_segmentation/model_templates/coco-instance-segmentation/instance-segmentation-0002/model.py
+  - $type: regex_replace
+    pattern: '\.\.\/\.\.\/\.\.\/external\/mmdetection'
+    replacement: '../../external/mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe'
+    file: model/training_extensions-develop/ote/ote/__init__.py
+  # delete extra libs
+  - $type: regex_replace
+    pattern: 'from yapf'
+    replacement: '# \g<0>'
+    file: model/lib/mmcv-full-1.3.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: '.*_requires?='
+    replacement: '# \g<0>'
+    file: model/lib/mmcv-full-1.3.0/setup.py
+  - $type: regex_replace
+    pattern: 'from onnxoptimizer|optimize_onnx_graph\(onnx_model_path\)\n'
+    replacement: '# \g<0>'
+    file: model/training_extensions-develop/external/mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe/tools/export.py
+  - $type: regex_replace
+    pattern: '(from|import) (pycocotools|matplotlib|editdistance|tqdm|Polygon )'
+    replacement: '# \g<0>'
+    file: model/training_extensions-develop/external/mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe/mmdet/**/*.py
+  - $type: regex_replace
+    pattern: 'try(.|\n)*?except.*\n.*raise(.*?)\((.|\n)*?\)'
+    replacement: ''
+    file: model/training_extensions-develop/external/mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe/mmdet/datasets/coco.py
+model_optimizer_args:
+  - --input_shape=[1, 3, 768, 1024]
+  - --mean_values=[103.53, 116.28, 123.675]
+  - --scale_values=[1.0, 1.0, 1.0]
+  - --input=image
+  - --output=boxes,labels,masks
+  - --input_model=$conv_dir/model.onnx
+framework: onnx
+license: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/LICENSE
