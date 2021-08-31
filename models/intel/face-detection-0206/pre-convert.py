@@ -52,7 +52,7 @@ def main():
         subprocess.run([
             sys.executable, 'setup.py', 'develop'],
             check=True, env=work_env)
-    
+
     # create work-dir tmp
     models_dir = Path(args.input_dir / 'model' / 'training_extensions-develop' / 'models' / 'object_detection')
     with cd(models_dir):
@@ -61,7 +61,7 @@ def main():
             sys.executable, '../../tools/instantiate_template.py',
             f'{work_env["MODEL_TEMPLATE"]}', f'{work_env["WORK_DIR"]}', '--do-not-load-snapshot'],
             check=True, env=work_env)
-    
+
     # convert to onnx
     work_dir = Path(work_env['WORK_DIR'])
     with cd(work_dir):

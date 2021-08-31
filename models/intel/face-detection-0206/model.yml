@@ -80,13 +80,9 @@ postprocessing:
     replacement: 'openvino:\n    default: false'
     file: model/training_extensions-develop/models/object_detection/model_templates/face-detection/face-detection-0206/template.yaml
   - $type: regex_replace
-    pattern: 'openvino:\n    default: true'
-    replacement: 'openvino:\n    default: false'
-    file: model/training_extensions-develop/models/object_detection/model_templates/face-detection/face-detection-0206/template.yaml
-  - $type: regex_replace
     pattern: 'pretrained=True'
     replacement: 'pretrained=False'
-    file: model/training_extensions-develop/ote/tools/model.py
+    file: model/training_extensions-develop/models/object_detection/model_templates/face-detection/face-detection-0206/model.py
   - $type: regex_replace
     pattern: '\.\.\/\.\.\/\.\.\/external\/mmdetection'
     replacement: '../../external/mmdetection-4856591efb5c60a1380e574a6c7f8566a9b31dfe'
