@@ -1295,7 +1295,7 @@ datasets:
         annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
         images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
         has_background: False
-        
+
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
     reader:

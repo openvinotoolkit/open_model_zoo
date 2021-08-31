@@ -156,7 +156,7 @@ To download SYGData0829 dataset, you need to follow the steps below:
     * `JPEGImages` - directory containing the SYGData0829 images
     * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
 		* `Main/val.txt` - image sets file for validation of detection tasks
- 
+
 ### Datasets in dataset_definitions.yml
 * `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-syg`](../models/public/mobilenet-yolo-syg/mobilenet-yolo-syg.md))
 
