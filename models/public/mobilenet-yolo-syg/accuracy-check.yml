@@ -26,7 +26,7 @@ models:
           outputs:
             - separable_conv2d_22/BiasAdd
             - separable_conv2d_30/BiasAdd
-            - separable_conv2d_38/BiasAdd            
+            - separable_conv2d_38/BiasAdd
           raw_output: True
 
     datasets:
@@ -58,7 +58,7 @@ models:
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
-            presenter:  print_scalar  
+            presenter:  print_scalar
 
 
   - name: mobilenet-yolo-syg
