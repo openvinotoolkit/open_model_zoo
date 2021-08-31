@@ -90,7 +90,6 @@ def syg_prepare_detection_labels(dataset_meta, has_background=True):
         reversed_label_map['__background__'] = 0
 
     return reversed_label_map
-	
 
 class PascalVOCSegmentationConverter(BaseFormatConverter):
     __provider__ = 'voc_segmentation'
