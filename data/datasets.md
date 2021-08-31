@@ -147,12 +147,8 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 ### How download dataset
 
 To download SYGData0829 dataset, you need to follow the steps below:
-1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
-2. Select [`SYGData0829.zip.001`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.001) 、
-[`SYGData0829.zip.002`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.002) 、
-[`SYGData0829.zip.003`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.003) 、
-[`SYGData0829.zip.004`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.004) and download archive
-3. Unpack archive
+1. Select ['SYGData0829.rar']https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/SYGData0829.rar
+2. Unpack archive
 
 ### Files layout
 * `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
