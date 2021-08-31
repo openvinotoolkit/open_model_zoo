@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import open_model_zoo.model_tools.converter
+import openvino.model_zoo.converter
 
 if __name__ == '__main__':
-    open_model_zoo.model_tools.converter.main()
+    openvino.model_zoo.converter.main()

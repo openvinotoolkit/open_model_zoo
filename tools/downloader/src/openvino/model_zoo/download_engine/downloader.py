@@ -19,7 +19,7 @@ import ssl
 import time
 import types
 
-from open_model_zoo.model_tools.download_engine import cache
+from openvino.model_zoo.download_engine import cache
 
 DOWNLOAD_TIMEOUT = 5 * 60
 

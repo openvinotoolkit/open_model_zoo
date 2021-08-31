@@ -19,8 +19,8 @@ import shlex
 import sys
 import yaml
 
-from open_model_zoo.model_tools import _common
-from open_model_zoo.model_tools.download_engine import file_source, postprocessing, validation
+from openvino.model_zoo import _common
+from openvino.model_zoo.download_engine import file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')

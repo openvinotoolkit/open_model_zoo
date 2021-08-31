@@ -58,7 +58,7 @@ class CustomBuild(distutils.command.build.build):
     def run(self):
         super().run()
 
-        package_build_dir = Path(self.build_lib, 'open_model_zoo/model_tools')
+        package_build_dir = Path(self.build_lib, 'openvino/model_zoo')
 
         if (package_build_dir / 'data').exists():
             shutil.rmtree(str(package_build_dir / 'data'))

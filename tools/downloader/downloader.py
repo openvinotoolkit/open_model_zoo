@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import open_model_zoo.model_tools.downloader
+import openvino.model_zoo.downloader
 
 if __name__ == '__main__':
-    open_model_zoo.model_tools.downloader.main()
+    openvino.model_zoo.downloader.main()
