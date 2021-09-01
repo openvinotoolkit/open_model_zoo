@@ -1,4 +1,4 @@
-# mobilemet-yolo-syg
+# mobilenet-yolo-syg
 
 ## Use Case and High-Level Description
 
