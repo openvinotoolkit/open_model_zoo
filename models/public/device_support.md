@@ -91,6 +91,7 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-yolo-syg | YES |    |    |
 | mozilla-deepspeech-0.6.1 | YES |    |    |
 | mozilla-deepspeech-0.8.2 | YES |    |    |
 | mtcnn-o | YES | YES |    |
