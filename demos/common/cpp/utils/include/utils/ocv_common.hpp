@@ -28,8 +28,15 @@ void matToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob
     if (static_cast<size_t>(orig_image.channels()) != channels) {
         throw std::runtime_error("The number of channels for net input and image must match");
     }
-    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
-    T* blob_data = blobMapped.as<T*>();
+    // get image value in correct format
+    static const auto img_value = [] (const cv::Mat& img, size_t h, size_t w, size_t c) {
+        switch (img.type()) {
+            case CV_8UC1: return (T)img.at<uchar>(h, w);
+            case CV_8UC3: return (T)img.at<cv::Vec3b>(h, w)[c];
+            case CV_32FC3: return (T)img.at<cv::Vec3f>(h, w)[c];
+        }
+        throw std::runtime_error("Image type is not recognized");
+    };
 
     cv::Mat resized_image(orig_image);
     if (static_cast<int>(width) != orig_image.size().width ||
@@ -37,32 +44,20 @@ void matToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob
         cv::resize(orig_image, resized_image, cv::Size(width, height));
     }
 
-    int batchOffset = batchIndex * width * height * channels;
+    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
+    T* blob_data = blobMapped.as<T*>();
 
-    if (channels == 1) {
-        for (size_t  h = 0; h < height; h++) {
-            for (size_t w = 0; w < width; w++) {
-                blob_data[batchOffset + h * width + w] = resized_image.at<uchar>(h, w);
-            }
-        }
-    } else if (channels == 3) {
-        for (size_t c = 0; c < channels; c++) {
-            for (size_t  h = 0; h < height; h++) {
-                for (size_t w = 0; w < width; w++) {
-                    if (std::is_same<T, float_t>::value) {
-                        blob_data[batchOffset + c * width * height + h * width + w] =
-                            (T)resized_image.at<cv::Vec3f>(h, w)[c];
-                    }
-                    else {
-                        blob_data[batchOffset + c * width * height + h * width + w] =
-                            (T)resized_image.at<cv::Vec3b>(h, w)[c];
-                    }
-                }
-            }
-        }
-    } else {
+    if (resized_image.type() == CV_32FC3 && std::is_same<T, uint8_t>::value) {
+        throw std::runtime_error("Conversion from float_t to uint8_t is forbidden");
+    }
+    int batchOffset = batchIndex * width * height * channels;
+    if (channels != 1 && channels != 3) {
         throw std::runtime_error("Unsupported number of channels");
     }
+    for (size_t c = 0; c < channels; c++)
+        for (size_t h = 0; h < height; h++)
+            for (size_t w = 0; w < width; w++)
+                blob_data[batchOffset + c * width * height + h * width + w] = img_value(resized_image, h, w, c);
 }
 
 /**
