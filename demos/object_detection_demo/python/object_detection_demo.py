@@ -162,13 +162,8 @@ class ColorPalette:
 
 
 def get_model(ie, args):
-    input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
-    common_args = (ie, args.model, input_transform)
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial:
-        raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
-
     if args.architecture_type == 'ssd':
-        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio,
+        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio,
                           threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
@@ -180,17 +175,17 @@ def get_model(ie, args):
                              threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
                              anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(*common_args, threshold=args.prob_threshold)
+        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return models.CenterNet(*common_args, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface':
         return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
+        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(*common_args, threshold=args.prob_threshold)
+        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'detr':
-        return models.DETR(*common_args, labels=args.labels, threshold=args.prob_threshold)
+        return models.DETR(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
@@ -241,6 +236,7 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args)
+    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
     log_blobs_info(model)
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,

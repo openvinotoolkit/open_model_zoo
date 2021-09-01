@@ -306,8 +306,8 @@ class RetinaFacePostprocessor:
 
 
 class RetinaFacePyTorch(Model):
-    def __init__(self, ie, model_path, input_transform, threshold=0.5):
-        super().__init__(ie, model_path, input_transform)
+    def __init__(self, ie, model_path, threshold=0.5):
+        super().__init__(ie, model_path)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         expected_outputs_count = (2, 3)

@@ -324,26 +324,21 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
         ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
-        InputTransform inputTransform = InputTransform(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
-        if ((FLAGS_at == "retinaface" || FLAGS_at == "yolo") && !inputTransform.isTrivial()) {
-            throw std::runtime_error(FLAGS_at + " model doesn't support input transforms.");
-        }
-
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, inputTransform, labels));
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
         }
         else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, inputTransform));
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "retinaface") {
             model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, inputTransform));
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, inputTransform, labels));
+            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
             model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
@@ -352,7 +347,7 @@ int main(int argc, char *argv[]) {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
-
+        model->SetInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;

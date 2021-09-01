@@ -23,9 +23,9 @@
 #include <utils/image_utils.h>
 
 
-ModelCenterNet::ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
-    const InputTransform& inputTransform, const std::vector<std::string>& labels)
-    : DetectionModel(modelFileName, confidenceThreshold, false, inputTransform, labels) {
+ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
+    float confidenceThreshold, const std::vector<std::string>& labels)
+    : DetectionModel(modelFileName, confidenceThreshold, false , labels) {
 }
 
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {

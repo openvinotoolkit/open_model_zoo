@@ -20,9 +20,8 @@
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
-    const InputTransform& inputTransform,
     const std::vector<std::string>& labels) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, labels) {
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {

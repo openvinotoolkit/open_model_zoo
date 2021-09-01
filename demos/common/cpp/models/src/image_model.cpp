@@ -16,10 +16,9 @@
 
 #include "models/image_model.h"
 
-ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, const InputTransform& inputTransform) :
+ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     ModelBase(modelFileName),
-    useAutoResize(useAutoResize),
-    inputTransform(inputTransform) {
+    useAutoResize(useAutoResize) {
 }
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {

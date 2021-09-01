@@ -18,9 +18,8 @@
 #include <utils/ocv_common.hpp>
 
 
-DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    const InputTransform& inputTransform, const std::vector<std::string>& labels) :
-    ImageModel(modelFileName, useAutoResize, inputTransform),
+DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
+    ImageModel(modelFileName, useAutoResize),
     confidenceThreshold(confidenceThreshold),
     labels(labels) {
 }

@@ -84,7 +84,7 @@ class OutputTransform:
 
 
 class InputTransform:
-    def __init__(self, reverse_input_channels, mean_values, scale_values):
+    def __init__(self, reverse_input_channels=False, mean_values=None, scale_values=None):
         self.is_trivial = not (reverse_input_channels or mean_values or scale_values)
         self.reverse_input_channels = reverse_input_channels
         self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else np.array([0., 0., 0.])

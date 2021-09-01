@@ -47,9 +47,7 @@ public:
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
-    /// @param inputTransform - if not trivial, it applies input normalization (means subtraction and/or division by scales per channel).
-    ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        float boxIOUThreshold, const InputTransform& inputTransform = InputTransform());
+    ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
