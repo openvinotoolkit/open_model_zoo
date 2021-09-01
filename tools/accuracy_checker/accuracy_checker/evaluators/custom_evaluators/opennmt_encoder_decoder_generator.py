@@ -490,24 +490,24 @@ class OpenNMTModel(BaseModel):
     def predict(self, identifiers, input_data, encoder_callback=None):
         predictions, raw_outputs = [], []
 
-        decode_strategy = BeamSearch(
-            5,
-            batch_size=1,
-            pad=1,
-            bos=2,
-            eos=3,
-            unk=0,
-            n_best=1,
-            global_scorer=self.global_scorer,
-            min_length=0,
-            max_length=100,
-            return_attention=False,
-            block_ngram_repeat=0,
-            exclusion_tokens=set(),
-            stepwise_penalty=False,
-            ratio=0.0,
-            ban_unk_token=False,
-        )
+        # decode_strategy = BeamSearch(
+        #     5,
+        #     batch_size=1,
+        #     pad=1,
+        #     bos=2,
+        #     eos=3,
+        #     unk=0,
+        #     n_best=1,
+        #     global_scorer=self.global_scorer,
+        #     min_length=0,
+        #     max_length=100,
+        #     return_attention=False,
+        #     block_ngram_repeat=0,
+        #     exclusion_tokens=set(),
+        #     stepwise_penalty=False,
+        #     ratio=0.0,
+        #     ban_unk_token=False,
+        # )
 
         for data in input_data:
             encoder_state, memory, src_len = self.encoder.predict(identifiers, data)
@@ -516,7 +516,50 @@ class OpenNMTModel(BaseModel):
             if self.store_encoder_predictions:
                 self._encoder_predictions.append((encoder_state, memory, src_len))
             self.decoder.init_state(encoder_state)
-            raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
+
+            for step in range(decode_strategy.max_length):
+                decoder_input = decode_strategy.current_predictions.view(1, -1, 1)
+
+                log_probs, attn = self._decode_and_generate(
+                    decoder_input,
+                    memory_bank,
+                    batch,
+                    src_vocabs,
+                    memory_lengths=memory_lengths,
+                    src_map=src_map,
+                    step=step,
+                    batch_offset=decode_strategy.batch_offset,
+                )
+
+                decode_strategy.advance(log_probs, attn)
+                any_finished = decode_strategy.is_finished.any()
+                if any_finished:
+                    decode_strategy.update_finished()
+                    if decode_strategy.done:
+                        break
+
+                select_indices = decode_strategy.select_indices
+
+                if any_finished:
+                    # Reorder states.
+                    if isinstance(memory_bank, tuple):
+                        memory_bank = tuple(
+                            x.index_select(1, select_indices) for x in memory_bank
+                        )
+                    else:
+                        memory_bank = memory_bank.index_select(1, select_indices)
+
+                    memory_lengths = memory_lengths.index_select(0, select_indices)
+
+                    if src_map is not None:
+                        src_map = src_map.index_select(1, select_indices)
+
+                if parallel_paths > 1 or any_finished:
+                    self.model.decoder.map_state(
+                        lambda state, dim: state.index_select(dim, select_indices)
+                    )
+
+            # raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -575,78 +618,78 @@ class OpenNMTModel(BaseModel):
                 {'name': 'decoder', 'model': self.decoder.network},
                 {'name': 'generator', 'model': self.generator.network}]
 
-    def decoder(self, identifiers, logits, callback=None):
-        output = []
-        raw_outputs = []
-        batches = logits.shape[0]
-        for batch_idx in range(batches):
-            inseq = np.squeeze(logits[batch_idx, :, :])
-            # inseq: TxBxF
-            logitlen = inseq.shape[0]
-            sentence = self._greedy_decode(inseq, logitlen, callback)
-            output.append(sentence)
-        result = self.adapter.process(output, identifiers, [{}])
+    # def decoder(self, identifiers, logits, callback=None):
+    #     output = []
+    #     raw_outputs = []
+    #     batches = logits.shape[0]
+    #     for batch_idx in range(batches):
+    #         inseq = np.squeeze(logits[batch_idx, :, :])
+    #         # inseq: TxBxF
+    #         logitlen = inseq.shape[0]
+    #         sentence = self._greedy_decode(inseq, logitlen, callback)
+    #         output.append(sentence)
+    #     result = self.adapter.process(output, identifiers, [{}])
+    #
+    #     return raw_outputs, result
 
-        return raw_outputs, result
-
-    def _greedy_decode(self, x, out_len, callback=None):
-        hidden_size = 320
-        hidden = (np.zeros([2, 1, hidden_size]), np.zeros([2, 1, hidden_size]))
-        label = []
-        for time_idx in range(out_len):
-            f = np.expand_dims(np.expand_dims(x[time_idx, ...], 0), 0)
-
-            not_blank = True
-            symbols_added = 0
-
-            while not_blank and symbols_added < self._max_symbols_per_step:
-                g, hidden_prime = self._pred_step(
-                    self._get_last_symb(label),
-                    hidden
-                )
-                if callback:
-                    callback(g)
-                hidden_prime = (g[self.prediction.output_layers[0]], g[self.prediction.output_layers[1]])
-                g = g[self.prediction.output_layers[2]]
-                logp = self._joint_step(f, g, log_normalize=False, callback=callback)[0, :]
-
-                k = np.argmax(logp)
-
-                if k == self._blank_id:
-                    not_blank = False
-                else:
-                    label.append(k)
-                    hidden = hidden_prime
-                symbols_added += 1
-
-        return label
-
-    def _pred_step(self, label, hidden):
-        if label == self._sos:
-            label = self._blank_id
-        if label > self._blank_id:
-            label -= 1
-        inputs = {
-            self.prediction.input_layers[0]: [[label, ]],
-            self.prediction.input_layers[1]: hidden[0],
-            self.prediction.input_layers[2]: hidden[1]
-        }
-        return self.prediction.predict(None, inputs)
-
-    def _joint_step(self, enc, pred, log_normalize=False, callback=None):
-        inputs = {self.joint.input_layers[0]: enc, self.joint.input_layers[1]: pred}
-        logits, logits_blob = self.joint.predict(None, inputs)
-        if callback:
-            callback(logits)
-        logits = logits_blob[:, 0, 0, :]
-        if not log_normalize:
-            return logits
-
-        probs = np.argmax(np.log(logits), axis=len(logits.shape) - 1)
-        return probs
-
-    def _get_last_symb(self, labels) -> int:
-        return self._sos if len(labels) == 0 else labels[-1]
+    # def _greedy_decode(self, x, out_len, callback=None):
+    #     hidden_size = 320
+    #     hidden = (np.zeros([2, 1, hidden_size]), np.zeros([2, 1, hidden_size]))
+    #     label = []
+    #     for time_idx in range(out_len):
+    #         f = np.expand_dims(np.expand_dims(x[time_idx, ...], 0), 0)
+    #
+    #         not_blank = True
+    #         symbols_added = 0
+    #
+    #         while not_blank and symbols_added < self._max_symbols_per_step:
+    #             g, hidden_prime = self._pred_step(
+    #                 self._get_last_symb(label),
+    #                 hidden
+    #             )
+    #             if callback:
+    #                 callback(g)
+    #             hidden_prime = (g[self.prediction.output_layers[0]], g[self.prediction.output_layers[1]])
+    #             g = g[self.prediction.output_layers[2]]
+    #             logp = self._joint_step(f, g, log_normalize=False, callback=callback)[0, :]
+    #
+    #             k = np.argmax(logp)
+    #
+    #             if k == self._blank_id:
+    #                 not_blank = False
+    #             else:
+    #                 label.append(k)
+    #                 hidden = hidden_prime
+    #             symbols_added += 1
+    #
+    #     return label
+    #
+    # def _pred_step(self, label, hidden):
+    #     if label == self._sos:
+    #         label = self._blank_id
+    #     if label > self._blank_id:
+    #         label -= 1
+    #     inputs = {
+    #         self.prediction.input_layers[0]: [[label, ]],
+    #         self.prediction.input_layers[1]: hidden[0],
+    #         self.prediction.input_layers[2]: hidden[1]
+    #     }
+    #     return self.prediction.predict(None, inputs)
+    #
+    # def _joint_step(self, enc, pred, log_normalize=False, callback=None):
+    #     inputs = {self.joint.input_layers[0]: enc, self.joint.input_layers[1]: pred}
+    #     logits, logits_blob = self.joint.predict(None, inputs)
+    #     if callback:
+    #         callback(logits)
+    #     logits = logits_blob[:, 0, 0, :]
+    #     if not log_normalize:
+    #         return logits
+    #
+    #     probs = np.argmax(np.log(logits), axis=len(logits.shape) - 1)
+    #     return probs
+    #
+    # def _get_last_symb(self, labels) -> int:
+    #     return self._sos if len(labels) == 0 else labels[-1]
 
 
 class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
@@ -1477,6 +1520,169 @@ class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
+
+class GNMTGlobalScorer(object):
+    """NMT re-ranking.
+
+    Args:
+       alpha (float): Length parameter.
+       beta (float):  Coverage parameter.
+       length_penalty (str): Length penalty strategy.
+       coverage_penalty (str): Coverage penalty strategy.
+
+    Attributes:
+        alpha (float): See above.
+        beta (float): See above.
+        length_penalty (callable): See :class:`penalties.PenaltyBuilder`.
+        coverage_penalty (callable): See :class:`penalties.PenaltyBuilder`.
+        has_cov_pen (bool): See :class:`penalties.PenaltyBuilder`.
+        has_len_pen (bool): See :class:`penalties.PenaltyBuilder`.
+    """
+
+    @classmethod
+    def from_opt(cls, opt):
+        return cls(
+            opt.alpha,
+            opt.beta,
+            opt.length_penalty,
+            opt.coverage_penalty)
+
+    def __init__(self, alpha, beta, length_penalty, coverage_penalty):
+        # self._validate(alpha, beta, length_penalty, coverage_penalty)
+        self.alpha = alpha
+        self.beta = beta
+        penalty_builder = PenaltyBuilder(coverage_penalty,
+                                                   length_penalty)
+        self.has_cov_pen = penalty_builder.has_cov_pen
+        # Term will be subtracted from probability
+        self.cov_penalty = penalty_builder.coverage_penalty
+
+        self.has_len_pen = penalty_builder.has_len_pen
+        # Probability will be divided by this
+        self.length_penalty = penalty_builder.length_penalty
+
+    # @classmethod
+    # def _validate(cls, alpha, beta, length_penalty, coverage_penalty):
+    #     # these warnings indicate that either the alpha/beta
+    #     # forces a penalty to be a no-op, or a penalty is a no-op but
+    #     # the alpha/beta would suggest otherwise.
+    #     if length_penalty is None or length_penalty == "none":
+    #         if alpha != 0:
+    #             warnings.warn("Non-default `alpha` with no length penalty. "
+    #                           "`alpha` has no effect.")
+    #     else:
+    #         # using some length penalty
+    #         if length_penalty == "wu" and alpha == 0.:
+    #             warnings.warn("Using length penalty Wu with alpha==0 "
+    #                           "is equivalent to using length penalty none.")
+    #     if coverage_penalty is None or coverage_penalty == "none":
+    #         if beta != 0:
+    #             warnings.warn("Non-default `beta` with no coverage penalty. "
+    #                           "`beta` has no effect.")
+    #     else:
+    #         # using some coverage penalty
+    #         if beta == 0.:
+    #             warnings.warn("Non-default coverage penalty with beta==0 "
+    #                           "is equivalent to using coverage penalty none.")
+
+class PenaltyBuilder(object):
+    """Returns the Length and Coverage Penalty function for Beam Search.
+
+    Args:
+        length_pen (str): option name of length pen
+        cov_pen (str): option name of cov pen
+
+    Attributes:
+        has_cov_pen (bool): Whether coverage penalty is None (applying it
+            is a no-op). Note that the converse isn't true. Setting beta
+            to 0 should force coverage length to be a no-op.
+        has_len_pen (bool): Whether length penalty is None (applying it
+            is a no-op). Note that the converse isn't true. Setting alpha
+            to 1 should force length penalty to be a no-op.
+        coverage_penalty (callable[[FloatTensor, float], FloatTensor]):
+            Calculates the coverage penalty.
+        length_penalty (callable[[int, float], float]): Calculates
+            the length penalty.
+    """
+
+    def __init__(self, cov_pen, length_pen):
+        self.has_cov_pen = not self._pen_is_none(cov_pen)
+        self.coverage_penalty = self._coverage_penalty(cov_pen)
+        self.has_len_pen = not self._pen_is_none(length_pen)
+        self.length_penalty = self._length_penalty(length_pen)
+
+    @staticmethod
+    def _pen_is_none(pen):
+        return pen == "none" or pen is None
+
+    def _coverage_penalty(self, cov_pen):
+        if cov_pen == "wu":
+            return self.coverage_wu
+        elif cov_pen == "summary":
+            return self.coverage_summary
+        elif self._pen_is_none(cov_pen):
+            return self.coverage_none
+        else:
+            raise NotImplementedError("No '{:s}' coverage penalty.".format(
+                cov_pen))
+
+    def _length_penalty(self, length_pen):
+        if length_pen == "wu":
+            return self.length_wu
+        elif length_pen == "avg":
+            return self.length_average
+        elif self._pen_is_none(length_pen):
+            return self.length_none
+        else:
+            raise NotImplementedError("No '{:s}' length penalty.".format(
+                length_pen))
+
+    # Below are all the different penalty terms implemented so far.
+    # Subtract coverage penalty from topk log probs.
+    # Divide topk log probs by length penalty.
+
+    def coverage_wu(self, cov, beta=0.):
+        """GNMT coverage re-ranking score.
+
+        See "Google's Neural Machine Translation System" :cite:`wu2016google`.
+        ``cov`` is expected to be sized ``(*, seq_len)``, where ``*`` is
+        probably ``batch_size x beam_size`` but could be several
+        dimensions like ``(batch_size, beam_size)``. If ``cov`` is attention,
+        then the ``seq_len`` axis probably sums to (almost) 1.
+        """
+
+        penalty = -torch.min(cov, cov.clone().fill_(1.0)).log().sum(-1)
+        return beta * penalty
+
+    def coverage_summary(self, cov, beta=0.):
+        """Our summary penalty."""
+        penalty = torch.max(cov, cov.clone().fill_(1.0)).sum(-1)
+        penalty -= cov.size(-1)
+        return beta * penalty
+
+    def coverage_none(self, cov, beta=0.):
+        """Returns zero as penalty"""
+        none = torch.zeros((1,), device=cov.device,
+                           dtype=torch.float)
+        if cov.dim() == 3:
+            none = none.unsqueeze(0)
+        return none
+
+    def length_wu(self, cur_len, alpha=0.):
+        """GNMT length re-ranking score.
+
+        See "Google's Neural Machine Translation System" :cite:`wu2016google`.
+        """
+
+        return ((5 + cur_len) / 6.0) ** alpha
+
+    def length_average(self, cur_len, alpha=0.):
+        """Returns the current sequence length."""
+        return cur_len
+
+    def length_none(self, cur_len, alpha=0.):
+        """Returns unmodified scores."""
+        return 1.0
 
 
 class CommonONNXModel(BaseModel):
