@@ -324,6 +324,7 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
         ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
+
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
             model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));

@@ -23,11 +23,11 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
-    const auto& img = inputTransform.call(origImg);
+    const auto& img = inputTransform(origImg);
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img, !inputTransform.isTrivial()));
+        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
         /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
         return std::make_shared<InternalImageMatModelData>(img);
     }

@@ -48,7 +48,7 @@ void matToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob
     T* blob_data = blobMapped.as<T*>();
 
     if (resized_image.type() == CV_32FC3 && std::is_same<T, uint8_t>::value) {
-        throw std::runtime_error("Conversion from float_t to uint8_t is forbidden");
+        throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
     }
     int batchOffset = batchIndex * width * height * channels;
     if (channels != 1 && channels != 3) {
@@ -67,10 +67,12 @@ void matToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob
  * @param mat - given cv::Mat object with an image data.
  * @return resulting Blob pointer.
  */
-static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat, bool isMatFloat = false) {
+static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
     size_t channels = mat.channels();
     size_t height = mat.size().height;
     size_t width = mat.size().width;
+
+    bool isMatFloat = mat.type() == CV_32FC3;
 
     if (!isMatFloat) {
         size_t strideH = mat.step.buf[0];
@@ -118,112 +120,104 @@ inline void putHighlightedText(const cv::Mat& frame,
 
 
 class OutputTransform {
-    public:
-        OutputTransform() : doResize(false), scaleFactor(1) {}
+public:
+    OutputTransform() : doResize(false), scaleFactor(1) {}
 
-        OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
-            doResize(true), scaleFactor(1), inputSize(inputSize), outputResolution(outputResolution) {}
+    OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
+        doResize(true), scaleFactor(1), inputSize(inputSize), outputResolution(outputResolution) {}
 
-        cv::Size computeResolution() {
-            float inputWidth = static_cast<float>(inputSize.width);
-            float inputHeight = static_cast<float>(inputSize.height);
-            scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
-            newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
-            return newResolution;
+    cv::Size computeResolution() {
+        float inputWidth = static_cast<float>(inputSize.width);
+        float inputHeight = static_cast<float>(inputSize.height);
+        scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
+        newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
+        return newResolution;
+    }
+
+    void resize(cv::Mat& image) {
+        if (!doResize) { return; }
+        cv::Size currSize = image.size();
+        if (currSize != inputSize) {
+            inputSize = currSize;
+            computeResolution();
         }
+        if (scaleFactor == 1) { return; }
+        cv::resize(image, image, newResolution);
+    }
 
-        void resize(cv::Mat& image) {
-            if (!doResize) { return; }
-            cv::Size currSize = image.size();
-            if (currSize != inputSize) {
-                inputSize = currSize;
-                computeResolution();
-            }
-            if (scaleFactor == 1) { return; }
-            cv::resize(image, image, newResolution);
-        }
+    template<typename T>
+    void scaleCoord(T& coord) {
+        if (!doResize || scaleFactor == 1) { return; }
+        coord.x = std::floor(coord.x * scaleFactor);
+        coord.y = std::floor(coord.y * scaleFactor);
+    }
 
-        template<typename T>
-        void scaleCoord(T& coord) {
-            if (!doResize || scaleFactor == 1) { return; }
-            coord.x = std::floor(coord.x * scaleFactor);
-            coord.y = std::floor(coord.y * scaleFactor);
-        }
+    template<typename T>
+    void scaleRect(T& rect) {
+        if (!doResize || scaleFactor == 1) { return; }
+        scaleCoord(rect);
+        rect.width = std::floor(rect.width * scaleFactor);
+        rect.height = std::floor(rect.height * scaleFactor);
+    }
 
-        template<typename T>
-        void scaleRect(T& rect) {
-            if (!doResize || scaleFactor == 1) { return; }
-            scaleCoord(rect);
-            rect.width = std::floor(rect.width * scaleFactor);
-            rect.height = std::floor(rect.height * scaleFactor);
-        }
+    bool doResize;
 
-        bool doResize;
-
-    private:
-        float scaleFactor;
-        cv::Size inputSize;
-        cv::Size outputResolution;
-        cv::Size newResolution;
+private:
+    float scaleFactor;
+    cv::Size inputSize;
+    cv::Size outputResolution;
+    cv::Size newResolution;
 };
 
 
 class InputTransform {
-    public:
-        InputTransform() : trivial(true), reverseInputChannels(false) {}
+public:
+    InputTransform() : trivial(true), reverseInputChannels(false) {}
 
-        InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
-            this->reverseInputChannels = reverseInputChannels;
-            trivial = !reverseInputChannels && meanValues.empty() && scaleValues.empty();
-            if (!isTrivial()) {
-                means = meanValues.empty() ? std::vector<float>({0, 0, 0}) : string2Vec(meanValues);
-                stdScales = scaleValues.empty() ? std::vector<float>({1, 1, 1}) : string2Vec(scaleValues);
-            }
+    InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) :
+        reverseInputChannels(reverseInputChannels),
+        trivial(!reverseInputChannels && meanValues.empty() && scaleValues.empty()),
+        means(meanValues.empty() ? cv::Scalar(0.0, 0.0, 0.0) : string2Vec(meanValues)),
+        stdScales(scaleValues.empty() ? cv::Scalar(1.0, 1.0, 1.0) : string2Vec(scaleValues)) {
+    }
+
+    bool isTrivial() const {
+        return trivial;
+    }
+
+    cv::Scalar string2Vec(const std::string &string) {
+        const auto& strValues = split(string, ' ');
+        std::vector<float> values;
+        try {
+            for (auto& str : strValues)
+                values.push_back(std::stof(str));
+        } catch (const std::invalid_argument&) {
+            throw std::runtime_error("Invalid parameter --mean_values or --scale_values is provided.");
         }
-
-        bool isTrivial() const {
-            return trivial;
+        if (values.size() != 3) {
+            throw std::runtime_error("InputTransform expects 3 values per channel, but get \"" + string + "\".");
         }
+        return cv::Scalar(values[0], values[1], values[2]);
+    }
 
-        std::vector<float> string2Vec(const std::string &string) {
-            const auto& strValues = split(string, ' ');
-            std::vector<float> values;
-            try {
-                for (auto& str : strValues)
-                    values.push_back(std::stof(str));
-            } catch(...) {
-                throw std::runtime_error("Invalid parameter --mean_values or --scale_values is provided.");
-            }
-            if (values.size() != 3) {
-                throw std::runtime_error("InputTransform expects 3 values per channel, but get \"" + string + "\".");
-            }
-            return values;
+    void setPrecision(const InferenceEngine::InputInfo::Ptr& input) {
+        const auto precision = isTrivial() ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
+        input->setPrecision(precision);
+    }
+
+    cv::Mat operator()(const cv::Mat& inputs) {
+        if (isTrivial()) { return inputs; }
+        cv::Mat result;
+        inputs.convertTo(result, CV_32F);
+        if (reverseInputChannels) {
+            cv::cvtColor(result, result, cv::COLOR_BGR2RGB);
         }
+        return (result - means) / stdScales;
+    }
 
-        void setPrecision(const InferenceEngine::InputInfo::Ptr& input) {
-            const auto precision = isTrivial() ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
-            input->setPrecision(precision);
-        }
-
-        cv::Mat call(const cv::Mat& inputs) {
-            if (isTrivial()) { return inputs; }
-            cv::Mat result;
-            inputs.convertTo(result, CV_32F);
-            if (reverseInputChannels) {
-                cv::cvtColor(result, result, cv::COLOR_BGR2RGB);
-            }
-            std::vector<cv::Mat> channels;
-            cv::split(result, channels);
-            for (size_t i = 0; i < channels.size(); i++) {
-                channels[i] = (channels[i] - means[i]) / stdScales[i];
-            }
-            cv::merge(channels, result);
-            return result;
-        }
-
-    private:
-        bool trivial;
-        bool reverseInputChannels;
-        std::vector<float> means;
-        std::vector<float> stdScales;
+private:
+    bool trivial;
+    bool reverseInputChannels;
+    cv::Scalar means;
+    cv::Scalar stdScales;
 };
