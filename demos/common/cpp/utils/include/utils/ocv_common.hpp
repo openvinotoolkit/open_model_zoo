@@ -86,7 +86,7 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
                                       {1, channels, height, width},
                                       InferenceEngine::Layout::NHWC);
 
-    auto& blob = InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
+    const auto& blob = InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
     blob->allocate();
     return blob;
 }

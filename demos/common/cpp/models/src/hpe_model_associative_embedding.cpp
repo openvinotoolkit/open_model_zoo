@@ -107,9 +107,9 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
-    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image.size().width / static_cast<float>(roi.width),
-        image.size().height / static_cast<float>(roi.height), std::move(paddedImage));
+
+    return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
+        image.size().width / static_cast<float>(roi.width), image.size().height / static_cast<float>(roi.height));
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
@@ -135,21 +135,21 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
     // Rescale poses to the original image
-    const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();
+    const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
     float outputScale = inputLayerSize.width / static_cast<float>(heatMapsDims[3]);
     float shiftX = 0.0, shiftY = 0.0;
     float scaleX = 1.0, scaleY = 1.0;
 
     if (resizeMode == RESIZE_KEEP_ASPECT_LETTERBOX) {
-        scaleX = scaleY = std::min(scale.x, scale.y);
+        scaleX = scaleY = std::min(scale.scaleX, scale.scaleY);
         if (aspectRatio >= 1.0)
-            shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.mat.cols * scaleX) / 2);
+            shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.inputImgWidth * scaleX) / 2);
         else
-            shiftY = static_cast<float>((targetSize * scaleY / aspectRatio - scale.mat.rows * scaleY) / 2);
+            shiftY = static_cast<float>((targetSize * scaleY / aspectRatio - scale.inputImgHeight * scaleY) / 2);
         scaleX = scaleY *= outputScale;
     } else {
-        scaleX = scale.x * outputScale;
-        scaleY = scale.y * outputScale;
+        scaleX = scale.scaleX * outputScale;
+        scaleY = scale.scaleY * outputScale;
     }
 
     for (auto& pose : poses) {
