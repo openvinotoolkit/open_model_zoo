@@ -224,6 +224,18 @@ class YOLO(Model):
         return clip_detections(detections, meta['original_shape'])
 
 
+def permute_to_N_HWA_K(tensor, K):
+    """
+    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
+    """
+    assert tensor.ndim == 4, tensor.shape
+    N, _, H, W = tensor.shape
+    tensor = tensor.reshape(N, -1, K, H, W)
+    tensor = tensor.transpose(0, 3, 4, 1, 2)
+    tensor = tensor.reshape(N, -1, K)
+    return tensor
+
+
 class YoloV4(YOLO):
     class Params:
         def __init__(self, classes, num, sides, anchors, mask):
@@ -262,46 +274,51 @@ class YoloV4(YOLO):
         return output_info
 
     @staticmethod
-    def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
+    def _parse_yolo_region(predictions, input_size, params, threshold):
         def sigmoid(x):
             return 1. / (1. + np.exp(-x))
-        # ------------------------------------------ Extracting layer parameters ---------------------------------------
+
         objects = []
         bbox_size = params.coords + 1 + params.classes
+        predictions = permute_to_N_HWA_K(predictions, bbox_size)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
-            # Getting raw values for each detection bounding bFox
-            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            x, y = sigmoid(bbox[:2])
-            width, height = bbox[2:4]
-            object_probability = sigmoid(bbox[4])
+        for prediction in predictions:
+            # Getting probabilities from raw outputs
+            object_probabilities = sigmoid(prediction[:, 4].flatten())
+            class_probabilities = sigmoid(prediction[:, params.coords + 1:].flatten())
+            class_probabilities *= np.repeat(object_probabilities, params.classes)
 
-            class_probabilities = sigmoid(bbox[5:])
-            if object_probability < threshold:
-                continue
-            # Process raw value
-            x = (col + x) / params.sides[1]
-            y = (row + y) / params.sides[0]
-            # Value for exp is very big number in some cases so following construction is using here
-            try:
-                width = np.exp(width)
-                height = np.exp(height)
-            except OverflowError:
-                continue
-            width = width * params.anchors[2 * n] / input_size[0]
-            height = height * params.anchors[2 * n + 1] / input_size[1]
+            # filter out the proposals with low confidence score
+            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
+            class_probabilities = class_probabilities[keep_idxs]
+            obj_indx = keep_idxs // params.classes
+            class_idx = keep_idxs % params.classes
 
-            if multiple_labels:
-                for class_id, class_probability in enumerate(class_probabilities):
-                    confidence = object_probability * class_probability
-                    if confidence > threshold:
-                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                                 confidence, class_id))
-            else:
-                class_id = np.argmax(class_probabilities)
-                confidence = class_probabilities[class_id] * object_probability
-                if confidence < threshold:
+            for ind, obj_ind in enumerate(obj_indx):
+                bbox = prediction[:, :params.coords][obj_ind]
+                x, y = sigmoid(bbox[:2])
+                width, height = bbox[2:]
+
+                row = obj_ind // (params.sides[0] * params.num)
+                col = (obj_ind - row * params.sides[0] * params.num) // params.num
+                n = (obj_ind - row * params.sides[0] * params.num) % params.num
+
+                # Process raw value to get absolute coordinates of boxes
+                x = (col + x) / params.sides[1]
+                y = (row + y) / params.sides[0]
+                # Value for exp is very big number in some cases so following construction is using here
+                try:
+                    width = np.exp(width)
+                    height = np.exp(height)
+                except OverflowError:
                     continue
+                width = width * params.anchors[2 * n] / input_size[0]
+                height = height * params.anchors[2 * n + 1] / input_size[1]
+
+                # Define class_label and cofidence
+                label = class_idx[ind]
+                confidence = class_probabilities[ind]
                 objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), class_id.item()))
+                                         confidence.item(), label.item()))
+
         return objects
