@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import openvino.model_zoo.info_dumper
+import openvino.model_zoo.omz_info_dumper
 
 if __name__ == '__main__':
-    openvino.model_zoo.info_dumper.main()
+    openvino.model_zoo.omz_info_dumper.main()
