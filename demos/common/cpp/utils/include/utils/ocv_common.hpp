@@ -172,7 +172,7 @@ private:
 
 class InputTransform {
 public:
-    InputTransform() : trivial(true), reverseInputChannels(false) {}
+    InputTransform() : reverseInputChannels(false), trivial(true) {}
 
     InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) :
         reverseInputChannels(reverseInputChannels),
@@ -216,8 +216,8 @@ public:
     }
 
 private:
-    bool trivial;
     bool reverseInputChannels;
+    bool trivial;
     cv::Scalar means;
     cv::Scalar stdScales;
 };
