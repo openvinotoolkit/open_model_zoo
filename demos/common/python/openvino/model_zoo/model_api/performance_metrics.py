@@ -16,9 +16,13 @@
 
 import logging as log
 from time import perf_counter
+
 import cv2
 
-from helpers import put_highlighted_text
+
+def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
+    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
+    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
 class Statistic:
