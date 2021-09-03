@@ -627,6 +627,7 @@ class ModelEvaluator(BaseEvaluator):
         self.dataset.reset(self.postprocessor.has_processors)
         if self.adapter:
             self.adapter.reset()
+        self.postprocessor.reset()
 
     def release(self):
         self.input_feeder.release()
