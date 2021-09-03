@@ -17,42 +17,25 @@
 import cv2
 import numpy as np
 
-from .model import Model
+from .image_model import ImageModel
 from .utils import load_labels
 
 
-class SegmentationModel(Model):
-    def __init__(self, ie, model_path, labels=None):
-        super().__init__(ie, model_path)
-
-        self.input_blob_name = self.prepare_inputs()
-        self.out_blob_name = self.prepare_outputs()
+class SegmentationModel(ImageModel):
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
+                 labels=None):
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
 
         if isinstance(labels, (list, tuple)):
             self.labels = labels
         else:
             self.labels = load_labels(labels) if labels else None
 
-    def prepare_inputs(self):
-        if len(self.net.input_info) != 1:
-            raise RuntimeError("Demo supports topologies only with 1 input")
+        self.output_blob_name = self._get_outputs()
 
-        blob_name = next(iter(self.net.input_info))
-        blob = self.net.input_info[blob_name]
-        blob.precision = "U8"
-        blob.layout = "NCHW"
-
-        input_size = blob.input_data.shape
-        if len(input_size) == 4 and input_size[1] == 3:
-            self.n, self.c, self.h, self.w = input_size
-        else:
-            raise RuntimeError("3-channel 4-dimensional model's input is expected")
-
-        return blob_name
-
-    def prepare_outputs(self):
+    def _get_outputs(self):
         if len(self.net.outputs) != 1:
-            raise RuntimeError("Demo supports topologies only with 1 output")
+            raise RuntimeError("The Segmentation model wrapper supports topologies only with 1 output")
 
         blob_name = next(iter(self.net.outputs))
         blob = self.net.outputs[blob_name]
@@ -66,16 +49,6 @@ class SegmentationModel(Model):
             raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size))
 
         return blob_name
-
-    def preprocess(self, inputs):
-        image = inputs
-        resized_image = cv2.resize(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = resized_image.transpose((2, 0, 1))
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-        dict_inputs = {self.input_blob_name: resized_image}
-        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         predictions = outputs[self.out_blob_name].squeeze()
