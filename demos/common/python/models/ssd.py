@@ -52,21 +52,6 @@ class SSD(DetectionModel):
             raise RuntimeError('Failed to identify the input for the image info: no 2D input layer found')
         return  image_info_blob_name
 
-    def _get_inputs(self):
-        image_blob_name = None
-        image_info_blob_name = None
-        for blob_name, blob in self.net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_name = blob_name
-            elif len(blob.input_data.shape) == 2:
-                image_info_blob_name = blob_name
-            else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
-                                   .format(len(blob.shape), blob_name))
-        if image_blob_name is None:
-            raise RuntimeError('Failed to identify the input for the image.')
-        return image_blob_name, image_info_blob_name
-
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
             parser = SingleOutputParser(net.outputs)
