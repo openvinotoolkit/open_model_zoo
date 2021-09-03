@@ -1081,7 +1081,7 @@ PYTHON_DEMOS = [
         ]
     )),
 
-    PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'], 
+    PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
                model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
                           **MONITORS,
