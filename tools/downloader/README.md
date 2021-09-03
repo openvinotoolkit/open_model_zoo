@@ -38,7 +38,8 @@ sudo apt-get install python3 python3-dev python3-setuptools python3-pip
 2. Install the tools with the following command:
 
 ```sh
-python3 setup.py --install
+python3 setup.py build
+python3 setup.py install
 ```
 
 For the model converter, you will also need to install the OpenVINO&trade;
