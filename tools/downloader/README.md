@@ -27,7 +27,10 @@ future releases.
 > <br>
 > Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
 
-## Prerequisites
+## Installation
+
+Model Downloader and other automation tools can be installed as a part of OpenVINO&trade; toolkit or from source.
+Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), setuptools:
 
