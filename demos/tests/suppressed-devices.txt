@@ -37,3 +37,5 @@ mozilla-deepspeech-0.8.2,GPU
 netvlad-tf,GPU
 #
 quartznet-15x5-en,GPU
+#
+wav2vec2-base,GPU
