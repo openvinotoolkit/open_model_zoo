@@ -24,9 +24,7 @@ class SSD(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        self.image_info_blob_name = None
-        if len(self.inputs) != 1:
-            self.image_info_blob_name = self._get_image_info_input()
+        self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
 
     def preprocess(self, inputs):
@@ -39,18 +37,6 @@ class SSD(DetectionModel):
         detections = self._parse_outputs(outputs, meta)
         detections = self._resize_detections(detections, meta)
         return detections
-
-    def _get_image_info_input(self):
-        image_info_blob_name = None
-        for blob_name, blob in self.net.input_info.items():
-            if len(blob.input_data.shape) == 2:
-                if not image_info_blob_name:
-                    image_info_blob_name = blob_name
-                else:
-                    raise RuntimeError('Failed to identify the input for image info: more than one 2D input layer found')
-        if image_info_blob_name is None:
-            raise RuntimeError('Failed to identify the input for the image info: no 2D input layer found')
-        return  image_info_blob_name
 
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:

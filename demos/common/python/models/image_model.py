@@ -26,24 +26,26 @@ class ImageModel(Model):
 
     def __init__(self, ie, model_path, input_transform=None, resize_type='default'):
         super().__init__(ie, model_path, input_transform=input_transform)
-        self.image_blob_name = self._get_image_input()
+        self.image_blob_names, self.image_info_blob_names = self._get_inputs()
+        self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         self.image_layout = 'NCHW'
         self.resize_type = resize_type
         self.resize = self.RESIZE_TYPES[self.resize_type]
 
-    def _get_image_input(self):
-        image_blob_name = None
+    def _get_inputs(self):
+        image_blob_names, image_info_blob_names = [], []
         for blob_name, blob in self.net.input_info.items():
             if len(blob.input_data.shape) == 4:
-                if not image_blob_name:
-                    image_blob_name = blob_name
-                else:
-                    raise RuntimeError('Failed to identify the input for image: more than one 4D input layer found')
-        if image_blob_name is None:
+                image_blob_names.append(blob_name)
+            if len(blob.input_data.shape) == 2:
+                image_info_blob_names.append(blob_name)
+            else:
+                raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
+        if not image_blob_names:
             raise RuntimeError('Failed to identify the input for the image: no 4D input layer found')
-        return image_blob_name
+        return image_blob_names, image_info_blob_names
 
     def preprocess(self, inputs):
         image = inputs

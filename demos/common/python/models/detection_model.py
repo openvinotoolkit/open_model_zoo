@@ -21,6 +21,11 @@ class DetectionModel(ImageModel):
     def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=None, iou_threshold=None):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
+
+        if not self.image_blob_name:
+            raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
+                               .format(len(self.image_blob_names)))
+
         if isinstance(labels, (list, tuple)):
             self.labels = labels
         else:
