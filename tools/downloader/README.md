@@ -32,18 +32,17 @@ future releases.
 Model Downloader and other automation tools can be installed as a part of OpenVINO&trade; toolkit or from source.
 Installation from source is as follows:
 
-1. Install Python (version 3.6 or higher), setuptools:
-
-```sh
-sudo apt-get install python3 python3-dev python3-setuptools python3-pip
-```
+1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
 2. Install the tools with the following command:
 
 ```sh
-python3 setup.py build
-python3 setup.py install
+python setup.py build
+python setup.py install
 ```
+
+> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
+> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
 
 For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
@@ -55,19 +54,19 @@ additional dependencies.
 For models from Caffe2:
 
 ```sh
-python3 -mpip install --user -r ./requirements-caffe2.in
+python -mpip install --user -r ./requirements-caffe2.in
 ```
 
 For models from PyTorch:
 
 ```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
+python -mpip install --user -r ./requirements-pytorch.in
 ```
 
 For models from TensorFlow:
 
 ```sh
-python3 -mpip install --user -r ./requirements-tensorflow.in
+python -mpip install --user -r ./requirements-tensorflow.in
 ```
 
 ## Model downloader usage
