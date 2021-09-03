@@ -36,7 +36,7 @@ class DetectionModel(ImageModel):
         if self.resize_type=='letterbox':
             detections = resize_detections_letterbox(detections, original_shape[1::-1], resized_shape[1::-1])
         elif self.resize_type == 'keep_aspect_ratio':
-            detections = resize_detections_with_aspect(detections, original_shape[1::-1], resized_shape[1::-1], (self.w, self.h))
+            detections = resize_detections_with_aspect_ratio(detections, original_shape[1::-1], resized_shape[1::-1], (self.w, self.h))
         elif self.resize_type == 'default':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
@@ -45,9 +45,6 @@ class DetectionModel(ImageModel):
 
 
 def resize_detections(detections, original_image_size):
-    '''
-    original_shape - (w, h, ...)
-    '''
     for detection in detections:
         detection.xmin *= original_image_size[0]
         detection.xmax *= original_image_size[0]
@@ -55,13 +52,7 @@ def resize_detections(detections, original_image_size):
         detection.ymax *= original_image_size[1]
     return detections
 
-def resize_detections_with_aspect(detections, original_image_size, resized_image_size, model_input_size):
-    '''
-    original_shape - (w, h)
-    resized_shape - (w, h)
-    model_shape - (w, h)
-    '''
-    print(model_input_size, resized_image_size)
+def resize_detections_with_aspect_ratio(detections, original_image_size, resized_image_size, model_input_size):
     scale_x = model_input_size[0] / resized_image_size[0] * original_image_size[0]
     scale_y = model_input_size[1] / resized_image_size[1] * original_image_size[1]
     for detection in detections:
@@ -71,14 +62,14 @@ def resize_detections_with_aspect(detections, original_image_size, resized_image
         detection.ymax *= scale_y
     return detections
 
-def resize_detections_letterbox(detections, original_shape, resized_shape):
-    scales = [x / y for x, y in zip(resized_shape, original_shape)]
+def resize_detections_letterbox(detections, original_image_size, resized_image_size):
+    scales = [x / y for x, y in zip(resized_image_size, original_image_size)]
     scale = min(scales)
     scales = (scale / scales[0], scale / scales[1])
     offset = [0.5 * (1 - x) for x in scales]
     for detection in detections:
-        detection.xmin = ((detection.xmin - offset[0]) / scales[0]) * original_shape[0]
-        detection.xmax = ((detection.xmax - offset[0]) / scales[0]) * original_shape[0]
-        detection.ymin = ((detection.ymin - offset[1]) / scales[1]) * original_shape[1]
-        detection.ymax = ((detection.ymax - offset[1]) / scales[1]) * original_shape[1]
+        detection.xmin = ((detection.xmin - offset[0]) / scales[0]) * original_image_size[0]
+        detection.xmax = ((detection.xmax - offset[0]) / scales[0]) * original_image_size[0]
+        detection.ymin = ((detection.ymin - offset[1]) / scales[1]) * original_image_size[1]
+        detection.ymax = ((detection.ymax - offset[1]) / scales[1]) * original_image_size[1]
     return detections
