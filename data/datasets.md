@@ -147,8 +147,12 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 ### How download dataset
 
 To download SYGData0829 dataset, you need to follow the steps below:
-1. Select ['SYGData0829.rar']https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/SYGData0829.rar
-2. Unpack archive
+1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+2. Select [`SYGData0829.z01`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01)
+Select ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02)
+Select ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03)
+Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip)
+3. Unpack archive
 
 ### Files layout
 * `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
@@ -158,7 +162,7 @@ To download SYGData0829 dataset, you need to follow the steps below:
 		* `Main/val.txt` - image sets file for validation of detection tasks
 
 ### Datasets in dataset_definitions.yml
-* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-syg`](../models/public/mobilenet-yolo-syg/README.md))
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-v4-syg`](../models/public/mobilenet-yolo-v4-syg/README.md))
 
 ## [PASCAL-S](http://cbs.ic.gatech.edu/salobj/)
 
