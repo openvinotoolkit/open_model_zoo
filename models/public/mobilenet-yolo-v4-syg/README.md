@@ -4,7 +4,7 @@
 
   This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/ermubuzhiming/OMZ-model-download/>,
+  For details see repository <https://github.com/legendary111/mobilenet-yolo-v4-syg/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 
 ## Specification
@@ -18,12 +18,12 @@
 
 ## Accuracy
 
-Accuracy metrics obtained on [SYGDate0829](https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-syg/SYGData0829.rar)
+Accuracy metrics obtained on [SYGDate0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
 which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
 | ------ | -------|
-| mAP    | 84.81% |
+| mAP    | 87.11% |
 
 ## Input：
 
@@ -69,7 +69,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_9` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
+- `class_no_1`,...,`class_no_4` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
 ### Converted model
 

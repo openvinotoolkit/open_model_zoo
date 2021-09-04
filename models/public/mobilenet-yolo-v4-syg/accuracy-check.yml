@@ -50,10 +50,6 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter:  print_scalar
-          - type: coco_precision
-            max_detections: 100
-            threshold: 0.5
-            presenter:  print_scalar
 
   - name: mobilenet-yolo-v4-syg
     launchers:
@@ -89,8 +85,4 @@ models:
           - type: map
             integral: 11point
             ignore_difficult: true
-            presenter:  print_scalar
-          - type: coco_precision
-            max_detections: 100
-            threshold: 0.5
             presenter:  print_scalar
