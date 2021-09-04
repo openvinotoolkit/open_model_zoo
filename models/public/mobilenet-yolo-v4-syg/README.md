@@ -18,7 +18,7 @@
 
 ## Accuracy
 
-Accuracy metrics obtained on [SYGDate0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+Accuracy metrics obtained on [SYGDate0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)'SYGDate0829.z01''SYGDate0829.z02''SYGDate0829.z03''SYGDate0829.zip'
 which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
