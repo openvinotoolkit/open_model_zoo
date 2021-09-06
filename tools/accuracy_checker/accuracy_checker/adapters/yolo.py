@@ -18,7 +18,7 @@ from collections import namedtuple
 import warnings
 
 import numpy as np
-
+import time
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
@@ -62,11 +62,11 @@ class YolofOutputProcessor(YoloOutputProcessor):
         if anchors is None:
             anchors = [1, 1]
 
-        x = self.coord_correct(bbox.x) * anchors[0] + i * self.x_normalizer
-        y = self.coord_correct(bbox.y) * anchors[1] + j * self.y_normalizer
+        x = self.coord_correct(bbox.x) * anchors[0] / self.width_normalizer + i / self.x_normalizer
+        y = self.coord_correct(bbox.y) * anchors[1] / self.height_normalizer + j / self.y_normalizer
 
-        w = self.size_correct(bbox.w) * anchors[0]
-        h = self.size_correct(bbox.h) * anchors[1]
+        w = self.size_correct(bbox.w) * anchors[0] / self.width_normalizer
+        h = self.size_correct(bbox.h) * anchors[1] / self.height_normalizer
 
         confidence = self.conf_correct(bbox.confidence)
         probabilities = self.prob_correct(bbox.probabilities)
@@ -143,7 +143,8 @@ def entry_index(w, h, n_coords, n_classes, pos, entry):
     return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
 
 
-def parse_output(predictions, cells, num, box_size, anchors, processor, threshold=0.001):
+def parse_output(predictions, cells, num, classes, box_size, anchors, processor,
+                 threshold=0.001, multiple_labels=False):
     cells_x, cells_y = cells, cells
 
     labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
@@ -154,20 +155,30 @@ def parse_output(predictions, cells, num, box_size, anchors, processor, threshol
         else:
             bbox = predictions[n * box_size:(n + 1) * box_size, y, x]
 
-        raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5:])
+        is_obj_prob = box_size != classes + 4
+        raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3],
+                                bbox[4] if is_obj_prob else 1, bbox[4 + is_obj_prob:])
         processed_box = processor(raw_bbox, x, y, anchors[2*n:2*n+2])
 
-        if processed_box.confidence < threshold:
-            continue
+        count_obj = 0
+        if multiple_labels:
+            conf = processed_box.probabilities * processed_box.confidence
+            indexes = np.where(conf > threshold)[0]
+            labels.extend(indexes)
+            scores.extend(conf[indexes])
+            count_obj = len(indexes)
+        else:
+            if processed_box.confidence < threshold:
+                continue
+            label = np.argmax(processed_box.probabilities)
+            labels.append(label)
+            scores.append(processed_box.probabilities[label] * processed_box.confidence)
+            count_obj = 1
 
-        label = np.argmax(processed_box.probabilities)
-
-        labels.append(label)
-        scores.append(processed_box.probabilities[label] * processed_box.confidence)
-        x_mins.append(processed_box.x - processed_box.w / 2.0)
-        y_mins.append(processed_box.y - processed_box.h / 2.0)
-        x_maxs.append(processed_box.x + processed_box.w / 2.0)
-        y_maxs.append(processed_box.y + processed_box.h / 2.0)
+        x_mins.extend(count_obj * [processed_box.x - processed_box.w / 2.0])
+        y_mins.extend(count_obj * [processed_box.y - processed_box.h / 2.0])
+        x_maxs.extend(count_obj * [processed_box.x + processed_box.w / 2.0])
+        y_maxs.extend(count_obj * [processed_box.y + processed_box.h / 2.0])
 
     return labels, scores, x_mins, y_mins, x_maxs, y_maxs
 
@@ -264,16 +275,19 @@ class YoloV2Adapter(Adapter):
             predictions = np.transpose(predictions, (0, 3, 1, 2)).reshape(shape)
 
         result = []
-        box_size = self.classes + self.coords + 1
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) != 3:
                 if self.output_format == 'BHW':
-                    new_shape = (self.num * box_size, self.cells, self.cells)
+                    new_shape = (-1, self.cells, self.cells)
                 else:
-                    new_shape = (self.cells, self.cells, self.num * box_size)
+                    new_shape = (self.cells, self.cells, -1)
                 prediction = np.reshape(prediction, new_shape)
+            if self.output_format == 'BHW':
+                box_size = prediction.shape[0] // self.num
+            else:
+                box_size = prediction.shape[2] // self.num
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
-                                                                          box_size, self.anchors,
+                                                                          self.classes, box_size, self.anchors,
                                                                           self.processor)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
@@ -350,6 +364,10 @@ class YoloV3Adapter(Adapter):
             'output_format': StringField(
                 choices=['BHW', 'HWB'], optional=True, default='BHW',
                 description="Set output layer format"
+            ),
+            'multiple_labels': BoolField(
+                optional=True, default=False,
+                description="Allow multiple labels for detection objects"
             )
         })
 
@@ -381,6 +399,7 @@ class YoloV3Adapter(Adapter):
         self.do_reshape = self.get_value_from_config('do_reshape')
         self.transpose = self.get_value_from_config('transpose')
         self.cells = self.get_value_from_config('cells')
+        self.multiple_labels = self.get_value_from_config('multiple_labels')
         if len(self.outputs) != len(self.cells):
             if self.do_reshape:
                 raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({}). '
@@ -419,7 +438,6 @@ class YoloV3Adapter(Adapter):
         out_layout = frame_meta[0].get('output_layout', {})
         predictions = self.prepare_predictions(batch, raw_outputs, out_precision, out_layout)
 
-        box_size = self.coords + 1 + self.classes
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
@@ -438,9 +456,9 @@ class YoloV3Adapter(Adapter):
                         raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
                                           'Check "cells" option.'.format(len(prediction), len(self.cells)))
                     if self.output_format == 'BHW':
-                        new_shape = (num * box_size, cells, cells)
+                        new_shape = (-1, cells, cells)
                     else:
-                        new_shape = (cells, cells, num * box_size)
+                        new_shape = (cells, cells, -1)
 
                     p = np.reshape(p, new_shape)
                 else:
@@ -449,12 +467,18 @@ class YoloV3Adapter(Adapter):
                     # clarification (works ONLY for square grids).
                     cells = p.shape[1] if self.output_format == 'BHW' else p.shape[0]
 
+                if self.output_format == 'BHW':
+                    box_size = p.shape[0] // self.num
+                else:
+                    box_size = p.shape[2] // self.num
+
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
 
-                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              box_size, anchors,
-                                                                              self.processor, self.threshold)
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num, self.classes,
+                                                                              box_size, anchors, self.processor,
+                                                                              self.threshold, self.multiple_labels)
+
                 detections['labels'].extend(labels)
                 detections['scores'].extend(scores)
                 detections['x_mins'].extend(x_mins)
@@ -624,6 +648,15 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
 
 
+class YolofAdapter(YoloV3Adapter):
+    __provider__ = 'yolof'
+
+    def configure(self):
+        super().configure()
+        if self.raw_output:
+            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+
+
 class YolorAdapter(Adapter):
     __provider__ = 'yolor'
     prediction_types = (DetectionPrediction, )
@@ -674,86 +707,3 @@ class YolorAdapter(Adapter):
                 identifier, j, scores, x_mins, y_mins, x_maxs, y_maxs, meta
             ))
         return result
-
-
-class YolofAdapter(YoloV3Adapter):
-    __provider__ = 'yolof'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'topk': NumberField(
-                value_type=int, optional=True, min_value=1, default=1000, description="Number of detection candidates."
-            ),
-        })
-
-        return parameters
-
-    def configure(self):
-        super().configure()
-        self.topk = self.get_value_from_config('topk')
-        if self.raw_output:
-            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
-
-    def process(self, raw, identifiers, frame_meta):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-            frame_meta: meta info about data processing
-        Returns:
-            list of DetectionPrediction objects
-        """
-
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-
-        self.select_output_blob(raw_outputs)
-        predictions = raw_outputs[self.output_blob]
-        out_precision = frame_meta[0].get('output_precision', {})
-        if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
-            predictions = predictions.view(out_precision[self.output_blob])
-
-        results = []
-        cells = self.cells[0]
-        for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
-            input_shape = list(meta.get('input_shape', {'data': (1, 3, 608, 608)}).values())[0]
-            prob = prediction[:, self.coords:].flatten()
-            prob = self.processor.prob_correct(prob)
-
-            # get first topk
-            num_topk = min(self.topk, prediction.shape[0])
-            topk_idxs = np.argsort(-prob)
-            prob = prob[topk_idxs][:num_topk]
-            topk_idxs = topk_idxs[:num_topk]
-
-            # filter out the proposals with low confidence score
-            keep_idxs = prob > self.threshold
-            prob = prob[keep_idxs]
-            topk_idxs = topk_idxs[keep_idxs]
-            obj_indx = topk_idxs // self.classes
-            class_idx = topk_idxs % self.classes
-
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
-            for ind, obj_ind in enumerate(obj_indx):
-                bbox = prediction[:, :self.coords][obj_ind]
-                raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], prob[ind], prob[ind])
-                row = obj_ind // (cells * self.num)
-                col = (obj_ind - row * cells * self.num) // self.num
-                n = (obj_ind - row * cells * self.num) % self.num
-                self.processor.x_normalizer = input_shape[3] // cells
-                self.processor.y_normalizer = input_shape[2] // cells
-                processed_box = self.processor(raw_bbox, col, row, self.anchors[2 * n:2 * n + 2])
-
-                label = class_idx[ind]
-
-                labels.append(label)
-                scores.append(processed_box.confidence)
-                x_mins.append(processed_box.x - processed_box.w / 2.0)
-                y_mins.append(processed_box.y - processed_box.h / 2.0)
-                x_maxs.append(processed_box.x + processed_box.w / 2.0)
-                y_maxs.append(processed_box.y + processed_box.h / 2.0)
-
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return results

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLOF is a simple, fast, and efficient object detector without FPN. Model based on ["You Only Look One-level Feature"](https://arxiv.org/abs/2103.09460) paper. It was implemented in PyTorch\* framework. For details see [repository](https://github.com/megvii-model/YOLOF). This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes.
+YOLOF is a simple, fast, and efficient object detector without FPN. Model based on ["You Only Look One-level Feature"](https://arxiv.org/abs/2103.09460) paper. It was implemented in PyTorch\* framework. Model used `CSPDarkNet-53` as backbone. For details see [repository](https://github.com/megvii-model/YOLOF). This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes.
 
 ## Specification
 
@@ -19,9 +19,9 @@ Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodata
 
 | Metric                                                                | Value  |
 | --------------------------------------------------------------------- | -------|
-| mAP                                                                   | 60.41% |
-| [COCO mAP (0.5)](https://cocodataset.org/#detection-eval)             | 66.14% |
-| [COCO mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval)   | 43.51% |
+| mAP                                                                   | 60.91% |
+| [COCO mAP (0.5)](https://cocodataset.org/#detection-eval)             | 66.23% |
+| [COCO mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval)   | 43.63% |
 
 ## Input
 
@@ -64,13 +64,13 @@ Detection box has format [`x_min`, `y_min`, `x_max`, `y_max`], where:
 
 ### Converted model
 
-The array of detection summary info, name - `boxes`, shape - `1, 8664, 84`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
+The array of detection summary info, name - `boxes`, shape - `1, 504, 38, 38`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
 
-For each case format is `B, N*Cx*Cy, 84`, where
+For each case format is `B, N*84, Cx, Cy`, where
 
 - `B` - batch size
-- `N` - number of detection boxes for cell (N = 6)
 - `Cx`, `Cy` - cell index
+- `N` - number of detection boxes for cell
 
 Detection box has format [`x`, `y`, `h`, `w`, `class_no_1`, ..., `class_no_80`], where:
 
