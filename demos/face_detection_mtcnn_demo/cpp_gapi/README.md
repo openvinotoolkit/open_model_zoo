@@ -15,18 +15,18 @@ Upon getting a frame from the OpenCV VideoCapture, the application performs infe
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/face_detection_mtcnn_demo/cpp_gapi/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+python3 <omz_dir>/tools/model_tools/downloader.py --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+python3 <omz_dir>/tools/model_tools/converter.py --list models.lst
 ```
 
 ### Supported Models
@@ -61,12 +61,12 @@ Options:
   -th "<num>", --threshold "<num>"
                         Optional. The threshold to define the face is
                         recognized or not.
-  -d_p "<device>", Optional. Target device for MTCNN P network.
-                   The demo will look for a suitable plugin for a specified device.Default value is CPU.
-  -d_r "<device>", Optional. Target device for MTCNN R network.
-                   The demo will look for a suitable plugin for a specified device.Default value is CPU.
-  -d_o "<device>", Optional. Target device for MTCNN O network.
-                   The demo will look for a suitable plugin for a specified device.Default value is CPU.
+  -d_p "<device>",      Optional. Target device for MTCNN P network.
+                        The demo will look for a suitable plugin for a specified device.Default value is CPU.
+  -d_r "<device>",      Optional. Target device for MTCNN R network.
+                        The demo will look for a suitable plugin for a specified device.Default value is CPU.
+  -d_o "<device>",      Optional. Target device for MTCNN O network.
+                        The demo will look for a suitable plugin for a specified device.Default value is CPU.
   -qc "<num>", Optional. Streaming executor queue capacity. Calculated automaticaly if 0.
   -hs,                  Optional. MTCNN P use half scale pyramid.
   --loop                Optional. Enable reading the input in a loop.
@@ -109,4 +109,4 @@ The demo reports
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

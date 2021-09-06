@@ -178,8 +178,6 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
             Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        int frames = 0;
-
         /** Save output result **/
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
@@ -209,7 +207,13 @@ int main(int argc, char* argv[]) {
             if (!FLAGS_no_show) {
                 cv::imshow("Face detection mtcnn demo G-API", out_image);
                 int key = cv::waitKey(1);
-                presenter.handleKey(key);
+                /** Press 'Esc' or 'Q' to quit **/
+                if (key == 27)
+                    break;
+                if (key == 81) // Q
+                    break;
+                else
+                    presenter.handleKey(key);
             }
         }
 

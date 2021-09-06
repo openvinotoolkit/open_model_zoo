@@ -6,54 +6,54 @@
 #include <opencv2/imgproc.hpp>
 
 namespace {
-const float P_NET_WINDOW_SIZE = 12.0f;
+    const float P_NET_WINDOW_SIZE = 12.0f;
 
-std::vector<custom::Face> buildFaces(const cv::Mat& scores,
-                             const cv::Mat& regressions,
-                             const float scaleFactor,
-                             const float threshold) {
+    std::vector<custom::Face> buildFaces(const cv::Mat& scores,
+        const cv::Mat& regressions,
+        const float scaleFactor,
+        const float threshold) {
 
-    auto w = scores.size[3];
-    auto h = scores.size[2];
-    auto size = w * h;
+        const auto w = scores.size[3];
+        const auto h = scores.size[2];
+        const auto size = w * h;
 
-    const float* scores_data = scores.ptr<float>();
-    scores_data += size;
+        const float* scores_data = scores.ptr<float>();
+        scores_data += size;
 
-    const float* reg_data = regressions.ptr<float>();
+        const float* reg_data = regressions.ptr<float>();
 
-    auto out_side = std::max(h, w);
-    auto in_side = 2 * out_side + 11;
-    float stride = 0.0f;
-    if (out_side != 1) {
-        stride = static_cast<float>(in_side - P_NET_WINDOW_SIZE) / static_cast<float>(out_side - 1);
-    }
-
-    std::vector<custom::Face> boxes;
-
-    for (int i = 0; i < size; i++) {
-        if (scores_data[i] >= (threshold)) {
-            float y = static_cast<float>(i / w);
-            float x = static_cast<float>(i - w * y);
-
-            custom::Face faceInfo;
-            custom::BBox& faceBox = faceInfo.bbox;
-
-            faceBox.x1 = std::max(0, static_cast<int>((x * stride) / scaleFactor));
-            faceBox.y1 = std::max(0, static_cast<int>((y * stride) / scaleFactor));
-            faceBox.x2 = static_cast<int>((x * stride + P_NET_WINDOW_SIZE - 1.0f) / scaleFactor);
-            faceBox.y2 = static_cast<int>((y * stride + P_NET_WINDOW_SIZE - 1.0f) / scaleFactor);
-            faceInfo.regression[0] = reg_data[i];
-            faceInfo.regression[1] = reg_data[i + size];
-            faceInfo.regression[2] = reg_data[i + 2 * size];
-            faceInfo.regression[3] = reg_data[i + 3 * size];
-            faceInfo.score = scores_data[i];
-            boxes.push_back(faceInfo);
+        const auto out_side = std::max(h, w);
+        const auto in_side = 2 * out_side + 11;
+        float stride = 0.0f;
+        if (out_side != 1) {
+            stride = static_cast<float>(in_side - P_NET_WINDOW_SIZE) / static_cast<float>(out_side - 1);
         }
-    }
 
-    return boxes;
-}
+        std::vector<custom::Face> boxes;
+
+        for (int i = 0; i < size; i++) {
+            if (scores_data[i] >= (threshold)) {
+                const float y = static_cast<float>(i / w);
+                const float x = static_cast<float>(i - w * y);
+
+                custom::Face faceInfo;
+                custom::BBox& faceBox = faceInfo.bbox;
+
+                faceBox.x1 = std::max(0, static_cast<int>((x * stride) / scaleFactor));
+                faceBox.y1 = std::max(0, static_cast<int>((y * stride) / scaleFactor));
+                faceBox.x2 = static_cast<int>((x * stride + P_NET_WINDOW_SIZE - 1.0f) / scaleFactor);
+                faceBox.y2 = static_cast<int>((y * stride + P_NET_WINDOW_SIZE - 1.0f) / scaleFactor);
+                faceInfo.regression[0] = reg_data[i];
+                faceInfo.regression[1] = reg_data[i + size];
+                faceInfo.regression[2] = reg_data[i + 2 * size];
+                faceInfo.regression[3] = reg_data[i + 3 * size];
+                faceInfo.score = scores_data[i];
+                boxes.push_back(faceInfo);
+            }
+        }
+
+        return boxes;
+    }
 } // anonymous namespace
 
 //Custom kernels implementation
@@ -62,7 +62,7 @@ GAPI_OCV_KERNEL(OCVBuildFaces, custom::BuildFaces) {
                     const cv::Mat & in_regresssions,
                     const float scaleFactor,
                     const float threshold,
-                    std::vector<custom::Face> &out_faces) {
+        std::vector<custom::Face> &out_faces) {
         out_faces = buildFaces(in_scores, in_regresssions, scaleFactor, threshold);
     }
 }; // GAPI_OCV_KERNEL(BuildFaces)
@@ -71,8 +71,8 @@ GAPI_OCV_KERNEL(OCVRunNMS, custom::RunNMS) {
     static void run(const std::vector<custom::Face> &in_faces,
                     const float threshold,
                     const bool useMin,
-                    std::vector<custom::Face> &out_faces) {
-                    std::vector<custom::Face> in_faces_copy = in_faces;
+        std::vector<custom::Face> &out_faces) {
+        std::vector<custom::Face> in_faces_copy = in_faces;
         out_faces = custom::Face::runNMS(in_faces_copy, threshold, useMin);
     }
 }; // GAPI_OCV_KERNEL(RunNMS)
@@ -80,8 +80,8 @@ GAPI_OCV_KERNEL(OCVRunNMS, custom::RunNMS) {
 GAPI_OCV_KERNEL(OCVAccumulatePyramidOutputs, custom::AccumulatePyramidOutputs) {
     static void run(const std::vector<custom::Face> &total_faces,
                     const std::vector<custom::Face> &in_faces,
-                    std::vector<custom::Face> &out_faces) {
-                    out_faces = total_faces;
+                          std::vector<custom::Face> &out_faces) {
+        out_faces = total_faces;
         out_faces.insert(out_faces.end(), in_faces.begin(), in_faces.end());
     }
 }; // GAPI_OCV_KERNEL(AccumulatePyramidOutputs)
@@ -89,7 +89,7 @@ GAPI_OCV_KERNEL(OCVAccumulatePyramidOutputs, custom::AccumulatePyramidOutputs) {
 GAPI_OCV_KERNEL(OCVApplyRegression, custom::ApplyRegression) {
     static void run(const std::vector<custom::Face> &in_faces,
                     const bool addOne,
-                    std::vector<custom::Face> &out_faces) {
+                          std::vector<custom::Face> &out_faces) {
         std::vector<custom::Face> in_faces_copy = in_faces;
         custom::Face::applyRegression(in_faces_copy, addOne);
         out_faces.clear();
@@ -99,7 +99,7 @@ GAPI_OCV_KERNEL(OCVApplyRegression, custom::ApplyRegression) {
 
 GAPI_OCV_KERNEL(OCVBBoxesToSquares, custom::BBoxesToSquares) {
     static void run(const std::vector<custom::Face> &in_faces,
-                    std::vector<custom::Face> &out_faces) {
+                          std::vector<custom::Face> &out_faces) {
         std::vector<custom::Face> in_faces_copy = in_faces;
         custom::Face::bboxes2Squares(in_faces_copy);
         out_faces.clear();
@@ -110,13 +110,13 @@ GAPI_OCV_KERNEL(OCVBBoxesToSquares, custom::BBoxesToSquares) {
 GAPI_OCV_KERNEL(OCVR_O_NetPreProcGetROIs, custom::R_O_NetPreProcGetROIs) {
     static void run(const std::vector<custom::Face> &in_faces,
                     const cv::Size & in_image_size,
-                    std::vector<cv::Rect> &outs) {
+                          std::vector<cv::Rect> &outs) {
         outs.clear();
         for (const auto& face : in_faces) {
             cv::Rect tmp_rect = face.bbox.getRect();
             //Compare to transposed sizes width<->height
             tmp_rect &= cv::Rect(tmp_rect.x, tmp_rect.y, in_image_size.height - tmp_rect.x, in_image_size.width - tmp_rect.y) &
-                        cv::Rect(0, 0, in_image_size.height, in_image_size.width);
+                cv::Rect(0, 0, in_image_size.height, in_image_size.width);
             outs.push_back(tmp_rect);
         }
     }
@@ -127,7 +127,7 @@ GAPI_OCV_KERNEL(OCVRNetPostProc, custom::RNetPostProc) {
                     const std::vector<cv::Mat> &in_scores,
                     const std::vector<cv::Mat> &in_regresssions,
                     const float threshold,
-                    std::vector<custom::Face> &out_faces) {
+                          std::vector<custom::Face> &out_faces) {
         out_faces.clear();
         for (unsigned int k = 0; k < in_faces.size(); ++k) {
             const float* scores_data = in_scores[k].ptr<float>();
@@ -148,7 +148,7 @@ GAPI_OCV_KERNEL(OCVONetPostProc, custom::ONetPostProc) {
                     const std::vector<cv::Mat> &in_regresssions,
                     const std::vector<cv::Mat> &in_landmarks,
                     const float threshold,
-                    std::vector<custom::Face> &out_faces) {
+                          std::vector<custom::Face> &out_faces) {
         out_faces.clear();
         for (unsigned int k = 0; k < in_faces.size(); ++k) {
             const float* scores_data = in_scores[k].ptr<float>();
@@ -177,7 +177,7 @@ GAPI_OCV_KERNEL(OCVONetPostProc, custom::ONetPostProc) {
 
 GAPI_OCV_KERNEL(OCVSwapFaces, custom::SwapFaces) {
     static void run(const std::vector<custom::Face> &in_faces,
-                    std::vector<custom::Face> &out_faces) {
+                          std::vector<custom::Face> &out_faces) {
         std::vector<custom::Face> in_faces_copy = in_faces;
         out_faces.clear();
         if (!in_faces_copy.empty()) {
@@ -196,10 +196,21 @@ GAPI_OCV_KERNEL(OCVSwapFaces, custom::SwapFaces) {
 using rectPoints = std::pair<cv::Rect, std::vector<cv::Point>>;
 
 GAPI_OCV_KERNEL(OCVBoxesAndMarks, custom::BoxesAndMarks) {
-    static void run(const cv::Mat& in,
+    static void run(const cv::Mat & in,
                     const std::vector<custom::Face> &in_faces,
-                          std::vector<cv::gapi::wip::draw::Prim>& out_prims) {
+                          std::vector<cv::gapi::wip::draw::Prim>&out_prims) {
+        out_prims.clear();
+        const auto rct = [](const cv::Rect& rc) {
+            return cv::gapi::wip::draw::Rect(rc, cv::Scalar(255, 0, 0), 1);
+        };
+        const auto txt = [](const std::string& ms, const cv::Rect& rc) {
+            return cv::gapi::wip::draw::Text(ms, rc.tl(), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0));
+        };
+        const auto crl = [](const cv::Point& point) {
+            return cv::gapi::wip::draw::Circle(point, 2, cv::Scalar(0, 255, 0));
+        };
         std::vector<rectPoints> data;
+        std::vector<float> confidence;
         // show the image with faces in it
         for (const auto& out_face : in_faces) {
             std::vector<cv::Point> pts;
@@ -210,20 +221,13 @@ GAPI_OCV_KERNEL(OCVBoxesAndMarks, custom::BoxesAndMarks) {
             const auto rect = out_face.bbox.getRect();
             const auto d = std::make_pair(rect, pts);
             data.push_back(d);
+            confidence.push_back(out_face.score);
         }
 
-        out_prims.clear();
-        const auto rct = [](const cv::Rect &rc) {
-            return cv::gapi::wip::draw::Rect(rc, cv::Scalar(0,255,0 ), 1);
-        };
-
-         const auto crl = [](const cv::Point &point) {
-            return cv::gapi::wip::draw::Circle(point, 3, cv::Scalar(0, 255, 255));
-        };
-
-        for (const auto& el : data) {
-            out_prims.emplace_back(rct(el.first));
-            for (const auto& point : el.second) {
+        for (size_t i = 0; i < data.size(); ++i) {
+            out_prims.emplace_back(rct(data.at(i).first));
+            out_prims.emplace_back(txt(cv::format("confidence: %0.2f", confidence.at(i)), data.at(i).first));
+            for (const auto& point : data.at(i).second) {
                 out_prims.emplace_back(crl(point));
             }
         }
@@ -232,13 +236,13 @@ GAPI_OCV_KERNEL(OCVBoxesAndMarks, custom::BoxesAndMarks) {
 
 cv::gapi::GKernelPackage custom::kernels() {
     return cv::gapi::kernels<OCVBuildFaces,
-                             OCVRunNMS,
-                             OCVAccumulatePyramidOutputs,
-                             OCVApplyRegression,
-                             OCVBBoxesToSquares,
-                             OCVR_O_NetPreProcGetROIs,
-                             OCVRNetPostProc,
-                             OCVONetPostProc,
-                             OCVSwapFaces,
-                             OCVBoxesAndMarks>();
+        OCVRunNMS,
+        OCVAccumulatePyramidOutputs,
+        OCVApplyRegression,
+        OCVBBoxesToSquares,
+        OCVR_O_NetPreProcGetROIs,
+        OCVRNetPostProc,
+        OCVONetPostProc,
+        OCVSwapFaces,
+        OCVBoxesAndMarks>();
 }
