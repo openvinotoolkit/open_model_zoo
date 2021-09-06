@@ -623,8 +623,9 @@ class YolorAdapter(Adapter):
         self.threshold = self.get_value_from_config('threshold')
         self.num = self.get_value_from_config('num')
         self.output_name = self.get_value_from_config('output_name')
-        if self.output_name is None:
-            self.output_name = self.output_blob
+        self.expanded_strides = []
+        self.grids = []
+        self.img_size = []
 
     @staticmethod
     def xywh2xyxy(x):
@@ -635,11 +636,23 @@ class YolorAdapter(Adapter):
         y[:, 3] = x[:, 1] + x[:, 3] / 2
         return y
 
+    def set_strides_grids(self, img_size):
+        pass
+
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        self.output_name = self.output_name or self.output_blob
 
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_name], frame_meta):
+            _, _, h, w = next(iter(meta.get('input_shape').values()))
+            self.set_strides_grids((w, h))
+
+            if np.size(self.expanded_strides) != 0 and np.size(self.grids) != 0:
+                output[..., :2] = (output[..., :2] + self.grids) * self.expanded_strides
+                output[..., 2:4] = np.exp(output[..., 2:4]) * self.expanded_strides
+
             valid_predictions = output[output[..., 4] > self.threshold]
             valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
 
@@ -653,3 +666,29 @@ class YolorAdapter(Adapter):
                 identifier, j, scores, x_mins, y_mins, x_maxs, y_maxs, meta
             ))
         return result
+
+
+class YoloxAdapter(YolorAdapter):
+    __provider__ = 'yolox'
+
+    def set_strides_grids(self, img_size):
+        if len(self.img_size) == 2 and img_size == self.img_size:
+            return
+
+        grids = []
+        expanded_strides = []
+
+        strides = [8, 16, 32]
+        hsizes = [img_size[0] // stride for stride in strides]
+        wsizes = [img_size[1] // stride for stride in strides]
+
+        for hsize, wsize, stride in zip(hsizes, wsizes, strides):
+            xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
+            grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
+            grids.append(grid)
+            shape = grid.shape[:2]
+            expanded_strides.append(np.full((*shape, 1), stride))
+
+        self.grids = np.concatenate(grids, 1)
+        self.expanded_strides = np.concatenate(expanded_strides, 1)
+        self.img_size = img_size
