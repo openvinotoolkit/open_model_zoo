@@ -39,7 +39,7 @@ class ImageModel(Model):
         for blob_name, blob in self.net.input_info.items():
             if len(blob.input_data.shape) == 4:
                 image_blob_names.append(blob_name)
-            if len(blob.input_data.shape) == 2:
+            elif len(blob.input_data.shape) == 2:
                 image_info_blob_names.append(blob_name)
             else:
                 raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
