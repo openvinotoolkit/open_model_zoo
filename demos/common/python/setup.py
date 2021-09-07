@@ -30,7 +30,7 @@ SETUP_DIR = Path(__file__).resolve().parent
 with open(SETUP_DIR / 'requirements.txt') as f:
     required = f.read().splitlines()
 
-SETUP_DIR = str(SETUP_DIR / 'openvino' / 'model_zoo')
+SETUP_DIR = str(SETUP_DIR)
 packages = find_packages(SETUP_DIR)
 package_dir = {'': SETUP_DIR}
 
