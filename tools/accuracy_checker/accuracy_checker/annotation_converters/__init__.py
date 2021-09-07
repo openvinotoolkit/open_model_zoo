@@ -70,7 +70,8 @@ from .text_classification import (
     QQPConverter,
     QNLIConverter,
     SST2Converter,
-    RTEConverter
+    RTEConverter,
+    ColumnDataset
 )
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
@@ -188,6 +189,7 @@ __all__ = [
     'QNLIConverter',
     'RTEConverter',
     'SST2Converter',
+    'ColumnDataset',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',

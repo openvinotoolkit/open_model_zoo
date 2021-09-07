@@ -511,6 +511,28 @@ The main difference between this converter and `super_resolution` in data organi
     ```yaml
         tokenizer_dir: <model_saving_path>/roberta-base
     ```
+* `custom_text_classification` - converts Custom Column dataset  to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv or csv format.
+  * `separator` - column separator, supported values: `comma` for comma-separated data and `tab` - for tabular separation. Optional, default behaviour derived from file extension - for csv is `,`, for tsv - `\t`.
+  * `text_1` - column id for text (Optional, default - 0).
+  * `text_2` - column id for text for sentence pair classification task (Optional, does not used if not provided).
+  * `label` - column id for label (Optional, default - 1).
+  * `labels_list` - list of label names (Optional, can be also provided using `dataset_meta_file`),
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `vocab_file` -  path to model vocabulary file for WordPiece tokenization (Optional in case, when another tokenization approach used).
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
 * `bert_xnli_tf_record` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) stored in tf records format. This converter usage requires TensorFlow installation. Please make sure that TensorFlow installed before conversion.
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
