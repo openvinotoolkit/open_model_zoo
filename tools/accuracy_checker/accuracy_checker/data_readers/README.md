@@ -39,7 +39,6 @@ AccuracyChecker supports following list of data readers:
 * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
    * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.
-   * `to_rgb` - allow conversion image to RGB (Optional, default `True`).
 * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`
 ```
 Note: since 1.3.0 version the image processing module is not a part of scipy library. This reader does not use scipy anymore.
@@ -66,8 +65,7 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `to_4D` - controls expanding of read results to 4D dimension (optional, default `True`)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
   * `mono` - get mean along channels if multichannel audio loaded (Optional, default `False`).
-  * `to_float` - converts audio signal to float (Optional, default `False`). Float data type can be selected using `float_dtype` parameter.
-  * `float_dtype` - specifies data type for `to_float` conversion. Supported values: `float16`, `float32`, `float64`. Optional, default `float32`.
+  * `to_float` - converts audio signal to float32 (Optional, default `False`).
 * `dicom_reader` - read images stored in DICOM format.
 * `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
   1. numeric data array

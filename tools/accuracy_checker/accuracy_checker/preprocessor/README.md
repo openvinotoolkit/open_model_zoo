@@ -42,9 +42,6 @@ Accuracy Checker supports following set of preprocessors:
       1. find original image ratio (input_width / input_height)
       2. if `dst_height` * ratio larger then `dst_width`, then `dst_width` = 32 * ratio
       3. Otherwise `dst_width` = `dst_height` * ratio
-    - `ppocr_max_ratio` - calculate scales in the following way:
-      1. Maximim between provided destination size used as `max_limit` for image ddimensions.
-      2. If maximum image size befire resize greater max limit, ratio calculated as `max_limit` / `max_size`, otherwise ratio is equal 1.
 * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
   Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
@@ -207,7 +204,6 @@ Accuracy Checker supports following set of preprocessors:
 * `context_window` - add context window padding to input signal.
   * `cw_l` - left side context window padding.
   * `cw_r` - right side context window padding.
-  * `to_multi_infer` - prepare data for multi inference (Optional, default `False`).
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.

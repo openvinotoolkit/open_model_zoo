@@ -32,7 +32,7 @@ from ...preprocessor import Crop, Resize
 
 
 class I3DEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, adapter, rgb_model, flow_model, orig_config):
+    def __init__(self, dataset_config, launcher, adapter, rgb_model, flow_model):
         self.dataset_config = dataset_config
         self.preprocessor = None
         self.dataset = None
@@ -42,11 +42,10 @@ class I3DEvaluator(BaseEvaluator):
         self.adapter = adapter
         self.rgb_model = rgb_model
         self.flow_model = flow_model
-        self.config = orig_config
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+    def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
         launcher_settings = config['launchers'][0]
         supported_frameworks = ['dlsdk']
@@ -87,7 +86,7 @@ class I3DEvaluator(BaseEvaluator):
                           "rgb model's output name: {}. flow model's output name: {}. Output name of rgb model "
                           "will be used in combined output".format(rgb_model.output_blob, flow_model.output_blob))
         adapter.output_blob = rgb_model.output_blob
-        return cls(dataset_config, launcher, adapter, rgb_model, flow_model, orig_config)
+        return cls(dataset_config, launcher, adapter, rgb_model, flow_model)
 
     @staticmethod
     def get_dataset_info(dataset):
@@ -139,7 +138,6 @@ class I3DEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
-            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
 
         annotation, identifiers = self.get_dataset_info(self.dataset)
         for batch_id, (batch_annotation, batch_identifiers) in enumerate(zip(annotation, identifiers)):
@@ -168,15 +166,13 @@ class I3DEvaluator(BaseEvaluator):
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting,
-                        ignore_metric_reference=ignore_metric_reference
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
                     )
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -186,22 +182,21 @@ class I3DEvaluator(BaseEvaluator):
         ):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         return self._metrics_results
 
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
+    def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+            presenter.write_results(metric_result, ignore_results_formatting)
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(False, ignore_results_formatting)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -214,7 +209,7 @@ class I3DEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+                presenter.write_result(metric_result, ignore_results_formatting)
 
         return extracted_results, extracted_meta
 
@@ -272,25 +267,6 @@ class I3DEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        model_type = None
-        details = {}
-        metrics = self.dataset_config[0].get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        adapter_type = self.adapter.__provider__
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        if self.dataset is None:
-            self.select_dataset('')
-
-        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
-        return details
 
 
 class BaseModel:

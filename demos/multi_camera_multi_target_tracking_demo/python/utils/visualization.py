@@ -64,7 +64,7 @@ def get_target_size(frame_sizes, vis=None, max_window_size=(1920, 1080), stack_f
     return target_width, target_height
 
 
-def visualize_multicam_detections(frames, all_objects, show_all_detections=True,
+def visualize_multicam_detections(frames, all_objects, fps='', show_all_detections=True,
                                   max_window_size=(1920, 1080), stack_frames='vertical'):
     assert len(frames) == len(all_objects)
     assert stack_frames in ['vertical', 'horizontal']
@@ -81,7 +81,12 @@ def visualize_multicam_detections(frames, all_objects, show_all_detections=True,
 
     target_width, target_height = get_target_size(frames, vis, max_window_size, stack_frames)
 
-    return cv.resize(vis, (target_width, target_height))
+    vis = cv.resize(vis, (target_width, target_height))
+
+    label_size, base_line = cv.getTextSize(str(fps), cv.FONT_HERSHEY_SIMPLEX, 1, 2)
+    cv.putText(vis, str(fps), (base_line*2, base_line*3),
+               cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    return vis
 
 
 def plot_timeline(sct_id, last_frame_num, tracks, save_path='', name='', show_online=False):

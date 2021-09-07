@@ -17,22 +17,21 @@ void ThrowNameNotFound(const std::string &name) {
 };
 }
 
-Cnn::Cnn(const std::string &model_path, const std::string& model_type, InferenceEngine::Core& ie,
-    const std::string & deviceName, const cv::Size &new_input_resolution)
-    : model_type(model_type), time_elapsed_(0), ncalls_(0) {
+Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution)
+    : time_elapsed_(0), ncalls_(0) {
     // ---------------------------------------------------------------------------------------------------
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
 
     // --------------------------- Changing input shape if it is needed ----------------------------------
-    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::runtime_error("The network should have only one input");
     }
     input_name_ = inputInfo.begin()->first;
-    InferenceEngine::InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
 
-    InferenceEngine::SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
     if (input_dims.size() != 4) {
         throw std::runtime_error("The network should have 4-dimensional input");
     }
@@ -47,15 +46,15 @@ Cnn::Cnn(const std::string &model_path, const std::string& model_type, Inference
 
     // --------------------------- Configuring input and output ------------------------------------------
     // ---------------------------   Preparing input blobs -----------------------------------------------
-    inputInfoFirst->setLayout(InferenceEngine::Layout::NCHW);
-    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
+    inputInfoFirst->setLayout(Layout::NCHW);
+    inputInfoFirst->setPrecision(Precision::U8);
 
     channels_ = input_dims[1];
     input_size_ = cv::Size(input_dims[3], input_dims[2]);
 
     // ---------------------------   Preparing output blobs ----------------------------------------------
 
-    InferenceEngine::OutputsDataMap output_info(network.getOutputsInfo());
+    OutputsDataMap output_info(network.getOutputsInfo());
     for (const auto &outputPair : output_info) {
         output_names_.push_back(outputPair.first);
     }
@@ -63,8 +62,7 @@ Cnn::Cnn(const std::string &model_path, const std::string& model_type, Inference
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Loading model to the device -------------------------------------------
-    InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
-    logExecNetworkInfo(executable_network, model_path, deviceName, model_type);
+    ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------
@@ -99,8 +97,8 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     return blobs;
 }
 
-void EncoderDecoderCNN::check_net_names(const InferenceEngine::OutputsDataMap &output_info_decoder,
-                                        const InferenceEngine::InputsDataMap &input_info_decoder
+void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_decoder,
+                                        const InputsDataMap &input_info_decoder
                                         ) const {
     if (std::find(output_names_.begin(), output_names_.end(), out_enc_hidden_name_) == output_names_.end())
         ThrowNameNotFound(out_enc_hidden_name_);
@@ -119,8 +117,8 @@ void EncoderDecoderCNN::check_net_names(const InferenceEngine::OutputsDataMap &o
  }
 
 
-EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path, std::string model_type,
-                                     InferenceEngine::Core &ie, const std::string &deviceName,
+EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
+                                     Core &ie, const std::string &deviceName,
                                      const std::string &out_enc_hidden_name,
                                      const std::string &out_dec_hidden_name,
                                      const std::string &in_dec_hidden_name,
@@ -129,7 +127,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path, std::string model_t
                                      const std::string &out_dec_symbol_name,
                                      const std::string &logits_name,
                                      size_t end_token
-                        ) : Cnn(model_path, model_type, ie, deviceName),
+                        ) : Cnn(model_path, ie, deviceName),
                         features_name_(features_name),
                         out_enc_hidden_name_(out_enc_hidden_name),
                         out_dec_hidden_name_(out_dec_hidden_name),
@@ -145,12 +143,11 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path, std::string model_t
         throw DecoderNotFound();
     while (model_path.find("encoder") != std::string::npos)
         model_path = model_path.replace(model_path.find("encoder"), 7, "decoder");
-    InferenceEngine::CNNNetwork network_decoder = ie.ReadNetwork(model_path);
+    CNNNetwork network_decoder = ie.ReadNetwork(model_path);
     this->check_net_names(network_decoder.getOutputsInfo(), network_decoder.getInputsInfo());
 
     // --------------------------- Loading model to the device -------------------------------------------
-    InferenceEngine::ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
-    logExecNetworkInfo(executable_network_decoder, model_path, deviceName, model_type);
+    ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------
@@ -183,10 +180,10 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     auto num_classes = infer_request_decoder_.GetBlob(out_dec_symbol_name_)->size();
 
     auto targets = InferenceEngine::make_shared_blob<float>(
-        InferenceEngine::TensorDesc(InferenceEngine::Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
-        InferenceEngine::Layout::HWC));
+        InferenceEngine::TensorDesc(Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
+        Layout::HWC));
     targets->allocate();
-    InferenceEngine::LockedMemory<void> blobMapped = targets->wmap();
+    LockedMemory<void> blobMapped = targets->wmap();
     auto data_targets = blobMapped.as<float*>();
 
     for (size_t num_decoder = 0; num_decoder < MAX_NUM_DECODER; num_decoder ++) {

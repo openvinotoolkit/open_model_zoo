@@ -41,7 +41,6 @@ class GTMaskLoader(Enum):
     NIFTI_CHANNELS_FIRST = 5
     PILLOW_CONVERT_TO_RGB = 6
     OPENCV_UNCHANGED = 7
-    OPENCV_GRAY = 8
 
 
 LOADERS_MAPPING = {
@@ -52,8 +51,7 @@ LOADERS_MAPPING = {
     'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
     'numpy': GTMaskLoader.NUMPY,
-    'opencv_unchanged': GTMaskLoader.OPENCV_UNCHANGED,
-    'opencv_gray': GTMaskLoader.OPENCV_GRAY
+    'opencv_unchanged': GTMaskLoader.OPENCV_UNCHANGED
 }
 
 
@@ -70,8 +68,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.NIFTI: 'nifti_reader',
         GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
         GTMaskLoader.NUMPY: 'numpy_reader',
-        GTMaskLoader.OPENCV_UNCHANGED: {'type': 'opencv_imread', 'reading_flag': 'unchanged'},
-        GTMaskLoader.OPENCV_GRAY: {'type': 'opencv_imread', 'reading_flag': 'gray'}
+        GTMaskLoader.OPENCV_UNCHANGED: {'type': 'opencv_imread', 'reading_flag': 'unchanged'}
     }
 
     def __init__(self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW):
@@ -376,11 +373,8 @@ class SalientRegionPrediction(SegmentationPrediction):
 
 
 class BackgroundMattingAnnotation(SegmentationAnnotation):
-    def __init__(self, identifier, path_to_mask, mask_to_gray=False):
-        super().__init__(
-            identifier, path_to_mask,
-            GTMaskLoader.OPENCV_UNCHANGED if not mask_to_gray else GTMaskLoader.OPENCV_GRAY
-        )
+    def __init__(self, identifier, path_to_mask):
+        super().__init__(identifier, path_to_mask, GTMaskLoader.OPENCV_UNCHANGED)
 
     def _load_mask(self):
         mask = super()._load_mask()

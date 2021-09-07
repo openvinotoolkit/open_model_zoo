@@ -9,6 +9,7 @@
 #include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
 #include "results_marker.hpp"
+#include "exponential_averager.hpp"
 #include "utils.hpp"
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
@@ -26,6 +27,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+    slog::info << "Parsing input parameters" << slog::endl;
     if (FLAGS_i.empty())
         throw std::logic_error("Parameter -i is not set");
     if (FLAGS_m.empty())
@@ -53,10 +55,8 @@ G_API_NET(Eyes,      <cv::GMat(cv::GMat)>, "l-open-closed-eyes");
 int main(int argc, char *argv[]) {
     try {
         using namespace gaze_estimation;
-        PerformanceMetrics metrics;
-
         /** Print info about Inference Engine **/
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        std::cout << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << std::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -164,8 +164,6 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_fd) + ".bin",  // path to weights
             FLAGS_d_fd,                          // device specifier
         };
-        slog::info << "The Face Detection model " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
-
         /** Get information about frame from cv::VideoCapture **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
@@ -177,7 +175,6 @@ int main(int argc, char *argv[]) {
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
-
         if (FLAGS_fd_reshape) {
             InferenceEngine::Core ie;
             const auto network = ie.ReadNetwork(FLAGS_m_fd);
@@ -190,6 +187,7 @@ int main(int argc, char *argv[]) {
             const double aspectRatioThreshold = 0.01;
 
             if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
+                std::cout << "Face Detection network is reshaped" << std::endl;
                 layerDims[3] = static_cast<unsigned long>(layerDims[2] * imageAspectRatio);
                 face_net.cfgInputReshape(layerName, layerDims);
             }
@@ -199,28 +197,21 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_hp) + ".bin",       // path to weights
             FLAGS_d_hp,                               // device specifier
         }.cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
-        slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
-
         auto landmarks_net = cv::gapi::ie::Params<nets::Landmarks> {
             FLAGS_m_lm,                               // path to topology IR
             fileNameNoExt(FLAGS_m_lm) + ".bin",       // path to weights
             FLAGS_d_lm,                               // device specifier
         };
-        slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
-
         auto gaze_net = cv::gapi::ie::Params<nets::Gaze> {
             FLAGS_m,                                  // path to topology IR
             fileNameNoExt(FLAGS_m) + ".bin",          // path to weights
             FLAGS_d,                                  // device specifier
         }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
-        slog::info << "The Gaze Estimation model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
-
         auto eyes_net = cv::gapi::ie::Params<nets::Eyes> {
             FLAGS_m_es,                               // path to topology IR
             fileNameNoExt(FLAGS_m_es) + ".bin",       // path to weights
             FLAGS_d_es,                               // device specifier
         };
-        slog::info << "The Eye State Estimation model " << FLAGS_m_es << " is loaded to " << FLAGS_d_es << " device." << slog::endl;
 
         /** Custom kernels **/
         auto kernels = custom::kernels();
@@ -247,6 +238,11 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
+        /** Exponential averagers for times **/
+        double smoothingFactor = 0.1;
+        ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
+        auto tIterationBegins = cv::getTickCount();
+
         /** Save output result **/
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
@@ -254,8 +250,6 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
 
-        bool isStart = true;
-        const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,
@@ -288,6 +282,21 @@ int main(int argc, char *argv[]) {
                 inferenceResults.push_back(inferenceResult);
             }
 
+            /** Measure FPS **/
+            auto tIterationEnds = cv::getTickCount();
+            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
+            overallTimeAverager.updateValue(overallTime);
+            tIterationBegins = tIterationEnds;
+
+            /** Print logs **/
+            if (FLAGS_r) {
+                for (auto& inferenceResult : inferenceResults) {
+                    std::cout << inferenceResult << std::endl;
+                }
+            }
+
+            /** Display system parameters **/
+            presenter.drawGraphs(frame);
 
             /** Display the results **/
             for (auto const& inferenceResult : inferenceResults) {
@@ -299,25 +308,7 @@ int main(int argc, char *argv[]) {
                 cv::flip(frame, frame, 1);
             }
 
-            /** Display system parameters **/
-            presenter.drawGraphs(frame);
-            if (isStart) {
-                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
-                isStart = false;
-            }
-            else {
-                metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
-            }
-
-            /** Print logs **/
-            if (FLAGS_r) {
-                for (auto& inferenceResult : inferenceResults) {
-                    slog::debug << inferenceResult << slog::endl;
-                }
-            }
-
+            putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue());
             if (videoWriter.isOpened()) {
                 videoWriter.write(frame);
             }
@@ -337,9 +328,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
-        slog::info << presenter.reportMeans() << slog::endl;
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -349,5 +338,6 @@ int main(int argc, char *argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
+    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

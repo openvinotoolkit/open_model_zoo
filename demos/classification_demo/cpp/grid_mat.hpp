@@ -11,7 +11,6 @@
 #include <queue>
 
 #include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core.hpp>
@@ -98,15 +97,15 @@ public:
             case PredictionResult::Incorrect:
                 textColor = cv::Scalar(50, 50, 255); break;   // red
             case PredictionResult::Unknown:
-                textColor = cv::Scalar(200, 10, 10); break;  // blue
+                textColor = cv::Scalar(75, 255, 255); break;  // yellow
             default:
                 throw std::runtime_error("Undefined type of prediction result");
         }
         int labelThickness = cellSize.width / 20;
         cv::Size labelTextSize = cv::getTextSize(label, fontType, 1, 2, &baseline);
-        double labelFontScale = static_cast<double>(cellSize.width - 2 * labelThickness) / labelTextSize.width;
+        double labelFontScale = static_cast<double>(cellSize.width - 2*labelThickness) / labelTextSize.width;
         cv::resize(mat, prevImg, cellSize);
-        putHighlightedText(prevImg, label,
+        cv::putText(prevImg, label,
             cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
             fontType, labelFontScale, textColor, 2);
         cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));

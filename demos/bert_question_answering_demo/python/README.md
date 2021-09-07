@@ -28,9 +28,11 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ### Supported Models
 
 * bert-large-uncased-whole-word-masking-squad-0001
+* bert-large-uncased-whole-word-masking-squad-emb-0001
 * bert-large-uncased-whole-word-masking-squad-int8-0001
 * bert-small-uncased-whole-word-masking-squad-0001
 * bert-small-uncased-whole-word-masking-squad-0002
+* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
 The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.

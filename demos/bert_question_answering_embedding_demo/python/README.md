@@ -43,6 +43,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * bert-small-uncased-whole-word-masking-squad-0002
 * bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 * bert-small-uncased-whole-word-masking-squad-int8-0002
+* bert-large-uncased-whole-word-masking-squad-emb-0001
+* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

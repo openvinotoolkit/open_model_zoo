@@ -49,7 +49,7 @@ The network output decoding process is pretty easy: get the argmax on `L` dimens
 
 ## Use text-detection demo
 
-Model is supported by text-detection c++ demo(`<omz_dir>/demos/text_detection_demo/cpp/main.cpp`). In order to use this model in the demo, user should pass the following options:
+Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/main.cpp). In order to use this model in the demo, user should pass the following options:
 ```
   -tr_pt_first
   -dt "simple"
@@ -61,6 +61,6 @@ For more information, please, see documentation of the demo.
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://github.com/Media-Smart/vedastr/blob/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/LICENSE).
-A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
+A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

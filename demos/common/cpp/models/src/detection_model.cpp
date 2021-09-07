@@ -16,6 +16,9 @@
 
 #include "models/detection_model.h"
 #include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+
+using namespace InferenceEngine;
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
     ImageModel(modelFileName, useAutoResize),

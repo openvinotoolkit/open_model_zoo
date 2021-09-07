@@ -40,12 +40,12 @@ SOFTWARE.
 import logging
 import os
 import re
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 import tempfile
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
-from subprocess import PIPE # nosec - disable B404:import-subprocess check
+from subprocess import PIPE
 from pathlib import Path
 
 import cv2 as cv

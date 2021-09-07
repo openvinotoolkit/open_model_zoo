@@ -1,5 +1,0 @@
-# See help here: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
-
-# Control 3d party dependencies
-**/*requirements*.*  @openvino-configuration-mgmt
-**/setup.py  @openvino-configuration-mgmt

@@ -85,7 +85,7 @@ class FacesDatabase:
                         name = self.ask_to_save(crop)
                         self.dump_faces(crop, descriptor, name)
                 else:
-                    log.debug("Adding label {} to the gallery".format(label))
+                    log.debug("Adding label {} to the gallery.".format(label))
                     self.add_item(descriptor, label)
 
     def ask_to_save(self, image):
@@ -226,10 +226,12 @@ class FacesDatabase:
 
         if match < 0:
             self.database.append(FacesDatabase.Identity(label, [desc]))
+            log.debug("Adding label {} to the database".format(label))
         else:
             self.database[match].descriptors.append(desc)
             log.debug("Appending new descriptor for label {}.".format(label))
 
+        log.debug("The database length is {}.".format(len(self.database)))
         return match, label
 
     def __getitem__(self, idx):

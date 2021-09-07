@@ -1,7 +1,6 @@
-from .async_pipeline import AsyncPipeline, get_user_config, parse_devices
+from .async_pipeline import get_user_config, AsyncPipeline
 
 __all__ = [
-    'AsyncPipeline',
     'get_user_config',
-    'parse_devices',
+    'AsyncPipeline',
 ]

@@ -26,7 +26,7 @@ class ActionRecognizer(IEModel):
     def __init__(self, model_path, device, ie_core, num_requests, img_scale, num_classes):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests, 'Action Recognition')
+        super().__init__(model_path, device, ie_core, num_requests)
 
         _, _, t, h, w = self.input_size
         self.input_height = h
@@ -75,6 +75,26 @@ class ActionRecognizer(IEModel):
         data = data.reshape((1,) + data.shape)
         data = np.transpose(data, (0, 2, 1, 3, 4))
         return data
+
+    def async_infer(self, frame_buffer, person_roi, req_id):
+        """Requests model inference for the specified batch of images"""
+
+        central_roi = self._convert_to_central_roi(person_roi,
+                                                   self.input_height, self.input_width,
+                                                   self.img_scale)
+
+        clip_data = self._prepare_net_input(frame_buffer, central_roi)
+
+        super().async_infer(clip_data, req_id)
+
+    def wait_request(self, req_id):
+        """Waits for the model output"""
+
+        result = super().wait_request(req_id)
+        if result is None:
+            return None
+        else:
+            return result[:self.num_test_classes]
 
     def __call__(self, frame_buffer, person_roi):
         """Runs model on the specified input"""

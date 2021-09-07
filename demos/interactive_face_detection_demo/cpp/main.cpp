@@ -34,6 +34,9 @@
 #include "face.hpp"
 #include "visualizer.hpp"
 
+using namespace InferenceEngine;
+
+
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
@@ -42,6 +45,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -63,7 +67,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -71,8 +75,8 @@ int main(int argc, char *argv[]) {
         }
 
         // --------------------------- 1. Loading Inference Engine -----------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+
+        Core ie;
 
         std::set<std::string> loadedDevices;
         std::pair<std::string, std::string> cmdOptions[] = {
@@ -102,21 +106,29 @@ int main(int argc, char *argv[]) {
             if (loadedDevices.find(deviceName) != loadedDevices.end()) {
                 continue;
             }
+            slog::info << "Loading device " << deviceName << slog::endl;
+            slog::info << printable(ie.GetVersions(deviceName)) << slog::endl;
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
+                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Loading extensions for GPU
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
 
             loadedDevices.insert(deviceName);
+        }
+
+        /** Per-layer metrics **/
+        if (FLAGS_pc) {
+            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
         // ---------------------------------------------------------------------------------------------------
 
@@ -141,14 +153,13 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
-
-        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
-        Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, {frame.cols / 4, 60});
 
         Visualizer visualizer{frame.size()};
         if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
@@ -166,14 +177,18 @@ int main(int argc, char *argv[]) {
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
 
-        auto startTimeNextFrame = std::chrono::steady_clock::now();
-        cv::Mat nextFrame = cap->read();
+        cv::Mat next_frame = cap->read();
+
+        std::cout << "To close the application, press 'CTRL+C' here";
+        if (!FLAGS_no_show) {
+            std::cout << " or switch to the output window and press Q or Esc";
+        }
+        std::cout << std::endl;
+
         while (frame.data) {
             timer.start("total");
-            const auto startTimePrevFrame = startTime;
-            cv::Mat prevFrame = std::move(frame);
-            startTime = startTimeNextFrame;
-            frame = std::move(nextFrame);
+            cv::Mat prev_frame = std::move(frame);
+            frame = std::move(next_frame);
             framesCounter++;
 
             // Retrieving face detection results for the previous frame
@@ -183,7 +198,7 @@ int main(int argc, char *argv[]) {
 
             // No valid frame to infer if previous frame is the last
             if (frame.data) {
-                if (frame.size() != prevFrame.size()) {
+                if (frame.size() != prev_frame.size()) {
                     throw std::runtime_error("Images of different size are not supported");
                 }
                 faceDetector.enqueue(frame);
@@ -193,8 +208,8 @@ int main(int argc, char *argv[]) {
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
-                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prevFrame.size());
-                    cv::Mat face = prevFrame(clippedRect);
+                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prev_frame.size());
+                    cv::Mat face = prev_frame(clippedRect);
                     ageGenderDetector.enqueue(face);
                     headPoseDetector.enqueue(face);
                     emotionsDetector.enqueue(face);
@@ -213,8 +228,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Read the next frame while waiting for inference results
-            startTimeNextFrame = std::chrono::steady_clock::now();
-            nextFrame = cap->read();
+            next_frame = cap->read();
 
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.wait();
@@ -236,12 +250,12 @@ int main(int argc, char *argv[]) {
             // For every detected face
             for (size_t i = 0; i < prev_detection_results.size(); i++) {
                 auto& result = prev_detection_results[i];
-                cv::Rect rect = result.location & cv::Rect({0, 0}, prevFrame.size());
+                cv::Rect rect = result.location & cv::Rect({0, 0}, prev_frame.size());
 
                 Face::Ptr face;
                 if (!FLAGS_no_smooth) {
                     face = matchFace(rect, prev_faces);
-                    float intensity_mean = calcMean(prevFrame(rect));
+                    float intensity_mean = calcMean(prev_frame(rect));
 
                     if ((face == nullptr) ||
                         ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
@@ -291,21 +305,25 @@ int main(int argc, char *argv[]) {
                 faces.push_back(face);
             }
 
-            // drawing faces
-            visualizer.draw(prevFrame, faces);
+            presenter.drawGraphs(prev_frame);
 
-            presenter.drawGraphs(prevFrame);
-            metrics.update(startTimePrevFrame, prevFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            // drawing faces
+            visualizer.draw(prev_frame, faces);
 
             timer.finish("total");
+            out.str("");
+            out << "Total image throughput: " << std::fixed << std::setprecision(1)
+                << 1000.0 / (timer["total"].getSmoothedDuration()) << " fps";
+            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
+                        cv::Scalar(255, 0, 0), 2);
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
-                videoWriter.write(prevFrame);
+                videoWriter.write(prev_frame);
             }
 
             int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", prevFrame);
+                cv::imshow("Detection results", prev_frame);
                 int key = cv::waitKey(delay);
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
@@ -314,9 +332,20 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
-        slog::info << presenter.reportMeans() << slog::endl;
+        slog::info << "Number of processed frames: " << framesCounter << slog::endl;
+        slog::info << "Total image throughput: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+
+        // Showing performance results
+        if (FLAGS_pc) {
+            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
+            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
+            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
+            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
+            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
+            antispoofingClassifier.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_am));
+        }
+
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -327,5 +356,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

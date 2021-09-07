@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle as pkl # nosec - disable B403:import-pickle check
+import pickle as pkl
 import json
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 from ..representation import CharacterRecognitionAnnotation

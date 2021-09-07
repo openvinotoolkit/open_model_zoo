@@ -16,7 +16,7 @@ Inference Engine plugin. When inference is done, the application outputs the dis
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/monodepth_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -68,9 +68,6 @@ Running the application with the empty list of options yields the usage message 
 ## Demo Output
 
 The application outputs are the floating disparity map (PFM) as well as a color-coded version (PNG).
-The demo reports
-
-* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

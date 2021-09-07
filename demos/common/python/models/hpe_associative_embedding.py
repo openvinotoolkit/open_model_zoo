@@ -46,7 +46,7 @@ class HpeAssociativeEmbedding(Model):
         self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
         default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
-        self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
+        self.logger.info('Reshape net to {}'.format(input_shape))
         self.net.reshape(input_shape)
 
         self.decoder = AssociativeEmbeddingDecoder(
@@ -81,7 +81,7 @@ class HpeAssociativeEmbedding(Model):
         img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)
         h, w = img.shape[:2]
         if not (self.h - self.size_divisor < h <= self.h and self.w - self.size_divisor < w <= self.w):
-            self.logger.warn("\tChosen model aspect ratio doesn't match image aspect ratio")
+            self.logger.warn("Chosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         if self.padding_mode == 'center':

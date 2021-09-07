@@ -99,7 +99,7 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
  * @param color - text color.
  * @param thickness - thickness of the lines used to draw a text.
  */
-inline void putHighlightedText(const cv::Mat& frame,
+inline void putHighlightedText(cv::Mat& frame,
                                const std::string& message,
                                cv::Point position,
                                int fontFace,

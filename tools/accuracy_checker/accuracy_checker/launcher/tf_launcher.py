@@ -311,10 +311,6 @@ class TFLauncher(Launcher):
             data = np.transpose(data, layout)
         else:
             data = np.array(data)
-
-        if len(np.shape(data)) > len(layout):
-            data = data[0, ...]
-
         return data.astype(precision) if precision else data
 
     def _get_graph_inputs(self, graph, config_inputs=None):

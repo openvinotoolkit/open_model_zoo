@@ -72,7 +72,6 @@ class CifarFormatConverter(BaseFormatConverter):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
             'data_batch_file': PathField(description="Path to pickle file which contain dataset batch."),
-            'batch_meta_file': PathField(optional=True, description='pickle file with lables'),
             'convert_images': BoolField(
                 optional=True,
                 default=False,
@@ -104,7 +103,6 @@ class CifarFormatConverter(BaseFormatConverter):
         for converting from the command line or config.
         """
         self.data_batch_file = self.get_value_from_config('data_batch_file')
-        self.batch_meta_file = self.get_value_from_config('batch_meta_file')
         self.has_background = self.get_value_from_config('has_background')
         self.num_classes = self.get_value_from_config('num_classes')
         self.converted_images_dir = self.get_value_from_config('converted_images_dir')
@@ -144,22 +142,18 @@ class CifarFormatConverter(BaseFormatConverter):
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.
-        meta, label_names, labels_id = self.generate_meta(labels_offset, annotation_dict)
+        meta, label_names, labels_id = self.generate_meta(labels_offset)
         labels = annotation_dict[labels_id]
         images = annotation_dict['data']
-        filenames = annotation_dict.get('filenames', [])
         images = images.reshape(images.shape[0], 3, 32, 32).astype(np.uint8)
         image_file = '{}_{}.png'
         num_iterations = len(labels)
         # convert each annotation object to ClassificationAnnotation
         for data_id, (label, feature) in enumerate(zip(labels, images)):
-            # get or generate id of image which will be used for evaluation (usually name of file is used)
+            # generate id of image which will be used for evaluation (usually name of file is used)
             # file name represented as {id}_{class}.png, where id is index of image in dataset,
             # label is text description of dataset class e.g. 1_cat.png
-            if filenames:
-                identifier = filenames[data_id]
-            else:
-                identifier = image_file.format(data_id, label_names[label] if label_names else label)
+            identifier = image_file.format(data_id, label_names[label] if label_names else label)
             # Create representation for image. Provided parameters can be differ depends on task.
             # ClassificationAnnotation contains image identifier and label for evaluation.
             annotation.append(ClassificationAnnotation(identifier, label + labels_offset))
@@ -180,23 +174,16 @@ class CifarFormatConverter(BaseFormatConverter):
 
         return ConverterReturn(annotation, meta, content_errors)
 
-    def generate_meta(self, labels_offset, annotation):
-        labels = []
+    def generate_meta(self, labels_offset):
+        labels, labels_id = class_map.get(self.num_classes, ([], 'labels'))
         meta = {}
-        labels_id = ''
-        if self.batch_meta_file:
-            labels = read_pickle(self.batch_meta_file, encoding='latin1').get('label_names', [])
-            labels_id = 'fine_labels' if 'fine_labels' in annotation else 'labels'
-        if not labels:
-            labels, labels_id = class_map.get(self.num_classes, ([], 'labels'))
-            meta = {}
-            if self.dataset_meta:
-                meta = read_json(self.dataset_meta)
-                if 'label_map' in meta:
-                    meta['label_map'] = verify_label_map(meta['label_map'])
-                    labels = list(meta['label_map'].values())
-                    return meta, labels, labels_id
-                labels = meta.get('labels', labels)
+        if self.dataset_meta:
+            meta = read_json(self.dataset_meta)
+            if 'label_map' in meta:
+                meta['label_map'] = verify_label_map(meta['label_map'])
+                labels = list(meta['label_map'].values())
+                return meta, labels, labels_id
+            labels = meta.get('labels', labels)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
 
         if self.has_background:

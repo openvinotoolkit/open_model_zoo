@@ -80,8 +80,6 @@ def parse_args():
                         help='Pair "name"="value" of model constructor parameter')
     parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH, default='float',
                         help='Data type for inputs')
-    parser.add_argument('--conversion-param', type=model_parameter, default=[], action='append',
-                        help='Additional parameter for export')
     return parser.parse_args()
 
 
@@ -118,7 +116,7 @@ def load_model(model_name, weights, model_paths, module_name, model_params):
 
 
 @torch.no_grad()
-def convert_to_onnx(model, input_shapes, output_file, input_names, output_names, inputs_dtype, conversion_params):
+def convert_to_onnx(model, input_shapes, output_file, input_names, output_names, inputs_dtype):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -128,7 +126,7 @@ def convert_to_onnx(model, input_shapes, output_file, input_names, output_names,
         for input_shape in input_shapes)
     model(*dummy_inputs)
     torch.onnx.export(model, dummy_inputs, str(output_file), verbose=False, opset_version=11,
-                      input_names=input_names.split(','), output_names=output_names.split(','), **conversion_params)
+                      input_names=input_names.split(','), output_names=output_names.split(','))
 
     model = onnx.load(str(output_file))
 
@@ -144,7 +142,7 @@ def main():
     model = load_model(args.model_name, args.weights,
                        args.model_paths, args.import_module, dict(args.model_param))
 
-    convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names, args.inputs_dtype, dict(args.conversion_param))
+    convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names, args.inputs_dtype)
 
 
 if __name__ == '__main__':

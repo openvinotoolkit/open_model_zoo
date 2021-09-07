@@ -76,5 +76,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_model=$conv_dir/yolo-v4-tiny.pb
 framework: tf
-quantizable: yes
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

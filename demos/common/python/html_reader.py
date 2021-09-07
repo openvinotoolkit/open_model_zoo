@@ -27,8 +27,8 @@ class HTMLDataExtractor(HTMLParser):
 def get_paragraphs(url_list):
     paragraphs_all = []
     for url in url_list:
-        log.debug("Get paragraphs from {}".format(url))
-        with urllib.request.urlopen(url) as response: # nosec - disable B310:urllib-urlopen check
+        log.info("Get paragraphs from {}".format(url))
+        with urllib.request.urlopen(url) as response:
             parser = HTMLDataExtractor(['title', 'p'])
             charset='utf-8'
             if 'Content-type' in response.headers:
@@ -39,7 +39,7 @@ def get_paragraphs(url_list):
             parser.feed(data.decode(charset))
             title = ' '.join(parser.ended_tags['title'])
             paragraphs = parser.ended_tags['p']
-            log.debug("Page '{}' has {} chars in {} paragraphs".format(title, sum(len(p) for p in paragraphs), len(paragraphs)))
+            log.info("Page '{}' has {} chars in {} paragraphs".format(title, sum(len(p) for p in paragraphs), len(paragraphs)))
             paragraphs_all.extend(paragraphs)
 
     return paragraphs_all

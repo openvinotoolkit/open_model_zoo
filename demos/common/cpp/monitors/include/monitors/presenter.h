@@ -29,7 +29,7 @@ public:
     void addRemoveMonitor(MonitorType monitor);
     void handleKey(int key); // handles c, d, m, h keys
     void drawGraphs(cv::Mat& frame);
-    std::vector<std::string> reportMeans() const;
+    std::string reportMeans() const;
 
     const int yPos;
     const cv::Size graphSize;

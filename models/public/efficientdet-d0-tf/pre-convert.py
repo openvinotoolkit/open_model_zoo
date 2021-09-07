@@ -16,7 +16,7 @@
 
 import argparse
 import shutil
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 import sys
 
 from pathlib import Path

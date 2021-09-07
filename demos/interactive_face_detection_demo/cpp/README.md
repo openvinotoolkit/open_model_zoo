@@ -37,7 +37,7 @@ The Async API operates with a notion of the Infer Request that encapsulates the 
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/interactive_face_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -111,6 +111,7 @@ Options:
     -dyn_am                    Optional. Enable dynamic batch size for Antispoofing Classification network
     -async                     Optional. Enable asynchronous mode
     -no_show                   Optional. Don't show output.
+    -pc                        Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
     -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face
@@ -143,12 +144,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
-The demo reports:
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-
-You can use these metrics to measure application-level performance.
+The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
 
 ## See Also
 

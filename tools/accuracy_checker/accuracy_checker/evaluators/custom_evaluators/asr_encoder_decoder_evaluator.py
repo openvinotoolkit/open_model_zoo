@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle # nosec - disable B403:import-pickle check
+import pickle
 from functools import partial
 from collections import OrderedDict
 import numpy as np
@@ -31,7 +31,7 @@ from ...logging import print_info
 
 
 class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model, orig_config):
+    def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
         self.preprocessing_executor = None
         self.preprocessor = None
@@ -41,10 +41,9 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
         self.launcher = launcher
         self.model = model
         self._metrics_results = []
-        self.config = orig_config
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+    def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -55,7 +54,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model, orig_config)
+        return cls(dataset_config, launcher, model)
 
     def process_dataset(
             self, subset=None,
@@ -74,8 +73,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
 
         self._create_subset(subset, num_images, allow_pairwise_subset)
         metric_config = self.configure_intermediate_metrics_results(kwargs)
-        (compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
-         ignore_metric_reference) = metric_config
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
 
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
@@ -117,10 +115,8 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting,
-                        ignore_metric_reference=ignore_metric_reference
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
                     )
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -128,7 +124,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -137,14 +133,13 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(False, ignore_results_formatting)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -157,17 +152,17 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+                presenter.write_result(metric_result, ignore_results_formatting)
 
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
+    def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+            presenter.write_result(metric_result, ignore_results_formatting)
 
     def release(self):
         self.model.release()
@@ -210,12 +205,11 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
     @staticmethod
     def configure_intermediate_metrics_results(config):
         compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
-        metric_interval, ignore_results_formatting, ignore_metric_reference = None, None, None
+        metric_interval, ignore_results_formatting = None, None
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
             ignore_results_formatting = config.get('ignore_results_formatting', False)
-            ignore_metric_reference = config.get('ignore_metric_reference', False)
-        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting, ignore_metric_reference
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     def load_network(self, network=None):
         self.model.load_network(network, self.launcher)
@@ -262,25 +256,6 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
     @property
     def dataset_size(self):
         return self.dataset.size
-
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        model_type = None
-        details = {}
-        metrics = self.dataset_config[0].get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        adapter_type = self.model.adapter.__provider__
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        if self.dataset is None:
-            self.select_dataset('')
-
-        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
-        return details
 
 
 class BaseModel:
@@ -470,10 +445,6 @@ class ASRModel(BaseModel):
         self.processing_frames_buffer = []
         if self._encoder_predictions is not None:
             self._encoder_predictions = []
-
-    @property
-    def adapter(self):
-        return self.decoder.adapter
 
     def release(self):
         self.encoder.release()

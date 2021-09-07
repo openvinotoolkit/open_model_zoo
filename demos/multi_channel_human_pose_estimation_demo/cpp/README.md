@@ -15,7 +15,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_human_pose_estimation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -59,6 +59,7 @@ Options:
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
+    -pc                          Optional. Enable per-layer performance report
     -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
@@ -118,13 +119,8 @@ To connect to IP cameras, use RTSP URIs:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frames with detections rendered as bounding boxes. The demo reports:
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-
-You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.
-You can use these metrics to measure application-level performance.
+The demo uses OpenCV to display the resulting frames with detections rendered as bounding boxes.
+On the top of the screen, the demo reports throughput in frames per second. You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.
 
 ## See Also
 

@@ -25,7 +25,7 @@ using Git attributes that begin with `omz.package`.
 """
 
 import argparse
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 
 from pathlib import Path, PurePath
 

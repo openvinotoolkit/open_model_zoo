@@ -489,14 +489,7 @@ class SRDirectoryBased(BaseFormatConverter):
             found_files.extend(search_dir.glob('*{}*'.format(i)))
         if not found_files:
             return None
-        result = found_files[0]
-        if len(found_files) > 1:
-            for found_file in found_files:
-                found_idx = get_index(found_file.name)
-                if found_idx == idx:
-                    result = found_file
-                    break
-        return result
+        return found_files[0]
 
     @staticmethod
     def find_file_with_prefix(search_dir, file_name):

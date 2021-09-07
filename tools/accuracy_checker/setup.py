@@ -20,7 +20,7 @@ import re
 import sys
 import warnings
 import platform
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
@@ -126,7 +126,5 @@ setup(
     python_requires='>=3.5',
     install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
-    cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips',
-                              'kenlm @ git+https://github.com/kpu/kenlm.git#egg=kenlm']}
+    cmdclass={'test': PyTest, 'install_core': CoreInstall}
 )

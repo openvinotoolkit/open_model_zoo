@@ -48,7 +48,7 @@ Predefined configuration file `accuracy-check.yml` for each Open Model Zoo model
 
 Example:
 
-`<omz_dir>/tools/accuracy_checker/configs/alexnet.yml` is a link for configuration file `<omz_dir>/models/public/alexnet/accuracy-check.yml` for [alexnet](../../../models/public/alexnet/README.md) model.
+[alexnet.yml](alexnet.yml) is a link for configuration file [accuracy-check.yml](../../../models/public/alexnet/accuracy-check.yml) for [alexnet](../../../models/public/alexnet/README.md) model.
 
 ## Options
 

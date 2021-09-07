@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import logging as log
 from collections import Counter, defaultdict, deque
 from functools import partial
 from itertools import islice
@@ -47,6 +46,7 @@ class ResultRenderer:
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=label_smoothing_window, history_size=label_smoothing_window)
                                for _ in range(number_of_predictions)]
+        print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
         inference_time = 0.0
@@ -55,14 +55,13 @@ class ResultRenderer:
             inference_time += self.meters[key].avg
         return inference_time
 
-    def render_frame(self, frame, logits, timers, frame_ind, raw_output, fps):
+    def render_frame(self, frame, logits, timers, frame_ind, fps):
         inference_time = self.update_timers(timers)
 
         if logits is not None:
             labels, probs = decode_output(logits, self.labels, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
-            if raw_output:
-                log.debug("Frame # {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
+            print("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:
             labels = ['Preparing...']
             probs = [0.]
@@ -90,7 +89,7 @@ class ResultRenderer:
 
         if frame_ind == 0 and self.output and not self.video_writer.open(self.output,
             cv2.VideoWriter_fourcc(*'MJPG'), fps, (frame.shape[1], frame.shape[0])):
-            log.error("Can't open video writer")
+            print("ERROR: Can't open video writer")
             return -1
 
         if self.display_fps:

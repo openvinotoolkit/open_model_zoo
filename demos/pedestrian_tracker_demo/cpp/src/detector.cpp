@@ -9,9 +9,10 @@
 #include <map>
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
+
 #include <ngraph/ngraph.hpp>
-#include <utils/slog.hpp>
-#include <utils/common.hpp>
+
+using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
 
@@ -71,13 +72,12 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
     width_ = static_cast<float>(frame.cols);
     height_ = static_cast<float>(frame.rows);
 
-    InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input_name_);
+    Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
     if (!im_info_name_.empty()) {
-        InferenceEngine::LockedMemory<void> imInfoMapped =
-            InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(im_info_name_))->wmap();
+        LockedMemory<void> imInfoMapped = as<MemoryBlob>(request->GetBlob(im_info_name_))->wmap();
         float* buffer = imInfoMapped.as<float*>();
         buffer[0] = static_cast<float>(inputBlob->getTensorDesc().getDims()[2]);
         buffer[1] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]);
@@ -103,16 +103,16 @@ ObjectDetector::ObjectDetector(
     deviceName_(deviceName) {
     auto cnnNetwork = ie_.ReadNetwork(config.path_to_model);
 
-    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (1 == inputInfo.size() || 2 == inputInfo.size()) {
-        for (const std::pair<std::string, InferenceEngine::InputInfo::Ptr>& input : inputInfo) {
-            InferenceEngine::InputInfo::Ptr inputInfo = input.second;
+        for (const std::pair<std::string, InputInfo::Ptr>& input : inputInfo) {
+            InputInfo::Ptr inputInfo = input.second;
             if (4 == inputInfo->getTensorDesc().getDims().size()) {
-                inputInfo->setPrecision(InferenceEngine::Precision::U8);
-                inputInfo->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+                inputInfo->setPrecision(Precision::U8);
+                inputInfo->getInputData()->setLayout(Layout::NCHW);
                 input_name_ = input.first;
-            } else if (InferenceEngine::SizeVector{1, 6} == inputInfo->getTensorDesc().getDims()) {
-                inputInfo->setPrecision(InferenceEngine::Precision::FP32);
+            } else if (SizeVector{1, 6} == inputInfo->getTensorDesc().getDims()) {
+                inputInfo->setPrecision(Precision::FP32);
                 im_info_name_ = input.first;
             } else {
                 throw std::runtime_error("Unknown input for Person Detection network");
@@ -124,18 +124,18 @@ ObjectDetector::ObjectDetector(
     } else {
         throw std::runtime_error("Person Detection network should have one or two inputs");
     }
-    InferenceEngine::InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
-    inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(Precision::U8);
+    inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
 
-    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
         throw std::runtime_error("Person Detection network should have only one output");
     }
-    InferenceEngine::DataPtr& _output = outputInfo.begin()->second;
+    DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
-    const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
+    const SizeVector outputDims = _output->getTensorDesc().getDims();
     if (outputDims.size() != 4) {
         throw std::runtime_error("Person Detection network output should have 4 dimensions, but had " +
             std::to_string(outputDims.size()));
@@ -145,12 +145,10 @@ ObjectDetector::ObjectDetector(
     if (object_size_ != 7) {
         throw std::runtime_error("Person Detection network output layer should have 7 as a last dimension");
     }
-    _output->setPrecision(InferenceEngine::Precision::FP32);
-    _output->setLayout(InferenceEngine::TensorDesc::getLayoutByDims(_output->getDims()));
+    _output->setPrecision(Precision::FP32);
+    _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
-    logExecNetworkInfo(net_, config.path_to_model, deviceName_, modelType);
-    slog::info << "\tBatch size is set to "<< config.max_batch_size << slog::endl;
 }
 
 void ObjectDetector::wait() {
@@ -162,8 +160,7 @@ void ObjectDetector::fetchResults() {
     results_.clear();
     if (results_fetched_) return;
     results_fetched_ = true;
-    InferenceEngine::LockedMemory<const void> outputMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(output_name_))->rmap();
+    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rmap();
     const float *data = outputMapped.as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
@@ -206,4 +203,9 @@ void ObjectDetector::fetchResults() {
 void ObjectDetector::waitAndFetchResults() {
     wait();
     fetchResults();
+}
+
+void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
+    std::cout << "Performance counts for object detector" << std::endl << std::endl;
+    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }

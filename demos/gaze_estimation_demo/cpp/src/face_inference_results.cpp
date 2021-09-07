@@ -7,24 +7,25 @@
 
 namespace gaze_estimation {
 
-slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults) {
-    os << "--Inference results--" << slog::endl;
+std::ostream& operator<<(std::ostream& os, const FaceInferenceResults& faceInferenceResults) {
+    os << "--Inference results--" << std::endl;
 
-    os << "Face detection confidence: " << faceInferenceResults.faceDetectionConfidence << slog::endl;
-    os << "Face bounding box: " << faceInferenceResults.faceBoundingBox << slog::endl;
+    os << "Face detection confidence: " << faceInferenceResults.faceDetectionConfidence << std::endl;
+    os << "Face bounding box: " << faceInferenceResults.faceBoundingBox << std::endl;
 
-    os << "Facial landmarks: " << slog::endl;
+    os << "Facial landmarks: " << std::endl;
     int lmCounter = 0;
     for (auto const& lm : faceInferenceResults.faceLandmarks) {
-        os << "\tlandmark #" << lmCounter << ": " << lm << slog::endl;
+        os << "\t landmark #" << lmCounter << ": " << lm << std::endl;
         ++lmCounter;
     }
 
-    os << "Head pose angles (yaw, pitch, roll): " << faceInferenceResults.headPoseAngles << slog::endl;
-    os << "Gaze vector (x, y, z): " << faceInferenceResults.gazeVector << slog::endl;
+    os << "Head pose angles (yaw, pitch, roll): " << faceInferenceResults.headPoseAngles << std::endl;
+    os << "Gaze vector (x, y, z): " << faceInferenceResults.gazeVector << std::endl;
 
-    os << "--End of inference results--" << slog::endl;
+    os << "--End of inference results--" << std::endl;
 
     return os;
 }
+
 }  // namespace gaze_estimation

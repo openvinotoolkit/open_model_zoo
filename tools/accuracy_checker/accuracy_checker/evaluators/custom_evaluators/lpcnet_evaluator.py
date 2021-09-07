@@ -342,7 +342,7 @@ def create_decoder(model_config, launcher, delayed_model_loading=False):
 
 class LPCNetEvaluator(TextToSpeechEvaluator):
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+    def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -353,4 +353,4 @@ class LPCNetEvaluator(TextToSpeechEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model, orig_config)
+        return cls(dataset_config, launcher, model)

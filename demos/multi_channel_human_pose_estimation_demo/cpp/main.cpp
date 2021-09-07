@@ -23,6 +23,7 @@
 #include <utility>
 
 #include <mutex>
+#include <atomic>
 #include <queue>
 #include <chrono>
 #include <sstream>
@@ -36,7 +37,6 @@
 #include <opencv2/opencv.hpp>
 
 #include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include <utils/args_helper.hpp>
 
@@ -76,6 +76,7 @@ void showUsage() {
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
+    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
@@ -90,6 +91,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
@@ -100,6 +102,16 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_duplicate_num == 0) {
         throw std::logic_error("Parameter -duplicate_num must be positive");
     }
+    slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
+    slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
+    if (!FLAGS_l.empty()) {
+        slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
+    }
+    if (!FLAGS_c.empty()) {
+        slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
+    }
+    slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
+    slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
 
     return true;
 }
@@ -139,10 +151,10 @@ DisplayParams prepareDisplayParams(size_t count) {
 }
 
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
+                     float time,
                      const std::string& stats,
                      DisplayParams params,
-                     Presenter& presenter,
-                     PerformanceMetrics& metrics) {
+                     Presenter& presenter) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -161,7 +173,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
             size_t currPos = 0;
             while (true) {
                 auto newPos = stats.find('\n', currPos);
-                putHighlightedText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8, cv::Scalar(0, 0, 255), 2);
+                cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8,  cv::Scalar(0, 0, 255), 1);
                 if (newPos == std::string::npos) {
                     break;
                 }
@@ -185,12 +197,13 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 #endif
     presenter.drawGraphs(windowImage);
     drawStats();
-    for (size_t i = 0; i < data.size() - 1; ++i) {
-        metrics.update(data[i]->timestamp);
-    }
-    metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+
+    char str[256];
+    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
+    cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
     cv::imshow(params.name, windowImage);
 }
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -198,6 +211,8 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
+        slog::info << "InferenceEngine: "
+            << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -207,14 +222,17 @@ int main(int argc, char* argv[]) {
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size()) {
-            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
+            slog::info << "Invalid model name: " << modelPath << slog::endl;
+            slog::info << "Expected to be <model_name>.xml" << slog::endl;
+            return -1;
         }
+        slog::info << "Model   path: " << modelPath << slog::endl;
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
+        graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
@@ -284,15 +302,21 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
+        std::atomic<float> averageFps = {0.0f};
+
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
         std::mutex statMutex;
         std::stringstream statStream;
 
+        std::cout << "To close the application, press 'CTRL+C' here";
+        if (!FLAGS_no_show) {
+            std::cout << " or switch to the output window and press ESC key";
+        }
+        std::cout << std::endl;
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
-        PerformanceMetrics metrics;
 
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
@@ -302,7 +326,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, str, params, presenter, metrics);
+            displayNSources(result, averageFps, str, params, presenter);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -315,6 +339,8 @@ int main(int argc, char* argv[]) {
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
         duration samplingTimeout(FLAGS_fps_sp);
+
+        size_t fpsCounter = 0;
 
         size_t perfItersCounter = 0;
 
@@ -340,6 +366,7 @@ int main(int argc, char* argv[]) {
                     batchRes.push_back(std::move(br[i]));
                 }
             }
+            ++fpsCounter;
 
             if (!output.isAlive()) {
                 break;
@@ -348,28 +375,60 @@ int main(int argc, char* argv[]) {
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
             if (deltaTime >= samplingTimeout) {
+                auto durMsec =
+                        std::chrono::duration_cast<duration>(deltaTime).count();
+                auto frameTime = durMsec / static_cast<float>(fpsCounter);
+                fpsCounter = 0;
                 lastTime = currTime;
-                if (FLAGS_show_stats) {
+
+                if (FLAGS_no_show) {
+                    slog::info << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
+                } else {
+                    averageFps = frameTime;
                 }
 
                 if (FLAGS_show_stats) {
+                    auto inputStat = sources.getStats();
+                    auto inferStat = network->getStats();
+                    auto outputStat = output.getStats();
+
                     std::unique_lock<std::mutex> lock(statMutex);
-                    slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
-                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
                     statStream.str(std::string());
-                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
+                    statStream << std::fixed << std::setprecision(1);
+                    statStream << "Input reads: ";
+                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
+                        if (0 == (i % 4)) {
+                            statStream << std::endl;
+                        }
+                        statStream << inputStat.readTimes[i] << "ms ";
+                    }
+                    statStream << std::endl;
+                    statStream << "HW decoding latency: "
+                               << inputStat.decodingLatency << "ms";
+                    statStream << std::endl;
+                    statStream << "Preprocess time: "
+                               << inferStat.preprocessTime << "ms";
+                    statStream << std::endl;
+                    statStream << "Plugin latency: "
+                               << inferStat.inferTime << "ms";
+                    statStream << std::endl;
+
+                    statStream << "Render time: " << outputStat.renderTime
+                               << "ms" << std::endl;
+
+                    if (FLAGS_no_show) {
+                        slog::info << statStream.str() << slog::endl;
+                    }
                 }
             }
         }
 
         network.reset();
 
-        slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
-        slog::info << presenter.reportMeans() << slog::endl;
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -380,5 +439,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

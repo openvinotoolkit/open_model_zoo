@@ -18,7 +18,7 @@
 import logging as log
 from pathlib import Path
 import sys
-from time import perf_counter
+import time
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
@@ -31,9 +31,6 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
-
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
 
 
 def build_argparser():
@@ -80,19 +77,20 @@ def build_argparser():
 def time_elapsed(func, *args):
     """ Auxiliary function that helps to measure elapsed time. """
 
-    start_time = perf_counter()
+    start_time = time.perf_counter()
     res = func(*args)
-    elapsed = perf_counter() - start_time
+    elapsed = time.perf_counter() - start_time
     return elapsed, res
 
 
 def main():
+    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-
-    cap = open_images_capture(args.input, args.loop)
 
     place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
                                          args.gallery_size)
+
+    cap = open_images_capture(args.input, args.loop)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
@@ -100,10 +98,8 @@ def main():
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
     video_writer = cv2.VideoWriter()
-    metrics = PerformanceMetrics()
 
     while True:
-        start_time = perf_counter()
         frame = cap.read()
 
         if frame is None:
@@ -122,7 +118,6 @@ def main():
                                np.mean(compute_embeddings_times), np.mean(search_in_gallery_times),
                                imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
-        metrics.update(start_time)
         if frames_processed == 0:
             if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
                                                      (image.shape[1], image.shape[0])):
@@ -135,9 +130,7 @@ def main():
         if key == 27:
             break
 
-    metrics.log_total()
-    for rep in presenter.reportMeans():
-        log.info(rep)
+    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':

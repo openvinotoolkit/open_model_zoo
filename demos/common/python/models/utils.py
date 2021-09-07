@@ -33,18 +33,6 @@ class Detection:
     def top_right_point(self):
         return self.xmax, self.ymax
 
-    def get_coords(self):
-        return self.xmin, self.ymin, self.xmax, self.ymax
-
-
-def clip_detections(detections, size):
-    for detection in detections:
-        detection.xmin = max(int(detection.xmin), 0)
-        detection.ymin = max(int(detection.ymin), 0)
-        detection.xmax = min(int(detection.xmax), size[1])
-        detection.ymax = min(int(detection.ymax), size[0])
-    return detections
-
 
 class DetectionWithLandmarks(Detection):
     def __init__(self, xmin, ymin, xmax, ymax, score, id, landmarks_x, landmarks_y):

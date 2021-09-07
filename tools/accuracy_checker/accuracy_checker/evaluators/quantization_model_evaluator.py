@@ -110,7 +110,11 @@ class ModelEvaluator:
 
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
-        if self._switch_to_sync():
+        if (
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or
+                self.dataset.multi_infer
+        ):
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset(
                 subset,
@@ -199,11 +203,6 @@ class ModelEvaluator:
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
-            if self.postprocessor.postprocessing_applyed:
-                self.dataset.reset(self.postprocessor.has_processors)
-            if self.metric_executor:
-                self.metric_executor.reset()
-            self.postprocessor.reset()
             return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
@@ -349,26 +348,7 @@ class ModelEvaluator:
 
         return infer_requests_pool
 
-    def _switch_to_sync(self):
-        if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
-        ):
-            return True
-
-        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
-            if self.preprocessor.dynamic_shapes:
-                return True
-            self._initialize_input_shape()
-
-        return False
-
-    def _initialize_input_shape(self):
-        _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, _ = self._get_batch_input(batch_input, batch_annotation)
-        self.launcher.initialize_undefined_shapes(filled_inputs)
-
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if not self.metric_executor:
             return []
         if self._metrics_results:
@@ -385,22 +365,20 @@ class ModelEvaluator:
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting,
-                                              ignore_metric_reference=ignore_metric_reference)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting)
         return self._metrics_results
 
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
+    def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+            presenter.write_result(metric_result, ignore_results_formatting)
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
+            self.compute_metrics(False, ignore_results_formatting)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -413,7 +391,7 @@ class ModelEvaluator:
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
+                presenter.write_result(metric_result, ignore_results_formatting)
 
         return extracted_results, extracted_meta
 
@@ -428,7 +406,7 @@ class ModelEvaluator:
         network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
+            self.launcher.config.get('inputs', []), self.launcher.inputs,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -439,7 +417,7 @@ class ModelEvaluator:
         xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
+            self.launcher.config.get('inputs', []), self.launcher.inputs,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -484,7 +462,6 @@ class ModelEvaluator:
             self.dataset.reset(self.postprocessor.has_processors)
         if self.adapter:
             self.adapter.reset()
-        self.postprocessor.reset()
 
     def release(self):
         self.launcher.release()

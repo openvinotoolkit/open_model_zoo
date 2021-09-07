@@ -301,6 +301,11 @@ public:
     ///
     void DropForgottenTracks();
 
+    ///
+    /// \brief Prints reid performance counter
+    ///
+    void PrintReidPerformanceCounts(std::string fullDeviceName) const;
+
 private:
     struct Match {
         int frame_idx1;

@@ -11,9 +11,11 @@
 #include <opencv2/opencv.hpp>
 #include <utils/ocv_common.hpp>
 
+using namespace InferenceEngine;
+
 class Cnn {
   public:
-    Cnn(const std::string &model_path, const  std::string& model_type, InferenceEngine::Core & ie, const std::string & deviceName,
+    Cnn(const std::string &model_path, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
     virtual InferenceEngine::BlobMap Infer(const cv::Mat &frame);
@@ -21,12 +23,12 @@ class Cnn {
     size_t ncalls() const {return ncalls_;}
     double time_elapsed() const {return time_elapsed_;}
     const cv::Size& input_size() const {return input_size_;}
-    const std::string model_type;
+
   protected:
     cv::Size input_size_;
     int channels_;
     std::string input_name_;
-    InferenceEngine::InferRequest infer_request_;
+    InferRequest infer_request_;
     std::vector<std::string> output_names_;
 
     double time_elapsed_;
@@ -35,8 +37,8 @@ class Cnn {
 
 class EncoderDecoderCNN : public Cnn {
   public:
-    EncoderDecoderCNN(std::string model_path, std::string model_type,
-                      InferenceEngine::Core &ie, const std::string &deviceName,
+    EncoderDecoderCNN(std::string model_path,
+                      Core &ie, const std::string &deviceName,
                       const std::string &out_enc_hidden_name,
                       const std::string &out_dec_hidden_name,
                       const std::string &in_dec_hidden_name,
@@ -48,7 +50,7 @@ class EncoderDecoderCNN : public Cnn {
                       );
     InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
   private:
-    InferenceEngine::InferRequest infer_request_decoder_;
+    InferRequest infer_request_decoder_;
     std::string features_name_;
     std::string out_enc_hidden_name_;
     std::string out_dec_hidden_name_;
@@ -57,8 +59,8 @@ class EncoderDecoderCNN : public Cnn {
     std::string out_dec_symbol_name_;
     std::string logits_name_;
     size_t end_token_;
-    void check_net_names(const InferenceEngine::OutputsDataMap &output_info_decoder,
-                         const InferenceEngine::InputsDataMap &input_info_decoder
+    void check_net_names(const OutputsDataMap &output_info_decoder,
+                         const InputsDataMap &input_info_decoder
                          ) const;
 };
 

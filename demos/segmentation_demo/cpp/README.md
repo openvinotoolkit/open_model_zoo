@@ -14,7 +14,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -33,7 +33,6 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ### Supported Models
 
 * deeplabv3
-* drn-d-38
 * fastseg-large
 * fastseg-small
 * hrnet-v2-c1-segmentation
@@ -66,8 +65,7 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -labels "<path>"          Optional. Path to a file with labels mapping.
-    -r                        Optional. Output inference results as mask histogram.
+    -pc                       Optional. Enables per-layer performance report.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -nthreads "<integer>"     Optional. Number of threads.
@@ -99,19 +97,8 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
-The demo reports:
+The demo uses OpenCV to display the resulting images with blended segmentation mask by default. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
 
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for each of the following pipeline stages:
-  * **Decoding** — capturing input data.
-  * **Preprocessing** — data preparation for inference.
-  * **Inference** — infering input data (images) and getting a result.
-  * **Postrocessing** — preparation inference result for output.
-  * **Rendering** — generating output image.
-
-You can use these metrics to measure application-level performance.
 > **NOTE**: the output file contains the same image as displayed one.
 
 ## See Also

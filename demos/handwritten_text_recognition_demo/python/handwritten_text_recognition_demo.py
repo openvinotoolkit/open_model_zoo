@@ -15,7 +15,7 @@
 
 import os
 import sys
-from time import perf_counter
+import time
 import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,10 +23,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IECore, get_version
+from openvino.inference_engine import IECore
 from utils.codec import CTCCodec
-
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -35,7 +33,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
     args.add_argument("-m", "--model", type=str, required=True,
-                      help="Required. Path to an .xml file with a trained model.")
+                      help="Path to an .xml file with a trained model.")
     args.add_argument("-i", "--input", type=str, required=True,
                       help="Required. Path to an image to infer")
     args.add_argument("-d", "--device", type=str, default="CPU",
@@ -71,20 +69,19 @@ def preprocess_input(image_name, height, width):
 
 
 def main():
+    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     # Plugin initialization
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-
     # Read IR
-    log.info('Reading model {}'.format(args.model))
+    log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
 
+    log.info("Preparing input/output blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 
@@ -95,26 +92,25 @@ def main():
     input_batch_size, input_channel, input_height, input_width= net.input_info[input_blob].input_data.shape
 
     # Read and pre-process input image (NOTE: one image only)
-    preprocessing_start_time = perf_counter()
     input_image = preprocess_input(args.input, height=input_height, width=input_width)[None, :, :, :]
-    preprocessing_total_time = perf_counter() - preprocessing_start_time
     assert input_batch_size == input_image.shape[0], "The net's input batch size should equal the input image's batch size "
     assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 
     # Loading model to the plugin
+    log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
-    start_time = perf_counter()
+    log.info("Starting inference ({} iterations)".format(args.number_iter))
+    infer_time = []
     for i in range(args.number_iter):
+        t0 = time.time()
         preds = exec_net.infer(inputs={input_blob: input_image})
         preds = preds[out_blob]
         result = codec.decode(preds)
         print(result)
-    total_latency = ((perf_counter() - start_time) / args.number_iter + preprocessing_total_time) * 1e3
-    log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency))
+        infer_time.append((time.time() - t0) * 1000)
+    log.info("Average throughput: {} ms".format(np.average(np.asarray(infer_time))))
 
     sys.exit()
 

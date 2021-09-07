@@ -17,7 +17,7 @@
 try:
     from monitors_extension import Presenter
 except ImportError:
-    import logging as log
+    import logging
 
 
     class Presenter:
@@ -26,7 +26,7 @@ except ImportError:
             self.graphSize = graphSize
             self.graphPadding = 0
             if keys:
-                log.warning("monitors_extension wasn't found")
+                logging.warning("monitors_extension wasn't found")
 
         def handleKey(self, key): pass
 

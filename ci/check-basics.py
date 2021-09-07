@@ -21,7 +21,7 @@ request without substantially impacting build time.
 """
 
 import re
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 import sys
 
 from pathlib import Path
@@ -147,10 +147,6 @@ def main():
 
     print('running flake8...', flush=True)
     if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
-        all_passed = False
-
-    print('running bandit...', flush=True)
-    if subprocess.run([sys.executable, '-m', 'bandit', '.', '-r', '-c', '.bandit'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
     print('running documentation checks...', flush=True)

@@ -206,7 +206,6 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
-        self.launcher.dyn_input_layers = False
 
         self.evaluator.process_dataset(None, None)
 
@@ -220,7 +219,6 @@ class TestModelEvaluatorAsync:
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
         self.dataset.multi_infer = False
-        self.launcher.dyn_input_layers = False
 
         self.evaluator.process_dataset('path', None)
 

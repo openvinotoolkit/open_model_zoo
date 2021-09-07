@@ -8,7 +8,6 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <utils/ocv_common.hpp>
 
 #include "visualizer.hpp"
 
@@ -183,7 +182,7 @@ void Visualizer::enableEmotionBar(std::vector<std::string> const& emotionNames) 
         ystep = imgSizePadded.height / nycells;
     } else {
         emotionVisualizer.reset();
-        slog::err << "Disabling emotion bar due to small frame resolution to draw on" << slog::endl;
+        std::cerr << "Disabling emotion bar due to small frame resolution to draw on\n";
     }
 }
 
@@ -208,8 +207,12 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
         out << "," << emotion.first;
     }
 
-    auto textPos = cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20));
-    putHighlightedText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, genderColor, 2);
+    cv::putText(img,
+                out.str(),
+                cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20)),
+                cv::FONT_HERSHEY_COMPLEX_SMALL,
+                1.5,
+                genderColor, 2);
 
     if (f->isHeadPoseEnabled()) {
         cv::Point3f center(static_cast<float>(f->_location.x + f->_location.width / 2),

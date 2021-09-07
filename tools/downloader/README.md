@@ -25,7 +25,7 @@ future releases.
 > performance of deep learning models on various Intel® architecture
 > configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
 > <br>
-> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
 
 ## Prerequisites
 
@@ -483,7 +483,6 @@ describing a single model. Each such object has the following keys:
   * `sound_classification`
   * `speech_recognition`
   * `style_transfer`
-  * `text_prediction`
   * `text_to_speech`
   * `time_series`
   * `token_recognition`

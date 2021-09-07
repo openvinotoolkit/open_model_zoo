@@ -56,7 +56,7 @@ For more details on the requests-based Inference Engine API, including the Async
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -103,7 +103,6 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-vehicle-bike-detection-2004
   - product-detection-0001
   - rfcn-resnet101-coco-tf
-  - retinaface-resnet50-pytorch
   - retinanet-tf
   - ssd300
   - ssd512
@@ -161,6 +160,7 @@ Options:
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -labels "<path>"          Optional. Path to a file with labels mapping.
+    -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -iou_t                    Optional. Filtering intersection over union threshold for overlapping boxes.
@@ -209,14 +209,7 @@ The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for each of the following pipeline stages:
-  * **Decoding** — capturing input data.
-  * **Preprocessing** — data preparation for inference.
-  * **Inference** — infering input data (images) and getting a result.
-  * **Postrocessing** — preparation inference result for output.
-  * **Rendering** — generating output image.
-
-You can use these metrics to measure application-level performance.
+You can use both of these metrics to measure application-level performance.
 
 ## See Also
 

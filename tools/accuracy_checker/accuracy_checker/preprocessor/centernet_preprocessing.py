@@ -24,8 +24,6 @@ from ..utils import get_size_from_config
 
 class CenterNetAffineTransformation(Preprocessor):
     __provider__ = 'centernet_affine_transform'
-    shape_modificator = True
-    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -108,7 +106,3 @@ class CenterNetAffineTransformation(Preprocessor):
 
         image.data = inp_image
         return image
-
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shapes

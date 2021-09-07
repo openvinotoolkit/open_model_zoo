@@ -57,19 +57,18 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
                                                        cv::Mat& embedding) {
     cv::Mat target = image;
     if (crop_gallery) {
-        detector.enqueue(image);
-        detector.submitRequest();
-        detector.wait();
-        detection::DetectedObjects faces = detector.fetchResults();
-        if (faces.size() == 0) {
-            return RegistrationStatus::FAILURE_NOT_DETECTED;
-        }
-        CV_Assert(faces.size() == 1);
-        cv::Mat face_roi = image(faces[0].rect);
-        target = face_roi;
+      detector.enqueue(image);
+      detector.submitRequest();
+      detector.wait();
+      detection::DetectedObjects faces = detector.fetchResults();
+      if (faces.size() == 0) {
+        return RegistrationStatus::FAILURE_NOT_DETECTED;
+      }
+      cv::Mat face_roi = image(faces[0].rect);
+      target = face_roi;
     }
     if ((target.rows < min_size_fr) && (target.cols < min_size_fr)) {
-        return RegistrationStatus::FAILURE_LOW_QUALITY;
+      return RegistrationStatus::FAILURE_LOW_QUALITY;
     }
     cv::Mat landmarks;
     landmarks_det.Compute(target, &landmarks, cv::Size(2, 5));
@@ -86,7 +85,8 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      const VectorCNN& landmarks_det,
                                      const VectorCNN& image_reid,
                                      bool use_greedy_matcher)
-    : reid_threshold(threshold), use_greedy_matcher(use_greedy_matcher) {
+    : reid_threshold(threshold),
+      use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
         return;
     }

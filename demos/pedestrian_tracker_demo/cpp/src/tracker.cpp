@@ -804,8 +804,8 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
         DrawPolyline(centers, colors_[idx % colors_.size()], &out_frame);
         std::stringstream ss;
         ss << idx;
-        putHighlightedText(out_frame, ss.str(), centers.back(), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 0.95,
-                    colors_[idx % colors_.size()], 2);
+        cv::putText(out_frame, ss.str(), centers.back(), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 2.0,
+                    colors_[idx % colors_.size()], 3);
         auto track = tracks().at(idx);
         if (track.lost) {
             cv::line(out_frame, active_track.second.back(),
@@ -814,4 +814,10 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
     }
 
     return out_frame;
+}
+
+void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {
+    if (descriptor_strong_) {
+        descriptor_strong_->PrintPerformanceCounts(fullDeviceName);
+    }
 }

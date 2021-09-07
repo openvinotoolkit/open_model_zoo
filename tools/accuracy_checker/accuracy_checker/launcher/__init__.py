@@ -62,13 +62,7 @@ except ImportError as import_error:
 
 from .opencv_launcher import OpenCVLauncher
 
-try:
-    from .gapi_launcher import GAPILauncher
-except ImportError as import_error:
-    GAPILauncher = unsupported_launcher(
-        'g-api',
-        "OpenVINO isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-    )
+from .gapi_launcher import GAPILauncher
 
 try:
     from .onnx_launcher import ONNXLauncher

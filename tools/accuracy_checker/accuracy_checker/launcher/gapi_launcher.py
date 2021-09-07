@@ -47,12 +47,6 @@ except ImportError:
     _ie_core = None
 
 
-try:
-    from openvino.inference_engine import known_plugins
-except ImportError:
-    known_plugins = []
-
-
 class GAPILauncherConfigValidator(LauncherConfigValidator):
     def create_device_regex(self, available_devices):
         self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
@@ -207,13 +201,12 @@ class GAPILauncher(Launcher):
         if self.non_image_inputs:
             return self._fit_to_input(data, layer_name, layout, precision)
         if np.ndim(data) == 4:
-            data = data[0]
-        else:
-            data = np.array(data)
-        if data.dtype in [float, np.float64] and precision is None:
+            if data[0].dtype in [float, np.float64]:
+                return data[0].astype(np.float32)
+            return data[0]
+        data = np.array(data)
+        if data.dtype in [float, np.float64]:
             data = data.astype(np.float32)
-        if precision:
-            data = data.astype(precision)
 
         return data
 

@@ -396,7 +396,15 @@ class YoloV3Adapter(Adapter):
         batch = len(identifiers)
         out_precision = frame_meta[0].get('output_precision', {})
         out_layout = frame_meta[0].get('output_layout', {})
-        predictions = self.prepare_predictions(batch, raw_outputs, out_precision, out_layout)
+        predictions = [[] for _ in range(batch)]
+        for blob in self.outputs:
+            if blob in out_precision and raw_outputs[blob].dtype != out_precision[blob]:
+                raw_outputs[blob] = raw_outputs[blob].view(out_precision[blob])
+            if blob in out_layout and out_layout[blob] == 'NHWC':
+                shape = raw_outputs[blob].shape
+                raw_outputs[blob] = np.transpose(raw_outputs[blob], (0, 3, 1, 2)).reshape(shape)
+            for b in range(batch):
+                predictions[b].append(raw_outputs[blob][b])
 
         box_size = self.coords + 1 + self.classes
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
@@ -447,22 +455,6 @@ class YoloV3Adapter(Adapter):
             ))
 
         return result
-
-    def prepare_predictions(self, batch, raw_outputs, out_precision, out_layout):
-        predictions = [[] for _ in range(batch)]
-        for blob in self.outputs:
-            out_blob = raw_outputs[blob]
-            if blob in out_precision and out_blob.dtype != out_precision[blob]:
-                out_blob = out_blob.view(out_precision[blob])
-            if blob in out_layout and out_layout[blob] == 'NHWC':
-                shape = out_blob.shape
-                out_blob = np.transpose(out_blob, (0, 3, 1, 2)).reshape(shape)
-            if batch == 1 and out_blob.shape[0] != batch:
-                out_blob = np.expand_dims(out_blob, 0)
-
-            for b in range(batch):
-                predictions[b].append(out_blob[b])
-        return predictions
 
 
 class YoloV3ONNX(Adapter):
@@ -601,94 +593,3 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  size_correct=lambda x: (2.0 / (1.0 + np.exp(-x))) ** 2,
                                                  conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
-
-
-class YolorAdapter(Adapter):
-    __provider__ = 'yolor'
-    prediction_types = (DetectionPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
-                                     description="Minimal objectiveness score value for valid detections."),
-            'num': NumberField(value_type=int, optional=True, min_value=1, default=5,
-                               description="Num parameter from DarkNet configuration file."),
-            'output_name': StringField(optional=True, default=None, description="Name of output.")
-        })
-        return parameters
-
-    def configure(self):
-        self.threshold = self.get_value_from_config('threshold')
-        self.num = self.get_value_from_config('num')
-        self.output_name = self.get_value_from_config('output_name')
-        self.expanded_strides = []
-        self.grids = []
-        self.img_size = []
-
-    @staticmethod
-    def xywh2xyxy(x):
-        y = np.copy(x)
-        y[:, 0] = x[:, 0] - x[:, 2] / 2
-        y[:, 1] = x[:, 1] - x[:, 3] / 2
-        y[:, 2] = x[:, 0] + x[:, 2] / 2
-        y[:, 3] = x[:, 1] + x[:, 3] / 2
-        return y
-
-    def set_strides_grids(self, img_size):
-        pass
-
-    def process(self, raw, identifiers, frame_meta):
-        result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_outputs)
-        self.output_name = self.output_name or self.output_blob
-
-        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_name], frame_meta):
-            _, _, h, w = next(iter(meta.get('input_shape').values()))
-            self.set_strides_grids((w, h))
-
-            if np.size(self.expanded_strides) != 0 and np.size(self.grids) != 0:
-                output[..., :2] = (output[..., :2] + self.grids) * self.expanded_strides
-                output[..., 2:4] = np.exp(output[..., 2:4]) * self.expanded_strides
-
-            valid_predictions = output[output[..., 4] > self.threshold]
-            valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
-
-            boxes = self.xywh2xyxy(valid_predictions[:, :4])
-
-            i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
-            x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
-            scores = valid_predictions[i, j + self.num]
-
-            result.append(DetectionPrediction(
-                identifier, j, scores, x_mins, y_mins, x_maxs, y_maxs, meta
-            ))
-        return result
-
-
-class YoloxAdapter(YolorAdapter):
-    __provider__ = 'yolox'
-
-    def set_strides_grids(self, img_size):
-        if len(self.img_size) == 2 and img_size == self.img_size:
-            return
-
-        grids = []
-        expanded_strides = []
-
-        strides = [8, 16, 32]
-        hsizes = [img_size[0] // stride for stride in strides]
-        wsizes = [img_size[1] // stride for stride in strides]
-
-        for hsize, wsize, stride in zip(hsizes, wsizes, strides):
-            xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
-            grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
-            grids.append(grid)
-            shape = grid.shape[:2]
-            expanded_strides.append(np.full((*shape, 1), stride))
-
-        self.grids = np.concatenate(grids, 1)
-        self.expanded_strides = np.concatenate(expanded_strides, 1)
-        self.img_size = img_size

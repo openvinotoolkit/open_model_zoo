@@ -15,8 +15,6 @@
 """
 
 import cv2
-import logging as log
-
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
@@ -30,28 +28,3 @@ def resolution(value):
     except ValueError:
         raise RuntimeError('Сorrect format of --output_resolution parameter is "width"x"height".')
     return result
-
-def log_blobs_info(model):
-    for name, layer in model.net.input_info.items():
-        log.info('\tInput blob: {}, shape: {}, precision: {}'.format(name, layer.input_data.shape, layer.precision))
-    for name, layer in model.net.outputs.items():
-        log.info('\tOutput blob: {}, shape: {}, precision: {}'.format(name, layer.shape, layer.precision))
-
-def log_runtime_settings(exec_net, devices):
-    if 'AUTO' not in devices:
-        for device in devices:
-            try:
-                nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
-                log.info('\tDevice: {}'.format(device))
-                log.info('\t\tNumber of streams: {}'.format(nstreams))
-                if device == 'CPU':
-                    nthreads = exec_net.get_config('CPU_THREADS_NUM')
-                    log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
-            except RuntimeError:
-                pass
-    log.info('\tNumber of network infer requests: {}'.format(len(exec_net.requests)))
-
-def log_latency_per_stage(*pipeline_metrics):
-    stages = ('Decoding', 'Preprocessing', 'Inference', 'Postprocessing', 'Rendering')
-    for stage, latency in zip(stages, pipeline_metrics):
-        log.info('\t{}:\t{:.1f} ms'.format(stage, latency))

@@ -50,6 +50,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
+static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -68,6 +69,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
+DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_uint32(nireq, 0, nireq_message);
@@ -95,6 +97,7 @@ static void showUsage() {
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
@@ -112,6 +115,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+
+    slog::info << "Parsing input parameters" << slog::endl;
+
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -142,7 +148,9 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics, renderMetrics;
+        PerformanceMetrics metrics;
+
+        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -150,6 +158,7 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
+        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
@@ -160,16 +169,15 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core core;
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
         int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
-            std::make_shared<ImageMetaData>(curr_frame, startTime));
+            std::make_shared<ImageMetaData>(curr_frame, startTime));;
 
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
@@ -185,8 +193,6 @@ int main(int argc, char *argv[]) {
         if (cap->getType() == "IMAGE" && !FLAGS_loop && !FLAGS_no_show) {
             pipeline.waitForTotalCompletion();
             result = pipeline.getResult();
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp);
-            auto renderingStart = std::chrono::steady_clock::now();
             if (found == std::string::npos) {
                 outputResolution = result->asRef<ImageResult>().resultImage.size();
                 cv::Size viewSize = view.getSize();
@@ -203,7 +209,6 @@ int main(int argc, char *argv[]) {
             outputResolution = outputTransform.computeResolution();
 
             view.renderResultData(result->asRef<ImageResult>(), outputResolution);
-            renderMetrics.update(renderingStart);
             auto key = 1;
             while (!(27 == key || 'q' == key || 'Q' == key)) {
                 view.show();
@@ -235,7 +240,6 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                auto renderingStart = std::chrono::steady_clock::now();
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
@@ -265,7 +269,6 @@ int main(int argc, char *argv[]) {
                 cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
-                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
@@ -287,12 +290,14 @@ int main(int argc, char *argv[]) {
             }
         } // while(keepRunning)
 
-        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
-        for (; framesProcessed <= frameNum; framesProcessed++) {
+        for (; framesProcessed <= frameNum; framesProcessed++)
+        {
             result = pipeline.getResult();
-            if (result != nullptr) {
+            if (result != nullptr)
+            {
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
@@ -335,11 +340,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
-        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
-            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
-            renderMetrics.getTotal().latency);
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        metrics.printTotal();
+
         slog::info << presenter.reportMeans() << slog::endl;
 
     }
@@ -352,5 +356,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

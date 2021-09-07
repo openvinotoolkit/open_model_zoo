@@ -16,14 +16,12 @@ import argparse
 import itertools
 import logging as log
 import sys
-from time import perf_counter
+import time
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.inference_engine import IECore
 from tokenizers import SentencePieceBPETokenizer
-
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class Translator:
@@ -39,9 +37,7 @@ class Translator:
         self.model = TranslationEngine(model_xml, model_bin, device, output_name)
         self.max_tokens = self.model.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
-        log.debug('Loaded src tokenizer, max tokens: {}'.format(self.max_tokens))
         self.tokenizer_tgt = Tokenizer(tokenizer_tgt, self.max_tokens)
-        log.debug('Loaded tgt tokenizer, max tokens: {}'.format(self.max_tokens))
 
     def __call__(self, sentence, remove_repeats=True):
         """ Main translation method.
@@ -70,17 +66,16 @@ class TranslationEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_xml, model_bin, device, output_name):
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
-
-        log.info('Reading model {}'.format(model_xml))
-        self.net = ie.read_network(
+        self.logger = log.getLogger("TranslationEngine")
+        self.logger.info(f"model_xml: {model_xml}")
+        self.logger.info(f"model_bin: {model_bin}")
+        self.ie = IECore()
+        self.net = self.ie.read_network(
             model=model_xml,
             weights=model_bin
         )
-        self.net_exec = ie.load_network(self.net, device)
-        log.info('The model {} is loaded to {}'.format(model_xml, device))
+        self.logger.info("loading model to the {}".format(device))
+        self.net_exec = self.ie.load_network(self.net, device)
         self.output_name = output_name
         assert self.output_name != "", "there is not output in model"
 
@@ -115,6 +110,10 @@ class Tokenizer:
         max_tokens (int): max tokens.
     """
     def __init__(self, path, max_tokens):
+        self.logger = log.getLogger("Tokenizer")
+        self.logger.info("loading tokenizer")
+        self.logger.info(f"path: {path}")
+        self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer.from_file(
             str(path / "vocab.json"),
             str(path / "merges.txt"),
@@ -219,6 +218,9 @@ def parse_input(input):
     return sentences
 
 def main(args):
+    log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
+    logger = log.getLogger("main")
+    logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
         model_bin=args.model.with_suffix(".bin"),
@@ -242,24 +244,23 @@ def main(args):
             while True:
                 yield input("> ")
 
-    start_time = perf_counter()
     # loop on user's or prepared questions
     for sentence in sentences():
         if not sentence.strip():
             break
 
         try:
+            start = time.perf_counter()
             translation = model(sentence)
+            stop = time.perf_counter()
             print(translation)
+            logger.info(f"time: {stop - start} s.")
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
                     print(translation, file=f)
         except Exception:
             log.error("an error occurred", exc_info=True)
 
-    total_latency = (perf_counter() - start_time) * 1e3
-    log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

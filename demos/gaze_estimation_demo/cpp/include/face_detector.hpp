@@ -23,9 +23,8 @@ public:
                  double detectionConfidenceThreshold,
                  bool enableReshape);
     std::vector<FaceInferenceResults> detect(const cv::Mat& image);
+    void printPerformanceCounts() const;
     ~FaceDetector();
-
-    const std::string modelType = "Face Detection";
 
 private:
     IEWrapper ieWrapper;

@@ -14,7 +14,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -34,7 +34,6 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 * architecture_type = segmentation
   - deeplabv3
-  - drn-d-38
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
@@ -70,7 +69,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
-                        Required. Specify model's architecture type.
+                        Optional. Default value is segmentation. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -84,7 +83,6 @@ Common model options:
   -c COLORS, --colors COLORS
                         Optional. Path to a text file containing colors for
                         classes.
-  --labels LABELS       Optional. Labels mapping file.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -114,10 +112,6 @@ Input/output options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
   --only_masks          Optional. Display only masks. Could be switched by TAB key.
-
-Debug options:
-  -r, --raw_output_message
-                        Optional. Output inference results as mask histogram.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -90,8 +90,8 @@ class ModelEvaluator(BaseEvaluator):
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), launcher_inputs, launcher.input_shape, launcher.fit_to_input,
-            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
+            launcher.config.get('inputs', []), launcher_inputs, launcher.fit_to_input, launcher.default_layout,
+            launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
         )
         if not postpone_model_loading:
             if input_precision:
@@ -336,8 +336,7 @@ class ModelEvaluator(BaseEvaluator):
             self._reset_stored_predictions(stored_predictions)
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
-        (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
-         ignore_metric_reference) = metric_config
+        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting, _ = metric_config
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
@@ -351,9 +350,7 @@ class ModelEvaluator(BaseEvaluator):
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_identifiers))
                 if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting,
-                                         ignore_metric_reference=ignore_metric_reference)
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -600,11 +597,6 @@ class ModelEvaluator(BaseEvaluator):
         ):
             return True
 
-        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
-            if self.preprocessor.dynamic_shapes:
-                return True
-            self._initialize_input_shape()
-
         return False
 
     @property
@@ -627,7 +619,6 @@ class ModelEvaluator(BaseEvaluator):
         self.dataset.reset(self.postprocessor.has_processors)
         if self.adapter:
             self.adapter.reset()
-        self.postprocessor.reset()
 
     def release(self):
         self.input_feeder.release()

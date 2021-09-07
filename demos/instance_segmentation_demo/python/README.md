@@ -39,7 +39,7 @@ The demo workflow is the following:
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/instance_segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -76,7 +76,7 @@ usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i INPUT
                                      [-d "<device>"] [-l "<absolute_path>"]
                                      [--delay "<num>"] [-pt "<num>"]
                                      [--no_keep_aspect_ratio] [--no_track]
-                                     [--show_scores] [--show_boxes] [-r]
+                                     [--show_scores] [--show_boxes] [-pc] [-r]
                                      [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
@@ -111,6 +111,7 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
+  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
@@ -143,12 +144,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The application uses OpenCV to display resulting instance segmentation masks.
-The demo reports
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+The application uses OpenCV to display resulting instance segmentation masks and current inference performance.
 
 ## See Also
 

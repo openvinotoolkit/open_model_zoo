@@ -16,12 +16,11 @@
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, load_labels, clip_detections
+from .utils import Detection, resize_image, load_labels
 
 
 class SSD(Model):
-    def __init__(self, ie, model_path, input_transform, labels=None,
-        keep_aspect_ratio_resize=False, threshold=0.5):
+    def __init__(self, ie, model_path, input_transform, labels=None, keep_aspect_ratio_resize=False):
         super().__init__(ie, model_path, input_transform)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
@@ -30,7 +29,6 @@ class SSD(Model):
         else:
             self.labels = load_labels(labels) if labels else None
 
-        self.threshold = threshold
         self.image_blob_name, self.image_info_blob_name = self._get_inputs()
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
@@ -54,21 +52,21 @@ class SSD(Model):
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
             parser = SingleOutputParser(net.outputs)
-            self.logger.debug('\tUsing SSD model with single output parser')
+            self.logger.info('Use SingleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
-            self.logger.debug('\tUsing SSD model with multiple output parser')
+            self.logger.info('Use MultipleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
-            self.logger.debug('\tUsing SSD model with "boxes-labels" output parser')
+            self.logger.info('Use BoxesLabelsParser')
             return parser
         except ValueError:
             pass
@@ -96,7 +94,6 @@ class SSD(Model):
 
     def postprocess(self, outputs, meta):
         detections = self.output_parser(outputs)
-        detections = [d for d in detections if d.score > self.threshold]
         orginal_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
         scale_x = self.w / resized_image_shape[1] * orginal_image_shape[1]
@@ -106,7 +103,7 @@ class SSD(Model):
             detection.xmax *= scale_x
             detection.ymin *= scale_y
             detection.ymax *= scale_y
-        return clip_detections(detections, orginal_image_shape)
+        return detections
 
 
 def find_layer_by_name(name, layers):

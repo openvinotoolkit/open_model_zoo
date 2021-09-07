@@ -137,8 +137,7 @@ def main():
     args = parser.parse_args()
 
     with _common.telemetry_session('Model Quantizer', 'quantizer') as telemetry:
-        models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
-
+        models = _configuration.load_models_from_args(parser, args)
         for mode in ['all', 'list', 'name']:
             if getattr(args, mode):
                 telemetry.send_event('md', 'quantizer_selection_mode', mode)

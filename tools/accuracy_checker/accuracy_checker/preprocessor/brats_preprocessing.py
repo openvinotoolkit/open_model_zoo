@@ -28,8 +28,6 @@ except ImportError as import_error:
 
 class Resize3D(Preprocessor):
     __provider__ = 'resize3d'
-    shape_modificator = True
-    _dynamic_shape = False
 
     @classmethod
     def parameters(cls):
@@ -65,10 +63,6 @@ class Resize3D(Preprocessor):
         if not all(np.array(size) > 0):
             raise ConfigError("Size must be positive value for {}, but {} found".format(self.__provider__, size))
         return size
-
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shape
 
 
 class CropBraTS(Preprocessor):

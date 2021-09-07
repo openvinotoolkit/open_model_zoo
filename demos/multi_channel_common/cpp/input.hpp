@@ -14,7 +14,6 @@
 #include <string>
 
 #include <opencv2/opencv.hpp>
-#include <utils/performance_metrics.hpp>
 
 #ifdef USE_NATIVE_CAMERA_API
 #include "multicam/controller.hpp"
@@ -34,16 +33,9 @@ private:
     std::shared_ptr<void> detections;
 };
 
-struct MatWithTimestamp {
-    cv::Mat mat;
-    PerformanceMetrics::TimePoint timestamp;
-};
-
 class VideoFrame final {
 public:
     cv::Mat frame;
-    PerformanceMetrics::TimePoint timestamp;
-
     std::size_t sourceIdx = 0;
     Detections detections;
     VideoFrame() = default;

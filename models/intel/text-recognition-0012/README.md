@@ -7,7 +7,7 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 ## Example
 
-![](./assets/text-recognition-0012.jpg) -> openvino
+![](./assets/openvino.jpg) -> openvino
 
 ## Specification
 

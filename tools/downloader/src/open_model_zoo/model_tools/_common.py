@@ -16,7 +16,7 @@ import contextlib
 import platform
 import re
 import shlex
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess
 
 from pathlib import Path
 
@@ -72,7 +72,6 @@ KNOWN_TASK_TYPES = {
     'sound_classification',
     'speech_recognition',
     'style_transfer',
-    'text_prediction',
     'text_to_speech',
     'time_series',
     'token_recognition',

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle # nosec - disable B403:import-pickle check
+import pickle
 from collections import defaultdict
 from pathlib import Path
 
@@ -166,7 +166,7 @@ class FaceRecognitionBinary(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         with self.bin_file.open('rb') as f:
-            bins, issame_list = pickle.load(f, encoding='bytes') # nosec - disable B301:pickle check
+            bins, issame_list = pickle.load(f, encoding='bytes')
         annotations = []
         content_errors = None if not check_content else []
         num_iterations = len(issame_list) * 2

@@ -43,7 +43,7 @@ class ClusterFeature:
             self.clusters.append(feature_vec)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:
-            idx = random.randint(0, self.feature_len - 1) # nosec - disable B311:random check
+            idx = random.randint(0, self.feature_len - 1)
             self.clusters_sizes[idx] += 1
             self.clusters[idx] += (feature_vec - self.clusters[idx]) / \
                                             self.clusters_sizes[idx]

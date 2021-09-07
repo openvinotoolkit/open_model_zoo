@@ -75,8 +75,6 @@ class Flip(Preprocessor):
 
 class PointAligner(Preprocessor):
     __provider__ = 'point_alignment'
-    shape_modificator = True
-    _dynamic_shapes = False
 
     ref_landmarks = np.array([
         30.2946 / 96, 51.6963 / 112,
@@ -174,10 +172,6 @@ class PointAligner(Preprocessor):
 
         return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r @ c1.T))
 
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shapes
-
 
 def center_padding(dst_width, dst_height, width, height, left_top_extend=False):
     delta = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
@@ -208,7 +202,6 @@ padding_func = {
 
 class Padding(Preprocessor):
     __provider__ = 'padding'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -324,17 +317,9 @@ class Padding(Preprocessor):
             mode=self.numpy_pad_mode, constant_values=pad_values
         )
 
-    @property
-    def dynamic_result_shape(self):
-        if self.stride:
-            return True
-        return False
-
 
 class Tiling(Preprocessor):
     __provider__ = 'tiling'
-    shape_modificator = True
-    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -383,14 +368,9 @@ class Tiling(Preprocessor):
 
         return image
 
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shapes
-
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -434,7 +414,6 @@ class ImagePyramid(Preprocessor):
 
 class FaceDetectionImagePyramid(Preprocessor):
     __provider__ = 'face_detection_image_pyramid'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -529,8 +508,6 @@ class FaceDetectionImagePyramid(Preprocessor):
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
-    shape_modificator = True
-    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -590,15 +567,8 @@ class WarpAffine(Preprocessor):
         image.data = [process_data(images) for images in image.data]
         return image
 
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shapes
-
-
 class SimilarityTransfom(Preprocessor):
     __provider__ = 'similarity_transform_box'
-    shape_modificator = True
-    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -680,7 +650,3 @@ class SimilarityTransfom(Preprocessor):
         T[:dim, :dim] *= scale
 
         return T
-
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shapes

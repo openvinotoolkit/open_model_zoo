@@ -12,7 +12,7 @@ On startup, the demo application reads command line parameters and loads a netwo
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/mask_rcnn_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -70,11 +70,7 @@ You can use the following command to do inference on CPU on an image using a tra
 
 ## Demo Output
 
-For each input image the application outputs a segmented image. For example, `out0.png` and `out1.png` are created for the network with batch size equal to 2. The demo reports:
-
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-
-You can use this metric to measure application-level performance.
+For each input image the application outputs a segmented image. For example, `out0.png` and `out1.png` are created for the network with batch size equal to 2.
 
 ## See Also
 

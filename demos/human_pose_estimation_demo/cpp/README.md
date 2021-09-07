@@ -17,7 +17,7 @@ On startup, the application reads command line parameters and loads human pose e
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -69,6 +69,7 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -pc                       Optional. Enables per-layer performance report.
     -t                        Optional. Probability threshold for poses filtering.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -nthreads "<integer>"     Optional. Number of threads.
@@ -99,18 +100,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with estimated poses. The demo reports:
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for each of the following pipeline stages:
-  * **Decoding** — capturing input data.
-  * **Preprocessing** — data preparation for inference.
-  * **Inference** — infering input data (images) and getting a result.
-  * **Postrocessing** — preparation inference result for output.
-  * **Rendering** — generating output image.
-
-You can use these metrics to measure application-level performance.
+The demo uses OpenCV to display the resulting frame with estimated poses and text report of **FPS** (frames per second) performance for the human pose estimation demo.
 
 ## See Also
 

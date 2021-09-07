@@ -16,7 +16,7 @@
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, nms, clip_detections
+from .utils import Detection, resize_image, nms
 
 
 class UltraLightweightFaceDetection(Model):
@@ -84,5 +84,4 @@ class UltraLightweightFaceDetection(Model):
         x_maxs = x_maxs[keep] * meta['original_shape'][1]
         y_maxs = y_maxs[keep] * meta['original_shape'][0]
 
-        detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
-        return clip_detections(detections, meta['original_shape'])
+        return [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]

@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import logging as log
 import time
 from collections import OrderedDict
 from itertools import chain, cycle
@@ -56,6 +55,7 @@ class PipelineStep:
         self.working = True
 
     def join(self):
+        print("finishing {}".format(self))
         self.input_queue.put(Signal.STOP)
         self._thread.join()
         self._thread = None
@@ -71,6 +71,7 @@ class PipelineStep:
         while True:
             self.total_time.tick()
             item = self.input_queue.get()
+            # print("{} get".format(self))
 
             if self._check_output(item):
                 break
@@ -140,10 +141,9 @@ class AsyncPipeline:
             step.join()
 
     def print_statistics(self):
-        log.info("Metrics report:")
         for name, step in chain(self.sync_steps.items(), self.steps.items(), ):
-            log.info("\t{} total: {}".format(name, step.total_time))
-            log.info("\t{}   own: {}".format(name, step.own_time))
+            print("{} total: {}".format(name, step.total_time))
+            print("{}   own: {}".format(name, step.own_time))
 
     def _run_sync_steps(self):
         """Run steps in main thread"""

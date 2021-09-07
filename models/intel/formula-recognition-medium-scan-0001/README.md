@@ -24,7 +24,7 @@ Vocabulary file is located under corresponding model configuration directory, `<
 | im2latex_medium_rendered dataset, im2latex-match-images metric     | 95.7%     |
 | Source framework                                                   | PyTorch\* |
 
-Im2latex-match-images metric is calculated by `<omz_dir>/tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py`
+Im2latex-match-images metric is calculated by [this algorithm](../../../tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py )
 
 ## Encoder model specification
 

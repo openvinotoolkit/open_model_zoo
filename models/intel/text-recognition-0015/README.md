@@ -8,7 +8,7 @@ The model is built on the ResNeXt-101 backbone with additional 2d attention-base
 
 ## Example of the input data
 
-![](./assets/text-recognition-0015.jpg)
+![](./assets/openvino.jpg)
 
 ## Example of the output
 

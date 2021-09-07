@@ -29,7 +29,6 @@ class PostprocessingExecutor:
         self.state = state or {}
 
         self.allow_image_postprocessor = True
-        self.postprocessing_applyed = False
 
         if not processors:
             return
@@ -49,7 +48,6 @@ class PostprocessingExecutor:
         return annotations, predictions
 
     def process_image(self, annotation, prediction, image_metadata=None):
-        self.postprocessing_applyed = True
         for method in self._image_processors:
             annotation_entries, prediction_entries = method.get_entries(annotation, prediction)
             method.process(annotation_entries, prediction_entries, image_metadata)
@@ -68,7 +66,6 @@ class PostprocessingExecutor:
         return zipped_result[0:2]  # return changed annotations and predictions only
 
     def full_process(self, annotations, predictions, metas=None):
-        self.postprocessing_applyed = True
         return self.process_dataset(*self.process_batch(annotations, predictions, metas))
 
     @property
@@ -109,9 +106,6 @@ class PostprocessingExecutor:
             errors.extend(Postprocessor.validate_config(processor, fetch_only=fetch_only, uri_prefix=processor_uri))
 
         return errors
-
-    def reset(self):
-        self.postprocessing_applyed = False
 
 
 class PostprocessorConfig(ConfigValidator):

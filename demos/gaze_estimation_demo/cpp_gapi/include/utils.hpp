@@ -9,4 +9,6 @@
 
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles);
+
+void putTimingInfoOnFrame(cv::Mat& image, double overallTime);
 }  // namespace gaze_estimation

@@ -31,6 +31,7 @@ class Detector(object):
         _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].input_data.shape
         self._h = -1
         self._w = -1
+        self.infer_time = -1
 
     def _preprocess(self, img):
         self._h, self._w, _ = img.shape
@@ -41,7 +42,10 @@ class Detector(object):
         return img[None, ]
 
     def _infer(self, prep_img):
-        return self._exec_model.infer(inputs={self._input_layer_name: prep_img})
+        t0 = cv2.getTickCount()
+        output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
+        self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
+        return output
 
 
     def _postprocess(self, bboxes):

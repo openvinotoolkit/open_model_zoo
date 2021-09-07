@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle # nosec - disable B403:import-pickle check
+import pickle
 from collections import OrderedDict
 import numpy as np
 
@@ -29,7 +29,7 @@ from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+    def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -40,7 +40,7 @@ class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model, orig_config)
+        return cls(dataset_config, launcher, model)
 
 
 class BaseModel:

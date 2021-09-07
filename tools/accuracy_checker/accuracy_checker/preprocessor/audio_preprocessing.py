@@ -19,7 +19,6 @@ import numpy as np
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
 from ..utils import UnsupportedPackage
-
 try:
     import scipy.signal as dsp
 except ImportError as import_error:
@@ -28,7 +27,6 @@ except ImportError as import_error:
 
 class ResampleAudio(Preprocessor):
     __provider__ = 'resample_audio'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -53,7 +51,7 @@ class ResampleAudio(Preprocessor):
 
         data = image.data
         duration = data.shape[1] / sample_rate
-        resampled_data = np.zeros(shape=(data.shape[0], int(duration * self.sample_rate)), dtype=float)
+        resampled_data = np.zeros(shape=(data.shape[0], int(duration*self.sample_rate)), dtype=float)
         x_old = np.linspace(0, duration, data.shape[1])
         x_new = np.linspace(0, duration, resampled_data.shape[1])
         resampled_data[0] = np.interp(x_new, x_old, data[0])
@@ -66,8 +64,6 @@ class ResampleAudio(Preprocessor):
 
 class ClipAudio(Preprocessor):
     __provider__ = 'clip_audio'
-    shape_modificator = True
-    _dynamic_shape = False
 
     @classmethod
     def parameters(cls):
@@ -209,10 +205,6 @@ class ClipAudio(Preprocessor):
                 raise ConfigError("Preprocessor {}: duration should be positive value - {}."
                                   .format(self.__provider__, self.duration))
 
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shape
-
 
 class SamplesToFloat32(Preprocessor):
     __provider__ = 'audio_samples_to_float32'
@@ -293,7 +285,6 @@ class HanningWindow(Preprocessor):
 
 class AudioSpectrogram(Preprocessor):
     __provider__ = 'audio_spectrogram'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -316,7 +307,7 @@ class AudioSpectrogram(Preprocessor):
         if self.skip_channels:
             frames = frames.squeeze()
 
-        pspec = np.absolute(np.fft.rfft(frames, self.fftbase))  # pylint:disable=W9904
+        pspec = np.absolute(np.fft.rfft(frames, self.fftbase)) # pylint:disable=W9904
         if self.magnutide_squared:
             pspec = np.square(pspec)
 
@@ -327,7 +318,6 @@ class AudioSpectrogram(Preprocessor):
 
 class TriangleFiltering(Preprocessor):
     __provider__ = 'audio_triangle_filtering'
-    shape_modificator = True
 
     HZ2MEL = 1127.0
     MEL_CUTOFF = 700
@@ -417,7 +407,7 @@ class TriangleFiltering(Preprocessor):
                 self.weights[i] = 0.0
             else:
                 if channel >= 0:
-                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin)) /
+                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin))/
                                        (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                 else:
                     self.weights[i] = ((center_frequencies[0] - self.freq2mel(i * hz_per_sbin)) /
@@ -443,7 +433,6 @@ class TriangleFiltering(Preprocessor):
 
 class DCT(Preprocessor):
     __provider__ = 'audio_dct'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -502,7 +491,6 @@ class DCT(Preprocessor):
 
 class ClipCepstrum(Preprocessor):
     __provider__ = 'clip_cepstrum'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -538,7 +526,6 @@ class ClipCepstrum(Preprocessor):
 
 class PackCepstrum(Preprocessor):
     __provider__ = 'pack_cepstrum'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -558,22 +545,19 @@ class PackCepstrum(Preprocessor):
         if steps % self.step:
             empty_context = np.zeros((self.step - (steps % self.step), context, numceps), dtype=features.dtype)
             features = np.concatenate((features, empty_context))
-            steps, context, numceps = features.shape  # pylint:disable=E0633
+            steps, context, numceps = features.shape # pylint:disable=E0633
 
         packed = []
         for i in range(0, steps, self.step):
-            packed.append(features[i:i + self.step, ...])
+            packed.append(features[i:i+self.step, ...])
 
         image.data = packed
         image.metadata['multi_infer'] = True
 
         return image
 
-
 class AddBatch(Preprocessor):
     __provider__ = 'add_batch'
-    shape_modificator = True
-    _dynamic_shape = False
 
     @classmethod
     def parameters(cls):
@@ -602,14 +586,8 @@ class AddBatch(Preprocessor):
 
         return image
 
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shape
-
-
 class TrimmingAudio(Preprocessor):
     __provider__ = 'trim'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -654,7 +632,7 @@ class TrimmingAudio(Preprocessor):
         y_mono = np.asfortranarray(y)
 
         if y_mono.ndim > 1:
-            y_mono = np.mean(y - y_mono, axis=0)
+            y_mono = np.mean(y-y_mono, axis=0)
 
         # Compute the MSE for the signal
         mse = self.mse(y_mono)
@@ -699,7 +677,6 @@ def as_strided(x, shape, strides):
     array.dtype = x.dtype
     return array
 
-
 windows = {
     'hann': np.hanning,
     'hamming': np.hamming,
@@ -711,7 +688,6 @@ windows = {
 
 class AudioToMelSpectrogram(Preprocessor):
     __provider__ = 'audio_to_mel_spectrogram'
-    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -805,7 +781,7 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # get power spectrum
         if self.mag_power != 1.0:
-            x = np.abs(x) ** self.mag_power
+            x = np.abs(x)**self.mag_power
 
         # dot with filterbank energies
         x = np.matmul(filterbanks, x)

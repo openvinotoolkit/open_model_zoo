@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 namespace slog {
 
@@ -80,20 +79,10 @@ public:
         (*_log_stream) << std::boolalpha;
         return *this;
     }
-
-    // Specializing for std::vector and std::list
-    template<template<class, class> class Container, class T>
-    LogStream& operator<< (const Container<T, std::allocator<T>>& container) {
-        for (const auto& el : container) {
-            *this << el << slog::endl;
-        }
-        return *this;
-    }
 };
 
 
 static LogStream info("INFO", std::cout);
-static LogStream debug("DEBUG", std::cout);
 static LogStream warn("WARNING", std::cout);
 static LogStream err("ERROR", std::cerr);
 

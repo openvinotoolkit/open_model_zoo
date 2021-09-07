@@ -96,12 +96,7 @@ PyObject *presenter_reportMeans(PresenterObject *self, PyObject *Py_UNUSED(ignor
         return nullptr;
     }
     try {
-        PyObject *PList = PyList_New(0);
-        auto report = self->_presenter->reportMeans();
-        for(const auto& s : report){
-            PyList_Append(PList, Py_BuildValue("s", s.c_str()));
-        }
-        return PList;
+        return PyUnicode_FromFormat(self->_presenter->reportMeans().c_str());
     } catch (std::exception &exception) {
         PyErr_SetString(PyExc_RuntimeError, exception.what());
         return nullptr;

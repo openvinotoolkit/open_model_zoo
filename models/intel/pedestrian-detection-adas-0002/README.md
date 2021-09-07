@@ -20,7 +20,7 @@ Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a
 | Source framework                | Caffe\*                                   |
 
 Average Precision metric described in: Mark Everingham et al.
-[The PASCAL Visual Object Classes (VOC) Challenge](https://link.springer.com/article/10.1007/s11263-009-0275-4).
+[The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
 
 Tested on an internal dataset with 1001 pedestrian to detect.
 

@@ -5,17 +5,17 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <utils/common.hpp>
 
 #include "ie_wrapper.hpp"
+
+using namespace InferenceEngine;
 
 namespace gaze_estimation {
 
 IEWrapper::IEWrapper(InferenceEngine::Core& ie,
                      const std::string& modelPath,
-                     const std::string& modelType,
                      const std::string& deviceName):
-           modelPath(modelPath), modelType(modelType), deviceName(deviceName), ie(ie) {
+           modelPath(modelPath), deviceName(deviceName), ie(ie) {
     network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
@@ -32,11 +32,11 @@ void IEWrapper::setExecPart() {
         inputBlobsDimsInfo[layerName] = layerDims_;
 
         if (layerDims.size() == 4) {
-            layerData->setLayout(InferenceEngine::Layout::NCHW);
-            layerData->setPrecision(InferenceEngine::Precision::U8);
+            layerData->setLayout(Layout::NCHW);
+            layerData->setPrecision(Precision::U8);
         } else if (layerDims.size() == 2) {
-            layerData->setLayout(InferenceEngine::Layout::NC);
-            layerData->setPrecision(InferenceEngine::Precision::FP32);
+            layerData->setLayout(Layout::NC);
+            layerData->setPrecision(Precision::FP32);
         } else {
             throw std::runtime_error("Unknown type of input layer layout. Expected either 4 or 2 dimensional inputs");
         }
@@ -51,11 +51,10 @@ void IEWrapper::setExecPart() {
 
         std::vector<unsigned long> layerDims_(layerDims.data(), layerDims.data() + layerDims.size());
         outputBlobsDimsInfo[layerName] = layerDims_;
-        layerData->setPrecision(InferenceEngine::Precision::FP32);
+        layerData->setPrecision(Precision::FP32);
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
-    logExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
     request = executableNetwork.CreateInferRequest();
 }
 
@@ -85,8 +84,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     if (dimsProduct != data.size()) {
         throw std::runtime_error("Input data does not match size of the blob");
     }
-    InferenceEngine::LockedMemory<void> blobMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(blobName))->wmap();
+    LockedMemory<void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->wmap();
     auto buffer = blobMapped.as<float *>();
     for (unsigned long int i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
@@ -102,8 +100,7 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
         dataSize *= dim;
     }
 
-    InferenceEngine::LockedMemory<const void> blobMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(blobName))->rmap();
+    LockedMemory<const void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rmap();
     auto buffer = blobMapped.as<float *>();
 
     for (int i = 0; i < dataSize; ++i) {
@@ -161,5 +158,12 @@ void IEWrapper::reshape(const std::map<std::string, std::vector<unsigned long> >
     }
     network.reshape(inputShapes);
     setExecPart();
+}
+
+void IEWrapper::printPerlayerPerformance() const {
+    std::cout << "\n-----------------START-----------------" << std::endl;
+    std::cout << "Performance for " << modelPath << " model\n" << std::endl;
+    printPerformanceCounts(request, std::cout, getFullDeviceName(ie, deviceName), false);
+    std::cout << "------------------END------------------\n" << std::endl;
 }
 }  // namespace gaze_estimation

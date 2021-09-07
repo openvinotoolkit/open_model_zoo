@@ -28,44 +28,46 @@
 #include <utils/slog.hpp>
 #include <ngraph/ngraph.hpp>
 
+using namespace InferenceEngine;
+
 const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, float delta, RESIZE_MODE resizeMode) :
+    int targetSize, float confidenceThreshold, float delta, std::string paddingMode) :
     ModelBase(modelFileName),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold),
     delta(delta),
-    resizeMode(resizeMode) {
+    paddingMode(paddingMode) {
 }
 
-void HpeAssociativeEmbedding::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     changeInputSize(cnnNetwork);
 
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputShapes.begin()->first);
-    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
+    SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(InferenceEngine::Precision::U8);
-    inputInfo.getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+    inputInfo.setPrecision(Precision::U8);
+    inputInfo.getInputData()->setLayout(Layout::NHWC);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
+    const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
     if (outputInfo.size() != 2 && outputInfo.size() != 3)
         throw std::runtime_error("Demo supports topologies only with 2 or 3 outputs");
     for (const auto& outputLayer: outputInfo) {
-        outputLayer.second->setPrecision(InferenceEngine::Precision::FP32);
+        outputLayer.second->setPrecision(Precision::FP32);
         outputsNames.push_back(outputLayer.first);
-        const InferenceEngine::SizeVector& outputLayerDims = outputLayer.second->getTensorDesc().getDims();
+        const SizeVector& outputLayerDims = outputLayer.second->getTensorDesc().getDims();
         if (outputLayerDims.size() != 4 && outputLayerDims.size() != 5)
                 throw std::runtime_error("output layers are expected to be 4-dimensional or 5-dimensional");
         if (outputLayerDims[0] != 1 || outputLayerDims[1] != 17)
@@ -81,9 +83,9 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(InferenceEngine::CNNNetwork& 
     }
 }
 
-void HpeAssociativeEmbedding::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
+void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {
         targetSize =  static_cast<int>(std::min(inputDims[2], inputDims[3]));
     }
@@ -98,37 +100,53 @@ void HpeAssociativeEmbedding::changeInputSize(InferenceEngine::CNNNetwork& cnnNe
     cnnNetwork.reshape(inputShapes);
 }
 
-std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    cv::Rect roi;
-    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
-    if (inputLayerSize.height - stride >= roi.height
-        || inputLayerSize.width - stride >= roi.width) {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+    cv::Mat resizedImage;
+    float scale = std::min(inputLayerSize.height / static_cast<float>(image.rows),
+                           inputLayerSize.width / static_cast<float>(image.cols));
+    cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
+    int h = resizedImage.rows;
+    int w = resizedImage.cols;
+    if (!(inputLayerSize.height - stride < h && h <= inputLayerSize.height
+        && inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     }
+    cv::Mat paddedImage;
+    int left = 0, right = 0, top = 0, bottom = 0;
+    if (paddingMode == "center") {
+        left = (inputLayerSize.width - w + 1) / 2;
+        right = (inputLayerSize.width - w) / 2;
+        top = (inputLayerSize.height - h + 1) / 2;
+        bottom = (inputLayerSize.height - h) / 2;
+    } else {
+        right = inputLayerSize.width - w;
+        bottom = inputLayerSize.height - h;
+    }
+    cv::copyMakeBorder(resizedImage, paddedImage, top, bottom, left, right,
+                       cv::BORDER_CONSTANT, meanPixel);
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image.size().width / static_cast<float>(roi.width),
-        image.size().height / static_cast<float>(roi.height), std::move(paddedImage));
+    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(w), image.rows / static_cast<float>(h), std::move(paddedImage));
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
     auto aembds = infResult.outputsData[embeddingsBlobName];
-    const InferenceEngine::SizeVector& aembdsDims = aembds->getTensorDesc().getDims();
+    const SizeVector& aembdsDims = aembds->getTensorDesc().getDims();
     float* aembdsMapped = aembds->rmap().as<float*>();
     std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsDims);
 
     auto heats = infResult.outputsData[heatmapsBlobName];
-    const InferenceEngine::SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
+    const SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
     float* heatMapsMapped = heats->rmap().as<float*>();
     std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsDims);
 
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
     if (nmsHeatmapsBlobName != heatmapsBlobName) {
         auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
-        const InferenceEngine::SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
+        const SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
         float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
     }
@@ -140,7 +158,7 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     float shiftX = 0.0, shiftY = 0.0;
     float scaleX = 1.0, scaleY = 1.0;
 
-    if (resizeMode == RESIZE_KEEP_ASPECT_LETTERBOX) {
+    if (paddingMode == "center") {
         scaleX = scaleY = std::min(scale.x, scale.y);
         if (aspectRatio >= 1.0)
             shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.mat.cols * scaleX) / 2);
@@ -180,7 +198,7 @@ std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName
     return suitableLayers[0];
 }
 
-std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const InferenceEngine::SizeVector& shape) {
+std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const SizeVector& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
     for (size_t i = 0; i < flattenData.size(); i++) {
         flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, data + i * shape[2] * shape[3]);

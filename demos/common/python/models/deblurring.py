@@ -77,7 +77,7 @@ class Deblurring(Model):
                           }
             resized_image = np.pad(image, **pad_params)
         else:
-            self.logger.warn("\tChosen model size doesn't match image size. The image is resized")
+            self.logger.warn("Chosen model size doesn't match image size. The image is resized")
             resized_image = cv2.resize(image, (self.w, self.h))
 
         resized_image = resized_image.transpose((2, 0, 1))

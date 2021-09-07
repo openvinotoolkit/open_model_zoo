@@ -19,11 +19,10 @@ from .adapter import Adapter, AdapterField, create_adapter
 from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
+    TextProposalsDetectionAdapter,
     EASTTextDetectionAdapter,
-    CRAFTTextDetectionAdapter,
-    PPOCRDetectionAdapter
+    CRAFTTextDetectionAdapter
 )
-from .ctpn import TextProposalsDetectionAdapter
 
 from .text_recognition import (
     BeamSearchDecoder,
@@ -59,8 +58,7 @@ from .detection import (
     FasterRCNNONNX,
     TwoStageDetector,
     DETRAdapter,
-    UltraLightweightFaceDetectionAdapter,
-    PPDetectionAdapter
+    UltraLightweightFaceDetectionAdapter
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -70,10 +68,8 @@ from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
-from .yolo import (
-    TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter, YolorAdapter, YoloxAdapter
-)
-from .classification import ClassificationAdapter, MaskToBinaryClassification
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
+from .classification import ClassificationAdapter
 from .segmentation import (
     SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
 )
@@ -107,11 +103,10 @@ from .audio_recognition import (
     CTCBeamSearchDecoder,
     CTCGreedyDecoder,
     CTCBeamSearchDecoderWithLm,
-    FastCTCBeamSearchDecoderWithLm,
-    Wav2VecDecoder
+    FastCTCBeamSearchDecoderWithLm
 )
 from .kaldi_asr_decoder import KaldiLatGenDecoder
-from .regression import RegressionAdapter, MultiOutputRegression, KaldiFeatsRegression
+from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
@@ -149,7 +144,6 @@ __all__ = [
     'TwoStageDetector',
     'DETRAdapter',
     'UltraLightweightFaceDetectionAdapter',
-    'PPDetectionAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
@@ -157,8 +151,6 @@ __all__ = [
     'YoloV3ONNX',
     'YoloV3TF2',
     'YoloV5Adapter',
-    'YolorAdapter',
-    'YoloxAdapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',
@@ -196,7 +188,6 @@ __all__ = [
     'TextProposalsDetectionAdapter',
     'EASTTextDetectionAdapter',
     'CRAFTTextDetectionAdapter',
-    'PPOCRDetectionAdapter',
 
     'BeamSearchDecoder',
     'LPRAdapter',
@@ -236,7 +227,6 @@ __all__ = [
 
     'RegressionAdapter',
     'MultiOutputRegression',
-    'KaldiFeatsRegression',
     'MixedAdapter',
 
     'CTCBeamSearchDecoder',
@@ -244,7 +234,6 @@ __all__ = [
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
     'KaldiLatGenDecoder',
-    'Wav2VecDecoder',
 
     'QualityAssessmentAdapter',
 
@@ -257,7 +246,5 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
-    'QuantilesPredictorAdapter',
-
-    'MaskToBinaryClassification'
+    'QuantilesPredictorAdapter'
 ]

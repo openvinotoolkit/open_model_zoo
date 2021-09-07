@@ -12,6 +12,7 @@
 """
 
 import cv2 as cv
+import logging as log
 import os.path as osp
 import sys
 from importlib import import_module
@@ -83,6 +84,11 @@ def check_pressed_keys(key):
     else:
         key = cv.waitKey(1)
     return key
+
+
+def set_log_config():
+    log.basicConfig(stream=sys.stdout, format='%(levelname)s: %(asctime)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
 COLOR_PALETTE = [[0, 113, 188],

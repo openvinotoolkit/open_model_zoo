@@ -18,7 +18,7 @@ GazeEstimator::GazeEstimator(InferenceEngine::Core& ie,
                              const std::string& modelPath,
                              const std::string& deviceName,
                              bool doRollAlign):
-               ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign) {
+               ieWrapper(ie, modelPath, deviceName), rollAlign(doRollAlign) {
     const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
 
     for (const auto& blobName: {BLOB_HEAD_POSE_ANGLES, BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
@@ -113,6 +113,10 @@ void GazeEstimator::estimate(const cv::Mat& image,
     }
 
     outputResults.gazeVector = gazeVector;
+}
+
+void GazeEstimator::printPerformanceCounts() const {
+    ieWrapper.printPerlayerPerformance();
 }
 
 GazeEstimator::~GazeEstimator() {

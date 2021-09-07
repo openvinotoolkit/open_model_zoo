@@ -20,9 +20,8 @@ public:
                       const std::string& deviceName);
     void estimate(const cv::Mat& image,
                   FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
     ~HeadPoseEstimator() override;
-
-    const std::string modelType = "Head Pose Estimation";
 
 private:
     IEWrapper ieWrapper;

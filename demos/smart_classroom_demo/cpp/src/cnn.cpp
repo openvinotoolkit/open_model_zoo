@@ -13,6 +13,8 @@
 
 #include <inference_engine.hpp>
 
+using namespace InferenceEngine;
+
 CnnDLSDKBase::CnnDLSDKBase(const Config& config) : config_(config) {}
 
 void CnnDLSDKBase::Load() {
@@ -27,31 +29,29 @@ void CnnDLSDKBase::Load() {
     if (in.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
-    in.begin()->second->setPrecision(InferenceEngine::Precision::U8);
-    in.begin()->second->setLayout(InferenceEngine::Layout::NCHW);
+    in.begin()->second->setPrecision(Precision::U8);
+    in.begin()->second->setLayout(Layout::NCHW);
     input_blob_name_ = in.begin()->first;
 
-    InferenceEngine::OutputsDataMap out = cnnNetwork.getOutputsInfo();
+    OutputsDataMap out = cnnNetwork.getOutputsInfo();
     for (auto&& item : out) {
-        item.second->setPrecision(InferenceEngine::Precision::FP32);
+        item.second->setPrecision(Precision::FP32);
         output_blobs_names_.push_back(item.first);
     }
 
     try {
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    } catch (const InferenceEngine::Exception&) {  // in case the model does not work with dynamic batch
+    } catch (const Exception&) {  // in case the model does not work with dynamic batch
         cnnNetwork.setBatchSize(1);
-        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName,
-            {{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED, InferenceEngine::PluginConfigParams::NO}});
+        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, {{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::NO}});
     }
-    logExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
         const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
-    InferenceEngine::Blob::Ptr input = infer_request_.GetBlob(input_blob_name_);
+    Blob::Ptr input = infer_request_.GetBlob(input_blob_name_);
     const size_t batch_size = input->getTensorDesc().getDims()[0];
 
     size_t num_imgs = frames.size();
@@ -71,6 +71,11 @@ void CnnDLSDKBase::InferBatch(
         }
         fetch_results(blobs, current_batch_size);
     }
+}
+
+void CnnDLSDKBase::PrintPerformanceCounts(std::string fullDeviceName) const {
+    std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
+    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
 }
 
 void CnnDLSDKBase::Infer(const cv::Mat& frame,
@@ -110,8 +115,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             for (size_t i = 0; i < blob_sizes.size(); ++i) {
                 blob_sizes[i] = ie_output_dims[i];
             }
-            InferenceEngine::LockedMemory<const void> blobMapped =
-                InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
+            LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
             cv::Mat out_blob(blob_sizes, CV_32F, blobMapped.as<float*>());
             for (size_t b = 0; b < batch_size; b++) {
                 cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,

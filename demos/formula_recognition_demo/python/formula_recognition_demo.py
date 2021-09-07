@@ -24,10 +24,8 @@ import cv2 as cv
 from tqdm import tqdm
 from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
                    DEFAULT_WIDTH, MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH,
-                   PREPROCESSING, Model, calculate_probability,
+                   PREPROCESSING, Model, calculate_probability, print_stats,
                    create_renderer, prerocess_crop, strip_internal_spaces)
-
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class InteractiveDemo:
@@ -161,10 +159,11 @@ def non_interactive_demo(model, args):
     renderer = create_renderer()
     show_window = not args.no_show
     for rec in tqdm(model.images_list):
+        log.info("Starting inference for %s", rec.img_name)
         image = rec.img
         distribution, targets = model.infer_sync(image)
         prob = calculate_probability(distribution)
-        log.info("Confidence score is {}".format(prob))
+        log.info("Confidence score is %s", prob)
         if prob >= args.conf_thresh ** len(distribution):
             phrase = model.vocab.construct_phrase(targets)
             if args.output_file:
@@ -179,6 +178,11 @@ def non_interactive_demo(model, args):
                         cv.waitKey(0)
         else:
             log.info("Confidence score is low. The formula was not recognized.")
+    if args.perf_counts:
+        log.info("Encoder performance statistics")
+        print_stats(model.exec_net_encoder)
+        log.info("Decoder performance statistics")
+        print_stats(model.exec_net_decoder)
 
 
 def build_argparser():
@@ -216,6 +220,8 @@ def build_argparser():
                       help='Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
+    args.add_argument('-pc', '--perf_counts',
+                      action='store_true', default=False)
     args.add_argument('--imgs_layer', help='Optional. Encoder input name for images. See README for details.',
                       default='imgs')
     args.add_argument('--row_enc_out_layer',
@@ -248,6 +254,9 @@ def build_argparser():
 
 
 def main():
+    log.basicConfig(format="[ %(levelname)s ] %(message)s",
+                    level=log.INFO, stream=sys.stdout)
+
     args = build_argparser().parse_args()
     interactive_mode = not (os.path.isdir(args.input) or args.input.endswith('.png') or args.input.endswith('.jpg'))
     model = Model(args, interactive_mode)
@@ -266,6 +275,7 @@ def main():
     while True:
         ret, frame = capture.read()
         if not ret:
+            log.info("End of file or error reading from camera")
             break
         bin_crop = demo.get_crop(frame)
         model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
@@ -276,12 +286,12 @@ def main():
         else:
             distribution, targets = model_res
             prob = calculate_probability(distribution)
-            log.debug("Confidence score is {}".format(prob))
+            log.info("Confidence score is %s", prob)
             if prob >= args.conf_thresh ** len(distribution):
-                log.debug("Prediction updated")
+                log.info("Prediction updated")
                 phrase = model.vocab.construct_phrase(targets)
             else:
-                log.debug("Confidence score is low, prediction is not complete")
+                log.info("Confidence score is low, prediction is not complete")
                 phrase = ''
         frame = demo.draw(frame, phrase)
         prev_text = phrase
@@ -294,6 +304,9 @@ def main():
                 demo.resize_window("decrease")
             elif key in (ord('p'), ord('P')):
                 demo.resize_window("increase")
+
+    log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
+             "from the openVINO toolkit\n")
 
 
 if __name__ == '__main__':

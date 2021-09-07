@@ -37,6 +37,7 @@ static const char target_device_message_lm[] = "Optional. Target device for Faci
 static const char target_device_message_es[] = "Optional. Target device for Open/Closed Eye network "
                                                "(the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";
 static const char thresh_output_message[] = "Optional. Probability threshold for Face Detector. The default value is 0.5.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char fd_reshape_message[] = "Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.";
@@ -56,6 +57,7 @@ DEFINE_string(d_hp, "CPU", target_device_message_hp);
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
 DEFINE_string(d_es, "CPU", target_device_message_es);
 DEFINE_bool(fd_reshape, false, fd_reshape_message);
+DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_bool(no_show, false, no_show_message);
@@ -88,6 +90,7 @@ static void showUsage() {
     std::cout << "    -d_es \"<device>\"         " << target_device_message_es << std::endl;
     std::cout << "    -fd_reshape              " << fd_reshape_message << std::endl;
     std::cout << "    -no_show                 " << no_show_message << std::endl;
+    std::cout << "    -pc                      " << performance_counter_message << std::endl;
     std::cout << "    -r                       " << raw_output_message << std::endl;
     std::cout << "    -t                       " << thresh_output_message << std::endl;
     std::cout << "    -u                       " << utilization_monitors_message << std::endl;

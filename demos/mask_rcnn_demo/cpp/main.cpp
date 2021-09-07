@@ -18,12 +18,13 @@
 
 #include <inference_engine.hpp>
 
-#include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
+#include <utils/args_helper.hpp>
 
 #include "mask_rcnn_demo.h"
+
+using namespace InferenceEngine;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -33,6 +34,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -47,7 +50,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -61,22 +64,29 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load inference engine------------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
             ie.AddExtension(extension_ptr, "CPU");
+            slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
+            slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
+
+        /** Printing version **/
+        slog::info << "Device info: " << slog::endl;
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------Load network (Generated xml/bin files)-------------------------------------------
+        slog::info << "Loading network files" << slog::endl;
 
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m);
@@ -86,29 +96,32 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // -----------------------------Prepare input blobs-----------------------------------------------------
+        slog::info << "Preparing input blobs" << slog::endl;
 
         /** Taking information about all topology inputs **/
-        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
 
         std::string imageInputName;
 
         for (const auto & inputInfoItem : inputInfo) {
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
                 imageInputName = inputInfoItem.first;
-                inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
+                inputInfoItem.second->setPrecision(Precision::U8);
             } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
-                inputInfoItem.second->setPrecision(InferenceEngine::Precision::FP32);
+                inputInfoItem.second->setPrecision(Precision::FP32);
             } else {
                 throw std::logic_error("Unsupported input shape with size = " + std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()));
             }
         }
 
         /** network dimensions for image input **/
-        const InferenceEngine::TensorDesc& inputDesc = inputInfo[imageInputName]->getTensorDesc();
+        const TensorDesc& inputDesc = inputInfo[imageInputName]->getTensorDesc();
         IE_ASSERT(inputDesc.getDims().size() == 4);
         size_t netBatchSize = getTensorBatch(inputDesc);
         size_t netInputHeight = getTensorHeight(inputDesc);
         size_t netInputWidth = getTensorWidth(inputDesc);
+
+        slog::info << "Network batch size is " << netBatchSize << slog::endl;
 
         /** Collect images **/
         std::vector<cv::Mat> images;
@@ -121,11 +134,11 @@ int main(int argc, char *argv[]) {
                        "), some input files will be ignored" << slog::endl;
         }
 
-        auto startTime = std::chrono::steady_clock::now();
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
             }
+            slog::info << "Prepare image " << imagePaths[inputIndex] << slog::endl;
 
             cv::Mat image = cv::imread(imagePaths[inputIndex], cv::IMREAD_COLOR);
 
@@ -141,27 +154,31 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Prepare output blobs------------------------------------------------------
+        slog::info << "Preparing output blobs" << slog::endl;
+
         InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         for (auto & item : outputInfo) {
-            item.second->setPrecision(InferenceEngine::Precision::FP32);
+            item.second->setPrecision(Precision::FP32);
         }
 
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------Load model to the device----------------------------------------------------
-        auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
-        logExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
-        slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
+        slog::info << "Loading model to the device" << slog::endl;
+        auto executable_network = ie.LoadNetwork(network, FLAGS_d);
 
         // -------------------------Create Infer Request--------------------------------------------------------
-        auto infer_request = executableNetwork.CreateInferRequest();
+        slog::info << "Create infer request" << slog::endl;
+        auto infer_request = executable_network.CreateInferRequest();
 
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------------Set input data--------------------------------------------------------
+        slog::info << "Setting input data to the blobs" << slog::endl;
+
         /** Iterate over all the input blobs **/
         for (const auto & inputInfoItem : inputInfo) {
-            InferenceEngine::Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
+            Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
 
             /** Fill first input tensor with images. First b channel, then g and r channels **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
@@ -172,8 +189,7 @@ int main(int argc, char *argv[]) {
 
             /** Fill second input tensor with image info **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
-                InferenceEngine::LockedMemory<void> inputMapped =
-                    InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
+                LockedMemory<void> inputMapped = as<MemoryBlob>(input)->wmap();
                 auto data = inputMapped.as<float *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
@@ -185,18 +201,19 @@ int main(int argc, char *argv[]) {
 
 
         // ----------------------------Do inference-------------------------------------------------------------
+        slog::info << "Start inference" << slog::endl;
         infer_request.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Postprocess output blobs--------------------------------------------------
+        slog::info << "Processing output blobs" << slog::endl;
+
         const auto do_blob = infer_request.GetBlob(FLAGS_detection_output_name.c_str());
-        InferenceEngine::LockedMemory<const void> doBlobMapped =
-            InferenceEngine::as<InferenceEngine::MemoryBlob>(do_blob)->rmap();
+        LockedMemory<const void> doBlobMapped = as<MemoryBlob>(do_blob)->rmap();
         const auto do_data  = doBlobMapped.as<float*>();
 
         const auto masks_blob = infer_request.GetBlob(FLAGS_masks_name.c_str());
-        InferenceEngine::LockedMemory<const void> masksBlobMapped =
-            InferenceEngine::as<InferenceEngine::MemoryBlob>(masks_blob)->rmap();
+        LockedMemory<const void> masksBlobMapped = as<MemoryBlob>(masks_blob)->rmap();
         const auto masks_data = masksBlobMapped.as<float*>();
 
         const float PROBABILITY_THRESHOLD = 0.2f;
@@ -205,7 +222,7 @@ int main(int argc, char *argv[]) {
         IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 2);
         size_t BOX_DESCRIPTION_SIZE = do_blob->getTensorDesc().getDims().back();
 
-        const InferenceEngine::TensorDesc& masksDesc = masks_blob->getTensorDesc();
+        const TensorDesc& masksDesc = masks_blob->getTensorDesc();
         IE_ASSERT(masksDesc.getDims().size() == 4);
         size_t BOXES = getTensorBatch(masksDesc);
         size_t C = getTensorChannels(masksDesc);
@@ -261,15 +278,12 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
-        metrics.update(startTime);
         for (size_t i = 0; i < output_images.size(); i++) {
             std::string imgName = "out" + std::to_string(i) + ".png";
             cv::imwrite(imgName, output_images[i]);
             slog::info << "Image " << imgName << " created!" << slog::endl;
         }
-
-        slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms" << slog::endl;
+        // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -280,5 +294,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
+                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }

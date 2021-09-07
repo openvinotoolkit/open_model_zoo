@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle # nosec - disable B403:import-pickle check
+import pickle
 from .loader import Loader, DictLoaderMixin, StoredPredictionBatch
 
 
@@ -54,7 +54,7 @@ class PickleLoader(DictLoaderMixin, Loader):
         with open(data_path, 'rb') as content:
             while True:
                 try:
-                    result.append(pickle.load(content)) # nosec - disable B301:pickle check
+                    result.append(pickle.load(content))
                 except EOFError:
                     break
         return result

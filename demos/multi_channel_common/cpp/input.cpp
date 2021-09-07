@@ -14,7 +14,6 @@
 
 #include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
-#include <utils/performance_metrics.hpp>
 
 #include "perf_timer.hpp"
 
@@ -139,7 +138,7 @@ struct VideoStream {
 };
 
 class VideoSourceStreamFile : public VideoSource {
-    using queue_elem_t = std::pair<bool, MatWithTimestamp>;
+    using queue_elem_t = std::pair<bool, cv::Mat>;
     using queue_t = std::queue<queue_elem_t>;
 
     VideoSources& parent;
@@ -185,13 +184,13 @@ public:
                 {
                     cv::Mat frame;
                     {
-                        const auto timestamp = std::chrono::steady_clock::now();
                         is_decoding = true;
                         std::unique_lock<std::mutex> lock(parent.decode_mutex);
+
                         parent.decoder.decode(stream.frame.ptr, stream.frame.length, stream.frame.width, stream.frame.height,
-                            [this, timestamp](cv::Mat&& img) mutable {
+                            [this](cv::Mat&& img) mutable {
                             bool success = !img.empty();
-                            frameQueue.push({ success, {std::move(img), timestamp} });
+                            frameQueue.push({success, std::move(img)});
                             if (perfTimer.enabled()) {
                                 auto prev = lastFrameTime;
                                 auto current = clock::now();
@@ -240,8 +239,8 @@ public:
             frameQueue.pop();
         }
         condVar.notify_one();
-        frame.frame = std::move(elem.second.mat);
-        frame.timestamp = elem.second.timestamp;
+        frame.frame = std::move(elem.second);
+
         return elem.first && running;
     }
 
@@ -261,7 +260,7 @@ class GeneralCaptureSource : public VideoSource {
     std::mutex mutex;
     std::condition_variable condVar;
     std::condition_variable hasFrame;
-    std::queue<std::pair<bool, MatWithTimestamp>> queue;
+    std::queue<std::pair<bool, cv::Mat>> queue;
 
     std::unique_ptr<ImagesCapture> cap;
 
@@ -271,7 +270,7 @@ class GeneralCaptureSource : public VideoSource {
     const size_t pollingTimeMSec;
 
     template<bool CollectStats>
-    MatWithTimestamp readFrame();
+    cv::Mat readFrame();
 
     template<bool CollectStats>
     void startImpl();
@@ -288,7 +287,7 @@ public:
 
     void stop();
 
-    bool read(cv::Mat& frame, PerformanceMetrics::TimePoint& timestamp);
+    bool read(cv::Mat& frame);
     bool read(VideoFrame& frame) override;
 
     float getAvgReadTime() const override {
@@ -303,7 +302,7 @@ private:
 #ifdef USE_NATIVE_CAMERA_API
 class VideoSourceNative : public VideoSource {
     VideoSources& parent;
-    using queue_elem_t = std::pair<bool, MatWithTimestamp>;
+    using queue_elem_t = std::pair<bool, cv::Mat>;
 #ifdef USE_TBB
     using queue_t = tbb::concurrent_bounded_queue<queue_elem_t>;
 #else
@@ -379,7 +378,6 @@ void VideoSourceNative::frameHandler(mcam::camera::frame_status status,
             assert(mcam::make_4cc('M', 'J', 'P', 'G') ==
                    settings.format4cc);
             assert(frame.valid());
-            const auto timestamp = std::chrono::steady_clock::now();
             auto data = frame.data();
             auto size = frame.size();
 
@@ -387,10 +385,10 @@ void VideoSourceNative::frameHandler(mcam::camera::frame_status status,
 
             parent.decoder.decode(
                         data, size, settings.width, settings.height,
-            [this, fr = std::move(frame), timestamp](cv::Mat&& img) mutable {
+            [this, fr = std::move(frame)](cv::Mat&& img) mutable {
                 fr = {};
                 bool success = !img.empty();
-                frameQueue.push({ success, {std::move(img), timestamp} });
+                frameQueue.push({success, std::move(img)});
                 if (perfTimer.enabled()) {
                     auto prev = lastFrameTime;
                     auto current = clock::now();
@@ -431,8 +429,7 @@ bool VideoSourceNative::read(VideoFrame& frame) {
             elem.second = dummyFrame;
         }
     }
-    frame.frame = std::move(elem.second.mat);
-    fame.timestamp = elem.second.timestamp;
+    frame.frame = std::move(elem.second);
     return elem.first;
 }
 #endif  // USE_NATIVE_CAMERA_API
@@ -444,13 +441,12 @@ bool isNumeric(const std::string& str) {
 }  // namespace
 
 template<bool CollectStats>
-MatWithTimestamp GeneralCaptureSource::readFrame() {
-    const auto timestamp = std::chrono::steady_clock::now();
+cv::Mat GeneralCaptureSource::readFrame() {
     if (CollectStats) {
         ScopedTimer st(perfTimer);
-        return { cap->read(), timestamp };
+        return cap->read();
     } else {
-        return { cap->read(), timestamp };
+        return cap->read();
     }
 }
 
@@ -475,8 +471,8 @@ bool GeneralCaptureSource::isRunning() const {
 template<bool CollectStats>
 void GeneralCaptureSource::thread_fn(GeneralCaptureSource *vs) {
     while (vs->running) {
-        MatWithTimestamp frame = vs->readFrame<CollectStats>();
-        const bool result = frame.mat.data;
+        cv::Mat frame = vs->readFrame<CollectStats>();
+        const bool result = frame.data;
         if (!result) {
             vs->running = false; // stop() also affects running, so override it only when out of frames
         }
@@ -515,7 +511,7 @@ void GeneralCaptureSource::stop() {
     }
 }
 
-bool GeneralCaptureSource::read(cv::Mat& frame, PerformanceMetrics::TimePoint& timestamp) {
+bool GeneralCaptureSource::read(cv::Mat& frame) {
     if (isAsync) {
         bool res;
         {
@@ -524,8 +520,7 @@ bool GeneralCaptureSource::read(cv::Mat& frame, PerformanceMetrics::TimePoint& t
                 return !queue.empty() || !running;
             });
             res = queue.front().first;
-            frame = queue.front().second.mat;
-            timestamp = queue.front().second.timestamp;
+            frame = queue.front().second;
             if (realFps || queue.size() > 1 || queueSize == 1) {
                 queue.pop();
             }
@@ -533,14 +528,13 @@ bool GeneralCaptureSource::read(cv::Mat& frame, PerformanceMetrics::TimePoint& t
         condVar.notify_one();
         return res;
     } else {
-        timestamp = std::chrono::steady_clock::now();
         frame = cap->read();
         return frame.data;
     }
 }
 
 bool GeneralCaptureSource::read(VideoFrame& frame) {
-    return read(frame.frame, frame.timestamp);
+    return read(frame.frame);
 }
 
 namespace {

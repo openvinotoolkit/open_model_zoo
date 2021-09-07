@@ -17,7 +17,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 | Metric   | Value |
 | -------- | ----- |
-| mean_iou | 68.41%|
+| mean_iou | 66.85%|
 
 ## Input
 
@@ -79,4 +79,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-TF-Models.txt`.
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

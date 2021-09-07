@@ -24,7 +24,6 @@ The Open Model Zoo includes the following demos:
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gaze Estimation C++ G-API Demo](./gaze_estimation_demo/cpp_gapi/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression. G-API version.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
-- [GPT-2 Text Prediction Python\* Demo](./gpt2_text_prediction_demo/python/README.md) - GPT-2 text prediction demo.
 - [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
 - [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
@@ -40,8 +39,6 @@ The Open Model Zoo includes the following demos:
 - [Machine Translation Python\* Demo](./machine_translation_demo/python/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
 - [Mask R-CNN C++ Demo for TensorFlow\* Object Detection API](./mask_rcnn_demo/cpp/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
 - [Monodepth Python\* Demo](./monodepth_demo/python/README.md) - The demo demonstrates how to run monocular depth estimation models.
-- [MRI Reconstruction C++ Demo](./mri_reconstruction_demo/cpp/README.md) - Compressed Sensing demo for medical images
-- [MRI Reconstruction Python\* Demo](./mri_reconstruction_demo/python/README.md) - Compressed Sensing demo for medical images
 - [Multi-Camera Multi-Target Tracking Python\* Demo](./multi_camera_multi_target_tracking_demo/python/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
 - [Multi-Channel Face Detection C++ Demo](./multi_channel_face_detection_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel face detection scenario.
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
@@ -54,10 +51,8 @@ The Open Model Zoo includes the following demos:
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
 - [Speech Recognition DeepSpeech Python\* Demo](./speech_recognition_deepspeech_demo/python/README.md) - Speech recognition demo: accepts an audio file with an English phrase on input and converts it into text. This demo does streaming audio data processing and can optionally provide current transcription of the processed part.
 - [Speech Recognition QuartzNet Python\* Demo](./speech_recognition_quartznet_demo/python/README.md) - Speech recognition demo for QuartzNet: takes a whole audio file with an English phrase on input and converts it into text.
-- [Speech Recognition Wav2Vec Python\* Demo](./speech_recognition_wav2vec_demo/python/README.md) - Speech recognition demo for Wav2Vec: takes a whole audio file with an English phrase on input and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
-- [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-PI version.
 - [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.

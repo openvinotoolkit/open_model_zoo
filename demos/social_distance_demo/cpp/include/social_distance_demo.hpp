@@ -21,6 +21,7 @@ static const char target_device_message_reid[] = "Optional. Specify the target d
                                                 "(the list of available devices is shown below). Default value is CPU. "
                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                 "The application looks for a suitable plugin for the specified device.";
+static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char thresh_output_message[] = "Optional. Probability threshold for person detections.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
@@ -56,6 +57,7 @@ DEFINE_string(m_det, "", detection_model_message);
 DEFINE_string(m_reid, "", reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_message);
 DEFINE_string(d_reid, "CPU", target_device_message_reid);
+DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.85, thresh_output_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -92,6 +94,7 @@ void showUsage() {
     std::cout << "      -c \"<absolute_path>\"   " << custom_cldnn_message << std::endl;
     std::cout << "    -d_det \"<device>\"        " << target_device_message << std::endl;
     std::cout << "    -d_reid \"<device>\"       " << target_device_message_reid << std::endl;
+    std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;

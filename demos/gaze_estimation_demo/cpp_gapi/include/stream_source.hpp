@@ -37,7 +37,7 @@ protected:
         }
         cv::Mat frame = cap->read();
         if (!frame.data) {
-            return false;
+            return false;;
         }
         data = frame.clone();
         return true;

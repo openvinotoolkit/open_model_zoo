@@ -18,9 +18,8 @@
 #include <opencv2/imgproc.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 #include "models/detection_model_centernet.h"
-
-#include <utils/image_utils.h>
 
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
@@ -31,6 +30,7 @@ ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -52,6 +52,8 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 3) {
         throw std::logic_error("This demo expect networks that have 3 outputs blobs");
@@ -108,9 +110,17 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
-    const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
 
+    int imgWidth = img.cols;
+    int imgHeight = img.rows;
+    float centerX = imgWidth / 2.0f;
+    float centerY = imgHeight / 2.0f;
+    int scale = std::max(imgWidth, imgHeight);
+
+    auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
+    cv::Mat resizedImg;
+    cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
     return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
 }
@@ -234,7 +244,7 @@ void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine:
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter data and get valid indices ---------------------------------
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
-    auto sz = heatInfRes->getTensorDesc().getDims();
+    auto sz = heatInfRes->getTensorDesc().getDims();;
     auto chSize = sz[2] * sz[3];
     auto scores = filterScores(heatInfRes, confidenceThreshold);
 

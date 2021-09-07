@@ -21,9 +21,8 @@ public:
                   bool doRollAlign = true);
     void estimate(const cv::Mat& image,
                   FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
     ~GazeEstimator() override;
-
-    const std::string modelType = "Gaze Estimation";
 
 private:
     IEWrapper ieWrapper;

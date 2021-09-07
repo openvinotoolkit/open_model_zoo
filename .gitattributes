@@ -7,7 +7,6 @@
 # so allow it.
 *.patch whitespace=-blank-at-eol
 
-.bandit -omz.package
 .editorconfig -omz.package
 .flake8 -omz.package
 .git* -omz.package

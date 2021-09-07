@@ -26,13 +26,14 @@ class PersonDetector(IEModel):
     def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests, 'Person Detection', output_shape)
+        super().__init__(model_path, device, ie_core, num_requests, output_shape)
 
         _, _, h, w = self.input_size
         self.input_height = h
         self.input_width = w
 
         self.last_scales = None
+        self.last_sizes = None
 
     def _prepare_frame(self, frame):
         """Converts input image according model requirements"""
@@ -44,12 +45,10 @@ class PersonDetector(IEModel):
         in_frame = in_frame.transpose((2, 0, 1))
         in_frame = in_frame.reshape(self.input_size)
 
-        return in_frame, scale_h, scale_w
+        return in_frame, initial_h, initial_w, scale_h, scale_w
 
-    def _process_output(self, result):
+    def _process_output(self, result, initial_h, initial_w, scale_h, scale_w, ):
         """Converts network output to the internal format"""
-
-        scale_h, scale_w = self.last_scales
 
         if result.shape[-1] == 5:  # format: [xmin, ymin, xmax, ymax, conf]
             return np.array([[scale_w, scale_h, scale_w, scale_h, 1.0]]) * result
@@ -63,7 +62,8 @@ class PersonDetector(IEModel):
     def async_infer(self, frame, req_id):
         """Requests model inference for the specified image"""
 
-        in_frame, scale_h, scale_w = self._prepare_frame(frame)
+        in_frame, initial_h, initial_w, scale_h, scale_w = self._prepare_frame(frame)
+        self.last_sizes = initial_h, initial_w
         self.last_scales = scale_h, scale_w
 
         super().async_infer(in_frame, req_id)
@@ -71,11 +71,26 @@ class PersonDetector(IEModel):
     def wait_request(self, req_id):
         """Waits for the model output"""
 
-        if self.last_scales is None:
+        if self.last_scales is None or self.last_sizes is None:
             raise ValueError('Unexpected request')
 
         result = super().wait_request(req_id)
         if result is None:
             return None
 
-        return self._process_output(result)
+        initial_h, initial_w = self.last_sizes
+        scale_h, scale_w = self.last_scales
+
+        out = self._process_output(result, initial_h, initial_w, scale_h, scale_w)
+
+        return out
+
+
+    def __call__(self, frame):
+        """Runs model on the specified input"""
+
+        in_frame, initial_h, initial_w, scale_h, scale_w = self._prepare_frame(frame)
+        result = self.infer(in_frame)
+        out = self._process_output(result, initial_h, initial_w, scale_h, scale_w)
+
+        return out

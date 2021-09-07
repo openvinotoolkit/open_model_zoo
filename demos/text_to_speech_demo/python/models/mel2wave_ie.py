@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import logging as log
 import os.path as osp
 
 import numpy as np
@@ -54,10 +53,10 @@ class WaveRNNIE:
             orig_shape = self.upsample_net.input_info['mels'].input_data.shape
             self.upsample_net.reshape({"mels": (orig_shape[0], upsampler_width, orig_shape[2])})
 
-        self.upsample_exec = self.create_exec_network(self.upsample_net, model_upsample)
+        self.upsample_exec = self.create_exec_network(self.upsample_net)
 
         self.rnn_net = self.load_network(model_rnn)
-        self.rnn_exec = self.create_exec_network(self.rnn_net, model_rnn, batch_sizes=self.batch_sizes)
+        self.rnn_exec = self.create_exec_network(self.rnn_net, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
         self.mel_len = self.upsample_net.input_info['mels'].input_data.shape[1] - 2 * self.pad
@@ -66,11 +65,11 @@ class WaveRNNIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading WaveRNN model {}'.format(model_xml))
+        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
-    def create_exec_network(self, net, path, batch_sizes=None):
+    def create_exec_network(self, net, batch_sizes=None):
         if batch_sizes is not None:
             exec_net = []
             for b_s in batch_sizes:
@@ -78,7 +77,6 @@ class WaveRNNIE:
                 exec_net.append(self.ie.load_network(network=net, device_name=self.device))
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        log.info('The WaveRNN model {} is loaded to {}'.format(path, self.device))
         return exec_net
 
     @staticmethod
@@ -219,11 +217,11 @@ class MelGANIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading MelGAN model {}'.format(model_xml))
+        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
-    def create_exec_network(self, net, path, scales=None):
+    def create_exec_network(self, net, scales=None):
         if scales is not None:
             orig_shape = net.input_info['mel'].input_data.shape
             exec_net = []
@@ -234,7 +232,6 @@ class MelGANIE:
                 net.reshape({"mel": orig_shape})
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
         return exec_net
 
     def forward(self, mel):

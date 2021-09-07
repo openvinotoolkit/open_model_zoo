@@ -65,7 +65,6 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        logExecNetworkInfo(net, xmlPath, deviceName, "Person Detection");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -87,7 +86,7 @@ public:
         }
     }
 
-    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
+    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::ostream* rawResults = nullptr) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         InferenceEngine::LockedMemory<const void> detectorOutputBlobMapped = InferenceEngine::as<
@@ -111,10 +110,11 @@ public:
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
             results.push_back(Result{label, confidence, rect});
-            std::ostringstream rawResultsStream;
-            rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
-                << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
-            rawResults.push_back(rawResultsStream.str());
+
+            if (rawResults) {
+                *rawResults << "[" << i << "," << label << "] element, prob = " << confidence
+                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")" << std::endl;
+            }
         }
         return results;
     }
@@ -167,7 +167,6 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        logExecNetworkInfo(net, xmlPath, deviceName, "Person Re-Identification");
     }
 
     InferenceEngine::InferRequest createInferRequest() {

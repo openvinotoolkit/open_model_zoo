@@ -13,7 +13,7 @@ This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxi
 | MParams                         | 15.8587                                   |
 | Source framework                | TensorFlow\*                              |
 
-For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://link.springer.com/article/10.1007/s11263-009-0275-4).
+For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
 Tested on the VOC 2012 validation dataset.
 
 ## Inputs

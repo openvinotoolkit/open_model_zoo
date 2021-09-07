@@ -70,9 +70,7 @@ class ONNXLauncher(Launcher):
 
     @property
     def output_blob(self):
-        if hasattr(self, 'output_names'):
-            return next(iter(self.output_names))
-        return None
+        return next(iter(self.output_names))
 
     @property
     def batch(self):

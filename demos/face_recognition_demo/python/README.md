@@ -45,8 +45,8 @@ To install all the required Python modules you can use:
 pip install -r requirements.txt
 ```
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
-The list of models supported by the demo is in `<omz_dir>/demos/face_recognition_demo/python/models.lst` file.
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/face_recognition_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -117,7 +117,7 @@ usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                 [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-l PATH] [-c PATH] [-v] [-t_fd [0..1]]
+                                [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
 Optional arguments:
@@ -190,6 +190,7 @@ Inference options:
                         if any. Path to the XML file with descriptions
                         of the kernels.
   -v, --verbose         Optional. Be more verbose.
+  -pc, --perf_stats     Optional. Output detailed per-layer performance stats.
   -t_fd [0..1]          Optional. Probability threshold for face detections.
   -t_id [0..1]          Optional. Cosine distance threshold between two vectors
                         for face identification.
@@ -242,11 +243,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 ## Demo output
 
 The demo uses OpenCV window to display the resulting video frame and detections.
-The demo reports
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+If specified, it also writes output to a file. It outputs logs to the terminal.
 
 ## See also
 

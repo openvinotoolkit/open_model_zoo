@@ -22,7 +22,7 @@ As an input, the demo application takes:
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/whiteboard_inpainting_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -124,12 +124,6 @@ The demo outputs original video with the processed one. Usage:
 * Invert colors on the resulting frame by pressing the `i` key.
 * Select a part of the frame to be shown in a separate window by using your left mouse button.
 * Exit the demo by pressing `Esc`.
-
-The demo reports
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
 
 ## See Also
 

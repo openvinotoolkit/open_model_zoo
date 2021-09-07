@@ -27,6 +27,7 @@ static const char target_device_detection_message[] = "Optional. Specify the tar
 static const char target_device_reid_message[] = "Optional. Specify the target device for pedestrian reidentification "
                                                  "(the list of available devices is shown below). Default value is CPU. "
                                                  "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin.";
+static const char performance_counter_message[] = "Optional. Enable per-layer performance statistics.";
 static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
                                             "Absolute path to the .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
@@ -49,6 +50,7 @@ DEFINE_string(m_det, "", pedestrian_detection_model_message);
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_detection_message);
 DEFINE_string(d_reid, "CPU", target_device_reid_message);
+DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -81,6 +83,7 @@ static void showUsage() {
     std::cout << "    -d_det \"<device>\"            " << target_device_detection_message << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_reid_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
+    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -delay                       " << delay_message << std::endl;
     std::cout << "    -out \"<path>\"                " << output_log_message << std::endl;

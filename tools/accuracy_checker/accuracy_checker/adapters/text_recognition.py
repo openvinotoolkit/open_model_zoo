@@ -238,11 +238,8 @@ class SimpleDecoder(Adapter):
             'eos_label': StringField(
                 optional=True, default='[s]', description="End-of-sequence label."
             ),
-            'custom_label_map': DictField(optional=True, description='Label map'),
-            'start_index': NumberField(optional=True, default=0, min_value=0, value_type=int,
-                                       description="Start index in predicted data"),
-            'do_lower': BoolField(optional=True, default=False,
-                                  description="Allow converting predicted data to lower case")
+            'custom_label_map': DictField(optional=True, description='Label map')
+
         })
         return parameters
 
@@ -255,8 +252,6 @@ class SimpleDecoder(Adapter):
     def configure(self):
         self.eos_label = self.get_value_from_config('eos_label')
         self.custom_label_map = self.get_value_from_config("custom_label_map")
-        self.start_index = self.get_value_from_config("start_index")
-        self.do_lower = self.get_value_from_config("do_lower")
         if self.custom_label_map:
             labels = {int(k): v for k, v in self.custom_label_map.items()}
             self.custom_label_map = labels
@@ -274,10 +269,8 @@ class SimpleDecoder(Adapter):
 
         result = []
         for identifier, data in zip(identifiers, preds_index):
-            decoded = ''.join(str(self.label_map[char]) for char in data[self.start_index:])
+            decoded = ''.join(str(self.label_map[char]) for char in data)
             decoded = decoded[:decoded.find(self.eos_label)]
-            if self.do_lower:
-                decoded = decoded.lower()
             result.append(CharacterRecognitionPrediction(identifier, decoded))
 
         return result

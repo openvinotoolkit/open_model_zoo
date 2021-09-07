@@ -14,15 +14,17 @@
 import cv2
 import numpy as np
 
+from inpainting import ImageInpainting
+from openvino.inference_engine import IECore
 
 class InpaintingGUI:
-    def __init__(self, srcImg, inpainter):
+    def __init__(self, srcImg, modelPath, device="CPU"):
         self.wnd_name = "Inpainting demo (press H for help)"
         self.mask_color = (255, 0, 0)
         self.radius = 10
         self.old_point = None
 
-        self.inpainter = inpainter
+        self.inpainter = ImageInpainting(IECore(), modelPath, device)
 
         self.img = cv2.resize(srcImg, (self.inpainter.input_width, self.inpainter.input_height))
         self.original_img = self.img.copy()

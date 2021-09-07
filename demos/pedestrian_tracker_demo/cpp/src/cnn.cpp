@@ -15,8 +15,7 @@
 
 #include <inference_engine.hpp>
 
-#include <utils/slog.hpp>
-#include <utils/common.hpp>
+using namespace InferenceEngine;
 
 CnnBase::CnnBase(const Config& config,
                  const InferenceEngine::Core & ie,
@@ -36,27 +35,25 @@ void CnnBase::Load() {
         throw std::runtime_error("Network should have only one input");
     }
 
-    InferenceEngine::SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
-    in.begin()->second->setPrecision(InferenceEngine::Precision::U8);
-    input_blob_ = InferenceEngine::make_shared_blob<uint8_t>(InferenceEngine::TensorDesc(InferenceEngine::Precision::U8, inputDims, InferenceEngine::Layout::NCHW));
+    SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
+    in.begin()->second->setPrecision(Precision::U8);
+    input_blob_ = make_shared_blob<uint8_t>(TensorDesc(Precision::U8, inputDims, Layout::NCHW));
     input_blob_->allocate();
-    InferenceEngine::BlobMap inputs;
+    BlobMap inputs;
     inputs[in.begin()->first] = input_blob_;
     outInfo_ = cnnNetwork.getOutputsInfo();
 
     for (auto&& item : outInfo_) {
-        InferenceEngine::SizeVector outputDims = item.second->getTensorDesc().getDims();
+        SizeVector outputDims = item.second->getTensorDesc().getDims();
         auto outputLayout = item.second->getTensorDesc().getLayout();
-        item.second->setPrecision(InferenceEngine::Precision::FP32);
-        InferenceEngine::TBlob<float>::Ptr output =
-            InferenceEngine::make_shared_blob<float>(InferenceEngine::TensorDesc(InferenceEngine::Precision::FP32, outputDims, outputLayout));
+        item.second->setPrecision(Precision::FP32);
+        TBlob<float>::Ptr output =
+            make_shared_blob<float>(TensorDesc(Precision::FP32, outputDims, outputLayout));
         output->allocate();
         outputs_[item.first] = output;
     }
 
     executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
-    logExecNetworkInfo(executable_network_, config_.path_to_model, deviceName_, modelType);
-    slog::info << "\tBatch size is set to " << config_.max_batch_size << slog::endl;
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
@@ -78,6 +75,11 @@ void CnnBase::InferBatch(
 
         fetch_results(outputs_, current_batch_size);
     }
+}
+
+void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
+    std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
+    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
 }
 
 void CnnBase::Infer(const cv::Mat& frame,
@@ -123,8 +125,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             for (size_t i = 0; i < blob_sizes.size(); ++i) {
                 blob_sizes[i] = ie_output_dims[i];
             }
-            InferenceEngine::LockedMemory<const void> blobMapped =
-                InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
+            LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
             cv::Mat out_blob(blob_sizes, CV_32F, blobMapped.as<float*>());
             for (size_t b = 0; b < batch_size; b++) {
                 cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,

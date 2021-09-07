@@ -11,10 +11,9 @@
  limitations under the License.
 """
 
-import logging as log
 import numpy as np
 
-from openvino.inference_engine import IECore, get_version
+from openvino.inference_engine import IECore
 
 
 class InferenceEngine:
@@ -22,11 +21,8 @@ class InferenceEngine:
         self.device = device
         self.stride = stride
 
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
 
-        log.info('Reading model {}'.format(net_model_xml_path))
         self.net = self.ie.read_network(net_model_xml_path, net_model_xml_path.with_suffix('.bin'))
         required_input_key = {'data'}
         assert required_input_key == set(self.net.input_info), \
@@ -36,7 +32,6 @@ class InferenceEngine:
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
         self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
-        log.info('The model {} is loaded to {}'.format(net_model_xml_path, device))
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),

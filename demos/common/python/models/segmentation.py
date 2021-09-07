@@ -18,20 +18,14 @@ import cv2
 import numpy as np
 
 from .model import Model
-from .utils import load_labels
 
 
 class SegmentationModel(Model):
-    def __init__(self, ie, model_path, labels=None):
+    def __init__(self, ie, model_path):
         super().__init__(ie, model_path)
 
         self.input_blob_name = self.prepare_inputs()
         self.out_blob_name = self.prepare_outputs()
-
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
 
     def prepare_inputs(self):
         if len(self.net.input_info) != 1:

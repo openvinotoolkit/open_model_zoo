@@ -12,6 +12,8 @@
 """
 
 import cv2
+import logging as log
+import sys
 
 
 ESC = 27
@@ -31,6 +33,11 @@ class MouseClick:
         elif event == cv2.EVENT_RBUTTONDOWN:
             self.points = {}
         self.crop_available = True if len(self.points) == 2 else False
+
+
+def set_log_config():
+    log.basicConfig(stream=sys.stdout, format='%(levelname)s: %(asctime)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
 def check_pressed_keys(key):

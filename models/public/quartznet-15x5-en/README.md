@@ -48,7 +48,7 @@ Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, nam
 - C - alphabet size, including the CTC blank symbol
 
 The per-frame probabilities are to be decoded with a CTC decoder.
-The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided at `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/default_alphabet_example.conf`.
+The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided [here](../../../demos/speech_recognition_deepspeech_demo/python/default_alphabet_example.conf).
 
 #### Converted model
 
@@ -72,4 +72,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/NVIDIA/NeMo/main/LICENSE).
-A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
+A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

@@ -28,7 +28,7 @@ Other demo objectives are:
 
 ## Preparing to Run
 
-For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -87,6 +87,7 @@ Options:
     -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Don't show output.
+    -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
     -u                       Optional. List of monitors to show initially.
@@ -134,14 +135,8 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with marked gaze vectors, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
+The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
 By default, it shows only gaze estimation results. To see inference results of auxiliary networks, use run-time control keys.
-The demo reports:
-
-* **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-
-You can use these metrics to measure application-level performance.
 
 ## See Also
 

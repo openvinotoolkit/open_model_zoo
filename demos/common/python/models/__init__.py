@@ -17,7 +17,6 @@
 
 from .centernet import CenterNet
 from .deblurring import Deblurring
-from .detr import DETR
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
@@ -34,7 +33,6 @@ __all__ = [
     'CTPN',
     'DetectionWithLandmarks',
     'Deblurring',
-    'DETR',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
     'InputTransform',

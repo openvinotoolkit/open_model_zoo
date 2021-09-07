@@ -15,8 +15,11 @@
 */
 
 #include "models/detection_model_ssd.h"
+#include <utils/slog.hpp>
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
+
+using namespace InferenceEngine;
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
@@ -27,7 +30,7 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     if (inputsNames.size() > 1) {
         auto blob = request->GetBlob(inputsNames[1]);
-        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
+        LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
         auto data = blobMapped.as<float*>();
         data[0] = static_cast<float>(netInputHeight);
         data[1] = static_cast<float>(netInputWidth);
@@ -44,7 +47,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
-    InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
+    LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
@@ -80,7 +83,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
-    std::vector<InferenceEngine::LockedMemory<const void>> mappedMemoryAreas;
+    std::vector<LockedMemory<const void>> mappedMemoryAreas;
     for (const auto& name : outputsNames) {
         mappedMemoryAreas.push_back(infResult.outputsData[name]->rmap());
     }
@@ -124,7 +127,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
     for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
@@ -135,22 +139,22 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                 inputsNames[0] = inputInfoItem.first;
             }
 
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
+            inputInfoItem.second->setPrecision(Precision::U8);
             if (useAutoResize) {
-                inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-                inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+                inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
+                inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
             }
             else {
-                inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+                inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
             }
-            const InferenceEngine::TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
+            const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
             inputsNames[1] = inputInfoItem.first;
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::FP32);
+            inputInfoItem.second->setPrecision(Precision::FP32);
         }
         else {
             throw std::logic_error("Unsupported " +
@@ -161,7 +165,8 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() == 1) {
         prepareSingleOutput(outputInfo);
     }
@@ -170,11 +175,11 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 }
 
-void ModelSSD::prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo) {
-    InferenceEngine::DataPtr& output = outputInfo.begin()->second;
+void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
+    DataPtr& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
-    const InferenceEngine::SizeVector outputDims = output->getTensorDesc().getDims();
+    const SizeVector outputDims = output->getTensorDesc().getDims();
 
     if (outputDims.size() != 4) {
         throw std::logic_error("Incorrect output dimensions for SSD");
@@ -186,11 +191,11 @@ void ModelSSD::prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo) 
         throw std::logic_error("Output should have 7 as a last dimension");
     }
 
-    output->setPrecision(InferenceEngine::Precision::FP32);
-    output->setLayout(InferenceEngine::Layout::NCHW);
+    output->setPrecision(Precision::FP32);
+    output->setLayout(Layout::NCHW);
 }
 
-void ModelSSD::prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo) {
+void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
     if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
         outputInfo.find("scores") != outputInfo.end()) {
         outputsNames.push_back("bboxes");
@@ -205,7 +210,7 @@ void ModelSSD::prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInf
         throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
     }
 
-    const InferenceEngine::SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+    const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
 
     if (outputDims.size() == 2) {
         maxProposalCount = outputDims[0];
@@ -228,6 +233,6 @@ void ModelSSD::prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInf
     }
 
     for (const std::string& name : outputsNames) {
-        outputInfo[name]->setPrecision(InferenceEngine::Precision::FP32);
+        outputInfo[name]->setPrecision(Precision::FP32);
     }
 }

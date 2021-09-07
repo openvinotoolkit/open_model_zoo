@@ -63,8 +63,6 @@ from .crop_image import CropImage, CornerCropImage
 from .pad_signal import PadSignal
 from .time_series_denormalize import TimeSeriesDenormalize
 from .interp import Interpolation
-from .invert_mask import InvertMask
-from .rescale_mask import RescaleMask
 
 
 __all__ = [
@@ -144,8 +142,5 @@ __all__ = [
 
     'TimeSeriesDenormalize',
 
-    'Interpolation',
-
-    'InvertMask',
-    'RescaleMask',
+    'Interpolation'
 ]

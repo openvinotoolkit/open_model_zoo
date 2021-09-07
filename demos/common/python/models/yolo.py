@@ -18,7 +18,7 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections
+from .utils import Detection, resize_image, resize_image_letterbox, load_labels
 
 ANCHORS = {
     'YOLOV3': [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
@@ -221,7 +221,7 @@ class YOLO(Model):
         else:
             detections = self._resize_detections(detections, meta['original_shape'][1::-1])
 
-        return clip_detections(detections, meta['original_shape'])
+        return detections
 
 
 class YoloV4(YOLO):

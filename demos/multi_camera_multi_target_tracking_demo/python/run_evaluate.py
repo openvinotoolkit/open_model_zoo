@@ -21,6 +21,9 @@ import numpy as np
 from tqdm import tqdm
 
 from mc_tracker.sct import TrackedObj
+from utils.misc import set_log_config
+
+set_log_config()
 
 
 def read_gt_tracks(gt_filenames, size_divisor=1, skip_frames=0, skip_heavy_occluded_objects=False):
@@ -107,7 +110,7 @@ def main():
     for time in tqdm(range(last_frame_idx + 1), 'Processing detections'):
         active_detections = get_detections_from_tracks(history, time)
         if check_contain_duplicates(active_detections):
-            log.warning('At least one IDs collision has occurred at the timestamp ' + str(time))
+            log.info('Warning: at least one IDs collision has occurred at the timestamp ' + str(time))
         gt_detections = get_detections_from_tracks(gt_tracks, time)
 
         for i, camera_gt_detections in enumerate(gt_detections):
@@ -131,6 +134,7 @@ def main():
                                                 np.array(ht_boxes), max_iou=0.5)
             accs[i].update(gt_labels, ht_labels, distances)
 
+    log.info('Computing MOT metrics...')
     mh = mm.metrics.create()
     summary = mh.compute_many(accs,
                               metrics=mm.metrics.motchallenge_metrics,
