@@ -46,7 +46,8 @@ public:
         YOLO_V1V2,
         YOLO_V3,
         YOLO_V4,
-        YOLO_V4_TINY
+        YOLO_V4_TINY,
+        YOLOF
     };
 
     /// Constructor.
@@ -82,6 +83,7 @@ protected:
     std::map<std::string, Region> regions;
     double boxIOUThreshold;
     bool useAdvancedPostprocessing;
+    bool isObjConf = 1;
     YoloVersion yoloVersion;
     const std::vector<float> presetAnchors;
     const std::vector<int64_t> presetMasks;

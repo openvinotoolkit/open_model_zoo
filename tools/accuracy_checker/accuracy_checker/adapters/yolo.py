@@ -18,7 +18,7 @@ from collections import namedtuple
 import warnings
 
 import numpy as np
-import time
+
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction

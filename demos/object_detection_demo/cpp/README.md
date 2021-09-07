@@ -135,6 +135,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-vehicle-detection-0001
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+  - yolof
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
