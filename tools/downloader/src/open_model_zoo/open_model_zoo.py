@@ -8,7 +8,7 @@ from  open_model_zoo.model_tools import (
 )
 
 class Model:
-    def __init__(self, model_name, precision, *, download_dir='models', cache_dir=None):
+    def __init__(self, model_name, *, precision='FP32', download_dir='models', cache_dir=None):
         '''
         Downloads target model. If the model has already been downloaded,
         retrieves the model from the cache instead of downloading it again.
@@ -63,3 +63,34 @@ class Model:
         if not os.path.exists(self.xml_path) or not os.path.exists(self.bin_path):
             converter.main(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
+
+    def from_pretrained(self, xml_path):
+        '''
+        Loads model from existing .xml, .bin files.
+        Parameters
+        ----------
+            xml_path
+                Path to .xml file.
+        '''
+        xml_path = Path(xml_path).resolve()
+        if not xml_path.exists():
+            raise ValueError('Path {} to xml file does not exist.'.format(xml_path))
+
+        self.xml_path = xml_path
+        self.bin_path = xml_path.with_suffix('.bin')
+
+        if not self.bin_path.exists():
+            raise ValueError('Path {} to .bin file does not exist.'
+                '.bin file should be in the same directory as .xml'.format(self.bin_path)
+            )
+        
+        self.description = 'Custom model {}'.format(xml_path.name)
+        self.task_type = None
+
+        self.xml_path = str(self.xml_path)
+        self.bin_path = str(self.bin_path)
+
+    def load(self, ie, device='cpu'):
+        self._ie = ie
+        self.net = ie.read_network(self.xml_path)
+        self.exec_net = ie.load_network(self.net, device)
