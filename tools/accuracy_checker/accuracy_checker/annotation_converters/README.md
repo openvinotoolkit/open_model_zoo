@@ -576,11 +576,16 @@ The main difference between this converter and `super_resolution` in data organi
   * `num_classes` - number of used classes.
 * `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
   * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
+  * `binary` - Input file mode flag. If set, input file is in binary mode instead of .npz mode. Optional, default `False`
   * `batch` - batch size expected by model
+  * `max_ind_range` - maximum index range for categorical features. Optional, default `0`
   * `subsample_size` - number of batches in test-only dataset, If provided, total number of records is batch * subsample_size
   * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename.
+  * `dense_features` - name of model dense features input. Optional, default `input.1`
+  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>. Optional, default `lS_i`
+  * `lso_features` - name of model offsets features input. Optional, default `lS_o`
   * `save_preprocessed_features` - allow saving preprocessed input features into `preprocessed_dir` (Optional, default True).
 * `features_regression` - converts dataset stored in a format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).

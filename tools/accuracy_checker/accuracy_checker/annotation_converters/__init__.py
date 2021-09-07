@@ -90,7 +90,7 @@ from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
-from .criteo_kaggle_dac import CriteoKaggleDACConverter, CriteoBinaryConverter
+from .criteo_kaggle_dac import CriteoKaggleDACConverter
 from .features_regression import FeaturesRegressionConverter, MultiOutputFeaturesRegression
 from .nyu_depth import NYUDepthV2Converter
 from .dna_seq import DNASequenceDatasetConverter
@@ -237,6 +237,6 @@ __all__ = [
     'OpenImagesDetectionConverter',
     'KSpaceMRIConverter',
     'AmazonProductData',
-    'WGSTFRecords',
-    'CriteoBinaryConverter'
+    'WGSTFRecords'
+
 ]
