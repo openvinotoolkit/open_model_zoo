@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os, math
 from pathlib import Path
 import numpy as np
 
@@ -36,7 +35,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             "binary": BoolField(optional=True, default=False,
                                     description="Allows input file in binary mode instead of .npz mode"),
             "batch": NumberField(optional=True, default=128, description="Model batch"),
-            "max_ind_range": NumberField(optional=True, default=0,
+            "max_ind_range": NumberField(optional=True, default=None, value_type=int, min_value=1,
                                          description="Maximum index range for categorical features"),
             "subsample_size": NumberField(optional=True, default=0,
                                           description="Limit total record count to batch * subsample size"),
@@ -101,7 +100,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             self._bytes_per_entry = bytes_per_feature * tot_fea * self.batch
             self._fea_shape = (self.batch, tot_fea)
 
-            self.count = math.ceil(os.path.getsize(self.src) / self._bytes_per_entry)
+            self.count = np.ceil(self.src.stat().st_size / self._bytes_per_entry)
             self.cat_feat = spa_fea
 
             self.binfile = open(self.src, 'rb') if self.save_preprocessed_features else None
@@ -111,7 +110,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             self._x_cat = data['X_cat']
             self._y = data['y']
             self.count, self.cat_feat = self._x_cat.shape
-            self.count = math.ceil(self.count / self.batch)
+            self.count = np.ceil(self.count / self.batch)
 
     def close_data_file(self):
         if self.binary:
@@ -144,7 +143,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         filecnt = 0
 
         self.load_data_file()
-        samples = (self.count // self.batch) * self.batch
+        samples = self.count
         start = 0
 
         if self.subsample:
@@ -169,7 +168,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
                 for name in self.sparse_features.keys():
                     x_cat_batch = x_cat[:, self.sparse_features[name]]
-                    x_cat_batch = x_cat_batch % self.max_ind_range if self.max_ind_range > 0 else x_cat_batch
+                    x_cat_batch = x_cat_batch % self.max_ind_range if self.max_ind_range is not None else x_cat_batch
                     sample[name] = x_cat_batch.T
 
                 np.savez_compressed(str(c_input), **sample)
