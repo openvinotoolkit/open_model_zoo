@@ -19,10 +19,10 @@ import csv
 import numpy as np
 
 
-from ..config import PathField, StringField, NumberField, BoolField
+from ..config import PathField, StringField, NumberField, BoolField, ListField, ConfigError
 from ..representation import TextClassificationAnnotation
-from ..utils import string_to_list, UnsupportedPackage
-from .format_converter import BaseFormatConverter, ConverterReturn
+from ..utils import string_to_list, UnsupportedPackage, read_json
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 from ._nlp_common import get_tokenizer, truncate_seq_pair, SEG_ID_A, SEG_ID_B, SEP_ID, CLS_ID, SEG_ID_CLS, SEG_ID_PAD
 
 
@@ -67,6 +67,9 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             'model_id': StringField(
                 optional=True,
                 description='The model id of a predefined tokenizer hosted inside a model repo on huggingface.co'
+            ),
+            'column_separator': StringField(
+                optional=True, choices=['tab', 'comma'], description='column separator used in annotation file'
             )
         })
 
@@ -74,6 +77,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
+        self.column_separator = self.get_column_separator()
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.lower_case = self.get_value_from_config('lower_case')
         self.tokenizer, self.external_tok = get_tokenizer(self.config, self.lower_case)
@@ -82,10 +86,20 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         self.class_token_first = self.get_value_from_config('class_token_first')
         self.enable_padding = self.get_value_from_config('enable_padding')
 
-    def read_tsv(self):
+    def get_column_separator(self):
+        sep = self.get_value_from_config('column_separator')
+        if sep is None:
+            if self.annotation_file.suffix not in ['.csv', '.tsv']:
+                raise ConfigError(
+                    'Impossible automatically detect column separator for annotation. '
+                    'Please provide separator in config')
+            sep = 'comma' if self.annotation_file.suffix == '.csv' else 'tab'
+        return ',' if sep == 'comma' else '\t'
+
+    def read_annotation(self):
         lines = []
         with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
-            reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
+            reader = csv.reader(ann_file, delimiter=self.column_separator, quotechar=None)
             for idx, line in enumerate(reader):
                 if idx == 0:
                     continue
@@ -168,7 +182,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         )
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        examples = self.read_tsv()
+        examples = self.read_annotation()
         annotations = []
         num_iter = len(examples)
         for example_id, example in enumerate(examples):
@@ -209,7 +223,7 @@ class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
         if self.language_filter is not None:
             self.language_filter = string_to_list(self.language_filter)
 
-    def read_tsv(self):
+    def read_annotation(self):
         lines = []
         with self.annotation_file.open('r') as ann_file:
             reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
@@ -441,3 +455,47 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
                 progress_callback(example_id * 100 / num_iter)
 
         return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+
+
+class ColumnDataset(BaseGLUETextClassificationConverter):
+    __provider__ = 'custom_text_classification'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'text_1': NumberField(value_type=int, description='Column index for text', optional=True, default=0),
+            'text_2': NumberField(value_type=int, description='Second column index for text', optional=True),
+            'label': NumberField(value_type=int, description='Label column', optional=True, default=1),
+            'labels_list': ListField(value_type=str, optional=True),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
+            )
+        })
+        return params
+
+    def configure(self):
+        self.text_a_ind = self.get_value_from_config('text_1')
+        self.text_b_ind = self.get_value_from_config('text_2')
+        self.label_ind = self.get_value_from_config('label')
+        self.label_map = self.select_label_map()
+        super().configure()
+
+    def select_label_map(self):
+        label_map = {}
+        if 'labels_list' in self.config:
+            label_map = dict(enumerate(self.get_value_from_config('label_list')))
+        if 'dataset_meta_file' in self.config:
+            meta = read_json(self.get_value_from_config('dataset_meta_file'))
+            if 'label_map' in meta:
+                label_map = verify_label_map(meta['label_map'])
+                return label_map
+
+            labels_list = meta.get('labels')
+            if labels_list:
+                label_map = dict(enumerate(labels_list))
+        if not label_map:
+            raise ConfigError(
+                'labels for dataset is not found. Please provide labels_list or dataset_meta_file with this info.'
+            )
+        return label_map
