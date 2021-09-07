@@ -25,7 +25,7 @@ which is our own made\* validation dataset for converted model.
 | ------ | -------|
 | mAP    | 87.11% |
 
-## Input：
+## Input
 
 ### Original model
 
