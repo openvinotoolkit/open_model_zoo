@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -30,6 +30,17 @@ ANCHORS = {
     'YOLOV4-TINY': [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
                     81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
 }
+
+def permute_to_N_HWA_K(tensor, K):
+    """
+    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
+    """
+    assert tensor.ndim == 4, tensor.shape
+    N, _, H, W = tensor.shape
+    tensor = tensor.reshape(N, -1, K, H, W)
+    tensor = tensor.transpose(0, 3, 4, 1, 2)
+    tensor = tensor.reshape(N, -1, K)
+    return tensor
 
 class YOLO(Model):
     class Params:
@@ -112,45 +123,51 @@ class YOLO(Model):
         return dict_inputs, meta
 
     @staticmethod
-    def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
+    def _parse_yolo_region(predictions, input_size, params, threshold):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
         size_normalizer = input_size if params.isYoloV3 else params.sides
         bbox_size = params.coords + 1 + params.classes
+        predictions = permute_to_N_HWA_K(predictions, bbox_size)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
-            # Getting raw values for each detection bounding bFox
-            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            x, y, width, height, object_probability = bbox[:5]
-            class_probabilities = bbox[5:]
-            if object_probability < threshold:
-                continue
-            # Process raw value
-            x = (col + x) / params.sides[1]
-            y = (row + y) / params.sides[0]
-            # Value for exp is very big number in some cases so following construction is using here
-            try:
-                width = np.exp(width)
-                height = np.exp(height)
-            except OverflowError:
-                continue
-            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            width = width * params.anchors[2 * n] / size_normalizer[0]
-            height = height * params.anchors[2 * n + 1] / size_normalizer[1]
+        for prediction in predictions:
+            # Getting probabilities from raw outputs
+            object_probabilities = prediction[:, 4].flatten()
+            class_probabilities = prediction[:, 5:].flatten()
+            class_probabilities *= np.repeat(object_probabilities, params.classes)
 
-            if multiple_labels:
-                for class_id, class_probability in enumerate(class_probabilities):
-                    confidence = object_probability * class_probability
-                    if confidence > threshold:
-                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                                 confidence, class_id))
-            else:
-                class_id = np.argmax(class_probabilities)
-                confidence = class_probabilities[class_id] * object_probability
-                if confidence < threshold:
+            # filter out the proposals with low confidence score
+            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
+            class_probabilities = class_probabilities[keep_idxs]
+            obj_indx = keep_idxs // params.classes
+            class_idx = keep_idxs % params.classes
+
+            for ind, obj_ind in enumerate(obj_indx):
+                x, y, width, height = prediction[:, :4][obj_ind]
+
+                row = obj_ind // (params.sides[0] * params.num)
+                col = (obj_ind - row * params.sides[0] * params.num) // params.num
+                n = (obj_ind - row * params.sides[0] * params.num) % params.num
+
+                # Process raw value to get absolute coordinates of boxes
+                x = (col + x) / params.sides[1]
+                y = (row + y) / params.sides[0]
+                # Value for exp is very big number in some cases so following construction is using here
+                try:
+                    width = np.exp(width)
+                    height = np.exp(height)
+                except OverflowError:
                     continue
+                # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
+                width = width * params.anchors[2 * n] / size_normalizer[0]
+                height = height * params.anchors[2 * n + 1] / size_normalizer[1]
+
+                # Define class_label and cofidence
+                label = class_idx[ind]
+                confidence = class_probabilities[ind]
                 objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), class_id.item()))
+                                         confidence.item(), label.item()))
+
         return objects
 
     @staticmethod
@@ -224,18 +241,6 @@ class YOLO(Model):
         return clip_detections(detections, meta['original_shape'])
 
 
-def permute_to_N_HWA_K(tensor, K):
-    """
-    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
-    """
-    assert tensor.ndim == 4, tensor.shape
-    N, _, H, W = tensor.shape
-    tensor = tensor.reshape(N, -1, K, H, W)
-    tensor = tensor.transpose(0, 3, 4, 1, 2)
-    tensor = tensor.reshape(N, -1, K)
-    return tensor
-
-
 class YoloV4(YOLO):
     class Params:
         def __init__(self, classes, num, sides, anchors, mask):
@@ -285,7 +290,7 @@ class YoloV4(YOLO):
         for prediction in predictions:
             # Getting probabilities from raw outputs
             object_probabilities = sigmoid(prediction[:, 4].flatten())
-            class_probabilities = sigmoid(prediction[:, params.coords + 1:].flatten())
+            class_probabilities = sigmoid(prediction[:, 5:].flatten())
             class_probabilities *= np.repeat(object_probabilities, params.classes)
 
             # filter out the proposals with low confidence score
@@ -295,7 +300,7 @@ class YoloV4(YOLO):
             class_idx = keep_idxs % params.classes
 
             for ind, obj_ind in enumerate(obj_indx):
-                bbox = prediction[:, :params.coords][obj_ind]
+                bbox = prediction[:, :4][obj_ind]
                 x, y = sigmoid(bbox[:2])
                 width, height = bbox[2:]
 
