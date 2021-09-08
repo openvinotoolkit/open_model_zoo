@@ -187,7 +187,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                 ]
                 for name in self.sparse_features.keys():
                     identifiers.append("{}_{}{}{}".format(name, i, self.separator, c_file))
-                label = y if not np.isscalar(y) else [y, ]
+                label = y if not np.isscalar(y) else [y,]
                 annotations.append(ClassificationAnnotation(identifiers, label))
             else:
                 for j in range(i, i + self.batch):
@@ -197,7 +197,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                     ]
                     for name in self.sparse_features.keys():
                         identifiers.append("{}_{}{}{}".format(name, j, self.separator, c_file))
-                    label = y[j, ...] if not np.isscalar(y[j, ...]) else [y[j, ...], ]
+                    label = y[j, ...] if not np.isscalar(y[j, ...]) else [y[j, ...],]
                     annotations.append(ClassificationAnnotation(identifiers, label))
 
         self.close_data_file()

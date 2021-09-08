@@ -584,7 +584,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename.
   * `dense_features` - name of model dense features input. Optional, default `input.1`
-  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`. Optional, default `lS_i`
+  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>. Optional, default `lS_i`
   * `lso_features` - name of model offsets features input. Optional, default `lS_o`
   * `save_preprocessed_features` - allow saving preprocessed input features into `preprocessed_dir` (Optional, default True).
 * `features_regression` - converts dataset stored in a format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
