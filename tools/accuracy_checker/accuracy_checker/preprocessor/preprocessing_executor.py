@@ -124,6 +124,10 @@ class PreprocessingExecutor:
             return False
         return shape_modification[-1]
 
+    def query_shapes(self, data_shape):
+        for processor in self.processors:
+            data_shape = processor.query_shapes(data_shape)
+        return data_shape
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)

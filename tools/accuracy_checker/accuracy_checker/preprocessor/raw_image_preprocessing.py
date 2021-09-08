@@ -92,3 +92,12 @@ class PackBayerImage(Preprocessor):
             out[:, :, 8] = np.squeeze(im[2:H:3, 1:W:3])
         image.data = out * ratio
         return image
+
+    def calculate_out_shape(self, data_shape):
+        if self.nine_channels:
+            height, width = data_shape[:2]
+            H = (height // 6) * 6
+            W = (width // 6) * 6
+
+            return H // 3, W // 3, 9
+        return data_shape

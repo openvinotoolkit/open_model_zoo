@@ -74,6 +74,13 @@ class CornerCrop(Preprocessor):
     @staticmethod
     def process_data(data, dst_height, dst_width, corner_type):
         height, width = data.shape[:2]
+        new_height, new_width, start_height, start_width = CornerCrop.get_roi(
+            height, width, dst_height, dst_width, corner_type)
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+
+    @staticmethod
+    def get_roi(height, width, dst_height, dst_width, corner_type):
         if corner_type == 'top_left':
             new_height = min(height, dst_height)
             start_height = 0
@@ -110,8 +117,15 @@ class CornerCrop(Preprocessor):
             else:
                 start_width = 0
                 new_width = width
+        return new_height, new_width, start_height, start_width
 
-        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+    def calculate_out_shape(self, data_shape):
+        height, width, _, _ = self.get_roi(
+            data_shape[0], data_shape[1], self.dst_height, self.dst_width, self.corner_type
+        )
+        if len(data_shape) == 2:
+            return height, width
+        return height, width, data_shape[2]
 
 
 class Crop(Preprocessor):
@@ -189,7 +203,7 @@ class Crop(Preprocessor):
             new_width = dst_width
         elif max_square:
             new_height = min(height, width)
-            new_width = min(height, width)
+            new_width = new_height
         else:
             new_height = int(height * central_fraction)
             new_width = int(width * central_fraction)
@@ -222,6 +236,23 @@ class Crop(Preprocessor):
         if self.max_square or self.central_fraction:
             return True
         return False
+
+    def calculate_out_shape(self, data_shape):
+        height, width = data_shape[:2]
+        if self.max_square:
+            if len(data_shape) == 2:
+                return min(height, width), min(height, width)
+            return min(height, width), min(height, width), data_shape[2]
+        if self.central_fraction:
+            new_height = int(height * self.central_fraction)
+            new_width = int(width * self.central_fraction)
+            if len(data_shape) == 2:
+                return new_height, new_width
+            return new_height, new_width, data_shape[2]
+
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_width, data_shape[2]
 
 
 class CropRect(Preprocessor):

@@ -112,3 +112,8 @@ class CenterNetAffineTransformation(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.input_height, self.input_width
+        return self.input_height, self.input_width, data_shape[2]

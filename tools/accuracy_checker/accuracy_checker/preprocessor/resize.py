@@ -396,18 +396,9 @@ class Resize(Preprocessor):
         is_simple_case = not isinstance(data, list) # otherwise -- pyramid, tiling, etc
 
         def process_data(data, new_height, new_width, scale_func, resize_func):
-            dst_width, dst_height = new_width, new_height
-            image_h, image_w = data.shape[:2]
-            if scale_func:
-                dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
-                if self.factor:
-                    dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
-                    dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
-                if new_height is None:
-                    new_height = dst_height
-                if new_width is None:
-                    new_width = dst_width
-
+            dst_height, dst_width, new_height, new_width, image_h, image_w = self.get_resize_size(
+                data.shape, new_height, new_width, scale_func
+            )
             resize_meta = {}
             resize_meta['preferable_width'] = max(dst_width, new_width)
             resize_meta['preferable_height'] = max(dst_height, new_height)
@@ -440,11 +431,37 @@ class Resize(Preprocessor):
 
         return image
 
+    def get_resize_size(self, data_shape, new_height, new_width, scale_func):
+        dst_width, dst_height = new_width, new_height
+        image_h, image_w = data_shape[:2]
+        if scale_func:
+            dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
+            if self.factor:
+                dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
+                dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
+            if new_height is None:
+                new_height = dst_height
+            if new_width is None:
+                new_width = dst_width
+        return dst_height, dst_width, new_height, new_width, image_h, image_w
+
     @property
     def dynamic_result_shape(self):
         if self.scaling_func:
             return True
         return False
+
+    def calculate_out_shape(self, data_shape):
+        if not self.dynamic_result_shape:
+            if len(data_shape) == 2:
+                return self.dst_height, self.dst_width
+            return self.dst_height, self.dst_width, data_shape[2]
+        dst_height, dst_width, _, _, _, _ = self.get_resize_size(
+            data_shape, self.dst_height, self.dst_width, self.scaling_func
+        )
+        if len(data_shape) == 2:
+            return dst_height, dst_width
+        return dst_height, dst_width, data_shape[2]
 
 
 class AutoResize(Preprocessor):
@@ -517,3 +534,8 @@ class AutoResize(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_width, data_shape[2]

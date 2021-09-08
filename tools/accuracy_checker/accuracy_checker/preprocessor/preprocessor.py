@@ -101,3 +101,12 @@ class Preprocessor(ClassProvider):
     @property
     def dynamic_result_shape(self):
         return self.shape_modificator
+
+    def query_shapes(self, data_shape):
+        if not self.shape_modificator:
+            return data_shape
+        return self.calculate_out_shape(data_shape)
+
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        return data_shape

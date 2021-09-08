@@ -29,14 +29,14 @@ from .dlsdk_launcher_config import (
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
-    parse_partial_shape
+    parse_partial_shape,
+    automatic_model_search
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError
 from ..logging import warning
 from ..utils import (
     read_yaml,
-    get_path,
     contains_any,
     string_to_tuple,
     get_or_parse_value,
@@ -79,9 +79,8 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(
-            self, config_entry, model_name='', delayed_model_loading=False,
-            preprocessor=None, postpone_inputs_configuration=False):
+    def __init__(self, config_entry, model_name='', delayed_model_loading=False,
+                 preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
 
         self._set_variable = False
@@ -109,6 +108,7 @@ class DLSDKLauncher(Launcher):
         self._output_precisions = {}
         self.dyn_input_layers = []
         self._partial_shapes = {}
+        self.is_dynamic = False
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
@@ -117,7 +117,11 @@ class DLSDKLauncher(Launcher):
                     self.config, self.parameters(), dlsdk_launcher_config.framework
                 )
             else:
-                self._model, self._weights = self.automatic_model_search()
+                self._model, self._weights = automatic_model_search(
+                    self._model_name, self.get_value_from_config('model'),
+                    self.get_value_from_config('weights'),
+                    self.get_value_from_config('_model_is_blob')
+                )
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
@@ -291,65 +295,6 @@ class DLSDKLauncher(Launcher):
                 )
             layers[layer_name].affinity = device
 
-    def automatic_model_search(self):
-        def get_xml(model_dir):
-            models_list = list(model_dir.glob('{}.xml'.format(self._model_name)))
-            if not models_list:
-                models_list = list(model_dir.glob('*.xml'))
-            return models_list
-
-        def get_blob(model_dir):
-            blobs_list = list(Path(model_dir).glob('{}.blob'.format(self._model_name)))
-            if not blobs_list:
-                blobs_list = list(Path(model_dir).glob('*.blob'))
-            return blobs_list
-
-        def get_onnx(model_dir):
-            onnx_list = list(Path(model_dir).glob('{}.onnx'.format(self._model_name)))
-            if not onnx_list:
-                onnx_list = list(Path(model_dir).glob('*.onnx'))
-            return onnx_list
-
-        def get_model():
-            model = Path(self.get_value_from_config('model'))
-            model_is_blob = self.get_value_from_config('_model_is_blob')
-            if not model.is_dir():
-                accepted_suffixes = ['.blob', '.onnx', '.xml']
-                if model.suffix not in accepted_suffixes:
-                    raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-                print_info('Found model {}'.format(model))
-                return model, model.suffix == '.blob'
-            if model_is_blob:
-                model_list = get_blob(model)
-            else:
-                model_list = get_xml(model)
-                if not model_list and model_is_blob is None:
-                    model_list = get_blob(model)
-                if not model_list:
-                    model_list = get_onnx(model)
-            if not model_list:
-                raise ConfigError('suitable model is not found')
-            if len(model_list) != 1:
-                raise ConfigError('More than one model matched, please specify explicitly')
-            model = model_list[0]
-            print_info('Found model {}'.format(model))
-            return model, model.suffix == '.blob'
-
-        model, is_blob = get_model()
-        if is_blob:
-            return model, None
-        weights = self.get_value_from_config('weights')
-        if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
-            weights_dir = weights or model.parent
-            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
-        if weights is not None:
-            accepted_weights_suffixes = ['.bin']
-            if weights.suffix not in accepted_weights_suffixes:
-                raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-            print_info('Found weights {}'.format(get_path(weights)))
-
-        return model, weights
-
     def _is_fpga(self):
         device_list = map(lambda device: device.split('.')[0], self._devices_list())
         return 'FPGA' in device_list
@@ -435,7 +380,9 @@ class DLSDKLauncher(Launcher):
         for layer_name, layer in ie_input_info.items():
             if layer_name in const_inputs_shapes:
                 continue
-            layer_shape = layer.shape
+            layer_shape = (
+                layer.shape if layer_name not in self._partial_shapes else list(self._partial_shapes[layer_name])
+            )
             ind_batch = layer.layout.find('N')
             if ind_batch != -1:
                 layer_shape[ind_batch] = batch_size
@@ -632,7 +579,7 @@ class DLSDKLauncher(Launcher):
                 output_tuple = string_to_tuple(output_string, casting_type=None)
                 if len(output_tuple) == 1:
                     return output_string
-                return (output_tuple[0], int(output_tuple[1]))
+                return output_tuple[0], int(output_tuple[1])
 
             preprocessed_outputs = [output_preprocessing(output) for output in outputs]
             self.network.add_outputs(preprocessed_outputs)
@@ -722,6 +669,18 @@ class DLSDKLauncher(Launcher):
 
         return inputs_with_undefined_shapes, partial_shapes
 
+    @property
+    def dyn_batch_only(self):
+        if not self.dyn_input_layers:
+            return True
+        for input_name in self.dyn_input_layers:
+            partial_shape = self._partial_shapes[input_name]
+            layout = self.inputs[input_name].layout
+            for dim, layout_dim in zip(partial_shape, layout):
+                if dim == -1 and layout_dim != 'N':
+                    return False
+        return True
+
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
@@ -750,8 +709,20 @@ class DLSDKLauncher(Launcher):
         return input_shapes
 
     def initialize_undefined_shapes(self, input_data):
+        try:
+            if not hasattr(self, 'exec_network') or self.exec_network is None:
+                self.exec_network = self.ie_core.load_network(
+                    self.network, self._device, num_requests=self.num_requests)
+            self.exec_network.infer(input_data)
+            self.is_dynamic = True
+        except RuntimeError:
+            self.is_dynamic = False
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
         self._reshape_input(input_shapes)
+
+    def resolve_undefined_shapes(self):
+        self._set_batch_size(self._batch)
+        self.load_network(self.network)
 
     def fit_to_input(self, data, layer_name, layout, precision):
         if layer_name in self.dyn_input_layers:
@@ -941,6 +912,8 @@ class DLSDKLauncher(Launcher):
         return self._model.suffix
 
     def input_shape(self, input_name):
+        if input_name in self._partial_shapes:
+            return self._partial_shapes[input_name]
         return self.inputs[input_name].shape
 
     def release(self):

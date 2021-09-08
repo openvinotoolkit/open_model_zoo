@@ -178,6 +178,11 @@ class PointAligner(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_width, data_shape[2]
+
 
 def center_padding(dst_width, dst_height, width, height, left_top_extend=False):
     delta = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
@@ -405,6 +410,11 @@ class Tiling(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_height, data_shape[2]
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
@@ -448,6 +458,12 @@ class ImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
 
         return image
+
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
 
 
 class FaceDetectionImagePyramid(Preprocessor):
@@ -544,6 +560,12 @@ class FaceDetectionImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
         return image
 
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
+
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
@@ -611,6 +633,11 @@ class WarpAffine(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_height, data_shape[2]
 
 
 class SimilarityTransfom(Preprocessor):
@@ -702,3 +729,8 @@ class SimilarityTransfom(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_shape(self, data_shape):
+        if len(data_shape) == 2:
+            return self.dst_height, self.dst_width
+        return self.dst_height, self.dst_height, data_shape[2]

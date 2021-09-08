@@ -338,6 +338,7 @@ class ModelEvaluator(BaseEvaluator):
         metric_config = self._configure_metrics(kwargs, output_callback)
         (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
+        self._resolve_undefined_shapes()
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
@@ -601,11 +602,25 @@ class ModelEvaluator(BaseEvaluator):
             return True
 
         if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.launcher.dyn_batch_only:
+                self.launcher.resolve_undefined_shapes()
+                return False
             if self.preprocessor.dynamic_shapes:
-                return True
+                self._initialize_input_shape_with_data_range()
+                return not self.launcher.is_dynamic
             self._initialize_input_shape()
 
         return False
+
+    def _resolve_undefined_shapes(self):
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.launcher.dyn_batch_only:
+                self.launcher.resolve_undefined_shapes()
+                return
+            if self.preprocessor.dynamic_shapes:
+                self._initialize_input_shape_with_data_range()
+                return
+            self._initialize_input_shape()
 
     @property
     def dataset_size(self):

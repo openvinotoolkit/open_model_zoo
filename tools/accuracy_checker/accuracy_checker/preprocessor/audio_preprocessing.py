@@ -63,6 +63,10 @@ class ResampleAudio(Preprocessor):
 
         return image
 
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        return [-1] * len(data_shape)
+
 
 class ClipAudio(Preprocessor):
     __provider__ = 'clip_audio'
