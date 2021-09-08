@@ -579,6 +579,8 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
                 if layer_name.endswith('fq_weights_1'):
                     fq_weights.append(layer_name)
                     box_outs[layer_name] = data
+                elif data.shape[0] <= i:
+                    box_outs[layer_name] = data
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
@@ -609,6 +611,8 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
                     continue
                 if layer_name.endswith('fq_weights_1'):
                     fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                elif data.shape[0] <= i:
                     box_outs[layer_name] = data
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
