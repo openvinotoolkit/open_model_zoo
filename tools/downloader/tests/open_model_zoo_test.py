@@ -8,7 +8,7 @@ from openvino.inference_engine import IECore
 class TestTopologies(unittest.TestCase):
     def test_load_intel(self):
         face_detection = omz.Model('face-detection-0200', 'FP16-INT8')
-        xml_path, bin_path = face_detection.xml_path, face_detection.bin_path
+        xml_path, bin_path = face_detection.model_path, face_detection.bin_path
 
         self.assertTrue(os.path.exists(xml_path))
         self.assertTrue(os.path.exists(bin_path))
@@ -26,7 +26,7 @@ class TestTopologies(unittest.TestCase):
 
     def test_load_public(self):
         ssd = omz.Model('mobilenet-ssd', 'FP32')
-        xml_path, bin_path = ssd.xml_path, ssd.bin_path
+        xml_path, bin_path = ssd.model_path, ssd.bin_path
 
         self.assertTrue(os.path.exists(xml_path))
         self.assertTrue(os.path.exists(bin_path))
