@@ -194,15 +194,21 @@ Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
-2. Install the tools with the following command:
+2. Build the wheel with the following command:
 
 ```sh
-python <omz_dir>/demos/common/python/setup.py build
-python <omz_dir>/demos/common/python/setup.py install
+python <omz_dir>/demos/common/python/setup.py bdist_wheel
+```
+The built wheel should appear in the dist folder;
+Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
+
+3. Install the package in the clean environment with `--force-reinstall` key:
+```sh
+python -m pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
 ```
 When the model API wheel is installed, you can import it via the following command:
-```
-python -c "import openvino.model_zoo.model_api"
+```sh
+python -c "from openvino.model_zoo import model_api"
 ```
 
 > **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).

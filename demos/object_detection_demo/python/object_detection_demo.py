@@ -30,13 +30,13 @@ from openvino.inference_engine import IECore, get_version
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 try:
-    from openvino import model_zoo as model_zoo
-except:
-    sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino'))
+    import openvino.model_zoo
+except ImportError:
+    sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_zoo.model_api import models
-from model_zoo.model_api.performance_metrics import PerformanceMetrics
-from model_zoo.model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api import models
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 
 import monitors
 from images_capture import open_images_capture
