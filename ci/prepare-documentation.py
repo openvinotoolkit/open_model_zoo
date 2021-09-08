@@ -353,7 +353,7 @@ def main():
     add_accuracy_checker_pages(output_root, navindex_element)
 
     downloader_element = add_page(output_root, navindex_element,
-        id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
+        id='omz_tools_downloader', path='tools/model_tools/README.md', title='Model Downloader')
     downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
 
     trained_models_group_element = add_page(output_root, navindex_element,

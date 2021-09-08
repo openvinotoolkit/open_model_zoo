@@ -11,18 +11,18 @@ The text is then used to search named entities.
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -84,7 +84,7 @@ The application reports
 ## Example Demo Cmd-Line
 
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded and converted with the
-[Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
+[Model Downloader](../../../tools/model_tools/README.md) executed with "--name bert*"):
 
 ```sh
     python3 bert_named_entity_recognition_demo.py.py
@@ -103,5 +103,5 @@ Notice that when the original "context" (text from the url) do not fit the model
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

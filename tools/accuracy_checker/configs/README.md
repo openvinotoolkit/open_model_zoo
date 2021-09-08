@@ -71,13 +71,13 @@ See how to evaluate model with using predefined configuration file for [densenet
 - `OPENVINO_DIR` - root directory with installed the OpenVINO&trade; toolkit
 
 1. First of all, you need to prepare dataset according to [Dataset Preparation Guide](../../../data/datasets.md)
-2. Download original model files from online source using [Model Downloader](../../../tools/downloader/README.md)
+2. Download original model files from online source using [Model Downloader](../../../tools/model_tools/README.md)
     ```sh
-    OMZ_ROOT/tools/downloader/downloader.py --name densenet-121-tf --output_dir MODEL_DIR
+    OMZ_ROOT/tools/model_tools/downloader.py --name densenet-121-tf --output_dir MODEL_DIR
     ```
-3. Convert model in the Inference Engine IR format using Model Optimizer via [Model Converter](../../../tools/downloader/README.md)
+3. Convert model in the Inference Engine IR format using Model Optimizer via [Model Converter](../../../tools/model_tools/README.md)
     ```sh
-    OMZ_ROOT/tools/downloader/converter.py --name densenet-121-tf --download_dir MODEL_DIR --mo OPENVINO_DIR/deployment_tools/model_optimizer/mo.py
+    OMZ_ROOT/tools/model_tools/converter.py --name densenet-121-tf --download_dir MODEL_DIR --mo OPENVINO_DIR/deployment_tools/model_optimizer/mo.py
     ```
 4. Run evaluation for model in FP32 precision using [Accuracy Checker](../README.md)
     ```sh
@@ -87,9 +87,9 @@ See how to evaluate model with using predefined configuration file for [densenet
     ```sh
     accuracy-check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td GPU
     ```
-5. Also you can quantize full-precision models in the IR format into low-precision versions via [Model Quantizer](../../../tools/downloader/README.md)
+5. Also you can quantize full-precision models in the IR format into low-precision versions via [Model Quantizer](../../../tools/model_tools/README.md)
    ```sh
-   OMZ_ROOT/tools/downloader/quantizer.py --name densenet-121-tf --dataset_dir DATASET_DIR --model_dir MODEL_DIR
+   OMZ_ROOT/tools/model_tools/quantizer.py --name densenet-121-tf --dataset_dir DATASET_DIR --model_dir MODEL_DIR
    ```
    Run evaluation for quantized model:
     ```sh
