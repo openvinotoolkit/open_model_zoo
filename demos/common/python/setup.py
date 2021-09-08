@@ -17,8 +17,9 @@
 """
 
 """
-Use this script to create a wheel for Open Model Zoo model API:
-$ python setup.py sdist bdist_wheel
+Use this script to create a wheel for Open Model Zoo
+model API. The installation of wheel is described in
+`<omz_dir>/demos/README.md`
 """
 
 from pathlib import Path
@@ -30,9 +31,8 @@ SETUP_DIR = Path(__file__).resolve().parent
 with open(SETUP_DIR / 'requirements.txt') as f:
     required = f.read().splitlines()
 
-SETUP_DIR = str(SETUP_DIR)
-packages = find_packages(SETUP_DIR)
-package_dir = {'': SETUP_DIR}
+packages = find_packages(str(SETUP_DIR))
+package_dir = {'openvino': str(SETUP_DIR / 'openvino')}
 
 setup(
     name='openmodelzoo-modelapi',
