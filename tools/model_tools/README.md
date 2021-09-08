@@ -37,7 +37,6 @@ Installation from source is as follows:
 2. Install the tools with the following command:
 
 ```sh
-python setup.py build
 python setup.py install
 ```
 
