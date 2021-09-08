@@ -33,7 +33,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         parameters.update({
             'testing_file': PathField(description="Path to testing file."),
             "binary": BoolField(optional=True, default=False,
-                                    description="Allows input file in binary mode instead of .npz mode"),
+                                description="Allows input file in binary mode instead of .npz mode"),
             "batch": NumberField(optional=True, default=128, description="Model batch"),
             "max_ind_range": NumberField(optional=True, default=None, value_type=int, min_value=1,
                                          description="Maximum index range for categorical features"),
@@ -123,12 +123,11 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             raw_data = self.binfile.read(self._bytes_per_entry)
             array = np.frombuffer(raw_data, dtype=np.int32).reshape(self._fea_shape)
             return array[:, 1:14], array[:, 14:], array[:, 0]
-        else:
-            start = step * self.batch
-            x_int_batch = self._x_int[start:start + self.batch, ...]
-            x_cat_batch = self._x_cat[start:start + self.batch, ...]
-            y_batch = self._y[start:start + self.batch, ...]
-            return x_int_batch, x_cat_batch, y_batch
+        start = step * self.batch
+        x_int_batch = self._x_int[start:start + self.batch, ...]
+        x_cat_batch = self._x_cat[start:start + self.batch, ...]
+        y_batch = self._y[start:start + self.batch, ...]
+        return x_int_batch, x_cat_batch, y_batch
 
     def convert(self, check_content=False, **kwargs):
         preprocessed_folder = Path(self.preprocessed_dir)
@@ -187,7 +186,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                 ]
                 for name in self.sparse_features.keys():
                     identifiers.append("{}_{}{}{}".format(name, i, self.separator, c_file))
-                label = y if not np.isscalar(y) else [y,]
+                label = y if not np.isscalar(y) else [y, ]
                 annotations.append(ClassificationAnnotation(identifiers, label))
             else:
                 for j in range(i, i + self.batch):
@@ -197,7 +196,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                     ]
                     for name in self.sparse_features.keys():
                         identifiers.append("{}_{}{}{}".format(name, j, self.separator, c_file))
-                    label = y[j, ...] if not np.isscalar(y[j, ...]) else [y[j, ...],]
+                    label = y[j, ...] if not np.isscalar(y[j, ...]) else [y[j, ...], ]
                     annotations.append(ClassificationAnnotation(identifiers, label))
 
         self.close_data_file()
