@@ -584,7 +584,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename.
   * `dense_features` - name of model dense features input. Optional, default `input.1`
-  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>. Optional, default `lS_i`
+  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form [name]:[index]. Optional, default `lS_i`
   * `lso_features` - name of model offsets features input. Optional, default `lS_o`
   * `save_preprocessed_features` - allow saving preprocessed input features into `preprocessed_dir` (Optional, default True).
 * `features_regression` - converts dataset stored in a format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
@@ -616,7 +616,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `separator` - Separator between input identifier and file identifier
   * `preprocessed_dir` - Preprocessed dataset location
   * `dense_features` - Name of model dense features input
-  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `[name]:[index]`
   * `lso_features` - Name of lS_o-like features input
 * `im2latex_formula_recognition` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
