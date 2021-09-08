@@ -120,6 +120,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - vehicle-license-plate-detection-barrier-0106
   - vehicle-license-plate-detection-barrier-0123
 * architecture_type = yolo
+  - mobilenet-yolo-v4-syg
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v3-tf
   - yolo-v3-tiny-tf
@@ -133,6 +134,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-ava-sparse-60-0001
   - yolo-v2-tiny-tf
   - yolo-v2-tiny-vehicle-detection-0001
+  - yolo-v4-tf
+  - yolo-v4-tiny-tf
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -171,6 +174,8 @@ Options:
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
+    -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -205,7 +210,14 @@ The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
