@@ -23,7 +23,6 @@
 #include <string>
 #include <gflags/gflags.h>
 
-using namespace InferenceEngine;
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
@@ -100,6 +99,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char **argv) {
     try {
+        PerformanceMetrics metrics;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie =
             LoadInferenceEngine(devices, custom_cpu_library, path_to_custom_layers);
 
@@ -147,6 +147,7 @@ int main(int argc, char **argv) {
             video_fps = 60.0;
         }
 
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) throw std::runtime_error("Can't read an image from the input");
         cv::Size firstFrameSize = frame.size();
@@ -170,7 +171,6 @@ int main(int argc, char **argv) {
             uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frameIdx);
             tracker->Process(frame, detections, cur_timestamp);
 
-            presenter.drawGraphs(frame);
             // Drawing colored "worms" (tracks).
             frame = tracker->DrawActiveTracks(frame);
 
@@ -188,6 +188,8 @@ int main(int argc, char **argv) {
                 putHighlightedText(frame, text, detection.rect.tl() - cv::Point{10, 10}, cv::FONT_HERSHEY_COMPLEX,
                             0.65, cv::Scalar(0, 0, 255), 2);
             }
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
@@ -205,6 +207,8 @@ int main(int argc, char **argv) {
                 DetectionLog log = tracker->GetDetectionLog(true);
                 SaveDetectionLogToTrajFile(detlog_out, log);
             }
+
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
             if (!frame.data) break;
             if (frame.size() != firstFrameSize)
@@ -220,6 +224,8 @@ int main(int argc, char **argv) {
                 PrintDetectionLog(log);
         }
 
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

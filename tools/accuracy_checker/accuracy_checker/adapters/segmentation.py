@@ -51,7 +51,10 @@ class SegmentationAdapter(Adapter):
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_outputs)
-        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
+        segm_out = raw_outputs[self.output_blob]
+        if segm_out.shape[0] != len(identifiers) and len(identifiers) == 1:
+            segm_out = np.expand_dims(segm_out, 0)
+        for identifier, output, meta in zip(identifiers, segm_out, frame_meta):
             input_shape = next(iter(meta['input_shape'].values()))
             is_chw = input_shape[1] <= 4
             if len(output.shape) == 2 and len(input_shape) == 4:
@@ -86,7 +89,7 @@ class SegmentationAdapter(Adapter):
             restore_output.append(image.squeeze())
             offset = next_offset
 
-        return {self.output_blob: restore_output}
+        return {self.output_blob: np.array(restore_output)}
 
 
 class SegmentationOneClassAdapter(Adapter):

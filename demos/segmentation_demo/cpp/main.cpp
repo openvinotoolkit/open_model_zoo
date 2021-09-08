@@ -57,6 +57,7 @@ static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+static const char only_masks_message[] = "Optional. Display only masks. Could be switched by TAB key.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
@@ -72,6 +73,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
+DEFINE_bool(only_masks, false, only_masks_message);
 
 /**
 * \brief This function shows a help message
@@ -100,6 +102,7 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -only_masks               " << only_masks_message << std::endl;
 }
 
 
@@ -173,7 +176,7 @@ cv::Mat applyColorMap(cv::Mat input) {
     return out;
 }
 
-cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outputTransform) {
+cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outputTransform, bool masks_only) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -186,7 +189,7 @@ cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outpu
     }
 
     // Visualizing result data over source image
-    cv::Mat output = inputImg / 2 + applyColorMap(result.resultImage) / 2;
+    cv::Mat output = masks_only ? applyColorMap(result.resultImage) : inputImg / 2 + applyColorMap(result.resultImage) / 2;
     outputTransform.resize(output);
     return output;
 }
@@ -254,6 +257,8 @@ int main(int argc, char* argv[]) {
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
 
+        bool only_masks = FLAGS_only_masks;
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 auto startTime = std::chrono::steady_clock::now();
@@ -304,7 +309,7 @@ int main(int argc, char* argv[]) {
             //    and use your own processing instead of calling renderSegmentationData().
             while (keepRunning && (result = pipeline.getResult())) {
                 auto renderingStart = std::chrono::steady_clock::now();
-                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform, only_masks);
                 //--- Showing results and device information
                 if (FLAGS_r) {
                     printRawResults(result->asRef<ImageResult>(), labels);
@@ -324,6 +329,8 @@ int main(int argc, char* argv[]) {
                     auto key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) { // Esc
                         keepRunning = false;
+                    } else if (9 == key) {
+                        only_masks = !only_masks;
                     } else {
                         presenter.handleKey(key);
                     }
@@ -331,13 +338,13 @@ int main(int argc, char* argv[]) {
             }
         } // while(keepRunning)
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
         for (; framesProcessed <= frameNum; framesProcessed++) {
             result = pipeline.getResult();
             if (result != nullptr) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform, only_masks);
                 //--- Showing results and device information
                 if (FLAGS_r) {
                     printRawResults(result->asRef<ImageResult>(), labels);
@@ -356,13 +363,11 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
-        printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+        metrics.logTotal();
+        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
             pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
             renderMetrics.getTotal().latency);
-
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

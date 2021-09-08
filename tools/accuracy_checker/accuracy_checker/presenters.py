@@ -59,7 +59,7 @@ class ScalarPrintPresenter(BasePresenter):
         )
 
     def extract_result(self, evaluation_result):
-        value, ref, name, metric_type, abs_threshold, rel_threshold, meta, _ = evaluation_result
+        value, ref, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         if isinstance(ref, dict):
             ref = ref.get(name)
         result_dict = {
@@ -68,7 +68,8 @@ class ScalarPrintPresenter(BasePresenter):
             'type': metric_type,
             'ref': ref or '',
             'abs_threshold': abs_threshold or 0,
-            'ref_threshold': rel_threshold or 0
+            'ref_threshold': rel_threshold or 0,
+            'profiling_file': profiling_file
         }
         return result_dict, meta
 
@@ -134,12 +135,12 @@ class VectorPrintPresenter(BasePresenter):
             )
 
     def extract_result(self, evaluation_result):
-        value, reference, name, metric_type, abs_threshold, rel_threshold, meta, _ = evaluation_result
+        value, reference, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         len_value = len(value) if not np.isscalar(value) and np.ndim(value) > 0 else 1
         value_names_orig = meta.get('names', list(range(0, len_value)))
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]
         if np.isscalar(value) or np.size(value) <= 1:
-            value_name = value_names[0] if 'names' in meta else name
+            value_name = value_names[0] if value_names and 'names' in meta else name
             value_name_orig = value_names_orig[0] if value_name != name else name
             if isinstance(reference, dict):
                 ref = reference.get(value_name_orig, '')
@@ -156,7 +157,8 @@ class VectorPrintPresenter(BasePresenter):
                 'type': metric_type,
                 'ref': ref,
                 'abs_threshold': abs_threshold or 0,
-                'rel_threshold': rel_threshold or 0
+                'rel_threshold': rel_threshold or 0,
+                'profiling_file': profiling_file
             }
             return result_dict, meta
 
@@ -172,6 +174,7 @@ class VectorPrintPresenter(BasePresenter):
             target_for_value = target_per_value.get(orig_name, target)
             meta_for_value = deepcopy(meta)
             meta_for_value['target'] = target_for_value
+            meta_for_value['class_name'] = orig_name
             per_value_meta.append(meta_for_value)
         results = []
         for idx, value_item in enumerate(value):
@@ -241,7 +244,7 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
     field_names = [
         'model', 'launcher', 'device', 'dataset',
         'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
-        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
+        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold', 'profiling_file']
     model, launcher, device, tags, dataset = processing_info
     main_info = {
         'model': model,
@@ -267,5 +270,6 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_postfix': metric_meta.get('postfix', '%'),
                 'ref': metric_result.get('ref', ''),
                 'abs_threshold': metric_result.get('abs_threshold', 0),
-                'rel_threshold': metric_result.get('rel_threshold', 0)
+                'rel_threshold': metric_result.get('rel_threshold', 0),
+                'profiling_file': metric_result.get('profiling_file', '')
             })

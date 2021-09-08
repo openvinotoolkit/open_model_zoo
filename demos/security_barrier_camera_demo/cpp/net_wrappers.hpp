@@ -65,7 +65,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, xmlPath, deviceName, "Vehicle And License Plate Detection");
+        logExecNetworkInfo(net, xmlPath, deviceName, "Vehicle And License Plate Detection");
 
     }
 
@@ -160,7 +160,7 @@ public:
         outputNameForType = (it)->second->getName();  // type is the second output.
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
+        logExecNetworkInfo(net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -264,7 +264,7 @@ public:
         }
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, FLAGS_m_lpr, deviceName, "License Plate Recognition");
+        logExecNetworkInfo(net, FLAGS_m_lpr, deviceName, "License Plate Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -314,12 +314,39 @@ public:
         // up to 88 items per license plate, ended with "-1"
         InferenceEngine::LockedMemory<const void> lprOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
             inferRequest.GetBlob(LprOutputName))->rmap();
-        const auto data = lprOutputMapped.as<float*>();
-        for (int i = 0; i < maxSequenceSizePerPlate; i++) {
-            if (data[i] == -1) {
-                break;
+
+        InferenceEngine::Precision precision = inferRequest.GetBlob(LprOutputName)->getTensorDesc().getPrecision();
+
+        switch (precision) {
+            case InferenceEngine::Precision::I32:
+            {
+                const auto data = lprOutputMapped.as<int32_t*>();
+                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                    int32_t val = data[i];
+                    if (val == -1) {
+                        break;
+                    }
+                    result += items[val];
+                }
             }
-            result += items[std::size_t(data[i])];
+            break;
+
+            case InferenceEngine::Precision::FP32:
+            {
+                const auto data = lprOutputMapped.as<float*>();
+                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                    int32_t val = int32_t(data[i]);
+                    if (val == -1) {
+                        break;
+                    }
+                    result += items[val];
+                }
+            }
+            break;
+
+            default:
+                throw std::logic_error("Not expected output blob precision");
+                break;
         }
         return result;
     }

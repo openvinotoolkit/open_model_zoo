@@ -160,7 +160,11 @@ Example of a valid command line to run the application for recognizing first rai
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with labeled actions and faces.
+The demo uses OpenCV to display the resulting frame with labeled actions and faces. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

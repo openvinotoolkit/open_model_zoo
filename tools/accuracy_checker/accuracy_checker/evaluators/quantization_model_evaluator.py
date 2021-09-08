@@ -199,6 +199,11 @@ class ModelEvaluator:
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
+            if self.postprocessor.postprocessing_applyed:
+                self.dataset.reset(self.postprocessor.has_processors)
+            if self.metric_executor:
+                self.metric_executor.reset()
+            self.postprocessor.reset()
             return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
@@ -479,6 +484,7 @@ class ModelEvaluator:
             self.dataset.reset(self.postprocessor.has_processors)
         if self.adapter:
             self.adapter.reset()
+        self.postprocessor.reset()
 
     def release(self):
         self.launcher.release()

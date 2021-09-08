@@ -17,8 +17,6 @@
 #include "models/segmentation_model.h"
 #include "utils/ocv_common.hpp"
 
-using namespace InferenceEngine;
-
 SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
     ImageModel(modelFileName, useAutoResize) {}
 
@@ -46,33 +44,34 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    if (inputShapes.size() != 1) {
         throw std::runtime_error("Demo supports topologies only with 1 input");
+    }
 
     inputsNames.push_back(inputShapes.begin()->first);
 
-    SizeVector& inSizeVector = inputShapes.begin()->second;
+    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
+    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+    inputInfo.setPrecision(InferenceEngine::Precision::U8);
 
     if (useAutoResize) {
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(Layout::NHWC);
+        inputInfo.getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        inputInfo.setLayout(InferenceEngine::Layout::NHWC);
     } else {
-        inputInfo.setLayout(Layout::NCHW);
+        inputInfo.setLayout(InferenceEngine::Layout::NCHW);
     }
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
+    const InferenceEngine::OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputsDataMap.begin()->first);
-    Data& data = *outputsDataMap.begin()->second;
+    InferenceEngine::Data& data = *outputsDataMap.begin()->second;
 
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
     switch (outSizeVector.size()) {
     case 3:
         outChannels = 1;
@@ -89,48 +88,23 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
 }
 
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request)
-{
-    auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
-
-    std::shared_ptr<InternalModelData> resPtr = nullptr;
-
-    if (useAutoResize)
-    {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-        /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-        resPtr = std::make_shared<InternalImageMatModelData>(img);
-    }
-    else
-    {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-        resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
-    }
-
-    return resPtr;
-}
-
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
     ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    MemoryBlob::Ptr blobPtr = infResult.getFirstOutputBlob();
+    InferenceEngine::MemoryBlob::Ptr blobPtr = infResult.getFirstOutputBlob();
 
     void* pData = blobPtr->rmap().as<void*>();
 
     result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
 
-    if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == Precision::I32)
+    if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::I32)
     {
         cv::Mat predictions(outHeight, outWidth, CV_32SC1, pData);
         predictions.convertTo(result->resultImage, CV_8UC1);
     }
-    else if (blobPtr->getTensorDesc().getPrecision() == Precision::FP32)
+    else if (blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::FP32)
     {
         float* ptr = reinterpret_cast<float*>(pData);
         for (int rowId = 0; rowId < outHeight; ++rowId)

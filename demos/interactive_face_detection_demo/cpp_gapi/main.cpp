@@ -15,6 +15,7 @@
 #include <ie_version.hpp>
 
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include <opencv2/gapi.hpp>
@@ -298,6 +299,8 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         // ------------------------------ Parsing and validating of input arguments --------------------------
         gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
         if (FLAGS_h) {
@@ -431,10 +434,7 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Mat> out_landmarks;
         if (!FLAGS_m_lm.empty()) out_vector += cv::gout(out_landmarks);
 
-        Visualizer::Ptr visualizer;
-        if (!FLAGS_no_show || !FLAGS_o.empty()) {
-            visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
-        }
+        Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
 
         std::list<Face::Ptr> faces;
         std::ostringstream out;
@@ -444,8 +444,8 @@ int main(int argc, char *argv[]) {
 
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
+        bool stop = false;
 
-        Timer timer;
         do {
             try {
                 setInput(stream, FLAGS_i);
@@ -456,10 +456,11 @@ int main(int argc, char *argv[]) {
                 throw std::invalid_argument(msg.str());
             }
 
-            timer.start("total");
+            bool isStart = true;
+            const auto startTime = std::chrono::steady_clock::now();
             stream.start();
             while (stream.pull(cv::GRunArgsP(out_vector))) {
-                if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
+                if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
 
@@ -479,8 +480,9 @@ int main(int argc, char *argv[]) {
                 faces.clear();
 
                 // Raw output of detected faces
-                if (FLAGS_r)
+                if (FLAGS_r) {
                     rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
+                }
 
                 // For every detected face
                 for (size_t i = 0; i < face_hub.size(); i++) {
@@ -519,29 +521,33 @@ int main(int argc, char *argv[]) {
                     faces.push_back(face);
                 }
 
+                // drawing faces
+                visualizer->draw(frame, faces);
+
                 presenter->drawGraphs(frame);
+                if (isStart) {
+                    metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
 
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
-                    out.str("");
-                    out << "FPS: " << std::fixed << std::setprecision(1)
-                        << 1000.0 / (timer["total"].getSmoothedDuration());
-
-                    putHighlightedText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                        cv::Scalar(255, 0, 0), 2);
-
-                    // drawing faces
-                    visualizer->draw(frame, faces);
-
                     cv::imshow("Detection results", frame);
 
                     int key = cv::waitKey(1);
                     if (27 == key || 'Q' == key || 'q' == key) {
                         stream.stop();
+                        stop = true;
                     } else {
                         presenter->handleKey(key);
                     }
                 }
+
                 if (!FLAGS_o.empty() && framesCounter == 0 &&
                     !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, frame.size())) {
                     throw std::runtime_error("Can't open video writer");
@@ -550,19 +556,15 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(frame);
                 }
 
-                timer["total"].calculateDuration();
                 framesCounter++;
             }
-            timer.finish("total");
-
-            //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << "Metrics report:" << slog::endl;
-            slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
-            slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
-            slog::info << presenter->reportMeans() << slog::endl;
-        } while (FLAGS_loop);
+        } while (FLAGS_loop && !stop);
 
         cv::destroyAllWindows();
+
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
+        slog::info << presenter->reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

@@ -30,8 +30,6 @@
 #include "person_trackers.hpp"
 #include "social_distance_demo.hpp"
 
-using namespace InferenceEngine;
-
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -63,7 +61,7 @@ struct InferRequestsContainer {
     InferRequestsContainer(const InferRequestsContainer&) = delete;
     InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
 
-    void assign(const std::vector<InferRequest>& inferRequests) {
+    void assign(const std::vector<InferenceEngine::InferRequest>& inferRequests) {
         actualInferRequests = inferRequests;
         this->inferRequests.container.clear();
 
@@ -72,13 +70,13 @@ struct InferRequestsContainer {
         }
     }
 
-    std::vector<InferRequest> getActualInferRequests() {
+    std::vector<InferenceEngine::InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
-    ConcurrentContainer<std::vector<std::reference_wrapper<InferRequest>>> inferRequests;
+    ConcurrentContainer<std::vector<std::reference_wrapper<InferenceEngine::InferRequest>>> inferRequests;
 
 private:
-    std::vector<InferRequest> actualInferRequests;
+    std::vector<InferenceEngine::InferRequest> actualInferRequests;
 };
 
 struct Context {  // stores all global data for tasks
@@ -100,13 +98,12 @@ struct Context {  // stores all global data for tasks
             std::vector<int>(inputChannels.size(), 1)},
         nireq{nireq},
         isVideo{isVideo},
-        t0{std::chrono::steady_clock::time_point()},
         freeDetectionInfersCount{0},
         frameCounter{0}
     {
         assert(inputChannels.size() == gridParam.size());
-        std::vector<InferRequest> detectorInferRequests;
-        std::vector<InferRequest> reidInferRequests;
+        std::vector<InferenceEngine::InferRequest> detectorInferRequests;
+        std::vector<InferenceEngine::InferRequest> reidInferRequests;
         detectorInferRequests.reserve(nireq);
         reidInferRequests.reserve(nreidireq);
         std::generate_n(std::back_inserter(detectorInferRequests), nireq, [&]{
@@ -138,7 +135,7 @@ struct Context {  // stores all global data for tasks
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::string& monitorsStr):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()},
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()},
             presenter{monitorsStr,
                 GridMat(gridParam, displayResolution).outimg.rows - 70,
                 cv::Size{GridMat(gridParam, displayResolution).outimg.cols / 4, 60}} {}
@@ -151,9 +148,6 @@ struct Context {  // stores all global data for tasks
         std::chrono::steady_clock::time_point prevShow;  // time stamp of previous imshow
         std::map<int64_t, GridMat> gridMats;
         std::mutex drawerMutex;
-        std::ostringstream outThroughput;
-        unsigned framesAfterUpdate;
-        std::chrono::steady_clock::time_point updateTime;
         Presenter presenter;
     } drawersContext;
 
@@ -181,10 +175,10 @@ struct Context {  // stores all global data for tasks
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    std::chrono::steady_clock::time_point t0;
-    std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<std::vector<InferenceEngine::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, reidInfers;
+    PerformanceMetrics metrics;
 };
 
 class ReborningVideoFrame : public VideoFrame {
@@ -237,7 +231,7 @@ public:
     ~ClassifiersAggregator() {
         std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        if (rawDetections.size() != 0) {
+        if (FLAGS_r && !rawDetections.empty()) {
             slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
             slog::debug << rawDetections;
         }
@@ -265,7 +259,7 @@ private:
 // extracts detections from blob InferRequests and runs Re-Id
 class DetectionsProcessor : public Task {
 public:
-    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferRequest *inferRequest)
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferenceEngine::InferRequest *inferRequest)
             : Task{sharedVideoFrame, 1.0},
               inferRequest{inferRequest},
               requireGettingNumberOfDetections{true} {}
@@ -284,10 +278,10 @@ public:
 
 private:
     std::shared_ptr<ClassifiersAggregator> classifiersAggregator; // when no one stores this object we will draw
-    InferRequest *inferRequest;
+    InferenceEngine::InferRequest *inferRequest;
     std::list<cv::Rect> personRects;
     std::vector<TrackableObject> personTrackers;
-    std::vector<std::reference_wrapper<InferRequest>> reservedReIdRequests;
+    std::vector<std::reference_wrapper<InferenceEngine::InferRequest>> reservedReIdRequests;
     bool requireGettingNumberOfDetections;
 };
 
@@ -371,28 +365,17 @@ void Drawer::process() {
         lastShownframeId++;
         cv::Mat mat = firstGridIt->second.getMat();
         constexpr float OPACITY = 0.6f;
-        fillROIColor(mat, cv::Rect(5, 5, 390, 115), cv::Scalar(255, 0, 0), OPACITY);
-        cv::putText(mat, "Detection InferRequests usage", cv::Point2f(15, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-        cv::Rect usage(15, 90, 370, 20);
+        fillROIColor(mat, cv::Rect(5, 5, 390, 125), cv::Scalar(255, 0, 0), OPACITY);
+        cv::putText(mat, "Detection InferRequests usage:", cv::Point2f(15, 95), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::Rect usage(15, 105, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
         uint32_t frameCounter = context.frameCounter;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
-        context.drawersContext.framesAfterUpdate++;
-        const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
-        const Sec timeDuration = localT1 - context.drawersContext.updateTime;
-        if (Sec{1} <= timeDuration || context.drawersContext.updateTime == context.t0) {
-            context.drawersContext.outThroughput.str("");
-            context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
-                << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
-            context.drawersContext.framesAfterUpdate = 0;
-            context.drawersContext.updateTime = localT1;
-        }
-        cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-
         context.drawersContext.presenter.drawGraphs(mat);
+        context.metrics.update(sharedVideoFrame->timestamp, mat, { 15, 35 }, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{ 255, 255, 255 }, 0);
         if (!FLAGS_no_show) {
             cv::imshow("Detection results", firstGridIt->second.getMat());
             context.drawersContext.prevShow = std::chrono::steady_clock::now();
@@ -521,12 +504,12 @@ void DetectionsProcessor::process() {
 
             for (auto reidRequestsIt = reservedReIdRequests.begin(); reidRequestsIt != reservedReIdRequests.end(); personRectsIt++, reidRequestsIt++) {
                 const cv::Rect personRect = *personRectsIt;
-                InferRequest& reidRequest = *reidRequestsIt;
+                InferenceEngine::InferRequest& reidRequest = *reidRequestsIt;
                 context.detectionsProcessorsContext.reid.setImage(reidRequest, sharedVideoFrame->frame, personRect);
 
                 reidRequest.SetCompletionCallback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                                InferRequest &reidRequest, cv::Rect rect, Context &context) {
+                        InferenceEngine::InferRequest &reidRequest, cv::Rect rect, Context &context) {
                                     reidRequest.SetCompletionCallback([] {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
@@ -573,7 +556,7 @@ bool InferTask::isReady() {
 void InferTask::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
-    std::reference_wrapper<InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    std::reference_wrapper<InferenceEngine::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
@@ -582,7 +565,7 @@ void InferTask::process() {
     inferRequest.get().SetCompletionCallback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
-               InferRequest& inferRequest,
+                InferenceEngine::InferRequest& inferRequest,
                Context& context) {
                     inferRequest.SetCompletionCallback([]{});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
@@ -607,6 +590,7 @@ bool Reader::isReady() {
 
 void Reader::process() {
     unsigned sourceID = sharedVideoFrame->sourceID;
+    sharedVideoFrame->timestamp = std::chrono::steady_clock::now();
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     const std::vector<std::shared_ptr<InputChannel>>& inputChannels = context.readersContext.inputChannels;
     if (inputChannels[sourceID]->read(sharedVideoFrame->frame)) {
@@ -706,7 +690,7 @@ int main(int argc, char* argv[]) {
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extensionPtr = std::make_shared<Extension>(FLAGS_l);
+                    auto extensionPtr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extensionPtr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
@@ -723,7 +707,7 @@ int main(int argc, char* argv[]) {
             if ("GPU" == device) {
                 // Load any user-specified clDNN Extensions
                 if (!FLAGS_c.empty()) {
-                    ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+                    ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
                 }
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (deviceNStreams.count("GPU") > 0 ? std::to_string(deviceNStreams.at("GPU")) :
@@ -741,7 +725,7 @@ int main(int argc, char* argv[]) {
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
             if (FLAGS_tag && deviceName == "HDDL") {
-                config[HDDL_GRAPH_TAG] = "tag" + suffix;
+                config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
             }
             return config;
         };
@@ -797,26 +781,20 @@ int main(int argc, char* argv[]) {
         }
 
         // Running
-        const std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-        context.t0 = t0;
-        context.drawersContext.updateTime = t0;
         worker->runThreads();
         worker->threadFunc();
         worker->join();
-        const auto t1 = std::chrono::steady_clock::now();
 
         uint32_t frameCounter = context.frameCounter;
+        double detectionsInfersUsage = 0;
         if (0 != frameCounter) {
-            const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
-                / context.readersContext.inputChannels.size();
-            const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
+            detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-
-            //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << "Metrics report:" << slog::endl;
-            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
-            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         }
+
+        slog::info << "Metrics report:" << slog::endl;
+        context.metrics.logTotal();
+        slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

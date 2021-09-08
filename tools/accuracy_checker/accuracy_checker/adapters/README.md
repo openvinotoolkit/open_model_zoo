@@ -75,6 +75,14 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names.
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
 * `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
+* `yolor` - converting output of YOLOR model to `DetectionPrediction` representation.
+  * `output_name` - name of output layer.
+  * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
+  * `num` - num parameter from DarkNet configuration file (Optional, default 5).
+* `yolox` - converting output of YOLOX model to `DetectionPrediction` representation.
+  * `output_name` - name of output layer (Optional).
+  * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
+  * `num` - num parameter from DarkNet configuration file (Optional, default 5).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
   * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).
@@ -452,6 +460,8 @@ AccuracyChecker supports following set of adapters:
   * `inverse_acoustic_scale` - inverse acoustic scale for lattice scaling (Optional, default `0`).
   * `word_insertion_penalty` - add word insertion penalty to the lattice. Penalties are negative log-probs, base e, and are added to the language model' part of the cost (Optional, `0`).
 * `kaldi_feat_regression` - converts output features from kaldi models to `RegressionPrediction` with merging whole matrix features and making deprocessing according context window size, if it is necessary.
+  * `target_out` - name of target output layer for regression (Optional, if not provided, the first output will be used).
+  * `flattenize` - make output features flatten. (Optional, default `False`).
 * `quantiles_predictor` - converts output of Time Series Forecasting models to `TimeSeriesForecastingQuantilesPrediction`.
   * `quantiles` - predictions[i]->quantile[i] mapping.
   * `output_name` - name of output node to convert.

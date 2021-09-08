@@ -9,7 +9,6 @@
 #include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
 #include "results_marker.hpp"
-#include "exponential_averager.hpp"
 #include "utils.hpp"
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
@@ -54,6 +53,8 @@ G_API_NET(Eyes,      <cv::GMat(cv::GMat)>, "l-open-closed-eyes");
 int main(int argc, char *argv[]) {
     try {
         using namespace gaze_estimation;
+        PerformanceMetrics metrics;
+
         /** Print info about Inference Engine **/
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
@@ -246,11 +247,6 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Exponential averagers for times **/
-        double smoothingFactor = 0.1;
-        ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
-        auto tIterationBegins = cv::getTickCount();
-
         /** Save output result **/
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
@@ -258,6 +254,8 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
 
+        bool isStart = true;
+        const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,
@@ -290,21 +288,6 @@ int main(int argc, char *argv[]) {
                 inferenceResults.push_back(inferenceResult);
             }
 
-            /** Measure FPS **/
-            auto tIterationEnds = cv::getTickCount();
-            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
-            overallTimeAverager.updateValue(overallTime);
-            tIterationBegins = tIterationEnds;
-
-            /** Print logs **/
-            if (FLAGS_r) {
-                for (auto& inferenceResult : inferenceResults) {
-                    slog::debug << inferenceResult << slog::endl;
-                }
-            }
-
-            /** Display system parameters **/
-            presenter.drawGraphs(frame);
 
             /** Display the results **/
             for (auto const& inferenceResult : inferenceResults) {
@@ -316,7 +299,25 @@ int main(int argc, char *argv[]) {
                 cv::flip(frame, frame, 1);
             }
 
-            putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue());
+            /** Display system parameters **/
+            presenter.drawGraphs(frame);
+            if (isStart) {
+                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                isStart = false;
+            }
+            else {
+                metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            }
+
+            /** Print logs **/
+            if (FLAGS_r) {
+                for (auto& inferenceResult : inferenceResults) {
+                    slog::debug << inferenceResult << slog::endl;
+                }
+            }
+
             if (videoWriter.isOpened()) {
                 videoWriter.write(frame);
             }
@@ -336,6 +337,8 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

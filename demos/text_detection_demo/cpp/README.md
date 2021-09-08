@@ -139,7 +139,18 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+* Latency for the following pipeline stages:
+  * **Text detection inference** — infering input data (images) and getting a result for text detection model.
+  * **Text detection postprocessing** — preparation inference result for output for text detection model.
+  * **Text recognition inference** — infering input data (images) and getting a result for text recognition model.
+  * **Text recognition postprocessing** — preparation inference result for output for text recognition model.
+  * **Text crop** — crop bounding boxes with text from input image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

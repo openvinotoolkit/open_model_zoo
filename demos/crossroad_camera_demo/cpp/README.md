@@ -125,12 +125,19 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
-In the default mode, the demo reports **Person Detection time** - inference time for the Person/Vehicle/Bike Detection network.
+In the default mode, during the demo's run it reports **Person Detection time** - inference time for the Person/Vehicle/Bike Detection network.
 
 If Person Attributes Recognition or Person Reidentification Retail are enabled, the additional info below is reported also:
 
 * **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
 * **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
+
+On completion the demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

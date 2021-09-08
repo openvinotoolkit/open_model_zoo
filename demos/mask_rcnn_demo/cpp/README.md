@@ -70,7 +70,11 @@ You can use the following command to do inference on CPU on an image using a tra
 
 ## Demo Output
 
-For each input image the application outputs a segmented image. For example, `out0.png` and `out1.png` are created for the network with batch size equal to 2.
+For each input image the application outputs a segmented image. For example, `out0.png` and `out1.png` are created for the network with batch size equal to 2. The demo reports:
+
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use this metric to measure application-level performance.
 
 ## See Also
 

@@ -69,8 +69,6 @@ class IEModel:  # pylint: disable=too-few-public-methods
             self.output_name = next(iter(self.net.outputs))
 
         self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
-        self.num_requests = num_requests
 
     def infer(self, data):
         """Runs model on the specified input"""

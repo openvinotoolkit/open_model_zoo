@@ -173,7 +173,12 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with labeled actions and faces.
+The demo uses OpenCV to display the resulting frame with labeled actions and faces. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

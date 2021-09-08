@@ -17,6 +17,7 @@ limitations under the License.
 import copy
 import pickle # nosec - disable B403:import-pickle check
 import platform
+from pathlib import Path
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -31,6 +32,7 @@ from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
+from ..metrics.metric_profiler import write_summary_result
 
 
 # pylint: disable=W0223,R0904
@@ -488,6 +490,13 @@ class ModelEvaluator(BaseEvaluator):
             self._metrics_results.append(evaluated_metric)
             if print_results:
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
+            if evaluated_metric.profiling_file and str(evaluated_metric.profiling_file).endswith('.json'):
+                result, meta = result_presenter.extract_result(evaluated_metric)
+                write_summary_result(
+                    result, meta, Path(self.metric_executor.profiler_dir) / evaluated_metric.profiling_file,
+                    self.dataset.labels
+                )
+
         return self._metrics_results
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
@@ -618,6 +627,7 @@ class ModelEvaluator(BaseEvaluator):
         self.dataset.reset(self.postprocessor.has_processors)
         if self.adapter:
             self.adapter.reset()
+        self.postprocessor.reset()
 
     def release(self):
         self.input_feeder.release()

@@ -145,7 +145,7 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
         for (size_t i = 0; i < featureMaps[k].first; ++i) {
             for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
-                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
+                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);
                 }
                 else {
                     calculateAnchors(anchors, { j + 0.5f }, { i + 0.5f }, minSizes[k][0], steps[k]);

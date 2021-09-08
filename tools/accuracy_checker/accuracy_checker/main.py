@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +17,18 @@ from datetime import datetime
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
+from csv import DictWriter
 
 import cv2
 
 from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
-from .presenters import write_csv_result
 from .progress_reporters import ProgressReporter
 from .utils import (
     get_path,
     cast_to_bool,
+    check_file_existence,
     validate_print_interval,
     start_telemetry,
     end_telemetry,
@@ -225,13 +223,6 @@ def add_tool_settings_args(parser):
         help='file for additional logging results',
         required=False
     )
-    tool_settings_args.add_argument(
-        '--ignore_metric_reference',
-        help='allow to ignore comparison of metric with reference value',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
 
 
 def add_openvino_specific_args(parser):
@@ -423,7 +414,6 @@ def main():
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
                     print_results=True, ignore_results_formatting=args.ignore_result_formatting,
-                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
                     write_csv_result(
@@ -457,6 +447,41 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('OpenCV version: {}'.format(cv2.__version__))
 
 
+def write_csv_result(csv_file, processing_info, metric_results, dataset_size, metrics_meta):
+    new_file = not check_file_existence(csv_file)
+    field_names = [
+        'model', 'launcher', 'device', 'dataset',
+        'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
+        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
+    model, launcher, device, tags, dataset = processing_info
+    main_info = {
+        'model': model,
+        'launcher': launcher,
+        'device': device.upper(),
+        'tags': ' '.join(tags) if tags else '',
+        'dataset': dataset,
+        'dataset_size': dataset_size
+    }
+
+    with open(csv_file, 'a+', newline='') as f:
+        writer = DictWriter(f, fieldnames=field_names)
+        if new_file:
+            writer.writeheader()
+        for metric_result, metric_meta in zip(metric_results, metrics_meta):
+            writer.writerow({
+                **main_info,
+                'metric_name': metric_result['name'],
+                'metric_type': metric_result['type'],
+                'metric_value': metric_result['value'],
+                'metric_target': metric_meta.get('target', 'higher-better'),
+                'metric_scale': metric_meta.get('scale', 100),
+                'metric_postfix': metric_meta.get('postfix', '%'),
+                'ref': metric_result.get('ref', ''),
+                'abs_threshold': metric_result.get('abs_threshold', 0),
+                'rel_threshold': metric_result.get('rel_threshold', 0)
+            })
+
+
 def setup_profiling(logs_dir, evaluator):
     _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     profiler_dir = logs_dir / _timestamp
@@ -473,7 +498,6 @@ def configure_evaluator_kwargs(args):
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
         evaluator_kwargs['csv_result'] = args.csv_result
     evaluator_kwargs['store_only'] = args.store_only
-    evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
     return evaluator_kwargs
 
 

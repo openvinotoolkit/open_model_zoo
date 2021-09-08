@@ -21,6 +21,7 @@ import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
 
+
 # pylint:disable=R0904
 class ModuleEvaluator(BaseEvaluator):
     def __init__(self, internal_module, config):

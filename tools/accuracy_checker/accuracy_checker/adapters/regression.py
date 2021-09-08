@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from .adapter import Adapter
-from ..config import BoolField, ListField
+from ..config import BoolField, ListField, StringField
 from ..representation import RegressionPrediction
 
 
@@ -92,6 +92,19 @@ class MultiOutputRegression(Adapter):
 class KaldiFeatsRegression(Adapter):
     __provider__ = 'kaldi_feat_regression'
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'target_out': StringField(optional=True, description='target output name'),
+            'flattenize': BoolField(optional=True, description='make output flatten')
+        })
+        return params
+
+    def configure(self):
+        self.target_out = self.get_value_from_config('target_out')
+        self.flattenize = self.get_value_from_config('flattenize')
+
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
@@ -107,6 +120,8 @@ class KaldiFeatsRegression(Adapter):
 
         result = []
         for identifier, output in zip(identifiers, predictions):
+            if self.flattenize:
+                output = output.flatten()
             prediction = RegressionPrediction(identifier, output)
             result.append(prediction)
 
@@ -130,3 +145,9 @@ class KaldiFeatsRegression(Adapter):
             output_map[self.output_blob] = out
 
         return output_map
+
+    def select_output_blob(self, outputs):
+        if self.target_out:
+            self.output_blob = self.target_out
+        if self.output_blob is None:
+            self.output_blob = next(iter(outputs))

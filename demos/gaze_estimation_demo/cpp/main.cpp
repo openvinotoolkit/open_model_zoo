@@ -31,6 +31,7 @@
 #include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include "gaze_estimation_demo.hpp"
@@ -46,11 +47,9 @@
 #include "gaze_estimator.hpp"
 
 #include "results_marker.hpp"
-#include "exponential_averager.hpp"
 
 #include "utils.hpp"
 
-using namespace InferenceEngine;
 using namespace gaze_estimation;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -81,13 +80,15 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
         // Loading Inference Engine
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         // Set up face detector and estimators
@@ -102,11 +103,6 @@ int main(int argc, char *argv[]) {
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
-        // Exponential averagers for times
-        double smoothingFactor = 0.1;
-        ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
-        ExponentialAverager inferenceTimeAverager(smoothingFactor, 30.);
-
         bool flipImage = false;
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
@@ -114,6 +110,8 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -128,30 +126,26 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {
                 cv::flip(frame, frame, 1);
             }
 
             // Infer results
-            auto tInferenceBegins = cv::getTickCount();
             auto inferenceResults = faceDetector.detect(frame);
             for (auto& inferenceResult : inferenceResults) {
                 for (auto estimator : estimators) {
                     estimator->estimate(frame, inferenceResult);
                 }
             }
-            auto tInferenceEnds = cv::getTickCount();
 
-            // Measure FPS
-            auto tIterationEnds = cv::getTickCount();
-            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
-            overallTimeAverager.updateValue(overallTime);
-            tIterationBegins = tIterationEnds;
+            // Display the results
+            for (auto const& inferenceResult : inferenceResults) {
+                resultsMarker.mark(frame, inferenceResult);
+            }
 
-            double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
-            inferenceTimeAverager.updateValue(inferenceTime);
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
@@ -159,13 +153,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            presenter.drawGraphs(frame);
-            // Display the results
-            for (auto const& inferenceResult : inferenceResults) {
-                resultsMarker.mark(frame, inferenceResult);
-            }
-            putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
-                                 inferenceTimeAverager.getAveragedValue());
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
@@ -185,9 +172,12 @@ int main(int argc, char *argv[]) {
                 else
                     presenter.handleKey(key);
             }
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
         } while (frame.data);
 
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

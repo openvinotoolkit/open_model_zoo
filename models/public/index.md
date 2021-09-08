@@ -66,9 +66,11 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | SE-ResNet 152               | Caffe\*                            | [se-resnet-152](./se-resnet-152/README.md) | 78.506%/94.45% | 22.709 | 66.746 |
 | SE-ResNeXt 50               | Caffe\*                            | [se-resnext-50](./se-resnext-50/README.md) | 78.968%/94.63% | 8.533 | 27.526|
 | SE-ResNeXt 101              | Caffe\*                            | [se-resnext-101](./se-resnext-101/README.md) | 80.168%/95.19% | 16.054 | 48.886 |
+| Shufflenet V2 x0.5          | Caffe\*                            | [shufflenet-v2-x0.5](./shufflenet-v2-x0.5/README.md) | 58.80%/81.13% | 0.08465 | 1.363 |
 | Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/README.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/README.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/README.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
+| Swin Transformer Tiny, window size=7| PyTorch\*                  | [swin-tiny-patch4-window7-224](./swin-tiny-patch4-window7-224/README.md) | 81.38%/95.51% | 9.0280 | 28.8173 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*<br>Caffe2\*                | [vgg19](./vgg19/README.md)<br>[vgg19-caffe2](./vgg19-caffe2/README.md) | 71.062%/89.832%<br>71.062%/89.832% | 39.3 | 143.667  |
 
@@ -85,7 +87,7 @@ detect areas with complex shape.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
-| DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 66.85% | 11.469 | 23.819 |
+| DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 68.41% | 11.469 | 23.819 |
 | DRN-D-38                  |  PyTorch\*     | [drn-d-38](./drn-d-38/README.md) | 71.31% | 1768.3276 | 25.9939 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
@@ -201,6 +203,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/README.md) | 33.47Db | 691.1589 | 12.7773|
+| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 35.77Db | 146.6037 | 11.3313 |
 
 ## Style Transfer
 
@@ -242,11 +245,12 @@ The task of sound classification is to predict what sounds are in an audio fragm
 
 The task of speech recognition is to recognize and translate spoken language into text.
 
-| Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
-| ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
+| Model Name        | Implementation | OMZ Model Name                                                   | Accuracy | GFlops | mParams |
+| ----------------- | -------------- | ---------------------------------------------------------------- | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/README.md) | 7.55%    | 0.0472 | 47.2    |
 | DeepSpeech V0.8.2 | TensorFlow\*   | [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/README.md) | 6.13%    | 0.0472 | 47.2    |
-| QuartzNet | Pytorch\* | [quartznet-15x5-en](./quartznet-15x5-en/README.md) | 3.86% | 2.4195 | 18.8857 |
+| QuartzNet         | PyTorch\*      | [quartznet-15x5-en](./quartznet-15x5-en/README.md)               | 3.86%    | 2.4195 | 18.8857 |
+| Wav2Vec 2.0 Base  | PyTorch\*      | [wav2vec2-base](./wav2vec2-base/README.md)                       | 3.39%    | 26.843 | 94.3965 |
 
 ## Image Translation
 
@@ -286,6 +290,14 @@ The task of image deblurring.
 | Model Name     | Implementation | OMZ Model Name            | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
 | F3Net          | PyTorch\*      | [f3net](./f3net/README.md) | 84.21%   | 31.2883 | 25.2791  |
+
+## Text Prediction
+
+Text prediction is a task to predict the next word, given all of the previous words within some text.
+
+| Model Name     | Implementation | OMZ Model Name             | Accuracy | GFlops   | mParams  |
+| -------------- | -------------- | -------------------------- | -------- | -------- | -------- |
+| GPT-2          | PyTorch\*      | [gpt-2](./gpt-2/README.md) | 29.00%   | 293.0489 | 175.6203 |
 
 ## Text Recognition
 

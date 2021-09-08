@@ -117,8 +117,13 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
+The demo uses OpenCV to display the resulting frame with marked gaze vectors and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
 By default, it shows only gaze estimation results. To see inference results of auxiliary networks, use run-time control keys.
+The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

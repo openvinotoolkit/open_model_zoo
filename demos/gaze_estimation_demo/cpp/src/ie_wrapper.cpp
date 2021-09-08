@@ -9,8 +9,6 @@
 
 #include "ie_wrapper.hpp"
 
-using namespace InferenceEngine;
-
 namespace gaze_estimation {
 
 IEWrapper::IEWrapper(InferenceEngine::Core& ie,
@@ -34,11 +32,11 @@ void IEWrapper::setExecPart() {
         inputBlobsDimsInfo[layerName] = layerDims_;
 
         if (layerDims.size() == 4) {
-            layerData->setLayout(Layout::NCHW);
-            layerData->setPrecision(Precision::U8);
+            layerData->setLayout(InferenceEngine::Layout::NCHW);
+            layerData->setPrecision(InferenceEngine::Precision::U8);
         } else if (layerDims.size() == 2) {
-            layerData->setLayout(Layout::NC);
-            layerData->setPrecision(Precision::FP32);
+            layerData->setLayout(InferenceEngine::Layout::NC);
+            layerData->setPrecision(InferenceEngine::Precision::FP32);
         } else {
             throw std::runtime_error("Unknown type of input layer layout. Expected either 4 or 2 dimensional inputs");
         }
@@ -53,11 +51,11 @@ void IEWrapper::setExecPart() {
 
         std::vector<unsigned long> layerDims_(layerDims.data(), layerDims.data() + layerDims.size());
         outputBlobsDimsInfo[layerName] = layerDims_;
-        layerData->setPrecision(Precision::FP32);
+        layerData->setPrecision(InferenceEngine::Precision::FP32);
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
-    printExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
+    logExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
     request = executableNetwork.CreateInferRequest();
 }
 
@@ -87,7 +85,8 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     if (dimsProduct != data.size()) {
         throw std::runtime_error("Input data does not match size of the blob");
     }
-    LockedMemory<void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->wmap();
+    InferenceEngine::LockedMemory<void> blobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(blobName))->wmap();
     auto buffer = blobMapped.as<float *>();
     for (unsigned long int i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
@@ -103,7 +102,8 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
         dataSize *= dim;
     }
 
-    LockedMemory<const void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rmap();
+    InferenceEngine::LockedMemory<const void> blobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(blobName))->rmap();
     auto buffer = blobMapped.as<float *>();
 
     for (int i = 0; i < dataSize; ++i) {

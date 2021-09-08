@@ -37,7 +37,6 @@ class APIntegralType(enum.Enum):
     voc_max = 'max'
 
 
-
 class BaseDetectionMetricMixin(Metric):
     @classmethod
     def parameters(cls):
@@ -106,13 +105,17 @@ class BaseDetectionMetricMixin(Metric):
                 self.use_filtered_tp
             )
             gt_boxes = [np.array(ann.boxes)[ann.labels == label] for ann in annotations]
+            num_images = np.sum([np.size(box_cnt) != 0 for box_cnt in gt_boxes])
 
             if not tp.size:
                 labels_stat[label] = {
                     'precision': np.array([]),
                     'recall': np.array([]),
                     'thresholds': conf,
-                    'fppi': np.array([])
+                    'fppi': np.array([]),
+                    'fp': np.sum(fp),
+                    'tp': np.sum(tp),
+                    'num_images': num_images
                 }
                 if profile_boxes:
                     labels_stat[label].update({
@@ -137,7 +140,10 @@ class BaseDetectionMetricMixin(Metric):
                 'precision': tp / np.maximum(tp + fp, np.finfo(np.float64).eps),
                 'recall': tp / np.maximum(n, np.finfo(np.float64).eps),
                 'thresholds': conf[threshold_indexes],
-                'fppi': fp / len(annotations)
+                'fppi': fp / len(annotations),
+                'fp': np.sum(fp),
+                'tp': np.sum(tp),
+                'num_images': num_images
             }
             if profile_boxes:
                 labels_stat[label].update({
@@ -192,11 +198,11 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         self.integral = APIntegralType(self.get_value_from_config('integral'))
 
     def update(self, annotation, prediction):
-        return self._calculate_map([annotation], [prediction], self.profiler is not None)
+        return self._calculate_map([annotation], [prediction], self.profiler is not None)[0]
 
     def evaluate(self, annotations, predictions):
         super().evaluate(annotations, predictions)
-        average_precisions = self._calculate_map(annotations, predictions)
+        average_precisions, label_stats = self._calculate_map(annotations, predictions)
         average_precisions, self.meta['names'] = finalize_metric_result(
             average_precisions, self.meta['orig_label_names']
         )
@@ -204,9 +210,94 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             warnings.warn("No detections to compute mAP")
             average_precisions.append(0)
 
+        if self.profiler:
+            summary = self.prepare_summary(label_stats)
+            summary['summary_result']['images_count'] = len(annotations)
+            self.profiler.write_summary(summary)
+
         return average_precisions
 
-    def _calculate_map(self, annotations, predictions, profile_boxes=False):
+    @staticmethod
+    def prepare_summary(label_stats):
+        ap, recall_v, recall, precision_v, precision, lamrs = [], [], [], [], [], []
+        per_class_summary = {}
+        tp_fp_rate = []
+        total_objects_cnt = 0
+        approx_pr_recall, approx_fppi_miss_rate = [], []
+        for label_idx, stat in label_stats.items():
+            if stat['num_images'] == 0:
+                lamrs.append(0)
+                tp_fp_rate.append([0, 0])
+                ap.append(np.NAN)
+                continue
+            ap.append(stat['result'])
+            recall.append(stat['recall'])
+            recall_v.append(recall[-1][-1] if np.size(recall[-1]) else np.NAN)
+            precision.append(stat['precision'])
+            precision_v.append(precision[-1][-1] if np.size(precision[-1]) else np.NAN)
+            fppi = 1 - precision[-1]
+            mr = stat['miss_rate']
+            if np.size(recall[-1]) and np.size(precision[-1]):
+                approx_recall = np.linspace(0, 1, 100, endpoint=True)
+                approx_precision = np.interp(approx_recall, recall[-1], precision[-1])
+                approx_pr_recall.append([approx_precision, approx_recall])
+                approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+                approx_mr = np.interp(approx_fppi, fppi, mr)
+                approx_fppi_miss_rate.append([approx_fppi, approx_mr])
+            pr = np.array([precision[-1], recall[-1]]).T
+            fm = np.array([fppi, mr]).T
+            fppi_tmp = np.insert(fppi, 0, -1.0)
+            mr_tmp = np.insert(mr, 0, 1.0)
+            ref = np.logspace(-2.0, 0.0, num=9)
+            fp = int(stat['fp'])
+            tp = int(stat['tp'])
+            tp_fp_rate.append([tp, fp])
+            for i, ref_i in enumerate(ref):
+                j = np.where(fppi_tmp <= ref_i)[-1][-1]
+                ref[i] = mr_tmp[j]
+
+            lamr = np.exp(np.mean(np.log(np.maximum(1e-10, ref))))
+            lamrs.append(lamr)
+            total_objects_cnt += len(recall[-1])
+            per_class_summary[label_idx] = {
+                'precision': precision[-1][-1] if np.size(precision[-1]) else -1,
+                'recall': recall[-1][-1] if np.size(recall[-1]) else -1,
+                'result': ap[-1] if not np.isnan(ap[-1]) else -1,
+                "scale": 100,
+                "result_postfix": "%",
+                'objects_count': len(recall[-1]),
+                'charts': {
+                    'precision_recall': pr.tolist(),
+                    'fppi_miss_rate': fm.tolist()
+                },
+                'images_count': int(stat['num_images'])
+            }
+        ap_res = np.nanmean(ap)
+        recall_res = np.nanmean(recall_v)
+        precision_res = np.nanmean(precision_v)
+        return {
+            'summary_result': {
+                'result': ap_res,
+                'precision': precision_res,
+                'recall': recall_res,
+                'result_scale': 100,
+                'result_postfix': '%',
+                'charts': {
+                    'ap': [0 if np.isnan(ap_) else ap_ for ap_ in ap],
+                    'log_miss_rate': lamrs,
+                    'tp_fp_rate': tp_fp_rate,
+                    'precision_recall': np.mean(approx_pr_recall, 0).T.tolist() if np.size(approx_pr_recall) else [],
+                    'fppi_miss_rate': (
+                        np.mean(approx_fppi_miss_rate, 0).T.tolist() if np.size(approx_fppi_miss_rate) else []
+                    )
+                },
+                'objects_count': total_objects_cnt
+
+            },
+            'per_class_result': per_class_summary
+        }
+
+    def _calculate_map(self, annotations, predictions, profile_boxes=False, return_labels_stats=False):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels, profile_boxes)
 
@@ -214,17 +305,18 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         for label in labels_stat:
             label_precision = labels_stat[label]['precision']
             label_recall = labels_stat[label]['recall']
+            label_miss_rate = 1 - label_recall
+            labels_stat[label]['miss_rate'] = label_miss_rate
             if label_recall.size:
                 ap = average_precision(label_precision, label_recall, self.integral)
                 average_precisions.append(ap)
             else:
                 average_precisions.append(np.nan)
-            if profile_boxes:
-                labels_stat[label]['ap'] = average_precisions[-1]
-                labels_stat[label]['result'] = average_precisions[-1]
+            labels_stat[label]['ap'] = average_precisions[-1]
+            labels_stat[label]['result'] = average_precisions[-1]
         if profile_boxes:
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(average_precisions))
-        return average_precisions
+        return average_precisions, labels_stat
 
 
 class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
@@ -685,6 +777,7 @@ def calc_iou(gt_box, dt_box):
     dt_area = (dt_box[2] - dt_box[0]) * (dt_box[3] - dt_box[1])
 
     return [intersect_area, dt_area, gt_area]
+
 
 class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
     __provider__ = 'youtube_faces_accuracy'

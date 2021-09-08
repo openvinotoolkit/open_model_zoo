@@ -156,12 +156,6 @@ models:
           - name: inp_state_049
             type: LSTM_INPUT
             value: out_state_049
-          - name: inp_state_050
-            type: LSTM_INPUT
-            value: out_state_050
-          - name: inp_state_051
-            type: LSTM_INPUT
-            value: out_state_051
     datasets:
       - name: speech_denoising_dataset
         preprocessing:

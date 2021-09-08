@@ -5,7 +5,7 @@ import cv2
 
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
-    bbox[0] = np.clip(bbox[0], 0, image.shape[0] - 1)
+    bbox[0] = np.clip(bbox[0], 0, image.shape[1] - 1)
     bbox[1] = np.clip(bbox[1], 0, image.shape[0] - 1)
     x2 = np.min((image.shape[1] - 1, bbox[0] + np.max((0, bbox[2] - 1))))
     y2 = np.min((image.shape[0] - 1, bbox[1] + np.max((0, bbox[3] - 1))))

@@ -99,10 +99,12 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * se-resnet-50
 * se-resnext-101
 * se-resnext-50
+* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
 * squeezenet1.0
 * squeezenet1.1
 * squeezenet1.1-caffe2
+* swin-tiny-patch4-window7-224
 * vgg16
 * vgg19
 * vgg19-caffe2
@@ -186,7 +188,18 @@ For example, use the following command-line command to run the application:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. After the completion, it prints average metrics values to the console.
+The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

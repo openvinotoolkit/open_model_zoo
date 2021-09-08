@@ -76,6 +76,7 @@ Options:
     -no_show                  Optional. Don't show output.
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
+    -only_masks               Optional. Display only masks. Could be switched by TAB key.
 ```
 
 Running the application with the empty list of options yields an error message.
@@ -98,7 +99,20 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask.
+The demo uses OpenCV to display the resulting images with blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
+The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
+> **NOTE**: the output file contains the same image as displayed one.
 
 ## See Also
 

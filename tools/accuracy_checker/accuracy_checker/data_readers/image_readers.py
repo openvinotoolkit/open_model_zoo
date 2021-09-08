@@ -64,9 +64,17 @@ class OpenCVImageReader(BaseReader):
 class PillowImageReader(BaseReader):
     __provider__ = 'pillow_imread'
 
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config, **kwargs)
-        self.convert_to_rgb = True
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'to_rgb': BoolField(optional=True, default=True, description='convert image to RGB format')
+        })
+        return parameters
+
+    def configure(self):
+        super().configure()
+        self.convert_to_rgb = self.get_value_from_config('to_rgb')
 
     def read(self, data_id):
         data_path = get_path(self.data_source / data_id) if self.data_source is not None else data_id

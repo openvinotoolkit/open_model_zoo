@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from argparse import Namespace
 import copy
 from pathlib import Path
 import os
@@ -364,7 +365,7 @@ class ConfigReader:
                     for model_path in model_paths:
                         copy_launcher = copy.deepcopy(launcher)
                         copy_launcher['model'] = model_path
-                        if launcher['framework'] == 'dlsdk' and 'model_is_blob' in arguments:
+                        if launcher['framework'] in ['dlsdk', 'g-api'] and 'model_is_blob' in arguments:
                             copy_launcher['_model_is_blob'] = arguments.model_is_blob
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
@@ -546,12 +547,14 @@ class ConfigReader:
     def convert_paths(config):
         mode = 'evaluations' if 'evaluations' in config else 'models'
         definitions = os.environ.get(DEFINITION_ENV_VAR)
+        args = {}
         if definitions:
             definitions = read_yaml(Path(definitions))
             ConfigReader._prepare_global_configs(definitions)
             config = ConfigReader._merge_configs(definitions, config, {}, mode)
-        if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
-            ConfigReader._merge_paths_with_prefixes({}, config, mode)
+        ConfigReader._merge_paths_with_prefixes(args, config, mode)
+        if COMMAND_LINE_ARGS_AS_ENV_VARS['kaldi_bin_dir'] in os.environ:
+            ConfigReader._provide_cmd_arguments(Namespace(**args), config, mode)
 
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():

@@ -25,7 +25,7 @@ if len(sys.argv) == 2:
 else:
     dir = '.' + os.sep
 
-files_list = glob.glob(dir + '*.png') + glob.glob(dir + '*.jpg')
+files_list = glob.glob(dir + '/*.png') + glob.glob(dir + '/*.jpg')
 
 labels = []
 objects = {}

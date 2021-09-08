@@ -65,6 +65,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         self.top_k = self.get_value_from_config('top_k')
         self.match = self.get_value_from_config('match')
         self.cast_to_int = self.get_value_from_config('cast_to_int')
+        self.summary_helper = None
 
         def loss(annotation_label, prediction_top_k_labels):
             return int(annotation_label in prediction_top_k_labels)
@@ -75,6 +76,12 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
             if isinstance(accuracy_score, UnsupportedPackage):
                 accuracy_score.raise_error(self.__provider__)
             self.accuracy = []
+        if self.profiler:
+            self.summary_helper = ClassificationProfilingSummaryHelper()
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
     def update(self, annotation, prediction):
         if not self.match:
@@ -85,6 +92,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
             accuracy = accuracy_score(annotation.label, label)
             self.accuracy.append(accuracy)
         if self.profiler:
+            self.summary_helper.submit_data(annotation.label, prediction.top_k(self.top_k), prediction.scores)
             self.profiler.update(
                 annotation.identifier, annotation.label, prediction.top_k(self.top_k), self.name, accuracy,
                 prediction.scores
@@ -94,6 +102,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         if self.profiler:
             self.profiler.finish()
+            summary = self.summary_helper.get_summary_report()
+            self.profiler.write_summary(summary)
         if not self.match:
             accuracy = self.accuracy.evaluate()
         else:
@@ -108,6 +118,162 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
         if self.profiler:
             self.profiler.reset()
+
+
+class ClassificationProfilingSummaryHelper:
+    def __init__(self):
+        self.gt, self.pred, self.scores = [], [], []
+
+    def reset(self):
+        self.gt, self.pred, self.scores = [], [], []
+
+    def submit_data(self, annotation_label, prediction_label, scores):
+        self.gt.append(annotation_label)
+        self.pred.append(prediction_label)
+        self.scores.append(scores)
+
+    def get_summary_report(self):
+        if not self.gt:
+            return {
+                'summary_result': {
+                    'precision': 0., 'recall': 0, 'f1_score': 0.,
+                    'charts': {'roc': [], 'precision_recall': []}, 'num_objects': 0
+                },
+                'per_class_result': {}
+            }
+        y_true, y_score = self.binarize_labels()
+        cm = self.cm()
+        average_roc, avg_roc_auc, per_class_roc, per_class_auc = self.roc(y_true, y_score)
+        average_pr_chart, per_class_pr_chart, average_pr_area, per_class_pr_area = self.pr(y_true, y_score)
+        cm_diagonal = cm.diagonal()
+        cm_horizontal_sum = cm.sum(axis=1)
+        cm_vertical_sum = cm.sum(axis=0)
+        precision = np.divide(
+            cm_diagonal, cm_horizontal_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_horizontal_sum != 0
+        )
+        recall = np.divide(
+            cm_diagonal, cm_vertical_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_vertical_sum != 0
+        )
+        sum_precision_recall = precision + recall
+        f1_score = 2 * np.divide(
+            precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
+            where=sum_precision_recall != 0
+        )
+        accuracy_per_class = precision
+        summary = {
+            'summary_result': {
+                'precision': precision.mean(),
+                'recall': recall.mean(),
+                'f1_score': f1_score.mean(),
+                'charts': {
+                    'roc': average_roc.tolist(),
+                    'precision_recall': average_pr_chart.tolist(),
+                    'roc_auc': avg_roc_auc,
+                    'precision_recall_area': average_pr_area,
+                },
+                'num_objects': np.sum(cm_horizontal_sum)
+            },
+            'per_class_result': {}
+        }
+        per_class_result = {}
+        for i in range(cm.shape[0]):
+            per_class_result[i] = {
+                'result': accuracy_per_class[i],
+                'precision': precision[i],
+                'recall': recall[i],
+                'f1_score': f1_score[i],
+                'result_scale': 100,
+                'result_postfix': '%',
+                'num_objects': cm_horizontal_sum[i],
+                'charts': {
+                    'roc': per_class_roc[i].tolist(),
+                    'precision_recall': per_class_pr_chart[i].tolist(),
+                    'roc_auc': per_class_auc[i],
+                    'precision_recall_area': per_class_pr_area[i]
+                }
+            }
+        summary['per_class_result'].update(per_class_result)
+        return summary
+
+    def cm(self):
+        num_labels = max(np.max(self.gt) + 1, np.max(self.pred) + 1)
+        cm = np.zeros((num_labels, num_labels))
+        for gt, pred in zip(self.gt, self.pred):
+            cm[gt][pred] += 1
+        return cm
+
+    def binarize_labels(self):
+        max_v = max(np.max(self.gt) + 1, np.max(self.pred) + 1)
+        gt_bin, pred_bin = [], []
+        for gt in self.gt:
+            label_bin = np.zeros(max_v)
+            label_bin[int(gt)] = 1
+            gt_bin.append(label_bin)
+
+        for pred, scores in zip(self.pred, self.scores):
+            label_bin = np.zeros(max_v)
+            label_bin[pred.astype(int)] = scores[pred.astype(int)]
+            pred_bin.append(label_bin)
+
+        return np.array(gt_bin), np.array(pred_bin)
+
+    def roc(self, y_true, y_score):
+        per_class_chart = {}
+        per_class_area = {}
+        for i in range(y_true.shape[-1]):
+            per_class_chart[i], per_class_area[i] = self.roc_curve(y_true[:, i], y_score[:, i])
+        average_chart, average_area = self.roc_curve(y_true.ravel(), y_score.ravel())
+        return average_chart, average_area, per_class_chart, per_class_area
+
+    def roc_curve(self, gt, pred):
+        desc_score_indices = np.argsort(pred, kind="mergesort")[::-1]
+        y_score = pred[desc_score_indices]
+        y_true = gt[desc_score_indices]
+        distinct_value_indices = np.where(np.diff(y_score))[0]
+        threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
+        tps = np.cumsum(y_true)[threshold_idxs]
+        fps = 1 + threshold_idxs - tps
+        if max(fps) > 0:
+            fps /= fps[-1]
+        if max(tps) > 0:
+            tps /= tps[-1]
+        plot = np.array([fps, tps, y_score[threshold_idxs]])
+        area = self.roc_auc_score(fps, tps)
+        return plot.T, area
+
+    def pr_curve(self, gt, pred):
+        chart, area = self.roc_curve(gt, pred)
+        fps, tps, _ = chart.T
+
+        precision = tps / (tps + fps)
+        precision[np.isnan(precision)] = 0
+        recall = tps / tps[-1]
+        recall[np.isnan(recall)] = 0
+        last_ind = tps.searchsorted(tps[-1])
+        sl = slice(last_ind, None, -1)
+        area = self.precision_recall_auc(np.r_[precision[sl], 1], np.r_[recall[sl], 0])
+        return np.array([np.r_[precision[sl], 1], np.r_[recall[sl], 0]]).T, area
+
+    def pr(self, y_true, y_score):
+        per_class_chart = {}
+        per_class_area = {}
+        for i in range(y_true.shape[-1]):
+            per_class_chart[i], per_class_area[i] = self.pr_curve(y_true[:, i], y_score[:, i])
+        average_chart, average_area = self.pr_curve(y_true.ravel(), y_score.ravel())
+        return average_chart, per_class_chart, average_area, per_class_area
+
+    @staticmethod
+    def roc_auc_score(fpr, tpr):
+        direction = 1
+        dx = np.diff(fpr)
+        if np.any(dx < 0):
+            if np.all(dx <= 0):
+                direction = -1
+        return direction * np.trapz(tpr, fpr)
+
+    @staticmethod
+    def precision_recall_auc(precision, recall):
+        return -np.sum(np.diff(recall) * np.array(precision)[:-1])
 
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):
@@ -180,6 +346,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
             self.profiler.reset()
         self.accuracy.reset()
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -305,6 +474,10 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
         if self.profiler:
             self.profiler.reset()
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):
