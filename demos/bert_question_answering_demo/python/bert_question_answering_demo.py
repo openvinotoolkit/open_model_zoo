@@ -27,7 +27,7 @@ from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
+from models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
 from html_reader import get_paragraphs
 from models import BertQuestionAnswering
 from pipelines import get_user_config, parse_devices, AsyncPipeline
@@ -40,7 +40,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-v", "--vocab", help="Required. path to the vocabulary file with tokens",
+    args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=Path)

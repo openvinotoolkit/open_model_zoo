@@ -24,7 +24,7 @@ class Bert(Model):
         self.token_pad = [vocab['[PAD]']]
         self.input_names = [i.strip() for i in input_names.split(',')]
         if self.net.input_info.keys() != set(self.input_names):
-            raise RuntimeError('The demo expects input names: {}, actual network input names: {}'.format(
+            raise RuntimeError('The Bert model expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.net.input_info.keys())))
         self.max_length = self.net.input_info[self.input_names[0]].input_data.shape[1]
 
@@ -127,7 +127,7 @@ class BertQuestionAnswering(Bert):
         self.squad_ver = squad_ver
         self.output_names = [o.strip() for o in output_names.split(',')]
         if self.net.outputs.keys() != set(self.output_names):
-            raise RuntimeError('The demo expects output names: {}, actual network output names: {}'.format(
+            raise RuntimeError('The BertQuestionAnswering model output names: {}, actual network output names: {}'.format(
                 self.output_names, list(self.net.outputs.keys())))
 
     def form_request(self, inputs):

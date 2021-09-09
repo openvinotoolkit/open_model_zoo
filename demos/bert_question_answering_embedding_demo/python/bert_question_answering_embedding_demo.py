@@ -27,7 +27,7 @@ from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
+from models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
 from html_reader import get_paragraphs
 from models import BertEmbedding, BertQuestionAnswering
 from pipelines import get_user_config, parse_devices, AsyncPipeline

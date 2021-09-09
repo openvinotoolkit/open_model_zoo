@@ -43,7 +43,7 @@ usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -v VOCAB, --vocab VOCAB
-                        Required. path to the vocabulary file with tokens
+                        Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
