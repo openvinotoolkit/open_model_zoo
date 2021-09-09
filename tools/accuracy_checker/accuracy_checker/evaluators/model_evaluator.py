@@ -18,6 +18,7 @@ import copy
 import pickle # nosec - disable B403:import-pickle check
 import platform
 from pathlib import Path
+import numpy as np
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -231,17 +232,20 @@ class ModelEvaluator(BaseEvaluator):
         details.update(self.dataset.send_annotation_info(dataset_config))
         return details
 
-    def _initialize_input_shape(self):
+    def _initialize_input_shape(self, dynamic_shape_helper=None):
         _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, _ = self._get_batch_input(batch_annotation, batch_input)
-        self.launcher.initialize_undefined_shapes(filled_inputs)
+        filled_inputs, _, input_template  = self._get_batch_input(batch_annotation, batch_input, dynamic_shape_helper)
+        self.launcher.initialize_undefined_shapes(filled_inputs, input_template)
 
-    def _get_batch_input(self, batch_annotation, batch_input):
+    def _get_batch_input(self, batch_annotation, batch_input, template=None):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         batch_meta = extract_image_representations(batch_input, meta_only=True)
-        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        if template is None:
+            filled_inputs = self.input_feeder.fill_inputs(batch_input)
+            return filled_inputs, batch_meta, None
 
-        return filled_inputs, batch_meta
+        filled_inputs, inputs_template, _ = self.input_feeder.fill_inputs_with_template(batch_input, template)
+        return filled_inputs, batch_meta, inputs_template
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
         def completion_callback(status_code, request_id):
@@ -340,7 +344,7 @@ class ModelEvaluator(BaseEvaluator):
          ignore_metric_reference) = metric_config
         self._resolve_undefined_shapes()
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
-            filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if stored_predictions:
                 self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
@@ -419,7 +423,7 @@ class ModelEvaluator(BaseEvaluator):
                 break
 
             queued_irs.append(ir_id)
-            batch_input, batch_meta = self._get_batch_input(batch_annotation, batch_input)
+            batch_input, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
                                         context=(batch_id, batch_input_ids, batch_annotation))
 
@@ -621,6 +625,22 @@ class ModelEvaluator(BaseEvaluator):
                 self._initialize_input_shape_with_data_range()
                 return
             self._initialize_input_shape()
+
+    def _initialize_input_shape_with_data_range(self):
+        input_shapes = []
+        for _, _, batch_input, _ in self.dataset:
+            input_shapes.extend(self.preprocessor.query_data_batch_shapes(batch_input))
+        shapes_statistic = np.array(input_shapes)
+        shape_template = [-1] * len(input_shapes[0])
+        undefined_shapes = np.sum(shapes_statistic == -1, axis=-1)
+        for i, ds in enumerate(undefined_shapes):
+            if ds > 0:
+                continue
+            axis_sizes = shapes_statistic[:, i]
+            min_size = np.min(axis_sizes)
+            max_size = np.max(axis_sizes)
+            shape_template[i] = min_size if min_size == max_size else (min_size, max_size)
+        self._initialize_input_shape(dynamic_shape_helper=shape_template)
 
     @property
     def dataset_size(self):

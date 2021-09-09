@@ -212,6 +212,9 @@ class InputFeeder:
             filled_inputs, extract_image_representations(data_representation_batch, meta_only=True)
         )
 
+    def fill_non_constant_inputs_with_template(self, data_representation_batch, template):
+        return self.fill_non_constant_inputs(data_representation_batch), template
+
     def fill_inputs(self, data_representation_batch):
         if self.dummy:
             return []
@@ -219,6 +222,17 @@ class InputFeeder:
         for infer_inputs in inputs:
             infer_inputs.update(self.const_inputs)
         return inputs
+
+    def fill_inputs_with_template(self, data_representation_batch, template=None):
+        if self.dummy:
+            return [], None
+        if template is None:
+            return self.fill_inputs(data_representation_batch), None
+
+        inputs, templates = self.fill_non_constant_inputs_with_template(data_representation_batch, template)
+        for infer_inputs in inputs:
+            infer_inputs.update(self.const_inputs)
+        return inputs, templates
 
     def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None):
         precision_info = self.validate_input_precision(precisions_list)

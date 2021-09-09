@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import warnings
+import numpy as np
 from ..config import ConfigValidator, StringField
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
@@ -128,6 +129,13 @@ class PreprocessingExecutor:
         for processor in self.processors:
             data_shape = processor.query_shapes(data_shape)
         return data_shape
+
+    def query_data_batch_shapes(self, data):
+        shapes = []
+        for input_data in data:
+            shapes.append(self.query_shapes(np.shape(input_data.data)))
+        return shapes
+
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)
