@@ -16,257 +16,14 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
+from ..config import BoolField, NumberField, StringField
 from ..preprocessor import Preprocessor
 from ..utils import UnsupportedPackage
 
 try:
     import scipy.signal as dsp
 except ImportError as import_error:
-    mask_util = UnsupportedPackage('scipy', import_error.msg)
-
-
-class ResampleAudio(Preprocessor):
-    __provider__ = 'resample_audio'
-    shape_modificator = True
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'sample_rate': NumberField(value_type=int, min_value=1,
-                                       description="Set new audio sample rate."),
-        })
-        return parameters
-
-    def configure(self):
-        self.sample_rate = self.get_value_from_config('sample_rate')
-
-    def process(self, image, annotation_meta=None):
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
-            raise RuntimeError('Operation "{}" can\'t resample audio: required original samplerate in metadata.'.
-                               format(self.__provider__))
-
-        if sample_rate == self.sample_rate:
-            return image
-
-        data = image.data
-        duration = data.shape[1] / sample_rate
-        resampled_data = np.zeros(shape=(data.shape[0], int(duration * self.sample_rate)), dtype=float)
-        x_old = np.linspace(0, duration, data.shape[1])
-        x_new = np.linspace(0, duration, resampled_data.shape[1])
-        resampled_data[0] = np.interp(x_new, x_old, data[0])
-
-        image.data = resampled_data
-        image.metadata['sample_rate'] = self.sample_rate
-
-        return image
-
-    @staticmethod
-    def calculate_out_shape(data_shape):
-        return [-1] * len(data_shape)
-
-
-class ClipAudio(Preprocessor):
-    __provider__ = 'clip_audio'
-    shape_modificator = True
-    _dynamic_shape = False
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'duration': BaseField(description="Length of audio clip in seconds or samples (with 'samples' suffix)."),
-            'max_clips': NumberField(
-                value_type=int, min_value=1, optional=True,
-                description="Maximum number of clips per audiofile."
-            ),
-            'pad_to': NumberField(optional=True, default=0, description="Number of points each clip padded to."),
-            'splice_frames': NumberField(optional=True, default=1, description="Number of frames to splice."),
-            'pad_center': BoolField(optional=True, default=False, description="Place clip to center of padded frame"),
-            'multi_infer': BoolField(optional=True, default=True, description="Metadata multi infer value"),
-            'overlap': BaseField(optional=True, description="Overlapping part for each clip."),
-        })
-        return parameters
-
-    def configure(self):
-        duration = self.get_value_from_config('duration')
-        self._parse_duration(duration)
-
-        self.max_clips = self.get_value_from_config('max_clips') or np.inf
-
-        overlap = self.get_value_from_config('overlap')
-        self._parse_overlap(overlap)
-
-        self.pad_to = int(self.get_value_from_config('pad_to'))
-        self.pad_center = self.get_value_from_config('pad_center')
-        self.multi_infer = self.get_value_from_config('multi_infer')
-        self.splice_frames = self.get_value_from_config('splice_frames')
-
-    def process(self, image, annotation_meta=None):
-        data = image.data
-
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
-            raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
-                               format(self.__provider__))
-        audio_duration = data.shape[1]
-        clip_duration = self.duration if self.is_duration_in_samples else int(self.duration * sample_rate)
-        clipped_data = []
-        if self.is_overlap_in_samples:
-            hop = clip_duration - self.overlap_in_samples
-        else:
-            hop = int((1 - self.overlap) * clip_duration)
-
-        if hop > clip_duration:
-            raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
-
-        audio_duration = (audio_duration + hop - 1) // hop
-        audio_duration = (audio_duration + self.splice_frames - 1) // self.splice_frames
-        audio_duration *= self.splice_frames * hop
-        audio_duration = int(audio_duration + clip_duration - hop)
-
-        if audio_duration > data.shape[1]:
-            data = np.concatenate((data, np.zeros((data.shape[0], audio_duration - data.shape[1]))), axis=1)
-
-        for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
-            if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
-                break
-            clip = data[:, clip_start: clip_start + clip_duration]
-            clipped_data.append(clip)
-
-        if self.pad_to is not None:
-            if self.pad_center:
-                clipped_data = self._pad_center(np.asarray(clipped_data), self.pad_to)
-        image.data = clipped_data
-        image.metadata['multi_infer'] = self.multi_infer
-
-        return image
-
-    @staticmethod
-    def _pad_center(data, size, axis=-1):
-        n = data.shape[axis]
-        lpad = int((size - n) // 2)
-        lengths = [(0, 0)] * data.ndim
-        lengths[axis] = (lpad, int(size - n - lpad))
-        return np.pad(data, lengths)
-
-    def _parse_overlap(self, overlap):
-        self.is_overlap_in_samples = False
-        self.overlap = 0
-        if overlap is None:
-            return
-        if isinstance(overlap, str):
-            if overlap.endswith('%'):
-                try:
-                    self.overlap = float(overlap[:-1]) / 100
-                except ValueError:
-                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                      .format(self.__provider__, overlap))
-            elif overlap.endswith('samples'):
-                try:
-                    self.overlap_in_samples = int(overlap[:-7])
-                except ValueError:
-                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                      .format(self.__provider__, overlap))
-                if self.overlap_in_samples < 1:
-                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                      .format(self.__provider__, overlap))
-                self.is_overlap_in_samples = True
-            else:
-                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                  .format(self.__provider__, overlap))
-        else:
-            try:
-                self.overlap = float(overlap)
-            except ValueError:
-                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                  .format(self.__provider__, overlap))
-            if self.overlap <= 0 or self.overlap >= 1:
-                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                  .format(self.__provider__, overlap))
-
-    def _parse_duration(self, duration):
-        self.is_duration_in_samples = False
-        if isinstance(duration, str):
-            if duration.endswith('samples'):
-                try:
-                    self.duration = int(duration[:-7])
-                except ValueError:
-                    raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                      .format(self.__provider__, duration))
-                if self.duration <= 1:
-                    raise ConfigError("Preprocessor {}: duration should be positive value - {}."
-                                      .format(self.__provider__, self.duration))
-                self.is_duration_in_samples = True
-            else:
-                raise ConfigError("Preprocessor {}: invalid value for duration - {}.".
-                                  format(self.__provider__, duration))
-        else:
-            try:
-                self.duration = float(duration)
-            except ValueError:
-                raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                  .format(self.__provider__, duration))
-            if self.duration <= 0:
-                raise ConfigError("Preprocessor {}: duration should be positive value - {}."
-                                  .format(self.__provider__, self.duration))
-
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shape
-
-
-class SamplesToFloat32(Preprocessor):
-    __provider__ = 'audio_samples_to_float32'
-
-    def process(self, image, annotation_meta=None):
-        image.data = self._convert_samples_to_float32(image.data)
-        return image
-
-    @staticmethod
-    def _convert_samples_to_float32(samples):
-        """Convert sample type to float32.
-        Audio sample type is usually integer or float-point.
-        Integers will be scaled to [-1, 1] in float32.
-        """
-        float32_samples = samples.astype('float32')
-        if samples.dtype in np.sctypes['int']:
-            bits = np.iinfo(samples.dtype).bits
-            float32_samples *= 1.0 / 2 ** (bits - 1)
-        elif samples.dtype in np.sctypes['float']:
-            pass
-        else:
-            raise TypeError("Unsupported sample type: {}.".format(samples.dtype))
-        return float32_samples
-
-
-class NormalizeAudio(Preprocessor):
-    __provider__ = 'audio_normalization'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'int16mode': BoolField(optional=True, default=False, description="Normalization to int16 range"),
-        })
-        return parameters
-
-    def configure(self):
-
-        self.int16mode = self.get_value_from_config('int16mode')
-
-    def process(self, image, annotation_meta=None):
-        sound = image.data
-        if self.int16mode:
-            sound = sound / np.float32(0x8000)
-        else:
-            sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
-
-        image.data = sound
-
-        return image
+    dsp = UnsupportedPackage('scipy', import_error.msg)
 
 
 class HanningWindow(Preprocessor):
@@ -291,7 +48,6 @@ class HanningWindow(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         image.data = image.data * self.window
-
         return image
 
 
@@ -310,7 +66,6 @@ class AudioSpectrogram(Preprocessor):
         return parameters
 
     def configure(self):
-
         self.fftbase = self.get_value_from_config('fftbase')
         self.magnutide_squared = self.get_value_from_config('magnitude_squared')
         self.skip_channels = self.get_value_from_config('skip_channels')
@@ -319,14 +74,17 @@ class AudioSpectrogram(Preprocessor):
         frames = image.data
         if self.skip_channels:
             frames = frames.squeeze()
-
         pspec = np.absolute(np.fft.rfft(frames, self.fftbase))  # pylint:disable=W9904
         if self.magnutide_squared:
             pspec = np.square(pspec)
-
         image.data = pspec
-
         return image
+
+    def calculate_out_shape(self, data_shape):
+        fake_input = np.zeros(data_shape)
+        if self.skip_channels:
+            fake_input = fake_input.squeeze()
+        return np.fft.rfft(fake_input, self.fftbase).shape
 
 
 class TriangleFiltering(Preprocessor):
@@ -382,6 +140,10 @@ class TriangleFiltering(Preprocessor):
         image.data = mfcc_output
 
         return image
+
+    def calculate_out_shape(self, data_shape):
+        samples, _ = data_shape
+        return samples, self.filterbank_channel_count
 
     def freq2mel(self, freq):
         return self.HZ2MEL * np.log1p(freq / self.MEL_CUTOFF)
@@ -473,13 +235,14 @@ class DCT(Preprocessor):
 
         for j in range(samples):
             cepstrum[j, ...] = self.compute(filtered[j, ...])
-
         image.data = cepstrum
-
         return image
 
-    def initialize(self):
+    def calculate_out_shape(self, data_shape):
+        samples, _ = data_shape
+        return samples, self.dct_coefficient_count
 
+    def initialize(self):
         self.cosine = np.zeros((self.dct_coefficient_count, self.input_length))
         fnorm = np.sqrt(2.0 / self.input_length)
         arg = np.pi / self.input_length
@@ -488,7 +251,6 @@ class DCT(Preprocessor):
                 self.cosine[i][j] = fnorm * np.cos(i * arg * (j + 0.5))
 
     def compute(self, filtered):
-
         output_dct = np.zeros(self.dct_coefficient_count)
         base = filtered.shape[0]
 
@@ -522,8 +284,11 @@ class ClipCepstrum(Preprocessor):
         self.numceps = self.get_value_from_config('numceps')
 
     def process(self, image, annotation_meta=None):
-        mfcc_feat = image.data
+        image.data = self.process_features(image.data)
 
+        return image
+
+    def process_features(self, mfcc_feat):
         num_strides, _ = mfcc_feat.shape
         empty_context = np.zeros((self.n_context, self.numceps), dtype=mfcc_feat.dtype)
         mfcc_feat = np.concatenate((empty_context, mfcc_feat, empty_context))
@@ -534,10 +299,12 @@ class ClipCepstrum(Preprocessor):
             (num_strides, window_size, self.numceps),
             (mfcc_feat.strides[0], mfcc_feat.strides[0], mfcc_feat.strides[1]),
             writeable=False)
+        return features
 
-        image.data = features
-
-        return image
+    def calculate_out_shape(self, data_shape):
+        data = np.zeros(data_shape)
+        feats = self.process_features(data)
+        return feats.shape
 
 
 class PackCepstrum(Preprocessor):
@@ -572,43 +339,6 @@ class PackCepstrum(Preprocessor):
         image.metadata['multi_infer'] = True
 
         return image
-
-
-class AddBatch(Preprocessor):
-    __provider__ = 'add_batch'
-    shape_modificator = True
-    _dynamic_shape = False
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'axis': NumberField(default=0, description="Add batch dimension", value_type=int),
-        })
-        return parameters
-
-    def configure(self):
-        self.axis = self.get_value_from_config('axis')
-
-    def process(self, image, annotation_meta=None):
-        data = image.data
-
-        data = np.expand_dims(data, 0)
-        if self.axis != 0:
-            if self.axis > len(data.shape):
-                raise RuntimeError(
-                    'Operation "{}" failed: Invalid axis {} for shape {}.'.format(self.__provider__, self.axis,
-                                                                                  data.shape)
-                )
-            order = list(range(1, self.axis + 1)) + [0] + list(range(self.axis + 1, len(data.shape)))
-            data = np.transpose(data, order)
-        image.data = data
-
-        return image
-
-    @property
-    def dynamic_result_shape(self):
-        return self._dynamic_shape
 
 
 class TrimmingAudio(Preprocessor):
@@ -679,6 +409,10 @@ class TrimmingAudio(Preprocessor):
         strides = list(strides) + [self.hop_length * new_stride]
         array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
         return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
+
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        return [-1] * len(data_shape)
 
 
 def as_strided(x, shape, strides):
@@ -841,10 +575,8 @@ class AudioToMelSpectrogram(Preprocessor):
                 if pad_amt != 0:
                     x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value,
                                mode='constant')
-
         # transpose according to model input layout
         x = np.transpose(x, [2, 0, 1])
-
         image.data = x
         return image
 
@@ -863,14 +595,11 @@ class AudioToMelSpectrogram(Preprocessor):
             # lower and upper slopes for all bins
             lower = -ramps[i] / fdiff[i]
             upper = ramps[i + 2] / fdiff[i + 1]
-
             # .. then intersect them with each other and zero
             weights[i] = np.maximum(0, np.minimum(lower, upper))
-
         # Slaney-style mel is scaled to be approx constant energy per channel
         enorm = 2.0 / (mel_f[2:n_mels + 2] - mel_f[:n_mels])
         weights *= enorm[:, np.newaxis]
-
         return weights
 
     @staticmethod
