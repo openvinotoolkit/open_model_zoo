@@ -24,7 +24,6 @@ import cv2
 import numpy as np
 import logging as log
 from openvino.inference_engine import IECore, get_version
-import matplotlib.pyplot as plt
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -180,7 +179,7 @@ def main():
             results = pipeline.get_result(next_frame_id_to_show)
         depth_map, frame_meta = results
         depth_map = apply_color_map(depth_map)
-        
+
         start_time = frame_meta['start_time']
 
         presenter.drawGraphs(depth_map)
