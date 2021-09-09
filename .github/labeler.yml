@@ -3,3 +3,14 @@
 dependencies:
   - '**/*requirements*.*'
   - '**/setup.py'
+demo:
+  - any: ['demos/**/*', '!demos/**/*.md']
+documentation:
+  - '*.md'
+  - '**/*.md'
+model:
+  - 'models/**/*.yml'
+accuracy checker:
+  - 'tools/accuracy_checker/**/*'
+downloader:
+  - 'tools/downloader/**/*'
