@@ -88,7 +88,7 @@ Input/output options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-You can use the following command to do inference on GPU with a pre-trained object detection model:
+You can use the following command to do inference on GPU with a pre-trained midasnet model:
 
 ```sh
 python3 monodepth_demo.py \
@@ -108,7 +108,7 @@ summed across all devices used.
 > **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
-  leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.
+  leads to a decrease in FPS.
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
 

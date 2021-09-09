@@ -109,7 +109,6 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
-    log_runtime_settings(pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
