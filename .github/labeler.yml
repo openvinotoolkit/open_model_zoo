@@ -14,3 +14,5 @@ accuracy checker:
   - 'tools/accuracy_checker/**/*'
 downloader:
   - 'tools/downloader/**/*'
+  - 'tools/model_tools/**/*'
+  
