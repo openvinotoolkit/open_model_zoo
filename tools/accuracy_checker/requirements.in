@@ -10,7 +10,8 @@ imagecodecs~=2020.5.30;python_version<"3.7"
 imagecodecs;python_version>="3.7"
 
 # reid
-scikit-learn>=0.24.1
+# python3.6 dropped in v1.0
+scikit-learn~=0.24.1
 
 # cpu extension usage
 py-cpuinfo>=7.0.0
