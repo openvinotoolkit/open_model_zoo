@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from models import MonoDepthModel, OutputTransform
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 from helpers import resolution, log_blobs_info, log_runtime_settings
@@ -85,11 +85,10 @@ def build_argparser():
     return parser
 
 
-def apply_color_map(depth_map):
-    depth_map *= 255
-    depth_map = depth_map.astype(np.uint8)
-    depth_map = cv2.applyColorMap(depth_map, cv2.COLORMAP_INFERNO)
-    return depth_map
+def apply_color_map(depth_map, output_transform):
+    depth_map = output_transform.resize(depth_map)
+    depth_map = (depth_map * 255.0).astype(np.uint8)
+    return cv2.applyColorMap(depth_map, cv2.COLORMAP_INFERNO)
 
 
 def main():
@@ -103,13 +102,13 @@ def main():
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    model = MonoDepthModel(ie, args.model)
     log.info('Reading model {}'.format(args.model))
+    model = MonoDepthModel(ie, args.model)
     log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
     log_runtime_settings(pipeline.exec_net, args.device)
 
     next_frame_id = 0
@@ -153,7 +152,7 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             depth_map, frame_meta = results
-            depth_map = apply_color_map(depth_map)
+            depth_map = apply_color_map(depth_map, output_transform)
 
             start_time = frame_meta['start_time']
             presenter.drawGraphs(depth_map)
@@ -162,7 +161,6 @@ def main():
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(depth_map)
             next_frame_id_to_show += 1
-
 
             if not args.no_show:
                 cv2.imshow(DEMO_NAME, depth_map)
@@ -178,7 +176,7 @@ def main():
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         depth_map, frame_meta = results
-        depth_map = apply_color_map(depth_map)
+        depth_map = apply_color_map(depth_map, output_transform)
 
         start_time = frame_meta['start_time']
 
@@ -191,9 +189,13 @@ def main():
         if not args.no_show:
             cv2.imshow(DEMO_NAME, depth_map)
             key = cv2.waitKey(1)
+            if key == 27 or key == 'q' or key == 'Q':
+                break
+            presenter.handleKey(key)
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':
