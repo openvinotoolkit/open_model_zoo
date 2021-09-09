@@ -22,6 +22,7 @@ static const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     switch (mat.type()) {
         case CV_8UC1:  return (T)mat.at<uchar>(h, w);
         case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
+        case CV_32FC1: return (T)mat.at<float>(h, w);
         case CV_32FC3: return (T)mat.at<cv::Vec3f>(h, w)[c];
     }
     throw std::runtime_error("cv::Mat type is not recognized");
@@ -62,7 +63,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
     }
     else {
         uint8_t* blobData = blobMapped.as<uint8_t*>();
-        if (resizedMat.type() == CV_32FC3) {
+        if ((resizedMat.type() & CV_MAT_DEPTH_MASK) == CV_32F) {
             throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
         }
         for (size_t c = 0; c < channels; c++)
