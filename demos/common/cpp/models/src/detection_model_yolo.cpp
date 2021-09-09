@@ -260,16 +260,16 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
             //--- Preliminary check for confidence threshold conformance
             if (scale >= confidenceThreshold){
                 //--- Calculating scaled region's coordinates
-                double x = (col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
-                double y = (row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
-                double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
-                double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
+                float x = (float)(col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
+                float y = (float)(row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
+                float height = (float)std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
+                float width = (float)std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
 
                 DetectedObject obj;
-                obj.x = (float)std::max((x-width/2), 0.);
-                obj.y = (float)std::max((y-height/2), 0.);
-                obj.width = std::min((float)width, original_im_w - obj.x);
-                obj.height = std::min((float)height, original_im_h - obj.y);
+                obj.x = clamp(x-width/2, 0.f, (float)original_im_w);
+                obj.y = clamp(y-height/2, 0.f, (float)original_im_h);
+                obj.width = clamp(width, 0.f, (float)original_im_w) - obj.x;
+                obj.height = clamp(height, 0.f, (float)original_im_h) - obj.y;
 
                 for (int j = 0; j < region.classes; ++j) {
                     int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords + 1 + j);

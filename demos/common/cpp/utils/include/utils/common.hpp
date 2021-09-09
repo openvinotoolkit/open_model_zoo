@@ -39,6 +39,11 @@ constexpr std::size_t arraySize(const T (&)[N]) noexcept {
     return N;
 }
 
+template <typename T>
+T clamp(T value, T low, T high) {
+    return value<low ? low : (value>high ? high : value);
+}
+
 // Redefine operator<< for LogStream to print IE version information.
 inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::Version& version) {
     os << "OpenVINO Inference Engine" << slog::endl;
