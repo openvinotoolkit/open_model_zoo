@@ -17,11 +17,11 @@ YOLO v4 Tiny is a real-time object detection model based on ["YOLOv4: Optimal Sp
 
 Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) validation dataset for converted model.
 
-| Metric                                                               | Value |
-| -------------------------------------------------------------------- | ------|
-| mAP                                                                  | 0.403 |
-| [COCO mAP (0.5)](http://cocodataset.org/#detection-eval)             | 0.463 |
-| [COCO mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval)   | 0.226 |
+| Metric                                                               | Value  |
+| -------------------------------------------------------------------- | ------ |
+| mAP                                                                  | 40.37% |
+| [COCO mAP (0.5)](http://cocodataset.org/#detection-eval)             | 46.36% |
+| [COCO mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval)   | 22.66% |
 
 ## Input
 
@@ -73,9 +73,9 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1, 26, 26, 255`. The anchor values are `23,27, 37,58, 81,82`.
+1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1, 255, 26, 26`. The anchor values are `23,27, 37,58, 81,82`.
 
-2. The array of detection summary info, name - `conv2d_17/BiasAdd/Add`, shape - `1, 13, 13, 255`. The anchor values are `81,82, 135,169, 344,319`.
+2. The array of detection summary info, name - `conv2d_17/BiasAdd/Add`, shape - `1, 255, 13, 13`. The anchor values are `81,82, 135,169, 344,319`.
 
 For each case format is `B, N*85, Cx, Cy`, where:
 
