@@ -234,8 +234,8 @@ class ModelEvaluator(BaseEvaluator):
 
     def _initialize_input_shape(self, dynamic_shape_helper=None):
         _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, _, input_template  = self._get_batch_input(batch_annotation, batch_input, dynamic_shape_helper)
-        self.launcher.initialize_undefined_shapes(filled_inputs, input_template)
+        filled_inputs, _, input_template = self._get_batch_input(batch_annotation, batch_input, dynamic_shape_helper)
+        self.launcher.initialize_undefined_shapes(filled_inputs, template_shapes=input_template)
 
     def _get_batch_input(self, batch_annotation, batch_input, template=None):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)

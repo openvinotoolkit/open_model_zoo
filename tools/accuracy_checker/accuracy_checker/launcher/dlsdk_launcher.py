@@ -708,7 +708,7 @@ class DLSDKLauncher(Launcher):
             )
         return input_shapes
 
-    def initialize_undefined_shapes(self, input_data):
+    def initialize_undefined_shapes(self, input_data, template_shapes=None):
         try:
             if not hasattr(self, 'exec_network') or self.exec_network is None:
                 self.exec_network = self.ie_core.load_network(
@@ -717,6 +717,12 @@ class DLSDKLauncher(Launcher):
             self.is_dynamic = True
         except RuntimeError:
             self.is_dynamic = False
+        if self.is_dynamic and template_shapes:
+            input_shapes = {
+                layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in input_data[0].items()
+            }
+            self._reshape_input(input_shapes)
+            return
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
         self._reshape_input(input_shapes)
 
@@ -724,9 +730,9 @@ class DLSDKLauncher(Launcher):
         self._set_batch_size(self._batch)
         self.load_network(self.network)
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if layer_name in self.dyn_input_layers:
-            data = self._data_to_blob_dyn(data, layout)
+            data, template = self._data_to_blob_dyn(data, layout, template)
             layer_shape = data.shape
         else:
             layer_shape = tuple(self.inputs[layer_name].shape)
@@ -734,8 +740,8 @@ class DLSDKLauncher(Launcher):
         if precision:
             data = data.astype(precision)
         if layer_name in self.dyn_input_layers:
-            self._do_reshape = True
-            return data
+            self._do_reshape = not self.is_dynamic
+            return data, template
         data_shape = np.shape(data)
         if data_shape != layer_shape:
             if self.allow_reshape_input:
@@ -744,11 +750,17 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name, layout)
 
     @staticmethod
-    def _data_to_blob_dyn(data, layout):
+    def _data_to_blob_dyn(data, layout, template=None):
         data_shape = np.shape(data)
+        if template is not None:
+            if len(template) < np.ndim(data):
+                template = [1] * (np.ndim(data) - len(template))
         if len(layout) == len(data_shape):
-            return np.transpose(data, layout)
-        return np.array(data)
+            if template is not None:
+                new_template = [template[l_dim] for l_dim in layout]
+                template = new_template
+            return np.transpose(data, layout), template
+        return np.array(data), template
 
     def _data_to_blob(self, layer_shape, data, layout):  # pylint:disable=R0911,R0912
         data_shape = np.shape(data)

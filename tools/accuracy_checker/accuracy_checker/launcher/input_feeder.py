@@ -71,11 +71,20 @@ class InputFeeder:
             self, inputs_config, network_inputs, shape_checker, prepare_input_data=None, default_layout='NCHW',
             dummy=False, input_precisions_list=None
     ):
-        def fit_to_input(data, input_layer_name, layout, precision):
-            if len(np.shape(data)) == 4:
+        def fit_to_input(data, input_layer_name, layout, precision, template=None):
+            layout_used = False
+            if np.ndim(data) == 4:
+                layout_used = True
                 data = np.transpose(data, layout)
             else:
                 data = np.array(data)
+            if template:
+                if len(template) != data.ndim:
+                    template = [1] * (data.ndim - len(template)) + list(template)
+                if layout_used:
+                    new_template = [template[l_dim] for l_dim in layout]
+                    template = new_template
+                return data.astype(precision) if precision else data, template
             return data.astype(precision) if precision else data
 
         self.shape_checker = shape_checker
@@ -210,10 +219,76 @@ class InputFeeder:
 
         return self._transform_batch(
             filled_inputs, extract_image_representations(data_representation_batch, meta_only=True)
-        )
+        )[0]
 
     def fill_non_constant_inputs_with_template(self, data_representation_batch, template):
-        return self.fill_non_constant_inputs(data_representation_batch), template
+        def match_by_regex(data, identifiers, input_regex, templates):
+            if not isinstance(identifiers, list):
+                identifiers = [identifiers]
+            input_data = None
+            shape_template = None
+            for identifier, data_value, template in zip(identifiers, data, templates):
+                if input_regex.match(identifier):
+                    input_data = data_value
+                    shape_template = template
+                    break
+            return input_data, shape_template
+        filled_inputs = {}
+        filled_template = {}
+        check_regex = True
+        if self.image_info_inputs or self.orig_image_info_inputs or self.scale_factor_inputs:
+            image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
+            filled_inputs = {**image_info_inputs}
+        for idx, input_layer in enumerate(self.non_constant_inputs):
+            input_batch = []
+            input_regex = (self.inputs_mapping or {}).get(input_layer)
+            shape_template = template[idx]
+            for data_representation in data_representation_batch:
+                identifiers = data_representation.identifier
+                data = data_representation.data
+                if isinstance(identifiers, ParametricImageIdentifier):
+                    input_batch.append(data[idx])
+                    continue
+
+                if not isinstance(identifiers, list) and input_regex is None:
+                    input_data = data
+                    input_batch.append(input_data)
+                    continue
+                if (
+                        isinstance(identifiers, list) and
+                        isinstance(identifiers[0], (KaldiFrameIdentifier, KaldiMatrixIdentifier))
+                ):
+                    check_regex = False
+                    self.ordered_inputs = True
+
+                if input_regex is None and check_regex:
+                    raise ConfigError('Impossible to choose correct data for layer {}.'
+                                      'Please provide regular expression for matching in config.'.format(input_layer))
+
+                if isinstance(identifiers, MultiFramesInputIdentifier):
+                    input_id_order = {
+                        input_index: frame_id for frame_id, input_index in enumerate(identifiers.input_id)
+                    }
+                    input_data = data[input_id_order[input_regex]]
+                    shape_template = template[input_id_order[input_regex]]
+                else:
+                    data = [data] if np.isscalar(identifiers) else data
+                    if self.ordered_inputs:
+                        assert idx < len(identifiers), 'number input layers and data is not matched'
+                        input_batch.append(data[idx])
+                        continue
+                    input_data, shape_template = match_by_regex(data, identifiers, input_regex, template)
+
+                if input_data is None:
+                    raise ConfigError('Suitable data for filling layer {} not found'.format(input_layer))
+                input_batch.append(input_data)
+
+            filled_inputs[input_layer] = input_batch
+            filled_template[input_layer] = shape_template
+
+        return self._transform_batch(
+            filled_inputs, extract_image_representations(data_representation_batch, meta_only=True), filled_template
+        )
 
     def fill_inputs(self, data_representation_batch):
         if self.dummy:
@@ -326,7 +401,7 @@ class InputFeeder:
         if input_config['type'] == 'IGNORE_INPUT':
             ignore_inputs.append(name)
 
-    def _transform_batch(self, batch_data, meta):
+    def _transform_batch(self, batch_data, meta, template=None):
         def calculate_num_splits(layers_data, batch_size):
             max_split_num = 1
             for _, data in layers_data.items():
@@ -352,24 +427,30 @@ class InputFeeder:
         if meta[0].get('multi_infer', False):
             num_splits = calculate_num_splits(batch_data, batch_size)
             infers_data = [{} for _ in range(num_splits)]
+            template_for_shapes = {}
             for layer_name, layer_data in batch_data.items():
+                tmpl = template.get(layer_name) if template is not None else None
                 batch_for_all_infers = separate_data(layer_data, num_splits)
                 for infer_id, on_infer_batch in enumerate(batch_for_all_infers):
-                    infers_data[infer_id][layer_name] = self.input_transform_func(
+                    res = self.input_transform_func(
                         on_infer_batch, layer_name,
                         self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
-                        self.precision_mapping.get(layer_name)
+                        self.precision_mapping.get(layer_name),
+                        tmpl
                     )
-            return infers_data
+                    infers_data[infer_id][layer_name] = res[0] if isinstance(res, tuple) else res
+                    if isinstance(res, tuple):
+                        template_for_shapes[layer_name] = res[1]
+            return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
             batch_data[layer_name] = self.input_transform_func(
                 layer_data, layer_name,
                 self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
-                self.precision_mapping.get(layer_name)
+                self.precision_mapping.get(layer_name), template
             )
 
-        return [batch_data]
+        return [batch_data], template
 
     def validate_input_precision(self, precisions_list):
         if not precisions_list:

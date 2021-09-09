@@ -90,7 +90,7 @@ class CaffeLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.network.outputs))
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         data_shape = np.shape(data)
         layer_shape = self.inputs[layer_name]
         if len(data_shape) == 5 and len(layer_shape) == 4:

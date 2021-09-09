@@ -260,11 +260,22 @@ class Launcher(ClassProvider):
         return meta
 
     @staticmethod
-    def fit_to_input(data, layer_name, layout, precision):
+    def fit_to_input(data, layer_name, layout, precision, template=None):
+        layout_used = False
         if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
+            layout_used = True
         else:
             data = np.array(data)
+
+        if template:
+            if len(template) < data.ndim:
+                template = [1] * (data.ndim - len(template)) + list(template)
+            if layout_used:
+                new_template = [template[l_dim] for l_dim in layout]
+                template = new_template
+            return data.astype(precision) if precision else data, template
+
         return data.astype(precision) if precision else data
 
     def inputs_info_for_meta(self, *args, **kwargs):
