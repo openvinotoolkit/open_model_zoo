@@ -9,10 +9,10 @@ documentation:
   - '*.md'
   - '**/*.md'
 model:
-  - 'models/**/*.yml'
+  - 'models/**/*'
 accuracy checker:
   - 'tools/accuracy_checker/**/*'
+  - 'models/**/accuracy_check.yml'
 downloader:
   - 'tools/downloader/**/*'
   - 'tools/model_tools/**/*'
-  
