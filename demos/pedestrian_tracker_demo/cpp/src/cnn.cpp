@@ -71,7 +71,7 @@ void CnnBase::InferBatch(
     for (size_t batch_i = 0; batch_i < num_imgs; batch_i += batch_size) {
         const size_t current_batch_size = std::min(batch_size, num_imgs - batch_i);
         for (size_t b = 0; b < current_batch_size; b++) {
-            matToBlob<uint8_t>(frames[batch_i + b], input_blob_, b);
+            matToBlob(frames[batch_i + b], input_blob_, b);
         }
 
         infer_request_.Infer();

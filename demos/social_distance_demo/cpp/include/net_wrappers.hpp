@@ -83,7 +83,7 @@ public:
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
-            matToBlob<uint8_t>(img, input);
+            matToBlob(img, input);
         }
     }
 
@@ -184,7 +184,7 @@ public:
             inferRequest.SetBlob(reIdInputName, roiBlob);
         } else {
             const cv::Mat& personImage = img(personRect);
-            matToBlob<uint8_t>(personImage, roiBlob);
+            matToBlob(personImage, roiBlob);
         }
     }
 

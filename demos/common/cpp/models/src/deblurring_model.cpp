@@ -87,7 +87,7 @@ std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& 
         cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
     }
     InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matToBlob<uint8_t>(resizedImage, frameBlob);
+    matToBlob(resizedImage, frameBlob);
 
     return std::make_shared<InternalImageModelData>(image.cols, image.rows);
 }

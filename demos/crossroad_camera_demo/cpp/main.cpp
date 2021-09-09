@@ -90,7 +90,7 @@ struct BaseDetection {
             request.SetBlob(inputName, inputBlob);
         } else {
             inputBlob = request.GetBlob(inputName);
-            matToBlob<uint8_t>(person, inputBlob);
+            matToBlob(person, inputBlob);
         }
     }
 

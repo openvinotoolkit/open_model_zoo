@@ -72,7 +72,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     cv::resize(image, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC);
 
     auto inputBlob = request.GetBlob(blobName);
-    matToBlob<uint8_t>(resizedImage, inputBlob);
+    matToBlob(resizedImage, inputBlob);
 }
 
 void IEWrapper::setInputBlob(const std::string& blobName,

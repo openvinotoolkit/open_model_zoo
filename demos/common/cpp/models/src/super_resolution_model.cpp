@@ -98,7 +98,7 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 
     if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight)
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
-    matToBlob<float_t>(img, lrInputBlob);
+    matToBlob(img, lrInputBlob);
 
     if (inputsNames.size() == 2) {
         InferenceEngine::Blob::Ptr bicInputBlob = request->GetBlob(inputsNames[1]);
@@ -107,7 +107,7 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
         int h = bicInputBlob->getTensorDesc().getDims()[2];
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
-        matToBlob<float_t>(resized, bicInputBlob);
+        matToBlob(resized, bicInputBlob);
     }
 
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);

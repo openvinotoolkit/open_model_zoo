@@ -33,11 +33,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
     }
     /* Resize and copy data from the image to the input blob */
     InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    if (inputTransform.isTrivial()) {
-        matToBlob<uint8_t>(img, frameBlob);
-    }
-    else {
-        matToBlob<float_t>(img, frameBlob);
-    }
+    matToBlob(img, frameBlob);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }

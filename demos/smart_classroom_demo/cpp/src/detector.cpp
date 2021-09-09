@@ -63,7 +63,7 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 
     InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
-    matToBlob<uint8_t>(frame, inputBlob);
+    matToBlob(frame, inputBlob);
 
     enqueued_frames_ = 1;
 }

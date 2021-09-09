@@ -84,7 +84,7 @@ public:
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
-            matToBlob<uint8_t>(img, input);
+            matToBlob(img, input);
         }
     }
 
@@ -177,7 +177,7 @@ public:
             inferRequest.SetBlob(attributesInputName, roiBlob);
         } else {
             const cv::Mat& vehicleImage = img(vehicleRect);
-            matToBlob<uint8_t>(vehicleImage, roiBlob);
+            matToBlob(vehicleImage, roiBlob);
         }
     }
     std::pair<std::string, std::string> getResults(InferenceEngine::InferRequest& inferRequest) {
@@ -281,7 +281,7 @@ public:
             inferRequest.SetBlob(LprInputName, roiBlob);
         } else {
             const cv::Mat& vehicleImage = img(plateRect);
-            matToBlob<uint8_t>(vehicleImage, roiBlob);
+            matToBlob(vehicleImage, roiBlob);
         }
 
         if (LprInputSeqName != "") {
