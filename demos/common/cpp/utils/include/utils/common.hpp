@@ -41,7 +41,7 @@ constexpr std::size_t arraySize(const T (&)[N]) noexcept {
 
 template <typename T>
 T clamp(T value, T low, T high) {
-    return value<low ? low : (value>high ? high : value);
+    return value < low ? low : (value > high ? high : value);
 }
 
 // Redefine operator<< for LogStream to print IE version information.
