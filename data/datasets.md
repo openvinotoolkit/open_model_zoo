@@ -142,6 +142,28 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/README.md), [`ssd300`](../models/public/ssd300/README.md))
 * `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v1-tiny-tf`](../models/public/yolo-v1-tiny-tf/README.md))
 
+## [SYGData0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+
+### How download dataset
+
+To download SYGData0829 dataset, you need to follow the steps below:
+1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+2. Select [`SYGData0829.z01`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01)
+Select ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02)
+Select ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03)
+Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip)
+3. Unpack archive
+
+### Files layout
+* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
+    * `Annotations` - directory containing the SYGData0829 annotation files
+    * `JPEGImages` - directory containing the SYGData0829 images
+    * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
+		* `Main/val.txt` - image sets file for validation of detection tasks
+
+### Datasets in dataset_definitions.yml
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-v4-syg`](../models/public/mobilenet-yolo-v4-syg/README.md))
+
 ## [PASCAL-S](http://cbs.ic.gatech.edu/salobj/)
 
 ### How download dataset
@@ -172,7 +194,6 @@ To download CoNLL2003 dataset, you need to follow the steps below:
 ### Files layout
 
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
-
 * `CONLL-2003` - directory containing annotation files
     * `valid.txt` - annotation file for CoNLL2003 validation set
 
