@@ -47,11 +47,12 @@ PROFILERS_MAPPING = {
     ('psnr', 'ssim'): 'complex_regression',
     ('normed_error', 'per_point_normed_error'): 'point_regression',
     ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation',
-    ('coco_precision', 'coco_recall', 'map', 'recall', 'miss_rate'): 'detection',
+    ('coco_precision', 'coco_recall'): 'detection_coco',
+    ('map', 'recall', 'miss_rate'): 'detection_voc',
     ('coco_orig_segm_precision', ): 'instance_segmentation'
 }
 
-PROFILERS_WITH_DATA_IS_LIST = {'detection', 'instance_segmentation'}
+PROFILERS_WITH_DATA_IS_LIST = {'detection_list', 'instance_segmentation'}
 
 
 class MetricProfiler(ClassProvider):
@@ -99,6 +100,30 @@ class MetricProfiler(ClassProvider):
     def finish(self):
         if self.storage:
             self.write_result()
+
+    def write_summary(self, summary):
+        if self.report_type == 'json':
+            out_path = self.out_dir / self.report_file
+            new_file = not out_path.exists()
+            if not new_file:
+                with open(str(out_path), 'r') as f:
+                    out_dict = json.load(f)
+            else:
+                out_dict = {
+                    'processing_info': {
+                        'model': self.model_name,
+                        'dataset': self.dataset,
+                        'framework': self.framework,
+                        'device': self.device,
+                        'tags': self.tags
+                    },
+                    'report': list(self.storage.values()),
+                    'report_type': self.__provider__,
+                    'dataset_meta': self.dataset_meta,
+                }
+            out_dict.update(summary)
+            with open(str(out_path), 'w') as f:
+                json.dump(out_dict, f)
 
     def reset(self):
         self._reset_storage()
@@ -151,8 +176,8 @@ class MetricProfiler(ClassProvider):
         self._reset_storage()
 
     def set_output_dir(self, out_dir):
-        self.out_dir = out_dir
-        if not out_dir.exists():
+        self.out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
+        if not self.out_dir.exists():
             self.out_dir.mkdir(parents=True)
 
     def set_processing_info(self, processing_info):

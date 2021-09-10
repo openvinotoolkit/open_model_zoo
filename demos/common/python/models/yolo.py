@@ -20,6 +20,17 @@ import ngraph
 from .model import Model
 from .utils import Detection, resize_image, resize_image_letterbox, load_labels
 
+ANCHORS = {
+    'YOLOV3': [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
+               30.0, 61.0, 62.0, 45.0, 59.0, 119.0,
+               116.0, 90.0, 156.0, 198.0, 373.0, 326.0],
+    'YOLOV4': [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
+               36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
+               142.0, 110.0, 192.0, 243.0, 459.0, 401.0],
+    'YOLOV4-TINY': [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
+                    81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
+}
+
 class YOLO(Model):
     class Params:
         # Magic numbers are copied from yolo samples
@@ -28,10 +39,7 @@ class YOLO(Model):
             self.coords = param.get('coord', 4)
             self.classes = param.get('classes', 80)
             self.sides = sides
-            self.anchors = param.get('anchors',
-                                     [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
-                                      30.0, 61.0, 62.0, 45.0, 59.0, 119.0,
-                                      116.0, 90.0, 156.0, 198.0, 373.0, 326.0])
+            self.anchors = param.get('anchors', ANCHORS['YOLOV3'])
 
             self.isYoloV3 = False
 
@@ -218,35 +226,38 @@ class YOLO(Model):
 
 class YoloV4(YOLO):
     class Params:
-        def __init__(self, num, sides, anchors, mask):
+        def __init__(self, classes, num, sides, anchors, mask):
             self.num = num
             self.coords = 4
-            self.classes = 80
+            self.classes = classes
             self.sides = sides
             masked_anchors = []
             for idx in mask:
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
+    def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5,
+                 anchors=None, masks=None):
+        self.anchors = anchors
+        self.masks = masks
+        super().__init__(ie, model_path, labels, keep_aspect_ratio, threshold, iou_threshold)
+
     def _get_output_info(self):
-        if self.is_tiny:
-            num = 2
-            anchors = [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
-                       81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
-            masks = [[1, 2, 3], [3, 4, 5]]
-        else:
-            num = 3
-            anchors = [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
-                       36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
-                       142.0, 110.0, 192.0, 243.0, 459.0, 401.0]
-            masks = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+        if not self.anchors:
+            self.anchors = ANCHORS['YOLOV4-TINY'] if self.is_tiny else ANCHORS['YOLOV4']
+        if not self.masks:
+            self.masks = [1, 2, 3, 3, 4, 5] if self.is_tiny else [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
         outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
 
         output_info = {}
+        num = 3
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
-            yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
+            classes = shape[1] // num - 5
+            if shape[1] % num != 0:
+                raise RuntimeError("The output blob {} has wrong 2nd dimension".format(name))
+            yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
         return output_info
 

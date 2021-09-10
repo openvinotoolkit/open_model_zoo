@@ -363,7 +363,7 @@ class ConfigReader:
                     for model_path in model_paths:
                         copy_launcher = copy.deepcopy(launcher)
                         copy_launcher['model'] = model_path
-                        if launcher['framework'] == 'dlsdk' and 'model_is_blob' in arguments:
+                        if launcher['framework'] in ['dlsdk', 'g-api'] and 'model_is_blob' in arguments:
                             copy_launcher['_model_is_blob'] = arguments.model_is_blob
                         updated_launchers.append(copy_launcher)
                 return updated_launchers

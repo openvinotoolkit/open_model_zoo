@@ -122,6 +122,18 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v3-tf
   - yolo-v3-tiny-tf
+  - yolo-v1-tiny-tf
+  - yolo-v2-ava-0001
+  - yolo-v2-ava-sparse-35-0001
+  - yolo-v2-ava-sparse-70-0001
+  - yolo-v2-tf
+  - yolo-v2-tiny-ava-0001
+  - yolo-v2-tiny-ava-sparse-30-0001
+  - yolo-v2-tiny-ava-sparse-60-0001
+  - yolo-v2-tiny-tf
+  - yolo-v2-tiny-vehicle-detection-0001
+  - yolo-v4-tf
+  - yolo-v4-tiny-tf
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -138,7 +150,7 @@ object_detection_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo
+    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
@@ -161,6 +173,8 @@ Options:
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
+    -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

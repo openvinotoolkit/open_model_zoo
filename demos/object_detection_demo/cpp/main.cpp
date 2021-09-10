@@ -35,6 +35,7 @@
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
+#include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 
@@ -42,7 +43,7 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo";
+static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -67,6 +68,10 @@ static const char iou_thresh_output_message[] = "Optional. Filtering intersectio
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+static const char anchors_message[] = "Optional. A comma separated list of anchors. "
+    "By default used default anchors for model. Only for YOLOV4 architecture type.";
+static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
+    "By default used default masks for model. Only for YOLOV4 architecture type.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -87,6 +92,8 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
+DEFINE_string(anchors, "", anchors_message);
+DEFINE_string(masks, "", masks_message);
 
 /**
 * \brief This function shows a help message
@@ -120,6 +127,8 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
+    std::cout << "    -anchors                  "      << anchors_message << std::endl;
+    std::cout << "    -masks                    "      << masks_message << std::endl;
 }
 
 class ColorPalette {
@@ -279,6 +288,28 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
+        const auto& strAnchors = split(FLAGS_anchors, ',');
+        const auto& strMasks = split(FLAGS_masks, ',');
+
+        std::vector<float> anchors;
+        std::vector<int64_t> masks;
+        try {
+            for (auto& str : strAnchors) {
+                anchors.push_back(std::stof(str));
+            }
+        } catch(...) {
+            throw std::runtime_error("Invalid anchors list is provided.");
+        }
+
+        try {
+            for (auto& str : strMasks) {
+                masks.push_back(std::stoll(str));
+            }
+        }
+        catch (...) {
+            throw std::runtime_error("Invalid masks list is provided.");
+        }
+
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
@@ -300,11 +331,14 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "retinaface") {
             model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
+        else if (FLAGS_at == "retinaface-pytorch") {
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
         else if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -341,8 +375,7 @@ int main(int argc, char *argv[]) {
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
+                    } else {
                         // Input stream is over
                         break;
                     }
@@ -355,8 +388,7 @@ int main(int argc, char *argv[]) {
             if (frameNum == 0) {
                 if (found == std::string::npos) {
                     outputResolution = curr_frame.size();
-                }
-                else {
+                } else {
                     outputResolution = cv::Size{
                         std::stoi(FLAGS_output_resolution.substr(0, found)),
                         std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
@@ -401,32 +433,35 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
-                    }
-                    else {
+                    } else {
                         presenter.handleKey(key);
                     }
                 }
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
+
         for (; framesProcessed <= frameNum; framesProcessed++) {
-            while (!(result = pipeline.getResult())) {}
-            auto renderingStart = std::chrono::steady_clock::now();
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            renderMetrics.update(renderingStart);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
-            if (!FLAGS_no_show) {
-                cv::imshow("Detection Results", outFrame);
-                //--- Updating output window
-                cv::waitKey(1);
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                auto renderingStart = std::chrono::steady_clock::now();
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection Results", outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
         }
 

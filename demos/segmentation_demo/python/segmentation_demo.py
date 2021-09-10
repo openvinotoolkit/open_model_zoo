@@ -90,16 +90,19 @@ class SegmentationVisualizer:
         input_3d = cv2.merge([input, input, input])
         return cv2.LUT(input_3d, self.color_map)
 
-    def overlay_masks(self, frame, objects, output_transform):
-        # Visualizing result data over source image
-        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
-
 
 class SaliencyMapVisualizer:
-    def overlay_masks(self, frame, objects, output_transform):
-        saliency_map = (objects * 255).astype(np.uint8)
+    def apply_color_map(self, input):
+        saliency_map = (input * 255.0).astype(np.uint8)
         saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
-        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2))
+        return saliency_map
+
+
+def render_segmentation(frame, masks, visualiser, resizer, only_masks=False):
+    output = visualiser.apply_color_map(masks)
+    if not only_masks:
+        output = np.floor_divide(frame, 2) + np.floor_divide(output, 2)
+    return resizer.resize(output)
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -147,6 +150,8 @@ def build_argparser():
                               'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+    io_args.add_argument('--only_masks', default=False, action='store_true',
+                         help='Optional. Display only masks. Could be switched by TAB key.')
     return parser
 
 
@@ -183,7 +188,7 @@ def main():
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
-
+    only_masks = args.only_masks
     while True:
         if pipeline.is_ready():
             # Get new image/frame
@@ -219,7 +224,7 @@ def main():
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-            frame = visualizer.overlay_masks(frame, objects, output_transform)
+            frame = render_segmentation(frame, objects, visualizer, output_transform, only_masks)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
@@ -232,6 +237,8 @@ def main():
                 key = cv2.waitKey(1)
                 if key == 27 or key == 'q' or key == 'Q':
                     break
+                if key == 9:
+                    only_masks = not only_masks
                 presenter.handleKey(key)
 
     pipeline.await_all()
@@ -244,7 +251,7 @@ def main():
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
-        frame = visualizer.overlay_masks(frame, objects, output_transform)
+        frame = render_segmentation(frame, objects, visualizer, output_transform, only_masks)
         presenter.drawGraphs(frame)
         metrics.update(start_time, frame)
 

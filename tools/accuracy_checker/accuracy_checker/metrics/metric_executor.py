@@ -40,13 +40,17 @@ class MetricsExecutor:
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
+        self.profiler_dir = None
+        self.profiler = None
         if self.profile_metrics:
             profiler_type = dataset.config.get('_report_type', 'csv')
             self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+            self.profiler_dir = dataset.config.get('_profiler_log_dir')
             self.profiler.set_dataset_meta(self._dataset.metadata)
 
         self.metrics = []
         self.need_store_predictions = False
+        self._metric_names = set()
         for metric_config_entry in metrics_config:
             self.register_metric(metric_config_entry)
 
@@ -99,6 +103,7 @@ class MetricsExecutor:
 
     def iterate_metrics(self, annotations, predictions):
         for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+            profiling_file = None if functor.profiler is None else functor.profiler.report_file
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
@@ -107,6 +112,7 @@ class MetricsExecutor:
                 abs_threshold=abs_threshold,
                 rel_threshold=rel_threshold,
                 meta=functor.meta,
+                profiling_file=profiling_file
             )
 
     def register_metric(self, metric_config_entry):
@@ -125,6 +131,12 @@ class MetricsExecutor:
         metric_config_validator.validate(metric_config_entry, type_)
 
         metric_identifier = metric_config_entry.get(identifier, metric_type)
+        if metric_identifier in self._metric_names:
+            raise ConfigError(
+                'non-unique metric identifier {}, please define metric name field with unique value'.format(
+                    metric_identifier)
+            )
+        self._metric_names.add(metric_identifier)
         annotation_source = metric_config_entry.get('annotation_source', '')
         prediction_source = metric_config_entry.get('prediction_source', '')
         metric_kwargs = {}
@@ -140,6 +152,11 @@ class MetricsExecutor:
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
         threshold_v = metric_config_entry.get(threshold)
         abs_threshold_v = metric_config_entry.get(abs_threshold)
+        reference_v = metric_config_entry.get(reference)
+        if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
+            raise ConfigError(
+                'reference value should be represented as number or dictionary with numbers for each submetric'
+            )
         if threshold_v is not None and abs_threshold_v is not None:
             warnings.warn(
                 f'both threshold and abs_threshold are provided for metric {metric_identifier}. '
@@ -154,7 +171,7 @@ class MetricsExecutor:
             metric_identifier,
             metric_type,
             metric_fn,
-            metric_config_entry.get(reference),
+            reference_v,
             abs_threshold_v,
             metric_config_entry.get(rel_threshold),
             metric_presenter
@@ -189,10 +206,13 @@ class MetricsExecutor:
         }
 
     def set_profiling_dir(self, profiler_dir):
-        self.profiler.set_profiling_dir(profiler_dir)
+        if self.profiler:
+            self.profiler.set_profiling_dir(profiler_dir)
+        self.profiler_dir = profiler_dir
 
     def set_processing_info(self, processing_info):
-        self.profiler.set_executing_info(processing_info)
+        if self.profiler:
+            self.profiler.set_executing_info(processing_info)
 
     def reset(self):
         for metric in self.metrics:
@@ -208,8 +228,20 @@ class MetricsExecutor:
                 )
                 return [ConfigError("Metrics are not provided", metrics, upper_level_uri)]
         errors = []
+        metric_ids = set()
         for metric_id, metric in enumerate(metrics):
             metric_uri = '{}.{}'.format(metrics_uri, metric_id)
             errors.extend(Metric.validate_config(metric, fetch_only=fetch_only, uri_prefix=metric_uri))
+            if 'type' not in metric:
+                continue
+            metric_name = metric.get('name', metric['type'])
+            if metric_name in metric_ids:
+                error = ConfigError(f'non-unique metric identifier {metric_name}, '
+                                    f'please define metric name field with unique value', metric, metric_uri
+                                    )
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+            metric_ids.add(metric_name)
 
         return errors
