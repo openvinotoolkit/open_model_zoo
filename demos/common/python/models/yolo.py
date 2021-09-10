@@ -1,12 +1,9 @@
 """
  Copyright (C) 2020-2021 Intel Corporation
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +11,14 @@
  limitations under the License.
 """
 
+from collections import namedtuple
 import numpy as np
 import ngraph
 
 from .model import Model
 from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections
+
+DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
 ANCHORS = {
     'YOLOV3': [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
@@ -29,9 +29,23 @@ ANCHORS = {
                142.0, 110.0, 192.0, 243.0, 459.0, 401.0],
     'YOLOV4-TINY': [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
                     81.0, 82.0, 135.0, 169.0, 344.0, 319.0],
-    'YOLOF': [16.0, 16.0, 32.0, 32.0, 64.0, 64.0,
-              128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
+    'YOLOF' : [16.0, 16.0, 32.0, 32.0, 64.0, 64.0,
+               128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
 }
+
+def permute_to_N_HWA_K(tensor, K):
+    """
+    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
+    """
+    assert tensor.ndim == 4, tensor.shape
+    N, _, H, W = tensor.shape
+    tensor = tensor.reshape(N, -1, K, H, W)
+    tensor = tensor.transpose(0, 3, 4, 1, 2)
+    tensor = tensor.reshape(N, -1, K)
+    return tensor
+
+def sigmoid(x):
+    return 1. / (1. + np.exp(-x))
 
 class YOLO(Model):
     class Params:
@@ -40,10 +54,11 @@ class YOLO(Model):
             self.num = param.get('num', 3)
             self.coords = param.get('coord', 4)
             self.classes = param.get('classes', 80)
+            self.bbox_size = self.coords + self.classes + 1
             self.sides = sides
             self.anchors = param.get('anchors', ANCHORS['YOLOV3'])
 
-            self.isYoloV3 = False
+            self.use_input_size = False
 
             mask = param.get('mask', None)
             if mask:
@@ -54,7 +69,7 @@ class YOLO(Model):
                     masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
                 self.anchors = masked_anchors
 
-                self.isYoloV3 = True  # Weak way to determine but the only one.
+                self.use_input_size = True  # Weak way to determine but the only one.
 
     def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path)
@@ -114,46 +129,67 @@ class YOLO(Model):
         return dict_inputs, meta
 
     @staticmethod
-    def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
+    def _parse_yolo_region(cls, predictions, input_size, params, threshold):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
-        size_normalizer = input_size if params.isYoloV3 else params.sides
-        bbox_size = params.coords + 1 + params.classes
+        size_normalizer = input_size if params.use_input_size else params.sides
+        predictions = permute_to_N_HWA_K(predictions, params.bbox_size)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
-            # Getting raw values for each detection bounding bFox
-            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            x, y, width, height, object_probability = bbox[:5]
-            class_probabilities = bbox[5:]
-            if object_probability < threshold:
-                continue
-            # Process raw value
-            x = (col + x) / params.sides[1]
-            y = (row + y) / params.sides[0]
-            # Value for exp is very big number in some cases so following construction is using here
-            try:
-                width = np.exp(width)
-                height = np.exp(height)
-            except OverflowError:
-                continue
-            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            width = width * params.anchors[2 * n] / size_normalizer[0]
-            height = height * params.anchors[2 * n + 1] / size_normalizer[1]
+        for prediction in predictions:
+            # Getting probabilities from raw outputs
+            class_probabilities = cls._get_probabilities(prediction, params.classes)
 
-            if multiple_labels:
-                for class_id, class_probability in enumerate(class_probabilities):
-                    confidence = object_probability * class_probability
-                    if confidence > threshold:
-                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                                 confidence, class_id))
-            else:
-                class_id = np.argmax(class_probabilities)
-                confidence = class_probabilities[class_id] * object_probability
-                if confidence < threshold:
-                    continue
-                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), class_id.item()))
+            # filter out the proposals with low confidence score
+            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
+            class_probabilities = class_probabilities[keep_idxs]
+            obj_indx = keep_idxs // params.classes
+            class_idx = keep_idxs % params.classes
+
+            for ind, obj_ind in enumerate(obj_indx):
+                row, col, n = cls._get_location(obj_ind, params.sides[0], params.num)
+
+                # Process raw value to get absolute coordinates of boxes
+                raw_box = cls._get_raw_box(prediction, obj_ind)
+                predicted_box = cls._get_absolute_det_box(raw_box, row, col, params.anchors[2 * n:2 * n + 2],
+                                                           params.sides, size_normalizer)
+
+                # Define class_label and cofidence
+                label = class_idx[ind]
+                confidence = class_probabilities[ind]
+                objects.append(Detection(predicted_box.x - predicted_box.w / 2,
+                                         predicted_box.y - predicted_box.h / 2,
+                                         predicted_box.x + predicted_box.w / 2,
+                                         predicted_box.y + predicted_box.h / 2,
+                                         confidence.item(), label.item()))
+
         return objects
+
+    @staticmethod
+    def _get_probabilities(prediction, classes):
+        object_probabilities = prediction[:, 4].flatten()
+        class_probabilities = prediction[:, 5:].flatten()
+        class_probabilities *= np.repeat(object_probabilities, classes)
+        return class_probabilities
+
+    @staticmethod
+    def _get_location(obj_ind, cells, num):
+        row = obj_ind // (cells * num)
+        col = (obj_ind - row * cells * num) // num
+        n = (obj_ind - row * cells * num) % num
+        return row, col, n
+
+    @staticmethod
+    def _get_raw_box(prediction, obj_ind):
+        return DetectionBox(*prediction[obj_ind, :4])
+
+    @staticmethod
+    def _get_absolute_det_box(box, row, col, anchors, coord_normalizer, size_normalizer):
+        x = (col + box.x) / coord_normalizer[1]
+        y = (row + box.y) / coord_normalizer[0]
+        width = np.exp(box.w) * anchors[0] / size_normalizer[0]
+        height = np.exp(box.h) * anchors[1] / size_normalizer[1]
+
+        return DetectionBox(x, y, width, height)
 
     @staticmethod
     def _filter(detections, iou_threshold):
@@ -186,18 +222,12 @@ class YOLO(Model):
         return [det for det in detections if det.score > 0]
 
     @staticmethod
-    def _resize_detections(detections, original_shape, resized_shape=None):
-        w, h = original_shape
-
-        if resized_shape:
-            w = original_shape[0] / resized_shape[0]
-            h = original_shape[1] / resized_shape[1]
-
+    def _resize_detections(detections, original_shape):
         for detection in detections:
-            detection.xmin *= w
-            detection.xmax *= w
-            detection.ymin *= h
-            detection.ymax *= h
+            detection.xmin *= original_shape[0]
+            detection.xmax *= original_shape[0]
+            detection.ymin *= original_shape[1]
+            detection.ymax *= original_shape[1]
         return detections
 
     @staticmethod
@@ -220,10 +250,9 @@ class YOLO(Model):
             out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
             out_blob.shape = layer_params[0]
-            detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
+            detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.threshold)
 
         detections = self._filter(detections, self.iou_threshold)
-
         if self.keep_aspect_ratio:
             detections = self._resize_detections_letterbox(detections, meta['original_shape'][1::-1],
                                                            meta['resized_shape'][1::-1])
@@ -232,17 +261,6 @@ class YOLO(Model):
 
         return clip_detections(detections, meta['original_shape'])
 
-def permute_to_N_HWA_K(tensor, K):
-    """
-    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
-    """
-    assert tensor.ndim == 4, tensor.shape
-    N, _, H, W = tensor.shape
-    tensor = tensor.reshape(N, -1, K, H, W)
-    tensor = tensor.transpose(0, 3, 4, 1, 2)
-    tensor = tensor.reshape(N, -1, K)
-    return tensor
-
 
 class YoloV4(YOLO):
     class Params:
@@ -250,11 +268,13 @@ class YoloV4(YOLO):
             self.num = num
             self.coords = 4
             self.classes = classes
+            self.bbox_size = self.coords + self.classes + 1
             self.sides = sides
             masked_anchors = []
             for idx in mask:
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
+            self.use_input_size = True
 
     def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
@@ -281,55 +301,20 @@ class YoloV4(YOLO):
             output_info[name] = (shape, yolo_params)
         return output_info
 
+
     @staticmethod
-    def _parse_yolo_region(predictions, input_size, params, threshold):
-        def sigmoid(x):
-            return 1. / (1. + np.exp(-x))
+    def _get_probabilities(prediction, classes):
+        object_probabilities = sigmoid(prediction[:, 4].flatten())
+        class_probabilities = sigmoid(prediction[:, 5:].flatten())
+        class_probabilities *= np.repeat(object_probabilities, classes)
+        return class_probabilities
 
-        objects = []
-        bbox_size = params.coords + 1 + params.classes
-        predictions = permute_to_N_HWA_K(predictions, bbox_size)
-        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for prediction in predictions:
-            # Getting probabilities from raw outputs
-            object_probabilities = sigmoid(prediction[:, 4].flatten())
-            class_probabilities = sigmoid(prediction[:, params.coords + 1:].flatten())
-            class_probabilities *= np.repeat(object_probabilities, params.classes)
-
-            # filter out the proposals with low confidence score
-            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
-            class_probabilities = class_probabilities[keep_idxs]
-            obj_indx = keep_idxs // params.classes
-            class_idx = keep_idxs % params.classes
-
-            for ind, obj_ind in enumerate(obj_indx):
-                bbox = prediction[:, :params.coords][obj_ind]
-                x, y = sigmoid(bbox[:2])
-                width, height = bbox[2:]
-
-                row = obj_ind // (params.sides[0] * params.num)
-                col = (obj_ind - row * params.sides[0] * params.num) // params.num
-                n = (obj_ind - row * params.sides[0] * params.num) % params.num
-
-                # Process raw value to get absolute coordinates of boxes
-                x = (col + x) / params.sides[1]
-                y = (row + y) / params.sides[0]
-                # Value for exp is very big number in some cases so following construction is using here
-                try:
-                    width = np.exp(width)
-                    height = np.exp(height)
-                except OverflowError:
-                    continue
-                width = width * params.anchors[2 * n] / input_size[0]
-                height = height * params.anchors[2 * n + 1] / input_size[1]
-
-                # Define class_label and cofidence
-                label = class_idx[ind]
-                confidence = class_probabilities[ind]
-                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), label.item()))
-
-        return objects
+    @staticmethod
+    def _get_raw_box(prediction, obj_ind):
+        bbox = prediction[obj_ind, :4]
+        x, y = sigmoid(bbox[:2])
+        width, height = bbox[2:]
+        return DetectionBox(x, y, width, height)
 
 
 class YOLOF(YOLO):
@@ -338,8 +323,10 @@ class YOLOF(YOLO):
             self.num = num
             self.coords = 4
             self.classes = classes
+            self.bbox_size = self.coords + self.classes
             self.sides = sides
             self.anchors = anchors
+            self.use_input_size = True
 
     def _get_output_info(self):
         anchors = ANCHORS['YOLOF']
@@ -354,51 +341,16 @@ class YOLOF(YOLO):
         return output_info
 
     @staticmethod
-    def _parse_yolo_region(predictions, input_size, params, threshold):
-        def sigmoid(x):
-            return 1. / (1. + np.exp(-x))
+    def _get_probabilities(prediction, classes):
+        return sigmoid(prediction[:, 4:].flatten())
 
-        objects = []
-        bbox_size = params.coords + params.classes
-        predictions = permute_to_N_HWA_K(predictions, bbox_size)
-        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for prediction in predictions:
-            prob = prediction[:, params.coords:].flatten()
-            class_probabilities = sigmoid(prob)
+    @staticmethod
+    def _get_absolute_det_box(box, row, col, anchors, coord_normalizer, size_normalizer):
+        anchor_x = anchors[0] / size_normalizer[0]
+        anchor_y = anchors[1] / size_normalizer[1]
+        x = box.x * anchor_x + col / coord_normalizer[1]
+        y = box.y * anchor_y + row / coord_normalizer[0]
+        width = np.exp(box.w) * anchor_x
+        height = np.exp(box.h) * anchor_y
 
-            # filter out the proposals with low confidence score
-            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
-            class_probabilities = class_probabilities[keep_idxs]
-            obj_indx = keep_idxs // params.classes
-            class_idx = keep_idxs % params.classes
-
-            for ind, obj_ind in enumerate(obj_indx):
-                bbox = prediction[:, :params.coords][obj_ind]
-                x, y, width, height = bbox[:4]
-
-                row = obj_ind // (params.sides[0] * params.num)
-                col = (obj_ind - row * params.sides[0] * params.num) // params.num
-                n = (obj_ind - row * params.sides[0] * params.num) % params.num
-
-                # Get absolute coords of center
-                anchor_x = params.anchors[2 * n] / input_size[1]
-                anchor_y = params.anchors[2 * n + 1] / input_size[0]
-                x = x * anchor_x + col / params.sides[1]
-                y = y * anchor_y + row / params.sides[0]
-
-                # Value for exp is very big number in some cases so following construction is using here
-                try:
-                    width = np.exp(width)
-                    height = np.exp(height)
-                except OverflowError:
-                    continue
-                width *= anchor_x
-                height *= anchor_y
-
-                # Define class_label and cofidence
-                label = class_idx[ind]
-                confidence = class_probabilities[ind]
-                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), label.item()))
-
-        return objects
+        return DetectionBox(x, y, width, height)
