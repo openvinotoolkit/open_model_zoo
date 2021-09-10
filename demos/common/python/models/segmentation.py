@@ -51,7 +51,7 @@ class SegmentationModel(ImageModel):
         return blob_name
 
     def postprocess(self, outputs, meta):
-        predictions = outputs[self.out_blob_name].squeeze()
+        predictions = outputs[self.output_blob_name].squeeze()
         input_image_height = meta['original_shape'][0]
         input_image_width = meta['original_shape'][1]
 
@@ -69,7 +69,7 @@ class SalientObjectDetectionModel(SegmentationModel):
     def postprocess(self, outputs, meta):
         input_image_height = meta['original_shape'][0]
         input_image_width = meta['original_shape'][1]
-        result = outputs[self.out_blob_name].squeeze()
+        result = outputs[self.output_blob_name].squeeze()
         result = 1/(1 + np.exp(-result))
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result

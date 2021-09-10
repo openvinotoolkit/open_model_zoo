@@ -50,6 +50,11 @@ class FaceBoxes(DetectionModel):
             "Expected the same dimension for boxes and scores"
         return bboxes_blob_name, scores_blob_name
 
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs, meta)
+        detections = self._resize_detections(detections, meta)
+        return detections
+
     def _parse_outputs(self, outputs, meta):
         boxes = outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0]

@@ -46,7 +46,7 @@ class DETR(DetectionModel):
         detections = self._resize_detections(detections, meta)
         return detections
 
-    def _parse_outputs(self, outputs, meta):
+    def _parse_outputs(self, outputs):
         boxes = outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0]
 
