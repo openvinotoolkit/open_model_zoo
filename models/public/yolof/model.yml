@@ -15,10 +15,10 @@
 description: >-
   YOLOF is a simple, fast, and efficient object detector without FPN. Model based
   on "You Only Look One-level Feature" <https://arxiv.org/abs/2103.09460> paper. It
-  was implemented in PyTorch* framework. Model used "CSPDarkNet-53" as backbone. For
-  details see repository <https://github.com/megvii-model/YOLOF>. This model was pre-trained
-  on Common Objects in Context (COCO) <https://cocodataset.org/#home> dataset with
-  80 classes.
+  was implemented in PyTorch* framework. Model used "DarkNet-53" with Cross Stage
+  Partial blocks as backbone. For details see repository <https://github.com/megvii-model/YOLOF>.
+  This model was pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset with 80 classes
 task_type: detection
 files:
   # cvpods
