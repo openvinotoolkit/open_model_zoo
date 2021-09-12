@@ -4,7 +4,7 @@
 
 A human gesture recognition model for the Jester dataset recognition scenario
 (gesture-level recognition). The model uses an S3D framework with MobileNet V3 backbone.
-Please refer to the [Jester](https://20bn.com/datasets/jester) dataset specification
+Please refer to the [Jester](https://web.archive.org/web/20210722062232/https://20bn.com/datasets/jester/) dataset specification
 to see the list of gestures that are recognized by this model.
 
 The model accepts a stack of frames (8 frames) sampled with a constant frame rate (15 FPS)

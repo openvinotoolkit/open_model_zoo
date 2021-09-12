@@ -93,6 +93,7 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-yolo-v4-syg | YES | YES |    |
 | mozilla-deepspeech-0.6.1 | YES |    |    |
 | mozilla-deepspeech-0.8.2 | YES |    |    |
 | mtcnn-o | YES | YES |    |
@@ -156,6 +157,7 @@
 | vgg16 | YES | YES | YES |
 | vgg19 | YES | YES | YES |
 | vgg19-caffe2 | YES | YES | YES |
+| wav2vec2-base | YES |    |    |
 | wavernn-rnn | YES | YES | YES |
 | wavernn-upsampler | YES | YES |    |
 | yolact-resnet50-fpn-pytorch | YES | YES | YES |

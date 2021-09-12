@@ -81,6 +81,10 @@ AccuracyChecker supports following set of adapters:
   * `output_name` - name of output layer.
   * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
   * `num` - num parameter from DarkNet configuration file (Optional, default 5).
+* `yolox` - converting output of YOLOX model to `DetectionPrediction` representation.
+  * `output_name` - name of output layer (Optional).
+  * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
+  * `num` - num parameter from DarkNet configuration file (Optional, default 5).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
   * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).

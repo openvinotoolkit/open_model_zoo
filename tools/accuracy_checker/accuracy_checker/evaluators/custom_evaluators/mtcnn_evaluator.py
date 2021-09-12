@@ -579,6 +579,8 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
                 if layer_name.endswith('fq_weights_1'):
                     fq_weights.append(layer_name)
                     box_outs[layer_name] = data
+                elif data.shape[0] <= i:
+                    box_outs[layer_name] = data
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
@@ -609,6 +611,8 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
                     continue
                 if layer_name.endswith('fq_weights_1'):
                     fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                elif data.shape[0] <= i:
                     box_outs[layer_name] = data
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
@@ -955,8 +959,7 @@ def pad(boxesA, h, w):
         dy[tmp] = 2 - y[tmp]
         y[tmp] = np.ones_like(y[tmp])
     # for python index from 0, while matlab from 1
-    dy = np.maximum(0, dy - 1)
-    dx = np.maximum(0, dx - 1)
+    dy, dx = np.maximum(0, dy - 1), np.maximum(0, dx - 1)
     y = np.maximum(0, y - 1)
     x = np.maximum(0, x - 1)
     edy = np.maximum(0, edy - 1)
@@ -984,13 +987,10 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
     numbox = bboxes.shape[0]
     tempimg = np.zeros((numbox, dst_size, dst_size, 3))
     for k in range(numbox):
-        tmp_k_h = int(tmph[k]) + int(include_bound)
-        tmp_k_w = int(tmpw[k]) + int(include_bound)
+        tmp_k_h, tmp_k_w = int(tmph[k]) + int(include_bound), int(tmpw[k]) + int(include_bound)
         tmp = np.zeros((tmp_k_h, tmp_k_w, 3))
-        tmp_ys = slice(int(dy[k]), int(edy[k]) + 1)
-        tmp_xs = slice(int(dx[k]), int(edx[k]) + 1)
-        img_ys = slice(int(y[k]), int(ey[k]) + 1)
-        img_xs = slice(int(x[k]), int(ex[k]) + 1)
+        tmp_ys, tmp_xs = slice(int(dy[k]), int(edy[k]) + 1), slice(int(dx[k]), int(edx[k]) + 1)
+        img_ys, img_xs = slice(int(y[k]), int(ey[k]) + 1), slice(int(x[k]), int(ex[k]) + 1)
         tmp[tmp_ys, tmp_xs] = img[img_ys, img_xs]
         tempimg[k, :, :, :] = cv2.resize(tmp, (dst_size, dst_size))
     image.data = tempimg

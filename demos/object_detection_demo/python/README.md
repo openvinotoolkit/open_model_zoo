@@ -119,6 +119,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - ultra-lightweight-face-detection-slim-320
 * architecture_type = yolo
   - mobilefacedet-v1-mxnet
+  - mobilenet-yolo-v4-syg
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v1-tiny-tf
   - yolo-v2-ava-0001

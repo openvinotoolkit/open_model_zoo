@@ -294,6 +294,46 @@ def add_model_pages(output_root, parent_element, group, group_title):
              title=device_support_title, index=0)
 
 
+def add_demos_pages(output_root, parent_element):
+    demos_group_element = add_page(output_root, parent_element,
+        title="Demos", id='omz_demos', path='demos/README.md')
+    demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
+
+    for md_path in [
+        *OMZ_ROOT.glob('demos/*_demo/*/README.md'),
+        *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
+    ]:
+        md_path_rel = md_path.relative_to(OMZ_ROOT)
+
+        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+            models_lines = models_lst.readlines()
+
+        with (md_path).open('r', encoding="utf-8") as demo_readme:
+            raw_demo_readme = demo_readme.read()
+
+        for model_line in models_lines:
+            if model_line.startswith('#'):
+                continue
+
+            model_line = model_line.rstrip('\n')
+            regex_line = model_line.replace('?', r'.').replace('*', r'\S+')
+
+            if not re.search(regex_line, raw_demo_readme):
+                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
+                                   'Add it to README.md or update models.lst file.')
+
+        # <name>_<implementation>
+        demo_id = '_'.join(md_path_rel.parts[1:3])
+
+        demo_element = add_page(output_root, demos_group_element,
+            id='omz_demos_' + demo_id, path=md_path_rel)
+
+        if not re.search(r'\bDemo\b', demo_element.attrib['title']):
+            raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
+
+    sort_titles(demos_group_element)
+
+
 def main():
     logging.basicConfig()
 
@@ -335,43 +375,7 @@ def main():
     # to change the upstream OpenVINO documentation building process.
     datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
-    demos_group_element = add_page(output_root, navindex_element,
-        title="Demos", id='omz_demos', path='demos/README.md')
-    demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
-
-    for md_path in [
-        *OMZ_ROOT.glob('demos/*_demo/*/README.md'),
-        *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
-    ]:
-        md_path_rel = md_path.relative_to(OMZ_ROOT)
-
-        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
-            models_lines = models_lst.readlines()
-
-        with (md_path).open('r', encoding="utf-8") as demo_readme:
-            raw_demo_readme = demo_readme.read()
-
-        for model_line in models_lines:
-            if model_line.startswith('#'):
-                continue
-
-            model_line = model_line.rstrip('\n')
-            regex_line = model_line.replace('?', r'.').replace('*', r'\S+')
-
-            if not re.search(regex_line, raw_demo_readme):
-                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
-                                   'Add it to README.md or update models.lst file.')
-
-        # <name>_<implementation>
-        demo_id = '_'.join(md_path_rel.parts[1:3])
-
-        demo_element = add_page(output_root, demos_group_element,
-            id='omz_demos_' + demo_id, path=md_path_rel)
-
-        if not re.search(r'\bDemo\b', demo_element.attrib['title']):
-            raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
-
-    sort_titles(demos_group_element)
+    add_demos_pages(output_root, navindex_element)
 
     for md_path in all_md_paths:
         if md_path not in documentation_md_paths:

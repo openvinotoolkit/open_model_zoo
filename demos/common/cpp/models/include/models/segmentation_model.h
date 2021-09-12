@@ -27,8 +27,6 @@ public:
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
