@@ -25,6 +25,7 @@ class SegmentationModel(ImageModel):
     def __init__(self, ie, model_path, input_transform=None, resize_type='standart',
                  labels=None):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
+        self._check_io_number(1, 1)
         if isinstance(labels, (list, tuple)):
             self.labels = labels
         else:
@@ -33,9 +34,6 @@ class SegmentationModel(ImageModel):
         self.output_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        if len(self.net.outputs) != 1:
-            raise RuntimeError("The Segmentation model wrapper supports topologies only with 1 output")
-
         blob_name = next(iter(self.net.outputs))
         blob = self.net.outputs[blob_name]
 
