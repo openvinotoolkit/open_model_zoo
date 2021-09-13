@@ -22,10 +22,9 @@ from .utils import Detection, nms
 
 
 class FaceBoxes(DetectionModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
                  labels=None, threshold=0.5, iou_threshold=0.3):
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
-                         keep_aspect_ratio=keep_aspect_ratio,
+        super().__init__(ie, model_path, resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         if keep_aspect_ratio:
             self.logger.warn('The FaceBoxes model wrapper has no default resizer with keeping aspect ratio.'

@@ -29,10 +29,10 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
                  labels=None, threshold=None, iou_threshold=None):
         '''The Detection Model constructor
-        
+
         Calls the ``ImageModel`` construtor first.
 
         Args:
@@ -43,7 +43,7 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
+        super().__init__(ie, model_path, resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio)
 
         if not self.image_blob_name:
             raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
@@ -64,7 +64,7 @@ class DetectionModel(ImageModel):
         Applies clipping bounding box to image size.
 
         Args:
-            detections(List[Detection]): list of detections with coordinates in normalized form 
+            detections(List[Detection]): list of detections with coordinates in normalized form
             meta: meta information with fields `resized_shape` and `original_shape`
 
         Returns:

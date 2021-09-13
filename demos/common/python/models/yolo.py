@@ -17,8 +17,9 @@
 import numpy as np
 import ngraph
 
+from .model import Model
 from .detection_model import DetectionModel
-from .utils import Detection
+from .utils import Detection, clip_detections, load_labels, nms, resize_image
 
 ANCHORS = {
     'YOLOV3': [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
@@ -65,11 +66,11 @@ class YOLO(DetectionModel):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type=None, keep_aspect_ratio=True,
+    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=True,
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'letterbox' if keep_aspect_ratio else 'standart'
-        super().__init__(ie, model_path, input_transform, resize_type, keep_aspect_ratio,
+        super().__init__(ie, model_path, resize_type, keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
@@ -205,12 +206,12 @@ class YoloV4(YOLO):
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type='letterbox',
+    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=True,
                  labels=None, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
         self.anchors = anchors
         self.masks = masks
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
+        super().__init__(ie, model_path, resize_type, keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):
@@ -286,11 +287,8 @@ class YoloV4(YOLO):
 class YOLOX(Model):
     def __init__(self, ie, model_path, labels=None, threshold=0.5):
         super().__init__(ie, model_path)
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
+        self._check_io_number(1, 1)
         self.image_blob_name = next(iter(self.net.input_info))
-
-        assert len(self.net.outputs) == 1, "Expected 1 output blob"
         self.output_blob_name = next(iter(self.net.outputs))
 
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape

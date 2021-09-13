@@ -22,9 +22,9 @@ from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='standart',
+    def __init__(self, ie, model_path, resize_type='standart',
                  labels=None):
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
+        super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
         if isinstance(labels, (list, tuple)):
             self.labels = labels

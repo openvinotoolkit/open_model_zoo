@@ -20,7 +20,7 @@ from .utils import InputTransform
 
 class Model:
     '''An abstract model wrapper
-    
+
     An abstract model wrapper can only load model from the disk.
     The ``preprocess`` and ``postprocess`` method should be implemented in concrete class
 
@@ -40,7 +40,6 @@ class Model:
         self.net = ie.read_network(model_path)
         self.inputs = self.net.input_info
         self.outputs = self.net.outputs
-        self.set_batch_size(1)
         self.input_transform = InputTransform()
 
     def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
@@ -68,12 +67,11 @@ class Model:
 
     def _check_io_number(self, number_of_inputs, number_of_outputs):
         '''Checking actual number of input/output blobs with supported by model wrapper
-        
 
         Args:
             number_of_inputs(int, Tuple(int)): number of input blobs, supported by wrapper. Use -1 to omit check
             number_of_outputs(int, Tuple(int)): number of output blobs, supported by wrapper. Use -1 to omit check
-        
+
         Raises:
             RuntimeError: if loaded model has unsupported number of input or output blob
         '''
@@ -85,7 +83,7 @@ class Model:
         else:
             if not len(self.inputs) in number_of_inputs:
                 raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
-                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]), len(self.inputs), 
+                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]), len(self.inputs),
                     ', '.join(self.inputs)
                 ))
 

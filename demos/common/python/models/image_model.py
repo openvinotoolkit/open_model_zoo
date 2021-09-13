@@ -29,7 +29,7 @@ class ImageModel(Model):
     An image-based model is model which has one or more inputs with image - 4D tensors with NWHC or NCHW layout.
     Also it may have support inputs - 2D tensor.
     Implements basic preprocessing for image: resizing and aligning to model input.
-    
+
     Attributes:
         resize_type(str): one of the preimplemented resize types
         image_blob_names(List[str]): names of all image-like inputs (4D tensors)
@@ -37,20 +37,27 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type=None, keep_aspect_ratio=False):
+    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=False):
         '''Image model constructor
 
         Calls the `Model` constructor first
 
         Args:
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
+            keep_aspect_ratio(bool): sets the default resizer type with keeping aspect ratio.
+                Should be defined in concrete model.
         '''
-        super().__init__(ie, model_path, input_transform=input_transform)
+        super().__init__(ie, model_path)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         self.image_layout = 'NCHW'
+        if not resize_type and keep_aspect_ratio:
+            self.logger.warn('The model wrapper has no default resizer with keeping aspect ratio.')
+        if not resize_type:
+            self.logger.warn('The resizer isn\'t set. The "standart" will be used')
+            resize_type = 'standart'
         self.resize_type = resize_type
         self.resize = self.RESIZE_TYPES[self.resize_type]
 
@@ -74,7 +81,7 @@ class ImageModel(Model):
         - resizing to net input size
         - applying tranform orerations: mean and scale values, BGR-RGB conversions
         - changing layout according to net input layout
-        
+
         Adds the size of initial image and after resizing to metadata as `original_shape` and `resized_shape`
         correspondenly.
 
@@ -95,8 +102,7 @@ class ImageModel(Model):
         meta.update({'resized_shape': resized_image.shape})
         if self.resize_type == 'fit_to_window':
             resized_image = pad_image(resized_image, (self.w, self.h))
-        if self.input_transform:
-            resized_image = self.input_transform(resized_image)
+        resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
