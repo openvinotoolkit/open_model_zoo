@@ -18,6 +18,19 @@ from .utils import resize_image, resize_image_with_aspect, resize_image_letterbo
 
 
 class ImageModel(Model):
+    '''An abstract wrapper for image-bases model
+
+    An image-based model is model which has one or more inputs with image - 4D tensors with NWHC or NCHW layout.
+    Also it may have support inputs - 2D tensor.
+    Implements basic preprocessing for image: resizing and aligning to model input.
+    
+    Attributes:
+        resize_type(str): one of the preimplemented resize types
+        image_blob_names(List[str]): names of all image-like inputs (4D tensors)
+        image_info_blob_names(List[str]): names of all secondary inputs (2D tensors)
+        image_blob_name(str): name of image input (None, if they are many)
+    '''
+
     RESIZE_TYPES = {
         'default': resize_image,
         'keep_aspect_ratio': resize_image_with_aspect,
@@ -25,6 +38,13 @@ class ImageModel(Model):
     }
 
     def __init__(self, ie, model_path, input_transform=None, resize_type='default'):
+        '''Image model constructor
+
+        Calls the `Model` constructor first
+
+        Args:
+            resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
+        '''
         super().__init__(ie, model_path, input_transform=input_transform)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
@@ -48,6 +68,27 @@ class ImageModel(Model):
         return image_blob_names, image_info_blob_names
 
     def preprocess(self, inputs):
+        '''Data preprocess method
+
+        Performs some basic preprocessing with single image:
+        - resizing to net input size
+        - applying tranform orerations: mean and scale values, BGR-RGB conversions
+        - changing layout according to net input layout
+        
+        Adds the size of initial image and after resizing to metadata as `original_shape` and `resized_shape`
+        correspondenly.
+
+        Note:
+            This method supports only models with single image input. If model has more image inputs
+            or has additional support inputs, their preprocessing should be implemented in concrete class
+
+        Args:
+            inputs: single image as 3D array in HWC layout
+
+        Returns:
+            - The dict with processed image data
+            - The dict with metadata
+        '''
         image = inputs
         meta = {'original_shape': image.shape}
         resized_image = self.resize(image, (self.w, self.h))

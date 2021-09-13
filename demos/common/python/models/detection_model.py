@@ -18,8 +18,31 @@ from .utils import load_labels, clip_detections
 
 
 class DetectionModel(ImageModel):
+    '''A abstract detection model class
+
+    This class supports the detection models. The Detection Model should have single image input.
+
+    Attributes:
+        labels(List[str]): list of labels for classes (could be None)
+        threshold(float): threshold for detection filtering, any detection with confidence less than this value
+            should be omitted in ``posptrocess`` method (0<=thresold<=1.0 for most models)
+        iou_threshold(float): threshold for NMS detection filtering
+    '''
+
     def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=None, iou_threshold=None):
+        '''The Detection Model constructor
+        
+        Calls the ``ImageModel`` construtor first.
+
+        Args:
+            labels(Iterable[str], str, Path): list of labels for detection classes or path to file with them
+            threshold(float): threshold for detections filtering by confidence
+            iou_threshold(float): threshold for NMS filtering
+
+        Raises:
+            RuntimeError: If loaded model has more than one image inputs
+        '''
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
 
         if not self.image_blob_name:
@@ -35,6 +58,21 @@ class DetectionModel(ImageModel):
         self.iou_threshold = iou_threshold
 
     def _resize_detections(self, detections, meta):
+        '''Resizes detection bounding box according to initial image size
+
+        Implements resize operations for different image resize types (see ``ImageModel`` class for details).
+        Applies clipping bounding box to image size.
+
+        Args:
+            detections(List[Detection]): list of detections with coordinates in normalized form 
+            meta: meta information with fields `resized_shape` and `original_shape`
+
+        Returns:
+            List of detections for initial image
+
+        Raises:
+            RuntimeError: If model uses custom resize or `resize_type` not set
+        '''
         resized_shape = meta['resized_shape']
         original_shape = meta['original_shape']
 
