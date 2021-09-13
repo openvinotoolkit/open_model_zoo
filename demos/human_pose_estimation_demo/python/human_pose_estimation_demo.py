@@ -26,11 +26,14 @@ import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-import models
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
+from model_api import models
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+
 import monitors
 from images_capture import open_images_capture
-from pipelines import get_user_config, parse_devices, AsyncPipeline
-from performance_metrics import PerformanceMetrics
 from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)

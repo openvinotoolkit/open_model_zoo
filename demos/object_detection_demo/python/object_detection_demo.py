@@ -28,11 +28,7 @@ import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-
-try:
-    import openvino.model_zoo
-except ImportError:
-    sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics

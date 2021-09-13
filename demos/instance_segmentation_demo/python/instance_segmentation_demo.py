@@ -26,6 +26,7 @@ import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from instance_segmentation_demo.model_utils import check_model
 from instance_segmentation_demo.tracker import StaticIOUTracker
@@ -33,7 +34,7 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 import monitors
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
+from model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
