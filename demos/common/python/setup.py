@@ -38,7 +38,7 @@ setup(
     version='0.0.0',
     author='Intel® Corporation',
     license='OSI Approved :: Apache Software License',
-    url='https://github.com/openvinotoolkit/open_model_zoo/demos/common/python/openvino/model_zoo/model_api',
+    url='https://github.com/openvinotoolkit/open_model_zoo/tree/develop/demos/common/python/openvino',
     description='Model API: model wrappers and pipelines from Open Model Zoo',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
