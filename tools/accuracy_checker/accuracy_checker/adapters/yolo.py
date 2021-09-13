@@ -250,6 +250,8 @@ class YoloV2Adapter(Adapter):
 
         result = []
         box_size = self.classes + self.coords + 1
+        if len(identifiers) == 1 and predictions.shape[0] != 1:
+            predictions = np.expand_dims(predictions, 0)
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) != 3:
                 if self.output_format == 'BHW':
