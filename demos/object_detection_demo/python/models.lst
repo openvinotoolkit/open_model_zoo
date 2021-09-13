@@ -57,3 +57,5 @@ yolo-v3-tiny-tf
 # For --architecture_type=yolov4
 yolo-v4-tf
 yolo-v4-tiny-tf
+# For --architecture_type=yolox
+yolox-tiny

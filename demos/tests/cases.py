@@ -978,6 +978,16 @@ PYTHON_DEMOS = [
                                       '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'yolox'}),
+                [
+                    TestCase(options={'-m': ModelArg('yolox-tiny')}),
+                    TestCase(options={'-m': ModelFileArg('yolox-tiny', 'yolox-tiny.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                ]
+            ),
         ],
     )),
 
