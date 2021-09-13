@@ -24,14 +24,15 @@ class DETR(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        assert len(self.net.outputs) == 2, "Expected 2 output blobs"
+        self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
     def _get_outputs(self):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.net.outputs.items()
 
-        assert bboxes_layer.shape[1] == scores_layer.shape[1], "Expected the same dimension for boxes and scores"
+        if bboxes_layer.shape[1] == scores_layer.shape[1]:
+            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+                               .format(bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
             return bboxes_blob_name, scores_blob_name

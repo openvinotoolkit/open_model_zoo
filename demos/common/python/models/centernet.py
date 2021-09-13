@@ -27,6 +27,7 @@ class CenterNet(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        self._check_io_number(1, 3)
         self._output_layer_names = sorted(self.net.outputs)
 
     def postprocess(self, outputs, meta):

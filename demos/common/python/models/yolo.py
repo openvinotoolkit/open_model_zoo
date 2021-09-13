@@ -71,9 +71,7 @@ class YOLO(DetectionModel):
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
-        if len(self.inputs) != 1:
-            raise RuntimeError(f"The YOLO model family expects only one input blob but {len(self.inputs)} found:\n"
-                               f"{','.join(*self.inputs)}")
+        self._check_io_number(1, -1)
 
         if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape

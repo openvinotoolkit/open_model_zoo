@@ -28,10 +28,7 @@ class RetinaFace(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        expected_outputs_count = (6, 9, 12)
-        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
-            ', '.join(str(count) for count in expected_outputs_count[:-1]), int(expected_outputs_count[-1]))
+        self._check_io_number(1, (6, 9, 12))
 
         self.detect_masks = len(self.net.outputs) == 12
         self.process_landmarks = len(self.net.outputs) > 6
@@ -57,10 +54,7 @@ class RetinaFacePyTorch(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        expected_outputs_count = (2, 3)
-        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
-            expected_outputs_count[0], expected_outputs_count[1])
+        self._check_io_number(1, (2, 3))
 
         self.process_landmarks = len(self.net.outputs) == 3
         self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)

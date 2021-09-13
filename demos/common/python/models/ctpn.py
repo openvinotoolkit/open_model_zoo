@@ -24,6 +24,7 @@ from .utils import Detection, nms, clip_detections
 class CTPN(Model):
     def __init__(self, ie, model_path, input_size, threshold=0.9):
         super().__init__(ie, model_path)
+        self._check_io_number(1, 2)
 
         self.image_blob_name = self.prepare_inputs()
         self.bboxes_blob_name, self.scores_blob_name = self.prepare_outputs()
@@ -60,9 +61,6 @@ class CTPN(Model):
         self.net.reshape(input_shape)
 
     def prepare_inputs(self):
-        if len(self.net.input_info) != 1:
-            raise RuntimeError("The CTPN topology supposes only 1 input layer")
-
         image_blob_name = next(iter(self.net.input_info))
         input_size = self.net.input_info[image_blob_name].input_data.shape
 
@@ -72,9 +70,6 @@ class CTPN(Model):
         return image_blob_name
 
     def prepare_outputs(self):
-        if len(self.net.outputs) != 2:
-            raise RuntimeError("The CTPN topology supposes exactly 2 output layers")
-
         (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.net.outputs.items()
 
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:

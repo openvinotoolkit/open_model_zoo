@@ -24,10 +24,8 @@ class UltraLightweightFaceDetection(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-
+        self._check_io_number(1, 2)
         self.labels = ['Face']
-
-        assert len(self.net.outputs) == 2, "Expected 2 output blobs"
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
     def _get_outputs(self):
@@ -41,8 +39,10 @@ class UltraLightweightFaceDetection(DetectionModel):
             else:
                 raise RuntimeError("Expected shapes [:,:,4] and [:,:2] for outputs, but got {} and {}"
                                    .format(*[output.shape for output in self.net.outputs]))
-        assert self.net.outputs[bboxes_blob_name].shape[1] == self.net.outputs[scores_blob_name].shape[1], \
-            "Expected the same dimension for boxes and scores"
+        if self.net.outputs[bboxes_blob_name].shape[1] != self.net.outputs[scores_blob_name].shape[1]:
+            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+                               .format(self.net.outputs[bboxes_blob_name].shape,
+                                       self.net.outputs[scores_blob_name].shape))
         return bboxes_blob_name, scores_blob_name
 
     def postprocess(self, outputs, meta):

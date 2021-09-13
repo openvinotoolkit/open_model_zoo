@@ -65,3 +65,38 @@ class Model:
             Postrocessed data in format accoding to conrete model
         '''
         raise NotImplementedError
+
+    def _check_io_number(self, number_of_inputs, number_of_outputs):
+        '''Checking actual number of input/output blobs with supported by model wrapper
+        
+
+        Args:
+            number_of_inputs(int, Tuple(int)): number of input blobs, supported by wrapper. Use -1 to omit check
+            number_of_outputs(int, Tuple(int)): number of output blobs, supported by wrapper. Use -1 to omit check
+        
+        Raises:
+            RuntimeError: if loaded model has unsupported number of input or output blob
+        '''
+        if not isinstance(number_of_inputs, tuple):
+            if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
+                raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
+                    number_of_inputs, 's' if number_of_inputs !=1 else '', len(self.inputs), ', '.join(self.inputs)
+                ))
+        else:
+            if not len(self.inputs) in number_of_inputs:
+                raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
+                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]), len(self.inputs), 
+                    ', '.join(self.inputs)
+                ))
+
+        if not isinstance(number_of_outputs, tuple):
+            if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
+                raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
+                    number_of_outputs, 's' if number_of_outputs !=1 else '', len(self.outputs), ', '.join(self.outputs)
+                ))
+        else:
+            if not len(self.outputs) in number_of_outputs:
+                raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
+                    ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]), len(self.outputs),
+                    ', '.join(self.outputs)
+                ))
