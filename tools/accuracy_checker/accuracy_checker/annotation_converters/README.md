@@ -759,6 +759,10 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
   * `preprocessed_dir` - path to preprocessed data
   * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
+* `wgs_pickle_records` - converts `Deepvariant WGS` preprocessed dataset (https://github.com/google/deepvariant/blob/r0.10/docs/deepvariant-training-case-study.md) dumped to pickle file to `ClassificationAnnotation`.
+  * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
+  * `preprocessed_dir` - path to preprocessed data
+  * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
