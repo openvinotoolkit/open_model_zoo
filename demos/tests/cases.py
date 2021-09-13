@@ -343,6 +343,7 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
+                    ModelArg('mobilenet-yolo-v4-syg'),
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
@@ -950,6 +951,7 @@ PYTHON_DEMOS = [
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilefacedet-v1-mxnet'),
+                    ModelArg('mobilenet-yolo-v4-syg'),
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),

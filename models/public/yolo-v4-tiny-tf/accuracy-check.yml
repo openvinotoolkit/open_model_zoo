@@ -16,8 +16,8 @@ models:
           do_reshape: True
           cells: [26, 13]
           outputs:
-            - conv2d_20/BiasAdd/Add
-            - conv2d_17/BiasAdd/Add
+            - conv2d_20/BiasAdd
+            - conv2d_17/BiasAdd
         inputs:
           - name: 'image_input'
             type: INPUT

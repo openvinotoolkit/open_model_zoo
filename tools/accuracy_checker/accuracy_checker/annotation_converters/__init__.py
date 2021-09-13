@@ -19,7 +19,7 @@ from .convert import make_subset, save_annotation, analyze_dataset, DatasetConve
 from .market1501 import Market1501Converter
 from .veri776 import VeRi776Converter
 from .mars import MARSConverter
-from .pascal_voc import PascalVOCDetectionConverter
+from .pascal_voc import PascalVOCDetectionConverter, SYGDetectionConverter
 from .sample_converter import SampleConverter
 from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
@@ -133,6 +133,7 @@ __all__ = [
     'VeRi776Converter',
     'SampleConverter',
     'PascalVOCDetectionConverter',
+    'SYGDetectionConverter',
     'WiderFormatConverter',
     'MARSConverter',
     'DetectionOpenCVStorageFormatConverter',
