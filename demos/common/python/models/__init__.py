@@ -27,7 +27,7 @@ from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
-from .yolo import YOLO, YoloV4, YOLOF
+from .yolo import YOLO, YoloV4, YOLOF, YOLOX
 
 __all__ = [
     'CenterNet',
@@ -49,4 +49,5 @@ __all__ = [
     'YOLO',
     'YoloV4',
     'YOLOF',
+    'YOLOX',
 ]

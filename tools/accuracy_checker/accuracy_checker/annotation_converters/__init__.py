@@ -119,7 +119,7 @@ from .dataset_folder import DatasetFolderConverter
 from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
 from .amazon import AmazonProductData
-from .wgs import WGSTFRecords
+from .wgs import WGSTFRecords, WGSPickleRecords
 
 __all__ = [
     'BaseFormatConverter',
@@ -238,6 +238,6 @@ __all__ = [
     'OpenImagesDetectionConverter',
     'KSpaceMRIConverter',
     'AmazonProductData',
-    'WGSTFRecords'
-
+    'WGSTFRecords',
+    'WGSPickleRecords',
 ]

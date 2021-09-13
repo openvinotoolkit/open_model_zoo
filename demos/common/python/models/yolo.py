@@ -16,7 +16,7 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections
+from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections, nms
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
@@ -354,3 +354,94 @@ class YOLOF(YOLO):
         height = np.exp(box.h) * anchor_y
 
         return DetectionBox(x, y, width, height)
+
+
+class YOLOX(Model):
+    def __init__(self, ie, model_path, input_transform, labels=None, threshold=0.5):
+        super().__init__(ie, model_path, input_transform)
+
+        assert len(self.net.input_info) == 1, "Expected 1 input blob"
+        self.image_blob_name = next(iter(self.net.input_info))
+
+        assert len(self.net.outputs) == 1, "Expected 1 output blob"
+        self.output_blob_name = next(iter(self.net.outputs))
+
+        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+        assert self.c == 3, "Expected 3-channel input"
+
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
+
+        self.threshold = threshold
+        self.nms_threshold = 0.65
+        self.expanded_strides = []
+        self.grids = []
+        self.set_strides_grids()
+
+    def preprocess(self, inputs):
+        image = inputs
+        resized_image = resize_image(image, (self.w, self.h), keep_aspect_ratio=True)
+
+        padded_image = np.ones((self.h, self.w, 3), dtype=np.uint8) * 114
+        padded_image[: resized_image.shape[0], : resized_image.shape[1]] = resized_image
+
+        meta = {'original_shape': image.shape,
+                'scale': min(self.w / image.shape[1], self.h / image.shape[0])}
+
+        preprocessed_image = self.input_transform(padded_image)
+        preprocessed_image = preprocessed_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        preprocessed_image = preprocessed_image.reshape((self.n, self.c, self.h, self.w))
+
+        dict_inputs = {self.image_blob_name: preprocessed_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        output = outputs[self.output_blob_name][0]
+
+        if np.size(self.expanded_strides) != 0 and np.size(self.grids) != 0:
+            output[..., :2] = (output[..., :2] + self.grids) * self.expanded_strides
+            output[..., 2:4] = np.exp(output[..., 2:4]) * self.expanded_strides
+
+        valid_predictions = output[output[..., 4] > self.threshold]
+        valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
+
+        boxes = self.xywh2xyxy(valid_predictions[:, :4]) / meta['scale']
+        i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
+        x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
+        scores = valid_predictions[i, j + 5]
+
+        keep_nms = nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold, include_boundaries=True)
+
+        detections = [Detection(*det) for det in zip(x_mins[keep_nms], y_mins[keep_nms], x_maxs[keep_nms],
+                                                     y_maxs[keep_nms], scores[keep_nms], j[keep_nms])]
+        return clip_detections(detections, meta['original_shape'])
+
+    def set_strides_grids(self):
+        grids = []
+        expanded_strides = []
+
+        strides = [8, 16, 32]
+
+        hsizes = [self.h // stride for stride in strides]
+        wsizes = [self.w // stride for stride in strides]
+
+        for hsize, wsize, stride in zip(hsizes, wsizes, strides):
+            xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
+            grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
+            grids.append(grid)
+            shape = grid.shape[:2]
+            expanded_strides.append(np.full((*shape, 1), stride))
+
+        self.grids = np.concatenate(grids, 1)
+        self.expanded_strides = np.concatenate(expanded_strides, 1)
+
+    @staticmethod
+    def xywh2xyxy(x):
+        y = np.copy(x)
+        y[:, 0] = x[:, 0] - x[:, 2] / 2
+        y[:, 1] = x[:, 1] - x[:, 3] / 2
+        y[:, 2] = x[:, 0] + x[:, 2] / 2
+        y[:, 3] = x[:, 1] + x[:, 3] / 2
+        return y
