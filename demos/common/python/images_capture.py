@@ -6,10 +6,7 @@ from time import perf_counter
 
 import cv2
 
-try:
-    import openvino.model_zoo
-except ImportError:
-    sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.performance_metrics import PerformanceMetrics
 
