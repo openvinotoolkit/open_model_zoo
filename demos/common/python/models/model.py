@@ -24,7 +24,7 @@ class Model:
     An abstract model wrapper can only load model from the disk.
     The ``preprocess`` and ``postprocess`` method should be implemented in concrete class
 
-    Attributes    
+    Attributes:
         net(CNNNetwork): loaded network
         logger(Logger): instance of the logger
     '''

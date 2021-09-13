@@ -163,15 +163,15 @@ class ColorPalette:
 
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio,
+        return models.SSD(*common_args, labels=args.labels, resize_type = 'keep_aspect_ratio' if args.keep_aspect_ratio else 'default',
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
-        return models.YOLO(ie, args.model, labels=args.labels, resize_type = 'letterbox' if args.keep_aspect_ratio else 'default',
+        return models.YOLO(ie, args.model, labels=args.labels, keep_aspect_ratio=args.keep_aspect_ratio,
                            threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, resize_type = 'letterbox' if args.keep_aspect_ratio else 'default',
+                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
                              anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'yolox':
         return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)

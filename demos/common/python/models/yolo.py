@@ -65,9 +65,11 @@ class YOLO(DetectionModel):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type='letterbox',
+    def __init__(self, ie, model_path, input_transform=None, resize_type=None, keep_aspect_ratio=True,
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
+        if not resize_type:
+            resize_type = 'letterbox' if keep_aspect_ratio else 'standart'
+        super().__init__(ie, model_path, input_transform, resize_type, keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 

@@ -20,9 +20,12 @@ from .utils import Detection
 
 
 class SSD(DetectionModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
+    def __init__(self, ie, model_path, input_transform=None, resize_type=None, keep_aspect_ratio=False,
                  labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'fit_to_window' if keep_aspect_ratio else 'stantard'
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
+                         keep_aspect_ratio=keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)

@@ -17,6 +17,12 @@ from .model import Model
 from .utils import resize_image, resize_image_with_aspect, resize_image_letterbox, pad_image
 
 
+RESIZE_TYPES = {
+    'standart': resize_image,
+    'fit_to_window': resize_image_with_aspect,
+    'fit_to_window_letterbox': resize_image_letterbox,
+}
+
 class ImageModel(Model):
     '''An abstract wrapper for image-bases model
 
@@ -31,13 +37,7 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    RESIZE_TYPES = {
-        'default': resize_image,
-        'keep_aspect_ratio': resize_image_with_aspect,
-        'letterbox': resize_image_letterbox,
-    }
-
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default'):
+    def __init__(self, ie, model_path, input_transform=None, resize_type=None, keep_aspect_ratio=False):
         '''Image model constructor
 
         Calls the `Model` constructor first
@@ -93,7 +93,7 @@ class ImageModel(Model):
         meta = {'original_shape': image.shape}
         resized_image = self.resize(image, (self.w, self.h))
         meta.update({'resized_shape': resized_image.shape})
-        if self.resize_type == 'keep_aspect_ratio':
+        if self.resize_type == 'fit_to_window':
             resized_image = pad_image(resized_image, (self.w, self.h))
         if self.input_transform:
             resized_image = self.input_transform(resized_image)
