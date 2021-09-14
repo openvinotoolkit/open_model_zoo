@@ -23,14 +23,12 @@ from .utils import Detection, clip_detections
 
 
 class CenterNet(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type=None, 
                  labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'standard'
         super().__init__(ie, model_path, resize_type=resize_type,
-                         keep_aspect_ratio=keep_aspect_ratio,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        if keep_aspect_ratio:
-            self.logger.warn('The CenterNet model wrapper has no default resizer with keeping aspect ratio.'
-                             'The "{}" will be used.'.format(resize_type))
         self._check_io_number(1, 3)
         self._output_layer_names = sorted(self.net.outputs)
 

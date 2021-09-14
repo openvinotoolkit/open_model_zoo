@@ -29,7 +29,7 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type=None,
                  labels=None, threshold=None, iou_threshold=None):
         '''The Detection Model constructor
 
@@ -43,7 +43,7 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(ie, model_path, resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio)
+        super().__init__(ie, model_path, resize_type=resize_type)
 
         if not self.image_blob_name:
             raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
@@ -76,11 +76,11 @@ class DetectionModel(ImageModel):
         resized_shape = meta['resized_shape']
         original_shape = meta['original_shape']
 
-        if self.resize_type=='letterbox':
+        if self.resize_type=='fit_to_window_letterbox':
             detections = resize_detections_letterbox(detections, original_shape[1::-1], resized_shape[1::-1])
-        elif self.resize_type == 'keep_aspect_ratio':
+        elif self.resize_type == 'fit_to_window':
             detections = resize_detections_with_aspect_ratio(detections, original_shape[1::-1], resized_shape[1::-1], (self.w, self.h))
-        elif self.resize_type == 'default':
+        elif self.resize_type == 'standard':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
             raise RuntimeError('Unknown resize type {}'.format(self.resize_type))

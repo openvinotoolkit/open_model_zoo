@@ -66,11 +66,11 @@ class YOLO(DetectionModel):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=True,
+    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
-            resize_type = 'letterbox' if keep_aspect_ratio else 'standart'
-        super().__init__(ie, model_path, resize_type, keep_aspect_ratio,
+            resize_type = 'fit_to_window_letterbox'
+        super().__init__(ie, model_path, resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
@@ -206,12 +206,12 @@ class YoloV4(YOLO):
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
-    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=True,
+    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
         self.anchors = anchors
         self.masks = masks
-        super().__init__(ie, model_path, resize_type, keep_aspect_ratio,
+        super().__init__(ie, model_path, resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):

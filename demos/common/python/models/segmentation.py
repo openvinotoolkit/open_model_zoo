@@ -22,7 +22,7 @@ from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, ie, model_path, resize_type='standart',
+    def __init__(self, ie, model_path, resize_type='standard',
                  labels=None):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)

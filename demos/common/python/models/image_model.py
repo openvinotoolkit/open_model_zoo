@@ -14,14 +14,8 @@
  limitations under the License.
 """
 from .model import Model
-from .utils import resize_image, resize_image_with_aspect, resize_image_letterbox, pad_image
+from .utils import RESIZE_TYPES, pad_image
 
-
-RESIZE_TYPES = {
-    'standart': resize_image,
-    'fit_to_window': resize_image_with_aspect,
-    'fit_to_window_letterbox': resize_image_letterbox,
-}
 
 class ImageModel(Model):
     '''An abstract wrapper for image-bases model
@@ -37,15 +31,13 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, ie, model_path, resize_type=None, keep_aspect_ratio=False):
+    def __init__(self, ie, model_path, resize_type=None):
         '''Image model constructor
 
         Calls the `Model` constructor first
 
         Args:
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
-            keep_aspect_ratio(bool): sets the default resizer type with keeping aspect ratio.
-                Should be defined in concrete model.
         '''
         super().__init__(ie, model_path)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
@@ -53,13 +45,11 @@ class ImageModel(Model):
         if self.image_blob_name:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         self.image_layout = 'NCHW'
-        if not resize_type and keep_aspect_ratio:
-            self.logger.warn('The model wrapper has no default resizer with keeping aspect ratio.')
         if not resize_type:
-            self.logger.warn('The resizer isn\'t set. The "standart" will be used')
-            resize_type = 'standart'
+            self.logger.warn('The resizer isn\'t set. The "standard" will be used')
+            resize_type = 'standard'
         self.resize_type = resize_type
-        self.resize = self.RESIZE_TYPES[self.resize_type]
+        self.resize = RESIZE_TYPES[self.resize_type]
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []

@@ -139,6 +139,13 @@ def resize_image_letterbox(image, size):
     return resized_image
 
 
+RESIZE_TYPES = {
+    'standard': resize_image,
+    'fit_to_window': resize_image_with_aspect,
+    'fit_to_window_letterbox': resize_image_letterbox,
+}
+
+
 def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=None):
     b = 1 if include_boundaries else 0
     areas = (x2 - x1 + b) * (y2 - y1 + b)

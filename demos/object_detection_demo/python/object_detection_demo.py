@@ -62,8 +62,8 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                                   help='Optional. Keeps aspect ratio on resize.')
+    common_model_args.add_argument('--resize_type', default=None, choices=models.RESIZE_TYPES.keys(),
+                                   help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
     common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
                                    help='Optional. The first image size used for CTPN model reshaping. '
                                         'Default: 600 600. Note that submitted images should have the same resolution, '
@@ -163,15 +163,16 @@ class ColorPalette:
 
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio=args.keep_aspect_ratio)
+        return models.SSD(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+                          threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
-        return models.YOLO(ie, args.model, labels=args.labels, keep_aspect_ratio=args.keep_aspect_ratio,
+        return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
                            threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
+                             threshold=args.prob_threshold, resize_type=args.resize_type,
                              anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'yolox':
         return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)

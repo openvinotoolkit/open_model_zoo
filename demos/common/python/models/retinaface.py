@@ -24,13 +24,12 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
 class RetinaFace(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio,
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        if keep_aspect_ratio:
-            self.logger.warn('The RetinaFace model wrapper has no default resizer with keeping aspect ratio.'
-                             'The "{}" will be used.'.format(resize_type))
         self._check_io_number(1, (6, 9, 12))
 
         self.detect_masks = len(self.net.outputs) == 12
@@ -53,13 +52,12 @@ class RetinaFace(DetectionModel):
 
 
 class RetinaFacePyTorch(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path,  resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio,
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path,  resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        if keep_aspect_ratio:
-            self.logger.warn('The RetinaFacePyTorch model wrapper has no default resizer with keeping aspect ratio.'
-                             'The "{}" will be used.'.format(resize_type))
         self._check_io_number(1, (2, 3))
 
         self.process_landmarks = len(self.net.outputs) == 3

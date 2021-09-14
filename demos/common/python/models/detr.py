@@ -20,20 +20,19 @@ from .utils import Detection
 
 
 class DETR(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standart', keep_aspect_ratio=False,
+    def __init__(self, ie, model_path, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, resize_type=resize_type, keep_aspect_ratio=keep_aspect_ratio,
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        if keep_aspect_ratio:
-            self.logger.warn('The DETR model wrapper has no default resizer with keeping aspect ratio.'
-                             'The "{}" will be used.'.format(resize_type))
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
     def _get_outputs(self):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.net.outputs.items()
 
-        if bboxes_layer.shape[1] == scores_layer.shape[1]:
+        if bboxes_layer.shape[1] != scores_layer.shape[1]:
             raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 
