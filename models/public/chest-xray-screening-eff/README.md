@@ -1,14 +1,18 @@
 # **Deep Neural Network for Chest X-Ray Screening**
 
-## **Use Case and High-Level Description**
+## Use Case and High-Level Description
 
 <div id="abs">
 
 Chest radiographs are primarily employed for the screening of pulmonary and cardio-thoracic conditions. Being undertaken at primary healthcare centers, they require the presence of an on-premise reporting Radiologist, which is a challenge in low and middle income countries. This has inspired the development of machine learning based automation of the screening process. While recent efforts demonstrate a performance benchmark using an ensemble of deep convolutional neural networks (CNN), our systematic search over multiple standard CNN architectures identified single candidate CNN models whose classification performances were found to be at par with ensembles.
 
-This code is to perform architecture search for models trained to detect multiple comorbid chest diseases in chest X-rays. In this code, we performed experiments to fine-tune the DenseNet-121[[1](#densenet)] CNN architecture for this task [[2](#embc)]. The method in this repository differs from the paper in a few aspects; In the paper, the authors classify an X-ray image into one or more of the 14 classes following a multi-hot encoding on account of co-morbidity of diseases, while in this repository we present the approach to classify a Chest X-ray image into any of the applicable 3 classes. This modified DenseNet-121 is retrained using the publicly available 2018 RSNA Pneumonia Detection Challenge dataset ([link](https://www.rsna.org/education/ai-resources-and-training/ai-image-challenge/rsna-pneumonia-detection-challenge-2018)).
+Models provided are trained to detect multiple chest diseases in chest X-rays. The model is based on the corresponding paper[[2](#embc)]. The model in this repository differs from the paper in a few aspects; In the paper, the authors classify an X-ray image into one or more of the 14 classes following a multi-hot encoding on account of co-morbidity of diseases, while in this repository we provide a model to classify a Chest X-ray image into any of the applicable 3 classes. 
 </div>
 
+
+## Dataset
+
+The model is trained using the publicly available 2018 RSNA Pneumonia Detection Challenge dataset ([link](https://www.rsna.org/education/ai-resources-and-training/ai-image-challenge/rsna-pneumonia-detection-challenge-2018)[license](https://www.rsna.org/-/media/Files/RSNA/Education/AI-resources-and-training/AI-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.ashx?la=en&hash=FF7A635F6DFFAD31A30C8715DFA3B8FC21131543)).
 
 Few example images from the dataset
 <table >
@@ -25,40 +29,54 @@ Few example images from the dataset
 </table>
 
 
-## Network Architecture:
+## Network Architecture
 
 We have used a DenseNet-121 as the base architecture.
 
-![6: A schematic illustration of the DenseNet-121 ...](https://lh6.googleusercontent.com/ziwy55LfUqzzErhcy0Cw418LbeCWpfH_liD3dXNrae8yVnV91rnCWsokLUVO0NVUuUeNHIG6bnkV3J7jNNT5U6DDr2Y78Z60NW-2ACUEuY53k6B7C6x1Q9HFrJ-1yJZNM1vyMPdg)
+![](https://lh6.googleusercontent.com/ziwy55LfUqzzErhcy0Cw418LbeCWpfH_liD3dXNrae8yVnV91rnCWsokLUVO0NVUuUeNHIG6bnkV3J7jNNT5U6DDr2Y78Z60NW-2ACUEuY53k6B7C6x1Q9HFrJ-1yJZNM1vyMPdg)
 
+A systematic search was performed over a set of CNN architectures by scaling the width and depth of the standard DenseNet using the EfficientNet approach[[3](#efficientnet)]. The details of our experiments based on EfficientNet is summarized in the image below.
 
+<img src = "./media/efficientnet.png" width=650>
 
-## **Example**
+Scaling factors `alpha`, `beta`, and `phi` values obtained for CheXpert dataset was used to scale the network. 
+
+| Variable | Value |
+| -- | -- |
+| α | 1.833 |
+| β | 1.044 |
+| ϕ | -0.10 | 
+
+## Example
 
 An example for using the onnx models shared in this repository is available [here](https://drive.google.com/file/d/1FCG9EaslKa_n_OF6FpcPlNy9Q3NNY4Rn/view?usp=sharing).
 
-## **Specification and Performance**
+## Specification and Performance
 
 The optimized DenseNet CNN model obtained through EfficientNet based architecture search is provided in this repository. The performance is measured using the average Area under the ROC curves (AUROC) across three classes.
 
-| Type | Classification (Mult-task) |
+| Type | Classification |
 | --- | --- |
 | Source Framework | Pytorch (converted to ONNX) |
-| GFLOPs | 5.88 |
-| Mparams | 6.97 |
-| Avg. AUROC | 0.7323 |
+| GFLOPs | 6.85 |
+| Mparams | 7.13 |
+| Avg. AUROC | 0.5531 |
 
+> Note: The network was trained using the same  `alpha`, `beta`, and `phi` values obtained for CheXpert dataset. The same model provides an AUROC value of 0.8010 when it is trained and tested using CheXpert dataset.
 
-### **Input**
+## Input
 
-For the optimal DenseNet model in the ONNX format provided in this repository, the input grayscale image is replicated to three channels. Each of the 3 image channels is normalized to match the distribution of the Image-Net dataset. The order of the dimensions for the input to the ONNX model is (B, C, H, W) where B is the batch size, C is the number of channels and H, W is the spatial dimensions of the image.
+The input grayscale image is replicated to three channels. Each of the 3 image channels is normalized to match the distribution of the Image-Net dataset. The order of the dimensions for the input is (B, C, H, W) where B is the batch size, C is the number of channels and H, W is the spatial dimensions of the image.
 
-The details of the image preprocessing steps are detailed in our demo code provided [here](https://drive.google.com/file/d/1FCG9EaslKa_n_OF6FpcPlNy9Q3NNY4Rn/view?usp=sharing).
+Shape: `1, 3, 1024, 1024`, format is `B, C, H, W`
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
 
+### Output
 
-## **Output**
-
-Outputs the prediction scores in the range of [0,1] for the three disease classes. We pose the Chest radiograph screening as a multi-label classification task where multiple disease classes can co-occur in the same image. The ordering of the disease classes is listed below:
+Outputs the prediction scores in the range of [0,1] for the three disease classes. We pose the Chest radiograph screening as a classification task. The ordering of the disease classes is listed below:
 
 | Class |
 | --- |
@@ -66,10 +84,10 @@ Outputs the prediction scores in the range of [0,1] for the three disease classe
 | Normal |
 | No Lung Opacity/ Not Normal |
 
-## **Acknowledgement**
+## Acknowledgement
 This work is undertaken as part of Intel India Grand Challenge 2016 Project MIRIAD: Many Incarnations of Screening of Radiology for High Throughput Disease Screening via Multiple Instance Reinforcement Learning with Adversarial Deep Neural Networks, sponsored by Intel Technology India Pvt. Ltd., Bangalore, India.
 
-## **References**
+## References
 
 <div id="densenet">
 <a href="#abs">[1]</a> Huang, Gao, Zhuang Liu, Laurens Van Der Maaten, and Kilian Q. Weinberger. Densely connected convolutional networks. In Proceedings of the IEEE conference on computer vision and pattern recognition_, pp. 4700-4708. 2017. <a href="https://arxiv.org/pdf/1608.06993.pdf"> (link) </a> 
@@ -87,6 +105,14 @@ This work is undertaken as part of Intel India Grand Challenge 2016 Project MIRI
 
 <div id="chexpert">
 <a href="#abs">[4]</a>  Irvin, Jeremy, Pranav Rajpurkar, Michael Ko, Yifan Yu, Silviana Ciurea-Ilcus, Chris Chute, Henrik Marklund et al. &quot;Chexpert: A large chest radiograph dataset with uncertainty labels and expert comparison.&quot; In _Proceedings of the AAAI Conference on Artificial Intelligence_, vol. 33, pp. 590-597. 2019. <a href="https://arxiv.org/abs/1901.07031"> (link) </a>
+</div>
+
+<div id="rsnadataset">
+<a href=#>[5] </a>George Shih , Carol C. Wu, Safwan S. Halabi, Marc D. Kohli, Luciano M. Prevedello, 
+Tessa S. Cook, Arjun Sharma, Judith K. Amorosa, Veronica Arteaga, Maya GalperinAizenberg, Ritu R. Gill, Myrna C.B. Godoy, Stephen Hobbs, Jean Jeudy, Archana 
+Laroia, Palmi N. Shah, Dharshan Vummidi, Kavitha Yaddanapudi, Anouk Stein, 
+Augmenting the National Institutes of Health Chest Radiograph Dataset with Expert 
+Annotations of Possible Pneumonia, Radiology: AI, January 30, 2019, https://doi.org/10.1148/ryai.2019180041
 </div>
 
 </br> 
