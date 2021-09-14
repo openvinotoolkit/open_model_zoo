@@ -37,7 +37,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
          throw std::logic_error("Expected 3-channel input");

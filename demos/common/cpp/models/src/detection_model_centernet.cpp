@@ -38,7 +38,7 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
         throw std::logic_error("Expected 3-channel input");
@@ -109,10 +109,10 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
     const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-
+    const auto& normalizedImg = inputTransform(resizedImg);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(normalizedImg));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
+    return std::make_shared<InternalImageMatModelData>(normalizedImg, img.cols, img.rows);
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
