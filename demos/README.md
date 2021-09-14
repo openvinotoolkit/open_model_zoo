@@ -206,7 +206,12 @@ Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
 ```sh
 python -m pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
 ```
-When the model API wheel is installed, you can import it via the following command:
+Alternatively, instead of building the wheel you can use the following command inside  `<omz_dir>/demos/common/python/` directory to build and install the package:
+```sh
+python -m pip install .
+```
+
+When the model API package is installed, you can import it as follows:
 ```sh
 python -c "from openvino.model_zoo import model_api"
 ```
