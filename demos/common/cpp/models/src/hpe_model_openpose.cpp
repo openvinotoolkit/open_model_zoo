@@ -109,7 +109,6 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     }
 
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
-    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
     return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
         image.cols / static_cast<float>(roi.width), image.rows / static_cast<float>(roi.height));
 }
