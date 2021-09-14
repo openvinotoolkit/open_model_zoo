@@ -342,14 +342,14 @@ void ModelYolo::parseYOLOOutput(const InferenceEngine::Blob::Ptr& blob,
             continue;
         }
 
-        const float* max_probability = std::max_element(&output_blob[res_num * len_of_res + 5], 
+        const float* max_probability = std::max_element(&output_blob[res_num * len_of_res + 5],
                                                         &output_blob[res_num * len_of_res + (len_of_res - 1)]);
         if (*max_probability >= confidenceThreshold) {
             float x = output_blob[res_num * len_of_res];
             float y = output_blob[res_num * len_of_res + 1];
             float width = output_blob[res_num * len_of_res + 2];
             float height = output_blob[res_num * len_of_res + 3];
-            int label_id = std::distance(&output_blob[res_num * len_of_res + 5], max_probability);
+            unsigned int label_id = (unsigned int)std::distance(&output_blob[res_num * len_of_res + 5], max_probability);
 
             DetectedObject obj;
             obj.x = (float)(x - width / 2) * original_im_w;
