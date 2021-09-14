@@ -175,7 +175,7 @@ def get_model(ie, args):
                              threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
                              anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'yolox':
-        return models.YOLOX(*common_args, labels=args.labels, threshold=args.prob_threshold)
+        return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'faceboxes':
         return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
