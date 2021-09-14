@@ -14,6 +14,8 @@ Models provided are trained to detect multiple chest diseases in chest X-rays. T
 
 The model is trained using the publicly available 2018 RSNA Pneumonia Detection Challenge dataset ([link](https://www.rsna.org/education/ai-resources-and-training/ai-image-challenge/rsna-pneumonia-detection-challenge-2018)[license](https://www.rsna.org/-/media/Files/RSNA/Education/AI-resources-and-training/AI-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.ashx?la=en&hash=FF7A635F6DFFAD31A30C8715DFA3B8FC21131543)).
 
+Dataset preprocessing and training scripts are provided [here](https://github.com/Rakshith2597/training_extensions/tree/develop/misc/pytorch_toolkit/chest_xray_screening)
+
 Few example images from the dataset
 <table >
 <tr>
