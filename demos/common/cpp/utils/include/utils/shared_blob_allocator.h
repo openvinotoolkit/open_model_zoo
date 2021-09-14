@@ -22,10 +22,10 @@ class SharedBlobAllocator : public InferenceEngine::IAllocator {
 public:
     SharedBlobAllocator(const cv::Mat& img);
     ~SharedBlobAllocator();
-    virtual void* lock(void* handle, InferenceEngine::LockOp op = InferenceEngine::LOCK_FOR_WRITE) noexcept;
-    virtual void unlock(void* handle) noexcept;
-    virtual void* alloc(size_t size) noexcept;
-    virtual bool free(void* handle) noexcept;
+    void* lock(void* handle, InferenceEngine::LockOp op = InferenceEngine::LOCK_FOR_WRITE) noexcept override;
+    void unlock(void* handle) noexcept override;
+    void* alloc(size_t size) noexcept override;
+    bool free(void* handle) noexcept override;
 
 private:
     const cv::Mat img;
