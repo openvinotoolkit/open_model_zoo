@@ -23,7 +23,7 @@ from .utils import Detection, clip_detections
 
 
 class CenterNet(DetectionModel):
-    def __init__(self, ie, model_path, resize_type=None, 
+    def __init__(self, ie, model_path, resize_type=None,
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'standard'
