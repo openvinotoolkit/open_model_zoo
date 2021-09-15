@@ -31,6 +31,7 @@ from .super_resolution_converter import (
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .rctw import RCTWPreprocessedConverter
+from .bentham import BenthamOCRDatasetConverter
 from .im2latex import Im2latexDatasetConverter
 from .unicode_character_recognition import (
     UnicodeCharacterRecognitionDatasetConverter, KondateNakayosiRecognitionDatasetConverter
@@ -145,6 +146,7 @@ __all__ = [
     'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
+    'BenthamOCRDatasetConverter',
     'RCTWPreprocessedConverter',
     'UnicodeCharacterRecognitionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',
