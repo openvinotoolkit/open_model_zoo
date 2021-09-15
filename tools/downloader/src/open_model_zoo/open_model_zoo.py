@@ -9,15 +9,15 @@ from  open_model_zoo.model_tools import (
 
 
 class BaseModel:
-    def __init__(self):
-        self.model_path = None
-        self.bin_path = None
+    def __init__(self, model_path=None, bin_path=None, description=None):
+        self.model_path = model_path
+        self.bin_path = bin_path
+        self.description = description
+        self.task_type = None
 
         self.net = None
         self.exec_net = None
         self._ie = None
-        self.description = None
-        self.task_type = None
 
 
 class Model(BaseModel):
@@ -45,7 +45,45 @@ class Model(BaseModel):
                 By default creates a folder '.cache' in current download directory.
         '''
         super().__init__()
+        
+        if self.model_path is None:
+            self.download_model(model_name, precision, download_dir, cache_dir)
 
+    @classmethod
+    def from_pretrained(cls, model_path):
+        '''
+        Loads model from existing .xml, .bin files.
+        Parameters
+        ----------
+            model_path
+                Path to .xml or .onnx file.
+        '''
+        model_path = Path(model_path).resolve()
+
+        if not model_path.exists():
+            raise ValueError('Path {} to model file does not exist.'.format(model_path))
+
+        description = 'Pretrained model {}'.format(model_path.name)
+        if model_path.suffix == '.xml':
+            model_path = model_path
+            bin_path = model_path.with_suffix('.bin')
+
+            if not bin_path.exists():
+                raise ValueError('Path {} to .bin file does not exist.'
+                    '.bin file should be in the same directory as .xml'.format(bin_path)
+                )
+
+            model_path = str(model_path)
+            bin_path = str(bin_path)
+        elif model_path.suffix == '.onnx':
+            model_path = str(model_path)
+            bin_path = None
+        else:
+            raise ValueError('Unsupported model format {}. Only .xml or .onnx supported.'.format(model_path.suffix))
+
+        return super(Model, cls).__init__(cls, model_path, bin_path, description)
+
+    def download_model(self, model_name, precision, download_dir, cache_dir):
         download_dir = Path(download_dir)
         cache_dir = cache_dir or download_dir / '.cache'
 
@@ -79,43 +117,12 @@ class Model(BaseModel):
             converter.main(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
 
-    def from_pretrained(self, model_path):
-        '''
-        Loads model from existing .xml, .bin files.
-        Parameters
-        ----------
-            model_path
-                Path to .xml or .onnx file.
-        '''
-        model_path = Path(model_path).resolve()
-
-        if not model_path.exists():
-            raise ValueError('Path {} to model file does not exist.'.format(model_path))
-
-        if model_path.suffix == '.xml':
-            self.model_path = model_path
-            self.bin_path = model_path.with_suffix('.bin')
-
-            if not self.bin_path.exists():
-                raise ValueError('Path {} to .bin file does not exist.'
-                    '.bin file should be in the same directory as .xml'.format(self.bin_path)
-                )
-
-            self.model_path = str(self.model_path)
-            self.bin_path = str(self.bin_path)
-        elif model_path.suffix == '.onnx':
-            self.model_path = model_path
-        else:
-            raise ValueError('Unsupported model format {}. Only .xml or .onnx supported.'.format(model_path.suffix))
-
-        self.description = 'Custom model {}'.format(model_path.name)
-
     def load(self, ie, device='CPU'):
         self._ie = ie
         self.net = ie.read_network(self.model_path)
         self.exec_net = ie.load_network(self.net, device)
 
-    def inference(self, inputs, ie=None, device='CPU'):
+    def __call__(self, inputs, ie=None, device='CPU'):
         if self.exec_net is None:
             self.load(ie, device)
 

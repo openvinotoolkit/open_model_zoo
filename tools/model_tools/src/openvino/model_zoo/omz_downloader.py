@@ -64,7 +64,7 @@ class ThreadSessionFactory:
         return session
 
 
-def main():
+def main(argv):
     parser = DownloaderArgumentParser()
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='download only models whose names match at least one of the specified patterns')
@@ -88,7 +88,7 @@ def main():
     parser.add_argument('-j', '--jobs', type=positive_int_arg, metavar='N', default=1,
         help='how many downloads to perform concurrently')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     def make_reporter(context):
         return _reporting.Reporter(context,
@@ -148,4 +148,4 @@ def main():
             sys.exit(1)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
