@@ -265,7 +265,7 @@ AccuracyChecker supports following set of adapters:
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
   * `logits_output` - Name of the output layer of the network to use in decoder
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
-  * `vocabulary_file` - file with modl vocab, represented as txt file, where each label is located on own line (Optional).
+  * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
