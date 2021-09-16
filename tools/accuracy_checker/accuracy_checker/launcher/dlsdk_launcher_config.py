@@ -253,7 +253,14 @@ DLSDK_LAUNCHER_PARAMETERS = {
         optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
     ),
     '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-    '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
+    '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
+    '_undefined_shapes_resolving_policy': StringField(
+        optional=True, default='default', choices=['default', 'dynamic', 'static'],
+        description='Policy how to make deal with undefined shapes in network: '
+                    'default - try to run as default, if does not work switch to static, '
+                    'dynamic - enforce network execution with dynamic shapes, '
+                    'static - convert undefined shapes to static before execution'
+    )
 }
 
 

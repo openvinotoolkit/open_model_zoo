@@ -86,6 +86,7 @@ class DLSDKLauncher(Launcher):
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
         self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
+#        self.ie_core.register_plugin("templatePlugin", "TEMPLATE")
         self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
             'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
@@ -93,6 +94,7 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
         device = self.config['device'].split('.')
         self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
+        self.dynamic_shapes_policy = self.get_value_from_config('_undefined_shapes_resolving_policy')
         self._set_variable = False
         self._async_mode = False
         self._prepare_bitstream_firmware(self.config)
@@ -612,7 +614,7 @@ class DLSDKLauncher(Launcher):
                 self._print_input_output_info()
             if preprocessing:
                 self._set_preprocess(preprocessing)
-            if self.network and not preprocessing and not self.dyn_input_layers:
+            if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
                 self.exec_network = self.ie_core.load_network(
                     self.network, self._device, num_requests=self.num_requests
                 )
@@ -709,14 +711,17 @@ class DLSDKLauncher(Launcher):
         return input_shapes
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
-        try:
-            if not hasattr(self, 'exec_network') or self.exec_network is None:
-                self.exec_network = self.ie_core.load_network(
-                    self.network, self._device, num_requests=self.num_requests)
-            self.exec_network.infer(input_data)
-            self.is_dynamic = True
-        except RuntimeError:
-            self.is_dynamic = False
+        if self.dynamic_shapes_policy in ['default', 'dynamic']:
+            try:
+                if not hasattr(self, 'exec_network') or self.exec_network is None:
+                    self.is_dynamic = True
+                    self.load_network(self.network)
+                self.exec_network.infer(input_data)
+
+            except RuntimeError as e:
+                if self.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
         if self.is_dynamic and template_shapes:
             input_shapes = {
                 layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in input_data[0].items()
@@ -727,8 +732,17 @@ class DLSDKLauncher(Launcher):
         self._reshape_input(input_shapes)
 
     def resolve_undefined_shapes(self):
-        self._set_batch_size(self._batch)
-        self.load_network(self.network)
+        if self.dynamic_shapes_policy in ['default', 'dynamic']:
+            try:
+                self.is_dynamic = True
+                self.load_network(self.network)
+            except RuntimeError as e:
+                if self.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+        if not self.is_dynamic:
+            self._set_batch_size(self._batch)
+            self.load_network(self.network)
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if layer_name in self.dyn_input_layers:

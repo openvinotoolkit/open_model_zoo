@@ -424,10 +424,10 @@ class InputFeeder:
             return grouped_data
 
         batch_size = len(meta)
+        template_for_shapes = {}
         if meta[0].get('multi_infer', False):
             num_splits = calculate_num_splits(batch_data, batch_size)
             infers_data = [{} for _ in range(num_splits)]
-            template_for_shapes = {}
             for layer_name, layer_data in batch_data.items():
                 tmpl = template.get(layer_name) if template is not None else None
                 batch_for_all_infers = separate_data(layer_data, num_splits)
@@ -444,13 +444,19 @@ class InputFeeder:
             return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
-            batch_data[layer_name] = self.input_transform_func(
+            layer_data_preprocessed = self.input_transform_func(
                 layer_data, layer_name,
                 self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
                 self.precision_mapping.get(layer_name), template
             )
+            if isinstance(layer_data_preprocessed, tuple):
+                layer_template = layer_data_preprocessed[1]
+                if layer_template is not None:
+                    template_for_shapes[layer_name] = layer_template
+                layer_data_preprocessed = layer_data_preprocessed[0]
+            batch_data[layer_name] = layer_data_preprocessed
 
-        return [batch_data], template
+        return [batch_data], template_for_shapes
 
     def validate_input_precision(self, precisions_list):
         if not precisions_list:
