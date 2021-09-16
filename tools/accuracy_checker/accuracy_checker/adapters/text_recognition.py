@@ -20,7 +20,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField, PathField
 from ..representation import CharacterRecognitionPrediction
-from ..utils import softmax
+from ..utils import softmax, read_txt
 
 
 class BeamSearchDecoder(Adapter):
@@ -238,7 +238,9 @@ class SimpleDecoder(Adapter):
             'eos_label': StringField(
                 optional=True, default='[s]', description="End-of-sequence label."
             ),
+            'start_label': StringField(optional=True, description="Special start token"),
             'custom_label_map': DictField(optional=True, description='Label map'),
+            'vocabulary_file': PathField(optional=True, description='File with decoding labels'),
             'start_index': NumberField(optional=True, default=0, min_value=0, value_type=int,
                                        description="Start index in predicted data"),
             'do_lower': BoolField(optional=True, default=False,
@@ -260,6 +262,12 @@ class SimpleDecoder(Adapter):
         if self.custom_label_map:
             labels = {int(k): v for k, v in self.custom_label_map.items()}
             self.custom_label_map = labels
+        vocab_file = self.get_value_from_config("vocabulary_file")
+        if not self.custom_label_map and vocab_file:
+            start_label = self.get_value_from_config('start_label')
+            chr_list = read_txt(vocab_file)
+            special_symbols = [start_label, self.eos_label] if start_label else [self.eos_label]
+            self.custom_label_map = dict(enumerate(special_symbols + chr_list))
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
