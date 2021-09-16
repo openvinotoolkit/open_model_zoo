@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec - disable B404:import-subprocess check
 import multiprocessing
 from pathlib import Path
 import os
@@ -28,7 +28,8 @@ from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
-    DLSDKLauncherConfigValidator
+    DLSDKLauncherConfigValidator,
+    parse_partial_shape
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError
@@ -51,6 +52,7 @@ except ImportError:
     try:
         # old structures names compatibilities
         from openvino.inference_engine import IEBlob, IETensorDesc
+
         Blob = IEBlob
         TensorDesc = IETensorDesc
     except ImportError:
@@ -626,6 +628,7 @@ class DLSDKLauncher(Launcher):
                 if len(output_tuple) == 1:
                     return output_string
                 return (output_tuple[0], int(output_tuple[1]))
+
             preprocessed_outputs = [output_preprocessing(output) for output in outputs]
             self.network.add_outputs(preprocessed_outputs)
         if input_shapes is not None:
@@ -676,21 +679,41 @@ class DLSDKLauncher(Launcher):
             )
 
     def _get_dynamic_inputs(self):
+        def is_dynamic(data_info):
+            if hasattr(data_info, 'is_dynamic'):
+                return data_info.is_dynamic
+            return -1 in data_info.shape or not data_info.shape
+
         inputs_with_undefined_shapes = []
+        outputs_with_undefined_shapes = []
         partial_shapes = {}
         if self.network is None:
             return inputs_with_undefined_shapes, partial_shapes
 
         for input_name, input_info in self.network.input_info.items():
-            if -1 in input_info.input_data.shape or not input_info.input_data.shape:
+            if is_dynamic(input_info.input_data):
                 inputs_with_undefined_shapes.append(input_name)
-        if inputs_with_undefined_shapes and not isinstance(ng, UnsupportedPackage):
-            ng_function = ng.function_from_cnn(self.network)
-            for node in ng_function.get_ordered_ops():
-                node_name = node.get_friendly_name()
-                if node_name not in inputs_with_undefined_shapes:
-                    continue
-                partial_shapes[node_name] = node.get_partial_shape()
+        for out_name, out_info in self.network.outputs.items():
+            if is_dynamic(out_info):
+                outputs_with_undefined_shapes.append(out_name)
+        if (inputs_with_undefined_shapes or outputs_with_undefined_shapes) and not isinstance(ng, UnsupportedPackage):
+            if hasattr(ng, 'partial_shape_from_data'):
+                for input_name in inputs_with_undefined_shapes:
+                    partial_shapes[input_name] = parse_partial_shape(ng.partial_shape_from_data(
+                        self.network.input_info[input_name].input_data
+                    ))
+                for out_name in outputs_with_undefined_shapes:
+                    partial_shapes[out_name] = parse_partial_shape(
+                        ng.partial_shape_from_data(self.network.outputs[out_name])
+                    )
+
+            else:
+                ng_function = ng.function_from_cnn(self.network)
+                for node in ng_function.get_ordered_ops():
+                    node_name = node.get_friendly_name()
+                    if node_name not in inputs_with_undefined_shapes:
+                        continue
+                    partial_shapes[node_name] = node.get_partial_shape()
 
         return inputs_with_undefined_shapes, partial_shapes
 
@@ -707,10 +730,19 @@ class DLSDKLauncher(Launcher):
         return network
 
     def inputs_info_for_meta(self):
-        return {
-            layer_name: layer.shape for layer_name, layer in self.inputs.items()
-            if layer_name not in self.const_inputs + self.image_info_inputs
-        }
+        if not self.dyn_input_layers:
+            return {
+                layer_name: layer.shape for layer_name, layer in self.inputs.items()
+                if layer_name not in self.const_inputs + self.image_info_inputs
+            }
+        input_shapes = {}
+        for layer_name, layer in self.inputs.items():
+            if layer_name in self.const_inputs + self.image_info_inputs:
+                continue
+            input_shapes[layer_name] = (
+                layer.shape if layer_name not in self.dyn_input_layers else self._partial_shapes.get(layer_name, [])
+            )
+        return input_shapes
 
     def initialize_undefined_shapes(self, input_data):
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
@@ -742,7 +774,7 @@ class DLSDKLauncher(Launcher):
             return np.transpose(data, layout)
         return np.array(data)
 
-    def _data_to_blob(self, layer_shape, data, layout): # pylint:disable=R0911,R0912
+    def _data_to_blob(self, layer_shape, data, layout):  # pylint:disable=R0911,R0912
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
@@ -844,7 +876,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
             print_info(
-                '\tshape {}\n'.format(
+                '\tshape: {}\n'.format(
                     input_info.shape if name not in self.dyn_input_layers else self._partial_shapes.get(name, [])
                 )
             )
@@ -852,7 +884,14 @@ class DLSDKLauncher(Launcher):
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(output_info.shape))
+            if not hasattr(output_info, 'is_dynamic'):
+                shape = output_info.shape
+            else:
+                if output_info.is_dynamic:
+                    shape = self._partial_shapes.get(name, [])
+                else:
+                    shape = output_info.shape
+            print_info('\tshape: {}\n'.format(shape))
             self._output_precisions[name] = PRECISION_TO_DTYPE[output_info.precision]
             self._output_layouts[name] = output_info.layout
 
