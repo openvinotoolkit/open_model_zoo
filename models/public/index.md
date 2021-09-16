@@ -1,5 +1,298 @@
 # Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
+@sphinxdirective
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Device Support
+   
+   omz_models_public_device_support
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Action Recognition Models
+   
+   omz_models_model_common_sign_language_0001
+   omz_models_model_i3d_rgb_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Classification Models
+   
+   omz_models_model_alexnet
+   omz_models_model_anti_spoof_mn3
+   omz_models_model_caffenet
+   omz_models_model_densenet_121
+   omz_models_model_densenet_121_caffe2
+   omz_models_model_densenet_121_tf
+   omz_models_model_densenet_161
+   omz_models_model_densenet_161_tf
+   omz_models_model_densenet_169
+   omz_models_model_densenet_169_tf
+   omz_models_model_densenet_201
+   omz_models_model_densenet_201_tf
+   omz_models_model_dla_34
+   omz_models_model_efficientnet_b0
+   omz_models_model_efficientnet_b0_pytorch
+   omz_models_model_efficientnet_b0_auto_aug
+   omz_models_model_efficientnet_b5
+   omz_models_model_efficientnet_b5_pytorch
+   omz_models_model_efficientnet_b7_pytorch
+   omz_models_model_efficientnet_b7_auto_aug
+   omz_models_model_googlenet_v1
+   omz_models_model_googlenet_v1_tf
+   omz_models_model_googlenet_v2
+   omz_models_model_googlenet_v2_tf
+   omz_models_model_googlenet_v3
+   omz_models_model_googlenet_v3_pytorch
+   omz_models_model_googlenet_v4_tf
+   omz_models_model_hbonet_0_25
+   omz_models_model_hbonet_0_5
+   omz_models_model_hbonet_1_0
+   omz_models_model_inception_resnet_v2_tf
+   omz_models_model_mixnet_l
+   omz_models_model_mobilenet_v1_0_25_128
+   omz_models_model_mobilenet_v1_0_50_160
+   omz_models_model_mobilenet_v1_0_50_224
+   omz_models_model_mobilenet_v1_1_0_224
+   omz_models_model_mobilenet_v1_1_0_224_tf
+   omz_models_model_mobilenet_v2
+   omz_models_model_mobilenet_v2_1_0_224
+   omz_models_model_mobilenet_v2_1_4_224
+   omz_models_model_mobilenet_v2_pytorch
+   omz_models_model_mobilenet_v3_large_1_0_224_tf
+   omz_models_model_mobilenet_v3_small_1_0_224_tf
+   omz_models_model_nfnet_f0
+   omz_models_model_octave_densenet_121_0_125
+   omz_models_model_octave_resnet_101_0_125
+   omz_models_model_octave_resnet_200_0_125
+   omz_models_model_octave_resnet_26_0_25
+   omz_models_model_octave_resnet_50_0_125
+   omz_models_model_octave_resnext_101_0_25
+   omz_models_model_octave_resnext_50_0_25
+   omz_models_model_octave_se_resnet_50_0_125
+   omz_models_model_open_closed_eye_0001
+   omz_models_model_regnetx_3_2gf
+   omz_models_model_repvgg_a0
+   omz_models_model_repvgg_b1
+   omz_models_model_repvgg_b3
+   omz_models_model_resnest_50_pytorch
+   omz_models_model_resnet_18_pytorch
+   omz_models_model_resnet_34_pytorch
+   omz_models_model_resnet_50_caffe2
+   omz_models_model_resnet_50_pytorch
+   omz_models_model_resnet_50_tf
+   omz_models_model_rexnet_v1_x1_0
+   omz_models_model_se_inception
+   omz_models_model_se_resnet_101
+   omz_models_model_se_resnet_152
+   omz_models_model_se_resnet_50
+   omz_models_model_se_resnext_101
+   omz_models_model_se_resnext_50
+   omz_models_model_shufflenet_v2_x1_0
+   omz_models_model_squeezenet1_0
+   omz_models_model_squeezenet1_1
+   omz_models_model_squeezenet1_1_caffe2
+   omz_models_model_vgg16
+   omz_models_model_vgg19
+   omz_models_model_vgg19_caffe2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Colorization Models
+   
+   omz_models_model_colorization_siggraph
+   omz_models_model_colorization_v2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Face Recognition Models
+   
+   omz_models_model_face_recognition_resnet100_arcface_onnx
+   omz_models_model_facenet_20180408_102900
+   omz_models_model_Sphereface
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Human Pose Estimation Models
+   
+   omz_models_model_higher_hrnet_w32_human_pose_estimation
+   omz_models_model_human_pose_estimation_3d_0001
+   omz_models_model_single_human_pose_estimation_0001
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Inpainting Models
+   
+   omz_models_model_gmcnn_places2_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Processing Models
+   
+   omz_models_model_deblurgan_v2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Translation Models
+   
+   omz_models_model_cocosnet
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Instance Segmentation Models
+   
+   omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_mask_rcnn_inception_v2_coco
+   omz_models_model_mask_rcnn_resnet101_atrous_coco
+   omz_models_model_mask_rcnn_resnet50_atrous_coco
+   omz_models_model_yolact_resnet50_fpn_pytorch
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Monocular Depth Estimation Models
+   
+   omz_models_model_fcrn_dp_nyu_depth_v2_tf
+   omz_models_model_midasnet
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Named Entity Recognition Models
+   
+   omz_models_model_bert_base_ner
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Object Attribute Estimation Models
+   
+   omz_models_model_vehicle_reid_0001
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Object Detection Models
+   
+   omz_models_model_ctdet_coco_dlav0_384
+   omz_models_model_ctdet_coco_dlav0_512
+   omz_models_model_ctpn
+   omz_models_model_efficientdet_d0_tf
+   omz_models_model_efficientdet_d1_tf
+   omz_models_model_face_detection_retail_0044
+   omz_models_model_faceboxes_pytorch
+   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_faster_rcnn_inception_v2_coco
+   omz_models_model_faster_rcnn_resnet101_coco
+   omz_models_model_faster_rcnn_resnet50_coco
+   omz_models_model_mobilefacedet_v1_mxnet
+   omz_models_model_mobilenet_ssd
+   omz_models_model_mtcnn
+   omz_models_model_pelee_coco
+   omz_models_model_retinaface_resnet50_pytorch
+   omz_models_model_retinanet_tf
+   omz_models_model_rfcn_resnet101_coco_tf
+   omz_models_model_ssd_resnet34_1200_onnx
+   omz_models_model_ssd300
+   omz_models_model_ssd512
+   omz_models_model_ssd_mobilenet_v1_coco
+   omz_models_model_ssd_mobilenet_v1_fpn_coco
+   omz_models_model_ssd_mobilenet_v2_coco
+   omz_models_model_ssd_resnet50_v1_fpn_coco
+   omz_models_model_ssdlite_mobilenet_v2
+   omz_models_model_ultra_lightweight_face_detection_rfb_320
+   omz_models_model_ultra_lightweight_face_detection_slim_320
+   omz_models_model_vehicle_license_plate_detection_barrier_0123
+   omz_models_model_yolo_v1_tiny_tf
+   omz_models_model_yolo_v2_tf
+   omz_models_model_yolo_v2_tiny_tf
+   omz_models_model_yolo_v3_tf
+   omz_models_model_yolo_v3_tiny_tf
+   omz_models_model_yolo_v4_tf
+   omz_models_model_yolo_v4_tiny_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Optical Character Recognition Models
+   
+   omz_models_model_license_plate_recognition_barrier_0007
+   omz_models_model_text_recognition_resnet_fc
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Place Recognition Models
+   
+   omz_models_model_netvlad_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Salient Object Detection Models
+   
+   omz_models_model_f3net
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Semantic Segmentation Models
+   
+   omz_models_model_brain_tumor_segmentation_0001
+   omz_models_model_brain_tumor_segmentation_0002
+   omz_models_model_deeplabv3
+   omz_models_model_fastseg_large
+   omz_models_model_fastseg_small
+   omz_models_model_hrnet_v2_c1_segmentation
+   omz_models_model_pspnet_pytorch
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Sound Classification Models
+   
+   omz_models_model_aclnet
+   omz_models_model_aclnet_int8
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Speech Recognition Models
+   
+   omz_models_model_mozilla_deepspeech_0_6_1
+   omz_models_model_mozilla_deepspeech_0_8_2
+   omz_models_model_quartznet_15x5_en
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Style Transfer Models
+   
+   omz_models_model_fast_neural_style_mosaic_onnx
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text-to-speech Models
+   
+   omz_models_model_forward_tacotron
+   omz_models_model_wavernn
+
+
+@endsphinxdirective
+
 OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
