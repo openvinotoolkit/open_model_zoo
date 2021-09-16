@@ -150,7 +150,7 @@ class ClassAwareNMS(NMS):
                 )
                 keep.extend(mask[keep_i])
 
-            prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
+            prediction.remove([box for box in range(prediction.size) if box not in keep])
 
         return annotations, predictions
 
