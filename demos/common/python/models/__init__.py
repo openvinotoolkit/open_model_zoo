@@ -15,6 +15,7 @@
 """
 
 
+from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .centernet import CenterNet
 from .deblurring import Deblurring
 from .detr import DETR
@@ -30,6 +31,9 @@ from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
 from .yolo import YOLO, YoloV4, YOLOX
 
 __all__ = [
+    'BertEmbedding',
+    'BertNamedEntityRecognition',
+    'BertQuestionAnswering',
     'CenterNet',
     'CTPN',
     'DetectionWithLandmarks',
