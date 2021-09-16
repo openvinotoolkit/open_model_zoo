@@ -305,11 +305,12 @@ Text prediction is a task to predict the next word, given all of the previous wo
 Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
 See details about datasets in [here](./text-recognition-resnet-fc/README.md)
-The reported metric is collected over the alphanumeric subset of icdar 13 (1015 images) in case-insensitive mode.
+The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 images) in case-insensitive mode.
 
-| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
-| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
+| Model Name                      | Implementation | OMZ Model Name                                                       | Accuracy | GFlops  | mParams  |
+| ------------------------------- | -------------- | -------------------------------------------------------------------- | -------- | ------- | -------- |
+| Resnet-FC                       | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94%   | 40.3704 | 177.9668 |
+| ViTSTR Small patch=16, size=224 | PyTorch\*      | [vitstr-small-patch16-224](./vitstr-small-patch16-224/README.md)     | 90.34%   | 9.1544  | 21.5061  |
 
 ## Text to Speech
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -72,6 +72,11 @@ int clip(int x, int max_val) {
     return std::min(std::max(x, 0), max_val);
 }
 
+bool fileExists(const std::string& name) {
+    std::ifstream f(name.c_str());
+    return f.good();
+}
+
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
@@ -119,16 +124,39 @@ int main(int argc, char *argv[]) {
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
         auto decoder_type = FLAGS_dt;
         auto decoder_bandwidth = FLAGS_b;
+        auto decoder_start_index = FLAGS_start_index;
+        auto pad = FLAGS_pad;
+        auto m_tr_ss = FLAGS_m_tr_ss;
 
-        const char kPadSymbol = '#';
-        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
+        if (pad.length() != 1)
+            throw std::invalid_argument("Pad symbol should be 1 character");
+
+        const char kPadSymbol = pad[0];
+
+        if (fileExists(m_tr_ss)) {
+            std::string symbols = "";
+            std::ifstream inputFile(m_tr_ss);
+            if (!inputFile.is_open())
+                throw std::runtime_error("Can't open the vocab file: " + m_tr_ss);
+            std::string vocabLine;
+            while (std::getline(inputFile, vocabLine)) {
+                if (vocabLine.length() != 1)
+                    throw std::invalid_argument("Lines in the vocab file must contain 1 character");
+                symbols += vocabLine;
+            }
+            if (symbols.empty())
+                throw std::logic_error("File is empty: " + m_tr_ss);
+            m_tr_ss = symbols;
+        }
+
+        if (m_tr_ss.find(kPadSymbol) != m_tr_ss.npos)
+            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol " + kPadSymbol);
         std::string kAlphabet;
         std::unique_ptr<Cnn> text_recognition;
         if (!FLAGS_m_tr.empty()) {
             try {
                 // 2 kPadSymbol stand for START_TOKEN and PAD_TOKEN, respectively
-                kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
+                kAlphabet = std::string(3, kPadSymbol) + m_tr_ss;
                 text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
                                                             "Composite Text Recognition",
                                                             ie,
@@ -149,9 +177,9 @@ int main(int argc, char *argv[]) {
             catch (const DecoderNotFound&) {
                 text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, "Monolithic Text Recognition", ie, FLAGS_d_tr));
                 if (FLAGS_tr_pt_first)
-                    kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+                    kAlphabet = std::string(decoder_start_index + 1, kPadSymbol) + m_tr_ss;
                 else
-                    kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+                    kAlphabet = m_tr_ss + kPadSymbol;
             }
         }
         const double min_text_recognition_confidence = FLAGS_thr;
@@ -254,7 +282,7 @@ int main(int argc, char *argv[]) {
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     if (decoder_type == "simple") {
-                        res = SimpleDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                        res = SimpleDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_start_index);
                     }
                     else if (decoder_type == "ctc") {
                         if (decoder_bandwidth == 0) {

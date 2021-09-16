@@ -558,6 +558,11 @@ NATIVE_DEMOS = [
                              extra_models=[ModelArg('text-recognition-0015-decoder')]),
                     TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                                       '-tr_pt_first': None}),
+                    TestCase(options={'-m_tr': ModelArg('vitstr-small-patch16-224'),
+                                      '-tr_pt_first': None,
+                                      '-m_tr_ss': str(OMZ_DIR / 'models/public/vitstr-small-patch16-224/vocab.txt'),
+                                      '-start_index': '1',
+                                      '-pad': " "}),
                 ]),
         ]
     )),
