@@ -51,9 +51,12 @@ class SpliceFrame(Preprocessor):
             seq.append(tmp)
         return np.concatenate(seq, axis=self.axis)
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         feat = np.zeros(data_shape)
         return self.process_feats(feat).shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class DitherFrame(Preprocessor):
@@ -102,12 +105,15 @@ class PreemphFrame(Preprocessor):
         )
         return image
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         if self.preemph == 0:
             return data_shape
         data = np.zeros(data_shape)
         np.concatenate((np.expand_dims(data[:, 0], axis=0), data[:, 1:] - self.preemph * data[:, :-1]), axis=1)
         return data.shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class DitherSpectrum(Preprocessor):
@@ -166,7 +172,7 @@ class SignalPatching(Preprocessor):
         return self._dynamic_output
 
     def calculate_out_shape(self, data_shape):
-        return (self.size, )
+        return [[self.size]] * len(data_shape)
 
 
 class ContextWindow(Preprocessor):
@@ -204,13 +210,16 @@ class ContextWindow(Preprocessor):
 
         return image
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         if self.to_multi_infer:
             return data_shape[1:]
         first_dim = data_shape[0] + self.cw_r + self.cw_l
         new_shape = list(data_shape)
         new_shape[0] = first_dim
         return tuple(new_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class ResampleAudio(Preprocessor):
@@ -251,8 +260,11 @@ class ResampleAudio(Preprocessor):
         return image
 
     @staticmethod
-    def calculate_out_shape(data_shape):
+    def calculate_out_single_shape(data_shape):
         return [-1] * len(data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class ClipAudio(Preprocessor):
@@ -493,5 +505,8 @@ class AddBatch(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shape
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         return self.process_feat(np.zeros(data_shape)).shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]

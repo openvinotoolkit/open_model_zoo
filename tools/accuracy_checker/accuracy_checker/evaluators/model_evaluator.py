@@ -599,29 +599,38 @@ class ModelEvaluator(BaseEvaluator):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
     def _switch_to_sync(self):
+        final_status = False
         if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+        ):
+            return True
+
+        if (
+                hasattr(self.launcher, 'dynamic_shapes_policy')
+                and self.launcher.dynamic_shapes_policy == 'static' and self.launcher.allow_reshape_input
         ):
             return True
 
         if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
             if self.launcher.dyn_batch_only:
-                self.launcher.resolve_undefined_shapes()
+                self.launcher.resolve_undefined_batch()
                 return False
             if self.preprocessor.dynamic_shapes:
-                self._initialize_input_shape_with_data_range()
-                return not self.launcher.is_dynamic
+                if not self.launcher.dynamic_shapes_policy != 'static':
+                    self._initialize_input_shape_with_data_range()
+                    return False
+                final_status = self.launcher.allow_reshape_input
             self._initialize_input_shape()
 
-        return False
+        return final_status
 
     def _resolve_undefined_shapes(self):
         if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
             if self.launcher.dyn_batch_only:
-                self.launcher.resolve_undefined_shapes()
+                self.launcher.resolve_undefined_batch()
                 return
-            if self.preprocessor.dynamic_shapes:
+            if self.preprocessor.dynamic_shapes and self.launcher.dynamic_shapes_policy != 'static':
                 self._initialize_input_shape_with_data_range()
                 return
             self._initialize_input_shape()

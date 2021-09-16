@@ -19,7 +19,7 @@ import numpy as np
 
 from ..config import NumberField
 from ..preprocessor import Preprocessor
-from ..utils import get_size_from_config
+from ..utils import get_size_from_config, finalize_image_shape, is_image
 
 
 class CenterNetAffineTransformation(Preprocessor):
@@ -113,7 +113,8 @@ class CenterNetAffineTransformation(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
     def calculate_out_shape(self, data_shape):
-        if len(data_shape) == 2:
-            return self.input_height, self.input_width
-        return self.input_height, self.input_width, data_shape[2]
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

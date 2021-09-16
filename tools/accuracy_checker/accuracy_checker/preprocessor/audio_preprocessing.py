@@ -80,11 +80,14 @@ class AudioSpectrogram(Preprocessor):
         image.data = pspec
         return image
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         fake_input = np.zeros(data_shape)
         if self.skip_channels:
             fake_input = fake_input.squeeze()
         return np.fft.rfft(fake_input, self.fftbase).shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class TriangleFiltering(Preprocessor):
@@ -141,9 +144,12 @@ class TriangleFiltering(Preprocessor):
 
         return image
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         samples, _ = data_shape
         return samples, self.filterbank_channel_count
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
     def freq2mel(self, freq):
         return self.HZ2MEL * np.log1p(freq / self.MEL_CUTOFF)
@@ -238,9 +244,14 @@ class DCT(Preprocessor):
         image.data = cepstrum
         return image
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
+        if -1 in data_shape:
+            return data_shape
         samples, _ = data_shape
         return samples, self.dct_coefficient_count
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
     def initialize(self):
         self.cosine = np.zeros((self.dct_coefficient_count, self.input_length))
@@ -301,10 +312,15 @@ class ClipCepstrum(Preprocessor):
             writeable=False)
         return features
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
+        if -1 in data_shape:
+            return data_shape
         data = np.zeros(data_shape)
         feats = self.process_features(data)
         return feats.shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
 class PackCepstrum(Preprocessor):
@@ -324,7 +340,14 @@ class PackCepstrum(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         features = image.data
+        packed = self.process_features(features)
 
+        image.data = packed
+        image.metadata['multi_infer'] = True
+
+        return image
+
+    def process_features(self, features):
         steps, context, numceps = features.shape
         if steps % self.step:
             empty_context = np.zeros((self.step - (steps % self.step), context, numceps), dtype=features.dtype)
@@ -334,11 +357,15 @@ class PackCepstrum(Preprocessor):
         packed = []
         for i in range(0, steps, self.step):
             packed.append(features[i:i + self.step, ...])
+        return packed
 
-        image.data = packed
-        image.metadata['multi_infer'] = True
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
-        return image
+    def calculate_out_single_shape(self, data_shape):
+        data = np.zeros(data_shape)
+        packed = self.process_features(data)
+        return np.shape(packed)
 
 
 class TrimmingAudio(Preprocessor):

@@ -24,7 +24,10 @@ from ..config import BoolField, ConfigError, NumberField, StringField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
-from ..utils import contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage
+from ..utils import (
+    contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage, is_image,
+    finalize_image_shape
+)
 
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
@@ -451,17 +454,18 @@ class Resize(Preprocessor):
             return True
         return False
 
-    def calculate_out_shape(self, data_shape):
+    def calculate_out_single_shape(self, data_shape):
         if not self.dynamic_result_shape:
-            if len(data_shape) == 2:
-                return self.dst_height, self.dst_width
-            return self.dst_height, self.dst_width, data_shape[2]
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        if -1 in data_shape:
+            return data_shape
         dst_height, dst_width, _, _, _, _ = self.get_resize_size(
             data_shape, self.dst_height, self.dst_width, self.scaling_func
         )
-        if len(data_shape) == 2:
-            return dst_height, dst_width
-        return dst_height, dst_width, data_shape[2]
+        return finalize_image_shape(dst_height, dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class AutoResize(Preprocessor):
@@ -535,7 +539,8 @@ class AutoResize(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
     def calculate_out_shape(self, data_shape):
-        if len(data_shape) == 2:
-            return self.dst_height, self.dst_width
-        return self.dst_height, self.dst_width, data_shape[2]
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

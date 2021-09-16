@@ -731,7 +731,7 @@ class DLSDKLauncher(Launcher):
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
         self._reshape_input(input_shapes)
 
-    def resolve_undefined_shapes(self):
+    def resolve_undefined_batch(self):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
             try:
                 self.is_dynamic = True
