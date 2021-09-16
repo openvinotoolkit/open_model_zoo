@@ -74,12 +74,15 @@ class ModelEvaluator:
             launcher, adapter, dataset_config
         )
 
-    def _get_batch_input(self, batch_input, batch_annotation):
+    def _get_batch_input(self, batch_annotation, batch_input, template=None):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         batch_meta = extract_image_representations(batch_input, meta_only=True)
-        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        if template is None:
+            filled_inputs = self.input_feeder.fill_inputs(batch_input)
+            return filled_inputs, batch_meta, None
 
-        return filled_inputs, batch_meta
+        filled_inputs, inputs_template, _ = self.input_feeder.fill_inputs_with_template(batch_input, template)
+        return filled_inputs, batch_meta, inputs_template
 
     # pylint: disable=R0912,R1702
     def process_dataset_async(
@@ -350,23 +353,62 @@ class ModelEvaluator:
         return infer_requests_pool
 
     def _switch_to_sync(self):
+        final_status = False
         if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
         ):
             return True
 
+        if (
+                hasattr(self.launcher, 'dynamic_shapes_policy')
+                and self.launcher.dynamic_shapes_policy == 'static' and self.launcher.allow_reshape_input
+        ):
+            return True
+
         if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.launcher.dyn_batch_only:
+                self.launcher.resolve_undefined_batch()
+                return False
             if self.preprocessor.dynamic_shapes:
-                return True
+                if not self.launcher.dynamic_shapes_policy != 'static':
+                    self._initialize_input_shape_with_data_range()
+                    return False
+                final_status = self.launcher.allow_reshape_input
             self._initialize_input_shape()
 
-        return False
+        return final_status
 
-    def _initialize_input_shape(self):
+    def _initialize_input_shape(self, dynamic_shape_helper=None):
         _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, _ = self._get_batch_input(batch_input, batch_annotation)
-        self.launcher.initialize_undefined_shapes(filled_inputs)
+        filled_inputs, _, input_template = self._get_batch_input(batch_annotation, batch_input, dynamic_shape_helper)
+        self.launcher.initialize_undefined_shapes(filled_inputs, template_shapes=input_template)
+
+    def _resolve_undefined_shapes(self):
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.launcher.dyn_batch_only:
+                self.launcher.resolve_undefined_batch()
+                return
+            if self.preprocessor.dynamic_shapes and self.launcher.dynamic_shapes_policy != 'static':
+                self._initialize_input_shape_with_data_range()
+                return
+            self._initialize_input_shape()
+
+    def _initialize_input_shape_with_data_range(self):
+        input_shapes = []
+        for _, _, batch_input, _ in self.dataset:
+            input_shapes.extend(self.preprocessor.query_data_batch_shapes(batch_input))
+        shapes_statistic = np.array(input_shapes)
+        shape_template = [-1] * len(input_shapes[0])
+        undefined_shapes = np.sum(shapes_statistic == -1, axis=-1)
+        for i, ds in enumerate(undefined_shapes):
+            if ds > 0:
+                continue
+            axis_sizes = shapes_statistic[:, i]
+            min_size = np.min(axis_sizes)
+            max_size = np.max(axis_sizes)
+            shape_template[i] = min_size if min_size == max_size else (min_size, max_size)
+        self._initialize_input_shape(dynamic_shape_helper=shape_template)
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self.metric_executor:
