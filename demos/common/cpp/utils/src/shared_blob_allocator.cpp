@@ -34,7 +34,7 @@ void SharedBlobAllocator::unlock(void * handle) noexcept {
 }
 
 void * SharedBlobAllocator::alloc(size_t size) noexcept {
-    return img.data;
+    return size <= img.rows*img.step[0] ? img.data : nullptr;
 }
 
 bool SharedBlobAllocator::free(void * handle) noexcept {
