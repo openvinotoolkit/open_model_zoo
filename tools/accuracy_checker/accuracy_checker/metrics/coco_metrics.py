@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from functools import singledispatch
+from collections import defaultdict
 import numpy as np
 from ..config import NumberField, BaseField, ConfigError
 from ..representation import (
@@ -28,7 +29,7 @@ from ..representation import (
 from ..utils import get_or_parse_value, finalize_metric_result, UnsupportedPackage
 from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
-from .detection import average_precision, APIntegralType
+from .detection import average_precision, APIntegralType, _prepare_prediction_boxes
 
 try:
     import pycocotools.mask as maskUtils
@@ -112,6 +113,33 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         if self.profiler:
             self.profiler.reset()
 
+    def _update_label_stat_for_non_matched_classes(self, labels_stat, predictions):
+        matched_classes = set(labels_stat)
+        background = self.dataset.metadata.get('background_label')
+        prediction_classes = np.unique([pred.labels for pred in predictions])
+        for pc in prediction_classes:
+            if pc == background or pc in matched_classes:
+                continue
+            prediction_boxes, _, _ = _prepare_prediction_boxes(
+                pc, predictions, True
+            )
+            conf = prediction_boxes[:, 0]
+            label_report = {
+                'precision': [],
+                'recall': [],
+                'result': [],
+                'ap': -1,
+                'scores': conf,
+                'matched': defaultdict(list),
+                'gt': [],
+                'dt': prediction_boxes[:, 1:],
+                'prediction_matches': 0,
+                'annotation_matches': 0,
+                'iou': []
+            }
+            labels_stat[int(pc)] = label_report
+        return labels_stat
+
 
 class MSCOCOAveragePrecision(MSCOCOBaseMetric):
     __provider__ = 'coco_precision'
@@ -123,8 +151,9 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
         ]
         precisions = [result[0] for result in per_class_result]
         if self.profiler:
-            for class_match, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
-                    per_class_matching, per_class_result
+            per_class_matching_dict = {}
+            for class_match, label, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
+                    per_class_matching, self.labels, per_class_result
             ):
                 class_match['result'] = precision
                 class_match['precision'] = precision
@@ -133,7 +162,12 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
                 max_recall = all_recalls[0] if np.size(all_recalls) else np.array([])
                 ap = average_precision(max_precision, max_recall, APIntegralType.voc_max)
                 class_match['ap'] = ap
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(precisions))
+                per_class_matching_dict[label] = class_match
+
+            per_class_matching_dict = self._update_label_stat_for_non_matched_classes(
+                per_class_matching_dict, [prediction]
+            )
+            self.profiler.update(annotation.identifier, per_class_matching_dict, self.name, np.nanmean(precisions))
         return precisions
 
     def evaluate(self, annotations, predictions):
@@ -171,6 +205,8 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             recall_v.append(recall_v_)
             precision.append(precisions[0] if np.size(precisions) else [])
             precision_v.append(precision_v_)
+            if not np.size(precisions):
+                continue
             fppi = 1 - precisions[0]
             mr = 1 - recalls[0]
             pr = np.array([precisions[0], recalls[0]]).T
@@ -246,15 +282,17 @@ class MSCOCORecall(MSCOCOBaseMetric):
         ]
         recalls = [metric[1] for metric in per_class_result]
         if self.profiler:
-            for class_match, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
-                    per_class_matching, per_class_result
+            per_class_matching_dict = {}
+            for class_match, label, (precision, recall, all_precisions, all_recalls, _, _, _) in zip(
+                    per_class_matching, self.labels, per_class_result
             ):
                 class_match['result'] = recall
                 class_match['precision'] = precision
                 class_match['recall'] = recall
                 ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
                 class_match['ap'] = ap
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(recalls))
+                per_class_matching_dict[label] = class_match
+            self.profiler.update(annotation.identifier, per_class_matching_dict, self.name, np.nanmean(recalls))
         return per_class_result
 
     def evaluate(self, annotations, predictions):
