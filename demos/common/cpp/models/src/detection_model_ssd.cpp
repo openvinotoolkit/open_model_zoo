@@ -134,8 +134,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             else {
                 inputsNames[0] = inputInfoItem.first;
             }
-
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
+            inputTransform.setPrecision(inputInfoItem.second);
             if (useAutoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
                 inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);

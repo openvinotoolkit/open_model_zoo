@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,18 +15,23 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+
 import logging as log
 import sys
-import time
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-from tokens_bert import text_to_tokens, load_vocab_file
+
+from models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
 from html_reader import get_paragraphs
+from models import BertQuestionAnswering
+from pipelines import get_user_config, parse_devices, AsyncPipeline
+from helpers import log_runtime_settings
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -35,7 +40,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-v", "--vocab", help="Required. path to the vocabulary file with tokens",
+    args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=Path)
@@ -67,225 +72,171 @@ def build_argparser():
     args.add_argument('-c', '--colors', action='store_true',
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
+    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
+                      default=0, type=int)
+    args.add_argument('-nstreams', '--num_streams',
+                      help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                           'mode (for HETERO and MULTI device cases use format '
+                           '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                      default='', type=str)
+    args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                      help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
     return parser
 
-# return entire sentence as start-end positions for a given answer (within the sentence).
-def find_sentence_range(context, s, e):
-    # find start of sentence
-    for c_s in range(s, max(-1, s - 200), -1):
-        if context[c_s] in "\n.":
-            c_s += 1
-            break
 
-    # find end of sentence
-    for c_e in range(max(0, e - 1), min(len(context), e + 200), +1):
-        if context[c_e] in "\n.":
-            break
+def update_answers_list(answers, output):
+    same = [i for i, ans in enumerate(answers) if ans[1:3] == output[1:3]]
+    if not same:
+        answers.append(output)
+    else:
+        assert len(same) == 1
+        prev_score = answers[same[0]][0]
+        answers[same[0]] = (max(output[0], prev_score), *output[1:])
 
-    return c_s, c_e
+
+class Visualizer:
+    def __init__(self, context, use_colors):
+        self.context = context
+        self.use_colors = use_colors
+
+    def mark(self, text):
+        return "\033[91m" + text + "\033[0m" if self.use_colors else "*" + text + "*"
+
+    # return entire sentence as start-end positions for a given answer (within the sentence)
+    def find_sentence_range(self, s, e):
+        # find start of sentence
+        for c_s in range(s, max(-1, s - 200), -1):
+            if self.context[c_s] in "\n.":
+                c_s += 1
+                break
+        # find end of sentence
+        for c_e in range(max(0, e - 1), min(len(self.context), e + 200), +1):
+            if self.context[c_e] in "\n.":
+                break
+        return c_s, c_e
+
+    def show_answers(self, answers):
+        log.info("\t\tShow top 3 answers")
+        answers = sorted(answers, key=lambda x: -x[0])[:3]
+        for score, s, e in answers:
+            c_s, c_e = self.find_sentence_range(s, e)
+            marked_answer = self.mark(self.context[s:e])
+            context_str = self.context[c_s:s] + marked_answer + self.context[e:c_e]
+            log.info("Answer: {}\n\t Score: {:0.2f}\n\t Context: {}".format(marked_answer, score, context_str))
+
+
+class ContextSource:
+    def __init__(self, q_tokens_id, c_tokens, model_max_length):
+        self.q_tokens_id = q_tokens_id
+
+        # calculate number of tokens for context in each inference request.
+        # reserve 3 positions for special tokens: [CLS] q_tokens [SEP] c_tokens [SEP]
+        c_window_len = model_max_length - (len(self.q_tokens_id) + 3)
+
+        self.window = ContextWindow(c_window_len, *c_tokens)
+
+    def get_data(self):
+        c_data = self.window.get_context_data()
+        self.window.move()
+        return (c_data, self.q_tokens_id)
+
+    def is_over(self):
+        return self.window.is_over()
+
 
 def main():
     args = build_argparser().parse_args()
 
-    if args.colors:
-        COLOR_RED = "\033[91m"
-        COLOR_RESET = "\033[0m"
-    else:
-        COLOR_RED = ""
-        COLOR_RESET = ""
+    paragraphs = get_paragraphs(args.input)
 
-    # load vocabulary file for model
+    preprocessing_start_time = perf_counter()
     vocab = load_vocab_file(args.vocab)
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
-    paragraphs = get_paragraphs(args.input)
     context = '\n'.join(paragraphs)
+    visualizer = Visualizer(context, args.colors)
     # encode context into token ids list
-    c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
+    c_tokens = text_to_tokens(context.lower(), vocab)
+    total_latency = (perf_counter() - preprocessing_start_time) * 1e3
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    # read IR
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
-    log.info('Reading model {}'.format(args.model))
-    ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
+    log.info('Reading model {}'.format(args.model))
+    model = BertQuestionAnswering(ie, args.model, vocab, args.input_names, args.output_names,
+                                  args.max_answer_token_num, args.model_squad_ver)
     if args.reshape:
-        # reshape the sequence length to the context + maximum question length (in tokens)
-        first_input_layer = next(iter(ie_encoder.input_info))
-        c = ie_encoder.input_info[first_input_layer].input_data.shape[1]
-        # find the closest multiple of 64, if it is smaller than current network's sequence length, let' use that
-        seq = min(c, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))
-        if seq < c:
-            new_shapes = {}
-            for input_name, input_info in ie_encoder.input_info.items():
-                n, c = input_info.input_data.shape
-                new_shapes[input_name] = [n, seq]
+        # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
+        new_length = min(model.max_length, int(np.ceil((len(c_tokens[0]) + args.max_question_token_num) / 64) * 64))
+        if new_length < model.max_length:
             try:
-                ie_encoder.reshape(new_shapes)
-                log.debug("Reshape model {} from {} to the {}".format(
-                    input_name, input_info.input_data.shape, new_shapes[input_name]))
+                model.reshape(new_length)
             except RuntimeError:
                 log.error("Failed to reshape the network, please retry the demo without '-r' option")
                 sys.exit(-1)
         else:
-            log.debug("Skipping network reshaping,"
-                     " as (context length + max question length) exceeds the current (input) network sequence length")
+            log.debug("\tSkipping network reshaping,"
+                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
-    # check input and output names
-    input_names = [i.strip() for i in args.input_names.split(',')]
-    output_names = [o.strip() for o in args.output_names.split(',')]
-    if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
-        raise RuntimeError("The demo expects input->output names: {}->{}, actual network input->output names: {}->{}".format(
-            input_names, output_names, list(ie_encoder.input_info.keys()), list(ie_encoder.outputs.keys())))
-
-    # load model to the device
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    pipeline = AsyncPipeline(ie, model, plugin_config,
+                             device=args.device, max_num_requests=args.num_infer_requests)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     if args.questions:
         def questions():
             for question in args.questions:
-                log.info("Question: {}".format(question))
+                log.info("\n\tQuestion: {}".format(question))
                 yield question
     else:
         def questions():
             while True:
-                yield input('Type question (empty string to exit):')
+                yield input('\n\tType a question (empty string to exit): ')
 
-    # loop on user's or prepared questions
     for question in questions():
         if not question.strip():
             break
 
-        q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
-
-        # maximum number of tokens that can be processed by network at once
-        max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
-
-        # calculate number of tokens for context in each inference request.
-        # reserve 3 positions for special tokens
-        # [CLS] q_tokens [SEP] c_tokens [SEP]
-        c_wnd_len = max_length - (len(q_tokens_id) + 3)
-
-        # token num between two neighbour context windows
-        # 1/2 means that context windows are overlapped by half
-        c_stride = c_wnd_len // 2
-
-        t0 = time.perf_counter()
-        t_count = 0
-
-        # array of answers from each window
         answers = []
+        next_window_id = 0
+        next_window_id_to_show = 0
+        start_time = perf_counter()
+        q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
+        source = ContextSource(q_tokens_id, c_tokens, model.max_length)
 
-        # init a window to iterate over context
-        c_s, c_e = 0, min(c_wnd_len, len(c_tokens_id))
+        while True:
+            if pipeline.callback_exceptions:
+                raise pipeline.callback_exceptions[0]
+            results = pipeline.get_result(next_window_id_to_show)
+            if results:
+                next_window_id_to_show += 1
+                update_answers_list(answers, results[0])
+                continue
 
-        # iterate while context window is not empty
-        while c_e > c_s:
-            # form the request
-            tok_cls = vocab['[CLS]']
-            tok_sep = vocab['[SEP]']
-            input_ids = [tok_cls] + q_tokens_id + [tok_sep] + c_tokens_id[c_s:c_e] + [tok_sep]
-            token_type_ids = [0] + [0] * len(q_tokens_id) + [0] + [1] * (c_e - c_s) + [0]
-            attention_mask = [1] * len(input_ids)
-
-            # pad the rest of the request
-            pad_len = max_length - len(input_ids)
-            input_ids += [0] * pad_len
-            token_type_ids += [0] * pad_len
-            attention_mask += [0] * pad_len
-
-            # create numpy inputs for IE
-            inputs = {
-                input_names[0]: np.array([input_ids], dtype=np.int32),
-                input_names[1]: np.array([attention_mask], dtype=np.int32),
-                input_names[2]: np.array([token_type_ids], dtype=np.int32),
-            }
-            if len(input_names)>3:
-                inputs[input_names[3]] = np.arange(len(input_ids), dtype=np.int32)[None, :]
-
-            t_start = time.perf_counter()
-            # infer by IE
-            res = ie_encoder_exec.infer(inputs=inputs)
-            t_end = time.perf_counter()
-            t_count += 1
-            log.info("Sequence of length {} is processed with {:0.2f} requests/sec ({:0.2} sec per request)".format(
-                max_length,
-                1 / (t_end - t_start),
-                t_end - t_start
-            ))
-
-            # get start-end scores for context
-            def get_score(name):
-                out = np.exp(res[name].reshape((max_length,)))
-                return out / out.sum(axis=-1)
-
-            score_s = get_score(output_names[0])
-            score_e = get_score(output_names[1])
-
-            # get 'no-answer' score (not valid if model has been fine-tuned on squad1.x)
-            if args.model_squad_ver.split('.')[0] == '1':
-                score_na = 0
+            if pipeline.is_ready():
+                if source.is_over():
+                    break
+                pipeline.submit_data(source.get_data(), next_window_id, None)
+                next_window_id += 1
             else:
-                score_na = score_s[0] * score_e[0]
+                pipeline.await_any()
 
-            # find product of all start-end combinations to find the best one
-            c_s_idx = len(q_tokens_id) + 2  # index of first context token in tensor
-            c_e_idx = max_length - (1 + pad_len)  # index of last+1 context token in tensor
-            score_mat = np.matmul(
-                score_s[c_s_idx:c_e_idx].reshape((c_e - c_s, 1)),
-                score_e[c_s_idx:c_e_idx].reshape((1, c_e - c_s))
-            )
-            # reset candidates with end before start
-            score_mat = np.triu(score_mat)
-            # reset long candidates (>max_answer_token_num)
-            score_mat = np.tril(score_mat, args.max_answer_token_num - 1)
-            # find the best start-end pair
-            max_s, max_e = divmod(score_mat.flatten().argmax(), score_mat.shape[1])
-            max_score = score_mat[max_s, max_e] * (1 - score_na)
+        pipeline.await_all()
+        for window_id in range(next_window_id_to_show, next_window_id):
+            results = pipeline.get_result(window_id)
+            while results is None:
+                results = pipeline.get_result(window_id)
+            update_answers_list(answers, results[0])
 
-            # convert to context text start-end index
-            max_s = c_tokens_se[c_s + max_s][0]
-            max_e = c_tokens_se[c_s + max_e][1]
+        visualizer.show_answers(answers)
+        total_latency += (perf_counter() - start_time) * 1e3
 
-            # check that answers list does not have duplicates (because of context windows overlapping)
-            same = [i for i, a in enumerate(answers) if a[1] == max_s and a[2] == max_e]
-            if same:
-                assert len(same) == 1
-                # update existing answer record
-                a = answers[same[0]]
-                answers[same[0]] = (max(max_score, a[0]), max_s, max_e)
-            else:
-                # add new record
-                answers.append((max_score, max_s, max_e))
-
-            # check that context window reached the end
-            if c_e == len(c_tokens_id):
-                break
-
-            # move to next window position
-            c_s = min(c_s + c_stride, len(c_tokens_id))
-            c_e = min(c_s + c_wnd_len, len(c_tokens_id))
-
-        t1 = time.perf_counter()
-        log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
-            t_count,
-            max_length,
-            t1 - t0,
-            (t1 - t0) / t_count
-        ))
-
-        # print top 3 results
-        answers = sorted(answers, key=lambda x: -x[0])
-        for score, s, e in answers[:3]:
-            log.info("---answer: {:0.2f} {}".format(score, context[s:e]))
-            c_s, c_e = find_sentence_range(context, s, e)
-            log.info("   " + context[c_s:s] + COLOR_RED + context[s:e] + COLOR_RESET + context[e:c_e])
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 
 if __name__ == '__main__':

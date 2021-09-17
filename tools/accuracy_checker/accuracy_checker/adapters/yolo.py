@@ -24,7 +24,7 @@ from ..config import BoolField, NumberField, StringField, ConfigValidator, ListF
 from ..representation import DetectionPrediction
 from ..utils import get_or_parse_value
 
-DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "probabilities"])
+DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
 
 class YoloOutputProcessor:
@@ -46,10 +46,7 @@ class YoloOutputProcessor:
         w = self.size_correct(bbox.w) * anchors[0] / self.width_normalizer
         h = self.size_correct(bbox.h) * anchors[1] / self.height_normalizer
 
-        confidence = self.conf_correct(bbox.confidence)
-        probabilities = self.prob_correct(bbox.probabilities)
-
-        return DetectionBox(x, y, w, h, confidence, probabilities)
+        return DetectionBox(x, y, w, h)
 
 
 class TinyYOLOv1Adapter(Adapter):
@@ -115,34 +112,43 @@ class TinyYOLOv1Adapter(Adapter):
         return result
 
 
-def entry_index(w, h, n_coords, n_classes, pos, entry):
-    row = pos // (w * h)
-    col = pos % (w * h)
-    return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
+def permute_to_HWA_K(tensor, K):
+    """
+    Transpose/reshape a tensor from ((A x K), H, W) to ((HxWxA), K)
+    """
+    assert tensor.ndim == 3, tensor.shape
+    _, H, W = tensor.shape
+    tensor = tensor.reshape(-1, K, H, W)
+    tensor = tensor.transpose(2, 3, 0, 1)
+    tensor = tensor.reshape(-1, K)
+    return tensor
 
 
-def parse_output(predictions, cells, num, box_size, anchors, processor, threshold=0.001):
-    cells_x, cells_y = cells, cells
-
+def parse_output(predictions, cells, num, classes, box_size, anchors, processor, threshold=0.001):
     labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
 
-    for x, y, n in np.ndindex((cells_x, cells_y, num)):
-        if predictions.shape[0] == predictions.shape[1]:
-            bbox = predictions[y, x, n*box_size:(n + 1)*box_size]
-        else:
-            bbox = predictions[n * box_size:(n + 1) * box_size, y, x]
+    if predictions.shape[0] == predictions.shape[1]:
+        predictions = np.transpose(predictions, (2, 0, 1))
+    predictions = permute_to_HWA_K(predictions, box_size)
+    confidence = processor.conf_correct(predictions[:, 4].flatten())
+    probabilities = processor.prob_correct(predictions[:, 5:].flatten())
 
-        raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5:])
-        processed_box = processor(raw_bbox, x, y, anchors[2*n:2*n+2])
+    # filter out the proposals with low confidence score
+    obj_indx = np.nonzero(confidence > threshold)[0]
 
-        if processed_box.confidence < threshold:
-            continue
+    # get boxes
+    for obj_ind in obj_indx:
+        row = obj_ind // (cells * num)
+        col = (obj_ind - row * cells * num) // num
+        n = (obj_ind - row * cells * num) % num
 
-        classes_prob = processed_box.probabilities
-        label = np.argmax(classes_prob)
+        raw_bbox = DetectionBox(*predictions[obj_ind, :4])
+        processed_box = processor(raw_bbox, col, row, anchors[2 * n:2 * n + 2])
+        label = np.argmax(probabilities[obj_ind * classes:(obj_ind + 1) * classes])
 
         labels.append(label)
-        scores.append(processed_box.probabilities[label] * processed_box.confidence)
+
+        scores.append(probabilities[obj_ind * classes + label] * confidence[obj_ind])
         x_mins.append(processed_box.x - processed_box.w / 2.0)
         y_mins.append(processed_box.y - processed_box.h / 2.0)
         x_maxs.append(processed_box.x + processed_box.w / 2.0)
@@ -244,6 +250,8 @@ class YoloV2Adapter(Adapter):
 
         result = []
         box_size = self.classes + self.coords + 1
+        if len(identifiers) == 1 and predictions.shape[0] != 1:
+            predictions = np.expand_dims(predictions, 0)
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) != 3:
                 if self.output_format == 'BHW':
@@ -252,7 +260,7 @@ class YoloV2Adapter(Adapter):
                     new_shape = (self.cells, self.cells, self.num * box_size)
                 prediction = np.reshape(prediction, new_shape)
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
-                                                                          box_size, self.anchors,
+                                                                          self.classes, box_size, self.anchors,
                                                                           self.processor)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
@@ -432,7 +440,7 @@ class YoloV3Adapter(Adapter):
                 self.processor.y_normalizer = cells
 
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              box_size, anchors,
+                                                                              self.classes, box_size, anchors,
                                                                               self.processor, self.threshold)
                 detections['labels'].extend(labels)
                 detections['scores'].extend(scores)

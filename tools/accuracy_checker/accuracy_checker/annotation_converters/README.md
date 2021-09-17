@@ -229,6 +229,11 @@ The main difference between this converter and `super_resolution` in data organi
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
+* `bentham_lines` - converts [Bentham](http://transcriptorium.eu/datasets/bentham-collection/) dataset for line-level character recognition to `CharacterRecognitionAnnotation`.
+  * `transcription_dir` - directory stored line transcriptions
+  * `partition_file` - file with selected subset for validation.
+  * `normalize_text` - allow unicode normalization for text (Optional, default `False`).
+  * `to_lower` - converts transcription text to lower case (Optional, default `False`).
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format. Also, can be used to convert other nifti-based datasets.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide a relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
@@ -511,6 +516,28 @@ The main difference between this converter and `super_resolution` in data organi
     ```yaml
         tokenizer_dir: <model_saving_path>/roberta-base
     ```
+* `custom_text_classification` - converts Custom Column dataset  to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv or csv format.
+  * `separator` - column separator, supported values: `comma` for comma-separated data and `tab` - for tabular separation. Optional, default behaviour derived from file extension - for csv is `,`, for tsv - `\t`.
+  * `text_1` - column id for text (Optional, default - 0).
+  * `text_2` - column id for text for sentence pair classification task (Optional, does not used if not provided).
+  * `label` - column id for label (Optional, default - 1).
+  * `labels_list` - list of label names (Optional, can be also provided using `dataset_meta_file`),
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `vocab_file` -  path to model vocabulary file for WordPiece tokenization (Optional in case, when another tokenization approach used).
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
 * `bert_xnli_tf_record` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) stored in tf records format. This converter usage requires TensorFlow installation. Please make sure that TensorFlow installed before conversion.
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
@@ -554,11 +581,16 @@ The main difference between this converter and `super_resolution` in data organi
   * `num_classes` - number of used classes.
 * `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
   * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
+  * `binary` - Input file mode flag. If set, input file is in binary mode instead of .npz mode. Optional, default `False`
   * `batch` - batch size expected by model
+  * `max_ind_range` - maximum index range for categorical features. Optional, default `0`
   * `subsample_size` - number of batches in test-only dataset, If provided, total number of records is batch * subsample_size
   * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename.
+  * `dense_features` - name of model dense features input. Optional, default `input.1`
+  * `sparse_features` - name of model sparse features input. For multiple inputs use comma-separated list in form [name]:[index]. Optional, default `lS_i`
+  * `lso_features` - name of model offsets features input. Optional, default `lS_o`
   * `save_preprocessed_features` - allow saving preprocessed input features into `preprocessed_dir` (Optional, default True).
 * `features_regression` - converts dataset stored in a format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).
@@ -589,7 +621,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `separator` - Separator between input identifier and file identifier
   * `preprocessed_dir` - Preprocessed dataset location
   * `dense_features` - Name of model dense features input
-  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `[name]:[index]`
   * `lso_features` - Name of lS_o-like features input
 * `im2latex_formula_recognition` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
@@ -729,6 +761,10 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_len` - maximum input sequence length. (Optional, default `100`)
   * `subsample_size` - limit number of preprocessed sentences. (Optional, default `0`, no limitation)
 * `wgs_tf_records` - converts `Deepvariant WGS` preprocessed dataset (https://github.com/google/deepvariant/blob/r0.10/docs/deepvariant-training-case-study.md) to `ClassificationAnnotation`.
+  * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
+  * `preprocessed_dir` - path to preprocessed data
+  * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
+* `wgs_pickle_records` - converts `Deepvariant WGS` preprocessed dataset (https://github.com/google/deepvariant/blob/r0.10/docs/deepvariant-training-case-study.md) dumped to pickle file to `ClassificationAnnotation`.
   * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
   * `preprocessed_dir` - path to preprocessed data
   * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)

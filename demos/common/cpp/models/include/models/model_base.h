@@ -18,6 +18,7 @@
 #include "input_data.h"
 #include "results.h"
 #include "utils/config_factory.h"
+#include <utils/ocv_common.hpp>
 
 class ModelBase {
 public:
@@ -37,6 +38,10 @@ public:
 
     std::string getModelFileName() { return modelFileName; }
 
+    void SetInputsPreprocessing(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
+        this->inputTransform = InputTransform(reverseInputChannels, meanValues, scaleValues);
+    }
+
     void setBatchOne(InferenceEngine::CNNNetwork & cnnNetwork) {
         auto shapes = cnnNetwork.getInputShapes();
         for (auto& shape : shapes)
@@ -48,6 +53,7 @@ protected:
     InferenceEngine::CNNNetwork prepareNetwork(InferenceEngine::Core& core);
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;
 
+    InputTransform inputTransform = InputTransform();
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
     InferenceEngine::ExecutableNetwork execNetwork;

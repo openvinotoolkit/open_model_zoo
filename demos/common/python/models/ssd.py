@@ -20,9 +20,9 @@ from .utils import Detection, resize_image, load_labels, clip_detections
 
 
 class SSD(Model):
-    def __init__(self, ie, model_path, input_transform, labels=None,
+    def __init__(self, ie, model_path, labels=None,
         keep_aspect_ratio_resize=False, threshold=0.5):
-        super().__init__(ie, model_path, input_transform)
+        super().__init__(ie, model_path)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         if isinstance(labels, (list, tuple)):

@@ -20,8 +20,8 @@ from .utils import Detection, resize_image, load_labels, clip_detections
 
 
 class DETR(Model):
-    def __init__(self, ie, model_path, input_transform, labels=None, threshold=0.5):
-        super().__init__(ie, model_path, input_transform)
+    def __init__(self, ie, model_path, labels=None, threshold=0.5):
+        super().__init__(ie, model_path)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))

@@ -19,7 +19,7 @@ from .convert import make_subset, save_annotation, analyze_dataset, DatasetConve
 from .market1501 import Market1501Converter
 from .veri776 import VeRi776Converter
 from .mars import MARSConverter
-from .pascal_voc import PascalVOCDetectionConverter
+from .pascal_voc import PascalVOCDetectionConverter, SYGDetectionConverter
 from .sample_converter import SampleConverter
 from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
@@ -31,6 +31,7 @@ from .super_resolution_converter import (
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .rctw import RCTWPreprocessedConverter
+from .bentham import BenthamOCRDatasetConverter
 from .im2latex import Im2latexDatasetConverter
 from .unicode_character_recognition import (
     UnicodeCharacterRecognitionDatasetConverter, KondateNakayosiRecognitionDatasetConverter
@@ -70,7 +71,8 @@ from .text_classification import (
     QQPConverter,
     QNLIConverter,
     SST2Converter,
-    RTEConverter
+    RTEConverter,
+    ColumnDataset
 )
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
@@ -118,7 +120,7 @@ from .dataset_folder import DatasetFolderConverter
 from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
 from .amazon import AmazonProductData
-from .wgs import WGSTFRecords
+from .wgs import WGSTFRecords, WGSPickleRecords
 
 __all__ = [
     'BaseFormatConverter',
@@ -132,6 +134,7 @@ __all__ = [
     'VeRi776Converter',
     'SampleConverter',
     'PascalVOCDetectionConverter',
+    'SYGDetectionConverter',
     'WiderFormatConverter',
     'MARSConverter',
     'DetectionOpenCVStorageFormatConverter',
@@ -144,6 +147,7 @@ __all__ = [
     'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
+    'BenthamOCRDatasetConverter',
     'RCTWPreprocessedConverter',
     'UnicodeCharacterRecognitionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',
@@ -188,6 +192,7 @@ __all__ = [
     'QNLIConverter',
     'RTEConverter',
     'SST2Converter',
+    'ColumnDataset',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
@@ -235,5 +240,6 @@ __all__ = [
     'OpenImagesDetectionConverter',
     'KSpaceMRIConverter',
     'AmazonProductData',
-    'WGSTFRecords'
+    'WGSTFRecords',
+    'WGSPickleRecords',
 ]

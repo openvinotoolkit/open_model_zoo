@@ -180,13 +180,13 @@ class CifarFormatConverter(BaseFormatConverter):
 
         return ConverterReturn(annotation, meta, content_errors)
 
-    def generate_meta(self, labels_offset, annoation):
+    def generate_meta(self, labels_offset, annotation):
         labels = []
         meta = {}
         labels_id = ''
         if self.batch_meta_file:
             labels = read_pickle(self.batch_meta_file, encoding='latin1').get('label_names', [])
-            labels_id = 'fine_labels' if 'fine_labels' in annoation else 'labels'
+            labels_id = 'fine_labels' if 'fine_labels' in annotation else 'labels'
         if not labels:
             labels, labels_id = class_map.get(self.num_classes, ([], 'labels'))
             meta = {}

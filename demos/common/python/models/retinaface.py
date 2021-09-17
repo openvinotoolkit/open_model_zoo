@@ -330,6 +330,7 @@ class RetinaFacePyTorch(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
+        resized_image = self.input_transform(resized_image)
         resized_image = np.expand_dims(resized_image.transpose((2, 0, 1)), axis=0) # Change data layout from HWC to CHW
 
         dict_inputs = {self.image_blob_name: resized_image}

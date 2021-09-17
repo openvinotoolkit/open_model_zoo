@@ -276,15 +276,21 @@ def is_path(data):
     return isinstance(data, (Path, str))
 
 
-def read_txt(file: Union[str, Path], sep='\n', **kwargs):
+def read_txt(file: Union[str, Path], sep='\n', ignore_space=False, **kwargs):
     def is_empty(string):
-        return not string or string.isspace()
+        emptyness = not string
+        if not ignore_space:
+            emptyness = emptyness or string.isspace()
+
+        return emptyness
 
     with get_path(file).open(**kwargs) as content:
         content = content.read().split(sep)
         content = list(filter(lambda string: not is_empty(string), content))
 
-        return list(map(str.strip, content))
+        if not ignore_space:
+            content = list(map(str.strip, content))
+        return content
 
 
 def read_xml(file: Union[str, Path], *args, **kwargs):

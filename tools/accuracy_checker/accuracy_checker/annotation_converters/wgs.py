@@ -19,9 +19,8 @@ import numpy as np
 
 from ..representation import ClassificationAnnotation
 from ..config import PathField, BoolField
-from ..utils import UnsupportedPackage
-from .format_converter import BaseFormatConverter
-from .format_converter import ConverterReturn
+from ..utils import UnsupportedPackage, read_pickle
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class WGSTFRecords(BaseFormatConverter):
@@ -51,8 +50,11 @@ class WGSTFRecords(BaseFormatConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.skip_dump = self.get_value_from_config('skip_dump')
 
-    def read_tf_records(self):
-        record_iterator = self.tf.python_io.tf_record_iterator(path=str(self.annotation_file))
+    def read_records(self):
+        try:
+            record_iterator = self.tf.python_io.tf_record_iterator(path=str(self.annotation_file))
+        except AttributeError:
+            record_iterator = self.tf.compat.v1.python_io.tf_record_iterator(path=str(self.annotation_file))
         record_list = []
         for string_record in record_iterator:
             example = self.tf.train.Example()
@@ -76,7 +78,7 @@ class WGSTFRecords(BaseFormatConverter):
         return record_list
 
     def convert(self, check_content=False, **kwargs):
-        examples = self.read_tf_records()
+        examples = self.read_records()
         annotations = []
         preprocessed_folder = Path(self.preprocessed_dir)
         if not self.skip_dump and not preprocessed_folder.exists():
@@ -89,3 +91,28 @@ class WGSTFRecords(BaseFormatConverter):
                 np.save(str(c_input), image)
             annotations.append(ClassificationAnnotation(str(c_input.relative_to(preprocessed_folder)), label))
         return ConverterReturn(annotations, None, None)
+
+
+class WGSPickleRecords(WGSTFRecords):
+    __provider__ = 'wgs_pickle_records'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'annotation_file': PathField(description='path to Deepvariant WGS preprocessed dataset file'),
+            "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
+                                          description="Preprocessed dataset location"),
+            "skip_dump": BoolField(optional=True, default=True, description='Annotate without saving features')
+        })
+
+        return parameters
+
+    def configure(self):
+        self.annotation_file = self.get_value_from_config('annotation_file')
+        self.preprocessed_dir = self.get_value_from_config('preprocessed_dir')
+        self.data_dir = self.get_value_from_config('data_dir')
+        self.skip_dump = self.get_value_from_config('skip_dump')
+
+    def read_records(self):
+        return read_pickle(self.annotation_file)
