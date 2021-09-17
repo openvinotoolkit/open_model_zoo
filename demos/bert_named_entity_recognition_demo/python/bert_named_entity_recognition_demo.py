@@ -26,12 +26,14 @@ from time import perf_counter
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from models.tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
-from models import BertNamedEntityRecognition
-from pipelines import get_user_config, parse_devices, AsyncPipeline
 from helpers import log_runtime_settings
+
+from model_api.models import BertNamedEntityRecognition
+from model_api.models.tokens_bert import text_to_tokens, load_vocab_file
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

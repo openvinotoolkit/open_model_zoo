@@ -26,12 +26,14 @@ import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
 from html_reader import get_paragraphs
-from models import BertEmbedding, BertQuestionAnswering
-from pipelines import get_user_config, parse_devices, AsyncPipeline
 from helpers import log_runtime_settings
+
+from model_api.models import BertEmbedding, BertQuestionAnswering
+from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
