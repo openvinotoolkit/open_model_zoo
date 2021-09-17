@@ -588,7 +588,7 @@ class DLSDKLauncher(Launcher):
                         self.ie_core.set_config(dict(value), key)
                     else:
                         warnings.warn(
-                            f'Configuration for {key} will e skipped as device is not listed in evaluation device'
+                            f'Configuration for {key} will be skipped as device is not listed in evaluation device'
                         )
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
