@@ -582,9 +582,14 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
-                    if key not in self.ie_core.available_devices:
-                        warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                    self.ie_core.set_config(dict(value), key)
+                    if key in self._devices_list():
+                        if key not in self.ie_core.available_devices:
+                            warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
+                        self.ie_core.set_config(dict(value), key)
+                    else:
+                        warnings.warn(
+                            f'Configuration for {key} will e skipped as device is not listed in evaluation device'
+                        )
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
