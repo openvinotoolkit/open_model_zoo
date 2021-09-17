@@ -96,6 +96,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace('(', '')
     processed = processed.replace(')', '')
     processed = processed.split(',')
+    processed = filter(lambda x: x, processed)
 
     return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
 

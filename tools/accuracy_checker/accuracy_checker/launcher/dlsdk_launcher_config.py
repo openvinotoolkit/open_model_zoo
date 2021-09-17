@@ -42,7 +42,25 @@ VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
 
 
 def parse_partial_shape(partial_shape):
-    return string_to_tuple(str(partial_shape).replace('{', '(').replace('}', ')').replace('?', '-1'), casting_type=int)
+    ps = str(partial_shape)
+    preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
+    if '[' not in preprocessed:
+        return string_to_tuple(preprocessed, casting_type=int)
+    shape_list = []
+    for elem in preprocessed.split('['):
+        if not elem:
+            continue
+        inside_elems = elem.split(']')
+        for internal_elem in inside_elems:
+            if internal_elem.startswith(','):
+                internal_elem = internal_elem[1:]
+            if not internal_elem:
+                continue
+            tuple_elem = string_to_tuple(internal_elem, casting_type=int)
+            if not tuple_elem:
+                continue
+            shape_list.append(tuple_elem[0] if len(tuple_elem) == 1 else tuple_elem)
+    return shape_list
 
 
 class CPUExtensionPathField(PathField):

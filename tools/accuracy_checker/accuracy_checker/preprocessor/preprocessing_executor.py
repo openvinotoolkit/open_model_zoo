@@ -125,6 +125,13 @@ class PreprocessingExecutor:
             return False
         return shape_modification[-1]
 
+    @property
+    def has_shape_modifications(self):
+        for processor in self.processors:
+            if processor.shape_modificator:
+                return True
+        return False
+
     def query_shapes(self, data_shape):
         for processor in self.processors:
             data_shape = processor.query_shapes(data_shape)

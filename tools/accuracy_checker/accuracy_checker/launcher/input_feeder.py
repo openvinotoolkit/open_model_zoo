@@ -452,7 +452,7 @@ class InputFeeder:
             if isinstance(layer_data_preprocessed, tuple):
                 layer_template = layer_data_preprocessed[1]
                 if layer_template is not None:
-                    template_for_shapes[layer_name] = layer_template
+                    template_for_shapes = layer_template
                 layer_data_preprocessed = layer_data_preprocessed[0]
             batch_data[layer_name] = layer_data_preprocessed
 

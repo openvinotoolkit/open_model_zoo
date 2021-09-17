@@ -86,7 +86,7 @@ class DLSDKLauncher(Launcher):
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
         self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
-#        self.ie_core.register_plugin("templatePlugin", "TEMPLATE")
+        self.ie_core.register_plugin("templatePlugin", "TEMPLATE")
         self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
             'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
@@ -713,21 +713,23 @@ class DLSDKLauncher(Launcher):
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
             try:
+                if template_shapes:
+                    input_shapes = {
+                        layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in
+                        input_data[0].items()
+                    }
+                    self._reshape_input(input_shapes)
+                    self.load_network(self.network)
+                    self.is_dynamic = True
                 if not hasattr(self, 'exec_network') or self.exec_network is None:
                     self.is_dynamic = True
                     self.load_network(self.network)
-                self.exec_network.infer(input_data)
-
+                self.exec_network.infer(input_data[0])
+                return
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
                     raise e
                 self.is_dynamic = False
-        if self.is_dynamic and template_shapes:
-            input_shapes = {
-                layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in input_data[0].items()
-            }
-            self._reshape_input(input_shapes)
-            return
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
         self._reshape_input(input_shapes)
 
@@ -746,8 +748,12 @@ class DLSDKLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if layer_name in self.dyn_input_layers:
-            data, template = self._data_to_blob_dyn(data, layout, template)
+            layer_rang = len(self._partial_shapes[layer_name])
+            input_template = template.get(layer_name) if template else template
+            data, l_template = self._data_to_blob_dyn(layer_rang, data, layout, input_template)
             layer_shape = data.shape
+            if l_template is not None:
+                template[layer_name] = l_template
         else:
             layer_shape = tuple(self.inputs[layer_name].shape)
             data = self._data_to_blob(layer_shape, data, layout)
@@ -764,11 +770,16 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name, layout)
 
     @staticmethod
-    def _data_to_blob_dyn(data, layout, template=None):
+    def _data_to_blob_dyn(layer_rang, data, layout, template=None):
         data_shape = np.shape(data)
+        if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
+            data = data[0]
+            data_shape = np.shape(data)
         if template is not None:
             if len(template) < np.ndim(data):
-                template = [1] * (np.ndim(data) - len(template))
+                template = [1] * (np.ndim(data) - len(template)) + template
+            if len(template) > np.ndim(data):
+                template = template[0]
         if len(layout) == len(data_shape):
             if template is not None:
                 new_template = [template[l_dim] for l_dim in layout]

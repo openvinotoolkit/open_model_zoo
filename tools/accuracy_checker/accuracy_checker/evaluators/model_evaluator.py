@@ -244,7 +244,7 @@ class ModelEvaluator(BaseEvaluator):
             filled_inputs = self.input_feeder.fill_inputs(batch_input)
             return filled_inputs, batch_meta, None
 
-        filled_inputs, inputs_template, _ = self.input_feeder.fill_inputs_with_template(batch_input, template)
+        filled_inputs, inputs_template = self.input_feeder.fill_inputs_with_template(batch_input, template)
         return filled_inputs, batch_meta, inputs_template
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
@@ -616,7 +616,7 @@ class ModelEvaluator(BaseEvaluator):
             if self.launcher.dyn_batch_only:
                 self.launcher.resolve_undefined_batch()
                 return False
-            if self.preprocessor.dynamic_shapes:
+            if self.preprocessor.dynamic_shapes or not self.preprocessor.has_shape_modifications:
                 if not self.launcher.dynamic_shapes_policy != 'static':
                     self._initialize_input_shape_with_data_range()
                     return False
@@ -630,7 +630,9 @@ class ModelEvaluator(BaseEvaluator):
             if self.launcher.dyn_batch_only:
                 self.launcher.resolve_undefined_batch()
                 return
-            if self.preprocessor.dynamic_shapes and self.launcher.dynamic_shapes_policy != 'static':
+            if (
+                    (self.preprocessor.dynamic_shapes or not self.preprocessor.has_shape_modifications)
+                    and self.launcher.dynamic_shapes_policy != 'static'):
                 self._initialize_input_shape_with_data_range()
                 return
             self._initialize_input_shape()
@@ -639,17 +641,21 @@ class ModelEvaluator(BaseEvaluator):
         input_shapes = []
         for _, _, batch_input, _ in self.dataset:
             input_shapes.extend(self.preprocessor.query_data_batch_shapes(batch_input))
-        shapes_statistic = np.array(input_shapes)
-        shape_template = [-1] * len(input_shapes[0])
-        undefined_shapes = np.sum(shapes_statistic == -1, axis=-1)
-        for i, ds in enumerate(undefined_shapes):
-            if ds > 0:
-                continue
-            axis_sizes = shapes_statistic[:, i]
-            min_size = np.min(axis_sizes)
-            max_size = np.max(axis_sizes)
-            shape_template[i] = min_size if min_size == max_size else (min_size, max_size)
-        self._initialize_input_shape(dynamic_shape_helper=shape_template)
+
+        shapes_statistic = np.swapaxes(np.array(input_shapes), 1, 0)
+        per_input_tamplates = []
+        for stat_shape in shapes_statistic:
+            shape_template = [-1] * len(stat_shape[0])
+            undefined_shapes = np.squeeze(np.sum(shapes_statistic == -1, axis=1), 0).astype(int)
+            for i, ds in enumerate(undefined_shapes):
+                if ds > 0:
+                    continue
+                axis_sizes = stat_shape[:, i]
+                min_size = np.min(axis_sizes)
+                max_size = np.max(axis_sizes)
+                shape_template[i] = min_size if min_size == max_size else (min_size, max_size)
+            per_input_tamplates.append(shape_template)
+        self._initialize_input_shape(dynamic_shape_helper=per_input_tamplates)
 
     @property
     def dataset_size(self):
