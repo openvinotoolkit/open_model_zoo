@@ -58,17 +58,17 @@ class DetectionModel(ImageModel):
         self.iou_threshold = iou_threshold
 
     def _resize_detections(self, detections, meta):
-        '''Resizes detection bounding box according to initial image size
+        '''Resizes detection bounding boxes according to initial image size
 
         Implements resize operations for different image resize types (see ``ImageModel`` class for details).
-        Applies clipping bounding box to image size.
+        Applies clipping bounding box to original image size.
 
         Args:
             detections(List[Detection]): list of detections with coordinates in normalized form
             meta: meta information with fields `resized_shape` and `original_shape`
 
         Returns:
-            List of detections for initial image
+            List of detections fit to initial image (resized and clipped)
 
         Raises:
             RuntimeError: If model uses custom resize or `resize_type` not set

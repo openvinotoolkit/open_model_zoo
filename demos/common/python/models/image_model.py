@@ -18,10 +18,10 @@ from .utils import RESIZE_TYPES, pad_image
 
 
 class ImageModel(Model):
-    '''An abstract wrapper for image-bases model
+    '''An abstract wrapper for image-based model
 
     An image-based model is model which has one or more inputs with image - 4D tensors with NWHC or NCHW layout.
-    Also it may have support inputs - 2D tensor.
+    Also it may have support additional inputs - 2D tensor.
     Implements basic preprocessing for image: resizing and aligning to model input.
 
     Attributes:

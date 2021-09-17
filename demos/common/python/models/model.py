@@ -34,7 +34,7 @@ class Model:
 
         Args:
             ie(openvino.core): instance of Inference Engine core, needs for model loading
-            model_path(str, Path): path to model's *.xml file
+            model_path(str, Path): path to model's *.xml or *.onnx file 
         '''
         self.logger = log.getLogger()
         self.net = ie.read_network(model_path)
