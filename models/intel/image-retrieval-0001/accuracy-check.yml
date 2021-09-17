@@ -12,5 +12,6 @@ models:
           - name: rank@1
             type: cmc
             top_k: 1
+            reference: 0.834
 
           - type: reid_map

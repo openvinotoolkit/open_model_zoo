@@ -22,7 +22,9 @@ models:
           - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+            reference: 0.4236
           - type: coco_orig_precision
+            reference: 0.3927
 
   - name: detr-resnet50
     launchers:
@@ -44,4 +46,6 @@ models:
           - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+            reference: 0.4236
           - type: coco_orig_precision
+            reference: 0.3927

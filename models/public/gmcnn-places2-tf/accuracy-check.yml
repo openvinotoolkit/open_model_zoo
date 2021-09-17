@@ -19,6 +19,8 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+                mean: 33.41
           - type: ssim
             presenter: print_vector
 
@@ -42,5 +44,7 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 33.41
           - type: ssim
             presenter: print_vector

@@ -25,3 +25,5 @@ models:
           - type: ner_accuracy
           - type: ner_f_score
             presenter: print_vector
+            reference:
+              mean: 0.8445

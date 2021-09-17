@@ -20,6 +20,8 @@ models:
         metrics:
           - type: salience_f-measure
             presenter: print_vector
+            reference:
+              f-measure: 0.8421
 
   - name: f3net
     launchers:
@@ -37,3 +39,5 @@ models:
         metrics:
           - type: salience_f-measure
             presenter: print_vector
+            reference:
+              f-measure: 0.8421

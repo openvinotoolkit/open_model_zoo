@@ -26,6 +26,15 @@ models:
           - type: normalization
             mean: (123.675,116.28,103.53)
             std: (58.395,57.12,57.375)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7464
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9206
 
   - name: dla-34
 
@@ -47,3 +56,12 @@ models:
           - type: crop
             size: 224
             use_pillow: True
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7464
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9206

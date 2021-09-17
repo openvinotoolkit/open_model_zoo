@@ -21,6 +21,7 @@ models:
             type: accuracy
             annotation_source: gender_annotation
             prediction_source: gender
+            reference: 0.958
 
           - name: accuracy@age
             type: accuracy_per_class
@@ -30,3 +31,4 @@ models:
             prediction_source: age_classification
 
           - type: mae
+            reference: 6.99

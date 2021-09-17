@@ -21,6 +21,7 @@ models:
         metrics:
           - type: 'perplexity'
             name: 'Perplexity'
+            reference: 0.29
 
   - name: gpt-2
     launchers:
@@ -43,3 +44,4 @@ models:
         metrics:
           - type: 'perplexity'
             name: 'Perplexity'
+            reference: 0.29

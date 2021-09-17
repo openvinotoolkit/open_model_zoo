@@ -24,3 +24,4 @@ models:
           - type: accuracy
             name: rank@1
             top_k: 1
+            reference: 0.847

@@ -21,3 +21,4 @@ models:
           - type: per_point_normed_error
             presenter: print_vector
           - type: normed_error
+            reference: 0.0705

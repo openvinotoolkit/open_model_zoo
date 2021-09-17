@@ -30,14 +30,17 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.4785
           - name: AP@0.5
             type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.5256
           - name: AP@0.5:0.05:95
             type: coco_precision
             max_detections: 100
             threshold: '0.5:0.05:0.95'
+            reference: 0.3182
 
   - name: yolox-tiny
     launchers:
@@ -65,11 +68,14 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.4785
           - name: AP@0.5
             type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.5256
           - name: AP@0.5:0.05:95
             type: coco_precision
             max_detections: 100
             threshold: '0.5:0.05:0.95'
+            reference: 0.3182

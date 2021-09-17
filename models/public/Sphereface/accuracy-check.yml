@@ -14,3 +14,7 @@ models:
           - type: resize
             dst_height: 112
             dst_width: 96
+        metrics:
+          - type: pairwise_accuracy_subsets
+            subset_number: 2
+            reference: 0.988321

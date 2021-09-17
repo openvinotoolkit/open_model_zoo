@@ -26,3 +26,14 @@ models:
           - type: dice_index
             median: True
             presenter: print_vector
+            reference:
+              mean:
+                overall tumor: 0.915
+                necrotic and non-enhancing tumor: 0.611
+                edema: 0.806
+                enhancing tumor: 0.794
+              median:
+                overall tumor: 0.927
+                necrotic and non-enhancing tumor: 0.645
+                edema: 0.835
+                enhancing tumor: 0.86

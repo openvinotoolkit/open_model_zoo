@@ -28,3 +28,5 @@ models:
             use_argmax: True
             ignore_label: 11
             presenter: print_vector
+            reference:
+              mean: 0.7195

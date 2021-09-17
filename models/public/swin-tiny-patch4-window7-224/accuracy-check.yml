@@ -25,9 +25,11 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.8138
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9551
 
   - name: swin-tiny-patch4-window7-224
 
@@ -52,6 +54,8 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.8138
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9551
