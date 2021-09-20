@@ -364,7 +364,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
         self.network.reshape(shapes)
         if self.dyn_input_layers:
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
+            self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -604,12 +604,12 @@ class DLSDKLauncher(Launcher):
         else:
             self.network = network
         if self.network is not None:
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
+            self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
 
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
+            self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
             if log:
                 self._print_input_output_info()
             if preprocessing:
@@ -623,7 +623,7 @@ class DLSDKLauncher(Launcher):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
-        self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
+        self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -633,7 +633,7 @@ class DLSDKLauncher(Launcher):
             )
 
     @staticmethod
-    def _get_dynamic_inputs(network):
+    def get_dynamic_inputs(network):
         def is_dynamic(data_info):
             if hasattr(data_info, 'is_dynamic'):
                 return data_info.is_dynamic

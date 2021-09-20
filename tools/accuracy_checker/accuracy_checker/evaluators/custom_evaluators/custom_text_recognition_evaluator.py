@@ -587,11 +587,13 @@ class RecognizerDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, suffix,
                  delayed_model_loading=False, inputs_mapping=None, outputs_mapping=None):
         super().__init__(network_info, launcher, suffix)
+        self.launcher = launcher
+        self.is_dynamic = False
         if not delayed_model_loading:
             model, weights = self.automatic_model_search(network_info)
             if weights is not None:
                 self.network = launcher.read_network(str(model), str(weights))
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.load_network(self.network, launcher)
             else:
                 self.exec_network = launcher.ie_core.import_network(str(model))
             self.print_input_output_info()
@@ -599,6 +601,8 @@ class RecognizerDLSDKModel(BaseModel):
         self.outputs_mapping = outputs_mapping
 
     def predict(self, inputs, identifiers=None):
+        if not self.is_dynamic and self.dynamic_inputs:
+            self.reshape_net({k: v.shape for k, v in inputs.items()})
         return self.exec_network.infer(inputs)
 
     def release(self):
@@ -608,7 +612,7 @@ class RecognizerDLSDKModel(BaseModel):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         if log:
@@ -616,7 +620,29 @@ class RecognizerDLSDKModel(BaseModel):
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
 
     def get_network(self):
         return self.network

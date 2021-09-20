@@ -328,17 +328,16 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
     def prepare_inputs(self, feed):
         feed_dict = super().prepare_inputs(feed)
         if (
-            self.input_mapping['text_encoder_outputs'] in self.dynamic_inputs or
-            feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
-            self.inputs[self.input_mapping['text_encoder_outputs']].input_data.shape
+                self.input_mapping['text_encoder_outputs'] in self.dynamic_inputs or
+                feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
+                self.inputs[self.input_mapping['text_encoder_outputs']].input_data.shape
         ):
             if not self.is_dynamic:
-                new_shapes = {
-                    input_name: feed_dict[input_name].shape
-                    if input_name in feed_dict else self.inputs[input_name].shape
-                    for input_name in self.inputs
-                }
-            self.reshape(new_shapes)
+                new_shapes = {}
+                for input_name in self.inputs:
+                    new_shapes[input_name] = (
+                        feed_dict[input_name].shape if input_name in feed_dict else self.inputs[input_name].shape)
+                self.reshape(new_shapes)
         return feed_dict
 
     def infer(self, feed_dict):
@@ -404,16 +403,15 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
             feed_dict = feed_dict_
 
         if (
-            self.input_mapping['encoder_outputs'] in self.dynamic_inputs or
-            feed_dict[self.input_mapping['encoder_outputs']].shape !=
-            self.inputs[self.input_mapping['encoder_outputs']].input_data.shape
+                self.input_mapping['encoder_outputs'] in self.dynamic_inputs or
+                feed_dict[self.input_mapping['encoder_outputs']].shape !=
+                self.inputs[self.input_mapping['encoder_outputs']].input_data.shape
         ):
             if not self.is_dynamic:
-                new_shapes = {
-                    input_name: feed_dict[input_name].shape
-                    if input_name in feed_dict else self.inputs[input_name].input_data.shape
-                    for input_name in self.inputs
-                }
+                new_shapes = {}
+                for input_name in self.inputs:
+                    new_shapes[input_name] = (
+                        feed_dict[input_name].shape if input_name in feed_dict else self.inputs[input_name].shape)
                 self.reshape(new_shapes)
 
         if len(feed_dict) != len(self.inputs):

@@ -505,7 +505,7 @@ class TTSDLSDKModel:
         if not self.is_dynamic:
             del self.exec_network
             self.network.reshape(input_shapes)
-            self.dynamic_inputs, self.partial_shapes = self.launcher._get_dynamic_inputs(self.network)
+            self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
             if not self.is_dynamic and self.dynamic_inputs:
                 self.exec_network = None
                 return
@@ -569,19 +569,17 @@ class TTSDLSDKModel:
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
             print_info('\tshape: {}\n'.format(
-                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name])
-            )
+                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
         print_info('{} - Output info'.format(self.default_model_suffix))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(
-                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name])
-            )
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
 
     def load_network(self, network, launcher):
         self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher._get_dynamic_inputs(self.network)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
         if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
             try:
                 self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)

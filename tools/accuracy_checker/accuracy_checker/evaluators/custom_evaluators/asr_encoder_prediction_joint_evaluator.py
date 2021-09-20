@@ -127,7 +127,18 @@ class BaseDLSDKModel:
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -164,7 +175,7 @@ class BaseDLSDKModel:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
@@ -402,7 +413,7 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
             input_info = self.exec_network.input_info[input_blob].input_data
         else:
             input_info = self.exec_network.inputs[input_blob]
-        if tuple(input_info.shape) != np.shape(input_data):
+        if input_blob in self.dynamic_inputs or tuple(input_info.shape) != np.shape(input_data):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
