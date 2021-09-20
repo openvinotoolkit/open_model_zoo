@@ -18,8 +18,8 @@ import sys
 import pytest
 
 from openvino.tools.accuracy_checker.launcher.model_conversion import (
-    exec_mo_binary, 
-    find_dlsdk_ir, 
+    exec_mo_binary,
+    find_dlsdk_ir,
     find_mo, prepare_args)
 from tests.common import mock_filesystem
 
