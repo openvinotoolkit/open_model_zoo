@@ -107,9 +107,13 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
                                       {1, channels, height, width},
                                       InferenceEngine::Layout::NHWC);
 
-    const auto& blob = isMatFloat ?
-        InferenceEngine::make_shared_blob<float>(tDesc, std::make_shared<SharedBlobAllocator>(mat)) :
-        InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
+    InferenceEngine::Blob::Ptr blob;
+    if (isMatFloat) {
+        blob = InferenceEngine::make_shared_blob<float>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
+    }
+    else {
+        blob = InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
+    }
 
     blob->allocate();
     return blob;
