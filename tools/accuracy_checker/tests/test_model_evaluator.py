@@ -16,7 +16,7 @@ limitations under the License.
 
 from unittest.mock import Mock, MagicMock
 
-from accuracy_checker.evaluators import ModelEvaluator
+from openvino.tools.accuracy_checker.evaluators import ModelEvaluator
 
 
 class TestModelEvaluator:
@@ -116,7 +116,7 @@ class TestModelEvaluator:
         assert not self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
 
         self.evaluator.process_dataset('path', None)
@@ -129,7 +129,7 @@ class TestModelEvaluator:
         assert self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_with_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = True
 
         self.evaluator.process_dataset('path', None)
@@ -229,7 +229,7 @@ class TestModelEvaluatorAsync:
         assert self.launcher.get_async_requests.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
 
         self.evaluator.process_dataset('path', None)

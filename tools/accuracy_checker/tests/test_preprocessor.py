@@ -19,8 +19,8 @@ import cv2
 import numpy as np
 import pytest
 
-from accuracy_checker.config import ConfigError
-from accuracy_checker.preprocessor import (
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.preprocessor import (
     Crop,
     Normalize,
     Preprocessor,
@@ -32,15 +32,15 @@ from accuracy_checker.preprocessor import (
     PointAligner,
     GeometricOperationMetadata
 )
-from accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
-from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
-from accuracy_checker.preprocessor.resize import _OpenCVResizer
-from accuracy_checker.data_readers import DataRepresentation
+from openvino.tools.accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
+from openvino.tools.accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
+from openvino.tools.accuracy_checker.preprocessor.resize import _OpenCVResizer
+from openvino.tools.accuracy_checker.data_readers import DataRepresentation
 
 
 class TestResize:
     def test_default_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('resize', {'type': 'resize', 'size': 200})
 
         input_mock = mocker.Mock()
@@ -53,7 +53,7 @@ class TestResize:
         )
 
     def test_custom_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
 
         resize = Preprocessor.provide(
             'resize', {'type': 'resize', 'dst_width': 126, 'dst_height': 128, 'interpolation': 'CUBIC'}
@@ -227,7 +227,7 @@ class TestResize:
 
 class TestAutoResize:
     def test_default_auto_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
         resize.set_input_shape({'data': (1, 3, 200, 200)})
 

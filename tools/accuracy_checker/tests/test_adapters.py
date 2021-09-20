@@ -17,8 +17,8 @@ limitations under the License.
 import numpy as np
 import pytest
 
-from accuracy_checker.adapters import SSDAdapter, Adapter
-from accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.adapters import SSDAdapter, Adapter
+from openvino.tools.accuracy_checker.config import ConfigError
 from .common import make_representation
 
 

@@ -17,9 +17,9 @@ limitations under the License.
 import pytest
 import re
 import numpy as np
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher.input_feeder import InputFeeder
-from accuracy_checker.data_readers import DataRepresentation
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.launcher.input_feeder import InputFeeder
+from openvino.tools.accuracy_checker.data_readers import DataRepresentation
 
 # InputInfo from openvino is needed here, but there is no appropriate API
 # to create InputInfo with specific shape, therefore lets use analog

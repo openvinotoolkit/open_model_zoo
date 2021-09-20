@@ -21,7 +21,7 @@ import sys
 import warnings
 import platform
 import subprocess # nosec - disable B404:import-subprocess check
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, find_namespace_packages
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
 from distutils.version import LooseVersion
@@ -83,7 +83,7 @@ def find_version(*path):
 
 is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
-version = find_version("accuracy_checker", "__init__.py")
+version = find_version("openvino/tools/accuracy_checker", "__init__.py")
 
 
 def prepare_requirements():
@@ -119,8 +119,8 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "accuracy_check=accuracy_checker.main:main",
-            "convert_annotation=accuracy_checker.annotation_converters.convert:main",
+            "accuracy_check=openvino.tools.accuracy_checker.main:main",
+            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main",
     ]},
     zip_safe=False,
     python_requires='>=3.5',

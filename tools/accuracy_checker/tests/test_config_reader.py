@@ -20,7 +20,7 @@ from argparse import Namespace
 
 import pytest
 from .common import mock_filesystem
-from accuracy_checker.config import ConfigReader, ConfigError
+from openvino.tools.accuracy_checker.config import ConfigReader, ConfigError
 
 
 class TestConfigReader:
@@ -77,7 +77,7 @@ class TestConfigReader:
             'datasets': self.global_datasets
         }
 
-        self.module = 'accuracy_checker.config.ConfigReader'
+        self.module = 'openvino.tools.accuracy_checker.config.ConfigReader'
         self.arguments = Namespace(**{
             'models': Path('models/'),
             'extensions': Path('extensions/'),
@@ -116,7 +116,7 @@ class TestConfigReader:
             'tf_obj_detection_api_pipeline_config_path': None, 'target_tags': None, 'cpu_extensions_mode': None,
             'aocl': None, 'deprecated_ir_v7': False, 'transformations_config_dir': None, 'model_attributes': None
         })
-        mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
+        mocker.patch('openvino.tools.accuracy_checker.utils.get_path', return_value=Path.cwd())
         mocker.patch('yaml.load', return_value=config)
         mocker.patch('pathlib.Path.open')
 

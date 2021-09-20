@@ -16,11 +16,11 @@ limitations under the License.
 
 import pytest
 import numpy as np
-from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.metrics import MetricsExecutor
+from openvino.tools.accuracy_checker.representation import (
     RegressionPrediction, RegressionAnnotation, FacialLandmarksAnnotation, FacialLandmarksPrediction
 )
-from accuracy_checker.presenters import EvaluationResult
+from openvino.tools.accuracy_checker.presenters import EvaluationResult
 
 
 class TestRegressionMetric:

@@ -18,21 +18,21 @@ import subprocess # nosec - disable B404:import-subprocess check
 
 import pytest
 
-pytest.importorskip('accuracy_checker.launcher.dlsdk_launcher')
+pytest.importorskip('openvino.tools.accuracy_checker.launcher.dlsdk_launcher')
 import os
 import cv2
 import numpy as np
 
 from pathlib import Path
 from unittest.mock import PropertyMock
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher import DLSDKLauncher
-from accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
-from accuracy_checker.launcher.launcher import create_launcher
-from accuracy_checker.launcher.model_conversion import FrameworkParameters
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.launcher import DLSDKLauncher
+from openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
+from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
+from openvino.tools.accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
-from accuracy_checker.data_readers import DataRepresentation
-from accuracy_checker.utils import contains_all
+from openvino.tools.accuracy_checker.data_readers import DataRepresentation
+from openvino.tools.accuracy_checker.utils import contains_all
 try:
     import ngraph as ng
 except ImportError:

@@ -93,7 +93,7 @@ Sometimes it can be useful to have opportunity to run the tool as script for deb
 For usage Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
 with following code:
 ```python
-from accuracy_checker.main import main
+from openvino.tools.accuracy_checker.main import main
 
 if __name__ == '__main__':
     main()
