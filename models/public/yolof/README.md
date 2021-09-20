@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLOF is a simple, fast, and efficient object detector without FPN. Model based on ["You Only Look One-level Feature"](https://arxiv.org/abs/2103.09460) paper. It was implemented in PyTorch\* framework. Model used `DarkNet-53` with Cross Stage Partial blocks as backbone. For details see [repository](https://github.com/megvii-model/YOLOF). This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes
+YOLOF is a simple, fast, and efficient object detector without FPN. Model based on ["You Only Look One-level Feature"](https://arxiv.org/abs/2103.09460) paper. It was implemented in PyTorch\* framework. Model used `DarkNet-53` with Cross Stage Partial blocks as backbone. For details see [repository](https://github.com/megvii-model/YOLOF). This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes. Mapping of class IDs to label names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ## Specification
 
@@ -72,13 +72,12 @@ For each case format is `B, N*84, Cx, Cy`, where
 - `Cx`, `Cy` - cell index
 - `N` - number of detection boxes for cell
 
-Detection box has format [`x`, `y`, `h`, `w`, `class_no_1`, ..., `class_no_80`], where:
+Detection box has format [`x`, `y`, `h`, `w`, `class_id_1`, ..., `class_id_80`], where:
 
 - (`x`, `y`) - raw coordinates of box center, multiply by corresponding anchors to get relative to the cell coordinates
 - `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence of each class
+- `class_id_1`,...,`class_id_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence of each class
 
-The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ## Download a Model and Convert it into Inference Engine Format
 
