@@ -15,34 +15,26 @@
 """
 import numpy as np
 
-from .model import Model
-from .utils import Detection, resize_image, load_labels, clip_detections
+from .detection_model import DetectionModel
+from .utils import Detection
 
 
-class DETR(Model):
-    def __init__(self, ie, model_path, labels=None, threshold=0.5):
-        super().__init__(ie, model_path)
+class DETR(DetectionModel):
+    def __init__(self, ie, model_path, resize_type='standard',
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path, resize_type=resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        self._check_io_number(1, 2)
+        self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        self.image_blob_name = next(iter(self.net.input_info))
-
-        assert len(self.net.outputs) == 2, "Expected 2 output blobs"
-        self.bboxes_blob_name, self.scores_blob_name = self._parse_outputs()
-
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
-
-        self.threshold = threshold
-
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        assert self.c == 3, "Expected 3-channel input"
-
-    def _parse_outputs(self):
+    def _get_outputs(self):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.net.outputs.items()
 
-        assert bboxes_layer.shape[1] == scores_layer.shape[1], "Expected the same dimension for boxes and scores"
+        if bboxes_layer.shape[1] != scores_layer.shape[1]:
+            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+                               .format(bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
             return bboxes_blob_name, scores_blob_name
@@ -52,29 +44,16 @@ class DETR(Model):
             raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
                                .format(*[output.shape for output in self.net.outputs]))
 
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = resize_image(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = self.input_transform(resized_image)
-        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
-
     def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs)
+        detections = self._resize_detections(detections, meta)
+        return detections
+
+    def _parse_outputs(self, outputs):
         boxes = outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0]
 
         x_mins, y_mins, x_maxs, y_maxs = self.box_cxcywh_to_xyxy(boxes)
-
-        x_mins = x_mins * meta['original_shape'][1]
-        y_mins = y_mins * meta['original_shape'][0]
-        x_maxs = x_maxs * meta['original_shape'][1]
-        y_maxs = y_maxs * meta['original_shape'][0]
 
         scores = self.softmax(scores)
         labels = np.argmax(scores[:, :-1], axis=-1)
@@ -84,7 +63,7 @@ class DETR(Model):
 
         detections = [Detection(*det) for det in zip(x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep],
                                                      det_scores[keep], labels[keep])]
-        return clip_detections(detections, meta['original_shape'])
+        return detections
 
     @staticmethod
     def box_cxcywh_to_xyxy(box):

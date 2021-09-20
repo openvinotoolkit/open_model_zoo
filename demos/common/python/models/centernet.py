@@ -18,45 +18,19 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from .model import Model
-from .utils import Detection, load_labels, clip_detections
+from .detection_model import DetectionModel
+from .utils import Detection, clip_detections
 
 
-class CenterNet(Model):
-    def __init__(self, ie, model_path, labels=None, threshold=0.3):
-        super().__init__(ie, model_path)
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        assert len(self.net.outputs) == 3, "Expected 3 output blobs"
-
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
-
-        self.image_blob_name = next(iter(self.net.input_info))
+class CenterNet(DetectionModel):
+    def __init__(self, ie, model_path, resize_type=None,
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path, resize_type=resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        self._check_io_number(1, 3)
         self._output_layer_names = sorted(self.net.outputs)
-
-        self._threshold = threshold
-
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        assert self.c == 3, "Expected 3-channel input"
-
-    def preprocess(self, inputs):
-        image = inputs
-        meta = {'original_shape': image.shape}
-
-        height, width = image.shape[0:2]
-        center = np.array([width / 2., height / 2.], dtype=np.float32)
-        scale = max(height, width)
-        trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
-        resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags=cv2.INTER_LINEAR)
-        resized_image = self.input_transform(resized_image)
-        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         heat = outputs[self._output_layer_names[0]][0]
@@ -83,7 +57,7 @@ class CenterNet(Model):
                                  xs + wh[..., 0:1] / 2,
                                  ys + wh[..., 1:2] / 2), axis=1)
         detections = np.concatenate((bboxes, scores, clses), axis=1)
-        mask = detections[..., 4] >= self._threshold
+        mask = detections[..., 4] >= self.threshold
         filtered_detections = detections[mask]
         scale = max(meta['original_shape'])
         center = np.array(meta['original_shape'][:2])/2.0

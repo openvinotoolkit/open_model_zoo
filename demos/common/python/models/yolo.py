@@ -18,7 +18,8 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections, nms
+from .detection_model import DetectionModel
+from .utils import Detection, clip_detections, load_labels, nms, resize_image
 
 ANCHORS = {
     'YOLOV3': [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
@@ -42,7 +43,7 @@ def permute_to_N_HWA_K(tensor, K):
     tensor = tensor.reshape(N, -1, K)
     return tensor
 
-class YOLO(Model):
+class YOLO(DetectionModel):
     class Params:
         # Magic numbers are copied from yolo samples
         def __init__(self, param, sides):
@@ -65,30 +66,22 @@ class YOLO(Model):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path)
-
+    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'fit_to_window_letterbox'
+        super().__init__(ie, model_path, resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
+        self._check_io_number(1, -1)
 
-        self.threshold = threshold
-        self.iou_threshold = iou_threshold
-
-        self.keep_aspect_ratio = keep_aspect_ratio
-        self.resize_image = resize_image_letterbox if self.keep_aspect_ratio else resize_image
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        self.image_blob_name = next(iter(self.net.input_info))
         if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-            self.nchw_shape = True
+            self.image_layout = 'NCHW'
         else:
             self.n, self.h, self.w, self.c = self.net.input_info[self.image_blob_name].input_data.shape
-            self.nchw_shape = False
+            self.image_layout = 'NHWС'
 
         self.yolo_layer_params = self._get_output_info()
 
@@ -106,21 +99,10 @@ class YOLO(Model):
             output_info[layer_name] = (shape, yolo_params)
         return output_info
 
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = self.resize_image(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        if self.nchw_shape:
-            resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-            resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        else:
-            resized_image = resized_image.reshape((self.n, self.h, self.w, self.c))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs, meta)
+        detections = self._resize_detections(detections, meta)
+        return detections
 
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold):
@@ -200,31 +182,8 @@ class YOLO(Model):
 
         return [det for det in detections if det.score > 0]
 
-    @staticmethod
-    def _resize_detections(detections, original_shape):
-        for detection in detections:
-            detection.xmin *= original_shape[0]
-            detection.xmax *= original_shape[0]
-            detection.ymin *= original_shape[1]
-            detection.ymax *= original_shape[1]
-        return detections
-
-    @staticmethod
-    def _resize_detections_letterbox(detections, original_shape, resized_shape):
-        scales = [x / y for x, y in zip(resized_shape, original_shape)]
-        scale = min(scales)
-        scales = (scale / scales[0], scale / scales[1])
-        offset = [0.5 * (1 - x) for x in scales]
-        for detection in detections:
-            detection.xmin = ((detection.xmin - offset[0]) / scales[0]) * original_shape[0]
-            detection.xmax = ((detection.xmax - offset[0]) / scales[0]) * original_shape[0]
-            detection.ymin = ((detection.ymin - offset[1]) / scales[1]) * original_shape[1]
-            detection.ymax = ((detection.ymax - offset[1]) / scales[1]) * original_shape[1]
-        return detections
-
-    def postprocess(self, outputs, meta):
+    def _parse_outputs(self, outputs, meta):
         detections = []
-
         for layer_name in self.yolo_layer_params.keys():
             out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
@@ -232,13 +191,7 @@ class YOLO(Model):
             detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
 
         detections = self._filter(detections, self.iou_threshold)
-        if self.keep_aspect_ratio:
-            detections = self._resize_detections_letterbox(detections, meta['original_shape'][1::-1],
-                                                           meta['resized_shape'][1::-1])
-        else:
-            detections = self._resize_detections(detections, meta['original_shape'][1::-1])
-
-        return clip_detections(detections, meta['original_shape'])
+        return detections
 
 
 class YoloV4(YOLO):
@@ -253,11 +206,13 @@ class YoloV4(YOLO):
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
-    def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5,
+    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
+                 labels=None, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
         self.anchors = anchors
         self.masks = masks
-        super().__init__(ie, model_path, labels, keep_aspect_ratio, threshold, iou_threshold)
+        super().__init__(ie, model_path, resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):
         if not self.anchors:
@@ -332,11 +287,8 @@ class YoloV4(YOLO):
 class YOLOX(Model):
     def __init__(self, ie, model_path, labels=None, threshold=0.5):
         super().__init__(ie, model_path)
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
+        self._check_io_number(1, 1)
         self.image_blob_name = next(iter(self.net.input_info))
-
-        assert len(self.net.outputs) == 1, "Expected 1 output blob"
         self.output_blob_name = next(iter(self.net.outputs))
 
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape

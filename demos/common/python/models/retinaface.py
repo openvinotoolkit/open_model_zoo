@@ -19,49 +19,61 @@ import re
 import numpy as np
 from itertools import product as product
 
-from .model import Model
-from .utils import DetectionWithLandmarks, Detection, resize_image, nms, clip_detections
+from .detection_model import DetectionModel
+from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
-class RetinaFace(Model):
-    def __init__(self, ie, model_path, threshold=0.5, mask_threshold=0.5):
-        super().__init__(ie, model_path)
+class RetinaFace(DetectionModel):
+    def __init__(self, ie, model_path, resize_type='standard',
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path, resize_type=resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        self._check_io_number(1, (6, 9, 12))
 
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        expected_outputs_count = (6, 9, 12)
-        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
-            ', '.join(str(count) for count in expected_outputs_count[:-1]), int(expected_outputs_count[-1]))
-
-        self.threshold = threshold
         self.detect_masks = len(self.net.outputs) == 12
         self.process_landmarks = len(self.net.outputs) > 6
-        self.mask_threshold = mask_threshold
+        self.mask_threshold = 0.5
         self.postprocessor = RetinaFacePostprocessor(detect_attributes=self.detect_masks,
                                                      process_landmarks=self.process_landmarks)
 
         self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
 
-        self.image_blob_name = next(iter(self.net.input_info))
         self._output_layer_names = self.net.outputs
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = resize_image(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
         outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold, self.mask_threshold)
+        return clip_detections(outputs, meta['original_shape'])
+
+
+class RetinaFacePyTorch(DetectionModel):
+    def __init__(self, ie, model_path, resize_type='standard',
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        if not resize_type:
+            resize_type = 'standard'
+        super().__init__(ie, model_path,  resize_type=resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        self._check_io_number(1, (2, 3))
+
+        self.process_landmarks = len(self.net.outputs) == 3
+        self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
+
+        self.labels = ['Face']
+
+        self._output_layer_names = self.net.outputs
+        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+
+    def postprocess(self, outputs, meta):
+        scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
+        scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
+
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
+                                                    meta['resized_shape'][:2])
         return clip_detections(outputs, meta['original_shape'])
 
 
@@ -303,46 +315,6 @@ class RetinaFacePostprocessor:
             pred[:, i, 1] = landmark_deltas[:, i, 1] * heights + ctr_y
 
         return pred
-
-
-class RetinaFacePyTorch(Model):
-    def __init__(self, ie, model_path, threshold=0.5):
-        super().__init__(ie, model_path)
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        expected_outputs_count = (2, 3)
-        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
-            expected_outputs_count[0], expected_outputs_count[1])
-
-        self.threshold = threshold
-        self.process_landmarks = len(self.net.outputs) == 3
-        self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
-
-        self.labels = ['Face']
-
-        self.image_blob_name = next(iter(self.net.input_info))
-        self._output_layer_names = self.net.outputs
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = resize_image(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = self.input_transform(resized_image)
-        resized_image = np.expand_dims(resized_image.transpose((2, 0, 1)), axis=0) # Change data layout from HWC to CHW
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
-
-    def postprocess(self, outputs, meta):
-        scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
-        scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
-
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
-                                                    meta['resized_shape'][:2])
-        return clip_detections(outputs, meta['original_shape'])
 
 
 class RetinaFacePyTorchPostprocessor:

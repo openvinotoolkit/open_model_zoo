@@ -27,7 +27,7 @@ from .retinaface import RetinaFace, RetinaFacePyTorch
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
-from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
+from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
 from .yolo import YOLO, YoloV4, YOLOX
 
 __all__ = [
@@ -44,6 +44,7 @@ __all__ = [
     'InputTransform',
     'OpenPose',
     'OutputTransform',
+    'RESIZE_TYPES',
     'RetinaFace',
     'RetinaFacePyTorch',
     'SalientObjectDetectionModel',
