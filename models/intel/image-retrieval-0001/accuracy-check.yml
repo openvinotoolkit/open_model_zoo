@@ -15,3 +15,4 @@ models:
             reference: 0.834
 
           - type: reid_map
+            reference: 0.855644

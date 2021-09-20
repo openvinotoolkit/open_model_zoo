@@ -31,12 +31,14 @@ models:
             ignore_difficult: True
             area_recall_constrain: 0.8
             area_precision_constrain: 0.4
+            reference: 0.73
 
           - type: focused_text_recall
             name: recall
             ignore_difficult: True
             area_recall_constrain: 0.8
             area_precision_constrain: 0.4
+            reference: 0.743379
 
           - type: focused_text_hmean
             name: hmean

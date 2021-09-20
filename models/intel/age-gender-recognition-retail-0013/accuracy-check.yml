@@ -29,6 +29,12 @@ models:
             label_map: age_label_map
             annotation_source: age_class_annotation
             prediction_source: age_classification
+            reference:
+              child: 0.007263
+              young: 0.853628
+              middle: 0.751714
+              old: 0.229058
+              mean: 0.460416
 
           - type: mae
             reference: 6.99

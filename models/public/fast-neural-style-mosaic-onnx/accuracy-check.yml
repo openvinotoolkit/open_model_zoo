@@ -27,3 +27,6 @@ models:
               mean: 12.03
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.496712
+              std: 0.137477

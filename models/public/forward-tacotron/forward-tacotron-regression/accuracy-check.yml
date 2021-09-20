@@ -15,3 +15,7 @@ models:
         metrics:
           - type: mae
             presenter: print_vector
+            reference:
+              mel:
+                mean: 1.134815
+                std: 0.048853

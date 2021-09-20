@@ -24,3 +24,10 @@ models:
         metrics:
           - type: mae
             presenter: print_vector
+            reference:
+              upsample_mels:
+                mean: 0
+                std: 0
+              aux:
+                mean: 0
+                std: 0
