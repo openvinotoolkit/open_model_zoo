@@ -47,19 +47,19 @@ def parse_partial_shape(partial_shape):
     if '[' not in preprocessed:
         return string_to_tuple(preprocessed, casting_type=int)
     shape_list = []
-    for elem in preprocessed.split('['):
-        if not elem:
-            continue
-        inside_elems = elem.split(']')
-        for internal_elem in inside_elems:
-            if internal_elem.startswith(','):
-                internal_elem = internal_elem[1:]
-            if not internal_elem:
-                continue
-            tuple_elem = string_to_tuple(internal_elem, casting_type=int)
-            if not tuple_elem:
-                continue
-            shape_list.append(tuple_elem[0] if len(tuple_elem) == 1 else tuple_elem)
+    s_pos = 0
+    e_pos = len(preprocessed)
+    while s_pos >= e_pos:
+        open_brace = preprocessed.find('[', s_pos, e_pos)
+        if open_brace == -1:
+            shape_list.extend(string_to_tuple(preprocessed[s_pos:], casting_type=int))
+            break
+        if open_brace != s_pos:
+            shape_list.extend(string_to_tuple(preprocessed[:open_brace], casting_type=int))
+        close_brace = preprocessed.find(']', open_brace, e_pos)
+        shape_range = preprocessed[open_brace + 1:close_brace]
+        shape_list.append(string_to_tuple(shape_range, casting_type=int))
+        s_pos = min(close_brace + 2, e_pos)
     return shape_list
 
 
