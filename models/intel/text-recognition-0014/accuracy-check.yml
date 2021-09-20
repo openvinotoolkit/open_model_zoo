@@ -67,7 +67,7 @@ models:
             dst_height: 32
         metrics:
           - type: character_recognition_accuracy
-            - reference: 0.8157
+            reference: 0.8157
 
       - name: ICDAR2015_recognition
         preprocessing:
