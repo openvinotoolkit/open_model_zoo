@@ -364,7 +364,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
         self.network.reshape(shapes)
         if self.dyn_input_layers:
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -604,12 +604,12 @@ class DLSDKLauncher(Launcher):
         else:
             self.network = network
         if self.network is not None:
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
 
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
-            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
             if log:
                 self._print_input_output_info()
             if preprocessing:
@@ -623,7 +623,7 @@ class DLSDKLauncher(Launcher):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
-        self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+        self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs(self.network)
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -632,7 +632,8 @@ class DLSDKLauncher(Launcher):
                 self.network, self._device, num_requests=self.num_requests
             )
 
-    def _get_dynamic_inputs(self):
+    @staticmethod
+    def _get_dynamic_inputs(network):
         def is_dynamic(data_info):
             if hasattr(data_info, 'is_dynamic'):
                 return data_info.is_dynamic
@@ -641,28 +642,28 @@ class DLSDKLauncher(Launcher):
         inputs_with_undefined_shapes = []
         outputs_with_undefined_shapes = []
         partial_shapes = {}
-        if self.network is None:
+        if network is None:
             return inputs_with_undefined_shapes, partial_shapes
 
-        for input_name, input_info in self.network.input_info.items():
+        for input_name, input_info in network.input_info.items():
             if is_dynamic(input_info.input_data):
                 inputs_with_undefined_shapes.append(input_name)
-        for out_name, out_info in self.network.outputs.items():
+        for out_name, out_info in network.outputs.items():
             if is_dynamic(out_info):
                 outputs_with_undefined_shapes.append(out_name)
         if (inputs_with_undefined_shapes or outputs_with_undefined_shapes) and not isinstance(ng, UnsupportedPackage):
             if hasattr(ng, 'partial_shape_from_data'):
                 for input_name in inputs_with_undefined_shapes:
                     partial_shapes[input_name] = parse_partial_shape(ng.partial_shape_from_data(
-                        self.network.input_info[input_name].input_data
+                        network.input_info[input_name].input_data
                     ))
                 for out_name in outputs_with_undefined_shapes:
                     partial_shapes[out_name] = parse_partial_shape(
-                        ng.partial_shape_from_data(self.network.outputs[out_name])
+                        ng.partial_shape_from_data(network.outputs[out_name])
                     )
 
             else:
-                ng_function = ng.function_from_cnn(self.network)
+                ng_function = ng.function_from_cnn(network)
                 for node in ng_function.get_ordered_ops():
                     node_name = node.get_friendly_name()
                     if node_name not in inputs_with_undefined_shapes:

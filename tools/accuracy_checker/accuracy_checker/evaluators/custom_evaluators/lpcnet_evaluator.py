@@ -164,15 +164,10 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
 
     def infer(self, feed_dict):
         feature_layer_shape = self.inputs[self.feature_input]
-        if feature_layer_shape != feed_dict[self.feature_input].shape:
+        if self.feature_input in self.dynamic_inputs or feature_layer_shape != feed_dict[self.feature_input].shape:
             input_shapes = {in_name: value.shape for in_name, value in feed_dict.items()}
-            self._reshape_input(input_shapes)
+            self.reshape(input_shapes)
         return self.exec_network.infer(feed_dict)
-
-    def _reshape_input(self, input_shapes):
-        del self.exec_network
-        self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
 
 class BaseONNXModel:
@@ -212,6 +207,7 @@ class BaseONNXModel:
             self.inference_session = launcher.create_inference_session(str(model))
             outputs = self.inference_session.get_outputs()
             self.output_names = [output.name for output in outputs]
+
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
     pass

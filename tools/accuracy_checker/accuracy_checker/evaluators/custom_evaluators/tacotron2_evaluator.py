@@ -328,23 +328,21 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
     def prepare_inputs(self, feed):
         feed_dict = super().prepare_inputs(feed)
         if (
-                feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
-                self.inputs[self.input_mapping['text_encoder_outputs']].input_data.shape
+            self.input_mapping['text_encoder_outputs'] in self.dynamic_inputs or
+            feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
+            self.inputs[self.input_mapping['text_encoder_outputs']].input_data.shape
         ):
-            new_shapes = {
-                input_name: feed_dict[input_name].shape if input_name in feed_dict else self.inputs[input_name].shape
-                for input_name in self.inputs
-            }
-            self._reshape_input(new_shapes)
+            if not self.is_dynamic:
+                new_shapes = {
+                    input_name: feed_dict[input_name].shape
+                    if input_name in feed_dict else self.inputs[input_name].shape
+                    for input_name in self.inputs
+                }
+            self.reshape(new_shapes)
         return feed_dict
 
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
-
-    def _reshape_input(self, input_shapes):
-        del self.exec_network
-        self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
 
 class BaseONNXModel:
@@ -404,16 +402,19 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
         if next(iter(self.input_mapping.values())) not in feed_dict:
             feed_dict_ = {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
             feed_dict = feed_dict_
+
         if (
-                feed_dict[self.input_mapping['encoder_outputs']].shape !=
-                self.inputs[self.input_mapping['encoder_outputs']].input_data.shape
+            self.input_mapping['encoder_outputs'] in self.dynamic_inputs or
+            feed_dict[self.input_mapping['encoder_outputs']].shape !=
+            self.inputs[self.input_mapping['encoder_outputs']].input_data.shape
         ):
-            new_shapes = {
-                input_name: feed_dict[input_name].shape
-                            if input_name in feed_dict else self.inputs[input_name].input_data.shape
-                for input_name in self.inputs
-            }
-            self._reshape_input(new_shapes)
+            if not self.is_dynamic:
+                new_shapes = {
+                    input_name: feed_dict[input_name].shape
+                    if input_name in feed_dict else self.inputs[input_name].input_data.shape
+                    for input_name in self.inputs
+                }
+                self.reshape(new_shapes)
 
         if len(feed_dict) != len(self.inputs):
             extra_inputs = set(self.inputs).difference(set(feed_dict))
@@ -425,11 +426,6 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
                     feed_dict[input_layer] = np.random.uniform(size=shape)
 
         return feed_dict
-
-    def _reshape_input(self, input_shapes):
-        del self.exec_network
-        self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
 
 class PostNetONNXModel(BaseONNXModel, PostNetModel):

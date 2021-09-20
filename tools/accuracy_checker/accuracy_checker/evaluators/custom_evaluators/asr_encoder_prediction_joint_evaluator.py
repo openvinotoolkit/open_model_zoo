@@ -84,7 +84,7 @@ class BaseDLSDKModel:
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
+            print_info('\tshape: {}\n'.format(input_info.shape))
         print_info('{} - Output info'.format(self.default_model_suffix))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
