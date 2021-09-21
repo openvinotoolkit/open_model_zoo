@@ -18,17 +18,19 @@ import logging as log
 import numpy as np
 from time import perf_counter
 import sys
-from os import path as osp
+from pathlib import Path
 
 from openvino.inference_engine import IECore, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, check_pressed_keys
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
 import monitors
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
+from model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -101,8 +103,7 @@ def main():
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    root_dir = osp.dirname(osp.abspath(__file__))
-
+    root_dir = Path(__file__).resolve().parent
     mouse = MouseClick()
     if not args.no_show:
         cv2.namedWindow(WINNAME)
@@ -115,11 +116,11 @@ def main():
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
     log.info('Reading model {}'.format(model_path))
     if args.m_instance_segmentation:
-        labels_file = osp.join(root_dir, 'coco_labels.txt')
+        labels_file = str(root_dir / 'coco_labels.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
                                 args.threshold, args.device, args.cpu_extension)
     elif args.m_semantic_segmentation:
-        labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
+        labels_file = str(root_dir / 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
     log.info('The model {} is loaded to {}'.format(model_path, args.device))

@@ -131,8 +131,8 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const Inference
         size_t idx = indicies[i];
         auto& prior = priors[idx];
         for (size_t j = 0; j < landmarksNum; j++) {
-            landmarks[i*landmarksNum + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
-            landmarks[i*landmarksNum + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
+            landmarks[i*landmarksNum + j].x = clamp(prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
+            landmarks[i*landmarksNum + j].y = clamp(prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height, 0.f, 1.f) * imgHeight;
         }
     }
     return landmarks;
@@ -184,10 +184,10 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
         float width = prior.width * exp(pRawBox->width * variance[1]);
         float height = prior.height * exp(pRawBox->height * variance[1]);
         rects.push_back(Rect{
-            (cX - width / 2) * imgWidth,
-            (cY - height / 2) * imgHeight,
-            (cX + width / 2) * imgWidth,
-            (cY + height / 2) * imgHeight });
+            clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
+            clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
+            clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
+            clamp(cY + height / 2, 0.f, 1.f) * imgHeight });
     }
 
     return rects;

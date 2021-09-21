@@ -29,6 +29,16 @@ models:
             mean: (123.675,116.28,103.53)
             std: (58.395,57.12,57.375)
 
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8369
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9671
+
   - name: efficientnet-b5-pytorch
 
     launchers:
@@ -51,3 +61,13 @@ models:
           - type: crop
             use_pillow: True
             size: 456
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8369
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9671

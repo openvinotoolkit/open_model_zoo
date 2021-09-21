@@ -26,6 +26,7 @@ import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from utils import crop
 from landmarks_detector import LandmarksDetector
@@ -36,8 +37,9 @@ from face_identifier import FaceIdentifier
 import monitors
 from helpers import resolution
 from images_capture import open_images_capture
-from models import OutputTransform
-from performance_metrics import PerformanceMetrics
+
+from model_api.models import OutputTransform
+from model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

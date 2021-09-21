@@ -255,10 +255,10 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
             slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
-                << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
+                << std::setw(4) << int(obj.x) << " | "
+                << std::setw(4) << int(obj.y) << " | "
+                << std::setw(4) << int(obj.x + obj.width) << " | "
+                << std::setw(4) << int(obj.y + obj.height)
                 << slog::endl;
         }
         outputTransform.scaleRect(obj);

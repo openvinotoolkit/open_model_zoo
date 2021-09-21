@@ -50,6 +50,7 @@ models:
             annotation_source: person_annotation
             prediction_source: class_agnostic_prediction
             label_map: person_label_map
+            reference: 0.8
 
           - type: detection_accuracy
             use_normalization: True
@@ -58,3 +59,4 @@ models:
             label_map: action_label_map
             fast_match: True
             ignore_label: 3
+            reference: 0.724

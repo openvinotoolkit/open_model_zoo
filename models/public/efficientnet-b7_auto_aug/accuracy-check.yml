@@ -22,6 +22,15 @@ models:
             size: 600
             use_pillow: True
             interpolation: BICUBIC
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8468
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9709
 
   - name: efficientnet-b7_auto_aug
 
@@ -39,3 +48,12 @@ models:
             size: 600
             use_pillow: True
             interpolation: BICUBIC
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8468
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9709

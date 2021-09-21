@@ -334,10 +334,10 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         bboxes[i].right /= scaleX;
         bboxes[i].bottom /= scaleY;
 
-        desc.x = bboxes[i].left;
-        desc.y = bboxes[i].top;
-        desc.width = bboxes[i].getWidth();
-        desc.height = bboxes[i].getHeight();
+        desc.x = clamp(bboxes[i].left, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth(), 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight(), 0.f, (float)imgHeight);
         //--- Default label 0 - Face. If detecting masks then labels would be 0 - No Mask, 1 - Mask
         desc.labelID = shouldDetectMasks ? (masks[i] > maskThreshold) : 0;
         desc.label = labels[desc.labelID];
@@ -345,8 +345,10 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 
         //--- Scaling landmarks coordinates
         for (size_t l = 0; l < ModelRetinaFace::LANDMARKS_NUM && shouldDetectLandmarks; ++l) {
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x /= scaleX;
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y /= scaleY;
+            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x =
+                clamp(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x / scaleX, 0.f, (float)imgWidth);
+            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y =
+                clamp(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y / scaleY, 0.f, (float)imgHeight);
             result->landmarks.push_back(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l]);
         }
     }

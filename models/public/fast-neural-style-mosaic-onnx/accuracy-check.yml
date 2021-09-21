@@ -19,3 +19,14 @@ models:
           - type: resize_style_transfer
             dst_width: 224
             dst_height: 224
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+            reference:
+              mean: 12.03
+          - type: ssim
+            presenter: print_vector
+            reference:
+              mean: 0.496712
+              std: 0.137477

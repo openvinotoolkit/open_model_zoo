@@ -24,12 +24,14 @@ import cv2
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from models import Deblurring
+from model_api.models import Deblurring
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+
 import monitors
-from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
 from helpers import log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)

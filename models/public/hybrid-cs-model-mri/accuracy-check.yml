@@ -1,5 +1,5 @@
 models:
-  - name: wnet_20
+  - name: hybrid-cs-model-mri
 
     launchers:
       - framework: dlsdk
@@ -16,3 +16,6 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 34.272884
+              std: 4.607115

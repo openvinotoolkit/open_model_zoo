@@ -290,10 +290,10 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
                 double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
 
                 DetectedObject obj;
-                obj.x = (float)std::max((x-width/2), 0.);
-                obj.y = (float)std::max((y-height/2), 0.);
-                obj.width = std::min((float)width, original_im_w - obj.x);
-                obj.height = std::min((float)height, original_im_h - obj.y);
+                obj.x = clamp(x-width/2, 0.f, (float)original_im_w);
+                obj.y = clamp(y-height/2, 0.f, (float)original_im_h);
+                obj.width = clamp(width, 0.f, (float)original_im_w) - obj.x;
+                obj.height = clamp(height, 0.f, (float)original_im_h) - obj.y;
 
                 for (int j = 0; j < region.classes; ++j) {
                     int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, region.coords + isObjConf + j);

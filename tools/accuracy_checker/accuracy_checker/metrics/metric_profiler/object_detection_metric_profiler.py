@@ -62,9 +62,9 @@ class DetectionProfiler(MetricProfiler):
         totat_pred_boxes, total_gt_boxes, total_gt_matches, total_pred_matches = 0, 0, 0, 0
         per_class_results = {}
         for idx, (class_id, class_result) in enumerate(metric_result.items()):
-            if not np.size(class_result['scores']):
+            if not np.size(class_result['gt']) + np.size(class_result['dt']):
                 continue
-            label_id = self.valid_labels[idx] if self.valid_labels else class_id
+            label_id = self.valid_labels[idx] if self.valid_labels and idx < len(self.valid_labels) else class_id
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
             gt = class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt']
             dt = class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt']
@@ -158,14 +158,16 @@ class DetectionProfiler(MetricProfiler):
             dt_matches += 1
             gt_matches += len(value[0])
 
+        precision = per_class_result['precision'][-1] if np.size(per_class_result['precision']) else -1
+        recall = per_class_result['recall'][-1] if np.size(per_class_result['recall']) else -1
         matching_result = {
             'prediction_matches': dt_matches,
             'annotation_matches': gt_matches,
-            'precision': per_class_result['precision'][-1],
-            'recall': per_class_result['recall'][-1]
+            'precision': precision if not np.isnan(precision) else -1,
+            'recall': recall if not np.isnan(recall) else -1
         }
         if 'ap' in per_class_result:
-            matching_result['ap'] = per_class_result['ap']
+            matching_result['ap'] = per_class_result['ap'] if not np.isnan(per_class_result['ap']) else -1
         return matching_result
 
     def register_metric(self, metric_name):
@@ -184,10 +186,10 @@ class DetectionListProfiler(DetectionProfiler):
         report = {'identifier': identifier, 'per_class_result': {}}
         per_class_results = {}
         totat_pred_boxes, total_gt_boxes, total_gt_matches, total_pred_matches = 0, 0, 0, 0
-        for idx, class_result in enumerate(metric_result):
-            if not np.size(class_result['scores']):
+        for idx, class_result in metric_result.items():
+            if not np.size(class_result['gt']) + np.size(class_result['dt']):
                 continue
-            label_id = self.valid_labels[idx] if self.valid_labels else idx
+            label_id = idx
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
             gt = class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt']
             dt = class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt']

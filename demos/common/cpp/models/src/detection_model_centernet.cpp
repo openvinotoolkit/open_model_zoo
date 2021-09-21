@@ -264,10 +264,10 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
-        desc.x = bboxes[i].left;
-        desc.y = bboxes[i].top;
-        desc.width = bboxes[i].getWidth();
-        desc.height = bboxes[i].getHeight();
+        desc.x = clamp(bboxes[i].left, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth(), 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight(), 0.f, (float)imgHeight);
 
         result->objects.push_back(desc);
     }
