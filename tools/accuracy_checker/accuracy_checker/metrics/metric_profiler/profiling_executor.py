@@ -52,8 +52,10 @@ def write_summary_result(result, meta, out_path, label_map):
         'result_scale': mean_meta.get('scale', 100), 'result_postfix': mean_meta.get('postfix', '%'),
         'metric_target': mean_meta['target']
     }
-    with open(str(out_path), 'r') as f:
-        out_dict = json.load(f)
+    out_dict = {}
+    if out_path.exists():
+        with open(str(out_path), 'r') as f:
+            out_dict = json.load(f)
 
     final_summary = out_dict.get('summary_result', {})
     final_summary.update(summary['summary_result'])
