@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from models.utils import resize_image
+from model_api.models.utils import resize_image
 
 
 def crop(frame, roi):

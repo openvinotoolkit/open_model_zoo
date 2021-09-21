@@ -187,6 +187,38 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
+### <a name="model_api_installation"></a>Python\* model API installation
+
+Python Model API with model wrappers and pipelines can be installed as a part of OpenVINO&trade; toolkit or from source.
+Installation from source is as follows:
+
+1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
+
+2. Build the wheel with the following command:
+
+```sh
+python <omz_dir>/demos/common/python/setup.py bdist_wheel
+```
+The built wheel should appear in the dist folder;
+Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
+
+3. Install the package in the clean environment with `--force-reinstall` key:
+```sh
+python -m pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
+```
+Alternatively, instead of building the wheel you can use the following command inside  `<omz_dir>/demos/common/python/` directory to build and install the package:
+```sh
+python -m pip install .
+```
+
+When the model API package is installed, you can import it as follows:
+```sh
+python -c "from openvino.model_zoo import model_api"
+```
+
+> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
+> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
+
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
