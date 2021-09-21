@@ -17,16 +17,15 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
-import sys
 import warnings
-import pickle # nosec - disable B403:import-pickle check
+import pickle  # nosec - disable B403:import-pickle check
 import numpy as np
 import yaml
 
 from .annotation_converters import (
     BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
 )
-from .metrics import  Metric
+from .metrics import Metric
 from .preprocessor import Preprocessor
 from .postprocessor import Postprocessor
 from .config import (
@@ -44,7 +43,7 @@ from .dependency import UnregisteredProviderException
 from .utils import (
     JSONDecoderWithAutoConversion,
     read_json, read_yaml,
-    get_path, contains_all, set_image_metadata, OrderedSet, contains_any
+    get_path, contains_all, set_image_metadata, OrderedSet, contains_any, RenameUnpickler
 )
 
 from .representation import (
@@ -236,7 +235,7 @@ class Dataset:
 
     @property
     def config(self):
-        return deepcopy(self._config) #read-only
+        return deepcopy(self._config)  # read-only
 
     def __len__(self):
         return len(self.data_provider)
@@ -360,28 +359,39 @@ class Dataset:
 
 
 def read_annotation(annotation_file: Path):
-    if 'accuracy_checker' not in sys.modules:
-        try:
-            # backward compatibility
-            import openvino.tools.accuracy_checker
-            sys.modules['accuracy_checker'] = openvino.tools.accuracy_checker
-        except ImportError:
-            pass
-    annotation_file = get_path(annotation_file)
+    annotation_file = Path(annotation_file)
 
     result = []
     with annotation_file.open('rb') as file:
+        loader = pickle.Unpickler(file) # nosec - disable B301:pickle check
         try:
-            first_obj = pickle.load(file) # nosec - disable B301:pickle check
+            first_obj = loader.load()
             if isinstance(first_obj, DatasetConversionInfo):
-                describe_cached_dataset(first_obj)
+                print(first_obj)
             else:
                 result.append(first_obj)
+        except ModuleNotFoundError:
+            loader = RenameUnpickler(
+                file,
+                {
+                    'accuracy_checker': 'openvino.tools.accuracy_checker',
+                    'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker':
+                        ['libs.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker',
+                         'openvino.tools.accuracy_checker']
+                })
+            try:
+                first_obj = loader.load()
+                if isinstance(first_obj, DatasetConversionInfo):
+                    print(first_obj)
+                else:
+                    result.append(first_obj)
+            except EOFError:
+                return result
         except EOFError:
             return result
         while True:
             try:
-                result.append(BaseRepresentation.load(file))
+                result.append(BaseRepresentation.load(file, loader))
             except EOFError:
                 break
 
@@ -533,7 +543,7 @@ class AnnotationProvider:
 
     @property
     def metadata(self):
-        return deepcopy(self._meta) #read-only
+        return deepcopy(self._meta)  # read-only
 
     @property
     def labels(self):
@@ -542,8 +552,8 @@ class AnnotationProvider:
 
 class DataProvider:
     def __init__(
-            self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
-            batch=None
+        self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
+        batch=None
     ):
         self.tag = tag
         self.data_reader = data_reader

@@ -308,6 +308,33 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
         return pickle.load(content, *args, **kwargs) # nosec - disable B301:pickle check
 
 
+class RenameUnpickler(pickle.Unpickler): # nosec - disable B301:pickle check
+    def __init__(self, file, renaming_mapping, *args, **kwargs):
+        self.renaming_mapping = renaming_mapping
+        super().__init__(file, *args, **kwargs)
+
+    def find_class(self, module, name):
+        renamed_module = module
+        for old_module, new_module in self.renaming_mapping.items():
+            if module.startswith(old_module):
+                if isinstance(new_module, list):
+                    for nm in new_module:
+                        try:
+                            renamed_module = module.replace(old_module, nm, 1)
+                            res = super().find_class(renamed_module, name)
+                            return res
+                        except ModuleNotFoundError:
+                            continue
+                else:
+                    renamed_module = module.replace(old_module, new_module, 1)
+        return super().find_class(renamed_module, name)
+
+
+def read_pickle_with_renaming(file: Union[str, Path], renaming_mapping, *args, **kwargs):
+    with get_path(file).open('rb') as content:
+        return RenameUnpickler(content, renaming_mapping, *args, **kwargs).load()
+
+
 def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
         return yaml.safe_load(content, *args, **kwargs)

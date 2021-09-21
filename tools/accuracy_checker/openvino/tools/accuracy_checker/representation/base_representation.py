@@ -24,8 +24,10 @@ class BaseRepresentation(abc.ABC):
         self.metadata = metadata or {}
 
     @classmethod
-    def load(cls, file):
-        obj = pickle.load(file) # nosec - disable B301:pickle check
+    def load(cls, file, loader=None):
+        if loader is None:
+            loader = pickle.Unpickler(file) # nosec - disable B301:pickle check
+        obj = loader.load()
 
         if cls != BaseRepresentation:
             assert isinstance(obj, cls)
