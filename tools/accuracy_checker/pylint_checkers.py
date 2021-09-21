@@ -129,8 +129,9 @@ class BadFunctionChecker(BaseChecker):
         func = node.func
         if hasattr(func, 'attrname'):
             return func.attrname
-        elif hasattr(func, 'name'):
+        if hasattr(func, 'name'):
             return func.name
+        return None
 
 
 def register(linter):

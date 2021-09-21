@@ -367,7 +367,7 @@ def read_annotation(annotation_file: Path):
         try:
             first_obj = loader.load()
             if isinstance(first_obj, DatasetConversionInfo):
-                print(first_obj)
+                describe_cached_dataset(first_obj)
             else:
                 result.append(first_obj)
         except ModuleNotFoundError:
@@ -382,7 +382,7 @@ def read_annotation(annotation_file: Path):
             try:
                 first_obj = loader.load()
                 if isinstance(first_obj, DatasetConversionInfo):
-                    print(first_obj)
+                    describe_cached_dataset(first_obj)
                 else:
                     result.append(first_obj)
             except EOFError:
@@ -552,8 +552,8 @@ class AnnotationProvider:
 
 class DataProvider:
     def __init__(
-        self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
-        batch=None
+            self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
+            batch=None
     ):
         self.tag = tag
         self.data_reader = data_reader

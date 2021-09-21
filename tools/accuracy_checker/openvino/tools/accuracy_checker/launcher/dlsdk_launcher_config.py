@@ -24,7 +24,7 @@ from ..logging import warning, print_info
 from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config, string_to_tuple
 
 try:
-    from openvino.inference_engine import known_plugins
+    from openvino.inference_engine import known_plugins  # pylint:disable=W9902
 except ImportError:
     known_plugins = []
 
