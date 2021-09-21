@@ -131,6 +131,29 @@ class NMS(Postprocessor):
 
         return keep
 
+class ClassAwareNMS(NMS):
+    __provider__ = 'class_aware_nms'
+
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
+
+    def process_image(self, annotations, predictions):
+        for prediction in predictions:
+            scores = get_scores(prediction)
+            labels = prediction.labels
+            keep = []
+            for label in np.unique(labels):
+                mask = np.flatnonzero(label == labels)
+                keep_i = self.nms(
+                    prediction.x_mins[mask], prediction.y_mins[mask], prediction.x_maxs[mask], prediction.y_maxs[mask],
+                    scores[mask], self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
+                )
+                keep.extend(mask[keep_i])
+
+            prediction.remove([box for box in range(prediction.size) if box not in keep])
+
+        return annotations, predictions
+
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
 

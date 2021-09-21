@@ -136,6 +136,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * architecture_type = yolov4
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+* architecture_type = yolof
+  - yolof
 * architecture_type = yolox
   - yolox-tiny
 
@@ -147,7 +149,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
+                                {ssd,yolo,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
                                 -i INPUT [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
                                 [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
                                 [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
@@ -161,8 +163,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}, --architecture_type {ssd,yolo,yolov4,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
-                        Required. Specify model' architecture type.
+  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.

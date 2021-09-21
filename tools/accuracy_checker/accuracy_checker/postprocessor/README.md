@@ -33,6 +33,7 @@ Accuracy Checker supports following set of postprocessors:
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
   * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.
+* `class_aware_nms` - class-aware non-maximum suppression, represented as nms, which applied to boxes belonging to specific class independently. The supported representations and parameters are the same as for the `nms`.
 * `diou_nms` - distance-IoU non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
 * `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.

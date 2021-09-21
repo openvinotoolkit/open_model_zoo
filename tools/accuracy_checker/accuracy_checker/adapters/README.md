@@ -67,6 +67,7 @@ AccuracyChecker supports following set of adapters:
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
   * `transpose` - transpose output tensor to specified format (optional).
+  * `multiple_labels` - allow multiple labels for detection objects (default `False`).
 * `yolo_v3_onnx` - converting output of ONNX Yolo V3 model to `DetectionPrediction`.
   * `boxes_out` - the name of layer with bounding boxes
   * `scores_out` - the name of output layer with detection scores for each class and box pair.
@@ -75,6 +76,7 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names.
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
 * `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
+* `yolof` - converting output of YOLOF model to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
 * `yolor` - converting output of YOLOR model to `DetectionPrediction` representation.
   * `output_name` - name of output layer.
   * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).

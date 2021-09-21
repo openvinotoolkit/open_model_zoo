@@ -1009,6 +1009,7 @@ PYTHON_DEMOS = [
             ),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
+            TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'detr'}),
                 [
