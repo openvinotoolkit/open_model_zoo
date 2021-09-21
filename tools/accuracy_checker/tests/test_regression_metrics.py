@@ -25,7 +25,7 @@ from openvino.tools.accuracy_checker.presenters import EvaluationResult
 
 class TestRegressionMetric:
     def setup_method(self):
-        self.module = 'accuracy_checker.metrics.metric_evaluator'
+        self.module = 'openvino.tools.accuracy_checker.metrics.metric_evaluator'
 
     def test_mae_with_zero_diff_between_annotation_and_prediction(self):
         annotations = [RegressionAnnotation('identifier', 3)]
