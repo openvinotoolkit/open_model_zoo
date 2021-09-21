@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-["A Hybrid Frequency-domain/Image-domain Deep
-Network for Magnetic Resonance Image
-Reconstruction"](https://arxiv.org/pdf/1810.12473.pdf) network. See original [project](https://github.com/rmsouza01/Hybrid-CS-Model-MRI) for the details.
+The `hybrid-cs-model-mri` model is a hybrid frequency-domain/image-domain deep network for Magnetic Resonance Image (MRI) reconstruction. The model is composed of a k-space network that essentially tries to fill missing k-space samples, an Inverse Discrete Fourier Transformation (IDFT) operation, and an image-domain network that acts as an anti-aliasing filter.
+
+More details provided in the [paper](https://arxiv.org/abs/1810.12473) and [repository](https://github.com/rmsouza01/Hybrid-CS-Model-MRI).
 
 ## Specification
 
@@ -14,7 +14,59 @@ Reconstruction"](https://arxiv.org/pdf/1810.12473.pdf) network. See original [pr
 | GFlops                          | 146.6037                                  |
 | MParams                         | 11.3313                                   |
 | Source framework                | TensorFlow\*                              |
-| Accuracy on [validation dataset](https://sites.google.com/view/calgary-campinas-dataset/home) | `35.772 (mean) +/- 3.214 (std) Db` (PSNR) |
+
+## Accuracy
+
+Accuracy metrics are obtained on [Calgary-Campinas Public Brain MR Dataset](https://sites.google.com/view/calgary-campinas-dataset/home).
+
+| Metric      | Value        |
+| ----------- | ------------ |
+| PSNR (mean) | 34.272884 dB |
+| PSNR (std)  | 4.607115 dB  |
+
+## Input
+
+### Original model
+
+MRI input, name - `input_1`, shape - `1, 2, 256, 256`, format - `B, C, H, W`, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+### Converted model
+
+MRI input, name - `input_1`, shape - `1, 2, 256, 256`, format - `B, C, H, W`, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+## Output
+
+### Original model
+
+The net outputs a blob with the name `StatefulPartitionedCall/model/conv2d_43/BiasAdd/Add` and shape `1, 1, 256, 256`, containing reconstructed MR image.
+
+### Converted model
+
+The net outputs a blob with the name `StatefulPartitionedCall/model/conv2d_43/BiasAdd/Add` and shape `1, 1, 256, 256`, containing reconstructed MR image.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 
