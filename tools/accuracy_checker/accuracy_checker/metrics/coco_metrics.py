@@ -70,6 +70,9 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         self.max_detections = self.get_value_from_config('max_detections')
         threshold = process_threshold(self.get_value_from_config('threshold'))
         self.thresholds = get_or_parse_value(threshold, COCO_THRESHOLDS)
+        if not self.dataset:
+            raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         if not self.dataset.metadata:
             raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
