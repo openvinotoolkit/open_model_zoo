@@ -204,7 +204,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/README.md) | 33.47Db | 691.1589 | 12.7773|
-| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 35.77Db | 146.6037 | 11.3313 |
+| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 34.27Db | 146.6037 | 11.3313 |
 
 ## Style Transfer
 
