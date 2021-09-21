@@ -167,3 +167,6 @@ models:
           - type: sisdr
             delay: 640
             presenter: print_vector
+            reference:
+              mean: 20.544
+              std: 5.13

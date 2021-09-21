@@ -1,6 +1,5 @@
 models:
-  - name: Sphereface
-
+  - name: face-reidentification-retail-0095
     launchers:
       - framework: dlsdk
         adapter: reid
@@ -12,9 +11,7 @@ models:
           - type: point_alignment
             size: 400
           - type: resize
-            dst_height: 112
-            dst_width: 96
+            size: 128
         metrics:
           - type: pairwise_accuracy_subsets
-            subset_number: 2
-            reference: 0.988321
+            reference: 0.9947

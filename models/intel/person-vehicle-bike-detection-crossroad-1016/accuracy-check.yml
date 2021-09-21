@@ -31,3 +31,8 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: False
+            reference:
+              mean: 0.6255
+              non-vehicle: 0.3618
+              person: 0.7363
+              vehicle: 0.7784

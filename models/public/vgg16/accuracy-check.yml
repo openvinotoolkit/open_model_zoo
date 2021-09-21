@@ -15,6 +15,15 @@ models:
             size: 224
           - type: normalization
             mean: 103.939, 116.779, 123.68
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.70968
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.89878
 
   - name: vgg16
     launchers:
@@ -29,3 +38,12 @@ models:
             aspect_ratio_scale: greater
           - type: crop
             size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.70968
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.89878

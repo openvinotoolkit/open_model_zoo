@@ -38,6 +38,15 @@ models:
             std: (0.229, 0.224, 0.225)
 
             # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.76128
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.92858
 
   - name: resnet-50-pytorch
 
@@ -62,3 +71,12 @@ models:
           # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
           - type: rgb_to_bgr
           # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.76128
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.92858

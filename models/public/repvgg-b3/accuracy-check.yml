@@ -27,9 +27,11 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.805
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9525
 
   - name: repvgg-b3
 
@@ -56,6 +58,8 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.805
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9525

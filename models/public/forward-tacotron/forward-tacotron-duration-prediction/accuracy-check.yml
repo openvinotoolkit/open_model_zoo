@@ -12,3 +12,8 @@ models:
         metrics:
           - type: mae
             presenter: print_vector
+            reference:
+              embeddings@mean: 0
+              embeddings@std: 0
+              duration@mean: 0
+              duration@std: 0

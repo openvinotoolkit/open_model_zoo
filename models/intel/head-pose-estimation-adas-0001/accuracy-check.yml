@@ -18,15 +18,24 @@ models:
             presenter: print_vector
             annotation_source: yaw
             prediction_source: angle_yaw
+            reference:
+              mean: 5.4
+              std: 4.4
 
           - name: pitch_mae
             type: mae
             presenter: print_vector
             annotation_source: pitch
             prediction_source: angle_pitch
+            reference:
+              mean: 5.5
+              std: 5.3
 
           - name: roll_mae
             type: mae
             presenter: print_vector
             annotation_source: roll
             prediction_source: angle_roll
+            reference:
+              mean: 4.6
+              std: 5.6

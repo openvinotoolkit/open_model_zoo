@@ -15,6 +15,15 @@ models:
           - type: normalization
             mean: 103.94, 116.78, 123.68
             std: 58.8235294
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.69496
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.89224
 
   - name: mobilenet-v1-1.0-224
     launchers:
@@ -28,3 +37,12 @@ models:
             size: 256
           - type: crop
             size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.69496
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.89224

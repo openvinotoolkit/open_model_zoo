@@ -22,6 +22,7 @@ models:
             std: 255
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9034
 
       - name: SVT_recognition
         preprocessing:
@@ -32,6 +33,7 @@ models:
             std: 255
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8547
 
       - name: IIIT5K
         preprocessing:
@@ -42,6 +44,7 @@ models:
             std: 255
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8707
 
       - name: ICDAR2015_recognition
         preprocessing:
@@ -52,6 +55,7 @@ models:
             std: 255
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.7504
 
       - name: ICDAR03_recognition
         preprocessing:
@@ -62,6 +66,7 @@ models:
             std: 255
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9343
 
   - name: vitstr-small-patch16-224
     launchers:
@@ -83,6 +88,7 @@ models:
             size: 224
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9034
 
       - name: SVT_recognition
         preprocessing:
@@ -91,6 +97,7 @@ models:
             size: 224
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8547
 
       - name: IIIT5K
         preprocessing:
@@ -99,6 +106,7 @@ models:
             size: 224
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8707
 
       - name: ICDAR2015_recognition
         preprocessing:
@@ -107,6 +115,7 @@ models:
             size: 224
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.7504
 
       - name: ICDAR03_recognition
         preprocessing:
@@ -115,3 +124,4 @@ models:
             size: 224
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9343

@@ -16,7 +16,15 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 299
-
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8021
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.952
 
   - name: googlenet-v4-tf
     launchers:
@@ -30,3 +38,12 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 299
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8021
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.952

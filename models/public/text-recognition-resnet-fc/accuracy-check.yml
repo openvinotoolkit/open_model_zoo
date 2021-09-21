@@ -55,6 +55,7 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8883
 
       - name: SVT_recognition
         preprocessing:
@@ -65,6 +66,7 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8856
 
       - name: ICDAR2015_recognition
         preprocessing:
@@ -75,6 +77,7 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.7758
 
       - name: ICDAR03_recognition
         preprocessing:
@@ -85,6 +88,7 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            refernce: 0.9296
 
       - name: ICDAR2013
         preprocessing:
@@ -94,3 +98,4 @@ models:
             dst_height: 32
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9044
