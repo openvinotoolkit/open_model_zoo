@@ -12,6 +12,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0015/README.md) for details.
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
+* `vitstr-small-patch16-224`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss <path to vocab file>/.vocab.txt` (supported symbols set), `-dt simple` (to specify decoder type), `-start_index 1` (to process output from provided index) and `-pad " "` (to use specific pad symbol).
 
 ## How It Works
 
@@ -52,6 +53,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * decoder_type = simple
   * text-recognition-0015
   * text-recognition-resnet-fc
+  * vitstr-small-patch16-224
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -73,7 +75,7 @@ Options:
     -m_td "<path>"                 Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"                 Required. Path to the Text Recognition model (.xml) file.
     -dt "<type>"                   Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders. Default is 'ctc'
-    -m_tr_ss "<value>"             Optional. Symbol set for the Text Recognition model.
+    -m_tr_ss "<value>" or "<path>" Optional. String or vocabulary file with symbol set for the Text Recognition model.
     -tr_pt_first                   Optional. Specifies if pad token is the first symbol in the alphabet. Default is false
     -lower                         Optional. Set this flag to convert recognized text to lowercase
     -out_enc_hidden_name "<value>" Optional. Name of the text recognition model encoder output hidden blob
@@ -98,6 +100,8 @@ Options:
     -r                             Optional. Output Inference results as raw values.
     -u                             Optional. List of monitors to show initially.
     -b                             Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
+    -start_index                   Optional. Start index for Simple decoder. Default value is 0.
+    -pad                           Optional. Pad symbol. Default value is '#'.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

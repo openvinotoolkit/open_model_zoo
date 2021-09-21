@@ -21,7 +21,7 @@ from ..config import PathField, ConfigError, StringField, NumberField, ListField
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters, convert_model
 from ..logging import warning
-from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config
+from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config, string_to_tuple
 
 try:
     from openvino.inference_engine import known_plugins
@@ -39,6 +39,10 @@ FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
+
+
+def parse_partial_shape(partial_shape):
+    return string_to_tuple(str(partial_shape).replace('{', '(').replace('}', ')').replace('?', '-1'), casting_type=int)
 
 
 class CPUExtensionPathField(PathField):

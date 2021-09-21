@@ -84,18 +84,18 @@ class OutputTransform:
 
 
 class InputTransform:
-    def __init__(self, reverse_input_channels, mean_values, scale_values):
-        self.is_trivial = not (reverse_input_channels or mean_values or scale_values)
+    def __init__(self, reverse_input_channels=False, mean_values=None, scale_values=None):
         self.reverse_input_channels = reverse_input_channels
-        self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else np.array([0., 0., 0.])
-        self.scale_values = np.array(scale_values, dtype=np.float32) if scale_values else np.array([1., 1., 1.])
+        self.is_trivial = not (reverse_input_channels or mean_values or scale_values)
+        self.means = np.array(mean_values, dtype=np.float32) if mean_values else np.array([0., 0., 0.])
+        self.std_scales = np.array(scale_values, dtype=np.float32) if scale_values else np.array([1., 1., 1.])
 
     def __call__(self, inputs):
         if self.is_trivial:
             return inputs
         if self.reverse_input_channels:
             inputs = cv2.cvtColor(inputs, cv2.COLOR_BGR2RGB)
-        return (inputs - self.mean_values) / self.scale_values
+        return (inputs - self.means) / self.std_scales
 
 def load_labels(label_file):
     with open(label_file, 'r') as f:
@@ -113,6 +113,18 @@ def resize_image(image, size, keep_aspect_ratio=False):
     return resized_frame
 
 
+def resize_image_with_aspect(image, size):
+    return resize_image(image, size, keep_aspect_ratio=True)
+
+
+def pad_image(image, size):
+    h, w = image.shape[:2]
+    if h != size[1] or w != size[0]:
+        image = np.pad(image, ((0, size[1] - h), (0, size[0] - w), (0, 0)),
+                               mode='constant', constant_values=0)
+    return image
+
+
 def resize_image_letterbox(image, size):
     ih, iw = image.shape[0:2]
     w, h = size
@@ -125,6 +137,13 @@ def resize_image_letterbox(image, size):
     resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
                            mode='constant', constant_values=128)
     return resized_image
+
+
+RESIZE_TYPES = {
+    'standard': resize_image,
+    'fit_to_window': resize_image_with_aspect,
+    'fit_to_window_letterbox': resize_image_letterbox,
+}
 
 
 def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=None):

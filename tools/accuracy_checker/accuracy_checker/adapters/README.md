@@ -266,14 +266,19 @@ AccuracyChecker supports following set of adapters:
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
   * `logits_output` - Name of the output layer of the network to use in decoder
-  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
+  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
+  * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
+  * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
-  * `eos_label` - label which should finish decoding
-  * `custom_label_map` - label map (if not provided by the dataset meta)
+  * `eos_label` - label which should finish decoding (Optional, default `[s]`).
+  * `start_label` - label which should start decoding (Optional).
+  * `custom_label_map` - label map (if not provided by the dataset meta).
   * `start_index` - start index in predicted data (Optional, default 0).
   * `do_lower` - allows converting predicted data to lower case (Optional, default False).
+  * `vocabulary_file` - file with decoding labels (Optional).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
 * `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
 * `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.

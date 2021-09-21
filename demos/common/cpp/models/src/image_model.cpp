@@ -15,7 +15,6 @@
 */
 
 #include "models/image_model.h"
-#include <utils/ocv_common.hpp>
 
 ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     ModelBase(modelFileName),
@@ -23,7 +22,8 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
 }
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-    auto& img = inputData.asRef<ImageInputData>().inputImage;
+    const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
+    const auto& img = inputTransform(origImg);
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
@@ -33,6 +33,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
     }
     /* Resize and copy data from the image to the input blob */
     InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(img, frameBlob);
+    matToBlob(img, frameBlob);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }

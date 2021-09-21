@@ -150,19 +150,14 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
                                 {ssd,yolo,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
-                                -i INPUT [-d DEVICE] [--labels LABELS]
-                                [-t PROB_THRESHOLD] [--keep_aspect_ratio]
-                                [--input_size INPUT_SIZE INPUT_SIZE]
-                                [-nireq NUM_INFER_REQUESTS]
-                                [-nstreams NUM_STREAMS]
-                                [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
-                                [-limit OUTPUT_LIMIT] [--no_show]
-                                [--output_resolution OUTPUT_RESOLUTION]
-                                [-u UTILIZATION_MONITORS]
-                                [--reverse_input_channels REVERSE_CHANNELS]
-                                [--mean_values MEAN_VALUES]
-                                [--scale_values SCALE_VALUES]
-                                [-r]
+                                -i INPUT [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
+                                [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
+                                [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
+                                [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+                                [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
+                                [--reverse_input_channels] [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
+                                [--scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -183,7 +178,8 @@ Common model options:
   -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
                         Optional. Probability threshold for detections
                         filtering.
-  --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
+  --resize_type {standard,fit_to_window,fit_to_window_letterbox}
+                        Optional. A resize type for model preprocess. By defauld used model predefined type.
   --input_size INPUT_SIZE INPUT_SIZE
                         Optional. The first image size used for CTPN model
                         reshaping. Default: 600 600. Note that submitted
@@ -230,11 +226,11 @@ Input transform options:
                         BGR to RGB.
   --mean_values MEAN_VALUES
                         Optional. Normalize input by subtracting the mean
-                        values per channel. Example: 255 255 255
+                        values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES
                         Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
-                        Example: 255 255 255
+                        Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message
