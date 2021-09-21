@@ -284,6 +284,11 @@ class YOLOF(YOLO):
             self.anchors = anchors
             self.use_input_size = True
 
+    def __init__(self, ie, model_path, resize_type='standard',
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        super().__init__(ie, model_path, resize_type,
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+
     def _get_output_info(self):
         anchors = ANCHORS['YOLOF']
 
