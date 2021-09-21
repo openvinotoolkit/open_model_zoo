@@ -21,7 +21,7 @@ from .segmentation import SegmentationModel
 
 class MonoDepthModel(SegmentationModel):
     def postprocess(self, outputs, meta):
-        result = outputs[self.out_blob_name].squeeze()
+        result = outputs[self.output_blob_name].squeeze()
         input_image_height = meta['original_shape'][0]
         input_image_width = meta['original_shape'][1]
 
