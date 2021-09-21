@@ -470,7 +470,6 @@ class Resize(Preprocessor):
 
 class AutoResize(Preprocessor):
     __provider__ = 'auto_resize'
-    shape_modificator = True
     _dynamic_shapes = False
 
     def __init__(self, config, name=None):
@@ -539,8 +538,16 @@ class AutoResize(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    @property
+    def shape_modificator(self):
+        if self.dst_height and self.dst_width:
+            return True
+        return False
+
     def calculate_out_single_shape(self, data_shape):
-        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        if self.dst_height and self.dst_height:
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        return data_shape
 
     def calculate_out_shape(self, data_shape):
         return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

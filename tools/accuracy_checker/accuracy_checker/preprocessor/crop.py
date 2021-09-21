@@ -259,6 +259,7 @@ class Crop(Preprocessor):
 class CropRect(Preprocessor):
     __provider__ = 'crop_rect'
     shape_modificator = True
+    dynamic_result_shapes = True
 
     def process(self, image, annotation_meta=None):
         if not annotation_meta:
@@ -282,6 +283,13 @@ class CropRect(Preprocessor):
         image.data = image.data[int(start_height):int(height), int(start_width):int(width)]
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_rect', {}))
         return image
+
+    @staticmethod
+    def calculate_out_single_shape(data_shape):
+        return finalize_image_shape(-1, -1, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class ExtendAroundRect(Preprocessor):

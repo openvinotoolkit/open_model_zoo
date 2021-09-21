@@ -86,7 +86,6 @@ class DLSDKLauncher(Launcher):
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
         self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
-        self.ie_core.register_plugin("templatePlugin", "TEMPLATE")
         self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
             'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
