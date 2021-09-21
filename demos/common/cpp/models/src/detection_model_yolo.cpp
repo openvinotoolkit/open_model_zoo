@@ -278,16 +278,16 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
             //--- Preliminary check for confidence threshold conformance
             if (scale >= confidenceThreshold){
                 //--- Calculating scaled region's coordinates
-                double x, y;
+                float x, y;
                 if (yoloVersion == YOLOF) {
-                    x = (static_cast<float>(col) / sideW + output_blob[box_index + 0 * entriesNum] * region.anchors[2 * n] / scaleW) * original_im_w;
-                    y = (static_cast<float>(row) / sideH + output_blob[box_index + 1 * entriesNum] * region.anchors[2 * n + 1] / scaleH) * original_im_h;
+                    x = ((float)col / sideW + output_blob[box_index + 0 * entriesNum] * region.anchors[2 * n] / scaleW) * original_im_w;
+                    y = ((float)row / sideH + output_blob[box_index + 1 * entriesNum] * region.anchors[2 * n + 1] / scaleH) * original_im_h;
                 } else {
-                    x = (col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
-                    y = (row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
+                    x = (float)(col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
+                    y = (float)(row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
                 }
-                double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
-                double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
+                float height = (float)std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
+                float width = (float)std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
 
                 DetectedObject obj;
                 obj.x = clamp(x-width/2, 0.f, (float)original_im_w);
