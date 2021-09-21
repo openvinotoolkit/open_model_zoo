@@ -17,6 +17,7 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
+import sys
 import warnings
 import pickle # nosec - disable B403:import-pickle check
 import numpy as np
@@ -359,6 +360,13 @@ class Dataset:
 
 
 def read_annotation(annotation_file: Path):
+    if 'accuracy_checker' not in sys.modules:
+        try:
+            # backward compatibility
+            import openvino.tools.accuracy_checker
+            sys.modules['accuracy_checker'] = openvino.tools.accuracy_checker
+        except ImportError:
+            pass
     annotation_file = get_path(annotation_file)
 
     result = []
