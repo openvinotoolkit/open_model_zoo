@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "utils/common.hpp"
+#include "utils/shared_blob_allocator.h"
 
 
 /**
@@ -105,10 +106,17 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
     InferenceEngine::TensorDesc tDesc(precision,
                                       {1, channels, height, width},
                                       InferenceEngine::Layout::NHWC);
+
+    InferenceEngine::Blob::Ptr blob;
     if (isMatFloat) {
-        return InferenceEngine::make_shared_blob<float>(tDesc, (float*)mat.data);
+        blob = InferenceEngine::make_shared_blob<float>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
     }
-    return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
+    else {
+        blob = InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
+    }
+
+    blob->allocate();
+    return blob;
 }
 
 /**
