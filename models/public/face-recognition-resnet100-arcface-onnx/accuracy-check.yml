@@ -13,3 +13,4 @@ models:
 
         metrics:
           - type: pairwise_accuracy_subsets
+            reference: 0.9968

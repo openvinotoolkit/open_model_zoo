@@ -36,5 +36,7 @@ models:
         metrics:
           - name: 'F1'
             type: 'f1'
+            reference: 0.914
           - name: 'EM'
             type: 'exact_match'
+            reference: 0.844

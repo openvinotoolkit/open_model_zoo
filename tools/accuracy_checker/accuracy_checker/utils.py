@@ -96,6 +96,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace('(', '')
     processed = processed.replace(')', '')
     processed = processed.split(',')
+    processed = filter(lambda x: x, processed)
 
     return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
 
@@ -276,15 +277,21 @@ def is_path(data):
     return isinstance(data, (Path, str))
 
 
-def read_txt(file: Union[str, Path], sep='\n', **kwargs):
+def read_txt(file: Union[str, Path], sep='\n', ignore_space=False, **kwargs):
     def is_empty(string):
-        return not string or string.isspace()
+        emptyness = not string
+        if not ignore_space:
+            emptyness = emptyness or string.isspace()
+
+        return emptyness
 
     with get_path(file).open(**kwargs) as content:
         content = content.read().split(sep)
         content = list(filter(lambda string: not is_empty(string), content))
 
-        return list(map(str.strip, content))
+        if not ignore_space:
+            content = list(map(str.strip, content))
+        return content
 
 
 def read_xml(file: Union[str, Path], *args, **kwargs):
@@ -410,6 +417,13 @@ def add_input_shape_to_meta(meta, shape):
 
 
 def set_image_metadata(annotation, images):
+    image_sizes = get_data_shapes(images)
+    annotation.set_image_size(image_sizes)
+
+    return annotation, images
+
+
+def get_data_shapes(images):
     image_sizes = []
     data = images.data
     if not isinstance(data, list):
@@ -417,9 +431,22 @@ def set_image_metadata(annotation, images):
     for image in data:
         data_shape = np.shape(image) if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
-    annotation.set_image_size(image_sizes)
+    return image_sizes
 
-    return annotation, images
+
+def is_image(data_shape):
+    if len(data_shape) not in [2, 3]:
+        return False
+    if len(data_shape) == 3:
+        if data_shape[-1] not in [1, 3, 4]:
+            return False
+    return True
+
+
+def finalize_image_shape(dst_h, dst_w, initial_shape):
+    if len(initial_shape) == 2:
+        return (dst_h, dst_w)
+    return tuple([dst_h, dst_w] + list(initial_shape[2:]))
 
 
 def find_nearest(array, value, mode=None):

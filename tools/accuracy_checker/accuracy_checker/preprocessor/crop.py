@@ -22,7 +22,7 @@ from ..config import NumberField, BoolField, StringField, ConfigError
 from ..logging import warning
 from .preprocessor import Preprocessor
 from .geometric_transformations import GeometricOperationMetadata
-from ..utils import get_size_from_config, get_size_3d_from_config
+from ..utils import get_size_from_config, get_size_3d_from_config, is_image, finalize_image_shape
 
 
 class CornerCrop(Preprocessor):
@@ -74,6 +74,13 @@ class CornerCrop(Preprocessor):
     @staticmethod
     def process_data(data, dst_height, dst_width, corner_type):
         height, width = data.shape[:2]
+        new_height, new_width, start_height, start_width = CornerCrop.get_roi(
+            height, width, dst_height, dst_width, corner_type)
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+
+    @staticmethod
+    def get_roi(height, width, dst_height, dst_width, corner_type):
         if corner_type == 'top_left':
             new_height = min(height, dst_height)
             start_height = 0
@@ -110,8 +117,16 @@ class CornerCrop(Preprocessor):
             else:
                 start_width = 0
                 new_width = width
+        return new_height, new_width, start_height, start_width
 
-        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+    def calculate_out_single_shape(self, data_shape):
+        height, width, _, _ = self.get_roi(
+            data_shape[0], data_shape[1], self.dst_height, self.dst_width, self.corner_type
+        )
+        return finalize_image_shape(height, width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class Crop(Preprocessor):
@@ -189,7 +204,7 @@ class Crop(Preprocessor):
             new_width = dst_width
         elif max_square:
             new_height = min(height, width)
-            new_width = min(height, width)
+            new_width = new_height
         else:
             new_height = int(height * central_fraction)
             new_width = int(width * central_fraction)
@@ -223,10 +238,28 @@ class Crop(Preprocessor):
             return True
         return False
 
+    def calculate_out_single_shape(self, data_shape):
+        height, width = data_shape[:2]
+        if self.dynamic_result_shape and (height == -1 or width == -1):
+            return data_shape
+        if self.max_square:
+            side = min(height, width)
+            return finalize_image_shape(side, side, data_shape)
+        if self.central_fraction:
+            new_height = int(height * self.central_fraction)
+            new_width = int(width * self.central_fraction)
+            return finalize_image_shape(new_height, new_width, data_shape)
+
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 class CropRect(Preprocessor):
     __provider__ = 'crop_rect'
     shape_modificator = True
+    dynamic_result_shapes = True
 
     def process(self, image, annotation_meta=None):
         if not annotation_meta:
@@ -250,6 +283,13 @@ class CropRect(Preprocessor):
         image.data = image.data[int(start_height):int(height), int(start_width):int(width)]
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_rect', {}))
         return image
+
+    @staticmethod
+    def calculate_out_single_shape(data_shape):
+        return finalize_image_shape(-1, -1, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class ExtendAroundRect(Preprocessor):
@@ -410,16 +450,16 @@ class TransformedCropWithAutoScale(Preprocessor):
         return parameters
 
     def configure(self):
-        self.input_height, self.input_width = get_size_from_config(self.config)
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
         self.stride = self.get_value_from_config('stride')
 
     def process(self, image, annotation_meta=None):
         data = image.data
         center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
-        trans = self.get_transformation_matrix(center, scale, [self.input_width, self.input_height])
-        rev_trans = self.get_transformation_matrix(center, scale, [self.input_width // self.stride,
-                                                                   self.input_height // self.stride], key=1)
-        data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
+        trans = self.get_transformation_matrix(center, scale, [self.dst_width, self.dst_height])
+        rev_trans = self.get_transformation_matrix(center, scale, [self.dst_width // self.stride,
+                                                                   self.dst_height // self.stride], key=1)
+        data = cv2.warpAffine(data, trans, (self.dst_width, self.dst_height), flags=cv2.INTER_LINEAR)
         image.data = data
         image.metadata.setdefault('rev_trans', rev_trans)
         return image
@@ -464,6 +504,12 @@ class TransformedCropWithAutoScale(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class CandidateCrop(Preprocessor):
@@ -601,6 +647,12 @@ class CropOrPad(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 class CropWithPadSize(Preprocessor):
     __provider__ = 'crop_image_with_padding'
@@ -635,6 +687,12 @@ class CropWithPadSize(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.size, self.size, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class ObjectCropWithScale(Preprocessor):
@@ -744,3 +802,9 @@ class ObjectCropWithScale(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shape
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

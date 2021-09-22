@@ -35,6 +35,7 @@ models:
           - type: map
             ignore_difficult: True
             include_boundaries: False
+            reference: 0.8478
 
   - name: ultra-lightweight-face-detection-rfb-320
 
@@ -67,3 +68,4 @@ models:
           - type: map
             ignore_difficult: True
             include_boundaries: False
+            reference: 0.8478

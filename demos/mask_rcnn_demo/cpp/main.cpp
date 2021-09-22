@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
                 /** Iterate over all input images **/
                 for (size_t image_id = 0; image_id < images.size(); ++image_id)
-                    matU8ToBlob<unsigned char>(images[image_id], input, image_id);
+                    matToBlob(images[image_id], input, image_id);
             }
 
             /** Fill second input tensor with image info **/

@@ -38,7 +38,7 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
         throw std::logic_error("Expected 3-channel input");
@@ -109,10 +109,9 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
     const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
 
-    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(inputTransform(resizedImg)));
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
@@ -264,10 +263,10 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
-        desc.x = bboxes[i].left;
-        desc.y = bboxes[i].top;
-        desc.width = bboxes[i].getWidth();
-        desc.height = bboxes[i].getHeight();
+        desc.x = clamp(bboxes[i].left, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth(), 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight(), 0.f, (float)imgHeight);
 
         result->objects.push_back(desc);
     }

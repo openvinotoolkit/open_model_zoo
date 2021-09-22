@@ -16,3 +16,4 @@ models:
         reader: numpy_reader
         metrics:
           - type: wer
+            reference: 0.0386

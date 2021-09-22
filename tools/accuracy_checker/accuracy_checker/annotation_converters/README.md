@@ -229,6 +229,11 @@ The main difference between this converter and `super_resolution` in data organi
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
+* `bentham_lines` - converts [Bentham](http://transcriptorium.eu/datasets/bentham-collection/) dataset for line-level character recognition to `CharacterRecognitionAnnotation`.
+  * `transcription_dir` - directory stored line transcriptions
+  * `partition_file` - file with selected subset for validation.
+  * `normalize_text` - allow unicode normalization for text (Optional, default `False`).
+  * `to_lower` - converts transcription text to lower case (Optional, default `False`).
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format. Also, can be used to convert other nifti-based datasets.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide a relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
@@ -756,6 +761,10 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_len` - maximum input sequence length. (Optional, default `100`)
   * `subsample_size` - limit number of preprocessed sentences. (Optional, default `0`, no limitation)
 * `wgs_tf_records` - converts `Deepvariant WGS` preprocessed dataset (https://github.com/google/deepvariant/blob/r0.10/docs/deepvariant-training-case-study.md) to `ClassificationAnnotation`.
+  * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
+  * `preprocessed_dir` - path to preprocessed data
+  * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
+* `wgs_pickle_records` - converts `Deepvariant WGS` preprocessed dataset (https://github.com/google/deepvariant/blob/r0.10/docs/deepvariant-training-case-study.md) dumped to pickle file to `ClassificationAnnotation`.
   * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
   * `preprocessed_dir` - path to preprocessed data
   * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)

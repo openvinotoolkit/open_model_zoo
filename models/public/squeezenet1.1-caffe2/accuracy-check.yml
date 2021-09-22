@@ -15,6 +15,15 @@ models:
             size: 227
           - type: normalization
             mean: 103.96,116.78,123.68
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.56502
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.79576
 
   - name: squeezenet1.1-caffe2
     launchers:
@@ -29,3 +38,12 @@ models:
             aspect_ratio_scale: greater
           - type: crop
             size: 227
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.56502
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.79576

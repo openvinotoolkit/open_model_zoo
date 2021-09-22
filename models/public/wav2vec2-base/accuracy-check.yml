@@ -18,3 +18,4 @@ models:
           - type: audio_normalization
         metrics:
           - type: wer
+            reference: 0.0339

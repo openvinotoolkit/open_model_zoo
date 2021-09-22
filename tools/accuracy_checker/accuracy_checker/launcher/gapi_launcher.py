@@ -203,7 +203,7 @@ class GAPILauncher(Launcher):
     def output_blob(self):
         return next(iter(self.output_names))
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if self.non_image_inputs:
             return self._fit_to_input(data, layer_name, layout, precision)
         if np.ndim(data) == 4:

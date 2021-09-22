@@ -120,6 +120,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - vehicle-license-plate-detection-barrier-0106
   - vehicle-license-plate-detection-barrier-0123
 * architecture_type = yolo
+  - mobilenet-yolo-v4-syg
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v3-tf
   - yolo-v3-tiny-tf
@@ -135,6 +136,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-vehicle-detection-0001
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+  - yolof
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -174,7 +176,10 @@ Options:
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
     -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
-    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.
+    -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
+    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
+    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

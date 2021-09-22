@@ -315,8 +315,37 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             labels_stat[label]['ap'] = average_precisions[-1]
             labels_stat[label]['result'] = average_precisions[-1]
         if profile_boxes:
+            self._update_label_stat_for_non_matched_classes(labels_stat, predictions)
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(average_precisions))
         return average_precisions, labels_stat
+
+    def _update_label_stat_for_non_matched_classes(self, labels_stat, predictions):
+        matched_classes = set(labels_stat)
+        background = self.dataset.metadata.get('background_label')
+        prediction_classes = np.unique([pred.labels for pred in predictions])
+        for pc in prediction_classes:
+            if pc == background or pc in matched_classes:
+                continue
+            prediction_boxes, prediction_images, _ = _prepare_prediction_boxes(
+                pc, predictions, True
+            )
+            conf = prediction_boxes[:, 0]
+            label_report = {
+                'precision': np.array([]),
+                'recall': np.array([]),
+                'thresholds': conf,
+                'fppi': np.array([]),
+                'fp': len(conf),
+                'tp': 0,
+                'num_images': len(prediction_images),
+                'scores': conf,
+                'dt': prediction_boxes[:, 1:],
+                'gt': np.array([]),
+                'matched': defaultdict(list),
+                'iou': np.array([])
+            }
+            labels_stat[int(pc)] = label_report
+        return labels_stat
 
 
 class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):

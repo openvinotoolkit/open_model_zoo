@@ -131,7 +131,7 @@ class ONNXLauncher(Launcher):
 
         return results
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = self.inputs[layer_name]
         input_precision = self._input_precisions.get(layer_name, np.float32) if not precision else precision
         if len(np.shape(data)) == 4:

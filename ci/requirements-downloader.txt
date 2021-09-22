@@ -2,13 +2,13 @@
 
 certifi==2021.5.30
     # via requests
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
-idna==2.10
+idna==3.2
     # via requests
 pyyaml==5.4.1
     # via -r tools/downloader/requirements.in
-requests==2.25.1
+requests==2.26.0
     # via -r tools/downloader/requirements.in
 urllib3==1.26.6
     # via requests

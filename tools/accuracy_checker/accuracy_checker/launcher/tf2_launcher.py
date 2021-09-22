@@ -78,7 +78,9 @@ class TF2Launcher(Launcher):
 
         return results
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
+        if np.ndim(data) == 3 and len(self.inputs[layer_name]['shape']) == 4:
+            data = np.expand_dims(data, -1)
         if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
         else:

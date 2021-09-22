@@ -136,6 +136,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101         | TensorFlow\*             | [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/README.md) | 35.72% | 112.052 | 48.128 |
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
+| Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	84.44%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
@@ -159,6 +160,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
 | YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.23%/77.40%/50.26% | 129.5567	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
+| YOLOF                                | PyTorch\*                | [yolof](./yolof/README.md)           | 60.69%/66.23%/43.63% | 175.37942 | 48.228 |
+| YOLOX Tiny                           | PyTorch\*                | [yolox-tiny](./yolox-tiny/README.md) | 47.85%/52.56%/31.82%| 6.4813 | 5.0472 |
 
 ## Face Recognition
 
@@ -202,7 +205,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/README.md) | 33.47Db | 691.1589 | 12.7773|
-| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 35.77Db | 146.6037 | 11.3313 |
+| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 34.27Db | 146.6037 | 11.3313 |
 
 ## Style Transfer
 
@@ -303,11 +306,12 @@ Text prediction is a task to predict the next word, given all of the previous wo
 Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
 See details about datasets in [here](./text-recognition-resnet-fc/README.md)
-The reported metric is collected over the alphanumeric subset of icdar 13 (1015 images) in case-insensitive mode.
+The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 images) in case-insensitive mode.
 
-| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
-| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
+| Model Name                      | Implementation | OMZ Model Name                                                       | Accuracy | GFlops  | mParams  |
+| ------------------------------- | -------------- | -------------------------------------------------------------------- | -------- | ------- | -------- |
+| Resnet-FC                       | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94%   | 40.3704 | 177.9668 |
+| ViTSTR Small patch=16, size=224 | PyTorch\*      | [vitstr-small-patch16-224](./vitstr-small-patch16-224/README.md)     | 90.34%   | 9.1544  | 21.5061  |
 
 ## Text to Speech
 

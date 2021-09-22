@@ -318,12 +318,14 @@ class BaseModel:
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
+            print_info('\tshape: {}\n'.format(
+                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
         print_info('{} - Output info'.format(self.default_model_suffix))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(output_info.shape))
+            print_info('\tshape: {}\n'.format(
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
 
 
 def create_encoder(model_config, launcher, delayed_model_loading=False):
@@ -438,6 +440,8 @@ class EncoderDLSDKModel(BaseModel):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
         self.with_prefix = None
+        self.launcher = launcher
+        self.is_dynamic = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -449,18 +453,34 @@ class EncoderDLSDKModel(BaseModel):
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
         if log:
             self.print_input_output_info()
 
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
+
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(self.fit_to_input(input_data))
+        input_dict = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self.reshape_net({key: data.shape for key, data in input_dict.items()})
+        return self.exec_network.infer(input_dict)
 
     def release(self):
         del self.exec_network
+        if hasattr(self, 'network'):
+            del self.network
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
@@ -469,9 +489,10 @@ class EncoderDLSDKModel(BaseModel):
             input_info = self.exec_network.input_info[self.input_blob].input_data
         else:
             input_info = self.exec_network.inputs[self.input_blob]
-        input_data = input_data.reshape(input_info.shape)
+        if not input_info.is_dynamic:
+            input_data = input_data.reshape(input_info.shape)
 
-        return {self.input_blob: input_data}
+        return {self.input_blob: np.array(input_data)}
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
@@ -510,7 +531,18 @@ class EncoderDLSDKModel(BaseModel):
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -538,12 +570,17 @@ class DecoderDLSDKModel(BaseModel):
         self.input_blob, self.output_blob = None, None
         self.adapter = create_adapter(network_info.get('adapter', 'classification'))
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
+        self.launcher = launcher
+        self.is_dynamic = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
-        raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        input_dict = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self.reshape_net({key: data.shape for key, data in input_dict.items()})
+        raw_result = self.exec_network.infer(input_dict)
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
@@ -557,8 +594,9 @@ class DecoderDLSDKModel(BaseModel):
             self.exec_network.input_info[self.input_blob].input_data
             if has_info else self.exec_network.inputs[self.input_blob]
         )
-        input_data = np.reshape(input_data, input_info.shape)
-        return {self.input_blob: input_data}
+        if not input_info.is_dynamic:
+            input_data = np.reshape(input_data, input_info.shape)
+        return {self.input_blob: np.array(input_data)}
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
@@ -603,7 +641,7 @@ class DecoderDLSDKModel(BaseModel):
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.exec_network = self.load_network(self.network, launcher.device)
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -613,7 +651,27 @@ class DecoderDLSDKModel(BaseModel):
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+
+    def reshape_net(self, shape):
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')

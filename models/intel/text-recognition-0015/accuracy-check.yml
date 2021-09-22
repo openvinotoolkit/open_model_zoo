@@ -87,6 +87,7 @@ evaluations:
               dst_height: 64
           metrics:
             - type: character_recognition_accuracy
+              reference: 0.8764
 
         - name: IIIT5K
           preprocessing:
@@ -97,6 +98,7 @@ evaluations:
               dst_height: 64
           metrics:
             - type: character_recognition_accuracy
+              reference: 0.8413
 
         - name: ICDAR2015_recognition
           preprocessing:
@@ -107,6 +109,7 @@ evaluations:
               dst_height: 64
           metrics:
             - type: character_recognition_accuracy
+              reference: 0.7355
 
         - name: ICDAR03_recognition
           preprocessing:
@@ -117,6 +120,7 @@ evaluations:
               dst_height: 64
           metrics:
             - type: character_recognition_accuracy
+              reference: 0.9389
 
         - name: ICDAR2013
           preprocessing:
@@ -127,3 +131,4 @@ evaluations:
               dst_height: 64
           metrics:
             - type: character_recognition_accuracy
+              reference: 0.8995

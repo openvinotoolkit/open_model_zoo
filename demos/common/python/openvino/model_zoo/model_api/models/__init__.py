@@ -15,6 +15,7 @@
 """
 
 
+from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .centernet import CenterNet
 from .deblurring import Deblurring
 from .detr import DETR
@@ -27,10 +28,13 @@ from .retinaface import RetinaFace, RetinaFacePyTorch
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
-from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
-from .yolo import YOLO, YoloV4
+from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
+from .yolo import YOLO, YoloV4, YOLOF, YOLOX
 
 __all__ = [
+    'BertEmbedding',
+    'BertNamedEntityRecognition',
+    'BertQuestionAnswering',
     'CenterNet',
     'CTPN',
     'DetectionWithLandmarks',
@@ -42,6 +46,7 @@ __all__ = [
     'MonoDepthModel',
     'OpenPose',
     'OutputTransform',
+    'RESIZE_TYPES',
     'RetinaFace',
     'RetinaFacePyTorch',
     'SalientObjectDetectionModel',
@@ -50,4 +55,6 @@ __all__ = [
     'UltraLightweightFaceDetection',
     'YOLO',
     'YoloV4',
+    'YOLOF',
+    'YOLOX',
 ]

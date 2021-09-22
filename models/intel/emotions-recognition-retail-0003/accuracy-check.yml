@@ -10,3 +10,4 @@ models:
 
         metrics:
           - type: accuracy
+            reference: 0.702

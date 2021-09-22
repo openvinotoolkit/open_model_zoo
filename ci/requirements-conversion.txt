@@ -10,7 +10,7 @@ cachetools==4.2.2
     # via google-auth
 certifi==2021.5.30
     # via requests
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
 dataclasses==0.8
     # via
@@ -30,11 +30,11 @@ future==0.18.2
     # via -r tools/downloader/requirements-caffe2.in
 gast==0.3.3
     # via tensorflow
-google-auth==1.32.0
+google-auth==1.35.0
     # via
     #   google-auth-oauthlib
     #   tensorboard
-google-auth-oauthlib==0.4.4
+google-auth-oauthlib==0.4.6
     # via tensorboard
 google-pasta==0.2.0
     # via tensorflow
@@ -46,9 +46,9 @@ grpcio==1.32.0
     #   tensorflow
 h5py==2.10.0
     # via tensorflow
-idna==2.10
+idna==3.2
     # via requests
-importlib-metadata==4.6.0
+importlib-metadata==4.8.1
     # via markdown
 keras-preprocessing==1.1.2
     # via tensorflow
@@ -81,14 +81,14 @@ numpy==1.19.5
     #   torchvision
 oauthlib==3.1.1
     # via requests-oauthlib
-onnx==1.9.0
+onnx==1.10.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
     #   -r tools/downloader/requirements-caffe2.in
     #   -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.3.0
     # via tensorflow
-pillow==8.2.0
+pillow==8.3.2
     # via torchvision
 protobuf==3.17.3
     # via
@@ -104,7 +104,7 @@ pyasn1-modules==0.2.8
     # via google-auth
 pyyaml==5.4.1
     # via yacs
-requests==2.25.1
+requests==2.26.0
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
@@ -131,13 +131,13 @@ six==1.15.0
     #   onnx
     #   protobuf
     #   tensorflow
-tensorboard==2.5.0
+tensorboard==2.6.0
     # via tensorflow
 tensorboard-data-server==0.6.1
     # via tensorboard
 tensorboard-plugin-wit==1.8.0
     # via tensorboard
-tensorflow==2.4.2
+tensorflow==2.4.3
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
     #   -r tools/downloader/requirements-tensorflow.in
@@ -164,7 +164,7 @@ urllib3==1.26.6
     #   requests
 werkzeug==2.0.1
     # via tensorboard
-wheel==0.36.2
+wheel==0.37.0
     # via
     #   astunparse
     #   tensorboard
@@ -173,7 +173,7 @@ wrapt==1.12.1
     # via tensorflow
 yacs==0.1.8
     # via -r tools/downloader/requirements-pytorch.in
-zipp==3.4.1
+zipp==3.5.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

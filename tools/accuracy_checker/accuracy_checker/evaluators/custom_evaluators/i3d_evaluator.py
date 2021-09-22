@@ -298,6 +298,8 @@ class BaseModel:
         self.input_blob = None
         self.output_blob = None
         self.with_prefix = False
+        self.launcher = launcher
+        self.is_dynamic = False
         reader_config = network_info.get('reader', {})
         source_prefix = reader_config.get('source_prefix', '')
         reader_config.update({
@@ -337,8 +339,22 @@ class BaseModel:
 
         return model, weights
 
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
+
     def predict(self, input_data):
-        return self.exec_network.infer(inputs=input_data[0])
+        input_dict = input_data[0]
+        if self.dynamic_inputs and not self.is_dynamic:
+            self.reshape_net({k: v.shape for k, v in input_dict.items()})
+        return self.exec_network.infer(inputs=input_dict)
 
     def release(self):
         del self.network
@@ -349,13 +365,28 @@ class BaseModel:
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
             self.network.batch_size = 1
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.exec_network = self.load_network(self.network, launcher)
         else:
             self.network = None
             launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
         if log:
             self.print_input_output_info()
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -396,12 +427,13 @@ class BaseModel:
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
+            print_info('\tshape: {}\n'.format(input_info.shape))
         print_info('{} - Output info'.format(self.net_type))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(output_info.shape))
+            print_info('\tshape: {}\n'.format(
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -411,7 +443,8 @@ class BaseModel:
         )
         input_data = np.array(input_data)
         input_data = np.transpose(input_data, (3, 0, 1, 2))
-        input_data = np.reshape(input_data, input_info.shape)
+        if not self.dynamic_inputs:
+            input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: input_data}
 
     def prepare_data(self, data):

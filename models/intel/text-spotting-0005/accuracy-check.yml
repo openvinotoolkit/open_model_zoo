@@ -51,3 +51,4 @@ evaluations:
               name: f-measure
               ignore_difficult: True
               word_spotting: True
+              reference: 0.7129

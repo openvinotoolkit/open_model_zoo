@@ -84,7 +84,7 @@ class BaseDLSDKModel:
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
+            print_info('\tshape: {}\n'.format(input_info.shape))
         print_info('{} - Output info'.format(self.default_model_suffix))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
@@ -127,7 +127,18 @@ class BaseDLSDKModel:
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -162,9 +173,15 @@ class BaseDLSDKModel:
             model, weights = launcher.convert_model(network_info)
         else:
             model, weights = self.automatic_model_search(network_info)
+        self.input_layers = network_info.get('inputs', self.default_input_layers)
+        self.output_layers = network_info.get('outputs', self.default_output_layers)
+        if len(self.input_layers) == 1:
+            self.input_blob = self.input_layers[0]
+        if len(self.output_layers) == 1:
+            self.output_blob = self.output_layers[0]
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
@@ -361,8 +378,8 @@ class ASRModel(BaseModel):
 
 class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'encoder'
-    input_layers = []
-    output_layers = []
+    default_input_layers = []
+    default_output_layers = []
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
@@ -402,7 +419,7 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
             input_info = self.exec_network.input_info[input_blob].input_data
         else:
             input_info = self.exec_network.inputs[input_blob]
-        if tuple(input_info.shape) != np.shape(input_data):
+        if input_blob in self.dynamic_inputs or tuple(input_info.shape) != np.shape(input_data):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
@@ -410,18 +427,18 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
-    output_blob = '472'
+    default_output_layers = ['472']
 
 
 class PredictionDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'prediction'
-    input_layers = ['input.1', '1', '2']
-    output_layers = ['151', '152', '153']
+    default_input_layers = ['input.1', '1', '2']
+    default_output_layers = ['151', '152', '153']
 
 
 class JointDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'joint'
-    input_layers = ['0', '1']
+    default_input_layers = ['0', '1']
 
 
 class CommonONNXModel(BaseModel):
@@ -466,8 +483,8 @@ class CommonONNXModel(BaseModel):
 
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
-    input_layers = []
-    output_layer = []
+    default_input_layers = []
+    default_output_layers = []
 
     def fit_to_input(self, input_data):
         frames, _, _ = input_data.shape
@@ -476,14 +493,14 @@ class EncoderONNXModel(CommonONNXModel):
 
 class PredictionONNXModel(CommonONNXModel):
     default_model_suffix = 'prediction'
-    input_layers = ['input.1', '1', '2']
-    output_layers = ['151', '152', '153']
+    default_input_layers = ['input.1', '1', '2']
+    deafult_output_layers = ['151', '152', '153']
 
 
 class JointONNXModel(CommonONNXModel):
     default_model_suffix = 'joint'
-    input_layers = ['0', '1']
-    output_layer = []
+    default_input_layers = ['0', '1']
+    default_output_layers = []
 
 
 class DummyEncoder(BaseModel):

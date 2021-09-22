@@ -1286,6 +1286,16 @@ datasets:
       target_suffix: sharp.png
     annotation: GOPRO.pickle
 
+  - name: SYGData0829
+    data_source: SYGData0829/dataset_format_VOC2007/JPEGImages/
+    dataset_meta_file: SYGData0829/voc_label.json
+    annotation_conversion:
+      converter: syg_detection
+      imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+      annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+      images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
+      has_background: False
+
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
     reader:
@@ -1380,3 +1390,12 @@ datasets:
       merges_file: gpt2/merges.txt
       testing_file: wikitext-2-raw/wiki.test.raw
       max_seq_length: 1024
+
+  - name: wavernn-io
+    data_source: wavernn_io/rnn
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: wavernn_io/rnn
+      input_suffix: in
+      reference_suffix: out

@@ -67,10 +67,15 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
             desc.confidence = confidence;
             desc.labelID = static_cast<int>(detections[i * objectSize + 1]);
             desc.label = getLabelName(desc.labelID);
-            desc.x = detections[i * objectSize + 3] * internalData.inputImgWidth;
-            desc.y = detections[i * objectSize + 4] * internalData.inputImgHeight;
-            desc.width = detections[i * objectSize + 5] * internalData.inputImgWidth - desc.x;
-            desc.height = detections[i * objectSize + 6] * internalData.inputImgHeight - desc.y;
+
+            desc.x = clamp(detections[i * objectSize + 3] * internalData.inputImgWidth,
+                0.f, (float)internalData.inputImgWidth);
+            desc.y = clamp(detections[i * objectSize + 4] * internalData.inputImgHeight,
+                0.f, (float)internalData.inputImgHeight);
+            desc.width = clamp(detections[i * objectSize + 5] * internalData.inputImgWidth,
+                0.f, (float)internalData.inputImgWidth) - desc.x;
+            desc.height = clamp(detections[i * objectSize + 6] * internalData.inputImgHeight,
+                0.f, (float)internalData.inputImgHeight) - desc.y;
 
             result->objects.push_back(desc);
         }
@@ -109,10 +114,15 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
             desc.confidence = confidence;
             desc.labelID = static_cast<int>(labels[i]);
             desc.label = getLabelName(desc.labelID);
-            desc.x = boxes[i * objectSize] * widthScale;
-            desc.y = boxes[i * objectSize + 1] * heightScale;
-            desc.width = boxes[i * objectSize + 2] * widthScale - desc.x;
-            desc.height = boxes[i * objectSize + 3] * heightScale - desc.y;
+
+            desc.x = clamp(boxes[i * objectSize] * widthScale,
+                0.f, (float)internalData.inputImgWidth);
+            desc.y = clamp(boxes[i * objectSize + 1] * heightScale,
+                0.f, (float)internalData.inputImgHeight);
+            desc.width = clamp(boxes[i * objectSize + 2] * widthScale,
+                0.f, (float)internalData.inputImgWidth) - desc.x;
+            desc.height = clamp(boxes[i * objectSize + 3] * heightScale,
+                0.f, (float)internalData.inputImgHeight) - desc.y;
 
             result->objects.push_back(desc);
         }
@@ -134,8 +144,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             else {
                 inputsNames[0] = inputInfoItem.first;
             }
-
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
+            inputTransform.setPrecision(inputInfoItem.second);
             if (useAutoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
                 inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);

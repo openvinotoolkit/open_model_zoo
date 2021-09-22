@@ -16,3 +16,4 @@ models:
         metrics:
           - name: acer
             type: acer_score
+            reference: 0.0381

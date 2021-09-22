@@ -27,7 +27,6 @@ ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float con
 void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -35,7 +34,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     std::string imageInputName = inputInfo.begin()->first;
     inputsNames.push_back(imageInputName);
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
     if (useAutoResize) {
         input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
         input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
@@ -51,8 +50,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     landmarksNum = 0;
 
@@ -134,8 +131,8 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const Inference
         size_t idx = indicies[i];
         auto& prior = priors[idx];
         for (size_t j = 0; j < landmarksNum; j++) {
-            landmarks[i*landmarksNum + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
-            landmarks[i*landmarksNum + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
+            landmarks[i*landmarksNum + j].x = clamp(prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
+            landmarks[i*landmarksNum + j].y = clamp(prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height, 0.f, 1.f) * imgHeight;
         }
     }
     return landmarks;
@@ -187,10 +184,10 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
         float width = prior.width * exp(pRawBox->width * variance[1]);
         float height = prior.height * exp(pRawBox->height * variance[1]);
         rects.push_back(Rect{
-            (cX - width / 2) * imgWidth,
-            (cY - height / 2) * imgHeight,
-            (cX + width / 2) * imgWidth,
-            (cY + height / 2) * imgHeight });
+            clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
+            clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
+            clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
+            clamp(cY + height / 2, 0.f, 1.f) * imgHeight });
     }
 
     return rects;

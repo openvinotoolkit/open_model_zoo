@@ -70,6 +70,9 @@ class Resize3D(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shape
 
+    def calculate_out_shape(self, data_shape):
+        return [list(ds[0]) + self.shape for ds in data_shape]
+
 
 class CropBraTS(Preprocessor):
     __provider__ = 'crop_brats'

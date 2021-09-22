@@ -37,7 +37,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
          throw std::logic_error("Expected 3-channel input");
@@ -228,10 +228,10 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = scores.second[i];
-        desc.x = bboxes[i].left / scaleX;
-        desc.y = bboxes[i].top / scaleY;
-        desc.width = bboxes[i].getWidth() / scaleX;
-        desc.height = bboxes[i].getHeight() / scaleY;
+        desc.x = clamp(bboxes[i].left / scaleX, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top / scaleY, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth() / scaleX, 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight() / scaleY, 0.f, (float)imgHeight);
         desc.labelID =  0;
         desc.label = labels[0];
 

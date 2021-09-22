@@ -8,9 +8,9 @@ audioread==2.1.9
     # via librosa
 certifi==2021.5.30
     # via requests
-cffi==1.14.5
+cffi==1.14.6
     # via soundfile
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
 cycler==0.10.0
     # via matplotlib
@@ -20,9 +20,9 @@ flake8==3.9.2
     # via motmetrics
 flake8-import-order==0.18.1
     # via motmetrics
-idna==2.10
+idna==3.2
     # via requests
-importlib-metadata==4.6.0
+importlib-metadata==4.8.1
     # via
     #   flake8
     #   pluggy
@@ -67,7 +67,7 @@ numpy==1.19.5
     #   scikit-learn
     #   scipy
     #   tensorboardx
-packaging==20.9
+packaging==21.0
     # via
     #   librosa
     #   nibabel
@@ -75,11 +75,11 @@ packaging==20.9
     #   pytest
 pandas==1.1.5
     # via motmetrics
-pillow==8.2.0
+pillow==8.3.2
     # via matplotlib
-pluggy==0.13.1
+pluggy==1.0.0
     # via pytest
-pooch==1.4.0
+pooch==1.5.1
     # via librosa
 protobuf==3.17.3
     # via tensorboardx
@@ -99,19 +99,19 @@ pyparsing==2.4.7
     # via
     #   matplotlib
     #   packaging
-pytest==6.2.4
+pytest==6.2.5
     # via
     #   motmetrics
     #   pytest-benchmark
 pytest-benchmark==3.4.1
     # via motmetrics
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
 pytz==2021.1
     # via pandas
-requests==2.25.1
+requests==2.26.0
     # via pooch
 resampy==0.2.2
     # via librosa
@@ -136,23 +136,23 @@ soundfile==0.10.3.post1
     # via librosa
 sympy==1.8
     # via -r demos/requirements.txt
-tensorboardx==2.3
+tensorboardx==2.4
     # via -r demos/requirements.txt
-threadpoolctl==2.1.0
+threadpoolctl==2.2.0
     # via scikit-learn
 tokenizers==0.10.3
     # via -r demos/requirements.txt
 toml==0.10.2
     # via pytest
-tqdm==4.61.1
+tqdm==4.62.2
     # via -r demos/requirements.txt
-typing-extensions==3.10.0.0
+typing-extensions==3.10.0.2
     # via importlib-metadata
 urllib3==1.26.6
     # via requests
 xmltodict==0.12.0
     # via motmetrics
-zipp==3.4.1
+zipp==3.5.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

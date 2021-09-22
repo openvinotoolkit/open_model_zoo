@@ -19,7 +19,7 @@ import threading
 from collections import deque
 from typing import Dict, Set
 
-from performance_metrics import PerformanceMetrics
+from ..performance_metrics import PerformanceMetrics
 
 
 def parse_devices(device_string):

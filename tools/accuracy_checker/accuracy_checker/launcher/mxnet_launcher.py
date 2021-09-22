@@ -111,7 +111,7 @@ class MxNetLauncher(Launcher):
     def batch(self):
         return self._batch
 
-    def fit_to_input(self, data, input_layer, layout, precision):
+    def fit_to_input(self, data, input_layer, layout, precision, template=None):
         if layout:
             data = np.transpose(data, layout)
         return self.mxnet.nd.array(data.astype(precision) if precision else data)

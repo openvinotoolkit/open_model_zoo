@@ -158,3 +158,6 @@ class PadWithEOS(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_shape(self, data_shape):
+        return [[self.sequence_len]] * len(data_shape)

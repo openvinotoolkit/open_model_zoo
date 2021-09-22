@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include "models/detection_model_yolo.h"
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
+#include <iostream>
 
 std::vector<float> defaultAnchors[] = {
     // YOLOv1v2
@@ -31,7 +32,10 @@ std::vector<float> defaultAnchors[] = {
       142.0f, 110.0f, 192.0f, 243.0f, 459.0f, 401.0f},
     // YOLOv4_Tiny
     { 10.0f, 14.0f, 23.0f, 27.0f, 37.0f, 58.0f,
-      81.0f, 82.0f, 135.0f, 169.0f, 344.0f, 319.0f}
+      81.0f, 82.0f, 135.0f, 169.0f, 344.0f, 319.0f},
+    // YOLOF
+    { 16.0f, 16.0f, 32.0f, 32.0f, 64.0f, 64.0f,
+      128.0f, 128.0f, 256.0f, 256.0f, 512.0f, 512.0f}
 };
 
 const std::vector<int64_t> defaultMasks[] = {
@@ -42,7 +46,9 @@ const std::vector<int64_t> defaultMasks[] = {
     // YOLOv4
     {0, 1, 2, 3, 4, 5, 6, 7, 8 },
     // YOLOv4_Tiny
-    {1, 2, 3, 3, 4, 5}
+    {1, 2, 3, 3, 4, 5},
+    // YOLOF
+    {0, 1, 2, 3, 4, 5}
 };
 
 static inline float sigmoid(float x) {
@@ -126,9 +132,20 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if(!isRegionFound)
     {
-        yoloVersion = outputsNames.size() == 2 ? YOLO_V4_TINY : YOLO_V4;
+        switch(outputsNames.size()) {
+        case 1:
+            yoloVersion = YOLOF;
+            break;
+        case 2:
+            yoloVersion = YOLO_V4_TINY;
+            break;
+        case 3:
+            yoloVersion = YOLO_V4;
+            break;
+        }
 
-        int num = 3;
+        int num = yoloVersion == YOLOF ? 6 : 3;
+        isObjConf = yoloVersion == YOLOF ? 0 : 1;
         int i = 0;
 
         auto chosenMasks = presetMasks.size() ? presetMasks : defaultMasks[yoloVersion];
@@ -143,7 +160,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         for (const auto& name : outputsNames) {
             auto& output = outputInfo[name];
             auto shape = output->getDims();
-            auto classes = shape[1] / num - 5;
+            auto classes = shape[1] / num - 4 - isObjConf;
             if (shape[1] % num != 0) {
                 throw std::runtime_error(std::string("The output blob ") + name + " has wrong 2nd dimension");
             }
@@ -235,6 +252,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     case YOLO_V3:
     case YOLO_V4:
     case YOLO_V4_TINY:
+    case YOLOF:
         sideH = static_cast<int>(blob->getTensorDesc().getDims()[2]);
         sideW = static_cast<int>(blob->getTensorDesc().getDims()[3]);
         scaleW = resized_im_w;
@@ -245,7 +263,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     auto entriesNum = sideW * sideH;
     const float* output_blob = blob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type*>();
 
-    auto postprocessRawData = (yoloVersion == YOLO_V4 || yoloVersion == YOLO_V4_TINY) ? sigmoid : linear;
+    auto postprocessRawData = (yoloVersion == YOLO_V4 || yoloVersion == YOLO_V4_TINY || yoloVersion == YOLOF) ? sigmoid : linear;
 
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < entriesNum; ++i) {
@@ -253,26 +271,32 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
         int col = i % sideW;
         for (int n = 0; n < region.num; ++n) {
             //--- Getting region data from blob
-            int obj_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords);
-            int box_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, 0);
-            float scale = postprocessRawData(output_blob[obj_index]);
+            int obj_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, region.coords);
+            int box_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, 0);
+            float scale = isObjConf ? postprocessRawData(output_blob[obj_index]) : 1;
 
             //--- Preliminary check for confidence threshold conformance
             if (scale >= confidenceThreshold){
                 //--- Calculating scaled region's coordinates
-                double x = (col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
-                double y = (row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
-                double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
-                double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
+                float x, y;
+                if (yoloVersion == YOLOF) {
+                    x = ((float)col / sideW + output_blob[box_index + 0 * entriesNum] * region.anchors[2 * n] / scaleW) * original_im_w;
+                    y = ((float)row / sideH + output_blob[box_index + 1 * entriesNum] * region.anchors[2 * n + 1] / scaleH) * original_im_h;
+                } else {
+                    x = (float)(col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
+                    y = (float)(row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
+                }
+                float height = (float)std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
+                float width = (float)std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
 
                 DetectedObject obj;
-                obj.x = (float)std::max((x-width/2), 0.);
-                obj.y = (float)std::max((y-height/2), 0.);
-                obj.width = std::min((float)width, original_im_w - obj.x);
-                obj.height = std::min((float)height, original_im_h - obj.y);
+                obj.x = clamp(x-width/2, 0.f, (float)original_im_w);
+                obj.y = clamp(y-height/2, 0.f, (float)original_im_h);
+                obj.width = clamp(width, 0.f, (float)original_im_w) - obj.x;
+                obj.height = clamp(height, 0.f, (float)original_im_h) - obj.y;
 
                 for (int j = 0; j < region.classes; ++j) {
-                    int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords + 1 + j);
+                    int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, region.coords + isObjConf + j);
                     float prob = scale * postprocessRawData(output_blob[class_index]);
 
                     //--- Checking confidence threshold conformance and adding region to the list
@@ -291,7 +315,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
 int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, int lclasses, int location, int entry) {
     int n = location / totalCells;
     int loc = location % totalCells;
-    return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
+    return (n * (lcoords + lclasses) + entry) * totalCells + loc;
 }
 
 double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {

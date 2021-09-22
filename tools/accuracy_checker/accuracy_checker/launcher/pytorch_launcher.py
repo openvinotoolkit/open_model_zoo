@@ -124,7 +124,7 @@ class PyTorchLauncher(Launcher):
             module.eval()
             return module
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if layout is not None:
             data = np.transpose(data, layout)
         tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))

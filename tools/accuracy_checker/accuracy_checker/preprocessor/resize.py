@@ -24,7 +24,10 @@ from ..config import BoolField, ConfigError, NumberField, StringField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
-from ..utils import contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage
+from ..utils import (
+    contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage, is_image,
+    finalize_image_shape
+)
 
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
@@ -396,18 +399,9 @@ class Resize(Preprocessor):
         is_simple_case = not isinstance(data, list) # otherwise -- pyramid, tiling, etc
 
         def process_data(data, new_height, new_width, scale_func, resize_func):
-            dst_width, dst_height = new_width, new_height
-            image_h, image_w = data.shape[:2]
-            if scale_func:
-                dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
-                if self.factor:
-                    dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
-                    dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
-                if new_height is None:
-                    new_height = dst_height
-                if new_width is None:
-                    new_width = dst_width
-
+            dst_height, dst_width, new_height, new_width, image_h, image_w = self.get_resize_size(
+                data.shape, new_height, new_width, scale_func
+            )
             resize_meta = {}
             resize_meta['preferable_width'] = max(dst_width, new_width)
             resize_meta['preferable_height'] = max(dst_height, new_height)
@@ -440,16 +434,42 @@ class Resize(Preprocessor):
 
         return image
 
+    def get_resize_size(self, data_shape, new_height, new_width, scale_func):
+        dst_width, dst_height = new_width, new_height
+        image_h, image_w = data_shape[:2]
+        if scale_func:
+            dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
+            if self.factor:
+                dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
+                dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
+            if new_height is None:
+                new_height = dst_height
+            if new_width is None:
+                new_width = dst_width
+        return dst_height, dst_width, new_height, new_width, image_h, image_w
+
     @property
     def dynamic_result_shape(self):
         if self.scaling_func:
             return True
         return False
 
+    def calculate_out_single_shape(self, data_shape):
+        if not self.dynamic_result_shape:
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        if -1 in data_shape:
+            return data_shape
+        dst_height, dst_width, _, _, _, _ = self.get_resize_size(
+            data_shape, self.dst_height, self.dst_width, self.scaling_func
+        )
+        return finalize_image_shape(dst_height, dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 class AutoResize(Preprocessor):
     __provider__ = 'auto_resize'
-    shape_modificator = True
     _dynamic_shapes = False
 
     def __init__(self, config, name=None):
@@ -517,3 +537,17 @@ class AutoResize(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    @property
+    def shape_modificator(self):
+        if self.dst_height and self.dst_width:
+            return True
+        return False
+
+    def calculate_out_single_shape(self, data_shape):
+        if self.dst_height and self.dst_height:
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        return data_shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

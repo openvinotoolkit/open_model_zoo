@@ -15,14 +15,14 @@ limitations under the License.
 """
 
 import math
-from collections import namedtuple
+from collections import namedtuple, Counter
 
 import cv2
 import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
-from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage
+from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage, is_image, finalize_image_shape
 from ..logging import warning
 
 try:
@@ -178,6 +178,12 @@ class PointAligner(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 def center_padding(dst_width, dst_height, width, height, left_top_extend=False):
     delta = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
@@ -258,7 +264,7 @@ class Padding(Preprocessor):
         if isinstance(pad_val, int):
             self.pad_value = (pad_val, pad_val, pad_val)
         if isinstance(pad_val, str):
-            self.pad_value = string_to_tuple(pad_val, float)
+            self.pad_value = string_to_tuple(pad_val, float) if pad_val != 'background' else pad_val
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.pad_type = self.get_value_from_config('pad_type')
         self.pad_func = padding_func[self.pad_type]
@@ -266,6 +272,7 @@ class Padding(Preprocessor):
         self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
         self.enable_resize = self.get_value_from_config('enable_resize')
         self.left_top_extend = self.get_value_from_config('left_top_extend')
+        self.padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
@@ -276,13 +283,15 @@ class Padding(Preprocessor):
         pref_height = math.ceil(pref_height / float(self.stride)) * self.stride
         pref_width = max(pref_width, width)
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
+        pad_value = self.pad_value
+        if pad_value == 'background':
+            pad_value = self.estimate_background_color(image.data)
         if self.pad_type == 'center':
             pad = self.pad_func(pref_width, pref_height, width, height, self.left_top_extend)
         else:
             pad = self.pad_func(pref_width, pref_height, width, height)
         image.metadata['padding'] = pad
-        padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
-        image.data = padding_realization_func(image.data, pad)
+        image.data = self.padding_realization_func(image.data, pad, pad_value)
         meta = {
             'pad': pad,
             'dst_width': self.dst_width,
@@ -303,16 +312,30 @@ class Padding(Preprocessor):
 
         return image
 
-    def _opencv_padding(self, image, pad):
+    def calculate_out_single_shape(self, data_shape):
+        if not self.dynamic_result_shape:
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        height, width = data_shape[:2]
+        if height == -1 or width == -1:
+            return data_shape
+        pref_height = math.ceil(height / float(self.stride)) * self.stride
+        pref_width = math.ceil(width / float(self.stride)) * self.stride
+        return finalize_image_shape(pref_height, pref_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
+    @staticmethod
+    def _opencv_padding(image, pad, pad_value):
         return cv2.copyMakeBorder(
-            image, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.pad_value
+            image, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=pad_value
         )
 
-    def _numpy_padding(self, image, pad):
+    def _numpy_padding(self, image, pad, pad_value):
         pad_values = (
-            (self.pad_value[0], self.pad_value[0]),
-            (self.pad_value[1], self.pad_value[1]),
-            (self.pad_value[2], self.pad_value[2])
+            (pad_value[0], pad_value[0]),
+            (pad_value[1], pad_value[1]),
+            (pad_value[2], pad_value[2])
         )
         if self.numpy_pad_mode != 'constant':
             return np.pad(
@@ -323,6 +346,20 @@ class Padding(Preprocessor):
             image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
             mode=self.numpy_pad_mode, constant_values=pad_values
         )
+
+    @staticmethod
+    def estimate_background_color(image):
+        if image.ndim == 2 or (image.ndim == 3 and image.shape[-1] == 1):
+            u, i = np.unique(np.array(image).flatten(), return_inverse=True)
+            return int(u[np.argmax(np.bincount(i))])
+        colors_counter = Counter()
+        h, w = image.shape[:2]
+        for y in range(0, h):
+            for x in range(0, w):
+                channels = tuple(image[x, y])
+                colors_counter.update([channels])
+        color, _ = colors_counter.most_common(1)
+        return color
 
     @property
     def dynamic_result_shape(self):
@@ -387,6 +424,12 @@ class Tiling(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
@@ -430,6 +473,12 @@ class ImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
 
         return image
+
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
 
 
 class FaceDetectionImagePyramid(Preprocessor):
@@ -526,6 +575,12 @@ class FaceDetectionImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
         return image
 
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
+
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
@@ -593,6 +648,12 @@ class WarpAffine(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class SimilarityTransfom(Preprocessor):
@@ -684,3 +745,9 @@ class SimilarityTransfom(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

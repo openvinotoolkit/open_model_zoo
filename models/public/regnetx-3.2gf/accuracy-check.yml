@@ -24,6 +24,15 @@ models:
           - type: normalization
             mean: (103.53,116.28,123.675)
             std: (57.375,57.12,58.395)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7815
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9409
 
   - name: regnetx-3.2gf
 
@@ -42,3 +51,12 @@ models:
           - type: crop
             size: 224
             use_pillow: True
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7815
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9409

@@ -6,7 +6,7 @@ attrs==21.2.0
     # via pytest
 certifi==2021.5.30
     # via requests
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
 click==8.0.1
     # via
@@ -28,15 +28,15 @@ filelock==3.0.12
     # via
     #   huggingface-hub
     #   transformers
-huggingface-hub==0.0.12
+huggingface-hub==0.0.16
     # via transformers
-idna==2.10
+idna==3.2
     # via requests
 imagecodecs==2020.5.30 ; python_version < "3.7"
     # via -r tools/accuracy_checker/requirements.in
 imageio==2.9.0
     # via scikit-image
-importlib-metadata==4.6.0
+importlib-metadata==4.8.1
     # via
     #   click
     #   huggingface-hub
@@ -54,7 +54,7 @@ lmdb==1.2.1
     # via -r tools/accuracy_checker/requirements.in
 matplotlib==3.3.4
     # via scikit-image
-more-itertools==8.8.0
+more-itertools==8.9.0
     # via pytest
 networkx==2.5.1
     # via scikit-image
@@ -78,7 +78,7 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
-packaging==20.9
+packaging==21.0
     # via
     #   huggingface-hub
     #   nibabel
@@ -88,7 +88,7 @@ pandas==1.1.5
     # via -r tools/accuracy_checker/requirements.in
 parasail==1.2.4
     # via -r tools/accuracy_checker/requirements.in
-pillow==8.2.0
+pillow==8.3.2
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
@@ -102,7 +102,7 @@ py-cpuinfo==8.0.0
     # via -r tools/accuracy_checker/requirements.in
 pyclipper==1.3.0
     # via -r tools/accuracy_checker/requirements.in
-pydicom==2.1.2
+pydicom==2.2.1
     # via -r tools/accuracy_checker/requirements.in
 pyparsing==2.4.7
     # via
@@ -114,7 +114,7 @@ pytest==5.4.3
     #   pytest-mock
 pytest-mock==2.0.0
     # via -r tools/accuracy_checker/requirements-test.in
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
@@ -128,12 +128,12 @@ pyyaml==5.4.1
     #   transformers
 rawpy==0.16.0
     # via -r tools/accuracy_checker/requirements.in
-regex==2021.4.4
+regex==2021.8.28
     # via
     #   nltk
     #   sacremoses
     #   transformers
-requests==2.25.1
+requests==2.26.0
     # via
     #   huggingface-hub
     #   transformers
@@ -156,7 +156,7 @@ six==1.16.0
     # via
     #   python-dateutil
     #   sacremoses
-threadpoolctl==2.1.0
+threadpoolctl==2.2.0
     # via scikit-learn
 tifffile==2020.9.3
     # via scikit-image
@@ -164,16 +164,16 @@ tokenizers==0.10.3
     # via
     #   -r tools/accuracy_checker/requirements.in
     #   transformers
-tqdm==4.61.1
+tqdm==4.62.2
     # via
     #   -r tools/accuracy_checker/requirements.in
     #   huggingface-hub
     #   nltk
     #   sacremoses
     #   transformers
-transformers==4.8.1
+transformers==4.10.0
     # via -r tools/accuracy_checker/requirements.in
-typing-extensions==3.10.0.0
+typing-extensions==3.10.0.2
     # via
     #   huggingface-hub
     #   importlib-metadata
@@ -181,5 +181,5 @@ urllib3==1.26.6
     # via requests
 wcwidth==0.2.5
     # via pytest
-zipp==3.4.1
+zipp==3.5.0
     # via importlib-metadata

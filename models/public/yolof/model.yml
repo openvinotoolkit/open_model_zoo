@@ -1,0 +1,186 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLOF is a simple, fast, and efficient object detector without FPN. Model based
+  on "You Only Look One-level Feature" <https://arxiv.org/abs/2103.09460> paper. It
+  was implemented in PyTorch* framework. Model used "DarkNet-53" with Cross Stage
+  Partial blocks as backbone. For details see repository <https://github.com/megvii-model/YOLOF>.
+  This model was pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset with 80 classes
+task_type: detection
+files:
+  # cvpods
+  - name: cvpods/__init__.py
+    size: 274
+    sha256: c1c2f703477719e084c1fe13d168cbe0ed0a6ddc7cb991b3287966f2c31c9c56
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/__init__.py
+  #  layers
+  - name: cvpods/layers/__init__.py
+    size: 1276
+    sha256: f2786a15562fe0468461e35ba0477eae2bbdc68deeaea03c441f50a83fa0a003
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/__init__.py
+  - name: cvpods/layers/batch_norm.py
+    size: 9872
+    sha256: 6da202a9db1b88019fbee82589e661b1e0ad533d0a750c0c2e13088d86f4e53f
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/batch_norm.py
+  - name: cvpods/layers/shape_spec.py
+    size: 672
+    sha256: 827b5758ba58addbd1f5d8a535202d4c6110a0e4f9c06dbaa5a53caeb8265a8d
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/shape_spec.py
+  - name: cvpods/layers/wrappers.py
+    size: 15619
+    sha256: 565e52061590ce0dbf41a4dedb7e31453e9c7e374256e6f0a45822fd9dc4a130
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/wrappers.py
+  #  modeling
+  - name: cvpods/modeling/anchor_generator.py
+    size: 15718
+    sha256: 3042a02614b94da05796299d94717347ac493f347c3185e6e07c2f603a0ba299
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/anchor_generator.py
+  - name: cvpods/modeling/backbone/__init__.py
+    size: 905
+    sha256: bf4fe28c492998b044c31ba7d35af3a39125039731b3582f7a2ac3975bd99cc0
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/backbone/__init__.py
+  - name: cvpods/modeling/backbone/backbone.py
+    size: 1632
+    sha256: ca6570234053322c3894ce3b8656351ba896c898d22c4469a7424a74c92a8e29
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/backbone/backbone.py
+  - name: cvpods/modeling/nn_utils/__init__.py
+    size: 0
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/nn_utils/__init__.py
+  - name: cvpods/modeling/nn_utils/weight_init.py
+    size: 3756
+    sha256: 71e5b5872bdbbfd72e335a80114ce77e42a7e88d9cd1ee9dad47f257daa65873
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/nn_utils/weight_init.py
+  #  structures
+  - name: cvpods/structures/__init__.py
+    size: 520
+    sha256: 1bb7c30fa43ee378c84e0b3d720ef8bb9522c37fdd1dee4921e387bb93392ee5
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/structures/__init__.py
+  - name: cvpods/structures/boxes.py
+    size: 15620
+    sha256: e8b20ba9b70203d4ec0dec93272da16799b5877006caa5b075d2b7beef086add
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/structures/boxes.py
+  # models
+  - name: models/cspdarknet.py
+    size: 11889
+    sha256: 6eae2826c76a51faf34744495c82d79d3680772775fbc603929749c1a1eee63b
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof.cspdarknet53.DC5.9x.stage2.3x/cspdarknet.py
+  # yolof_base
+  - name: yolof_base/__init__.py
+    size: 156
+    sha256: 32a4e9e7cbafa0ba6a4a968294bf9bb431809f2684fe188a1448fe0250426a9f
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/__init__.py
+  - name: yolof_base/decoder.py
+    size: 4473
+    sha256: db2c11620dcd42d9cb628c5cea60d7b498310662b52b8c5835c6384dcec89ad0
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/decoder.py
+  - name: yolof_base/encoder.py
+    size: 4588
+    sha256: 352a22cbf911d7ed2553fe72e31206b254c9f7f6200a7d1a3ebffc6cc079c176
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/encoder.py
+  - name: yolof_base/utils.py
+    size: 1615
+    sha256: e3608f20bf1d5d685d56c822f1963531168d65a2c499d537545188787d497765
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/utils.py
+  # ckpt
+  - name: ckpt/YOLOF_CSP_D_53_DC5_9x.pth
+    size: 385559524
+    sha256: 5aac157a091993f9c54471f6a8c365b5aa1e7ca3e8f360517edd36bdd3a9fcfc
+    source: https://upzqqa.bn.files.1drv.com/y4mwk1QklsZktMCS8X9bmTcxB8cqyMbouGOKV_8fjN0-nISdWdiRAoZwkzOqKHSq7bOmFchzhWz52mHMRvXC6sa-rjEPwP_QqVxjc9dePvpE-7X3Lr5sDyV0zlLky_MClBOSfcpWPd_Fro-BKaE9KDC20_eukQJRREXf5uWp8w0CHHMZ2JN9wv38W17KkSy-EspmHSLvPrkw2BysFTeOTJJ6A
+  # addict
+  - name: lib/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
+postprocessing:
+  # unpack
+  - $type: unpack_archive
+    format: zip
+    file: lib/addict-2.4.0-py3-none-any.whl
+  # cvpods
+  - $type: regex_replace
+    file: cvpods/__init__.py
+    pattern: 'from \.(utils) |setup_environment\(\)'
+    replacement: '# \g<0>'
+  #  layers
+  - $type: regex_replace
+    file: cvpods/layers/__init__.py
+    pattern: 'from \.(mask_ops|activation_funcs|deform_conv|deform_conv_with_off|larc|position_encoding|roi_align|roi_align_rotated|swap_align2nat|tree_filter_v2)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: cvpods/layers/__init__.py
+    pattern: 'from \.nms [^)]*\)'
+    replacement: ''
+  #  modeling
+  - $type: regex_replace
+    file: cvpods/modeling/anchor_generator.py
+    pattern: 'from cvpods.structures import Boxes, RotatedBoxes'
+    replacement: 'from cvpods.structures import Boxes #RotatedBoxes'
+  - $type: regex_replace
+    file: cvpods/modeling/anchor_generator.py
+    pattern: 'return anchors\n\n\n'
+    replacement: 'return anchors_over_all_feature_maps\n\n\n'
+  - $type: regex_replace
+    file: cvpods/modeling/backbone/__init__.py
+    pattern: 'from \.(bifpn) (.|\n)*'
+    replacement: ''
+  #  structures
+  - $type: regex_replace
+    file: cvpods/structures/__init__.py
+    pattern: 'from \.(image_list) (.|\n)*'
+    replacement: ''
+  - $type: regex_replace
+    file: cvpods/structures/__init__.py
+    pattern: 'from \.boxes import Boxes'
+    replacement: 'from .boxes import Boxes #'
+  #  batch_norm
+  - $type: regex_replace
+    file: cvpods/layers/batch_norm.py
+    pattern: 'from cvpods\.utils import comm|comm\.get_world_size\(\) == 1 or'
+    replacement: ''
+  # yolof_base
+  - $type: regex_replace
+    file: yolof_base/__init__.py
+    pattern: 'from \.(yolof)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: yolof_base/utils.py
+    pattern: 'from cvpods\.utils'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: yolof_base/utils.py
+    pattern: 'from cvpods\.utils import env|if env\.TORCH_VERSION <= \(\n.*1, 5\)
+      else nn\.SyncBatchNorm,'
+    replacement: ','
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-path=$dl_dir/lib/addict
+  - --model-name=get_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/ckpt/YOLOF_CSP_D_53_DC5_9x.pth"
+  - --input-shape=1,3,608,608
+  - --input-names=image
+  - --output-names=boxes
+  - --output-file=$conv_dir/yolof.onnx
+model_optimizer_args:
+  - --input_shape=[1,3,608,608]
+  - --mean_values=image[103.53,116.28,123.675]
+  - --input=image
+  - --output=boxes
+  - --input_model=$conv_dir/yolof.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/megvii-model/YOLOF/main/LICENSE

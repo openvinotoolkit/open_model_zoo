@@ -120,7 +120,7 @@ Accuracy Checker supports following set of preprocessors:
   * `crop_padding` - the padding size to use when centering the crop.
 * `padding` - padding for image.
   * `stride` - stride for padding.
-  * `pad_value` - value for filling space around original image.
+  * `pad_value` - value for filling space around original image (should be provided as comma-separatd channel-wise float values or `background` for estimation background pixel color for image).
   * `dst_width` and `dst_height` are destination width and height for padded image respectively.
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
   * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).

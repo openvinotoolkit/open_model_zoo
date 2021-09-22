@@ -71,6 +71,10 @@ static const char anchors_message[] = "Optional. A comma separated list of ancho
     "By default used default anchors for model. Only for YOLOV4 architecture type.";
 static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
     "By default used default masks for model. Only for YOLOV4 architecture type.";
+static const char reverse_input_channels_message[] = "Optional. Switch the input channels order from BGR to RGB.";
+static const char mean_values_message[] = "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+    "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -92,6 +96,9 @@ DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 DEFINE_string(anchors, "", anchors_message);
 DEFINE_string(masks, "", masks_message);
+DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
 * \brief This function shows a help message
@@ -124,8 +131,11 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
-    std::cout << "    -anchors                  "      << anchors_message << std::endl;
-    std::cout << "    -masks                    "      << masks_message << std::endl;
+    std::cout << "    -anchors                  " << anchors_message << std::endl;
+    std::cout << "    -masks                    " << masks_message << std::endl;
+    std::cout << "    -reverse_input_channels   " << reverse_input_channels_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }
 
 class ColorPalette {
@@ -245,10 +255,10 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
             slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
-                << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
+                << std::setw(4) << int(obj.x) << " | "
+                << std::setw(4) << int(obj.y) << " | "
+                << std::setw(4) << int(obj.x + obj.width) << " | "
+                << std::setw(4) << int(obj.y + obj.height)
                 << slog::endl;
         }
         outputTransform.scaleRect(obj);
@@ -338,7 +348,7 @@ int main(int argc, char *argv[]) {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
-
+        model->SetInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;

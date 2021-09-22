@@ -32,3 +32,4 @@ models:
           - name: AP
             type: coco_precision
             max_detections: 20
+            reference: 0.428
