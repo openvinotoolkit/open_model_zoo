@@ -18,10 +18,10 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 
 ## Accuracy
 
-| Metric | Value  |
-| ------ | -------|
-| Top 1  | 67.36% |
-| Top 5  | 87.44% |
+| Metric | Original model | Converted model |
+| ------ | -------------- | --------------- |
+| Top 1  | 67.36%         | 67.36%          |
+| Top 5  | 87.44%         | 87.44%          |
 
 ## Input
 
