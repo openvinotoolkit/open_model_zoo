@@ -135,7 +135,6 @@ int main(int argc, char **argv) {
 
         bool should_save_det_log = !detlog_out.empty();
 
-        //model API part
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
