@@ -298,7 +298,7 @@ class TFLauncher(Launcher):
 
         return graph
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = self.inputs[layer_name]
         if (
                 len(layer_shape) > len(np.shape(data)) and

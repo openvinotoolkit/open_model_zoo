@@ -20,7 +20,7 @@ import platform
 from ..config import PathField, ConfigError, StringField, NumberField, ListField, DictField, BaseField, BoolField
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters, convert_model
-from ..logging import warning
+from ..logging import warning, print_info
 from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config, string_to_tuple
 
 try:
@@ -42,7 +42,25 @@ VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
 
 
 def parse_partial_shape(partial_shape):
-    return string_to_tuple(str(partial_shape).replace('{', '(').replace('}', ')').replace('?', '-1'), casting_type=int)
+    ps = str(partial_shape)
+    preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
+    if '[' not in preprocessed:
+        return string_to_tuple(preprocessed, casting_type=int)
+    shape_list = []
+    s_pos = 0
+    e_pos = len(preprocessed)
+    while s_pos >= e_pos:
+        open_brace = preprocessed.find('[', s_pos, e_pos)
+        if open_brace == -1:
+            shape_list.extend(string_to_tuple(preprocessed[s_pos:], casting_type=int))
+            break
+        if open_brace != s_pos:
+            shape_list.extend(string_to_tuple(preprocessed[:open_brace], casting_type=int))
+        close_brace = preprocessed.find(']', open_brace, e_pos)
+        shape_range = preprocessed[open_brace + 1:close_brace]
+        shape_list.append(string_to_tuple(shape_range, casting_type=int))
+        s_pos = min(close_brace + 2, e_pos)
+    return shape_list
 
 
 class CPUExtensionPathField(PathField):
@@ -253,7 +271,14 @@ DLSDK_LAUNCHER_PARAMETERS = {
         optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
     ),
     '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-    '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
+    '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
+    '_undefined_shapes_resolving_policy': StringField(
+        optional=True, default='default', choices=['default', 'dynamic', 'static'],
+        description='Policy how to make deal with undefined shapes in network: '
+                    'default - try to run as default, if does not work switch to static, '
+                    'dynamic - enforce network execution with dynamic shapes, '
+                    'static - convert undefined shapes to static before execution'
+    )
 }
 
 
@@ -343,3 +368,62 @@ def mo_convert_model(config, launcher_parameters, framework=None):
         get_parameter_value_from_config(config, launcher_parameters, '_transformations_config_dir'),
         should_log_cmd=should_log_mo_cmd
     )
+
+
+def automatic_model_search(model_name, model_cfg, weights_cfg, model_is_blob):
+    def get_xml(model_dir):
+        models_list = list(model_dir.glob('{}.xml'.format(model_name)))
+        if not models_list:
+            models_list = list(model_dir.glob('*.xml'))
+        return models_list
+
+    def get_blob(model_dir):
+        blobs_list = list(Path(model_dir).glob('{}.blob'.format(model_name)))
+        if not blobs_list:
+            blobs_list = list(Path(model_dir).glob('*.blob'))
+        return blobs_list
+
+    def get_onnx(model_dir):
+        onnx_list = list(Path(model_dir).glob('{}.onnx'.format(model_name)))
+        if not onnx_list:
+            onnx_list = list(Path(model_dir).glob('*.onnx'))
+        return onnx_list
+
+    def get_model():
+        model = Path(model_cfg)
+        if not model.is_dir():
+            accepted_suffixes = ['.blob', '.onnx', '.xml']
+            if model.suffix not in accepted_suffixes:
+                raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+            print_info('Found model {}'.format(model))
+            return model, model.suffix == '.blob'
+        if model_is_blob:
+            model_list = get_blob(model)
+        else:
+            model_list = get_xml(model)
+            if not model_list and model_is_blob is None:
+                model_list = get_blob(model)
+            if not model_list:
+                model_list = get_onnx(model)
+        if not model_list:
+            raise ConfigError('suitable model is not found')
+        if len(model_list) != 1:
+            raise ConfigError('More than one model matched, please specify explicitly')
+        model = model_list[0]
+        print_info('Found model {}'.format(model))
+        return model, model.suffix == '.blob'
+
+    model, is_blob = get_model()
+    if is_blob:
+        return model, None
+    weights = weights_cfg
+    if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
+        weights_dir = weights or model.parent
+        weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+    if weights is not None:
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('Found weights {}'.format(get_path(weights)))
+
+    return model, weights

@@ -363,6 +363,8 @@ class BaseModel:
         self.input_blob = None
         self.output_blob = None
         self.with_prefix = False
+        self.launcher = launcher
+        self.is_dynamic = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -413,7 +415,7 @@ class BaseModel:
         model, weights = self.auto_model_search(network_info, self.net_type)
         if weights:
             self.network = launcher.read_network(model, weights)
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -423,8 +425,30 @@ class BaseModel:
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.set_input_and_output()
+
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
 
     def set_input_and_output(self):
         pass
@@ -451,12 +475,14 @@ class BaseModel:
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
-        print_info('{} - Output info'.format(self.net_type))
+            print_info('\tshape: {}\n'.format(
+                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+            print_info('{} - Output info'.format(self.net_type))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(output_info.shape))
+            print_info('\tshape: {}\n'.format(
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
 
 
 class CocosnetModel(BaseModel):
@@ -490,7 +516,10 @@ class CocosnetModel(BaseModel):
     def predict(self, identifiers, inputs):
         results = []
         for current_input in inputs:
-            prediction = self.exec_network.infer(self.fit_to_input(current_input))
+            input_data = self.fit_to_input(current_input)
+            if not self.is_dynamic and self.dynamic_inputs:
+                self.reshape_net({k: v.shape for k, v in input_data.items()})
+            prediction = self.exec_network.infer(input_data)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
 
@@ -507,7 +536,7 @@ class GanCheckModel(BaseModel):
             self.network = launcher.read_network(model, weights)
             for layer in self.additional_layers:
                 self.network.add_outputs(layer)
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -533,6 +562,9 @@ class GanCheckModel(BaseModel):
     def predict(self, identifiers, input_data, index_of_key):
         results = []
         for data in input_data:
-            prediction = self.exec_network.infer(self.fit_to_input(data.value))
+            input_dict = self.fit_to_input(data.value)
+            if not self.is_dynamic and self.dynamic_inputs:
+                self.reshape_net({k, v.shape} for k, v in input_dict.items())
+            prediction = self.exec_network.infer(input_dict)
             results.append(np.squeeze(prediction[self.output_blob[index_of_key]]))
         return results

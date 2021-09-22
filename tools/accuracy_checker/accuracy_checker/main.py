@@ -351,6 +351,14 @@ def add_openvino_specific_args(parser):
         '--kaldi_log_file', help='path for saving logs from Kaldi tools', type=partial(get_path, check_exists=False),
         required=False
     )
+    openvino_specific_args.add_argument(
+        '--undefined_shapes_resolving_policy', choices=['default', 'dynamic', 'static'],
+        help='Policy how to make deal with undefined shapes in network: '
+             'default - try to run as default, if does not work switch to static, '
+             'dynamic - enforce network execution with dynamic shapes, '
+             'static - convert undefined shapes to static before execution',
+        required=False, default='default'
+    )
 
 
 def build_arguments_parser():

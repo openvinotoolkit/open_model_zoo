@@ -883,6 +883,9 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         if not am.is_dir():
             launcher_entry['affinity_map'] = arguments.affinity_map
 
+    if 'undefined_shapes_resolving_policy' in arguments:
+        launcher_entry['_undefined_shapes_resolving_policy'] = arguments.undefined_shapes_resolving_policy
+
     return launcher_entry
 
 

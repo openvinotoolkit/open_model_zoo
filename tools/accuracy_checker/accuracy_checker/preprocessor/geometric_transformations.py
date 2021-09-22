@@ -22,7 +22,7 @@ import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
-from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage
+from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage, is_image, finalize_image_shape
 from ..logging import warning
 
 try:
@@ -178,6 +178,12 @@ class PointAligner(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 def center_padding(dst_width, dst_height, width, height, left_top_extend=False):
     delta = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
@@ -306,6 +312,19 @@ class Padding(Preprocessor):
 
         return image
 
+    def calculate_out_single_shape(self, data_shape):
+        if not self.dynamic_result_shape:
+            return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+        height, width = data_shape[:2]
+        if height == -1 or width == -1:
+            return data_shape
+        pref_height = math.ceil(height / float(self.stride)) * self.stride
+        pref_width = math.ceil(width / float(self.stride)) * self.stride
+        return finalize_image_shape(pref_height, pref_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
     @staticmethod
     def _opencv_padding(image, pad, pad_value):
         return cv2.copyMakeBorder(
@@ -405,6 +424,12 @@ class Tiling(Preprocessor):
     def dynamic_result_shape(self):
         return self._dynamic_shapes
 
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
@@ -448,6 +473,12 @@ class ImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
 
         return image
+
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
 
 
 class FaceDetectionImagePyramid(Preprocessor):
@@ -544,6 +575,12 @@ class FaceDetectionImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
         return image
 
+    @staticmethod
+    def calculate_out_shape(data_shape):
+        if len(data_shape) == 2:
+            return -1, -1
+        return -1, -1, data_shape[2]
+
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
@@ -611,6 +648,12 @@ class WarpAffine(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
 
 
 class SimilarityTransfom(Preprocessor):
@@ -702,3 +745,9 @@ class SimilarityTransfom(Preprocessor):
     @property
     def dynamic_result_shape(self):
         return self._dynamic_shapes
+
+    def calculate_out_single_shape(self, data_shape):
+        return finalize_image_shape(self.dst_height, self.dst_width, data_shape)
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]

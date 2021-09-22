@@ -245,6 +245,7 @@ class TestModelEvaluatorAsync:
     def test_switch_to_sync_predict_if_need_reshaping(self):
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = True
+        self.launcher.dynamic_shapes_policy = 'static'
         self.preprocessor.has_multi_infer_transformations = False
 
         self.evaluator.process_dataset(None, None)
