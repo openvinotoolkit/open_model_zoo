@@ -12,61 +12,53 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Classification                            |
-| GFlops                          | 0.121                                     |
+| GFlops                          | 0.11682                                   |
 | MParams                         | 2.537                                     |
 | Source framework                | TensorFlow\*                              |
 
 ## Accuracy
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| Top 1  | 67.36%          | 67.36%           |
-| Top 5  | 87.45%          | 87.45%           |
+| Metric | Value  |
+| ------ | -------|
+| Top 1  | 67.36% |
+| Top 5  | 87.44% |
 
 ## Input
 
 ### Original Model
 
-Image, name: `input` , shape: [1x224x224x3], format: [BxHxWxC], where:
+Image, name: `input_1` , shape: [1x224x224x3], format: [BxHxWxC], where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: RGB.
-   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
+Expected color order: RGB.
 
 ### Converted Model
 
-Image, name: `input` , shape: [1x3x224x224], format: [BxCxHxW], where:
+Image, name: `input_1` , shape: [1x3x224x224], format: [BxCxHxW], where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
 ### Original Model
 
-Probabilities for all dataset classes (0 class is background). Name: `MobilenetV3/Predictions/Softmax`,
-shape: [1,1001], format: [BxC],
-    where:
+Object classifier according to ImageNet classes, name - `StatefulPartitionedCall/MobilenetV3small/Predictions/Softmax`,  shape - `1,1000`, output data format is `B,C` where:
 
-    - B - batch size
-    - C - vector of probabilities.
+- `B` - batch size
+- `C` - Predicted probabilities for each class in  [0, 1] range
 
 ### Converted Model
 
-Probabilities for all dataset classes (0 class is background). Name: `MobilenetV3/Predictions/Softmax`,
-shape: [1,1001], format: [BxC],
-    where:
-
-    - B - batch size
-    - C - vector of probabilities.
+The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format
 
