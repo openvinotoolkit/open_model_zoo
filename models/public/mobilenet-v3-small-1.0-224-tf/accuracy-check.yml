@@ -19,4 +19,4 @@ models:
           - name: accuracy@top5
             type: accuracy
             top_k: 5
-            reference: 0.8745
+            reference: 0.8744
