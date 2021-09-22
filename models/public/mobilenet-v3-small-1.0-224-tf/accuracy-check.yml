@@ -1,39 +1,11 @@
 models:
   - name: mobilenet-v3-small-1.0-224-tf
-
-    launchers:
-      - framework: tf
-        model: v3-small_224_1.0_float/v3-small_224_1.0_float.pb
-        adapter: classification
-
-    datasets:
-      - name: imagenet_1001_classes
-        preprocessing:
-          - type: bgr_to_rgb
-          - type: resize
-            size: 256
-          - type: crop
-            size: 224
-          - type: normalization
-            mean: 127.5
-            std: 127.5
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-            reference: 0.6736
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-            reference: 0.8745
-
-  - name: mobilenet-v3-small-1.0-224-tf
     launchers:
       - framework: dlsdk
         adapter: classification
 
     datasets:
-      - name: imagenet_1001_classes
+      - name: imagenet_1000_classes
         preprocessing:
           - type: resize
             size: 256
