@@ -74,7 +74,7 @@ class ModelEvaluator:
             launcher, adapter, dataset_config
         )
 
-    def _get_batch_input(self, batch_annotation, batch_input, template=None):
+    def _get_batch_input(self, batch_input, batch_annotation, template=None):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         batch_meta = extract_image_representations(batch_input, meta_only=True)
         if template is None:
@@ -257,7 +257,7 @@ class ModelEvaluator:
         )
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
-            filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_inputs, batch_annotation)
             batch_raw_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.adapter and (calculate_metrics or dump_prediction_to_annotation):
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
@@ -330,7 +330,7 @@ class ModelEvaluator:
             except StopIteration:
                 break
 
-            batch_input, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
+            batch_input, batch_meta, _ = self._get_batch_input(batch_inputs, batch_annotation)
             queued_irs.append(ir_id)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
                                         context=(batch_id, batch_input_ids, batch_annotation, batch_identifiers))
@@ -413,7 +413,7 @@ class ModelEvaluator:
 
     def _initialize_input_shape(self, dynamic_shape_helper=None):
         _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, _, input_template = self._get_batch_input(batch_annotation, batch_input, dynamic_shape_helper)
+        filled_inputs, _, input_template = self._get_batch_input(batch_input, batch_annotation, dynamic_shape_helper)
         self.launcher.initialize_undefined_shapes(filled_inputs, template_shapes=input_template)
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
