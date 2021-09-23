@@ -14,9 +14,9 @@
 // limitations under the License.
 */
 
+#include <ngraph/ngraph.hpp>
 #include "models/detection_model_yolo.h"
 #include <utils/common.hpp>
-#include <ngraph/ngraph.hpp>
 #include <iostream>
 
 std::vector<float> defaultAnchors[] = {
