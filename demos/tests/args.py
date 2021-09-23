@@ -14,6 +14,7 @@
 
 import collections
 import shutil
+from itertools import cycle
 
 from pathlib import Path
 
@@ -55,16 +56,21 @@ class Arg:
 
 
 class ModelArg(Arg):
-    def __init__(self, name, precision='FP32'):
+    def __init__(self, name, precisions=None):
         self.name = name
-        self.precision = precision
+        self.precisions = precisions
+
+    def set_precisions(self, precisions):
+        if self.precisions is None:
+            self.precisions = precisions
+        self.precision = cycle(self.precisions + self.precisions[::-1])
 
     def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
+        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / next(self.precision) / (self.name + '.xml'))
 
     @property
     def required_models(self):
-        return [RequestedModel(self.name, [self.precision])]
+        return [RequestedModel(self.name, self.precisions)]
 
 
 class ModelFileArg(Arg):

@@ -47,6 +47,23 @@ class Demo:
             return {'CPU': []}
         return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
+    def get_models(self, case):
+        return (case.options[key] for key in self.model_keys if key in case.options)
+
+    def set_precisions(self, precisions):
+        cases_to_repeat = []
+        for case in self.test_cases:
+            case_to_add = True
+            for model in self.get_models(case):
+                if isinstance(model, ModelArg):
+                    model.set_precisions(precisions)
+                else:
+                    case_to_add = False
+            if case_to_add:
+                cases_to_repeat.append(case)
+        if len(precisions) > 1:
+            self.test_cases += cases_to_repeat * (len(precisions) - 1)
+
 
 class CppDemo(Demo):
     def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None):
@@ -615,7 +632,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002', precision='FP32-INT8'),
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002', precisions=['FP32-INT8']),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -628,7 +645,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precision='FP32-INT8'),
+                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precisions=['FP32-INT8']),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -656,7 +673,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', precision='FP32-INT8'),
+                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', precisions=['FP32-INT8']),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--vocab':
                     str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/vocab.txt'),
