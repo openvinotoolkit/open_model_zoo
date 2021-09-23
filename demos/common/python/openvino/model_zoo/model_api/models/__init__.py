@@ -17,6 +17,7 @@
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .centernet import CenterNet
+from .classification import Classification
 from .deblurring import Deblurring
 from .detr import DETR
 from .ctpn import CTPN
@@ -36,6 +37,7 @@ __all__ = [
     'BertNamedEntityRecognition',
     'BertQuestionAnswering',
     'CenterNet',
+    'Classification',
     'CTPN',
     'DetectionWithLandmarks',
     'Deblurring',

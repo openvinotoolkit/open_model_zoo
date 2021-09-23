@@ -97,6 +97,7 @@ class InputTransform:
             inputs = cv2.cvtColor(inputs, cv2.COLOR_BGR2RGB)
         return (inputs - self.means) / self.std_scales
 
+
 def load_labels(label_file):
     with open(label_file, 'r') as f:
         labels_map = [x.strip() for x in f]
@@ -139,7 +140,18 @@ def resize_image_letterbox(image, size, interpolation=cv2.INTER_LINEAR):
     return resized_image
 
 
+def resize_with_center_square_crop(image, size):
+    if (image.shape[0] > image.shape[1]):
+        offset = (image.shape[0] - image.shape[1]) // 2
+        cropped_frame = image[offset:image.shape[0] - offset, 0:image.shape[1]]
+    else:
+        offset = (image.shape[1] - image.shape[0]) // 2
+        cropped_frame = image[0:image.shape[0], offset:image.shape[0] - offset]
+    return cv2.resize(cropped_frame, size)
+
+
 RESIZE_TYPES = {
+    'crop' : resize_with_center_square_crop,
     'standard': resize_image,
     'fit_to_window': resize_image_with_aspect,
     'fit_to_window_letterbox': resize_image_letterbox,
