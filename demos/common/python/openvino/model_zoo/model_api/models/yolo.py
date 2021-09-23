@@ -147,6 +147,25 @@ class YOLO(DetectionModel):
 
         return objects
 
+    # For model which includes postprocess
+    @staticmethod
+    def _parse_yolo_with_postprocess_region(predictions, threshold):
+        objects = []
+        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
+        for prediction in predictions:
+            x, y, width, height, object_score = prediction[:5]
+            class_probabilities = prediction[5:]
+            if object_score < threshold:
+                continue
+
+            class_id = np.argmax(class_probabilities)
+            class_probability = class_probabilities[class_id]
+            if class_probability > threshold:
+                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                         class_probability, class_id))
+
+        return objects
+
     @staticmethod
     def _get_probabilities(prediction, classes):
         object_probabilities = prediction[:, 4].flatten()
@@ -208,9 +227,12 @@ class YOLO(DetectionModel):
         detections = []
         for layer_name in self.yolo_layer_params.keys():
             out_blob = outputs[layer_name]
-            layer_params = self.yolo_layer_params[layer_name]
-            out_blob.shape = layer_params[0]
-            detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.threshold)
+            if 'ResWithPostprocess' in layer_name:
+                detections += self._parse_yolo_with_postprocess_region(out_blob, self.threshold)
+            else:
+                layer_params = self.yolo_layer_params[layer_name]
+                out_blob.shape = layer_params[0]
+                detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.threshold)
 
         detections = self._filter(detections, self.iou_threshold)
         return detections
@@ -244,14 +266,17 @@ class YoloV4(YOLO):
         if not self.masks:
             self.masks = [1, 2, 3, 3, 4, 5] if self.is_tiny else [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
-        outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
+        if 'ResWithPostprocess' in list(self.net.outputs.items())[0][0]:
+            outputs = sorted(self.net.outputs.items(), key=None, reverse=True)
+        else:
+            outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
 
         output_info = {}
         num = 3
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
             classes = shape[1] // num - 5
-            if shape[1] % num != 0:
+            if 'ResWithPostprocess' not in name and shape[1] % num != 0:
                 raise RuntimeError("The output blob {} has wrong 2nd dimension".format(name))
             yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
