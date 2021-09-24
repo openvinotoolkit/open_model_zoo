@@ -86,9 +86,9 @@ def temp_dir_as_path():
         yield Path(temp_dir)
 
 
-def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test, precisions):
+def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
     model_names = set()
-    model_precisions = set(precisions)
+    model_precisions = set()
 
     for demo in demos_to_test:
         for case in demo.test_cases:
@@ -186,7 +186,7 @@ def main():
         demo.set_precisions(args.precisions)
 
     with temp_dir_as_path() as global_temp_dir:
-        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
+        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
 
         num_failures = 0
 

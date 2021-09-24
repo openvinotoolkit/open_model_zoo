@@ -56,12 +56,12 @@ class Arg:
 
 
 class ModelArg(Arg):
-    def __init__(self, name, precisions=None):
+    def __init__(self, name, precisions=[]):
         self.name = name
         self.precisions = precisions
 
     def set_precisions(self, precisions):
-        if self.precisions is None:
+        if not self.precisions:
             self.precisions = precisions
         self.precision = cycle(self.precisions + self.precisions[::-1])
 
