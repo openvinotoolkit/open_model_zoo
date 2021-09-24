@@ -22,10 +22,11 @@ from .utils import load_labels
 
 
 class Classification(ImageModel):
-    def __init__(self, ie, model_path, labels, resize_type='crop', log=None):
+    def __init__(self, ie, model_path, labels, ntop, resize_type='crop', log=None):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
         self._check_inputs()
+        self.ntop = ntop
         self.labels = self._load_labels(labels)
         self.output_blob_name = self._get_outputs()
 
@@ -38,7 +39,6 @@ class Classification(ImageModel):
                 if (begin_idx == -1):
                     raise Exception("The labels file has incorrect format.")
                 end_idx = s.find(',')
-                
                 labels.append(s[(begin_idx + 1):end_idx])
         return labels
 
@@ -73,7 +73,7 @@ class Classification(ImageModel):
     def postprocess(self, outputs, meta):
         probs = outputs[self.output_blob_name].squeeze()
         indices = np.argsort(probs)
-        max_indices = indices[-3:][::-1] # indices sorted by probs in descended order
-        result = [(i, probs[i], self.labels[i]) for i in max_indices]
+        max_indices = indices[-self.ntop:][::-1] # indices sorted by probs in descended order
+        result = [(i, self.labels[i], probs[i]) for i in max_indices]
         return result
 

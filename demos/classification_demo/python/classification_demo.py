@@ -15,16 +15,13 @@
  limitations under the License.
 """
 
-import colorsys
 import logging as log
-import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
@@ -58,10 +55,8 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
-    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
-                                   help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--resize_type', default=None, choices=models.RESIZE_TYPES.keys(),
-                                   help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
+    common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be >= 1.', default=5,
+                                   required=False, type=int)
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -79,6 +74,8 @@ def build_argparser():
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
                          help='Optional. Name of the output file(s) to save.')
+    io_args.add_argument('--pause', required=False, default=1, type=int,
+                         help='Optional. Pause in ms between frames to show.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
@@ -90,18 +87,6 @@ def build_argparser():
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
-    input_transform_args = parser.add_argument_group('Input transform options')
-    input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
-                                      help='Optional. Switch the input channels order from '
-                                           'BGR to RGB.')
-    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
-                                      help='Optional. Normalize input by subtracting the mean '
-                                           'values per channel. Example: 255.0 255.0 255.0')
-    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
-                                      help='Optional. Divide input by scale values per channel. '
-                                           'Division is applied after mean values subtraction. '
-                                           'Example: 255.0 255.0 255.0')
-
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
@@ -110,26 +95,32 @@ def build_argparser():
 
 def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
-    offset = 0
+    label_height = cv2.getTextSize(classifications[0][1], cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
+    num = len(classifications)
+    labels_pos =  frame.shape[0] - label_height * 2 * num - label_height
+    if (labels_pos < 0):
+        labels_pos = 0
+        log.warning("Too much labels to display on this frame, some will be omitted ")
+    
+    offset_y = labels_pos 
     for classification in classifications:
-        label = '{} {:.1%}'.format(classification[2], classification[1])
-        label_size =cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0]
-        print(label_size)
-        offset += label_size[1] * 2
-        put_highlighted_text(frame, label, (frame.shape[1] - label_size[0], offset),
-            cv2.FONT_HERSHEY_COMPLEX, 0.75, (210,10,10), 2)
+        label = '{} {:.1%}'.format(classification[1], classification[2])
+        label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
+        offset_y += label_height * 2
+        put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
+            cv2.FONT_HERSHEY_COMPLEX, 0.75, (10,10,210), 2)
     return frame
 
 
-def print_raw_results(detections, labels, frame_id):
+def print_raw_results(classifications, frame_id):
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
-    log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
-    for detection in detections:
-        xmin, ymin, xmax, ymax = detection.get_coords()
-        class_id = int(detection.id)
-        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-        log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+    log.debug(' Class ID | Confidence | Label ')
+    for classification in classifications:
+        class_id = classification[0]
+        label = classification[1]
+        conf = classification[2]
+        log.debug('{:^4} | {:^9} | {:^10f } '
+                  .format(class_id, label, conf))
 
 
 def main():
@@ -144,15 +135,14 @@ def main():
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Reading model {}'.format(args.model))
-    model = models.Classification(ie, args.model, labels=args.labels)
-    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
+    model = models.Classification(ie, args.model,ntop=args.ntop, labels=args.labels)
     log_blobs_info(model)
 
-    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
+    async_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(detector_pipeline.exec_net, set(parse_devices(args.device)))
+    log_runtime_settings(async_pipeline.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -164,17 +154,17 @@ def main():
     video_writer = cv2.VideoWriter()
 
     while True:
-        if detector_pipeline.callback_exceptions:
-            raise detector_pipeline.callback_exceptions[0]
+        if async_pipeline.callback_exceptions:
+            raise async_pipeline.callback_exceptions[0]
         # Process all completed requests
-        results = detector_pipeline.get_result(next_frame_id_to_show)
+        results = async_pipeline.get_result(next_frame_id_to_show)
         if results:
             classifications, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            # if len(objects) and args.raw_output_message:
-            #     print_raw_results(objects, model.labels, next_frame_id_to_show)
+            if len(classifications) and args.raw_output_message:
+                print_raw_results(classifications, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
@@ -187,8 +177,8 @@ def main():
             next_frame_id_to_show += 1
 
             if not args.no_show:
-                cv2.imshow('Detection Results', frame)
-                key = cv2.waitKey(0)
+                cv2.imshow('Classification Results', frame)
+                key = cv2.waitKey(args.pause)
 
                 ESC_KEY = 27
                 # Quit.
@@ -197,7 +187,7 @@ def main():
                 presenter.handleKey(key)
             continue
 
-        if detector_pipeline.is_ready():
+        if async_pipeline.is_ready():
             # Get new image/frame
             start_time = perf_counter()
             frame = cap.read()
@@ -217,25 +207,25 @@ def main():
                                                          cap.fps(), output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
-            detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            async_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
         else:
             # Wait for empty request
-            detector_pipeline.await_any()
+            async_pipeline.await_any()
 
-    detector_pipeline.await_all()
+    async_pipeline.await_all()
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
-        results = detector_pipeline.get_result(next_frame_id_to_show)
+        results = async_pipeline.get_result(next_frame_id_to_show)
         while results is None:
-            results = detector_pipeline.get_result(next_frame_id_to_show)
+            results = async_pipeline.get_result(next_frame_id_to_show)
         classifications, frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
-        # if len(objects) and args.raw_output_message:
-        #     print_raw_results(objects, model.labels, next_frame_id_to_show)
+        if len(classifications) and args.raw_output_message:
+            print_raw_results(classifications, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
@@ -247,8 +237,8 @@ def main():
             video_writer.write(frame)
 
         if not args.no_show:
-            cv2.imshow('Detection Results', frame)
-            key = cv2.waitKey(0)
+            cv2.imshow('Classification Results', frame)
+            key = cv2.waitKey(args.pause)
 
             ESC_KEY = 27
             # Quit.
@@ -258,9 +248,9 @@ def main():
 
     metrics.log_total()
     log_latency_per_stage(cap.reader_metrics.get_latency(),
-                          detector_pipeline.preprocess_metrics.get_latency(),
-                          detector_pipeline.inference_metrics.get_latency(),
-                          detector_pipeline.postprocess_metrics.get_latency(),
+                          async_pipeline.preprocess_metrics.get_latency(),
+                          async_pipeline.inference_metrics.get_latency(),
+                          async_pipeline.postprocess_metrics.get_latency(),
                           render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
