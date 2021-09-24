@@ -1,0 +1,16 @@
+compression:
+  algorithms:
+    - name: DefaultQuantization
+      params:
+        preset: mixed
+        stat_subset_size: 300
+        ignored:
+          scope:
+            - StatefulPartitionedCall/MobilenetV3large/expanded_conv/depthwise/depthwise
+            - StatefulPartitionedCall/MobilenetV3large/multiply/mul
+            - StatefulPartitionedCall/MobilenetV3large/expanded_conv/Add/add
+        weights:
+          mode: symmetric
+          granularity: perchannel
+        activations:
+          mode: asymmetric
