@@ -1,4 +1,4 @@
-# Classification C++ Demo
+# Classification Benchmark C++ Demo
 
 The demo visualize OpenVINO performance on inference of neural networks for image classification.
 
@@ -16,8 +16,8 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+The list of models supported by the demo is in `<omz_dir>/demos/classification_benchmark_demo/cpp/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -147,7 +147,7 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-classification_demo [OPTION]
+classification_benchmark_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
@@ -179,7 +179,7 @@ For higher FPS, it is recommended to use -nireq which slightly exceeds -nstreams
 For example, use the following command-line command to run the application:
 
 ```sh
-./classification_demo -m <path_to_classification_model> \
+./classification_benchmark_demo -m <path_to_classification_model> \
                       -i <path_to_folder_with_images> \
                       -labels <path_to_file_with_list_of_labels> \
                       -gt <path_to_ground_truth_data_file> \
