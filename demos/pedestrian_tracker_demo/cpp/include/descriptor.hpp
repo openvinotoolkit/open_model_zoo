@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -107,9 +107,9 @@ private:
     VectorCNN handler;
 
 public:
-    DescriptorIE(const CnnConfig& config,
+    DescriptorIE(const CnnConfigTracker& config,
                  const InferenceEngine::Core& ie,
-                 const std::string & deviceName):
+                 const std::string& deviceName):
         handler(config, ie, deviceName) {}
 
     ///

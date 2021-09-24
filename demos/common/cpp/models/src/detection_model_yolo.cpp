@@ -155,32 +155,32 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         }
 
         std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outputInfo](const std::string& x, const std::string&  y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
+            [&outputInfo](const std::string& x, const std::string& y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
 
         for (const auto& name : outputsNames) {
             auto& output = outputInfo[name];
             auto shape = output->getDims();
-            auto classes = shape[1] / num - 4 - isObjConf;
+            int classes = (int)shape[1] / num - 4 - (isObjConf ? 1 : 0);
             if (shape[1] % num != 0) {
                 throw std::runtime_error(std::string("The output blob ") + name + " has wrong 2nd dimension");
             }
             regions.emplace(name, Region(classes, 4,
                 presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
                 std::vector<int64_t>(chosenMasks.begin() + i*num, chosenMasks.begin() + (i+1)*num),
-                shape[3], shape[2]));
+                (int)shape[3], (int)shape[2]));
             i++;
         }
     }
     else {
         // Currently externally set anchors and masks are supported only for YoloV4
-        if(presetAnchors.size() || presetMasks.size()){
+        if(presetAnchors.size() || presetMasks.size()) {
             slog::warn << "Preset anchors and mask can be set for YoloV4 model only. "
                 "This model is not YoloV4, so these options will be ignored." << slog::endl;
         }
     }
 }
 
-std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) {
+std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     std::vector<DetectedObject> objects;
 
@@ -333,8 +333,8 @@ ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionY
     num = mask.size();
 
     auto shape = regionYolo->get_input_shape(0);
-    outputWidth = shape[3];
-    outputHeight = shape[2];
+    outputWidth = (int)shape[3];
+    outputHeight = (int)shape[2];
 
     if (num) {
 

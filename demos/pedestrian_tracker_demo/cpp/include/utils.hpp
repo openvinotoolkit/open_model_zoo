@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -24,7 +24,7 @@
 ///
 struct DetectionLogEntry {
     TrackedObjects objects;  ///< Detected objects.
-    int frame_idx;           ///< Processed frame index (-1 if N/A).
+    int64_t frame_idx;           ///< Processed frame index (-1 if N/A).
     double time_ms;          ///< Frame processing time in ms (-1 if N/A).
 
     ///

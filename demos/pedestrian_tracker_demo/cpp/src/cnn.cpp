@@ -19,8 +19,8 @@
 #include <utils/common.hpp>
 
 CnnBase::CnnBase(const Config& config,
-                 const InferenceEngine::Core & ie,
-                 const std::string & deviceName) :
+    const InferenceEngine::Core& ie,
+    const std::string& deviceName) :
     config_(config), ie_(ie), deviceName_(deviceName) {}
 
 void CnnBase::Load() {
@@ -81,13 +81,13 @@ void CnnBase::InferBatch(
 }
 
 void CnnBase::Infer(const cv::Mat& frame,
-                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
-    InferBatch({frame}, fetch_results);
+    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
+    InferBatch({ frame }, fetch_results);
 }
 
 VectorCNN::VectorCNN(const Config& config,
-                     const InferenceEngine::Core& ie,
-                     const std::string & deviceName)
+    const InferenceEngine::Core& ie,
+    const std::string& deviceName)
     : CnnBase(config, ie, deviceName) {
     Load();
 
@@ -100,14 +100,14 @@ VectorCNN::VectorCNN(const Config& config,
 }
 
 void VectorCNN::Compute(const cv::Mat& frame,
-                        cv::Mat* vector, cv::Size outp_shape) const {
+    cv::Mat* vector, cv::Size outp_shape) const {
     std::vector<cv::Mat> output;
-    Compute({frame}, &output, outp_shape);
+    Compute({ frame }, &output, outp_shape);
     *vector = output[0];
 }
 
 void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors,
-                        cv::Size outp_shape) const {
+    cv::Size outp_shape) const {
     if (images.empty()) {
         return;
     }
@@ -128,10 +128,10 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             cv::Mat out_blob(blob_sizes, CV_32F, blobMapped.as<float*>());
             for (size_t b = 0; b < batch_size; b++) {
                 cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,
-                                     reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));
+                    reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));
                 vectors->emplace_back();
                 if (outp_shape != cv::Size())
-                    blob_wrapper = blob_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
+                    blob_wrapper = blob_wrapper.reshape(1, { outp_shape.height, outp_shape.width });
                 blob_wrapper.copyTo(vectors->back());
             }
         }

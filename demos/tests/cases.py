@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -398,14 +398,43 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
-        single_option_cases('-m_det',
-            ModelArg('person-detection-retail-0002'),
-            ModelArg('person-detection-retail-0013')),
-        single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
+        *combine_cases(
+            TestCase(options={'-at': 'ssd'}),
+            single_option_cases('-m_det',
+                ModelArg('person-detection-retail-0002'),
+                ModelArg('person-detection-retail-0013'))),
+            single_option_cases('-m_reid',
+                ModelArg('person-reidentification-retail-0277'),
+                ModelArg('person-reidentification-retail-0286'),
+                ModelArg('person-reidentification-retail-0287'),
+                ModelArg('person-reidentification-retail-0288')),
+        *combine_cases(
+            TestCase(options={'-at': 'yolo', '-person_label': '0'}),
+            single_option_cases('-m_det',
+                ModelArg('yolo-v3-tf'))),
+            single_option_cases('-m_reid',
+                ModelArg('person-reidentification-retail-0277'),
+                ModelArg('person-reidentification-retail-0286'),
+                ModelArg('person-reidentification-retail-0287'),
+                ModelArg('person-reidentification-retail-0288')),
+        *combine_cases(
+            TestCase(options={'-at': 'ssd', '-person_label': '1'}),
+            single_option_cases('-m_det',
+                ModelArg('retinanet-tf'))),
+            single_option_cases('-m_reid',
+                ModelArg('person-reidentification-retail-0277'),
+                ModelArg('person-reidentification-retail-0286'),
+                ModelArg('person-reidentification-retail-0287'),
+                ModelArg('person-reidentification-retail-0288')),
+        *combine_cases(
+            TestCase(options={'-at': 'centernet', '-person_label': '0'}),
+            single_option_cases('-m_det',
+                ModelArg('ctdet_coco_dlav0_512'))),
+            single_option_cases('-m_reid',
+                ModelArg('person-reidentification-retail-0277'),
+                ModelArg('person-reidentification-retail-0286'),
+                ModelArg('person-reidentification-retail-0287'),
+                ModelArg('person-reidentification-retail-0288')),
     )),
 
     CppDemo(name='security_barrier_camera_demo',
