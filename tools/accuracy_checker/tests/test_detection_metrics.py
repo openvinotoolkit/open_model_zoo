@@ -16,9 +16,9 @@ limitations under the License.
 
 import pytest
 import numpy as np
-from accuracy_checker.metrics import DetectionMAP
-from accuracy_checker.metrics.detection import Recall, bbox_match
-from accuracy_checker.metrics.overlap import IOU, IOA
+from openvino.tools.accuracy_checker.metrics import DetectionMAP
+from openvino.tools.accuracy_checker.metrics.detection import Recall, bbox_match
+from openvino.tools.accuracy_checker.metrics.overlap import IOU, IOA
 from tests.common import (make_representation, single_class_dataset, multi_class_dataset,
                           multi_class_dataset_without_background)
 

@@ -47,11 +47,11 @@ from ..logging import print_info
 from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 
 try:
-    from openvino.inference_engine import Blob, TensorDesc
+    from openvino.inference_engine import Blob, TensorDesc  # pylint:disable=W9902
 except ImportError:
     try:
         # old structures names compatibilities
-        from openvino.inference_engine import IEBlob, IETensorDesc
+        from openvino.inference_engine import IEBlob, IETensorDesc # pylint:disable=W9902
 
         Blob = IEBlob
         TensorDesc = IETensorDesc

@@ -21,11 +21,11 @@ import sys
 import warnings
 import platform
 import subprocess # nosec - disable B404:import-subprocess check
-from setuptools import find_packages, setup
-from setuptools.command.test import test as test_command
-from setuptools.command.install import install as install_command
 from distutils.version import LooseVersion
 from pathlib import Path
+from setuptools import find_packages, setup # pylint:disable=W9902
+from setuptools.command.test import test as test_command # pylint:disable=W9902
+from setuptools.command.install import install as install_command # pylint:disable=W9902
 
 here = Path(__file__).parent
 
@@ -38,9 +38,9 @@ class PyTest(test_command):
         self.pytest_args = ''
 
     def run_tests(self):
-        import shlex
+        import shlex # pylint:disable=C0415
         # import here, cause outside the eggs aren't loaded
-        import pytest
+        import pytest # pylint:disable=C0415
 
         error_code = pytest.main(shlex.split(self.pytest_args))
         sys.exit(error_code)
@@ -54,7 +54,7 @@ def read(*path):
 
 def check_and_update_numpy(min_acceptable='1.15'):
     try:
-        import numpy as np
+        import numpy as np # pylint:disable=C0415
         update_required = LooseVersion(np.__version__) < LooseVersion(min_acceptable)
     except ImportError:
         update_required = True
@@ -83,7 +83,7 @@ def find_version(*path):
 
 is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
-version = find_version("accuracy_checker", "__init__.py")
+version = find_version("openvino/tools/accuracy_checker", "__init__.py")
 
 
 def prepare_requirements():
@@ -94,7 +94,7 @@ def prepare_requirements():
     return requirements_core + requirements
 
 
-requirements = prepare_requirements()
+_requirements = prepare_requirements()
 
 try:
     importlib.import_module('cv2')
@@ -103,13 +103,15 @@ except ImportError as opencv_import_error:
         warnings.warn(
             "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
         )
-        requirements.append('opencv-python')
+        _requirements.append('opencv-python')
     else:
-        warnings.warn("Problem with cv2 import: \n{}.\n Probably due to unsuitable numpy version, will be updated".format(opencv_import_error))
+        warnings.warn(
+            "Problem with cv2 import: \n{}".format(opencv_import_error)
+            + "\n Probably due to unsuitable numpy version, will be updated")
         check_and_update_numpy()
 
 if is_arm:
-    install_dependencies_with_pip(requirements)
+    install_dependencies_with_pip(_requirements)
 
 setup(
     name="accuracy_checker",
@@ -119,12 +121,11 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "accuracy_check=accuracy_checker.main:main",
-            "convert_annotation=accuracy_checker.annotation_converters.convert:main",
-    ]},
+            "accuracy_check=openvino.tools.accuracy_checker.main:main",
+            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main"]},
     zip_safe=False,
     python_requires='>=3.5',
-    install_requires=requirements if not is_arm else '',
+    install_requires=_requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
     extras_require={'extra': ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips',

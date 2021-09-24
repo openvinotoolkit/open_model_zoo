@@ -19,7 +19,7 @@ from pathlib import Path
 from unittest.mock import ANY
 
 import pytest
-from accuracy_checker.config.config_validator import (
+from openvino.tools.accuracy_checker.config.config_validator import (
     ConfigError,
     ConfigValidator,
     DictField,
@@ -30,16 +30,16 @@ from accuracy_checker.config.config_validator import (
     BaseField,
     BoolField
 )
-from accuracy_checker.evaluators import ModelEvaluator
-from accuracy_checker.launcher import Launcher
-from accuracy_checker.dataset import Dataset
-from accuracy_checker.metrics import Metric
-from accuracy_checker.postprocessor import Postprocessor
-from accuracy_checker.preprocessor import Preprocessor
-from accuracy_checker.data_readers import BaseReader
-from accuracy_checker.annotation_converters import BaseFormatConverter
-from accuracy_checker.adapters import Adapter
-from accuracy_checker.utils import contains_all
+from openvino.tools.accuracy_checker.evaluators import ModelEvaluator
+from openvino.tools.accuracy_checker.launcher import Launcher
+from openvino.tools.accuracy_checker.dataset import Dataset
+from openvino.tools.accuracy_checker.metrics import Metric
+from openvino.tools.accuracy_checker.postprocessor import Postprocessor
+from openvino.tools.accuracy_checker.preprocessor import Preprocessor
+from openvino.tools.accuracy_checker.data_readers import BaseReader
+from openvino.tools.accuracy_checker.annotation_converters import BaseFormatConverter
+from openvino.tools.accuracy_checker.adapters import Adapter
+from openvino.tools.accuracy_checker.utils import contains_all
 from tests.common import mock_filesystem
 
 
