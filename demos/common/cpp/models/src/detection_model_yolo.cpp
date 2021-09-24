@@ -155,7 +155,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         }
 
         std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outputInfo](const std::string& x, const std::string&  y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
+            [&outputInfo](const std::string& x, const std::string& y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
 
         for (const auto& name : outputsNames) {
             auto& output = outputInfo[name];
@@ -167,20 +167,20 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             regions.emplace(name, Region(classes, 4,
                 presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
                 std::vector<int64_t>(chosenMasks.begin() + i*num, chosenMasks.begin() + (i+1)*num),
-                shape[3], shape[2]));
+                (int)shape[3], (int)shape[2]));
             i++;
         }
     }
     else {
         // Currently externally set anchors and masks are supported only for YoloV4
-        if(presetAnchors.size() || presetMasks.size()){
+        if(presetAnchors.size() || presetMasks.size()) {
             slog::warn << "Preset anchors and mask can be set for YoloV4 model only. "
                 "This model is not YoloV4, so these options will be ignored." << slog::endl;
         }
     }
 }
 
-std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) {
+std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     std::vector<DetectedObject> objects;
 
