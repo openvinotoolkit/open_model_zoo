@@ -160,7 +160,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         for (const auto& name : outputsNames) {
             auto& output = outputInfo[name];
             auto shape = output->getDims();
-            auto classes = shape[1] / num - 4 - isObjConf;
+            int classes = (int)shape[1] / num - 4 - (isObjConf ? 1 : 0);
             if (shape[1] % num != 0) {
                 throw std::runtime_error(std::string("The output blob ") + name + " has wrong 2nd dimension");
             }
