@@ -543,7 +543,7 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
             data = input_data[self._name_to_idx[name]]
             data = np.expand_dims(data, axis=0)
             data = np.transpose(data, [0, 3, 1, 2])
-            if not input_info.is_dynamic:
+            if not info.input_data.is_dynamic:
                 assert tuple(info.input_data.shape) == np.shape(data)
             fitted[name] = data
 
