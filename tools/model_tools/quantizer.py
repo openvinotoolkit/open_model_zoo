@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import open_model_zoo.model_tools.quantizer
+import openvino.model_zoo.omz_quantizer
 
 if __name__ == '__main__':
-    open_model_zoo.model_tools.quantizer.main()
+    openvino.model_zoo.omz_quantizer.main()

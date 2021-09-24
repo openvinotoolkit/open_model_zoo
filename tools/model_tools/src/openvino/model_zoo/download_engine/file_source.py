@@ -15,7 +15,7 @@
 import re
 import requests
 
-from open_model_zoo.model_tools.download_engine import validation
+from openvino.model_zoo.download_engine import validation
 
 
 class TaggedBase:

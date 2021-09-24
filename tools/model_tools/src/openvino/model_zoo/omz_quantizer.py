@@ -22,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from open_model_zoo.model_tools import (
+from openvino.model_zoo import (
     _configuration, _common, _reporting,
 )
 

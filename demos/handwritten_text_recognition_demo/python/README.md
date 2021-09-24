@@ -11,18 +11,18 @@ The demo first reads an image and performs the preprocessing such as resize and 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/handwritten_text_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -113,4 +113,4 @@ The demo reports
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

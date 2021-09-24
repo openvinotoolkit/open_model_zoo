@@ -3,7 +3,7 @@
 # Copyright (C) 2020 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
-#  This script is automatically executed by open_model_zoo/tools/downloader/converter.py,
+#  This script is automatically executed by open_model_zoo/tools/model_tools/converter.py,
 #  and runs pbmm_to_pb.py and scorer_to_kenlm.py.
 #
 import sys

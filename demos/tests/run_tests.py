@@ -170,7 +170,7 @@ def main():
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
-    auto_tools_dir = omz_dir / 'tools/downloader'
+    auto_tools_dir = omz_dir / 'tools/model_tools'
 
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],

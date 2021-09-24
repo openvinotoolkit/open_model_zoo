@@ -119,7 +119,7 @@ def main():
     compat_symlinks = [
         ('deployment_tools/intel_models', 'open_model_zoo/models/intel'),
         ('deployment_tools/open_model_zoo/intel_models', 'models/intel'),
-        ('deployment_tools/tools/model_downloader', '../open_model_zoo/tools/downloader'),
+        ('deployment_tools/tools/model_downloader', '../open_model_zoo/tools/model_tools'),
         ('deployment_tools/inference_engine/demos', '../open_model_zoo/demos'),
     ]
 

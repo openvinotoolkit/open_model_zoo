@@ -23,10 +23,10 @@ import threading
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import (
+from openvino.model_zoo import (
     _configuration, _common, _concurrency, _reporting,
 )
-from open_model_zoo.model_tools.download_engine.downloader import Downloader
+from openvino.model_zoo.download_engine.downloader import Downloader
 
 
 class DownloaderArgumentParser(argparse.ArgumentParser):

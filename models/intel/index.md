@@ -5,7 +5,7 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
+The models can be downloaded via [Model Downloader](../../tools/model_tools/README.md).
 
 > **TIP**: You also can download and profile Intel® pretrained models inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
 > [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
@@ -316,7 +316,7 @@ Deep Learning models for time series forecasting.
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../tools/model_tools/README.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
 
 ## Legal Information

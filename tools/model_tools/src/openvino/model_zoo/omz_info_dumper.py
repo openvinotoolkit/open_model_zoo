@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _configuration, _common
+from openvino.model_zoo import _configuration, _common
 
 def to_info(model):
     return {

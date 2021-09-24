@@ -27,14 +27,21 @@ future releases.
 > <br>
 > Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
 
-## Prerequisites
+## Installation
 
-1. Install Python (version 3.6 or higher)
-2. Install the tools' dependencies with the following command:
+Model Downloader and other automation tools can be installed as a part of OpenVINO&trade; toolkit or from source.
+Installation from source is as follows:
+
+1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
+
+2. Install the tools with the following command:
 
 ```sh
-python3 -mpip install --user -r ./requirements.in
+python setup.py install
 ```
+
+> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
+> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
 
 For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
@@ -46,19 +53,19 @@ additional dependencies.
 For models from Caffe2:
 
 ```sh
-python3 -mpip install --user -r ./requirements-caffe2.in
+python -mpip install --user -r ./requirements-caffe2.in
 ```
 
 For models from PyTorch:
 
 ```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
+python -mpip install --user -r ./requirements-pytorch.in
 ```
 
 For models from TensorFlow:
 
 ```sh
-python3 -mpip install --user -r ./requirements-tensorflow.in
+python -mpip install --user -r ./requirements-tensorflow.in
 ```
 
 ## Model downloader usage
@@ -66,7 +73,7 @@ python3 -mpip install --user -r ./requirements-tensorflow.in
 The basic usage is to run the script like this:
 
 ```sh
-./downloader.py --all
+omz_downloader --all
 ```
 
 This will download all models. The `--all` option can be replaced with
@@ -78,14 +85,14 @@ in the current directory. To download into a different directory, use
 the `-o`/`--output_dir` option:
 
 ```sh
-./downloader.py --all --output_dir my/download/directory
+omz_downloader --all --output_dir my/download/directory
 ```
 
 You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
+omz_downloader --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -93,7 +100,7 @@ the `--num_attempts` option to change that and increase the robustness of the
 download process:
 
 ```sh
-./downloader.py --all --num_attempts 5 # attempt each download five times
+omz_downloader --all --num_attempts 5 # attempt each download five times
 ```
 
 You can use the `--cache_dir` option to make the script use the specified directory
@@ -101,7 +108,7 @@ as a cache. The script will place a copy of each downloaded file in the cache, o
 if it is already there, retrieve it from the cache instead of downloading it again.
 
 ```sh
-./downloader.py --all --cache_dir my/cache/directory
+omz_downloader --all --cache_dir my/cache/directory
 ```
 
 The cache format is intended to remain compatible in future Open Model Zoo
@@ -113,7 +120,7 @@ text. If you want to consume progress information programmatically, use the
 `--progress_format` option:
 
 ```sh
-./downloader.py --all --progress_format=json
+omz_downloader --all --progress_format=json
 ```
 
 When this option is set to `json`, the script's standard output is replaced by
@@ -129,7 +136,7 @@ The script can download files for multiple models concurrently. To enable this,
 use the `-j`/`--jobs` option:
 
 ```sh
-./downloader.py --all -j8 # download up to 8 models at a time
+omz_downloader --all -j8 # download up to 8 models at a time
 ```
 
 See the "Shared options" section for information on other options accepted by
@@ -224,7 +231,7 @@ In particular:
 The basic usage is to run the script like this:
 
 ```sh
-./converter.py --all
+omz_converter --all
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
@@ -239,14 +246,14 @@ downloader. To specify a different download tree path, use the `-d`/`--download_
 option:
 
 ```sh
-./converter.py --all --download_dir my/download/directory
+omz_converter --all --download_dir my/download/directory
 ```
 
 By default, the converted models are placed into the download tree. To place them
 into a different directory tree, use the `-o`/`--output_dir` option:
 
 ```sh
-./converter.py --all --output_dir my/output/directory
+omz_converter --all --output_dir my/output/directory
 ```
 >Note: models in intermediate format are placed to this directory too.
 
@@ -255,7 +262,7 @@ for conversion. To only produce models in a specific precision, use the `--preci
 option:
 
 ```sh
-./converter.py --all --precisions=FP16
+omz_converter --all --precisions=FP16
 ```
 
 If the specified precision is not supported for a model, that model will be skipped.
@@ -265,7 +272,7 @@ that was used to run the script itself. To use a different Python executable,
 use the `-p`/`--python` option:
 
 ```sh
-./converter.py --all --python my/python
+omz_converter --all --python my/python
 ```
 
 The script will attempt to locate Model Optimizer using several methods:
@@ -274,7 +281,7 @@ The script will attempt to locate Model Optimizer using several methods:
    to the script to run:
 
    ```sh
-   ./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
+   omz_converter --all --mo my/openvino/path/model_optimizer/mo.py
    ```
 
 2. Otherwise, if the selected Python executable can import the `mo` package,
@@ -291,14 +298,14 @@ configuration by using the `--add_mo_arg` option. The option can be repeated
 to add multiple arguments:
 
 ```sh
-./converter.py --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent
+omz_converter --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent
 ```
 
 The script can run multiple conversion commands concurrently. To enable this,
 use the `-j`/`--jobs` option:
 
 ```sh
-./converter.py --all -j8 # run up to 8 commands at a time
+omz_converter --all -j8 # run up to 8 commands at a time
 ```
 
 The argument to the option must be either a maximum number of concurrently
@@ -309,7 +316,7 @@ The script can print the conversion commands without actually running them.
 To do this, use the `--dry_run` option:
 
 ```sh
-./converter.py --all --dry_run
+omz_converter --all --dry_run
 ```
 
 See the "Shared options" section for information on other options accepted by
@@ -325,7 +332,7 @@ about dataset preparation in the [Dataset Preparation Guide](../../data/datasets
 The basic usage is to run the script like this:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR>
+omz_quantizer --all --dataset_dir <DATASET_DIR>
 ```
 
 This will quantize all models for which quantization is supported. Other models
@@ -338,14 +345,14 @@ The current directory must be the root of a tree of model files create by the mo
 converter. To specify a different model tree path, use the `--model_dir` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --model_dir my/model/directory
+omz_quantizer --all --dataset_dir <DATASET_DIR> --model_dir my/model/directory
 ```
 
 By default, the quantized models are placed into the same model tree. To place them
 into a different directory tree, use the `-o`/`--output_dir` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --output_dir my/output/directory
+omz_quantizer --all --dataset_dir <DATASET_DIR> --output_dir my/output/directory
 ```
 
 By default, the script will produce models in every precision that is supported
@@ -353,7 +360,7 @@ as a quantization output. To only produce models in a specific precision, use
 the `--precisions` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
+omz_quantizer --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
 ```
 
 By default, the script will run Post-Training Optimization Toolkit using the same
@@ -361,7 +368,7 @@ Python executable that was used to run the script itself. To use a different
 Python executable, use the `-p`/`--python` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --python my/python
+omz_quantizer --all --dataset_dir <DATASET_DIR> --python my/python
 ```
 
 The script will attempt to locate Post-Training Optimization Toolkit using several methods:
@@ -370,7 +377,7 @@ The script will attempt to locate Post-Training Optimization Toolkit using sever
    to the script to run:
 
    ```sh
-   ./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
+   omz_quantizer --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
    ```
 
 2. Otherwise, if the selected Python executable can import the `pot` package,
@@ -386,7 +393,7 @@ It's possible to specify a target device for Post-Training Optimization Toolkit
 to optimize for, by using the `--target_device` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --target_device VPU
+omz_quantizer --all --dataset_dir <DATASET_DIR> --target_device VPU
 ```
 
 The supported values are those accepted by the "target_device" option in
@@ -397,7 +404,7 @@ The script can print the quantization commands without actually running them.
 To do this, use the `--dry_run` option:
 
 ```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --dry_run
+omz_quantizer --all --dataset_dir <DATASET_DIR> --dry_run
 ```
 
 With this option specified, the configuration file for Post-Training Optimization
@@ -411,7 +418,7 @@ the script.
 The basic usage is to run the script like this:
 
 ```sh
-./info_dumper.py --all
+omz_info_dumper --all
 ```
 
 This will print to standard output information about all models.
@@ -497,7 +504,7 @@ The are certain options that all tools accept.
 `-h`/`--help` can be used to print a help message:
 
 ```sh
-./TOOL.py --help
+omz_TOOL --help
 ```
 
 There are several mutually exclusive filter options that select the models the
@@ -506,7 +513,7 @@ tool will process:
 * `--all` selects all models.
 
   ```sh
-  ./TOOL.py --all
+  omz_TOOL --all
   ```
 
 * `--name` takes a comma-separated list of patterns and selects models that match
@@ -515,7 +522,7 @@ tool will process:
   of individual models it consists of.
 
   ```sh
-  ./TOOL.py --name 'mtcnn,densenet-*'
+  omz_TOOL --name 'mtcnn,densenet-*'
   ```
 
   See https://docs.python.org/3/library/fnmatch.html for a full description of
@@ -527,7 +534,7 @@ tool will process:
   of individual models it consists of.
 
   ```sh
-  ./TOOL.py --list my.lst
+  omz_TOOL --list my.lst
   ```
 
   The file must contain one pattern per line. The pattern syntax is the same
@@ -544,7 +551,7 @@ option is specified, the tool will print all model names defined in the
 configuration file and exit:
 
 ```
-$ ./TOOL.py --print_all
+$ omz_TOOL --print_all
 action-recognition-0001-decoder
 action-recognition-0001-encoder
 age-gender-recognition-retail-0013

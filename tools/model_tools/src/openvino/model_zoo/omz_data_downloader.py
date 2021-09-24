@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from openvino.model_zoo import _common
 
 def copy_data(output_dir):
     data_path = output_dir / 'data'

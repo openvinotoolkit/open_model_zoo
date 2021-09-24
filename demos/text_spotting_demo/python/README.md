@@ -43,18 +43,18 @@ The demo workflow is the following:
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/text_spotting_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -179,4 +179,4 @@ You can use both of these metrics to measure application-level performance.
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

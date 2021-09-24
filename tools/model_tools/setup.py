@@ -23,7 +23,7 @@ If you're an end user, you most likely don't need to run this. Just execute
 the scripts in this directory (downloader.py, etc.) directly.
 """
 
-import distutils.command.build
+import distutils.command.build_py
 import distutils.command.sdist
 import itertools
 import os
@@ -54,11 +54,11 @@ class DisabledSdist(distutils.command.sdist.sdist):
     def run(self):
         raise RuntimeError("building sdists is not supported")
 
-class CustomBuild(distutils.command.build.build):
+class CustomBuild(distutils.command.build_py.build_py):
     def run(self):
         super().run()
 
-        package_build_dir = Path(self.build_lib, 'open_model_zoo/model_tools')
+        package_build_dir = Path(self.build_lib, 'openvino/model_zoo')
 
         if (package_build_dir / 'data').exists():
             shutil.rmtree(str(package_build_dir / 'data'))
@@ -101,7 +101,7 @@ setup(
         'tensorflow2': read_text('requirements-tensorflow.in'),
     },
     cmdclass={
-        'build': CustomBuild,
+        'build_py': CustomBuild,
         'sdist': DisabledSdist,
     },
 )
