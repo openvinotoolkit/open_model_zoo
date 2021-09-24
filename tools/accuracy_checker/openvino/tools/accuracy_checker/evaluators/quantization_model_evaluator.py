@@ -360,6 +360,9 @@ class ModelEvaluator:
         ):
             return True
 
+        if hasattr(self.launcher, 'dyn_input_layers') and not self.launcher.dyn_input_layers:
+            return self.launcher.allow_reshape_input
+
         if (
                 hasattr(self.launcher, 'dynamic_shapes_policy')
                 and self.launcher.dynamic_shapes_policy == 'static' and self.launcher.allow_reshape_input
