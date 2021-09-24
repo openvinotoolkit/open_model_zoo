@@ -123,7 +123,7 @@ def single_option_cases(key, *args):
 
 
 NATIVE_DEMOS = [
-    CppDemo(name='classification_demo',
+    CppDemo(name='classification_benchmark_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
