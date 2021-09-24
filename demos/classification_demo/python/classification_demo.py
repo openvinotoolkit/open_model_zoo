@@ -115,9 +115,9 @@ def draw_labels(frame, classifications, output_transform):
         label = '{} {:.1%}'.format(classification[2], classification[1])
         label_size =cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0]
         print(label_size)
+        offset += label_size[1] * 2
         put_highlighted_text(frame, label, (frame.shape[1] - label_size[0], offset),
             cv2.FONT_HERSHEY_COMPLEX, 0.75, (210,10,10), 2)
-        offset += label_size[1] + 10
     return frame
 
 
