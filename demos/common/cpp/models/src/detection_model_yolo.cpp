@@ -333,8 +333,8 @@ ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionY
     num = mask.size();
 
     auto shape = regionYolo->get_input_shape(0);
-    outputWidth = shape[3];
-    outputHeight = shape[2];
+    outputWidth = (int)shape[3];
+    outputHeight = (int)shape[2];
 
     if (num) {
 
