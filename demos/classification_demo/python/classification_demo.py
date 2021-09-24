@@ -55,8 +55,8 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
-    common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be >= 1.', default=5,
-                                   required=False, type=int)
+    common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
+                                   required=False, type=int, choices=range(1,11))
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
