@@ -100,7 +100,7 @@ def draw_labels(frame, classifications, output_transform):
     if (labels_pos < 0):
         labels_pos = label_height
         log.warning("Too much labels to display on this frame, some will be omitted ")
-    
+
     offset_y = labels_pos
     for classification in classifications:
         label = '{} {:.1%}'.format(classification[1], classification[2])
