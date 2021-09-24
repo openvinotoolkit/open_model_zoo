@@ -317,11 +317,22 @@ class DLSDKModelMixin:
 
     @property
     def inputs(self):
-        has_info = hasattr(self.exec_network, 'input_info')
+        if self.exec_network:
+            has_info = hasattr(self.exec_network, 'input_info')
+            if not has_info:
+                return self.exec_network.inputs
+            inputs = OrderedDict()
+            for name, data in self.exec_network.input_info.items():
+                if name in self.partial_shapes:
+                    inputs[name] = self.partial_shapes[name]
+                else:
+                    inputs[name] = data.input_data
+            return inputs
+        has_info = hasattr(self.network, 'input_info')
         if not has_info:
-            return self.exec_network.inputs
+            return self.network.inputs
         inputs = OrderedDict()
-        for name, data in self.exec_network.input_info.items():
+        for name, data in self.network.input_info.items():
             if name in self.partial_shapes:
                 inputs[name] = self.partial_shapes[name]
             else:
@@ -337,7 +348,7 @@ class DLSDKModelMixin:
         del self.exec_network
         self.launcher.release()
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = (
             tuple(self.inputs[layer_name].shape)
             if layer_name not in self.dynamic_inputs else self.partial_shapes[layer_name])
@@ -443,7 +454,7 @@ class DLSDKModelMixin:
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:
             return
-        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
@@ -535,6 +546,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
     ):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.adapter = None
+        self.is_dynamic = False
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
@@ -545,7 +557,18 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 
     def load_network(self, network, launcher, model_prefix):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
@@ -555,15 +578,8 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.exec_network = self.load_network(self.network, launcher, model_prefix)
         self.launcher = launcher
-        self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(
-            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input
-        )
-        pnet_outs = self.model_info['outputs']
-        pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
-        self.adapter = create_adapter(pnet_adapter_config)
         if log:
             self.print_input_output_info()
 
@@ -580,6 +596,8 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
             self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
@@ -616,6 +634,8 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
             self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)

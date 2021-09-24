@@ -366,7 +366,7 @@ class BaseModel:
         model, weights = self.auto_model_search(network_info, self.net_type)
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, launcher.device)
+            self.load_network(self.network, launcher)
         else:
             self.network = None
             launcher.ie_core.import_network(str(model))

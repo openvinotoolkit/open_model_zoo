@@ -561,6 +561,7 @@ class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
         self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
+        self.is_dynamic = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
         self.with_prefix = False

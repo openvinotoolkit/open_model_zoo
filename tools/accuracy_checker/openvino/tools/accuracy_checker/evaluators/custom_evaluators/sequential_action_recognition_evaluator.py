@@ -641,7 +641,7 @@ class DecoderDLSDKModel(BaseModel):
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher.device)
+            self.exec_network = self.load_network(self.network, launcher)
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -674,13 +674,18 @@ class DecoderDLSDKModel(BaseModel):
         self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
 
     def set_input_and_output(self):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_blob = next(iter(input_info))
+        if self.exec_network:
+            has_info = hasattr(self.exec_network, 'input_info')
+            input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+            input_blob = next(iter(input_info))
+        else:
+            has_info = hasattr(self.network, 'input_info')
+            input_info = self.network.input_info if has_info else self.network.inputs
+            input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.input_blob is None:
-                output_blob = next(iter(self.exec_network.outputs))
+                output_blob = next(iter(self.exec_network.outputs if self.exec_network else self.network.outputs))
             else:
                 output_blob = (
                     '_'.join([self.default_model_suffix, self.output_blob])

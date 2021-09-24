@@ -665,7 +665,7 @@ class RecognizerDLSDKModel(BaseModel):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher.device)
+            self.exec_network = self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         if log:
