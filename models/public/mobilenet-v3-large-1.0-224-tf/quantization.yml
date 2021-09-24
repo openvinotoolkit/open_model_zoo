@@ -7,10 +7,5 @@ compression:
         ignored:
           scope:
             - StatefulPartitionedCall/MobilenetV3large/expanded_conv/depthwise/depthwise
-            - StatefulPartitionedCall/MobilenetV3large/multiply/mul
             - StatefulPartitionedCall/MobilenetV3large/expanded_conv/Add/add
-        weights:
-          mode: symmetric
-          granularity: perchannel
-        activations:
-          mode: asymmetric
+        use_fast_bias: false
