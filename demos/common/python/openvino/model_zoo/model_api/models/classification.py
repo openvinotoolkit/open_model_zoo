@@ -14,11 +14,9 @@
  limitations under the License.
 """
 
-import cv2
 import numpy as np
 
 from .image_model import ImageModel
-from .utils import load_labels
 
 
 class Classification(ImageModel):
@@ -48,8 +46,7 @@ class Classification(ImageModel):
             raise Exception("3-channel 4-dimensional model's input is expected")
         if in_size[2] != in_size[3]:
             raise Exception("Model input has incorrect image shape. Must be NxN square."
-                                " Got " + str(in_size[2]) +
-                                "x" + str(in_size[3]) + ".")
+                                " Got " + str(in_size[2]) + "x" + str(in_size[3]) + ".")
 
     def _get_outputs(self):
         out_blob_name = next(iter(self.net.outputs))
@@ -61,7 +58,7 @@ class Classification(ImageModel):
             raise Exception("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1")
 
         if (out_size[1] == len(self.labels) + 1):
-            #self.labels.insert(labels.begin(), "other")
+            self.labels.insert(0, "other")
             if self.log is not None:
                 self.log.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):

@@ -56,7 +56,7 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
     common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
-                                   required=False, type=int, choices=range(1,11))
+                                   required=False, type=int, choices=range(1, 11))
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -107,7 +107,7 @@ def draw_labels(frame, classifications, output_transform):
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
         offset_y += label_height * 2
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
-            cv2.FONT_HERSHEY_COMPLEX, 0.75, (10,10,210), 2)
+            cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 210), 2)
     return frame
 
 
@@ -134,7 +134,7 @@ def main():
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Reading model {}'.format(args.model))
-    model = models.Classification(ie, args.model,ntop=args.ntop, labels=args.labels)
+    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
     log_blobs_info(model)
 
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
