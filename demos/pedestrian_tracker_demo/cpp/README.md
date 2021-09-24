@@ -127,7 +127,7 @@ Options:
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
     -u                           Optional. List of monitors to show initially.
-	 -t                           Optional. Probability threshold for detections.
+	-t                           Optional. Probability threshold for detections.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
     -iou_t                       Optional. Filtering intersection over union threshold for overlapping boxes.
     -yolo_af                     Optional. Use advanced postprocessing/filtering algorithm for YOLO.
@@ -145,6 +145,7 @@ For example, to run the application with the OpenVINO&trade; toolkit pre-trained
                           -m_det <path_to_model>/person-detection-retail-0013.xml \
                           -m_reid <path_to_model>/person-reidentification-retail-0277.xml \
                           -d_det GPU
+                          -at ssd
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
