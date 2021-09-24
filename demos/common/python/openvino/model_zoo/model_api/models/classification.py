@@ -59,7 +59,7 @@ class Classification(ImageModel):
             raise Exception("Demo supports topologies only with 2-dimensional or 4-dimensional output")
         if len(out_size) == 4 and out_size[2] != 1 and out_size[3] != 1:
             raise Exception("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1")
-        
+
         if (out_size[1] == len(self.labels) + 1):
             #self.labels.insert(labels.begin(), "other")
             if self.log is not None:
@@ -76,4 +76,3 @@ class Classification(ImageModel):
         max_indices = indices[-self.ntop:][::-1] # indices sorted by probs in descended order
         result = [(i, self.labels[i], probs[i]) for i in max_indices]
         return result
-

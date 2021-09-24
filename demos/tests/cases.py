@@ -768,6 +768,25 @@ PYTHON_DEMOS = [
         }),
     )),
 
+    PythonDemo(name='classification_demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+        TestCase(options={
+            '--no_show': None,
+            '-i': DataDirectoryOrigFileNamesArg('classification'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
+        single_option_cases('-m',
+            ModelArg('alexnet'),
+            ModelArg('densenet-121-tf'),
+            ModelArg('densenet-169'),
+            ModelArg('mixnet-l'),
+            ModelArg('mobilenet-v2-pytorch'),
+            ModelArg('repvgg-a0'),
+            ModelArg('repvgg-b1'),
+            ModelArg('repvgg-b3'),
+            ModelArg('resnet-50-caffe2')),
+    )),
+
     PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
        TestCase(options={
            '--no_show': None,

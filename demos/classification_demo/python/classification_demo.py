@@ -96,13 +96,12 @@ def build_argparser():
 def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
     label_height = cv2.getTextSize(classifications[0][1], cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
-    num = len(classifications)
-    labels_pos =  frame.shape[0] - label_height * 2 * num - label_height
+    labels_pos =  frame.shape[0] - label_height * (2 * len(classifications) + 1)
     if (labels_pos < 0):
-        labels_pos = 0
+        labels_pos = label_height
         log.warning("Too much labels to display on this frame, some will be omitted ")
     
-    offset_y = labels_pos 
+    offset_y = labels_pos
     for classification in classifications:
         label = '{} {:.1%}'.format(classification[1], classification[2])
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
