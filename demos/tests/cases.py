@@ -50,19 +50,18 @@ class Demo:
     def get_models(self, case):
         return (case.options[key] for key in self.model_keys if key in case.options)
 
-    def set_precisions(self, precisions):
-        cases_to_repeat = []
+    def set_precisions(self, precisions, model_info):
         for case in self.test_cases:
-            case_to_add = True
+            add_case = True
             for model in self.get_models(case):
                 if isinstance(model, ModelArg):
-                    model.set_precisions(precisions)
+                    supported = list(set(precisions) & set(model_info[model.name]["precisions"]))
+                    model.set_precisions(supported)
+                    precisions_num = len(model.precisions)
                 else:
-                    case_to_add = False
-            if case_to_add:
-                cases_to_repeat.append(case)
-        if len(precisions) > 1:
-            self.test_cases += cases_to_repeat * (len(precisions) - 1)
+                    add_case = False
+            if add_case and precisions_num > 1:
+                self.test_cases += case * (precisions_num - 1)
 
 
 class CppDemo(Demo):
