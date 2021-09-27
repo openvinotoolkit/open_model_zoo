@@ -51,8 +51,9 @@ class Demo:
         return (case.options[key] for key in self.model_keys if key in case.options)
 
     def set_precisions(self, precisions, model_info):
-        for case in self.test_cases:
+        for case in self.test_cases[:]:
             add_case = True
+            precisions_num = 0
             for model in self.get_models(case):
                 if isinstance(model, ModelArg):
                     supported = list(set(precisions) & set(model_info[model.name]["precisions"]))
@@ -61,7 +62,7 @@ class Demo:
                 else:
                     add_case = False
             if add_case and precisions_num > 1:
-                self.test_cases += case * (precisions_num - 1)
+                self.test_cases += [case] * (precisions_num - 1)
 
 
 class CppDemo(Demo):
@@ -631,7 +632,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002', precisions=['FP32-INT8']),
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002', precisions=['FP16-INT8']),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -644,7 +645,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precisions=['FP32-INT8']),
+                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precisions=['FP16-INT8']),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -672,7 +673,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', precisions=['FP32-INT8']),
+                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', precisions=['FP16-INT8']),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--vocab':
                     str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/vocab.txt'),
