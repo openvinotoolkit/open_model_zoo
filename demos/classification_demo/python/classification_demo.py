@@ -112,14 +112,14 @@ def draw_labels(frame, classifications, output_transform):
 
 
 def print_raw_results(classifications, frame_id):
+    label_max_len = len(max(classifications, key=lambda item:len(item[1]))[1])
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
-    log.debug(' Class ID | Confidence | Label ')
+    log.debug(' Class ID | {:^{width}s}| Confidence '.format("Label", width = label_max_len))
     for classification in classifications:
         class_id = classification[0]
         label = classification[1]
         conf = classification[2]
-        log.debug('{:^4} | {:^9} | {:^10f } '
-                  .format(class_id, label, conf))
+        log.debug('{:^9} | {:^{width}}| {:^10f} '.format(class_id, label, conf, width = label_max_len))
 
 
 def main():
@@ -134,7 +134,7 @@ def main():
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Reading model {}'.format(args.model))
-    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
+    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels, log = log)
     log_blobs_info(model)
 
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
