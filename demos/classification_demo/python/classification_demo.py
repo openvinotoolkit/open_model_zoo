@@ -112,7 +112,7 @@ def draw_labels(frame, classifications, output_transform):
 
 
 def print_raw_results(classifications, frame_id):
-    label_max_len = len(max(classifications, key=lambda item:len(item[1]))[1])
+    label_max_len = len(max(classifications, key=lambda item: len(item[1]))[1])
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     log.debug(' Class ID | {:^{width}s}| Confidence '.format("Label", width = label_max_len))
     for classification in classifications:
