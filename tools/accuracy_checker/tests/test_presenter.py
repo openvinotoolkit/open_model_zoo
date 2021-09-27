@@ -139,7 +139,7 @@ class TestPresenter:
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value=45.6,
+            reference_value=0.456,
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -164,7 +164,7 @@ class TestPresenter:
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value=45.6,
+            reference_value=0.456,
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -189,7 +189,7 @@ class TestPresenter:
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value={'vector_metric': 45.6},
+            reference_value={'vector_metric': 0.456},
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -214,7 +214,7 @@ class TestPresenter:
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value={'other_metric': 45.6},
+            reference_value={'other_metric': 0.456},
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -289,7 +289,7 @@ class TestPresenter:
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=0.4,
+            evaluated_value=40,
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -315,7 +315,7 @@ class TestPresenter:
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=0.4,
+            evaluated_value=40,
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -367,7 +367,7 @@ class TestPresenter:
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=[0.4],
+            evaluated_value=[40],
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -393,7 +393,7 @@ class TestPresenter:
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
-            evaluated_value=[0.4],
+            evaluated_value=[40],
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -509,7 +509,7 @@ class TestPresenter:
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
-            evaluated_value=[0.4, 0.6],
+            evaluated_value=[40, 60],
             reference_value=49,
             abs_threshold=None,
             rel_threshold=None,
@@ -647,37 +647,6 @@ class TestPresenter:
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None, postfix='%',
-                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
-            ),
-            call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
-                result.abs_threshold, result.rel_threshold,
-                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
-            )
-        ]
-        mock_write_scalar_res.assert_has_calls(calls)
-
-    def test_vector_presenter_with_vector_data_with_dict_ref(self, mocker):
-        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
-        result = EvaluationResult(
-            name='scalar_metric',
-            metric_type='metric',
-            evaluated_value=[0.4, 0.6],
-            reference_value={'class1': 0.4, 'class2': 0.5},
-            abs_threshold=None,
-            rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
-            profiling_file=None
-        )
-        presenter = VectorPrintPresenter()
-        presenter.write_result(result)
-        calls = [
-            call(
-                result.evaluated_value[0], result.name, None, None, (0, 0),
-                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
-            ),
-            call(
-                result.evaluated_value[1], result.name, None, None, (0.7, 1.4), postfix='%',
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
             ),
             call(
