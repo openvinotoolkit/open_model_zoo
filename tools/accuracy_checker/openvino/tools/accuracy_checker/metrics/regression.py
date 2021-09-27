@@ -684,3 +684,124 @@ class EndPointError(BaseRegressionMetric):
         def l2_diff(ann_value, pred_value):
             return np.mean(np.linalg.norm(ann_value - pred_value, ord=2, axis=2))
         super().__init__(l2_diff, *args, **kwargs)
+
+
+class BaseMagnitudeAnalysisError(BaseRegressionMetric):
+    annotation_types = (FeaturesRegressionAnnotation, RegressionAnnotation, )
+    prediction_types = (RegressionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.pop('max_error')
+        params.update({
+            'frq_size': NumberField(optional=True, default=160, description='Frequency size'),
+            'frm_range': NumberField(optional=True, default=400, value_type=int, min_value=1, description='frame range')
+        })
+        return params
+
+    def configure(self):
+        super().configure()
+        self.frq_size = self.get_value_from_config('frq_size')
+        self.frm_range = self.get_value_from_config('frm_range')
+        self.meta.update({
+                'scale': 1, 'postfix': 'Db', 'calculate_mean': False, 'target': 'higher-worse'
+            })
+
+    def analysis_err(self, ref_fft, tst_fft):
+        tst_fft_abs = np.sqrt(tst_fft[..., 0] ** 2 + tst_fft[..., 1] ** 2)
+        mag_t = 20 * np.log10((tst_fft_abs + 1e-6) / self.frq_size)
+
+        ref_fft_abs = np.sqrt(ref_fft[..., 0] ** 2 + ref_fft[..., 1] ** 2)
+        mag_r = 20 * np.log10((ref_fft_abs + 1e-6) / self.frq_size)
+
+        mag_err = np.abs(
+            mag_t[0, 0:min(tst_fft.shape[1], ref_fft.shape[1]) // 400 * 400, 2:158] -
+            mag_r[0, 0:min(tst_fft.shape[1], ref_fft.shape[1]) // 400 * 400, 2:158])
+        mag_err = np.transpose(mag_err, (1, 0))
+        mag_err = np.reshape(mag_err, (mag_err.shape[0], -1, self.frm_range))
+        mag_err = np.transpose(mag_err, (0, 2, 1))
+
+        return mag_err
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self.analysis_err, *args, **kwargs)
+
+
+class MagnitudeAnalysisErrorMax(BaseMagnitudeAnalysisError):
+    __provider__ = 'fft_analysis_error_max'
+
+    def analysis_err(self, ref_fft, tst_fft):
+        mag_err = super().analysis_err(ref_fft, tst_fft)
+        max_err_f = np.max(np.max(mag_err, 1), -1)
+        return max_err_f
+
+    def configure(self):
+        super().configure()
+        self.meta['names'] = ['max_error']
+
+    def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
+        if isinstance(self.magnitude, dict):
+            names, result = [], []
+            for key, values in self.magnitude.items():
+                names.append('{}@max_error'.format(key))
+                result.append(np.max(values))
+            self.meta['names'] = names
+            return result
+        return np.max(self.magnitude)
+
+
+class MagnitudeAnalysisErrorAvg(BaseMagnitudeAnalysisError):
+    __provider__ = 'fft_analysis_error_avg'
+
+    def analysis_err(self, ref_fft, tst_fft):
+        mag_err = super().analysis_err(ref_fft, tst_fft)
+        max_err_f = np.max(np.mean(mag_err, 1), -1)
+        return max_err_f
+
+    def configure(self):
+        super().configure()
+        self.meta['names'] = ['avg_error']
+
+    def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
+        if isinstance(self.magnitude, dict):
+            names, result = [], []
+            for key, values in self.magnitude.items():
+                names.append('{}@avg_error'.format(key))
+                result.append(np.mean(values))
+            self.meta['names'] = names
+            return result
+        return np.mean(self.magnitude)
+
+
+def rms(array, axis):
+    return np.sqrt(np.mean(np.array(array) ** 2, axis))
+
+
+class MagnitudeAnalysisRMSError(BaseMagnitudeAnalysisError):
+    __provider__ = 'fft_analysis_error_rms'
+
+    def analysis_err(self, ref_fft, tst_fft):
+        mag_err = super().analysis_err(ref_fft, tst_fft)
+        max_err_f = np.max(rms(mag_err, 1), -1)
+        return max_err_f
+
+    def configure(self):
+        super().configure()
+        self.meta['names'] = ['rms_error']
+
+    def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
+        if isinstance(self.magnitude, dict):
+            names, result = [], []
+            for key, values in self.magnitude.items():
+                names.append('{}@rms_error'.format(key))
+                result.append(rms(values, 0))
+            self.meta['names'] = names
+            return result
+        return rms(self.magnitude, 1)

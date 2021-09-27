@@ -65,6 +65,7 @@ from .time_series_denormalize import TimeSeriesDenormalize
 from .interp import Interpolation
 from .invert_mask import InvertMask
 from .rescale_mask import RescaleMask
+from .deep_filter import DeepFilterPostprocessor
 
 
 __all__ = [
@@ -149,4 +150,6 @@ __all__ = [
 
     'InvertMask',
     'RescaleMask',
+
+    'DeepFilterPostprocessor'
 ]

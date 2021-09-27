@@ -62,7 +62,10 @@ from .regression import (
 
     AngleError,
 
-    PercentageCorrectKeypoints
+    PercentageCorrectKeypoints,
+    MagnitudeAnalysisErrorAvg,
+    MagnitudeAnalysisErrorMax,
+    MagnitudeAnalysisRMSError
 )
 from .image_quality_assessment import (
     StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS,
@@ -165,6 +168,9 @@ __all__ = [
     'MeanAbsolutePercentageError',
     'Log10Error',
     'RelativeL2Error',
+    'MagnitudeAnalysisErrorAvg',
+    'MagnitudeAnalysisErrorMax',
+    'MagnitudeAnalysisRMSError',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',

@@ -158,6 +158,15 @@ More detailed information about calculation segmentation metrics you can find [h
 * `relative_l2_error` - Mean relative error defined like L2 norm for difference between annotation and prediction normalized by L2 norm for annotation value. Direction of metric's growth is higher-worse. Supported representations:
   `FeatureRegressionAnnotation`, `RegressionPrediction`.
   * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
+* `fft_error_max` - Max error based on FFT magnitude analysis. Direction of metric's growth is higher-worse. Supported representations: `FeatureRegressionAnnotation`, `RegressionPrediction`.
+  * `frq_size` - frequency size, optional, default - 160.
+  * `frm_rate` - frame rate, optional, default - 400.
+* `fft_error_avg` - Average error based on FFT magnitude analysis. Direction of metric's growth is higher-worse. Supported representations: `FeatureRegressionAnnotation`, `RegressionPrediction`.
+  * `frq_size` - frequency size, optional, default - 160.
+  * `frm_rate` - frame rate, optional, default - 400.
+* `fft_error_rms` - Root Mean Square error based on FFT magnitude analysis. Direction of metric's growth is higher-worse. Supported representations: `FeatureRegressionAnnotation`, `RegressionPrediction`.
+  * `frq_size` - frequency size, optional, default - 160.
+  * `frm_rate` - frame rate, optional, default - 400.
 * `multi_accuracy` - accuracy for multilabel recognition task. Direction of metric's growth is higher-better. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).

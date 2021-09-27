@@ -129,3 +129,8 @@ Accuracy Checker supports following set of postprocessors:
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
   * `min` - minimal value in range, optional, default 0.
   * `max`- maximal value in range.
+* `deep_filter` - apply filtering transform on regression features using input specification. Supported representations: `FeatureRegressionAnnotation`, `RegressionAnnotation`, `RegressionPrediction`
+  * `input_spec_file` - input specification file in Kaldi ark format.
+  * `time_pad` - padding size for time dimension (Optional, default 1).
+  * `feat_pad` - padding size for feature dimension (Optional, default 1).
+  * `look_forward` - allow filter looking forward (Optional, default `False`).

@@ -114,8 +114,8 @@ class KaldiFeatsRegression(Adapter):
         Returns:
             list of RegressionPrediction objects
         """
+        self.select_output_blob(raw if isinstance(raw, dict) else raw[0])
         predictions = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(predictions)
         predictions = predictions[self.output_blob]
 
         result = []
