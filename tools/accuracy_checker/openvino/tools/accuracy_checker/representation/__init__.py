@@ -87,7 +87,8 @@ from .nlp_representation import (
     LanguageModelingAnnotation,
     LanguageModelingPrediction,
     QuestionAnsweringBiDAFAnnotation,
-    BERTNamedEntityRecognitionAnnotation
+    BERTNamedEntityRecognitionAnnotation,
+    SentenceSimilarityAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -202,6 +203,7 @@ __all__ = [
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
     'BERTNamedEntityRecognitionAnnotation',
+    'SentenceSimilarityAnnotation',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',

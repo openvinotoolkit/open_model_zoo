@@ -17,6 +17,7 @@ limitations under the License.
 import numpy as np
 from .base_representation import BaseRepresentation
 from .classification_representation import ClassificationAnnotation, SequenceClassificationAnnotation
+from .base_representation import BaseRepresentation
 
 
 class MachineTranslationRepresentation(BaseRepresentation):
@@ -146,3 +147,17 @@ class BERTNamedEntityRecognitionAnnotation(SequenceClassificationAnnotation):
         self.segment_ids = segment_ids if segment_ids is not None else []
         self.valid_ids = np.array(valid_ids, dtype=bool) if valid_ids is not None else valid_ids
         self.label_mask = np.array(label_mask, dtype=bool) if label_mask is not None else label_mask
+
+
+class SentenceSimilarityAnnotation(BaseRepresentation):
+    def __init__(
+        self,
+        identifier,  idx, pair_id, similarity_score, input_ids, input_mask, segment_ids
+    ):
+        super().__init__(identifier)
+        self.id = idx
+        self.pair_id = pair_id
+        self.input_ids = input_ids
+        self.similarity_score = similarity_score
+        self.input_mask = input_mask if input_mask is not None else []
+        self.segment_ids = segment_ids if segment_ids is not None else []

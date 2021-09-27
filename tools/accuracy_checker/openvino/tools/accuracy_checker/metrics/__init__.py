@@ -40,7 +40,9 @@ from .reid import (
     PairwiseAccuracySubsets,
     FaceRecognitionTAFAPairMetric,
     NormalizedEmbeddingAccuracy,
-    LocalizationRecall
+    LocalizationRecall,
+    SpearmanCorrelation,
+    PearsonCorrelation
 )
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
 from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
@@ -144,6 +146,8 @@ __all__ = [
     'FaceRecognitionTAFAPairMetric',
     'NormalizedEmbeddingAccuracy',
     'LocalizationRecall',
+    'SpearmanCorrelation',
+    'PearsonCorrelation',
 
     'SegmentationAccuracy',
     'SegmentationIOU',

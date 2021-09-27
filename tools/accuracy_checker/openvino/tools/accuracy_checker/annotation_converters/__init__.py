@@ -121,6 +121,7 @@ from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
 from .amazon import AmazonProductData
 from .wgs import WGSTFRecords, WGSPickleRecords
+from .sentence_similarity import SentenceSimilarityConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -242,4 +243,5 @@ __all__ = [
     'AmazonProductData',
     'WGSTFRecords',
     'WGSPickleRecords',
+    'SentenceSimilarityConverter'
 ]
