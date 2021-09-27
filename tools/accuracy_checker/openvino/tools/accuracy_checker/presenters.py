@@ -51,8 +51,7 @@ class ScalarPrintPresenter(BasePresenter):
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
         if reference and not ignore_metric_reference:
-            _, original_scale, _ = get_result_format_parameters(meta, False)
-            difference = compare_with_ref(reference, value, original_scale, name)
+            difference = compare_with_ref(reference, value, name)
         write_scalar_result(
             value, name, abs_threshold, rel_threshold, difference,
             postfix=postfix, scale=scale, result_format=result_format
@@ -96,8 +95,7 @@ class VectorPrintPresenter(BasePresenter):
             difference = None
             value_name = value_names[0] if value_names else None
             if reference and not ignore_metric_reference:
-                _, original_scale, _ = get_result_format_parameters(meta, False)
-                difference = compare_with_ref(reference, value, original_scale, value_name)
+                difference = compare_with_ref(reference, value, value_name)
             write_scalar_result(
                 value, name, abs_threshold, rel_threshold, difference,
                 value_name=value_name,
@@ -113,7 +111,7 @@ class VectorPrintPresenter(BasePresenter):
             value_name = value_names[index] if value_names else None
 
             if reference and not ignore_metric_reference and isinstance(reference, dict):
-                difference = compare_with_ref(reference, res, value_scale, value_name)
+                difference = compare_with_ref(reference, res, value_name)
             write_scalar_result(
                 res, name, abs_threshold, rel_threshold, difference,
                 value_name=value_name,
@@ -126,8 +124,7 @@ class VectorPrintPresenter(BasePresenter):
             mean_value = np.mean(np.multiply(value, scale))
             difference = None
             if reference and not ignore_metric_reference:
-                original_scale = get_result_format_parameters(meta, False)[1] if ignore_results_formatting else 1
-                difference = compare_with_ref(reference, mean_value, original_scale, 'mean')
+                difference = compare_with_ref(reference, mean_value, 'mean')
             write_scalar_result(
                 mean_value, name, abs_threshold, rel_threshold, difference, value_name='mean',
                 postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
@@ -208,7 +205,7 @@ def write_scalar_result(
         rel_threshold = rel_threshold or 0
         if abs_threshold <= diff_with_ref[0] or rel_threshold <= diff_with_ref[1]:
             fail_message = "[FAILED:  abs error = {:.4} | relative error = {:.4}]".format(
-                diff_with_ref[0], diff_with_ref[1]
+                diff_with_ref[0] * scale, diff_with_ref[1]
             )
             message = "{} {}".format(message, color_format(fail_message, Color.FAILED))
         else:
@@ -217,14 +214,14 @@ def write_scalar_result(
     print_info(message)
 
 
-def compare_with_ref(reference, res_value, scale, name=None):
+def compare_with_ref(reference, res_value, name=None):
     if isinstance(reference, dict):
         if name is None:
             reference = next(iter(reference.values()))
         reference = reference.get(name)
     if reference is None:
         return None
-    return abs(reference - (res_value * scale)), abs(reference - (res_value * scale)) / reference
+    return abs(reference - res_value), abs(reference - res_value) / reference
 
 
 def get_result_format_parameters(meta, use_default_formatting):

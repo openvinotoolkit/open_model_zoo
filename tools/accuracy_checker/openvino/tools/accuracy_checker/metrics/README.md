@@ -16,6 +16,14 @@ reference:
   std: 0.89
 ```
 
+If you want provide reference for metric expressed as a percentage, you should normalized reference value by `scale = 100`. For example, if you use accuracy metric for classification models, you should specify reference as:
+```yaml
+name: accuracy@top1
+type: accuracy
+top_k: 1
+reference: 0.7464
+```
+
 Every metric has parameters available for configuration. The metric and its parameters are set through the configuration file. Metrics are provided in `datasets` section of configuration file to use specific metric.
 
 ## Supported Metrics
