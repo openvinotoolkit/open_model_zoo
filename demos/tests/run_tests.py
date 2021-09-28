@@ -65,7 +65,7 @@ def parse_args():
         help='path to report file')
     parser.add_argument('--suppressed-devices', type=Path, required=False,
         help='path to file with suppressed devices for each model')
-    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
         help='IR precisions for all models. By default, models are tested in FP16 precision')
     return parser.parse_args()
 
