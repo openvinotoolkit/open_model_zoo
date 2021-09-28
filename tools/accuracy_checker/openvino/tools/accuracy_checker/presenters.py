@@ -121,13 +121,14 @@ class VectorPrintPresenter(BasePresenter):
             )
 
         if len(value) > 1 and meta.get('calculate_mean', True):
-            mean_value = np.mean(np.multiply(value, scale))
+            mean_value = np.mean(value)
+            value_scale = scale[0] if not np.isscalar(scale) else scale
             difference = None
             if reference and not ignore_metric_reference:
                 difference = compare_with_ref(reference, mean_value, 'mean')
             write_scalar_result(
                 mean_value, name, abs_threshold, rel_threshold, difference, value_name='mean',
-                postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
+                postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=value_scale,
                 result_format=result_format
             )
 
