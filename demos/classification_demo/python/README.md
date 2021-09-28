@@ -187,8 +187,7 @@ For example, use the following command-line command to run the application:
 ```sh
 ./classification_demo -m <path_to_classification_model> \
                       -i <path_to_folder_with_images> \
-                      --labels <path_to_file_with_list_of_labels> \
-                      --pause 2000
+                      --labels <path_to_file_with_list_of_labels>
 ```
 
 ## Demo Output

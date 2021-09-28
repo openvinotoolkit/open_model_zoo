@@ -20,11 +20,12 @@ from .image_model import ImageModel
 
 
 class Classification(ImageModel):
-    def __init__(self, ie, model_path, labels, ntop, resize_type='crop', log=None):
+    def __init__(self, ie, model_path, labels, ntop, resize_type='crop', logger=None):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
         self._check_inputs()
         self.ntop = ntop
+        self.log = logger
         self.labels = self._load_labels(labels)
         self.output_blob_name = self._get_outputs()
 
