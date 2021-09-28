@@ -52,16 +52,13 @@ class Demo:
 
     def set_precisions(self, precisions, model_info):
         for case in self.test_cases[:]:
-            add_case = True
             precisions_num = 0
             for model in self.get_models(case):
                 if isinstance(model, ModelArg):
                     supported = list(set(precisions) & set(model_info[model.name]["precisions"]))
                     model.set_precisions(supported)
                     precisions_num = len(model.precisions)
-                else:
-                    add_case = False
-            if add_case and precisions_num > 1:
+            if precisions_num > 1:
                 self.test_cases += [case] * (precisions_num - 1)
 
 
