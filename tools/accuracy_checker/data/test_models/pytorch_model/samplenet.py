@@ -20,7 +20,7 @@ import torch.nn.functional as F
 
 class SampLeNet(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(SampLeNet, self).__init__() # pylint: disable=R1725
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
