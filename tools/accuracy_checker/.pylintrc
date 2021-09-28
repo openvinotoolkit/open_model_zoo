@@ -16,7 +16,8 @@ disable = C0103,
           C0204,
           W0201,
           W0107,
-          R0401
+          R0401,
+          R0801
 
 max-line-length = 120
 ignore-docstrings = yes

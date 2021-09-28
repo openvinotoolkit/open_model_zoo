@@ -149,7 +149,7 @@ class GAPILauncher(Launcher):
             self.prepare_net()
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
         return GAPILauncherConfigValidator(
             uri_prefix or 'launcher.{}'.format(cls.__provider__),
             fields=cls.parameters(), delayed_model_loading=delayed_model_loading

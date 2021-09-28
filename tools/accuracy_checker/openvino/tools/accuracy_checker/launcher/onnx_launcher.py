@@ -17,7 +17,7 @@ limitations under the License.
 import re
 from pathlib import Path
 import numpy as np
-import onnxruntime.backend as backend
+from onnxruntime import backend
 import onnxruntime as onnx_rt
 from ..logging import warning
 from ..config import PathField, StringField, ListField, ConfigError

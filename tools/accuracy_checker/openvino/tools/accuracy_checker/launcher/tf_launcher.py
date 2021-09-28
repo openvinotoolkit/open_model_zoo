@@ -58,7 +58,7 @@ class TFLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError(
                 "TensorFlow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-            )
+            ) from import_error
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
@@ -87,8 +87,8 @@ class TFLauncher(Launcher):
                     try:
                         tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
                         self.node_pattern = '{}:0'
-                    except KeyError:
-                        raise ConfigError('model graph does not contains output {}'.format(output))
+                    except KeyError as key_err:
+                        raise ConfigError('model graph does not contains output {}'.format(output)) from key_err
                 self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
@@ -321,7 +321,7 @@ class TFLauncher(Launcher):
         inputs_ops = {'Placeholder'}
         inputs = [x for x in graph.as_graph_def().node if not x.input and x.op in inputs_ops]
         if config_inputs:
-            node_pattern_without_op = self.node_pattern.split(':')[0]
+            node_pattern_without_op = self.node_pattern.split(':', maxsplit=1)[0]
             config_inputs_names = [node_pattern_without_op.format(layer['name']) for layer in config_inputs]
             config_inputs = [x for x in graph.as_graph_def().node if x.name in config_inputs_names]
             inputs.extend(config_inputs)
@@ -369,8 +369,8 @@ class TFLauncher(Launcher):
                 try:
                     tensor = _graph.get_tensor_by_name('{}:0'.format(output))
                     _node_pattern = '{}:0'
-                except KeyError:
-                    raise ConfigError('model graph does not contains output {}'.format(output))
+                except KeyError as key_err:
+                    raise ConfigError('model graph does not contains output {}'.format(output)) from key_err
             _outputs_tensors.append(tensor)
 
         graph_inputs = self._get_graph_inputs(_graph, inputs)

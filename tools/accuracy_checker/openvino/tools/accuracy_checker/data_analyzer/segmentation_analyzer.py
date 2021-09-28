@@ -58,11 +58,11 @@ class SegmentationDataAnalyzer(BaseDataAnalyzer):
                     counter[elem] = int(count_)
 
         label_map = meta.get('label_map', {})
-        for key in counter:
+        for key, value in counter.items():
             class_name = label_map.get(key, 'class_{key}'.format(key=key))
             print_info('{class_name}: count = {count}'.format(
                 class_name=class_name,
-                count=counter[key]))
-            data_analysis[class_name] = counter[key]
+                count=value))
+            data_analysis[class_name] = value
 
         return data_analysis

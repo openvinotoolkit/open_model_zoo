@@ -134,7 +134,7 @@ class DLSDKLauncher(Launcher):
         self.reset_memory_state = self.get_value_from_config('reset_memory_state')
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
         field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
             field_uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading).validate(

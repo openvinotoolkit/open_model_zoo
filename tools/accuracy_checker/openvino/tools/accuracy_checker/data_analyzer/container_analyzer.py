@@ -40,9 +40,9 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
                     meta_names[annotation_prefix].append(meta_name)
                 else:
                     meta_names[annotation_prefix] = [meta_name]
-        for label_annotation in dict_annotations:
+        for label_annotation, value in dict_annotations.items():
             name_annotation = label_annotation.split('_')[0]
-            first_element = next(iter(dict_annotations[label_annotation]), None)
+            first_element = next(iter(value), None)
             analyzer = BaseDataAnalyzer.provide(first_element.__class__.__name__)
             print_info('Analyzed annotation: {name}'.format(name=label_annotation))
             if name_annotation in meta_names:
@@ -50,9 +50,8 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
                 annotation_specific_meta = {
                     key.split('{}_'.format(name_annotation))[-1]: meta[key] for key in specific_keys
                 }
-                data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation],
-                                                                   annotation_specific_meta, False)
+                data_analysis[label_annotation] = analyzer.analyze(value, annotation_specific_meta, False)
             else:
-                data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation], meta, False)
+                data_analysis[label_annotation] = analyzer.analyze(value, meta, False)
 
         return data_analysis

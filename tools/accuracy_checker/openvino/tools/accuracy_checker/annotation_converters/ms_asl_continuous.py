@@ -130,8 +130,7 @@ class MSASLContiniousConverter(BaseFormatConverter):
     @staticmethod
     def get_indices(record, output_fps, out_clip_size):
         time_step = int(round(float(record.fps) / float(output_fps)))
-        if time_step < 1:
-            time_step = 1
+        time_step = max(time_step, 1)
 
         input_length, output_length = time_step * out_clip_size, out_clip_size
 

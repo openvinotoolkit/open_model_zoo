@@ -135,10 +135,10 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
             self.ref_len += closest_len
 
             sys_ngrams = self.extract_ngrams(output, self.max_order)
-            for ngram in sys_ngrams.keys():
+            for ngram, value in sys_ngrams.items():
                 n = len(ngram.split())
-                self.correct[n - 1] += min(sys_ngrams[ngram], ref_ngrams.get(ngram, 0))
-                self.total[n - 1] += sys_ngrams[ngram]
+                self.correct[n - 1] += min(value, ref_ngrams.get(ngram, 0))
+                self.total[n - 1] += value
 
     def evaluate(self, annotations, predictions):
         def log(num):
@@ -207,8 +207,8 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
                     closest_len = reflen
 
             ngrams_ref = self.extract_ngrams(ref, self.max_order)
-            for ngram in ngrams_ref.keys():
-                ngrams[ngram] = max(ngrams[ngram], ngrams_ref[ngram])
+            for ngram, value in ngrams_ref.items():
+                ngrams[ngram] = max(ngrams[ngram], value)
 
         return ngrams, closest_diff, closest_len
 

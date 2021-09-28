@@ -104,10 +104,10 @@ class BaseFilter(ClassProvider):
 class FilterByLabels(BaseFilter):
     __provider__ = 'labels'
 
-    def apply_filter(self, entry, labels):
+    def apply_filter(self, entry, filter_arg):
         filtered = []
         for index, label in enumerate(entry.labels):
-            if label in labels:
+            if label in filter_arg:
                 filtered.append(index)
 
         return filtered
@@ -116,14 +116,14 @@ class FilterByLabels(BaseFilter):
 class FilterByMinConfidence(BaseFilter):
     __provider__ = 'min_confidence'
 
-    def apply_filter(self, entry, min_confidence):
+    def apply_filter(self, entry, filter_arg):
         filtered = []
 
         if isinstance(entry, DetectionAnnotation):
             return filtered
 
         for index, score in enumerate(entry.scores):
-            if score < min_confidence:
+            if score < filter_arg:
                 filtered.append(index)
 
         return filtered
@@ -132,16 +132,16 @@ class FilterByMinConfidence(BaseFilter):
 class FilterTopK(BaseFilter):
     __provider__ = 'top_k'
 
-    def apply_filter(self, entry, top_k):
+    def apply_filter(self, entry, filter_arg):
         filtered = []
 
         if isinstance(entry, DetectionAnnotation):
             return filtered
 
-        if len(entry.scores) <= top_k:
+        if len(entry.scores) <= filter_arg:
             return filtered
         scores_inds = np.argsort(entry.scores)[::-1]
-        non_filtered = scores_inds[:int(top_k)]
+        non_filtered = scores_inds[:int(filter_arg)]
 
         return [ind for ind in range(len(entry.scores)) if ind not in non_filtered]
 
@@ -151,7 +151,7 @@ class FilterByHeightRange(BaseFilter):
     annotation_types = (DetectionAnnotation, TextDetectionAnnotation)
     prediction_types = (DetectionPrediction, TextDetectionPrediction)
 
-    def apply_filter(self, entry, height_range):
+    def apply_filter(self, entry, filter_arg):
         @singledispatch
         def filter_func(entry_value, height_range_):
             return []
@@ -180,7 +180,7 @@ class FilterByHeightRange(BaseFilter):
 
             return filtered
 
-        return filter_func(entry, convert_to_range(height_range))
+        return filter_func(entry, convert_to_range(filter_arg))
 
 
 class FilterByWidthRange(BaseFilter):
@@ -189,7 +189,7 @@ class FilterByWidthRange(BaseFilter):
     annotation_types = (DetectionAnnotation, TextDetectionAnnotation)
     prediction_types = (DetectionPrediction, TextDetectionPrediction)
 
-    def apply_filter(self, entry, width_range):
+    def apply_filter(self, entry, filter_arg):
         @singledispatch
         def filter_func(entry_value, width_range_):
             return []
@@ -218,7 +218,7 @@ class FilterByWidthRange(BaseFilter):
 
             return filtered
 
-        return filter_func(entry, convert_to_range(width_range))
+        return filter_func(entry, convert_to_range(filter_arg))
 
 
 class FilterByAreaRange(BaseFilter):
@@ -227,8 +227,8 @@ class FilterByAreaRange(BaseFilter):
     annotation_types = (TextDetectionAnnotation, PoseEstimationAnnotation)
     prediction_types = (TextDetectionPrediction, )
 
-    def apply_filter(self, entry, area_range):
-        area_range = convert_to_range(area_range)
+    def apply_filter(self, entry, filter_arg):
+        area_range = convert_to_range(filter_arg)
 
         @singledispatch
         def filter_func(entry, area_range):
@@ -259,7 +259,7 @@ class FilterByAreaRange(BaseFilter):
 class FilterEmpty(BaseFilter):
     __provider__ = 'is_empty'
 
-    def apply_filter(self, entry: DetectionAnnotation, is_empty):
+    def apply_filter(self, entry: DetectionAnnotation, filter_arg):
         return np.where(np.bitwise_or(entry.x_maxs - entry.x_mins <= 0, entry.y_maxs - entry.y_mins <= 0))[0]
 
 
@@ -272,9 +272,9 @@ class FilterByVisibility(BaseFilter):
         'visible': 2
     }
 
-    def apply_filter(self, entry, min_visibility):
+    def apply_filter(self, entry, filter_arg):
         filtered = []
-        min_visibility_level = self.visibility_level(min_visibility)
+        min_visibility_level = self.visibility_level(filter_arg)
         for index, visibility in enumerate(entry.metadata.get('visibilities', [])):
             if self.visibility_level(visibility) < min_visibility_level:
                 filtered.append(index)
@@ -293,8 +293,8 @@ class FilterByVisibility(BaseFilter):
 class FilterByAspectRatio(BaseFilter):
     __provider__ = 'aspect_ratio'
 
-    def apply_filter(self, entry, aspect_ratio):
-        aspect_ratio = convert_to_range(aspect_ratio)
+    def apply_filter(self, entry, filter_arg):
+        aspect_ratio = convert_to_range(filter_arg)
 
         filtered = []
         coordinates = zip(entry.x_mins, entry.y_mins, entry.x_maxs, entry.y_maxs)
@@ -309,8 +309,8 @@ class FilterByAspectRatio(BaseFilter):
 class FilterByAreaRatio(BaseFilter):
     __provider__ = 'area_ratio'
 
-    def apply_filter(self, entry, area_ratio):
-        area_ratio = convert_to_range(area_ratio)
+    def apply_filter(self, entry, filter_arg):
+        area_ratio = convert_to_range(filter_arg)
 
         filtered = []
         if not isinstance(entry, DetectionAnnotation):
@@ -337,7 +337,7 @@ class FilterByAreaRatio(BaseFilter):
 class FilterInvalidBoxes(BaseFilter):
     __provider__ = 'invalid_boxes'
 
-    def apply_filter(self, entry, invalid_boxes):
+    def apply_filter(self, entry, filter_arg):
         infinite_mask_x = np.logical_or(~np.isfinite(entry.x_mins), ~np.isfinite(entry.x_maxs)) # pylint: disable=E1130
         infinite_mask_y = np.logical_or(~np.isfinite(entry.y_mins), ~np.isfinite(entry.y_maxs)) # pylint: disable=E1130
         infinite_mask = np.logical_or(infinite_mask_x, infinite_mask_y)

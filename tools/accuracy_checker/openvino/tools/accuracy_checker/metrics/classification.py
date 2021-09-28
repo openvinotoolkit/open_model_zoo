@@ -273,7 +273,7 @@ class ClassificationProfilingSummaryHelper:
 
     @staticmethod
     def precision_recall_auc(precision, recall):
-        return -np.sum(np.diff(recall) * np.array(precision)[:-1])
+        return -1 * np.sum(np.diff(recall) * np.array(precision)[:-1])
 
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):

@@ -64,7 +64,7 @@ class MxNetLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError(
                 "MXNet isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-            )
+            ) from import_error
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
@@ -111,7 +111,7 @@ class MxNetLauncher(Launcher):
     def batch(self):
         return self._batch
 
-    def fit_to_input(self, data, input_layer, layout, precision, template=None):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         if layout:
             data = np.transpose(data, layout)
         return self.mxnet.nd.array(data.astype(precision) if precision else data)
@@ -121,7 +121,7 @@ class MxNetLauncher(Launcher):
         return self._inputs
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
         return MxNetLauncherConfigValidator(
             uri_prefix or 'launcher.{}'.format(cls.__provider__), fields=cls.parameters(),
             delayed_model_loading=delayed_model_loading

@@ -411,8 +411,7 @@ class InputFeeder:
 
                 offset = 0 if total_tiles_num % batch_size == 0 else 1
                 splits_for_layer = (total_tiles_num // batch_size) + offset
-                if max_split_num < splits_for_layer:
-                    max_split_num = splits_for_layer
+                max_split_num = max(max_split_num, splits_for_layer)
 
             return max_split_num
 

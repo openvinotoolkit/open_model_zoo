@@ -302,7 +302,7 @@ def unsupported_launcher(name, error_message=None):
             msg = "{launcher} launcher is disabled. Please install {launcher} to enable it.".format(launcher=name)
             raise ValueError(error_message or msg)
 
-        def predict(self, data, meta=None, **kwargs):
+        def predict(self, inputs, metadata=None, **kwargs):
             raise NotImplementedError
 
         def release(self):

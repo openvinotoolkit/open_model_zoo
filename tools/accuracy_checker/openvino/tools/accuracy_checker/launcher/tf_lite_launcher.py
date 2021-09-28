@@ -38,7 +38,7 @@ class TFLiteLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError(
                 "TensorFlow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-            )
+            ) from import_error
         try:
             self.tf_lite = tf.lite
         except AttributeError:

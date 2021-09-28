@@ -205,12 +205,12 @@ class BaseField(BaseValidator):
 
     def parameters(self):
         parameters_dict = {}
-        for key, _ in self.__dict__.items():
+        for key, value in self.__dict__.items():
             if not key.startswith('_') and hasattr(self, key) and not hasattr(BaseValidator(), key):
-                if isinstance(self.__dict__[key], BaseField):
-                    parameters_dict[key] = self.__dict__[key].parameters()
+                if isinstance(value, BaseField):
+                    parameters_dict[key] = value.parameters()
                 else:
-                    parameters_dict[key] = self.__dict__[key]
+                    parameters_dict[key] = value
             parameters_dict['type'] = type((self.type or str)()).__name__
 
         return parameters_dict
@@ -560,12 +560,12 @@ class BoolField(BaseField):
 
     def parameters(self):
         parameters_dict = {}
-        for key, _ in self.__dict__.items():
+        for key, value in self.__dict__.items():
             if not key.startswith('_') and hasattr(self, key) and not hasattr(BaseValidator(), key):
-                if isinstance(self.__dict__[key], BaseField):
-                    parameters_dict[key] = self.__dict__[key].parameters()
+                if isinstance(value, BaseField):
+                    parameters_dict[key] = value.parameters()
                 else:
-                    parameters_dict[key] = self.__dict__[key]
+                    parameters_dict[key] = value
             parameters_dict['type'] = type(bool()).__name__
         return parameters_dict
 

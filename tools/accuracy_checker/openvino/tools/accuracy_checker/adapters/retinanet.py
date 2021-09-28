@@ -536,8 +536,8 @@ class RetinaNetTF2(Adapter):
             scores_trans = np.transpose(scores_in, [1, 0])
             scores_trans = np.reshape(scores_trans, [-1, num_anchors])
 
-            indices_ = np.argsort(-scores_trans)
-            top_k_scores = -1 * np.sort(-scores_trans)[:, :pre_nms_num_detections]
+            indices_ = np.argsort(-1 * scores_trans)
+            top_k_scores = -1 * np.sort(-1 * scores_trans)[:, :pre_nms_num_detections]
             top_k_indices = indices_[:, :pre_nms_num_detections]
 
             top_k_scores = np.reshape(top_k_scores,

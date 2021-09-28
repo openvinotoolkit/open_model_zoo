@@ -42,17 +42,17 @@ class CoCoInstanceSegmentationDataAnalyzer(BaseDataAnalyzer):
                     characteristics[label] = {'area': [float(area)],
                                               'width': [float(rect[2])], 'height': [float(rect[3])]}
 
-        for key in characteristics:
+        for key, value in characteristics.items():
             size = counter[key]
-            characteristics[key]['area'] = {'average': sum(characteristics[key]['area']) / size,
-                                            'min': min(characteristics[key]['area']),
-                                            'max': max(characteristics[key]['area'])}
-            characteristics[key]['width'] = {'average': sum(characteristics[key]['width']) / size,
-                                             'min': min(characteristics[key]['width']),
-                                             'max': max(characteristics[key]['width'])}
-            characteristics[key]['height'] = {'average': sum(characteristics[key]['height']) / size,
-                                              'min': min(characteristics[key]['height']),
-                                              'max': max(characteristics[key]['height'])}
+            value['area'] = {'average': sum(characteristics[key]['area']) / size,
+                             'min': min(characteristics[key]['area']),
+                             'max': max(characteristics[key]['area'])}
+            value['width'] = {'average': sum(characteristics[key]['width']) / size,
+                              'min': min(characteristics[key]['width']),
+                              'max': max(characteristics[key]['width'])}
+            value['height'] = {'average': sum(characteristics[key]['height']) / size,
+                               'min': min(characteristics[key]['height']),
+                               'max': max(characteristics[key]['height'])}
 
         print_info('Total instances: {value}'.format(value=total_instances))
         data_analysis['total_instances'] = total_instances

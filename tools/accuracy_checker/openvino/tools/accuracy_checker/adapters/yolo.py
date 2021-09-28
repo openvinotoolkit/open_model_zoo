@@ -455,9 +455,11 @@ class YoloV3Adapter(Adapter):
                 if self.do_reshape or len(p.shape) != 3:
                     try:
                         cells = self.cells[layer_id]
-                    except IndexError:
-                        raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
-                                          'Check "cells" option.'.format(len(prediction), len(self.cells)))
+                    except IndexError as index_err:
+                        raise ConfigError(
+                            'Number of output layers ({}) is more than detection grid size ({}). '
+                            'Check "cells" option.'.format(len(prediction), len(self.cells))
+                        ) from index_err
                     if self.output_format == 'BHW':
                         new_shape = (-1, cells, cells)
                     else:
