@@ -137,19 +137,19 @@ def create_reader(config):
 
 
 class DataReaderField(BaseField):
-    def validate(self, entry_, field_uri=None, fetch_only=False, validation_scheme=None):
-        errors = super().validate(entry_, field_uri)
+    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
+        errors = super().validate(entry, field_uri)
 
-        if entry_ is None:
+        if entry is None:
             return errors
 
         field_uri = field_uri or self.field_uri
-        if isinstance(entry_, str):
+        if isinstance(entry, str):
             errors.extend(
                 StringField(choices=BaseReader.providers).validate(
-                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme)
+                    entry, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme)
             )
-        elif isinstance(entry_, dict):
+        elif isinstance(entry, dict):
             class DictReaderValidator(ConfigValidator):
                 type = StringField(choices=BaseReader.providers)
 
@@ -158,13 +158,13 @@ class DataReaderField(BaseField):
             )
             errors.extend(
                 dict_reader_validator.validate(
-                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme
+                    entry, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme
                 ))
         else:
             msg = 'reader must be either string or dictionary'
             if not fetch_only:
-                self.raise_error(entry_, field_uri, msg)
-            errors.append(self.build_error(entry_, field_uri, msg, validation_scheme))
+                self.raise_error(entry, field_uri, msg)
+            errors.append(self.build_error(entry, field_uri, msg, validation_scheme))
 
         return errors
 

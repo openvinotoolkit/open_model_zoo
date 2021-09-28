@@ -513,13 +513,13 @@ class CocosnetModel(BaseModel):
             inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].precision])
         return inputs
 
-    def predict(self, identifiers, inputs):
+    def predict(self, identifiers, input_data):
         results = []
-        for current_input in inputs:
-            input_data = self.fit_to_input(current_input)
+        for current_input in input_data:
+            data = self.fit_to_input(current_input)
             if not self.is_dynamic and self.dynamic_inputs:
-                self.reshape_net({k: v.shape for k, v in input_data.items()})
-            prediction = self.exec_network.infer(input_data)
+                self.reshape_net({k: v.shape for k, v in data.items()})
+            prediction = self.exec_network.infer(data)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
 

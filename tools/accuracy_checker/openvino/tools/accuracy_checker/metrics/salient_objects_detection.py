@@ -69,8 +69,7 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         sum_label = 2 * np.mean(prediction.mask)
-        if sum_label > 1:
-            sum_label = 1
+        sum_label = min(sum_label, 1)
 
         label3 = np.zeros_like(annotation.mask)
         label3[prediction.mask >= sum_label] = 1

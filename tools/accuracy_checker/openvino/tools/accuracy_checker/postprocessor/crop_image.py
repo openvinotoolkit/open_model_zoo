@@ -68,10 +68,10 @@ class CropImage(PostprocessorWithSpecificTargets):
 
         return annotation, prediction
 
-    def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if 'image_size' in image_metadata:
             self.image_size = image_metadata['image_size']
-        self.process_image(annotations, predictions)
+        self.process_image(annotation, prediction)
 
 
 class CornerCropImage(PostprocessorWithSpecificTargets):
@@ -117,7 +117,7 @@ class CornerCropImage(PostprocessorWithSpecificTargets):
 
         return annotation, prediction
 
-    def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if 'image_size' in image_metadata:
             self.image_size = image_metadata['image_size']
-        self.process_image(annotations, predictions)
+        self.process_image(annotation, prediction)

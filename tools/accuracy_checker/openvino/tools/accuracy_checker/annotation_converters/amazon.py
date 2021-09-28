@@ -35,21 +35,21 @@ class DataIterator:
                  batch_size=128,
                  maxlen=100):
 
-        self.source = open(source, 'r')
+        self.source = open(source, 'r', encoding='UTF-8') # pylint: disable=R1732
         self.source_dicts = []
         for source_dict in [uid_voc, mid_voc, cat_voc]:
             # disable B301:pickle check
-            self.source_dicts.append(pickle.load(open(source_dict, 'rb'), encoding='UTF-8')) # nosec
+            with open(source_dict, 'rb') as source_content:
+                self.source_dicts.append(pickle.load(source_content, encoding='UTF-8')) # nosec
 
-        f_meta = open(item_info, "r")
-        meta_map = {}
-        for line in f_meta:
-            arr = line.strip().split("\t")
-            if arr[0] not in meta_map:
-                meta_map[arr[0]] = arr[1]
+        with open(item_info, "r", encoding='UTF-8') as f_meta:
+            meta_map = {}
+            for line in f_meta:
+                arr = line.strip().split("\t")
+                if arr[0] not in meta_map:
+                    meta_map[arr[0]] = arr[1]
         self.meta_id_map = {}
-        for key in meta_map:
-            val = meta_map[key]
+        for key, val in meta_map.items():
             if key in self.source_dicts[1]:
                 mid_idx = self.source_dicts[1][key]
             else:
@@ -60,14 +60,14 @@ class DataIterator:
                 cat_idx = 0
             self.meta_id_map[mid_idx] = cat_idx
 
-        f_review = open(reviews_info, "r")
-        self.mid_list_for_random = []
-        for line in f_review:
-            arr = line.strip().split("\t")
-            tmp_idx = 0
-            if arr[1] in self.source_dicts[1]:
-                tmp_idx = self.source_dicts[1][arr[1]]
-            self.mid_list_for_random.append(tmp_idx)
+        with open(reviews_info, "r", encoding='UTF-8') as f_review:
+            self.mid_list_for_random = []
+            for line in f_review:
+                arr = line.strip().split("\t")
+                tmp_idx = 0
+                if arr[1] in self.source_dicts[1]:
+                    tmp_idx = self.source_dicts[1][arr[1]]
+                self.mid_list_for_random.append(tmp_idx)
 
         self.batch_size = batch_size
         self.maxlen = maxlen

@@ -497,8 +497,8 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
             per_class_result = {k: compute_precision_recall(
                 self.threshold, [v])[0] for k, v in per_class_matching.items()
                                 }
-            for label in per_class_matching:
-                per_class_matching[label]['result'] = per_class_result[label]
+            for label, value in per_class_matching.items():
+                value['result'] = per_class_result[label]
             self.profiler.update(
                 annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values()))
             )

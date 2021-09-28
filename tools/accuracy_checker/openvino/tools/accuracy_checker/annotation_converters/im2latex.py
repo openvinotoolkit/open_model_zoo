@@ -38,7 +38,7 @@ def read_vocab(vocab_path):
         with open(vocab_path, "rb") as f:
             vocab_dict = pkl.load(f)
     elif vocab_path.suffix == '.json':
-        with open(vocab_path, "r") as f:
+        with open(vocab_path, "r", encoding='UTF-8') as f:
             vocab_dict = json.load(f)
             id2sign = {int(k): v for k, v in vocab_dict['id2sign'].items()}
             vocab_dict['id2sign'] = id2sign

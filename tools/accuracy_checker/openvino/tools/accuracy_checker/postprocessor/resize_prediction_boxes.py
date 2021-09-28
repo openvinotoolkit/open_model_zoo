@@ -42,15 +42,15 @@ class ResizePredictionBoxes(Postprocessor):
     def configure(self):
         self.rescale = self.get_value_from_config('rescale')
 
-    def process_image(self, annotations, predictions):
+    def process_image(self, annotation, prediction):
         h, w, _ = self.image_size
-        for prediction in predictions:
-            prediction.x_mins *= w
-            prediction.x_maxs *= w
-            prediction.y_mins *= h
-            prediction.y_maxs *= h
+        for pred in prediction:
+            pred.x_mins *= w
+            pred.x_maxs *= w
+            pred.y_mins *= h
+            pred.y_maxs *= h
 
-        return annotations, predictions
+        return annotation, prediction
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         h, w, _ = self.image_size

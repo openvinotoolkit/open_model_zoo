@@ -199,8 +199,8 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         }
 
         specified = []
-        for mo_source_option in sources:
-            if contains_all(entry, sources[mo_source_option]):
+        for mo_source_option, mo_source_value in sources.items():
+            if contains_all(entry, mo_source_value):
                 specified.append(mo_source_option)
 
         if not specified:

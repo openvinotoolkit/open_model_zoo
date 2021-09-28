@@ -103,7 +103,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             self.count = np.ceil(self.src.stat().st_size / self._bytes_per_entry)
             self.cat_feat = spa_fea
 
-            self.binfile = open(self.src, 'rb') if self.save_preprocessed_features else None
+            self.binfile = open(self.src, 'rb') if self.save_preprocessed_features else None # pylint: disable=R1732
         else:
             data = np.load(self.src)
             self._x_int = data['X_int']

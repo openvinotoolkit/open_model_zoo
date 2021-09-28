@@ -45,7 +45,7 @@ class TF2Launcher(Launcher):
         except ImportError as import_error:
             raise ValueError(
                 "TensorFlow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-            )
+            ) from import_error
         self.tf = tensorflow
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)

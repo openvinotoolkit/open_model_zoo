@@ -147,8 +147,8 @@ def verify_label_map(label_map):
         try:
             int_class_id = int(class_id)
             valid_label_map[int_class_id] = class_name
-        except ValueError:
+        except ValueError as value_err:
             raise ConfigError(
                 'class_id {} is invalid. `label_map` should have integer keys.'.format(class_id)
-            )
+            ) from value_err
     return valid_label_map

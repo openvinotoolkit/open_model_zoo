@@ -52,7 +52,7 @@ class SegmentationPredictionResample(Postprocessor):
     def configure(self):
         self.make_argmax = self.config.get('make_argmax')
 
-    def process_image(self, annotations, predictions):
+    def process_image(self, annotation, prediction):
         raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):

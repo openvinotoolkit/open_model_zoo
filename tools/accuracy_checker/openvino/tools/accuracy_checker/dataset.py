@@ -403,16 +403,16 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
         if subsample_size.endswith('%'):
             try:
                 subsample_size = float(subsample_size[:-1])
-            except ValueError:
-                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+            except ValueError as value_err:
+                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size)) from value_err
             if subsample_size <= 0:
                 raise ConfigError('subsample_size should be > 0')
             subsample_size *= len(annotation) / 100
             subsample_size = int(subsample_size) or 1
     try:
         subsample_size = int(subsample_size)
-    except ValueError:
-        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+    except ValueError as value_err:
+        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size)) from value_err
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
     return make_subset(annotation, subsample_size, subsample_seed, shuffle)

@@ -23,13 +23,13 @@ class Translate3dPoses(Postprocessor):
     annotation_types = (PoseEstimation3dAnnotation,)
     prediction_types = (PoseEstimation3dPrediction,)
 
-    def process_image(self, annotations, predictions):
-        for batch_id, prediction in enumerate(predictions):
-            for pose_id in range(prediction.size):
-                translation = prediction.translations[pose_id]
-                translation[2] *= annotations[batch_id].fx if annotations[batch_id] is not None else 1
-                prediction.x_3d_values[pose_id] += translation[0]
-                prediction.y_3d_values[pose_id] += translation[1]
-                prediction.z_3d_values[pose_id] += translation[2]
+    def process_image(self, annotation, prediction):
+        for batch_id, pred in enumerate(prediction):
+            for pose_id in range(pred.size):
+                translation = pred.translations[pose_id]
+                translation[2] *= annotation[batch_id].fx if annotation[batch_id] is not None else 1
+                pred.x_3d_values[pose_id] += translation[0]
+                pred.y_3d_values[pose_id] += translation[1]
+                pred.z_3d_values[pose_id] += translation[2]
 
-        return annotations, predictions
+        return annotation, prediction

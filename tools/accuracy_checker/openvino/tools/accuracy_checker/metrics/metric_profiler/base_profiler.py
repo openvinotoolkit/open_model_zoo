@@ -106,7 +106,7 @@ class MetricProfiler(ClassProvider):
             out_path = self.out_dir / self.report_file
             new_file = not out_path.exists()
             if not new_file:
-                with open(str(out_path), 'r') as f:
+                with open(str(out_path), 'r', encoding='utf-8') as f:
                     out_dict = json.load(f)
             else:
                 out_dict = {
@@ -122,7 +122,7 @@ class MetricProfiler(ClassProvider):
                     'dataset_meta': self.dataset_meta,
                 }
             out_dict.update(summary)
-            with open(str(out_path), 'w') as f:
+            with open(str(out_path), 'w', encoding='utf-8') as f:
                 json.dump(out_dict, f)
 
     def reset(self):
@@ -142,7 +142,7 @@ class MetricProfiler(ClassProvider):
             else:
                 data_to_store.append(value)
 
-        with open(str(out_path), 'a+', newline='') as f:
+        with open(str(out_path), 'a+', newline='', encoding='utf-8') as f:
             writer = DictWriter(f, fieldnames=self.fields)
             if new_file:
                 writer.writeheader()
@@ -154,7 +154,7 @@ class MetricProfiler(ClassProvider):
         out_path = self.out_dir / self.report_file
         new_file = not out_path.exists()
         if not new_file:
-            with open(str(out_path), 'r') as f:
+            with open(str(out_path), 'r', encoding='utf-8') as f:
                 out_dict = json.load(f)
             out_dict['report'].extend(list(self.storage.values()))
         else:
@@ -170,7 +170,7 @@ class MetricProfiler(ClassProvider):
                 'report_type': self.__provider__,
                 'dataset_meta': self.dataset_meta
             }
-        with open(str(out_path), 'w') as f:
+        with open(str(out_path), 'w', encoding='utf-8') as f:
             json.dump(out_dict, f)
 
         self._reset_storage()

@@ -84,19 +84,19 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
             coeff_y /= input_h
         return coeff_x, coeff_y
 
-    def process_image(self, annotations, predictions):
+    def process_image(self, annotation, prediction):
         raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
 
-    def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         assert image_metadata and 'geometric_operations' in image_metadata, (
             "Postprocessing step `faster_rcnn_postprocessing_resize` cannot work without "
             "metadata with `geometric_operations` field")
         coeff_x, coeff_y = self.get_coeff_x_y_from_metadata(image_metadata, self.rescale)
 
-        for prediction in predictions:
-            prediction.x_mins *= coeff_x
-            prediction.x_maxs *= coeff_x
-            prediction.y_mins *= coeff_y
-            prediction.y_maxs *= coeff_y
+        for pred in prediction:
+            pred.x_mins *= coeff_x
+            pred.x_maxs *= coeff_x
+            pred.y_mins *= coeff_y
+            pred.y_maxs *= coeff_y
 
-        return annotations, predictions
+        return annotation, prediction

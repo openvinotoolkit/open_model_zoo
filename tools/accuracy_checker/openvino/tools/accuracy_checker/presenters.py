@@ -255,7 +255,7 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
         'dataset_size': dataset_size
     }
 
-    with open(csv_file, 'a+', newline='') as f:
+    with open(csv_file, 'a+', newline='', encoding='utf-8') as f:
         writer = DictWriter(f, fieldnames=field_names)
         if new_file:
             writer.writeheader()

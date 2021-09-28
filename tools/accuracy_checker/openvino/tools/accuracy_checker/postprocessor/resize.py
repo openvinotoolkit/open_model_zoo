@@ -93,7 +93,7 @@ class Resize(PostprocessorWithSpecificTargets):
         self.x_scale = image_w / input_w
         self.y_scale = image_h / input_h
 
-    def process_image(self, annotations, predictions):
+    def process_image(self, annotation, prediction):
         @singledispatch
         def resize(entry, height, width):
             return entry
@@ -180,20 +180,20 @@ class Resize(PostprocessorWithSpecificTargets):
             return height, width
 
         if self.apply_to is None or self.apply_to in [ApplyToOption.PREDICTION, ApplyToOption.ALL]:
-            if annotations:
-                for annotation, prediction in zip(annotations, predictions):
-                    height, width = set_sizes(annotation or prediction)
-                    resize(prediction, height, width)
+            if annotation:
+                for ann, pred in zip(annotation, prediction):
+                    height, width = set_sizes(ann or pred)
+                    resize(pred, height, width)
             else:
-                for prediction in predictions:
-                    height, width = set_sizes(prediction)
-                    resize(prediction, height, width)
+                for pred in prediction:
+                    height, width = set_sizes(pred)
+                    resize(pred, height, width)
 
         if self.apply_to is None or self.apply_to in [ApplyToOption.ANNOTATION, ApplyToOption.ALL]:
-            for annotation in annotations:
-                if annotation is None:
+            for ann in annotation:
+                if ann is None:
                     continue
-                height, width = set_sizes(annotation)
-                resize(annotation, height, width)
+                height, width = set_sizes(ann)
+                resize(ann, height, width)
 
-        return annotations, predictions
+        return annotation, prediction

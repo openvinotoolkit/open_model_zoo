@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 
 class SampLeNet(nn.Module):
     def __init__(self):
-        super(SampLeNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)

@@ -112,9 +112,9 @@ class SRConverter(BaseFormatConverter):
                 try:
                     self.lr_dir.relative_to(self.data_dir)
                     self.upsampled_dir.relative_to(self.data_dir)
-                except ValueError:
+                except ValueError as value_err:
                     raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
-                                      'lr_dir and upsampled_dir, if 2 streams used')
+                                      'lr_dir and upsampled_dir, if 2 streams used') from value_err
             self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
             if self.lr_dir != self.upsampled_dir:
                 warnings.warn("lr_dir and upsampled_dir are different folders."
@@ -318,7 +318,7 @@ class SRMultiFrameConverter(BaseFormatConverter):
         except ValueError:
             ref_func = self.predefined_ref_frame.get(config_value)
             if ref_func is None:
-                raise ConfigError('Unsupported value for reference_frame: {}'.format(config_value))
+                raise ConfigError('Unsupported value for reference_frame: {}'.format(config_value)) from None
             ref_frame = ref_func(num_frames)
         if ref_frame > num_frames:
             raise ConfigError('Unexpected value for reference_frame id: {}'.format(ref_frame))
@@ -422,13 +422,13 @@ class SRDirectoryBased(BaseFormatConverter):
         if self.images_dir:
             try:
                 self.lr_dir.relative_to(self.images_dir)
-            except ValueError:
-                raise ConfigError('lr_dir should be relative to images_dir')
+            except ValueError as value_err:
+                raise ConfigError('lr_dir should be relative to images_dir') from value_err
             if self.two_streams:
                 try:
                     self.upsample_dir.relative_to(self.images_dir)
-                except ValueError:
-                    raise ConfigError('upsample_dir should be relative to images_dir')
+                except ValueError as value_err:
+                    raise ConfigError('upsample_dir should be relative to images_dir') from value_err
         else:
             self.images_dir = (
                 os.path.commonpath([str(self.lr_dir), str(self.upsample_dir)]) if self.two_streams else self.lr_dir

@@ -27,11 +27,11 @@ class XML2DetectionAdapter(Adapter):
     __provider__ = 'xml_detection'
     prediction_types = (DetectionPrediction, )
 
-    def process(self, tree, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers=None, frame_meta=None):
         class_to_ind = dict(zip(self.label_map.values(), range(len(self.label_map.values()))))
 
         result = {}
-        for frames in tree.getroot():
+        for frames in raw.getroot():
             for frame in frames:
                 identifier = frame.tag + '.png'
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []

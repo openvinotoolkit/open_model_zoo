@@ -37,8 +37,8 @@ def require_kenlm():
     if kenlm is None:
         try:
             import kenlm as kenlm_imported  # pylint: disable=import-outside-toplevel
-        except ImportError:
-            raise ValueError("kenlm is not installed. Please install it with 'pip install pypi-kenlm'.")
+        except ImportError as import_err:
+            raise ValueError("kenlm is not installed. Please install it with 'pip install pypi-kenlm'.") from import_err
         kenlm = kenlm_imported
 
 
@@ -50,11 +50,11 @@ def require_ctcdecode_numpy():
     if ctcdecode_numpy is None:
         try:
             import ctcdecode_numpy as ctcdecode_numpy_imported  # pylint: disable=import-outside-toplevel
-        except ImportError:
+        except ImportError as impoer_err:
             raise ValueError(
                 "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
                 "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
-            )
+            ) from impoer_err
         ctcdecode_numpy = ctcdecode_numpy_imported
 
 

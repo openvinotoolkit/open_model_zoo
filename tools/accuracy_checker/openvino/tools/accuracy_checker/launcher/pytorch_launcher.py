@@ -62,7 +62,8 @@ class PyTorchLauncher(Launcher):
             # it is the reason, why it is imported only when it used
             import torch # pylint: disable=C0415
         except ImportError as import_error:
-            raise ValueError("PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg))
+            raise ValueError("PyTorch isn't installed. Please, install it before using. \n{}".format(
+                import_error.msg)) from import_error
         self._torch = torch
         self.validate_config(config_entry)
         module_args = config_entry.get("module_args", ())
@@ -117,7 +118,7 @@ class PyTorchLauncher(Launcher):
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
-                if all([key.startswith('module.') for key in state]):
+                if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
             module.to(self.device)

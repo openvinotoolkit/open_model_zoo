@@ -143,11 +143,11 @@ class TensorflowImageReader(BaseReader):
         super().__init__(data_source, config, **kwargs)
         try:
             import tensorflow as tf  # pylint: disable=C0415
-        except ImportError as import_error:
+        except ImportError as import_err:
             raise ImportError(
                 'tf backend for image reading requires TensorFlow. '
-                'Please install it before usage. {}'.format(import_error.msg)
-            )
+                'Please install it before usage. {}'.format(import_err.msg)
+            ) from import_err
         if tf.__version__ < '2.0.0':
             tf.enable_eager_execution()
 

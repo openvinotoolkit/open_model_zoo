@@ -77,16 +77,16 @@ class NMS(Postprocessor):
         self.keep_top_k = self.get_value_from_config('keep_top_k')
         self.use_min_area = self.get_value_from_config('use_min_area')
 
-    def process_image(self, annotations, predictions):
-        for prediction in predictions:
-            scores = get_scores(prediction)
+    def process_image(self, annotation, prediction):
+        for pred in prediction:
+            scores = get_scores(pred)
             keep = self.nms(
-                prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
+                pred.x_mins, pred.y_mins, pred.x_maxs, pred.y_maxs, scores,
                 self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
             )
-            prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
+            pred.remove([box for box in range(len(pred.x_mins)) if box not in keep])
 
-        return annotations, predictions
+        return annotation, prediction
 
     @staticmethod
     def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None, use_min_area=False):
@@ -137,22 +137,22 @@ class ClassAwareNMS(NMS):
     prediction_types = (DetectionPrediction, ActionDetectionPrediction)
     annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
 
-    def process_image(self, annotations, predictions):
-        for prediction in predictions:
-            scores = get_scores(prediction)
-            labels = prediction.labels
+    def process_image(self, annotation, prediction):
+        for pred in prediction:
+            scores = get_scores(pred)
+            labels = pred.labels
             keep = []
             for label in np.unique(labels):
                 mask = np.flatnonzero(label == labels)
                 keep_i = self.nms(
-                    prediction.x_mins[mask], prediction.y_mins[mask], prediction.x_maxs[mask], prediction.y_maxs[mask],
+                    pred.x_mins[mask], pred.y_mins[mask], pred.x_maxs[mask], pred.y_maxs[mask],
                     scores[mask], self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
                 )
                 keep.extend(mask[keep_i])
 
-            prediction.remove([box for box in range(prediction.size) if box not in keep])
+            pred.remove([box for box in range(pred.size) if box not in keep])
 
-        return annotations, predictions
+        return annotation, prediction
 
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
@@ -184,19 +184,19 @@ class SoftNMS(Postprocessor):
         self.sigma = self.get_value_from_config('sigma')
         self.min_score = self.get_value_from_config('min_score')
 
-    def process_image(self, annotations, predictions):
-        for prediction in predictions:
-            if not prediction.size:
+    def process_image(self, annotation, prediction):
+        for pred in prediction:
+            if not pred.size:
                 continue
 
-            scores = get_scores(prediction)
+            scores = get_scores(pred)
             keep, new_scores = self._nms(
-                np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs], scores,
+                np.c_[pred.x_mins, pred.y_mins, pred.x_maxs, pred.y_maxs], scores,
             )
-            prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
-            set_scores(prediction, new_scores)
+            pred.remove([box for box in range(len(pred.x_mins)) if box not in keep])
+            set_scores(pred, new_scores)
 
-        return annotations, predictions
+        return annotation, prediction
 
     @staticmethod
     def _matrix_iou(set_a, set_b):
@@ -280,16 +280,16 @@ class DIoUNMS(Postprocessor):
         self.include_boundaries = self.get_value_from_config('include_boundaries')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
 
-    def process_image(self, annotations, predictions):
-        for prediction in predictions:
-            scores = get_scores(prediction)
+    def process_image(self, annotation, prediction):
+        for pred in prediction:
+            scores = get_scores(pred)
             keep = self.diou_nms(
-                prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
+                pred.x_mins, pred.y_mins, pred.x_maxs, pred.y_maxs, scores,
                 self.overlap, self.include_boundaries, self.keep_top_k
             )
-            prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
+            pred.remove([box for box in range(len(pred.x_mins)) if box not in keep])
 
-        return annotations, predictions
+        return annotation, prediction
 
     @staticmethod
     def diou_nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None, use_min_area=False):

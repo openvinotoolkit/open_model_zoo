@@ -42,7 +42,7 @@ def _clean(sentence, subword_option=None):
         sentence = re.sub("@@ ", "", sentence)
     # SPM
     if subword_option == "spm":
-        sentence = u"".join(sentence.split()).replace(u"\u2581", u" ").lstrip()
+        sentence = "".join(sentence.split()).replace("\u2581", " ").lstrip()
 
     return sentence.split(' ')
 

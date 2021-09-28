@@ -360,15 +360,15 @@ class ClipAudio(Preprocessor):
             if overlap.endswith('%'):
                 try:
                     self.overlap = float(overlap[:-1]) / 100
-                except ValueError:
+                except ValueError as value_err:
                     raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                      .format(self.__provider__, overlap))
+                                      .format(self.__provider__, overlap)) from value_err
             elif overlap.endswith('samples'):
                 try:
                     self.overlap_in_samples = int(overlap[:-7])
-                except ValueError:
+                except ValueError as value_err:
                     raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                      .format(self.__provider__, overlap))
+                                      .format(self.__provider__, overlap)) from value_err
                 if self.overlap_in_samples < 1:
                     raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
                                       .format(self.__provider__, overlap))
@@ -379,9 +379,9 @@ class ClipAudio(Preprocessor):
         else:
             try:
                 self.overlap = float(overlap)
-            except ValueError:
+            except ValueError as value_err:
                 raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
-                                  .format(self.__provider__, overlap))
+                                  .format(self.__provider__, overlap)) from value_err
             if self.overlap <= 0 or self.overlap >= 1:
                 raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
                                   .format(self.__provider__, overlap))
@@ -392,9 +392,9 @@ class ClipAudio(Preprocessor):
             if duration.endswith('samples'):
                 try:
                     self.duration = int(duration[:-7])
-                except ValueError:
+                except ValueError as value_err:
                     raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                      .format(self.__provider__, duration))
+                                      .format(self.__provider__, duration)) from value_err
                 if self.duration <= 1:
                     raise ConfigError("Preprocessor {}: duration should be positive value - {}."
                                       .format(self.__provider__, self.duration))
@@ -405,9 +405,9 @@ class ClipAudio(Preprocessor):
         else:
             try:
                 self.duration = float(duration)
-            except ValueError:
+            except ValueError as value_err:
                 raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                  .format(self.__provider__, duration))
+                                  .format(self.__provider__, duration)) from value_err
             if self.duration <= 0:
                 raise ConfigError("Preprocessor {}: duration should be positive value - {}."
                                   .format(self.__provider__, self.duration))

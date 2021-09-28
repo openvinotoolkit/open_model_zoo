@@ -112,16 +112,16 @@ def crop_image(img, output_path, default_size=None):
 
 
 def run(cmd, timeout_sec):
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL)
-
     def kill_proc(process):
         return process.kill()
-    timer = Timer(timeout_sec, kill_proc, [proc])
-    try:
-        timer.start()
-        _, _ = proc.communicate()
-    finally:
-        timer.cancel()
+
+    with subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL) as proc:
+        timer = Timer(timeout_sec, kill_proc, [proc])
+        try:
+            timer.start()
+            _, _ = proc.communicate()
+        finally:
+            timer.cancel()
 
 
 def preprocess_formula(formula):

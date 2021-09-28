@@ -54,7 +54,7 @@ def write_summary_result(result, meta, out_path, label_map):
     }
     out_dict = {}
     if out_path.exists():
-        with open(str(out_path), 'r') as f:
+        with open(str(out_path), 'r', encoding='utf-8') as f:
             out_dict = json.load(f)
 
     final_summary = out_dict.get('summary_result', {})
@@ -65,7 +65,7 @@ def write_summary_result(result, meta, out_path, label_map):
         per_class_res.update(summary['per_class_result'])
         out_dict['per_class_result'] = per_class_res
 
-    with open(str(out_path), 'w') as f:
+    with open(str(out_path), 'w', encoding='utf-8') as f:
         json.dump(out_dict, f)
 
 

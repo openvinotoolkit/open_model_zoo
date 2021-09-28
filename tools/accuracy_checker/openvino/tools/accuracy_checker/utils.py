@@ -50,8 +50,8 @@ def concat_lists(*lists):
 def get_path(entry: Union[str, Path], is_directory=False, check_exists=True, file_or_directory=False):
     try:
         path = Path(entry)
-    except TypeError:
-        raise TypeError('"{}" is expected to be a path-like'.format(entry))
+    except TypeError as type_err:
+        raise TypeError('"{}" is expected to be a path-like'.format(entry)) from type_err
 
     if not check_exists:
         return path
@@ -368,12 +368,12 @@ def get_or_parse_value(item, supported_values=None, default=None, casting_type=f
 
         try:
             return string_to_tuple(item, casting_type=casting_type)
-        except ValueError:
+        except ValueError as value_err:
             message = 'Invalid value "{}", expected {}list of values'.format(
                 item,
                 'one of precomputed: ({}) or '.format(', '.join(supported_values.keys())) if supported_values else ''
             )
-            raise ValueError(message)
+            raise ValueError(message) from value_err
 
     if isinstance(item, (float, int)):
         return (casting_type(item), )
@@ -502,15 +502,15 @@ class OrderedSet(MutableSet):
     def __contains__(self, key):
         return key in self.map
 
-    def add(self, key):
-        if key not in self.map:
+    def add(self, value):
+        if value not in self.map:
             end = self.end
             curr = end[1]
-            curr[2] = end[1] = self.map[key] = [key, curr, end]
+            curr[2] = end[1] = self.map[value] = [value, curr, end]
 
-    def discard(self, key):
-        if key in self.map:
-            key, prev_value, next_value = self.map.pop(key)
+    def discard(self, value):
+        if value in self.map:
+            value, prev_value, next_value = self.map.pop(value)
             prev_value[2] = next_value
             next_value[1] = prev_value
 
@@ -848,7 +848,7 @@ def loadmat(filename):
             fd.seek(curpos - 1)
         return end
 
-    fd = open(filename, 'rb')
+    fd = open(filename, 'rb') # pylint: disable=R1732
 
     fd.seek(124)
     tst_str = fd.read(4)

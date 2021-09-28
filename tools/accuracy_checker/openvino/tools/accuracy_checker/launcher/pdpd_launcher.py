@@ -33,7 +33,7 @@ class PaddlePaddleLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError(
                 "PaddlePaddle isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-            )
+            ) from import_error
         self._paddle_tensor = PaddleTensor
         self._analysis_config = AnalysisConfig
         self._create_paddle_predictor = create_paddle_predictor

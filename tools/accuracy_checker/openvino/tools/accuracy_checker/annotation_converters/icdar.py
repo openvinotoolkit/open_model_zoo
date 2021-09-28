@@ -47,15 +47,15 @@ def is_word(text):
 
     forbidden_symbols = "\N{MULTIPLICATION SIGN}\N{DIVISION SIGN}\N{GREEK ANO TELEIA}"
 
-    range1 = [ord(u'a'), ord(u'z')]
-    range2 = [ord(u'A'), ord(u'Z')]
-    range3 = [ord(u'\N{LATIN CAPITAL LETTER A WITH GRAVE}'),
-              ord(u'\N{LATIN LETTER WYNN}')]
-    range4 = [ord(u'\N{LATIN CAPITAL LETTER DZ WITH CARON}'),
-              ord(u'\N{LATIN SMALL LETTER REVERSED R WITH FISHHOOK}')]
-    range5 = [ord(u'\N{GREEK CAPITAL LETTER ALPHA WITH TONOS}'),
-              ord(u'\N{GREEK CAPITAL REVERSED DOTTED LUNATE SIGMA SYMBOL}')]
-    range6 = [ord(u'-'), ord(u'-')]
+    range1 = [ord('a'), ord('z')]
+    range2 = [ord('A'), ord('Z')]
+    range3 = [ord('\N{LATIN CAPITAL LETTER A WITH GRAVE}'),
+              ord('\N{LATIN LETTER WYNN}')]
+    range4 = [ord('\N{LATIN CAPITAL LETTER DZ WITH CARON}'),
+              ord('\N{LATIN SMALL LETTER REVERSED R WITH FISHHOOK}')]
+    range5 = [ord('\N{GREEK CAPITAL LETTER ALPHA WITH TONOS}'),
+              ord('\N{GREEK CAPITAL REVERSED DOTTED LUNATE SIGMA SYMBOL}')]
+    range6 = [ord('-'), ord('-')]
 
     for char in text:
         char_code = ord(char)
@@ -109,7 +109,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
 
         for gt_id, gt_file in enumerate(files):
             gt_file_name = str(gt_file.parts[-1])
-            identifier = '{}.jpg'.format(gt_file_name.split('gt_')[-1].split('.txt')[0])
+            identifier = '{}.jpg'.format(gt_file_name.rsplit('gt_', maxsplit=1)[0].split('.txt')[0])
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))

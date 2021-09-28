@@ -88,7 +88,7 @@ class ScoreF1(PerImageEvaluationMetric):
         f1 = (2 * precision * recall) / (precision + recall)
         return f1
 
-    def evaluate(self, annotation, prediction):
+    def evaluate(self, annotations, predictions):
         return sum(self.per_question_results.values()) / len(self.per_question_results)
 
     def reset(self):
@@ -121,7 +121,7 @@ class ExactMatchScore(PerImageEvaluationMetric):
     def compute_exact(a_gold, a_pred):
         return int(normalize_answer(a_gold) == normalize_answer(a_pred))
 
-    def evaluate(self, annotation, prediction):
+    def evaluate(self, annotations, predictions):
         return sum(self.per_question_results.values()) / len(self.per_question_results)
 
     def reset(self):

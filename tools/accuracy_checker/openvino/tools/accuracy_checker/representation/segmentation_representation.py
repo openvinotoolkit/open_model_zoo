@@ -172,7 +172,7 @@ class SegmentationPrediction(SegmentationRepresentation):
         mask_source = Path.cwd() / 'dumped_masks'
         if not mask_source.exists():
             mask_source.mkdir()
-        mask_file = mask_source / (str(self.identifier).split('.')[0] + '.npy')
+        mask_file = mask_source / (str(self.identifier).split('.', maxsplit=1)[0] + '.npy')
         mask_shape = self.mask.shape
         if len(mask_shape) == 3 and mask_shape[0] != 1:
             argmaxed_mask = np.argmax(self.mask, axis=0).astype(np.uint8)
