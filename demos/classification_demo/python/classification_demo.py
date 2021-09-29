@@ -186,7 +186,6 @@ def main():
     output_transform = None
     video_writer = cv2.VideoWriter()
 
-    frames_num = 0
     correct_predictions = 0
     while True:
         if async_pipeline.callback_exceptions:
