@@ -210,7 +210,7 @@ def main():
             frame = draw_labels(frame, classifications, output_transform, model.labels, gt_id)
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
-            
+
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
             next_frame_id_to_show += 1
