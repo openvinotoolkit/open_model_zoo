@@ -162,8 +162,10 @@ def main():
 
         pot_path = args.pot
         if pot_path is None:
-            if _common.get_package_path(args.python, 'pot'):
+            if _common.get_package_path(args.python, 'openvino.tools.pot'):
                 # run POT as a module
+                pot_cmd_prefix = [str(args.python), '-m', 'openvino.tools.pot']
+            elif _common.get_package_path(args.python, 'pot'):
                 pot_cmd_prefix = [str(args.python), '-m', 'pot']
             else:
                 try:
