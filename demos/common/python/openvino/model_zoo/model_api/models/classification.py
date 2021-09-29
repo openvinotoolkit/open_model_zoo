@@ -60,7 +60,7 @@ class Classification(ImageModel):
 
         if (out_size[1] == len(self.labels) + 1):
             self.labels.insert(0, "other")
-            if self.log is not None:
+            if self.log:
                 self.log.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):
             raise Exception("Model's number of classes and parsed labels must match \
@@ -72,5 +72,5 @@ class Classification(ImageModel):
         probs = outputs[self.output_blob_name].squeeze()
         indices = np.argsort(probs)
         max_indices = indices[-self.ntop:][::-1] # indices sorted by probs in descended order
-        result = [(i, self.labels[i], probs[i]) for i in max_indices]
+        result = [(i, probs[i]) for i in max_indices]
         return result

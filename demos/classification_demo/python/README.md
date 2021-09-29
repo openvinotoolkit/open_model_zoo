@@ -109,7 +109,20 @@ omz_converter --list models.lst
 
 ### Required Files
 
-If you want to see classification results, you must use "--labels" flags to specify a .txt file containing lists of classes and labels.
+If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files containing lists of classes and labels.
+
+"The ground truth" file is used for matching image file names with correct object classes.
+
+It has the following format:
+
+```
+./ILSVRC2012_val_00000001.JPEG 65
+./ILSVRC2012_val_00000002.JPEG 970
+./ILSVRC2012_val_00000003.JPEG 230
+...
+```
+
+Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
 "Labels" file contains the list of human-readable labels, one line for each class.
 
@@ -148,6 +161,8 @@ Options:
 
 Common model options:
   --labels LABELS       Required. Labels mapping file.
+  -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
+                        Optional. Path to ground truth .txt file.
   -ntop {1,2,3,4,5,6,7,8,9,10}
                         Optional. Number of top results. Default value is 5. Must be from 1 to 10.
 
