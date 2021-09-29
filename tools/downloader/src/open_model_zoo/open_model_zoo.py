@@ -1,3 +1,4 @@
+import cv2
 import os
 import argparse
 
@@ -46,11 +47,10 @@ class Model(BaseModel):
         '''
         super().__init__()
         
-        if self.model_path is None:
-            self.download_model(model_name, precision, download_dir, cache_dir)
+        self.download_model(model_name, precision, download_dir, cache_dir)
 
-    @classmethod
-    def from_pretrained(cls, model_path):
+    @staticmethod
+    def from_pretrained(model_path):
         '''
         Loads model from existing .xml, .bin files.
         Parameters
@@ -81,7 +81,7 @@ class Model(BaseModel):
         else:
             raise ValueError('Unsupported model format {}. Only .xml or .onnx supported.'.format(model_path.suffix))
 
-        return super(Model, cls).__init__(cls, model_path, bin_path, description)
+        return BaseModel(model_path, bin_path, description)
 
     def download_model(self, model_name, precision, download_dir, cache_dir):
         download_dir = Path(download_dir)
@@ -118,7 +118,6 @@ class Model(BaseModel):
                         '--download_dir=' + str(download_dir)])
 
     def load(self, ie, device='CPU'):
-        self._ie = ie
         self.net = ie.read_network(self.model_path)
         self.exec_net = ie.load_network(self.net, device)
 
@@ -126,5 +125,13 @@ class Model(BaseModel):
         if self.exec_net is None:
             self.load(ie, device)
 
+        input_names = next(iter(self.net.input_info))
+        for input_name, value in inputs:
+            if input_name not in input_names:
+                raise ValueError('Unknown input name {}'.format(input_name))
+
+            input_shape = self.net.input_info[input_name].input_data.shape
+            if input_shape != value.shape:
+                value = cv2.resize(value, input_shape)
         res = self.exec_net.infer(inputs=inputs)
         return res
