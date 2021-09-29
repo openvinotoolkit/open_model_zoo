@@ -128,7 +128,7 @@ def print_raw_results(classifications, frame_id, labels, gt_id):
     for cl in classifications:
         class_id = cl[0]
         conf = cl[1]
-        log.debug('{:^9} | {:^{width}}| {:^10f} '.format(class_id, labels[class_id], conf, width=label_max_len))
+        log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, labels[class_id], conf, width=label_max_len))
 
 
 def load_ground_truth(gt_file, image_names, classes_num):
@@ -168,6 +168,7 @@ def main():
     model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels, logger=log)
     log_blobs_info(model)
 
+    gt_indices = None
     if args.ground_truth and isinstance(cap, DirReader):
         gt_indices = load_ground_truth(args.ground_truth, cap.names, len(model.labels))
 
