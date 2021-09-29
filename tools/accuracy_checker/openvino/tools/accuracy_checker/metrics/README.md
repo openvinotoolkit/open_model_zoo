@@ -16,6 +16,7 @@ reference:
   std: 0.89
 ```
 
+**Note**: all reference values should be provided in raw format without scaling (metric specific, you can see raw metrics results using --ignore_results_formatting True parameter) e.g.
 If you want provide reference for metric expressed as a percentage, you should normalized reference value by `scale = 100`. For example, if you use accuracy metric for classification models, you should specify reference as:
 ```yaml
 name: accuracy@top1
