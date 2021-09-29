@@ -36,7 +36,7 @@ class Classification(ImageModel):
             for s in f:
                 begin_idx = s.find(' ')
                 if (begin_idx == -1):
-                    raise Exception("The labels file has incorrect format.")
+                    raise Exception('The labels file has incorrect format.')
                 end_idx = s.find(',')
                 labels.append(s[(begin_idx + 1):end_idx])
         return labels
@@ -46,25 +46,25 @@ class Classification(ImageModel):
         if len(in_size) == 4 and in_size[1] != 3:
             raise Exception("3-channel 4-dimensional model's input is expected")
         if in_size[2] != in_size[3]:
-            raise Exception("Model input has incorrect image shape. Must be NxN square."
-                                " Got " + str(in_size[2]) + "x" + str(in_size[3]) + ".")
+            raise Exception('Model input has incorrect image shape. Must be NxN square.\
+                             Got {} x {}.'.format(in_size[2], in_size[3]))
 
     def _get_outputs(self):
         out_blob_name = next(iter(self.net.outputs))
         out_blob = self.net.outputs[out_blob_name]
         out_size = out_blob.shape
         if len(out_size) != 2 and len(out_size) != 4:
-            raise Exception("Demo supports topologies only with 2-dimensional or 4-dimensional output")
+            raise Exception('Demo supports topologies only with 2-dimensional or 4-dimensional output')
         if len(out_size) == 4 and out_size[2] != 1 and out_size[3] != 1:
-            raise Exception("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1")
+            raise Exception('Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1')
 
         if (out_size[1] == len(self.labels) + 1):
-            self.labels.insert(0, "other")
+            self.labels.insert(0, 'other')
             if self.log:
                 self.log.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):
-            raise Exception("Model's number of classes and parsed labels must match \
-                 (" + str(out_size[1]) + " and " + str(len(self.labels)) + ')')
+            raise Exception("Model's number of classes and parsed \
+                 labels must match {} and {}".format(out_size[1], len(self.labels)))
 
         return out_blob_name
 

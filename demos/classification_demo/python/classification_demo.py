@@ -103,7 +103,7 @@ def draw_labels(frame, classifications, output_transform, labels, gt_idx):
 
     if (initial_labels_pos < 0):
         initial_labels_pos = label_height
-        log.warning("Too much labels to display on this frame, some will be omitted ")
+        log.warning('Too much labels to display on this frame, some will be omitted')
     offset_y = initial_labels_pos
 
     for cl in classifications:
@@ -122,9 +122,9 @@ def print_raw_results(classifications, frame_id, labels, gt_id):
     label_max_len = len(max([labels[cl[0]] for cl in classifications], key=len))
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     if gt_id:
-        log.debug(" Ground Truth: {} {}".format(gt_id, labels[gt_id]))
+        log.debug(' Ground Truth: {} {}'.format(gt_id, labels[gt_id]))
 
-    log.debug(' Class ID | {:^{width}s}| Confidence '.format("Label", width=label_max_len))
+    log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
     for cl in classifications:
         class_id = cl[0]
         conf = cl[1]
@@ -137,7 +137,7 @@ def load_ground_truth(gt_file, image_names, classes_num):
         for s in f:
             separator_idx = s.find(' ')
             if (separator_idx == -1):
-                raise Exception("The labels file has incorrect format.")
+                raise Exception('The labels file has incorrect format.')
             ground_truth[s[0:separator_idx]] = s[separator_idx + 1:]
 
     indices = []
@@ -145,10 +145,10 @@ def load_ground_truth(gt_file, image_names, classes_num):
         try:
             idx = int(ground_truth[name])
             if idx > classes_num:
-                raise Exception("Class index {} is outside the range supported by the model.".format(idx))
+                raise Exception('Class index {} is outside the range supported by the model.'.format(idx))
             indices.append(int(ground_truth[name]))
         except KeyError:
-            raise Exception("No class specified for image " + name)
+            raise Exception('No class specified for image ' + name)
 
     return indices
 
@@ -291,7 +291,7 @@ def main():
             presenter.handleKey(key)
 
     if args.ground_truth:
-        log.info("Accuracy (top {}): {:.1%}".format(args.ntop, correct_predictions / next_frame_id))
+        log.info('Accuracy (top {}): {:.1%}'.format(args.ntop, correct_predictions / next_frame_id))
 
     metrics.log_total()
     log_latency_per_stage(cap.reader_metrics.get_latency(),
