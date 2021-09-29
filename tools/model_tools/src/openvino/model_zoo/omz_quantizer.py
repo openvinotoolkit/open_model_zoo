@@ -165,6 +165,8 @@ def main():
             if _common.get_package_path(args.python, 'openvino.tools.pot'):
                 # run POT as a module
                 pot_cmd_prefix = [str(args.python), '-m', 'openvino.tools.pot']
+            elif _common.get_package_path(args.python, 'pot'):
+                pot_cmd_prefix = [str(args.python), '-m', 'pot']
             else:
                 try:
                     pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
