@@ -122,7 +122,7 @@ def print_raw_results(classifications, frame_id, labels, gt_id):
     label_max_len = len(max([labels[cl[0]] for cl in classifications], key=len))
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     if gt_id:
-        log.debug("Ground Truth: {} {}".format(gt_id, labels[gt_id]))
+        log.debug(" Ground Truth: {} {}".format(gt_id, labels[gt_id]))
 
     log.debug(' Class ID | {:^{width}s}| Confidence '.format("Label", width=label_max_len))
     for cl in classifications:
@@ -210,7 +210,7 @@ def main():
             frame = draw_labels(frame, classifications, output_transform, model.labels, gt_id)
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
-
+            
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
             next_frame_id_to_show += 1
@@ -274,7 +274,6 @@ def main():
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
         frame = draw_labels(frame, classifications, output_transform, model.labels, gt_id)
-
         render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 
@@ -292,7 +291,7 @@ def main():
             presenter.handleKey(key)
 
     if args.ground_truth:
-        log.info("Accuracy (top {}): {:.1%}".format(args.ntop, correct_predictions / (next_frame_id_to_show + 1)))
+        log.info("Accuracy (top {}): {:.1%}".format(args.ntop, correct_predictions / next_frame_id))
 
     metrics.log_total()
     log_latency_per_stage(cap.reader_metrics.get_latency(),
