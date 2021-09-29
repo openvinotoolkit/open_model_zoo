@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -159,6 +156,7 @@ class EncoderModel:
     default_model_suffix = 'encoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.is_dynamic = False
         self.network_info = network_info
         self.input_mapping = {
             'text_encoder_outputs': 'text_encoder_outputs',
@@ -200,6 +198,7 @@ class DecoderModel:
     default_model_suffix = 'decoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.is_dynamic = False
         self.network_info = network_info
         self.input_mapping = {
             'decoder_input': 'decoder_input',
@@ -411,7 +410,8 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
                 new_shapes = {}
                 for input_name in self.inputs:
                     new_shapes[input_name] = (
-                        feed_dict[input_name].shape if input_name in feed_dict else self.inputs[input_name].shape)
+                        feed_dict[input_name].shape if input_name in feed_dict else
+                        self.inputs[input_name].input_data.shape)
                 self.reshape(new_shapes)
 
         if len(feed_dict) != len(self.inputs):

@@ -108,8 +108,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
         num_iterations = len(files)
 
         for gt_id, gt_file in enumerate(files):
-            gt_file_name = str(gt_file.parts[-1])
-            identifier = '{}.jpg'.format(gt_file_name.rsplit('gt_', maxsplit=1)[0].split('.txt')[0])
+            identifier = '{}.jpg'.format(gt_file.name.replace('gt_', '').replace('.txt', ''))
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))

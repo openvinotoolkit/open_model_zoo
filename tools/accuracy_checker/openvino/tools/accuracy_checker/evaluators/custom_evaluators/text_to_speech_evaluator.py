@@ -488,6 +488,7 @@ class TTSDLSDKModel:
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         self.network_info = network_info
         self.default_model_suffix = suffix
+        self.is_dynamic = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
         self.launcher = launcher
@@ -502,6 +503,8 @@ class TTSDLSDKModel:
         del self.exec_network
 
     def reshape(self, input_shapes):
+        if not hasattr(self, 'is_dynamic'):
+            self.is_dynamic = False
         if not self.is_dynamic:
             del self.exec_network
             self.network.reshape(input_shapes)
@@ -599,7 +602,7 @@ class TTSDLSDKModel:
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         if log:

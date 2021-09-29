@@ -641,7 +641,7 @@ class DecoderDLSDKModel(BaseModel):
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher)
+            self.load_network(self.network, launcher)
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
