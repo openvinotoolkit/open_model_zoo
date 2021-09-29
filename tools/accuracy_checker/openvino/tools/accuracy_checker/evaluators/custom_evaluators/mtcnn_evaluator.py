@@ -578,7 +578,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
-        self.exec_network = self.load_network(self.network, launcher, model_prefix)
+        self.load_network(self.network, launcher, model_prefix)
         self.launcher = launcher
         if log:
             self.print_input_output_info()

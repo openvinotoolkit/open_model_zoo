@@ -121,6 +121,7 @@ class SequentialModel:
 
 class EncoderModel:
     def __init__(self, network_info, launcher, suffix, nb_features, nb_used_features, delayed_model_loading=False):
+        self.is_dynamic = False
         self.network_info = network_info
         self.nb_features = nb_features
         self.nb_used_features = nb_used_features
@@ -215,6 +216,7 @@ class EncoderONNXModel(BaseONNXModel, EncoderModel):
 
 class DecoderModel:
     def __init__(self, network_info, launcher, suffix, frame_size, nb_features, delayed_model_loading=False):
+        self.is_dynamic = False
         self.network_info = network_info
         self.default_model_suffix = suffix
         self.frame_size = frame_size

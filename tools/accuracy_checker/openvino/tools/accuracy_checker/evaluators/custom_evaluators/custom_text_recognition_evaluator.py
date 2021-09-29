@@ -282,7 +282,7 @@ class BaseModel:
         self.default_model_suffix = default_model_suffix
         self.network_info = network_info
 
-    def predict(self, input_data, identifiers):
+    def predict(self, inputs, identifiers=None):
         raise NotImplementedError
 
     def release(self):
@@ -600,10 +600,10 @@ class RecognizerDLSDKModel(BaseModel):
         self.inputs_mapping = inputs_mapping
         self.outputs_mapping = outputs_mapping
 
-    def predict(self, input_data, identifiers=None):
+    def predict(self, inputs, identifiers=None):
         if not self.is_dynamic and self.dynamic_inputs:
-            self.reshape_net({k: v.shape for k, v in input_data.items()})
-        return self.exec_network.infer(input_data)
+            self.reshape_net({k: v.shape for k, v in inputs.items()})
+        return self.exec_network.infer(inputs)
 
     def release(self):
         del self.exec_network

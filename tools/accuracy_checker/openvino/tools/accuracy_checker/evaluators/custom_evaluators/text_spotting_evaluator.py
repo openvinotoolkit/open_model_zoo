@@ -287,6 +287,7 @@ class TextSpottingEvaluator(BaseEvaluator):
 
 class BaseModel:
     def __init__(self, network_info, launcher, default_model_suffix, delayed_model_loading=False):
+        self.is_dynamic = False
         self.default_model_suffix = default_model_suffix
         self.network_info = network_info
         self.launcher = launcher
@@ -574,11 +575,18 @@ class DetectorDLSDKModel(BaseModel):
         self.im_data_name = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
-            has_info = hasattr(self.exec_network, 'input_info')
-            input_info = (
-                OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
-                if has_info else self.exec_network.inputs
-            )
+            if self.exec_network is not None:
+                has_info = hasattr(self.exec_network, 'input_info')
+                input_info = (
+                    OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+                    if has_info else self.exec_network.inputs
+                )
+            else:
+                has_info = hasattr(self.network, 'input_info')
+                input_info = (
+                    OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+                    if has_info else self.network.inputs
+                )
             self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
             self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
             if self.im_info_name:
@@ -625,14 +633,21 @@ class DetectorDLSDKModel(BaseModel):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = (
-            OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
-            if has_info else self.exec_network.inputs
-        )
+        if self.exec_network:
+            has_info = hasattr(self.exec_network, 'input_info')
+            input_info = (
+                OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+                if has_info else self.exec_network.inputs
+            )
+        else:
+            has_info = hasattr(self.network, 'input_info')
+            input_info = (
+                OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+                if has_info else self.network.inputs
+            )
         self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
         self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
         if self.im_info_name:
@@ -665,7 +680,7 @@ class RecognizerDLSDKModel(BaseModel):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = self.load_network(self.network, launcher)
+            self.load_network(self.network, launcher)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         if log:

@@ -11,7 +11,7 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.
+limitations under the License."
 """
 
 from pathlib import Path
@@ -365,7 +365,7 @@ class BaseModel:
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
             self.network.batch_size = 1
-            self.exec_network = self.load_network(self.network, launcher)
+            self.load_network(self.network, launcher)
         else:
             self.network = None
             launcher.ie_core.import_network(str(model))
