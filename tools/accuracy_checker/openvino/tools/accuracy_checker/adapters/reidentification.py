@@ -39,7 +39,8 @@ class ReidAdapter(Adapter):
             'joining_method': StringField(
                 optional=True, default='sum', description='method used to join embeddings',
                 choices=['sum', 'concatenation']
-            )
+            ),
+            'target_out': StringField(optional=True, description='Target output layer name')
         })
 
         return parameters
@@ -50,6 +51,7 @@ class ReidAdapter(Adapter):
         """
         self.grn_workaround = self.get_value_from_config('grn_workaround')
         self.joining_method = self.get_value_from_config('joining_method')
+        self.target_out = self.get_value_from_config('target_out')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -59,8 +61,8 @@ class ReidAdapter(Adapter):
         Returns:
             list of ReIdentificationPrediction objects
         """
+        self.select_output_blob(raw if not isinstance(raw, list) else raw[0])
         raw_prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_prediction)
         prediction = raw_prediction[self.output_blob]
 
         if self.grn_workaround:
@@ -89,3 +91,9 @@ class ReidAdapter(Adapter):
             return {self.output_blob: emb}
 
         return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
+    def select_output_blob(self, outputs):
+        if self.target_out:
+            self.output_blob = self.target_out
+        if self.output_blob is None:
+            self.output_blob = next(iter(outputs))

@@ -17,7 +17,6 @@ limitations under the License.
 import numpy as np
 from .base_representation import BaseRepresentation
 from .classification_representation import ClassificationAnnotation, SequenceClassificationAnnotation
-from .base_representation import BaseRepresentation
 
 
 class MachineTranslationRepresentation(BaseRepresentation):

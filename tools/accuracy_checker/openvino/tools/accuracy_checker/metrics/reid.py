@@ -765,21 +765,30 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
         return recall
 
 
+def row_norms(x, squared=False):
+    norms = np.einsum("ij,ij->i", x, x)
+    if not squared:
+        np.sqrt(norms, norms)
+    return norms
+
+
 def pairwise_dot_score(embeddings1, embeddings2):
     return [np.dot(emb1, emb2) for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
 def pairwise_manhattan_score(embeddings1, embeddings2):
-    return [-np.abs(emb1 - emb2).sum(axis=-1) for emb1, emb2 in zip(embeddings1, embeddings2)]
+    return [-1 * np.abs(emb1 - emb2).sum(axis=-1) for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
 def pairwise_euclidean_score(embeddings1, embeddings2):
-    return [-np.linalg.norm(emb1 - emb2) for emb1, emb2 in zip(embeddings1, embeddings2)]
+    return [-1 * row_norms(emb1[np.newaxis, :] - emb2[np.newaxis, :]) for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
 def pairwise_cosine_score(embeddings1, embeddings2):
-    return [np.inner(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
-        for emb1, emb2 in zip(embeddings1, embeddings2)]
+    def cosine_dist(emb1, emb2):
+        return 0.5 * row_norms(
+            emb1 / (row_norms(emb1)[:, np.newaxis]) - emb2 / (row_norms(emb2)[:, np.newaxis]), squared=True)
+    return [1 - cosine_dist(emb1[np.newaxis, :], emb2[np.newaxis, :]) for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
 similarity_score = {
@@ -824,6 +833,11 @@ class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
             scores.append(ann.similarity_score)
         return first_emb, second_emb, scores
 
+    def evaluate(self, annotations, predictions):
+        embeddings1, embeddings2, gt_score = self.get_pair_embeddings(annotations, predictions)
+        sim_score = self.similarity_score_func(embeddings1, embeddings2)
+        return sim_score, gt_score
+
 
 class SpearmanCorrelation(BaseSentenceSimilarityMetric):
     __provider__ = 'spearman_correlation_coef'
@@ -836,9 +850,8 @@ class SpearmanCorrelation(BaseSentenceSimilarityMetric):
             spearmanr.raise_error(self.name)
 
     def evaluate(self, annotations, predictions):
-        embeddings1, embeddings2, gt_score = self.get_pair_embeddings(annotations, predictions)
-        sim_score = self.similarity_score_func(embeddings1, embeddings2)
-        score, _ = spearmanr(gt_score, sim_score)
+        sim_score, gt_score = super().evaluate(annotations, predictions)
+        score, _ = spearmanr(gt_score, np.squeeze(sim_score))
         return score
 
 
@@ -853,7 +866,6 @@ class PearsonCorrelation(BaseSentenceSimilarityMetric):
             spearmanr.raise_error(self.name)
 
     def evaluate(self, annotations, predictions):
-        embeddings1, embeddings2, gt_score = self.get_pair_embeddings(annotations, predictions)
-        sim_score = self.similarity_score_func(embeddings1, embeddings2)
-        score, _ = pearsonr(gt_score, sim_score)
+        sim_score, gt_score = super().evaluate(annotations, predictions)
+        score, _ = pearsonr(gt_score, np.squeeze(sim_score))
         return score

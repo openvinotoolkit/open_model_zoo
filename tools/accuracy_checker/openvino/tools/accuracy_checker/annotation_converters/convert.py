@@ -84,22 +84,23 @@ def build_argparser():
 
 
 def make_subset(annotation, size, seed=666, shuffle=True):
+    dtype_specific_subsets = {
+        SentenceSimilarityAnnotation: make_subset_sentence_similarity,
+        PlaceRecognitionAnnotation: make_subset_place_recognition,
+        ReIdentificationClassificationAnnotation: make_subset_pairwise,
+        ReIdentificationAnnotation: make_subset_reid,
+    }
     np.random.seed(seed)
     dataset_size = len(annotation)
     if dataset_size < size:
         warnings.warn('Dataset size {} less than subset size {}'.format(dataset_size, size))
         return annotation
-    if isinstance(annotation[-1], SentenceSimilarityAnnotation):
-        return make_subset_sentence_similarity(annotation, size, shuffle)
-    if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
-        return make_subset_pairwise(annotation, size, shuffle)
-    if isinstance(annotation[-1], ReIdentificationAnnotation):
-        return make_subset_reid(annotation, size, shuffle)
-    if isinstance(annotation[-1], PlaceRecognitionAnnotation):
-        return make_subset_place_recognition(annotation, size, shuffle)
     if isinstance(annotation[-1].identifier, (KaldiMatrixIdentifier, KaldiFrameIdentifier)):
         return make_subset_kaldi(annotation, size, shuffle)
 
+    for dtype, subset_func in dtype_specific_subsets.items():
+        if isinstance(annotation[-1], dtype):
+            return subset_func(annotation, size, shuffle)
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
 
