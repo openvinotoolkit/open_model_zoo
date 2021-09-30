@@ -23,9 +23,7 @@ files:
   - name: Sphereface.caffemodel
     size: 90688218
     sha256: 092d8fb00291d80ed7e43f7c9323693581cd75e734be3c52764525043288a20d
-    source:
-      $type: google_drive
-      id: 0B_geeR2lTMegb2F6dmlmOXhWaVk
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/Sphereface/sphereface_model.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,112,96]
   - --input=data
