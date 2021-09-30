@@ -111,12 +111,17 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         self.need_conversion = None
 
     def create_device_regex(self, available_devices):
-        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
+        resolve_multi_device = set()
+        for device in available_devices:
+            resolve_multi_device.add(device)
+            if '.' in device:
+                resolve_multi_device.add(device.split('.')[0])
+        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(resolve_multi_device))
         self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
-            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
+            hetero=HETERO_KEYWORD, devices="|".join(resolve_multi_device)
         )
         self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
-            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
+            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(resolve_multi_device)
         )
         self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
             multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
