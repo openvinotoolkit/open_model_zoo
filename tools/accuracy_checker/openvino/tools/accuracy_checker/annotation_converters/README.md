@@ -697,13 +697,14 @@ The main difference between this converter and `super_resolution` in data organi
    * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used.
    * `ivectors` - include ivectors features to input, Optional, default `False`.
 * `kaldi_feat_regression` - converts preprocessed Kaldi\* features to `RegressionAnnotation`.
-  * `data_dir` - directory with input ark files.
-  * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used. Subset file has following format: each line stores information about input sample. Input sample consists of space separated list of input files and ends with reference file name.
+  * `data_dir` - directory with input ark or npz files.
+  * `features_subset_file` - file with list testing ark or npz files, Optional, if not provided, all found in `data_dir` files will be used. Subset file has following format: each line stores information about input sample. Input sample consists of space separated list of input files and ends with reference file name.
   * `ivectors` - include ivectors features to input, Optional, default `False`.
-  * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
+  * `ref_data_dir` - directory with reference ark or npz files (Optional, if not provided `data_dir` will be used instead).
   * `vectors_mode` - allow usage each vector in utterance as independent data.
   * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
   * `utterance_name_agnostic`  - allow ignoring utterance name during conversion. Optional, default required utterance keys matching.
+  * `use_numpy_data` - allow using data stored in npz instead ark files as preferable data format.
 * `electricity` - converts Electricity dataset to `TimeSeriesForecastingAnnotation`.
   * `data_path_file` - Path to dataset file in .csv format.
   * `num_encoder_steps` - The maximum number of historical timestamps that model use.

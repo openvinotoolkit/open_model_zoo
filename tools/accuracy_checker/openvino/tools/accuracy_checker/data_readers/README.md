@@ -56,6 +56,7 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `separator` - separator symbol between input identifier and file identifier
   * `id_sep` - separator symbol between input name and record number in input identifier
   * `block` - block mode (batch - oriented). In this mode reader returns whole variable.
+  * `record_mode` - allow get specific record from numpy array using `id_sep` as separator between field name and record id
 * `numpy_txt_reader`- read data stored in text format to numpy array.
 * `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
 * `nifti_reader` - read NifTI data format
