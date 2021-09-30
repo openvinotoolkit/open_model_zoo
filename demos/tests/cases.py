@@ -58,10 +58,10 @@ class Demo:
                 new_options = case.options.copy()
                 for (key, model_name) in updated_options[p]:
                     new_options[key] = ModelArg(model_name, p)
-                self.test_cases += [case._replace(options=new_options)]
+                self.test_cases.append(case._replace(options=new_options))
 
         for case in self.test_cases[:]:
-            updated_options = dict()
+            updated_options = {}
 
             for model, key in self.get_models(case):
                 if not isinstance(model, ModelArg):
