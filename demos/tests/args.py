@@ -14,7 +14,6 @@
 
 import collections
 import shutil
-from itertools import cycle
 
 from pathlib import Path
 
@@ -56,21 +55,16 @@ class Arg:
 
 
 class ModelArg(Arg):
-    def __init__(self, name, precisions=[]):
+    def __init__(self, name, precision=None):
         self.name = name
-        self.precisions = precisions
-
-    def set_precisions(self, precisions):
-        if not self.precisions:
-            self.precisions = precisions
-        self.precision = cycle(self.precisions + self.precisions[::-1])
+        self.precision = precision
 
     def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / next(self.precision) / (self.name + '.xml'))
+        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
     @property
     def required_models(self):
-        return [RequestedModel(self.name, self.precisions)]
+        return [RequestedModel(self.name, [])]
 
 
 class ModelFileArg(Arg):

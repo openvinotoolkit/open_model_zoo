@@ -96,7 +96,6 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
                 if isinstance(arg, Arg):
                     for model_request in arg.required_models:
                         model_names.add(model_request.name)
-                        model_precisions.update(model_request.precisions)
 
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
@@ -194,9 +193,9 @@ def main():
         }
 
         for demo in demos_to_test:
-            demo.set_precisions(args.precisions, model_info)
             print('Testing {}...'.format(demo.subdirectory))
             print()
+            demo.set_precisions(args.precisions, model_info)
 
             declared_model_names = {model['name']
                 for model in json.loads(subprocess.check_output(

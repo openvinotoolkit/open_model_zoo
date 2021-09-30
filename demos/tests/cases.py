@@ -48,18 +48,36 @@ class Demo:
         return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
     def get_models(self, case):
-        return (case.options[key] for key in self.model_keys if key in case.options)
+        return ((case.options[key], key) for key in self.model_keys if key in case.options)
 
     def set_precisions(self, precisions, model_info):
+
+        def update_case(case, updated_options):
+            if not updated_options: return
+            for p in updated_options.keys():
+                new_options = case.options.copy()
+                for (key, model_name) in updated_options[p]:
+                    new_options[key] = ModelArg(model_name, p)
+                self.test_cases += [case._replace(options=new_options)]
+
         for case in self.test_cases[:]:
-            precisions_num = 0
-            for model in self.get_models(case):
-                if isinstance(model, ModelArg):
-                    supported = list(set(precisions) & set(model_info[model.name]["precisions"]))
-                    model.set_precisions(supported)
-                    precisions_num = len(model.precisions)
-            if precisions_num > 1:
-                self.test_cases += [case] * (precisions_num - 1)
+            updated_options = dict()
+
+            for model, key in self.get_models(case):
+                if not isinstance(model, ModelArg):
+                    continue
+                supported_p = list(set(precisions) & set(model_info[model.name]["precisions"]))
+                if len(supported_p):
+                    model.precision = supported_p[0]
+                    for p in supported_p[1:]:
+                        updated_options[p] = updated_options.get(p, []) + [(key, model.name)]
+                else:
+                    print("Warning: {} model does not support {} precisions and will not be tested\n".format(
+                          model.name, ','.join(precisions)))
+                    self.test_cases.remove(case)
+                    break
+
+            update_case(case, updated_options)
 
 
 class CppDemo(Demo):
@@ -629,7 +647,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002', precisions=['FP16-INT8']),
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -642,7 +660,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precisions=['FP16-INT8']),
+                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
                 '--vocab':
@@ -670,7 +688,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
             }),
             TestCase(options={
-                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', precisions=['FP16-INT8']),
+                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--vocab':
                     str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/vocab.txt'),
