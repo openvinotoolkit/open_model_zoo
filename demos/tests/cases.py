@@ -863,7 +863,8 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': image_net_arg('00000002'),
+        TestCase(options={'--no_show': None, **MONITORS,
+                          '-i': DataPatternArg('object-detection-demo'),
                           '-m': ModelArg('midasnet')})
     )),
 
