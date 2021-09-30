@@ -93,7 +93,7 @@ def main():
     # copy appropriate files to each component
 
     for component_name, component_files in files_per_component.items():
-        component_output_dir = args.output_dir / component_name / 'deployment_tools/open_model_zoo'
+        component_output_dir = args.output_dir / component_name / 'extras/open_model_zoo'
         component_output_dir.mkdir(parents=True, exist_ok=True)
 
         subprocess.run(
@@ -109,7 +109,7 @@ def main():
         ['git', '-C', str(OMZ_ROOT), 'rev-parse', 'HEAD'])
     omz_commit = rev_parse_output.decode().rstrip('\n')
 
-    version_txt_path = args.output_dir / 'tools/deployment_tools/open_model_zoo/version.txt'
+    version_txt_path = args.output_dir / 'tools/extras/open_model_zoo/version.txt'
 
     with open(version_txt_path, 'w', newline=eol_chars) as version_txt_file:
         print(omz_commit, file=version_txt_file)
@@ -117,10 +117,10 @@ def main():
     # create compatibility symlinks
 
     compat_symlinks = [
-        ('deployment_tools/intel_models', 'open_model_zoo/models/intel'),
-        ('deployment_tools/open_model_zoo/intel_models', 'models/intel'),
-        ('deployment_tools/tools/model_downloader', '../open_model_zoo/tools/model_tools'),
-        ('deployment_tools/inference_engine/demos', '../open_model_zoo/demos'),
+        ('extras/intel_models', 'open_model_zoo/models/intel'),
+        ('extras/open_model_zoo/intel_models', 'models/intel'),
+        ('extras/tools/model_downloader', '../open_model_zoo/tools/model_tools'),
+        ('extras/inference_engine/demos', '../open_model_zoo/demos'),
     ]
 
     for link_source, link_target in compat_symlinks:
