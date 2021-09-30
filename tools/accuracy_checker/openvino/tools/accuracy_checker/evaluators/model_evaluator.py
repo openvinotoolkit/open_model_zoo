@@ -648,7 +648,9 @@ class ModelEvaluator(BaseEvaluator):
         per_input_tamplates = []
         for stat_shape in shapes_statistic:
             shape_template = [-1] * len(stat_shape[0])
-            undefined_shapes = np.squeeze(np.sum(shapes_statistic == -1, axis=1), 0).astype(int)
+            undefined_shapes = np.sum(stat_shape == -1, axis=1 if len(shape_template) > 1 else 0).astype(int)
+            if undefined_shapes.ndim == 2:
+                undefined_shapes = np.squeeze(undefined_shapes, 0)
             for i, ds in enumerate(undefined_shapes):
                 if ds > 0:
                     continue

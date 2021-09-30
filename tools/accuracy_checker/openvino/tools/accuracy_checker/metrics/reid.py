@@ -770,7 +770,7 @@ def pairwise_dot_score(embeddings1, embeddings2):
 
 
 def pairwise_manhattan_score(embeddings1, embeddings2):
-    return [-abs(emb1 - emb2) for emb1, emb2 in zip(embeddings1, embeddings2)]
+    return [-np.abs(emb1 - emb2).sum(axis=-1) for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
 def pairwise_euclidean_score(embeddings1, embeddings2):
@@ -778,8 +778,7 @@ def pairwise_euclidean_score(embeddings1, embeddings2):
 
 
 def pairwise_cosine_score(embeddings1, embeddings2):
-    return [
-        1 - np.inner(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return [np.inner(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
         for emb1, emb2 in zip(embeddings1, embeddings2)]
 
 
@@ -808,11 +807,13 @@ class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
 
     def configure(self):
         self.similarity_score_func = similarity_score[self.get_value_from_config('similarity_distance')]
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
 
     @staticmethod
     def get_pair_embeddings(annotations, predictions):
         first_emb, second_emb, scores = [], [], []
-        idx_to_emb = {ann.id: pred.value for ann, pred in zip(annotations, predictions)}
+        idx_to_emb = {ann.id: pred.embedding for ann, pred in zip(annotations, predictions)}
         for ann in annotations:
             if ann.pair_id is None:
                 continue
@@ -820,7 +821,7 @@ class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
                 continue
             first_emb.append(idx_to_emb[ann.id])
             second_emb.append(idx_to_emb[ann.pair_id])
-            scores.append(ann.score)
+            scores.append(ann.similarity_score)
         return first_emb, second_emb, scores
 
 
