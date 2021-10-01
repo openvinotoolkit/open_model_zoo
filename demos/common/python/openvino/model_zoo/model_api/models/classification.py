@@ -23,10 +23,9 @@ class Classification(ImageModel):
     def __init__(self, ie, model_path, labels, ntop, resize_type='crop'):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
-        in_size = self.inputs[self.image_blob_name].input_data.shape
-        if in_size[2] != in_size[3]:
-            raise RuntimeError('Model input has incorrect image shape. Must be NxN square.\
-                                Got {} x {}.'.format(in_size[2], in_size[3]))
+        if self.h != self.w:
+            raise RuntimeError('Model input has incorrect image shape. Must be NxN square. '
+                                'Got {} x {}.'.format(self.h, self.w))
         self.ntop = ntop
         self.labels = self._load_labels(labels)
         self.output_blob_name = self._get_outputs()
@@ -50,15 +49,15 @@ class Classification(ImageModel):
         if len(out_size) != 2 and len(out_size) != 4:
             raise RuntimeError('The Classification model wrapper supports topologies only with 2D or 4D output')
         if len(out_size) == 4 and (out_size[2] != 1 or out_size[3] != 1):
-            raise RuntimeError('The Classification model wrapper supports topologies only with 4D \
-                 output which has last two dimensions of size 1')
+            raise RuntimeError('The Classification model wrapper supports topologies only with 4D '
+                               'output which has last two dimensions of size 1')
 
         if (out_size[1] == len(self.labels) + 1):
             self.labels.insert(0, 'other')
-            self.log.warning("\tInserted 'other' label as first.")
+            self.logger.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):
-            raise RuntimeError("Model's number of classes and parsed \
-                 labels must match ({} != {})".format(out_size[1], len(self.labels)))
+            raise RuntimeError("Model's number of classes and parsed "
+                               'labels must match ({} != {})'.format(out_size[1], len(self.labels)))
 
         return out_blob_name
 

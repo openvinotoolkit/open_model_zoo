@@ -55,8 +55,8 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
-    common_model_args.add_argument('-gt', '--ground_truth', help='Optional. Path to ground truth .txt file (used only with folder of images as an input, \
-                                    in other cases would be ignored).', default=None, required=False, type=Path)
+    common_model_args.add_argument('-gt', '--ground_truth', help='Optional. Path to ground truth .txt file (used only with folder of images as an input '
+                                    'in other cases would be ignored).', default=None, required=False, type=Path)
     common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
@@ -121,11 +121,8 @@ def print_raw_results(classifications, frame_id, labels, gt_id):
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     if gt_id:
         log.debug(' Ground Truth: {} {}'.format(gt_id, labels[gt_id]))
-
     log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
-    for cl in classifications:
-        class_id = cl[0]
-        conf = cl[1]
+    for class_id, conf in classifications:
         log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, labels[class_id], conf, width=label_max_len))
 
 
