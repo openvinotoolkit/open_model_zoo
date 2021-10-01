@@ -162,7 +162,7 @@ Options:
 Common model options:
   --labels LABELS       Required. Labels mapping file.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
-                        Optional. Path to ground truth .txt file.
+                        Optional. Path to ground truth .txt file (used only with folder of images as an input, in other cases would be ignored).
   -ntop {1,2,3,4,5,6,7,8,9,10}
                         Optional. Number of top results. Default value is 5. Must be from 1 to 10.
 

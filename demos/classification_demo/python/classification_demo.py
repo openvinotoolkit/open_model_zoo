@@ -55,8 +55,8 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
-    common_model_args.add_argument('-gt', '--ground_truth', help='Optional. Path to ground truth .txt file.', default=None,
-                                   required=False, type=Path)
+    common_model_args.add_argument('-gt', '--ground_truth', help='Optional. Path to ground truth .txt file (used only with folder of images as an input, \
+                                    in other cases would be ignored).', default=None, required=False, type=Path)
     common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
@@ -169,8 +169,10 @@ def main():
     log_blobs_info(model)
 
     gt_indices = None
-    if args.ground_truth and isinstance(cap, DirReader):
+    if args.ground_truth and cap.get_type() == 'DIR':
         gt_indices = load_ground_truth(args.ground_truth, cap.names, len(model.labels))
+    else:
+        log.warning('Ground Truth file will be ignored as it is only applicable with a folder of images as an input.')
 
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
