@@ -70,7 +70,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "classification_demo [OPTION]" << std::endl;
+    std::cout << "classification_benchmark_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
