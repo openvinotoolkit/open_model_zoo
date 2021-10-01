@@ -215,7 +215,7 @@ def main():
                 mo_dir = mo_package_path.parent
             else:
                 try:
-                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
+                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
                 except KeyError:
                     sys.exit('Unable to locate Model Optimizer. '
                         + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')

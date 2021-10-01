@@ -169,7 +169,7 @@ def main():
                 pot_cmd_prefix = [str(args.python), '-m', 'pot']
             else:
                 try:
-                    pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
+                    pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/post_training_optimization_tool/main.py'
                 except KeyError:
                     sys.exit('Unable to locate Post-Training Optimization Toolkit. '
                         + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
