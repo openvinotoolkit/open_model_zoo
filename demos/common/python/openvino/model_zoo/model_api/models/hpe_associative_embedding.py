@@ -81,7 +81,7 @@ class HpeAssociativeEmbedding(Model):
         img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)
         h, w = img.shape[:2]
         if not (self.h - self.size_divisor < h <= self.h and self.w - self.size_divisor < w <= self.w):
-            self.logger.warn("\tChosen model aspect ratio doesn't match image aspect ratio")
+            self.logger.warning("\tChosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         if self.padding_mode == 'center':

@@ -46,7 +46,7 @@ class ImageModel(Model):
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         self.image_layout = 'NCHW'
         if not resize_type:
-            self.logger.warn('The resizer isn\'t set. The "standard" will be used')
+            self.logger.warning('The resizer isn\'t set. The "standard" will be used')
             resize_type = 'standard'
         self.resize_type = resize_type
         self.resize = RESIZE_TYPES[self.resize_type]
