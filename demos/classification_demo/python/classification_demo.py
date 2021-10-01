@@ -165,7 +165,7 @@ def main():
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Reading model {}'.format(args.model))
-    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels, logger=log)
+    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
     log_blobs_info(model)
 
     gt_indices = None

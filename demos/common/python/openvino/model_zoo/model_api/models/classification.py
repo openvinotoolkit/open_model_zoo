@@ -20,12 +20,14 @@ from .image_model import ImageModel
 
 
 class Classification(ImageModel):
-    def __init__(self, ie, model_path, labels, ntop, resize_type='crop', logger=None):
+    def __init__(self, ie, model_path, labels, ntop, resize_type='crop'):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
-        self._check_inputs()
+        in_size = self.inputs[self.image_blob_name].input_data.shape
+        if in_size[2] != in_size[3]:
+            raise RuntimeError('Model input has incorrect image shape. Must be NxN square.\
+                                Got {} x {}.'.format(in_size[2], in_size[3]))
         self.ntop = ntop
-        self.log = logger
         self.labels = self._load_labels(labels)
         self.output_blob_name = self._get_outputs()
 
@@ -36,35 +38,27 @@ class Classification(ImageModel):
             for s in f:
                 begin_idx = s.find(' ')
                 if (begin_idx == -1):
-                    raise Exception('The labels file has incorrect format.')
+                    raise RuntimeError('The labels file has incorrect format.')
                 end_idx = s.find(',')
                 labels.append(s[(begin_idx + 1):end_idx])
         return labels
-
-    def _check_inputs(self):
-        in_size = self.inputs[self.image_blob_name].input_data.shape
-        if len(in_size) == 4 and in_size[1] != 3:
-            raise Exception("3-channel 4-dimensional model's input is expected")
-        if in_size[2] != in_size[3]:
-            raise Exception('Model input has incorrect image shape. Must be NxN square.\
-                             Got {} x {}.'.format(in_size[2], in_size[3]))
 
     def _get_outputs(self):
         out_blob_name = next(iter(self.net.outputs))
         out_blob = self.net.outputs[out_blob_name]
         out_size = out_blob.shape
         if len(out_size) != 2 and len(out_size) != 4:
-            raise Exception('Demo supports topologies only with 2-dimensional or 4-dimensional output')
-        if len(out_size) == 4 and out_size[2] != 1 and out_size[3] != 1:
-            raise Exception('Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1')
+            raise RuntimeError('The Classification model wrapper supports topologies only with 2D or 4D output')
+        if len(out_size) == 4 and (out_size[2] != 1 or out_size[3] != 1):
+            raise RuntimeError('The Classification model wrapper supports topologies only with 4D \
+                 output which has last two dimensions of size 1')
 
         if (out_size[1] == len(self.labels) + 1):
             self.labels.insert(0, 'other')
-            if self.log:
-                self.log.warning("\tInserted 'other' label as first.")
+            self.log.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):
-            raise Exception("Model's number of classes and parsed \
-                 labels must match {} and {}".format(out_size[1], len(self.labels)))
+            raise RuntimeError("Model's number of classes and parsed \
+                 labels must match ({} != {})".format(out_size[1], len(self.labels)))
 
         return out_blob_name
 
