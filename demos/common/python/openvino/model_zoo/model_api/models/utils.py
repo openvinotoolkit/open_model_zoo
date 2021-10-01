@@ -146,7 +146,7 @@ def resize_with_center_square_crop(image, size):
         cropped_frame = image[offset:image.shape[0] - offset, 0:image.shape[1]]
     else:
         offset = (image.shape[1] - image.shape[0]) // 2
-        cropped_frame = image[0:image.shape[0], offset:image.shape[0] - offset]
+        cropped_frame = image[0:image.shape[0], offset:image.shape[1] - offset]
     return cv2.resize(cropped_frame, size)
 
 
