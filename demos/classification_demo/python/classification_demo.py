@@ -106,9 +106,7 @@ def draw_labels(frame, classifications, output_transform, labels, gt_idx):
         log.warning('Too much labels to display on this frame, some will be omitted')
     offset_y = initial_labels_pos
 
-    for cl in classifications:
-        class_id = cl[0]
-        conf = cl[1]
+    for class_id, conf in classifications:
         label = '{} {:.1%}'.format(labels[class_id], conf)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
         offset_y += label_height * 2
@@ -137,7 +135,7 @@ def load_ground_truth(gt_file, image_names, classes_num):
         for s in f:
             separator_idx = s.find(' ')
             if (separator_idx == -1):
-                raise Exception('The labels file has incorrect format.')
+                raise RuntimeError('The Ground Truth file has incorrect format.')
             ground_truth[s[0:separator_idx]] = s[separator_idx + 1:]
 
     indices = []
@@ -145,10 +143,10 @@ def load_ground_truth(gt_file, image_names, classes_num):
         try:
             idx = int(ground_truth[name])
             if idx > classes_num:
-                raise Exception('Class index {} is outside the range supported by the model.'.format(idx))
+                raise RuntimeError('Class index {} is outside the range supported by the model.'.format(idx))
             indices.append(int(ground_truth[name]))
         except KeyError:
-            raise Exception('No class specified for image ' + name)
+            raise RuntimeError('No class specified for image ' + name)
 
     return indices
 
