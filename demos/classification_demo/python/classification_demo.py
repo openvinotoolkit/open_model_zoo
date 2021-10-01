@@ -107,7 +107,7 @@ def draw_labels(frame, classifications, output_transform, labels, gt_idx):
     offset_y = initial_labels_pos
 
     for class_id, conf in classifications:
-        label = '{} {:.1%}'.format(labels[class_id], conf)
+        label = '{} {:.2f}'.format(labels[class_id], conf)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
         offset_y += label_height * 2
         color = (10, 210, 10) if gt_idx == class_id else (10, 10, 210)
@@ -164,10 +164,11 @@ def main():
     log_blobs_info(model)
 
     gt_indices = None
-    if args.ground_truth and cap.get_type() == 'DIR':
-        gt_indices = load_ground_truth(args.ground_truth, cap.names, len(model.labels))
-    else:
-        log.warning('Ground Truth file will be ignored as it is only applicable with a folder of images as an input.')
+    if args.ground_truth:
+        if cap.get_type() == 'DIR':
+            gt_indices = load_ground_truth(args.ground_truth, cap.names, len(model.labels))
+        else:
+            log.warning('Ground Truth file will be ignored as it is only applicable with a folder of images as an input.')
 
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
@@ -196,10 +197,10 @@ def main():
             start_time = frame_meta['start_time']
 
             if args.ground_truth and gt_indices:
-                if gt_indices[next_frame_id_to_show] in [cl[0] for cl in classifications]:
+                if gt_indices[next_frame_id_to_show % len(gt_indices)] in [cl[0] for cl in classifications]:
                     correct_predictions += 1
 
-            gt_id = gt_indices[next_frame_id_to_show] if gt_indices else None
+            gt_id = gt_indices[next_frame_id_to_show % len(gt_indices)] if gt_indices else None
             if len(classifications) and args.raw_output_message:
                 print_raw_results(classifications, next_frame_id_to_show, model.labels, gt_id)
 
@@ -265,7 +266,7 @@ def main():
             if gt_indices[next_frame_id_to_show] in [cl[0] for cl in classifications]:
                 correct_predictions += 1
 
-        gt_id = gt_indices[next_frame_id_to_show] if gt_indices else None
+        gt_id = gt_indices[next_frame_id_to_show % len(gt_indices)] if gt_indices else None
         if len(classifications) and args.raw_output_message:
             print_raw_results(classifications, next_frame_id_to_show, model.labels, gt_id)
 
