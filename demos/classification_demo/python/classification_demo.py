@@ -55,8 +55,6 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
                                    required=True, type=Path)
-    common_model_args.add_argument('-gt', '--ground_truth', help='Optional. Path to ground truth .txt file (used only with folder of images as an input '
-                                    'in other cases would be ignored).', default=None, required=False, type=Path)
     common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
@@ -95,7 +93,7 @@ def build_argparser():
     return parser
 
 
-def draw_labels(frame, classifications, output_transform, labels, gt_idx):
+def draw_labels(frame, classifications, output_transform, labels):
     frame = output_transform.resize(frame)
     class_id = classifications[0][0]
     label_height = cv2.getTextSize(labels[class_id], cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
@@ -110,42 +108,17 @@ def draw_labels(frame, classifications, output_transform, labels, gt_idx):
         label = '{} {:.2f}'.format(labels[class_id], conf)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
         offset_y += label_height * 2
-        color = (10, 210, 10) if gt_idx == class_id else (10, 10, 210)
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
-            cv2.FONT_HERSHEY_COMPLEX, 0.75, color, 2)
+            cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 210), 2)
     return frame
 
 
-def print_raw_results(classifications, frame_id, labels, gt_id):
+def print_raw_results(classifications, frame_id, labels):
     label_max_len = len(max([labels[cl[0]] for cl in classifications], key=len))
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
-    if gt_id:
-        log.debug(' Ground Truth: {} {}'.format(gt_id, labels[gt_id]))
     log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
     for class_id, conf in classifications:
         log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, labels[class_id], conf, width=label_max_len))
-
-
-def load_ground_truth(gt_file, image_names, classes_num):
-    with open(gt_file, 'r') as f:
-        ground_truth = {}
-        for s in f:
-            separator_idx = s.find(' ')
-            if (separator_idx == -1):
-                raise RuntimeError('The Ground Truth file has incorrect format.')
-            ground_truth[s[0:separator_idx]] = s[separator_idx + 1:]
-
-    indices = []
-    for name in image_names:
-        try:
-            idx = int(ground_truth[name])
-            if idx > classes_num:
-                raise RuntimeError('Class index {} is outside the range supported by the model.'.format(idx))
-            indices.append(int(ground_truth[name]))
-        except KeyError:
-            raise RuntimeError('No class specified for image ' + name)
-
-    return indices
 
 
 def main():
@@ -163,13 +136,6 @@ def main():
     model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
     log_blobs_info(model)
 
-    gt_indices = None
-    if args.ground_truth:
-        if cap.get_type() == 'DIR':
-            gt_indices = load_ground_truth(args.ground_truth, cap.names, len(model.labels))
-        else:
-            log.warning('Ground Truth file will be ignored as it is only applicable with a folder of images as an input.')
-
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
@@ -185,7 +151,6 @@ def main():
     output_transform = None
     video_writer = cv2.VideoWriter()
 
-    correct_predictions = 0
     while True:
         if async_pipeline.callback_exceptions:
             raise async_pipeline.callback_exceptions[0]
@@ -196,17 +161,12 @@ def main():
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            if args.ground_truth and gt_indices:
-                if gt_indices[next_frame_id_to_show % len(gt_indices)] in [cl[0] for cl in classifications]:
-                    correct_predictions += 1
-
-            gt_id = gt_indices[next_frame_id_to_show % len(gt_indices)] if gt_indices else None
             if len(classifications) and args.raw_output_message:
-                print_raw_results(classifications, next_frame_id_to_show, model.labels, gt_id)
+                print_raw_results(classifications, next_frame_id_to_show, model.labels)
 
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
-            frame = draw_labels(frame, classifications, output_transform, model.labels, gt_id)
+            frame = draw_labels(frame, classifications, output_transform, model.labels)
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
 
@@ -262,17 +222,12 @@ def main():
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
-        if args.ground_truth and gt_indices:
-            if gt_indices[next_frame_id_to_show % len(gt_indices)] in [cl[0] for cl in classifications]:
-                correct_predictions += 1
-
-        gt_id = gt_indices[next_frame_id_to_show % len(gt_indices)] if gt_indices else None
         if len(classifications) and args.raw_output_message:
-            print_raw_results(classifications, next_frame_id_to_show, model.labels, gt_id)
+            print_raw_results(classifications, next_frame_id_to_show, model.labels)
 
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
-        frame = draw_labels(frame, classifications, output_transform, model.labels, gt_id)
+        frame = draw_labels(frame, classifications, output_transform, model.labels)
         render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 
@@ -288,9 +243,6 @@ def main():
             if key in {ord('q'), ord('Q'), ESC_KEY}:
                 break
             presenter.handleKey(key)
-
-    if args.ground_truth:
-        log.info('Accuracy (top {}): {:.1%}'.format(args.ntop, correct_predictions / next_frame_id))
 
     metrics.log_total()
     log_latency_per_stage(cap.reader_metrics.get_latency(),
