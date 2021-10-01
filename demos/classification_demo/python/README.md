@@ -116,9 +116,9 @@ If you want to see classification results, you must use "-gt" and "-labels" flag
 It has the following format:
 
 ```
-./ILSVRC2012_val_00000001.JPEG 65
-./ILSVRC2012_val_00000002.JPEG 970
-./ILSVRC2012_val_00000003.JPEG 230
+ILSVRC2012_val_00000001.JPEG 65
+ILSVRC2012_val_00000002.JPEG 970
+ILSVRC2012_val_00000003.JPEG 230
 ...
 ```
 
@@ -200,9 +200,9 @@ Running the application with the empty list of options yields an error message.
 For example, use the following command-line command to run the application:
 
 ```sh
-./classification_demo -m <path_to_classification_model> \
-                      -i <path_to_folder_with_images> \
-                      --labels <path_to_file_with_list_of_labels>
+python3 classification_demo.py -m <path_to_classification_model> \
+                               -i <path_to_folder_with_images> \
+                                --labels <path_to_file_with_list_of_labels>
 ```
 
 ## Demo Output
