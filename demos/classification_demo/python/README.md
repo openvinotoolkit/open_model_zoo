@@ -1,5 +1,7 @@
 # Classification Python\* Demo
 
+![](./classification.jpg)
+
 This demo showcases inference of Classification networks using Python\* Model API and Async Pipeline.
 
 ## How It Works

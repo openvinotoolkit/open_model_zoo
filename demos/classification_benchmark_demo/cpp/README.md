@@ -1,5 +1,7 @@
 # Classification Benchmark C++ Demo
 
+![](./classification_benchmark.gif)
+
 The demo visualize OpenVINO performance on inference of neural networks for image classification.
 
 ## How It Works

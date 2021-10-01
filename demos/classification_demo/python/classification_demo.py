@@ -263,7 +263,7 @@ def main():
         start_time = frame_meta['start_time']
 
         if args.ground_truth and gt_indices:
-            if gt_indices[next_frame_id_to_show] in [cl[0] for cl in classifications]:
+            if gt_indices[next_frame_id_to_show % len(gt_indices)] in [cl[0] for cl in classifications]:
                 correct_predictions += 1
 
         gt_id = gt_indices[next_frame_id_to_show % len(gt_indices)] if gt_indices else None
