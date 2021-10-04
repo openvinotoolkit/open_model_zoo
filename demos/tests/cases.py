@@ -50,12 +50,15 @@ class Demo:
     def get_models(self, case):
         return ((case.options[key], key) for key in self.model_keys if key in case.options)
 
-    def update_case(self, case, updated_options):
+    def update_case(self, case, updated_options, with_replace=False):
         if not updated_options: return
         new_options = case.options.copy()
         for key, value in updated_options.items():
             new_options[key] = value
-        return case._replace(options=new_options)
+        new_case = case._replace(options=new_options)
+        if with_replace:
+            self.test_cases.remove(case)
+        self.test_cases.append(new_case)
 
     def set_precisions(self, precisions, model_info):
         for case in self.test_cases[:]:
@@ -76,9 +79,7 @@ class Demo:
                     break
 
             for p in precisions:
-                new_case = self.update_case(case, updated_options[p])
-                if new_case:
-                    self.test_cases.append(new_case)
+                self.update_case(case, updated_options[p])
 
 
 class CppDemo(Demo):
