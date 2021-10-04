@@ -40,7 +40,7 @@ Supported representations: `ClassificationAnnotation`, `TextClassificationAnnota
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `character_recognition_accuracy` - accuracy metric for character recognition task. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
-  * `remove_spaces` - allow removement spaces from reference and predicted strings (Optional, default - `False`).
+  * `remove_spaces` - allow removing spaces from reference and predicted strings (Optional, default - `False`).
 * `label_level_recognition_accuracy` - [label level recognition accuracy](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) metric for text line character recognition task using [editdistance](https://pypi.org/project/editdistance/). Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
@@ -52,8 +52,8 @@ Supported representations: `ClassificationAnnotation`, `TextClassificationAnnota
 * `map` - mean average precision. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
-  * `include_boundaries` - allows include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
-  * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
+  * `include_boundaries` - allows including boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
+  * `ignore_difficult` - allows ignoring difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
@@ -61,8 +61,8 @@ Supported representations: `ClassificationAnnotation`, `TextClassificationAnnota
 * `miss_rate` - miss rate metric of detection models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
-  * `include_boundaries` - allows include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
-  * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
+  * `include_boundaries` - allows including boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
+  * `ignore_difficult` - allows ignoring difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
@@ -70,32 +70,32 @@ Supported representations: `ClassificationAnnotation`, `TextClassificationAnnota
 * `recall` - recall metric of detection models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
-  * `include_boundaries` - allows include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
-  * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
+  * `include_boundaries` - allows including boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
+  * `ignore_difficult` - allows ignoring difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `detection_accuracy` - accuracy for detection models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
-  * `include_boundaries` - allows include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
+  * `include_boundaries` - allows to include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `use_normalization` - allows to normalize confusion_matrix for metric calculation.
 * `segmentation_accuracy` - pixel accuracy for semantic segmentation models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
-  * `use_argmax` - allows to use argmax for prediction mask.
+  * `use_argmax` - allows using argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used).
 * `mean_iou` - mean intersection over union for semantic segmentation models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
-  * `use_argmax` - allows to use argmax for prediction mask.
+  * `use_argmax` - allows using argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used).
 * `mean_accuracy` - mean accuracy for semantic segmentation models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
-  * `use_argmax` - allows to use argmax for prediction mask.
+  * `use_argmax` - allows using argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used).
 * `frequency_weighted_accuracy` - frequency weighted accuracy for semantic segmentation models. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
-  * `use_argmax` - allows to use argmax for prediction mask.
+  * `use_argmax` - allows using argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used).
 More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038).
 * `cmc` - Cumulative Matching Characteristics (CMC) score. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
-  * `top_k` -  number of k highest ranked samples to consider when matching.
+  * `top_k` -  number of k-highest ranked samples to consider when matching.
   * `separate_camera_set` - should identities from the same camera view be filtered out.
   * `single_gallery_shot` -  each identity has only one instance in the gallery.
   * `number_single_shot_repeats` - number of repeats for single_gallery_shot setting (required for CUHK).
@@ -105,15 +105,19 @@ More detailed information about calculation segmentation metrics you can find [h
 * `pairwise_accuracy` - pairwise accuracy for object reidentification. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
   * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
-  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
+  * `subtract_mean` - allows subtracting mean calculated on train embeddings before calculating the distance(optional, default - `False`).
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
   * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
-  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
+  * `subtract_mean` - allows subtracting mean calculated on train embeddings before calculating the distance(optional, default - `False`).
 * `localization_recall` - recall metric used for evaluation place recognition task. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
-  * `top_k` - number of k highest ranked samples to consider when matching.
+  * `top_k` - number of k-highest ranked samples to consider when matching.
   * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
+* `spearman_correlation_coef` - the similarity of the embeddings by calculating the Spearman rank correlation in comparison to the gold standard labels. Supported representations: `SentenceSimilarityAnnotation`, `ReidentificationPrediction`. The Spearman rank-order correlation coefficient is a nonparametric measure of the monotonicity of the relationship between two values sets. Like other correlation coefficients, this one varies between -1 and +1 with 0 implying no correlation. Correlations of -1 or +1 imply an exact monotonic relationship. Positive correlations imply that as x increases, so does y. Negative correlations imply that as x increases, y decreases.
+    * `similarity_distance` - approach for calculation distance between embeddings, supported methods: `cosine` - cosine distance, `manhattan` - manhattan distance, `euclidian` - euclidian distance, `dot_product` - dot product between embeddings vectors.
+* `pearson_correlation_coef` - the similarity of the embeddings by calculating the Pearson rank correlation in comparison to the gold standard labels. Supported representations: `SentenceSimilarityAnnotation`, `ReidentificationPrediction`. The Pearson rank-order correlation coefficient is a nonparametric measure of the linear relationship between two values sets. Like other correlation coefficients, this one varies between -1 and +1 with 0 implying no correlation. Correlations of -1 or +1 imply an exact monotonic relationship. Positive correlations imply that as x increases, so does y. Negative correlations imply that as x increases, y decreases.
+    * `similarity_distance` - approach for calculation distance between embeddings, supported methods: `cosine` - cosine distance, `manhattan` - manhattan distance, `euclidian` - euclidian distance, `dot_product` - dot product between embeddings vectors.
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Direction of metric's growth is higher-worse. Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
   * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Direction of metric's growth is higher-worse. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.

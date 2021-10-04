@@ -30,6 +30,7 @@ import numpy as np
 from .. import __version__
 from ..representation import (
     ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
+    SentenceSimilarityAnnotation
 )
 from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
 from ..utils import (
@@ -83,20 +84,23 @@ def build_argparser():
 
 
 def make_subset(annotation, size, seed=666, shuffle=True):
+    dtype_specific_subsets = {
+        SentenceSimilarityAnnotation: make_subset_sentence_similarity,
+        PlaceRecognitionAnnotation: make_subset_place_recognition,
+        ReIdentificationClassificationAnnotation: make_subset_pairwise,
+        ReIdentificationAnnotation: make_subset_reid,
+    }
     np.random.seed(seed)
     dataset_size = len(annotation)
     if dataset_size < size:
         warnings.warn('Dataset size {} less than subset size {}'.format(dataset_size, size))
         return annotation
-    if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
-        return make_subset_pairwise(annotation, size, shuffle)
-    if isinstance(annotation[-1], ReIdentificationAnnotation):
-        return make_subset_reid(annotation, size, shuffle)
-    if isinstance(annotation[-1], PlaceRecognitionAnnotation):
-        return make_subset_place_recognition(annotation, size, shuffle)
     if isinstance(annotation[-1].identifier, (KaldiMatrixIdentifier, KaldiFrameIdentifier)):
         return make_subset_kaldi(annotation, size, shuffle)
 
+    for dtype, subset_func in dtype_specific_subsets.items():
+        if isinstance(annotation[-1], dtype):
+            return subset_func(annotation, size, shuffle)
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
 
@@ -190,6 +194,31 @@ def make_subset_place_recognition(annotation, size, shuffle=True):
         else:
             pair = queries_ids[np.argmin(dist_mat[:, subset_id_to_g_id[idx]])]
         addition = OrderedSet([idx, pair])
+        subsample_set |= addition
+        if len(subsample_set) == size:
+            break
+        if len(subsample_set) > size:
+            subsample_set -= addition
+    return [annotation[ind] for ind in subsample_set]
+
+
+def make_subset_sentence_similarity(annotation, size, shuffle=True):
+    subsample_set = OrderedSet()
+    potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
+    index_to_info = {
+        idx: (ann.id, ann.pair_id)
+        for idx, ann in enumerate(annotation)
+    }
+    pair_id_to_idx = {pair_id: idx for idx, (_, pair_id) in index_to_info.items() if pair_id is not None}
+    id_to_idx = {inst_id: idx for idx, (inst_id, _) in index_to_info.items()}
+    for idx in potential_ann_ind:
+        addition = OrderedSet()
+        addition.add(idx)
+        sample_id, pair_id = index_to_info[idx]
+        if sample_id in pair_id_to_idx:
+            addition.add(pair_id_to_idx[sample_id])
+        if pair_id is not None and pair_id in id_to_idx:
+            addition.add(id_to_idx[pair_id])
         subsample_set |= addition
         if len(subsample_set) == size:
             break

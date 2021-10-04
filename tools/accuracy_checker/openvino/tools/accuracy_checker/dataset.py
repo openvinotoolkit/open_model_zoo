@@ -47,7 +47,9 @@ from .utils import (
 )
 
 from .representation import (
-    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+    BaseRepresentation, ReIdentificationClassificationAnnotation,
+    ReIdentificationAnnotation, PlaceRecognitionAnnotation,
+    SentenceSimilarityAnnotation
 )
 from .data_readers import (
     DataReaderField, REQUIRES_ANNOTATIONS, BaseReader,
@@ -458,7 +460,8 @@ class AnnotationProvider:
             next(iter(self._data_buffer.values())), (
                 ReIdentificationAnnotation,
                 ReIdentificationClassificationAnnotation,
-                PlaceRecognitionAnnotation
+                PlaceRecognitionAnnotation,
+                SentenceSimilarityAnnotation
             )
         )
         if ids:
@@ -506,6 +509,22 @@ class AnnotationProvider:
                     pairs_set |= OrderedSet(gallery_for_person)
             return pairs_set, subsample_set
 
+        def sentence_sim_subset(pairs_set, subsample_set, ids):
+            index_to_info = {
+                idx: (identifier, ann.id, ann.pair_id)
+                for idx, (identifier, ann) in enumerate(self._data_buffer.items())
+            }
+            pair_id_to_idx = {pair_id: idx for idx, (_, _, pair_id) in index_to_info.items() if pair_id is not None}
+            id_to_idx = {inst_id: idx for idx, (_, inst_id, _) in index_to_info.items()}
+            for idx in ids:
+                subsample_set.add(idx)
+                current_annotation = self._data_buffer[index_to_info[idx][0]]
+                if current_annotation.pair_id is not None and current_annotation.pair_id in id_to_idx:
+                    pairs_set.add(id_to_idx[current_annotation.pair_id])
+                if current_annotation.id in pair_id_to_idx:
+                    pairs_set.add(pair_id_to_idx[current_annotation.id])
+            return pairs_set, subsample_set
+
         def ibl_subset(pairs_set, subsample_set, ids):
             queries_ids = [idx for idx, (_, ann) in enumerate(self._data_buffer.items()) if ann.query]
             gallery_ids = [idx for idx, (_, ann) in enumerate(self._data_buffer.items()) if not ann.query]
@@ -526,6 +545,7 @@ class AnnotationProvider:
             return pairs_set, subsample_set
 
         realisation = [
+            (SentenceSimilarityAnnotation, sentence_sim_subset),
             (PlaceRecognitionAnnotation, ibl_subset),
             (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
             (ReIdentificationAnnotation, reid_subset),

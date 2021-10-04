@@ -22,10 +22,18 @@ from ..representation import (
     ReIdentificationClassificationAnnotation,
     ReIdentificationAnnotation,
     PlaceRecognitionAnnotation,
-    ReIdentificationPrediction
+    ReIdentificationPrediction,
+    SentenceSimilarityAnnotation
 )
 from ..config import BaseField, BoolField, NumberField, StringField
 from .metric import FullDatasetEvaluationMetric
+from ..utils import UnsupportedPackage
+
+try:
+    from scipy.stats import spearmanr, pearsonr
+except ImportError as e:
+    spearmanr = UnsupportedPackage('scipy', e.msg)
+    pearsonr = UnsupportedPackage('scipy', e.msg)
 
 
 def _auc(x, y):
@@ -755,3 +763,109 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
                     correct_at_n += 1
         recall = correct_at_n / query_len
         return recall
+
+
+def row_norms(x, squared=False):
+    norms = np.einsum("ij,ij->i", x, x)
+    if not squared:
+        np.sqrt(norms, norms)
+    return norms
+
+
+def pairwise_dot_score(embeddings1, embeddings2):
+    return [np.dot(emb1, emb2) for emb1, emb2 in zip(embeddings1, embeddings2)]
+
+
+def pairwise_manhattan_score(embeddings1, embeddings2):
+    return [-1 * np.abs(emb1 - emb2).sum(axis=-1) for emb1, emb2 in zip(embeddings1, embeddings2)]
+
+
+def pairwise_euclidean_score(embeddings1, embeddings2):
+    return [-1 * row_norms(emb1[np.newaxis, :] - emb2[np.newaxis, :]) for emb1, emb2 in zip(embeddings1, embeddings2)]
+
+
+def pairwise_cosine_score(embeddings1, embeddings2):
+    def cosine_dist(emb1, emb2):
+        return 0.5 * row_norms(
+            emb1 / (row_norms(emb1)[:, np.newaxis]) - emb2 / (row_norms(emb2)[:, np.newaxis]), squared=True)
+    return [1 - cosine_dist(emb1[np.newaxis, :], emb2[np.newaxis, :]) for emb1, emb2 in zip(embeddings1, embeddings2)]
+
+
+similarity_score = {
+    'manhattan': pairwise_manhattan_score,
+    'euclidean': pairwise_euclidean_score,
+    'cosine': pairwise_cosine_score,
+    'dot_product': pairwise_dot_score
+}
+
+
+class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
+    annotation_types = (SentenceSimilarityAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'similarity_distance': StringField(
+                optional=True, default='cosine', choices=similarity_score,
+                description='select similarity distance calculation approach'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.similarity_score_func = similarity_score[self.get_value_from_config('similarity_distance')]
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
+
+    @staticmethod
+    def get_pair_embeddings(annotations, predictions):
+        first_emb, second_emb, scores = [], [], []
+        idx_to_emb = {ann.id: pred.embedding for ann, pred in zip(annotations, predictions)}
+        for ann in annotations:
+            if ann.pair_id is None:
+                continue
+            if ann.pair_id not in idx_to_emb:
+                continue
+            first_emb.append(idx_to_emb[ann.id])
+            second_emb.append(idx_to_emb[ann.pair_id])
+            scores.append(ann.similarity_score)
+        return first_emb, second_emb, scores
+
+    def evaluate(self, annotations, predictions):
+        embeddings1, embeddings2, gt_score = self.get_pair_embeddings(annotations, predictions)
+        sim_score = self.similarity_score_func(embeddings1, embeddings2)
+        return sim_score, gt_score
+
+
+class SpearmanCorrelation(BaseSentenceSimilarityMetric):
+    __provider__ = 'spearman_correlation_coef'
+    annotation_types = (SentenceSimilarityAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(spearmanr, UnsupportedPackage):
+            spearmanr.raise_error(self.name)
+
+    def evaluate(self, annotations, predictions):
+        sim_score, gt_score = super().evaluate(annotations, predictions)
+        score, _ = spearmanr(gt_score, np.squeeze(sim_score))
+        return score
+
+
+class PearsonCorrelation(BaseSentenceSimilarityMetric):
+    __provider__ = 'pearson_correlation_coef'
+    annotation_types = (SentenceSimilarityAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(pearsonr, UnsupportedPackage):
+            spearmanr.raise_error(self.name)
+
+    def evaluate(self, annotations, predictions):
+        sim_score, gt_score = super().evaluate(annotations, predictions)
+        score, _ = pearsonr(gt_score, np.squeeze(sim_score))
+        return score
