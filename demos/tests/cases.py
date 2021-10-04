@@ -50,18 +50,16 @@ class Demo:
     def get_models(self, case):
         return ((case.options[key], key) for key in self.model_keys if key in case.options)
 
+    def update_case(self, case, updated_options):
+        if not updated_options: return
+        new_options = case.options.copy()
+        for key, value in updated_options.items():
+            new_options[key] = value
+        return case._replace(options=new_options)
+
     def set_precisions(self, precisions, model_info):
-
-        def update_case(case, updated_options):
-            if not updated_options: return
-            for p in updated_options.keys():
-                new_options = case.options.copy()
-                for (key, model_name) in updated_options[p]:
-                    new_options[key] = ModelArg(model_name, p)
-                self.test_cases.append(case._replace(options=new_options))
-
         for case in self.test_cases[:]:
-            updated_options = {}
+            updated_options = {p: {} for p in precisions}
 
             for model, key in self.get_models(case):
                 if not isinstance(model, ModelArg):
@@ -70,14 +68,17 @@ class Demo:
                 if len(supported_p):
                     model.precision = supported_p[0]
                     for p in supported_p[1:]:
-                        updated_options[p] = updated_options.get(p, []) + [(key, model.name)]
+                        updated_options[p][key] = ModelArg(model.name, p)
                 else:
                     print("Warning: {} model does not support {} precisions and will not be tested\n".format(
                           model.name, ','.join(precisions)))
                     self.test_cases.remove(case)
                     break
 
-            update_case(case, updated_options)
+            for p in precisions:
+                new_case = self.update_case(case, updated_options[p])
+                if new_case:
+                    self.test_cases.append(new_case)
 
 
 class CppDemo(Demo):
