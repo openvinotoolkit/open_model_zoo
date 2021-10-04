@@ -65,6 +65,8 @@ def parse_args():
         help='path to report file')
     parser.add_argument('--suppressed-devices', type=Path, required=False,
         help='path to file with suppressed devices for each model')
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
+        help='IR precisions for all models. By default, models are tested in FP16 precision')
     return parser.parse_args()
 
 
@@ -84,9 +86,9 @@ def temp_dir_as_path():
         yield Path(temp_dir)
 
 
-def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
+def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test, model_precisions):
     model_names = set()
-    model_precisions = set()
+    model_precisions = set(model_precisions)
 
     for demo in demos_to_test:
         for case in demo.test_cases:
@@ -94,10 +96,6 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
                 if isinstance(arg, Arg):
                     for model_request in arg.required_models:
                         model_names.add(model_request.name)
-                        model_precisions.update(model_request.precisions)
-
-    if not model_precisions:
-        model_precisions.add('FP32')
 
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
@@ -184,7 +182,7 @@ def main():
         demos_to_test = DEMOS
 
     with temp_dir_as_path() as global_temp_dir:
-        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
+        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
 
         num_failures = 0
 
@@ -197,6 +195,7 @@ def main():
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
             print()
+            demo.set_precisions(args.precisions, model_info)
 
             declared_model_names = {model['name']
                 for model in json.loads(subprocess.check_output(
