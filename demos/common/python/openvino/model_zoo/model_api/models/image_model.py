@@ -14,7 +14,7 @@
  limitations under the License.
 """
 from .model import Model
-from .utils import RESIZE_TYPES, pad_image
+from .utils import RESIZE_TYPES, pad_image, InputTransform
 
 
 class ImageModel(Model):
@@ -46,10 +46,14 @@ class ImageModel(Model):
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         self.image_layout = 'NCHW'
         if not resize_type:
-            self.logger.warn('The resizer isn\'t set. The "standard" will be used')
+            self.logger.warning('The resizer isn\'t set. The "standard" will be used')
             resize_type = 'standard'
         self.resize_type = resize_type
         self.resize = RESIZE_TYPES[self.resize_type]
+        self.input_transform = InputTransform()
+
+    def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
+        self.input_transform = InputTransform(reverse_input_channels, mean_values, scale_values)
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []

@@ -47,14 +47,14 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Optional. Input prompt", required=False, type=str, action='append')
     args.add_argument("--max_sample_token_num", help="Optional. Maximum number of tokens in generated sample",
                       default=40, required=False, type=int)
-    args.add_argument("--top_k", help="Optional. Number of tokens with the highest probability"
+    args.add_argument("--top_k", help="Optional. Number of tokens with the highest probability "
                                       "which will be kept for generation",
                       default=0, required=False, type=int)
-    args.add_argument("--top_p", help="Optional. Maximum probability, tokens with such a probability"
+    args.add_argument("--top_p", help="Optional. Maximum probability, tokens with such a probability "
                                       "and lower will be kept for generation",
                       default=0.9, required=False, type=float)
     args.add_argument("-d", "--device",
-                      help="Optional. Target device to perform inference on."
+                      help="Optional. Target device to perform inference on. "
                            "Default value is CPU",
                       default="CPU", type=str)
     return parser

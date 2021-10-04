@@ -26,7 +26,7 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* bert-base-ner
+* gpt-2
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -53,19 +53,13 @@ Options:
   --max_sample_token_num MAX_SAMPLE_TOKEN_NUM
                         Optional. Maximum number of tokens in generated sample
   --top_k TOP_K         Optional. Number of tokens with the highest
-                        probabilitywhich will be kept for generation
+                        probability which will be kept for generation
   --top_p TOP_P         Optional. Maximum probability, tokens with such a
-                        probabilityand lower will be kept for generation
+                        probability and lower will be kept for generation
   -d DEVICE, --device DEVICE
                         Optional. Target device to perform inference
                         on.Default value is CPU
 ```
-
-## Supported models
-
-* gpt-2
-
-> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Demo Inputs
 

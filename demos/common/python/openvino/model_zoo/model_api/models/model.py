@@ -15,7 +15,6 @@
 """
 
 import logging as log
-from .utils import InputTransform
 
 
 class Model:
@@ -40,10 +39,6 @@ class Model:
         self.net = ie.read_network(model_path)
         self.inputs = self.net.input_info
         self.outputs = self.net.outputs
-        self.input_transform = InputTransform()
-
-    def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
-        self.input_transform = InputTransform(reverse_input_channels, mean_values, scale_values)
 
     def preprocess(self, inputs):
         '''Interface for preprocess method

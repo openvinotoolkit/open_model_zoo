@@ -103,7 +103,7 @@ def main():
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    root_dir = Path(__file__).resolve().parent
+    labels_dir = Path(__file__).resolve().parents[3] / 'data/dataset_classes'
     mouse = MouseClick()
     if not args.no_show:
         cv2.namedWindow(WINNAME)
@@ -116,11 +116,11 @@ def main():
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
     log.info('Reading model {}'.format(model_path))
     if args.m_instance_segmentation:
-        labels_file = str(root_dir / 'coco_labels.txt')
+        labels_file = str(labels_dir / 'coco_80cl_bkgr.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
                                 args.threshold, args.device, args.cpu_extension)
     elif args.m_semantic_segmentation:
-        labels_file = str(root_dir / 'cityscapes_labels.txt')
+        labels_file = str(labels_dir / 'cityscapes_19cl_bkgr.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
     log.info('The model {} is loaded to {}'.format(model_path, args.device))
