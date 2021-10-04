@@ -150,7 +150,7 @@ class SentenceSimilarityConverter(FileBasedAnnotationConverter):
                 tokens.append("[CLS]" if self.support_vocab else CLS_ID)
                 segment_ids.append(SEG_ID_CLS)
         else:
-            tokens = self.tokenizer.tokenize(example.text)
+            tokens = self.tokenizer.tokenize(example.text, add_special_tokens=True)
             segment_ids = [SEG_ID_A] * len(tokens)
 
             if len(tokens) > self.max_seq_length:
