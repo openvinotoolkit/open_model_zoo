@@ -40,7 +40,8 @@ class NumPyReader(BaseReader):
                 description='Separator symbol between input name and record number in input identifier.'
             ),
             'block': BoolField(optional=True, default=False, description='Allows block mode.'),
-            'batch': NumberField(optional=True, default=1, description='Batch size')
+            'batch': NumberField(optional=True, default=1, description='Batch size'),
+            'records_mode': BoolField(optional=True, default=False, description='separate data on records'),
         })
         return parameters
 
@@ -53,9 +54,10 @@ class NumPyReader(BaseReader):
         self.id_sep = self.get_value_from_config('id_sep')
         self.block = self.get_value_from_config('block')
         self.batch = int(self.get_value_from_config('batch'))
+        self.record_mode = self.get_value_from_config('records_mode')
 
         if self.separator and self.is_text:
-            raise ConfigError('text file reading with numpy does')
+            raise ConfigError('text file reading with numpy does support separation')
         if not self.data_source:
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
@@ -90,7 +92,15 @@ class NumPyReader(BaseReader):
                 return res
 
         key = next(iter(data.keys()))
-        return data[key]
+        data = data[key]
+        if self.record_mode and self.id_sep in field_id:
+            recno = field_id.split(self.id_sep)[-1]
+            recno = int(recno)
+            res = data[recno, :]
+            return res
+        if self.multi_infer:
+            return list(data)
+        return data
 
 
 class NumpyTXTReader(BaseReader):
