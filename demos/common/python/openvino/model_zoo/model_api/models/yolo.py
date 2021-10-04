@@ -15,9 +15,8 @@ from collections import namedtuple
 import numpy as np
 import ngraph
 
-from .model import Model
 from .detection_model import DetectionModel
-from .utils import Detection, clip_detections, load_labels, nms, resize_image
+from .utils import Detection, clip_detections, nms, resize_image
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
@@ -317,23 +316,13 @@ class YOLOF(YOLO):
         return DetectionBox(x, y, width, height)
 
 
-class YOLOX(Model):
-    def __init__(self, ie, model_path, labels=None, threshold=0.5):
-        super().__init__(ie, model_path)
+class YOLOX(DetectionModel):
+    def __init__(self, ie, model_path, labels=None, threshold=0.5, iou_threshold=0.65):
+        super().__init__(ie, model_path, labels=labels,
+                         threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, 1)
-        self.image_blob_name = next(iter(self.net.input_info))
         self.output_blob_name = next(iter(self.net.outputs))
 
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        assert self.c == 3, "Expected 3-channel input"
-
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
-
-        self.threshold = threshold
-        self.nms_threshold = 0.65
         self.expanded_strides = []
         self.grids = []
         self.set_strides_grids()
@@ -370,7 +359,7 @@ class YOLOX(Model):
         x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
         scores = valid_predictions[i, j + 5]
 
-        keep_nms = nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold, include_boundaries=True)
+        keep_nms = nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.iou_threshold, include_boundaries=True)
 
         detections = [Detection(*det) for det in zip(x_mins[keep_nms], y_mins[keep_nms], x_maxs[keep_nms],
                                                      y_maxs[keep_nms], scores[keep_nms], j[keep_nms])]

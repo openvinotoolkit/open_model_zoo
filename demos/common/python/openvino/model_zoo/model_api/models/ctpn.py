@@ -17,22 +17,17 @@
 import cv2
 import numpy as np
 
-from .model import Model
+from .detection_model import DetectionModel
 from .utils import Detection, nms, clip_detections
 
 
-class CTPN(Model):
-    def __init__(self, ie, model_path, input_size, threshold=0.9):
-        super().__init__(ie, model_path)
+class CTPN(DetectionModel):
+    def __init__(self, ie, model_path, input_size, threshold=0.9, iou_threshold=0.5):
+        super().__init__(ie, model_path, labels=['Text'],
+                         threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, 2)
+        self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
-        self.image_blob_name = self.prepare_inputs()
-        self.bboxes_blob_name, self.scores_blob_name = self.prepare_outputs()
-
-        self.labels = ['Text']
-
-        self.boxes_threshold = threshold
-        self.nms_threshold = 0.5
         self.min_size = 8
         self.min_ratio = 0.5
         self.min_width = 32
@@ -60,16 +55,7 @@ class CTPN(Model):
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.net.reshape(input_shape)
 
-    def prepare_inputs(self):
-        image_blob_name = next(iter(self.net.input_info))
-        input_size = self.net.input_info[image_blob_name].input_data.shape
-
-        if len(input_size) != 4 or input_size[1] != 3:
-            raise RuntimeError("3-channel 4-dimensional model's input is expected")
-
-        return image_blob_name
-
-    def prepare_outputs(self):
+    def _get_outputs(self):
         (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.net.outputs.items()
 
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
@@ -187,7 +173,7 @@ class CTPN(Model):
 
         # apply nms
         keep = nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1),
-                   self.nms_threshold, include_boundaries=True)
+                   self.iou_threshold, include_boundaries=True)
         if self.post_nms_top_n > 0:
             keep = keep[:self.post_nms_top_n]
         proposals, scores = proposals[keep, :], scores[keep]
@@ -205,7 +191,7 @@ class CTPN(Model):
         heights = (abs(text_recs[:, 5] - text_recs[:, 1]) + abs(text_recs[:, 7] - text_recs[:, 3])) / 2.0 + 1
         widths = (abs(text_recs[:, 2] - text_recs[:, 0]) + abs(text_recs[:, 6] - text_recs[:, 4])) / 2.0 + 1
         scores = text_recs[:, 8]
-        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.boxes_threshold) &
+        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.threshold) &
                              (widths > self.min_width))[0]
 
         return text_recs[keep_inds]

@@ -30,7 +30,7 @@ class SSD(DetectionModel):
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
 
     def preprocess(self, inputs):
-        dict_inputs, meta =  super().preprocess(inputs)
+        dict_inputs, meta = super().preprocess(inputs)
         if self.image_info_blob_name:
             dict_inputs[self.image_info_blob_name] = [self.h, self.w, 1]
         return dict_inputs, meta
