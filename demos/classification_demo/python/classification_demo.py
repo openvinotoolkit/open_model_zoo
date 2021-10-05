@@ -74,8 +74,6 @@ def build_argparser():
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
                          help='Optional. Name of the output file(s) to save.')
-    io_args.add_argument('--pause', required=False, default=1, type=int,
-                         help='Optional. Pause in ms between frames to show.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
@@ -125,6 +123,7 @@ def main():
     args = build_argparser().parse_args()
 
     cap = open_images_capture(args.input, args.loop)
+    delay = int(cap.get_type() in {'VIDEO', 'CAMERA'})
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
@@ -167,8 +166,9 @@ def main():
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
             frame = draw_labels(frame, classifications, output_transform, model.labels)
-            render_metrics.update(rendering_start_time)
-            metrics.update(start_time, frame)
+            if delay or args.no_show:
+                render_metrics.update(rendering_start_time)
+                metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -176,7 +176,7 @@ def main():
 
             if not args.no_show:
                 cv2.imshow('Classification Results', frame)
-                key = cv2.waitKey(args.pause)
+                key = cv2.waitKey(delay)
 
                 ESC_KEY = 27
                 # Quit.
@@ -228,15 +228,16 @@ def main():
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
         frame = draw_labels(frame, classifications, output_transform, model.labels)
-        render_metrics.update(rendering_start_time)
-        metrics.update(start_time, frame)
+        if delay or args.no_show:
+            render_metrics.update(rendering_start_time)
+            metrics.update(start_time, frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
 
         if not args.no_show:
             cv2.imshow('Classification Results', frame)
-            key = cv2.waitKey(args.pause)
+            key = cv2.waitKey(delay)
 
             ESC_KEY = 27
             # Quit.
@@ -244,12 +245,13 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.log_total()
-    log_latency_per_stage(cap.reader_metrics.get_latency(),
-                          async_pipeline.preprocess_metrics.get_latency(),
-                          async_pipeline.inference_metrics.get_latency(),
-                          async_pipeline.postprocess_metrics.get_latency(),
-                          render_metrics.get_latency())
+    if delay or args.no_show:
+        metrics.log_total()
+        log_latency_per_stage(cap.reader_metrics.get_latency(),
+                            async_pipeline.preprocess_metrics.get_latency(),
+                            async_pipeline.inference_metrics.get_latency(),
+                            async_pipeline.postprocess_metrics.get_latency(),
+                            render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
 
