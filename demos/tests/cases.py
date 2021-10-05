@@ -194,6 +194,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
+            model_keys=['-m_p', '-m_r', '-m_o'],
             device_keys=['-d_p', '-d_r', '-d_o'],
             test_cases=combine_cases(
         TestCase(options={'--no_show': None,
