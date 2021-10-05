@@ -14,6 +14,7 @@
 
 import argparse
 import collections
+import distutils.spawn
 import json
 import os
 import string
@@ -207,11 +208,13 @@ def main():
         mo_path = args.mo
 
         if mo_path is None:
-            mo_package_path = _common.get_package_path(args.python, 'mo')
+            mo_executable = distutils.spawn.find_executable('mo')
 
-            if mo_package_path:
-                # run MO as a module
-                mo_cmd_prefix = [str(args.python), '-m', 'mo']
+            if mo_executable:
+                mo_cmd_prefix = [mo_executable]
+                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                if mo_package_path is None:
+                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
                 mo_dir = mo_package_path.parent
             else:
                 try:
