@@ -8,6 +8,10 @@ click==8.0.1
     # via
     #   nltk
     #   sacremoses
+colorama==0.4.4
+    # via
+    #   click
+    #   tqdm
 cycler==0.10.0
     # via matplotlib
 dataclasses==0.8
@@ -61,6 +65,7 @@ numpy==1.19.5
     #   imageio
     #   matplotlib
     #   nibabel
+    #   opencv-python
     #   pandas
     #   parasail
     #   pywavelets
@@ -70,6 +75,8 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
+opencv-python==4.5.3.56
+    # via -r tools/accuracy_checker/requirements-core.in
 packaging==21.0
     # via
     #   huggingface-hub

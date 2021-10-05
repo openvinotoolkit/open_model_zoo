@@ -2,6 +2,8 @@
 
 appdirs==1.4.4
     # via pooch
+atomicwrites==1.4.0
+    # via pytest
 attrs==21.2.0
     # via pytest
 audioread==2.1.9
@@ -12,6 +14,10 @@ cffi==1.14.6
     # via soundfile
 charset-normalizer==2.0.4
     # via requests
+colorama==0.4.4
+    # via
+    #   pytest
+    #   tqdm
 cycler==0.10.0
     # via matplotlib
 decorator==5.0.9
@@ -55,7 +61,7 @@ numba==0.53.1
     #   resampy
 numpy==1.19.5
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/python/requirements.txt
+    #   -r ${INTEL_OPENVINO_DIR}\python\requirements.txt
     #   -r demos/requirements.txt
     #   librosa
     #   matplotlib

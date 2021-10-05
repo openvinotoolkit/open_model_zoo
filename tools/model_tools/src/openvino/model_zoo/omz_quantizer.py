@@ -127,8 +127,8 @@ def main():
     parser.add_argument('--all', action='store_true', help='quantize all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
-        help='Python executable to run Post-Training Optimization Toolkit with')
-    parser.add_argument('--pot', type=Path, help='Post-Training Optimization Toolkit entry point script')
+        help='Python executable to run Post-Training Optimization Tool with')
+    parser.add_argument('--pot', type=Path, help='Post-Training Optimization Tool entry point script')
     parser.add_argument('--dry_run', action='store_true',
         help='print the quantization commands without running them')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
@@ -169,9 +169,9 @@ def main():
                 pot_cmd_prefix = [str(args.python), '-m', 'pot']
             else:
                 try:
-                    pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
+                    pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/post_training_optimization_tool/main.py'
                 except KeyError:
-                    sys.exit('Unable to locate Post-Training Optimization Toolkit. '
+                    sys.exit('Unable to locate Post-Training Optimization Tool. '
                         + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
         if pot_path is not None:

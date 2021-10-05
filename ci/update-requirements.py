@@ -27,8 +27,8 @@ def fixup_req_file(req_path, path_placeholders):
     contents = req_path.read_text()
 
     for path, placeholder in path_placeholders:
-        contents = contents.replace(f'-r {path}/', f'-r ${{{placeholder}}}/')
-        contents = contents.replace(f'({path}/', f'(${{{placeholder}}}/')
+        contents = contents.replace(f'-r {path}{os.sep}', f'-r ${{{placeholder}}}{os.sep}')
+        contents = contents.replace(f'({path}{os.sep}', f'(${{{placeholder}}}{os.sep}')
 
     contents = "# use {} to update this file\n\n".format(script_name) + contents
     req_path.write_text(contents)
@@ -72,7 +72,7 @@ def main():
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
         *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
-        *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
+        *(openvino_dir / f'tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
         'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
@@ -80,8 +80,8 @@ def main():
         'tools/model_tools/requirements.in')
     pc('ci/requirements-quantization.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
-        openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
-        openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
+        openvino_dir / 'tools/post_training_optimization_tool/setup.py',
+        openvino_dir / 'tools/model_optimizer/requirements_kaldi.txt')
 
 if __name__ == '__main__':
     main()

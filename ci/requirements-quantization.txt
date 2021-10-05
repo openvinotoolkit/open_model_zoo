@@ -1,7 +1,7 @@
 # use update-requirements.py to update this file
 
 addict==2.4.0
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    # via pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
 certifi==2021.5.30
     # via requests
 charset-normalizer==2.0.4
@@ -10,6 +10,10 @@ click==8.0.1
     # via
     #   nltk
     #   sacremoses
+colorama==0.4.4
+    # via
+    #   click
+    #   tqdm
 cycler==0.10.0
     # via matplotlib
 dataclasses==0.8
@@ -18,12 +22,14 @@ decorator==4.4.2
     # via networkx
 defusedxml==0.7.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+    #   -r ${INTEL_OPENVINO_DIR}\tools\model_optimizer\requirements_kaldi.txt
     #   -r tools/accuracy_checker/requirements-core.in
 editdistance==0.5.3
     # via -r tools/accuracy_checker/requirements.in
 fast-ctc-decode==0.3.0
     # via -r tools/accuracy_checker/requirements.in
+fastjsonschema==2.15.1
+    # via -r ${INTEL_OPENVINO_DIR}\tools\model_optimizer\requirements_kaldi.txt
 filelock==3.0.12
     # via
     #   huggingface-hub
@@ -47,7 +53,7 @@ joblib==1.0.1
     #   sacremoses
     #   scikit-learn
 jstyleson==0.0.2
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    # via pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
 kiwisolver==1.3.1
     # via matplotlib
 lmdb==1.2.1
@@ -56,8 +62,8 @@ matplotlib==3.3.4
     # via scikit-image
 networkx==2.5.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   -r ${INTEL_OPENVINO_DIR}\tools\model_optimizer\requirements_kaldi.txt
+    #   pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
     #   scikit-image
 nibabel==3.2.1
     # via -r tools/accuracy_checker/requirements.in
@@ -65,15 +71,16 @@ nltk==3.6.2
     # via -r tools/accuracy_checker/requirements.in
 numpy==1.19.5
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+    #   -r ${INTEL_OPENVINO_DIR}\tools\model_optimizer\requirements_kaldi.txt
     #   -r tools/accuracy_checker/requirements-core.in
     #   imagecodecs
     #   imageio
     #   matplotlib
     #   nibabel
+    #   opencv-python
     #   pandas
     #   parasail
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
     #   pywavelets
     #   rawpy
     #   scikit-image
@@ -81,6 +88,8 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
+opencv-python==4.5.3.56
+    # via -r tools/accuracy_checker/requirements-core.in
 packaging==21.0
     # via
     #   huggingface-hub
@@ -89,7 +98,7 @@ packaging==21.0
 pandas==1.1.5
     # via
     #   -r tools/accuracy_checker/requirements.in
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
 parasail==1.2.4
     # via -r tools/accuracy_checker/requirements.in
 pillow==8.3.2
@@ -129,7 +138,7 @@ regex==2021.8.28
     #   transformers
 requests==2.26.0
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+    #   -r ${INTEL_OPENVINO_DIR}\tools\model_optimizer\requirements_kaldi.txt
     #   huggingface-hub
     #   transformers
 sacremoses==0.0.45
@@ -141,7 +150,7 @@ scikit-learn==0.24.2
 scipy==1.5.4
     # via
     #   -r tools/accuracy_checker/requirements.in
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
     #   scikit-image
     #   scikit-learn
 sentencepiece==0.1.96
@@ -153,7 +162,7 @@ six==1.16.0
     #   python-dateutil
     #   sacremoses
 texttable==1.6.4
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    # via pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
 threadpoolctl==2.2.0
     # via scikit-learn
 tifffile==2020.9.3
@@ -167,7 +176,7 @@ tqdm==4.62.2
     #   -r tools/accuracy_checker/requirements.in
     #   huggingface-hub
     #   nltk
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}\tools\post_training_optimization_tool\setup.py)
     #   sacremoses
     #   transformers
 transformers==4.10.0

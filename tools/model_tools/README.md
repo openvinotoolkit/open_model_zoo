@@ -11,7 +11,7 @@ based on configuration files in the models' directories.
   Inference Engine IR format into that format using Model Optimizer.
 
 * `quantizer.py` (model quantizer) quantizes full-precision models in the IR
-  format into low-precision versions using Post-Training Optimization Toolkit.
+  format into low-precision versions using Post-Training Optimization Tool.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
@@ -363,7 +363,7 @@ the `--precisions` option:
 omz_quantizer --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
 ```
 
-By default, the script will run Post-Training Optimization Toolkit using the same
+By default, the script will run Post-Training Optimization Tool using the same
 Python executable that was used to run the script itself. To use a different
 Python executable, use the `-p`/`--python` option:
 
@@ -371,13 +371,13 @@ Python executable, use the `-p`/`--python` option:
 omz_quantizer --all --dataset_dir <DATASET_DIR> --python my/python
 ```
 
-The script will attempt to locate Post-Training Optimization Toolkit using several methods:
+The script will attempt to locate Post-Training Optimization Tool using several methods:
 
 1. If the `--pot` option was specified, then its value will be used as the path
    to the script to run:
 
    ```sh
-   omz_quantizer --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
+   omz_quantizer --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_tool/main.py
    ```
 
 2. Otherwise, if the selected Python executable can import the `pot` package,
@@ -385,11 +385,11 @@ The script will attempt to locate Post-Training Optimization Toolkit using sever
 
 3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
    script has been executed, the environment variables set by that script will
-   be used to locate Post-Training Optimization Toolkit within the OpenVINO toolkit.
+   be used to locate Post-Training Optimization Tool within the OpenVINO toolkit.
 
 4. Otherwise, the script will fail.
 
-It's possible to specify a target device for Post-Training Optimization Toolkit
+It's possible to specify a target device for Post-Training Optimization Tool
 to optimize for, by using the `--target_device` option:
 
 ```sh
@@ -397,8 +397,8 @@ omz_quantizer --all --dataset_dir <DATASET_DIR> --target_device VPU
 ```
 
 The supported values are those accepted by the "target_device" option in
-Post-Training Optimization Toolkit's config files. If this option is unspecified,
-Post-Training Optimization Toolkit's default is used.
+Post-Training Optimization Tool's config files. If this option is unspecified,
+Post-Training Optimization Tool's default is used.
 
 The script can print the quantization commands without actually running them.
 To do this, use the `--dry_run` option:
@@ -408,7 +408,7 @@ omz_quantizer --all --dataset_dir <DATASET_DIR> --dry_run
 ```
 
 With this option specified, the configuration file for Post-Training Optimization
-Toolkit will still be created, so that you can inspect it.
+Tool will still be created, so that you can inspect it.
 
 See the "Shared options" section for information on other options accepted by
 the script.
