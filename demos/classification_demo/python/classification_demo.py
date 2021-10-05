@@ -85,6 +85,18 @@ def build_argparser():
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
+    input_transform_args = parser.add_argument_group('Input transform options')
+    input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
+                                      help='Optional. Switch the input channels order from '
+                                           'BGR to RGB.')
+    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
+                                      help='Optional. Normalize input by subtracting the mean '
+                                           'values per channel. Example: 255 255 255')
+    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
+                                      help='Optional. Divide input by scale values per channel. '
+                                           'Division is applied after mean values subtraction. '
+                                           'Example: 255 255 255')
+
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
@@ -133,6 +145,7 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
+    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
     log_blobs_info(model)
 
     async_pipeline = AsyncPipeline(ie, model, plugin_config,
