@@ -193,6 +193,18 @@ NATIVE_DEMOS = [
         }),
     )),
 
+    CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
+            model_keys=['-m_p', '-m_r', '-m_o'],
+            device_keys=['-d_p', '-d_r', '-d_o'],
+            test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00000002'),
+                          '-m_p': ModelArg('mtcnn-p'),
+                          '-m_r': ModelArg('mtcnn-r'),
+                          '-m_o': ModelArg('mtcnn-o')}),
+    )),
+
+
     CppDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,

@@ -323,10 +323,10 @@ int main(int argc, char *argv[]) {
             cv::GMat detections = cv::gapi::infer<Faces>(in);
 
             cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
-                FLAGS_t,
-                FLAGS_bb_enlarge_coef,
-                FLAGS_dx_coef,
-                FLAGS_dy_coef);
+                                                      FLAGS_t,
+                                                      FLAGS_bb_enlarge_coef,
+                                                      FLAGS_dx_coef,
+                                                      FLAGS_dy_coef);
             auto outs = GOut(frame, detections, faces);
 
             cv::GArray<cv::GMat> ages, genders;
@@ -354,7 +354,7 @@ int main(int argc, char *argv[]) {
             }
 
             return cv::GComputation(cv::GIn(in), std::move(outs));
-            });
+        });
 
         auto det_net = cv::gapi::ie::Params<Faces> {
             FLAGS_m,                         // path to model
