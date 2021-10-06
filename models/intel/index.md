@@ -86,6 +86,7 @@ Age/Gender recognition after Face Detection).
 | [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/README.md) | 0.462 | 11.177 |
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/README.md) | 0.126 | 2.483 |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/README.md) | 0.021 | 0.191 |
+| [facial-landmarks-98-detection-0001](./facial-landmarks-98-detection-0001/README.md) | 0.6 | 9.66 |
 | [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/README.md)       | 0.042 | 4.595 |
 | [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/README.md) | 0.174 | 0.735 |
 | [person-attributes-recognition-crossroad-0234](./person-attributes-recognition-crossroad-0234/README.md) | 2.167 | 23.510 |

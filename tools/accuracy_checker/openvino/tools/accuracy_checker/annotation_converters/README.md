@@ -322,6 +322,9 @@ The main difference between this converter and `super_resolution` in data organi
 * `cvat_age_gender` -  converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/manual/advanced/xml_format/) format for images which represent dataset for age gender recognition to `ContainerAnnotation` with `ClassificationAnnotation` for gender recognition, `ClassificationAnnotation` for age classification and `RegeressionAnnotation` for age regression. The identifiers for representations following: `gender_annotation`, `age_class_annotation`, `age_regression_annotation`.
   * `annotation_file` - path to xml file in appropriate format.
 * `cvat_facial_landmarks` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/manual/advanced/xml_format/) format for images to `FacialLandmarksAnnotation`.
+* `coco_facial_landmarks` - converts landmarks dataset in Coco format to `FacialLandmarksHeatMapAnnotation`.
+  * `annotation_file` - path to dataset annotation file in Coco format
+* `cvat_facial_landmarks` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/manual/advanced/xml_format) format for images to `FacialLandmarksAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
 * `cvat_pose_estimation` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/manual/advanced/xml_format/) format for images to `PoseEstimationAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.

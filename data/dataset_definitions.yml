@@ -289,6 +289,17 @@ datasets:
     postprocessing:
       - type: normalize_landmarks_points
 
+  - name: facial_landmarks_98_db
+    data_source: 98_landmarks
+    annotation_conversion:
+      converter: coco_facial_landmarks
+      annotation_file: 98_landmarks/lms_test.json
+    preprocessing:
+      - type: resize
+        size: 64
+    postprocessing:
+      - type: normalize_landmarks_points
+
   - name: emotions_recognition
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation_conversion:

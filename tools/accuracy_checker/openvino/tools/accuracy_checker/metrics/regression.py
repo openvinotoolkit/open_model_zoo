@@ -23,6 +23,8 @@ import numpy as np
 from ..representation import (
     RegressionAnnotation,
     RegressionPrediction,
+    FacialLandmarksHeatMapAnnotation,
+    FacialLandmarksHeatMapPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
     FacialLandmarks3DAnnotation,
@@ -380,8 +382,8 @@ class RelativeL2Error(BaseRegressionMetric):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapAnnotation)
 
     def configure(self):
         self.meta.update({
@@ -426,8 +428,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):
@@ -501,8 +503,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, )
-    prediction_types = (FacialLandmarks3DPrediction, )
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):
@@ -526,8 +528,12 @@ class NormalizedMeanError(PerImageEvaluationMetric):
         self.magnitude = []
 
     def update(self, annotation, prediction):
-        gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
-        pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
+        if self.only_2d:
+            gt = np.array([annotation.x_values, annotation.y_values]).T
+            pred = np.array([prediction.x_values, prediction.y_values]).T
+        else:
+            gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
+            pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
 
         diff = np.square(gt - pred)
         dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
