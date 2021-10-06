@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import argparse
-import distutils.spawn
 import json
 import os
+import shutil
 import sys
 import tempfile
 
@@ -163,7 +163,7 @@ def main():
 
         pot_path = args.pot
         if pot_path is None:
-            pot_executable = distutils.spawn.find_executable('pot')
+            pot_executable = shutil.which('pot')
 
             if pot_executable:
                 pot_cmd_prefix = [pot_executable]

@@ -14,9 +14,9 @@
 
 import argparse
 import collections
-import distutils.spawn
 import json
 import os
+import shutil
 import string
 import sys
 
@@ -208,7 +208,7 @@ def main():
         mo_path = args.mo
 
         if mo_path is None:
-            mo_executable = distutils.spawn.find_executable('mo')
+            mo_executable = shutil.which('mo')
 
             if mo_executable:
                 mo_cmd_prefix = [mo_executable]
