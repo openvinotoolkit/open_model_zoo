@@ -51,7 +51,7 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
 
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        with open(self.annotation_file) as f:
+        with open(self.annotation_file, encoding='UTF-8') as f:
             data = json.load(f)
         coco_ann = data["annotations"]
         id2name = self._collectImageIds(data["images"])
