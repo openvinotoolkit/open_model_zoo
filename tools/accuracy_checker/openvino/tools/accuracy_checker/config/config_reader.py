@@ -28,7 +28,6 @@ ENTRIES_PATHS = {
     'launchers': {
         'cpu_extensions': 'extensions',
         'gpu_extensions': 'extensions',
-        'bitstream': 'bitstreams',
         'affinity_map': 'affinity_map',
         'predictions': 'source'
     },
@@ -83,14 +82,13 @@ LIST_ENTRIES_PATHS = {
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'source': 'DATA_DIR',
     'annotations': 'ANNOTATIONS_DIR',
-    'bitstreams': 'BITSTREAMS_DIR',
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
     'model_attributes': 'MODEL_ATTRIBUTES_DIR',
     'kaldi_bin_dir': 'KALDI_BIN_DIR'
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
-CONFIG_SHARED_PARAMETERS = ['bitstream']
+CONFIG_SHARED_PARAMETERS = []
 ACCEPTABLE_MODEL = [
     'caffe_model', 'caffe_weights',
     'tf_model', 'tf_meta',
@@ -839,14 +837,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
         return launcher_entry
 
-    def _fpga_specific_args(launcher_entry):
-        if 'aocl' in arguments and arguments.aocl:
-            launcher_entry['_aocl'] = arguments.aocl
-
-        if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
-            if not arguments.bitstreams.is_dir():
-                launcher_entry['bitstream'] = arguments.bitstreams
-
     def _async_evaluation_args(launcher_entry):
         if 'async_mode' in arguments:
             launcher_entry['async_mode'] = arguments.async_mode
@@ -868,7 +858,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     launcher_entry.update(update_launcher_entry)
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
-    _fpga_specific_args(launcher_entry)
 
     if 'device_config' in arguments and arguments.device_config:
         merge_device_configs(launcher_entry, arguments.device_config)

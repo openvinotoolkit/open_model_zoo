@@ -35,7 +35,6 @@ except ImportError as import_error:
 
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
-FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
@@ -239,7 +238,6 @@ DLSDK_LAUNCHER_PARAMETERS = {
     'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
     'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
     'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
-    'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
     'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
     'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
     'outputs': ListField(optional=True, description="Outputs."),
@@ -271,11 +269,9 @@ DLSDK_LAUNCHER_PARAMETERS = {
     '_tf_obj_detection_api_pipeline_config_path': PathField(
         optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
     '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
-    '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
     '_vpu_log_level': StringField(
         optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
     ),
-    '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
     '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
     '_undefined_shapes_resolving_policy': StringField(
         optional=True, default='default', choices=['default', 'dynamic', 'static'],

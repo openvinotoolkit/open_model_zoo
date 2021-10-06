@@ -121,7 +121,6 @@ You may refer to `-h, --help` to full list of command line options. Some argumen
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 - `-d, --definitions` path to the global configuration file.
 - `-e, --extensions` directory with InferenceEngine extensions.
-- `-b, --bitstreams` directory with bitstream (for Inference Engine with fpga plugin).
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
@@ -139,7 +138,6 @@ You are also able to replace some command line arguments with environment variab
 * `MODELS_DIR` - equivalent of `-m`, `--models`.
 * `EXTENSIONS` - equivalent of `-e`, `--extensions`.
 * `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
-* `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
 * `MODEL_ATTRIBUTES_DIR` - equivalent of `--model_attributes`.
 
 #### Configuration
