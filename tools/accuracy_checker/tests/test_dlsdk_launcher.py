@@ -19,7 +19,6 @@ import subprocess # nosec - disable B404:import-subprocess check
 import pytest
 
 pytest.importorskip('openvino.tools.accuracy_checker.launcher.dlsdk_launcher')
-import os
 import cv2
 import numpy as np
 
@@ -235,190 +234,6 @@ class TestDLSDKLauncherAffinity:
 class TestDLSDKLauncher:
     FAKE_MO_PATH = Path('/path/ModelOptimizer').absolute()
 
-    def test_program_bitsream_when_device_is_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        launcher = create_launcher(config, model_name='custom')
-        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
-        launcher.release()
-
-    def test_program_bitstream_when_fpga_in_hetero_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        launcher = create_launcher(config, model_name='custom')
-        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
-        launcher.release()
-
-    def test_does_not_program_bitstream_when_device_is_not_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:cpu,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-
-        subprocess_mock.assert_not_called()
-
-    def test_sets_dla_aocx_when_device_is_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
-
-    def test_sets_dla_aocx_when_fpga_in_hetero_device(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-        os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
-
-    def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_when_hetero_without_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:cpu,cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
-        mocker.patch('os.environ')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
-        mocker.patch('os.environ')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
     def test_model_converted_from_caffe(self, mocker):
         mock = mocker.patch(
             'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
@@ -430,7 +245,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             "device": 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -453,7 +267,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'mo_params': {'data_type': 'FP16'},
             'adapter': 'classification',
             'should_log_cmd': False
@@ -477,7 +290,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'mo_flags': ['reverse_input_channels'],
             'adapter': 'classification',
             'should_log_cmd': False
@@ -1167,15 +979,15 @@ class TestDLSDKLauncherConfig:
 
     def test_hetero_correct(self):
         self.config.validate(update_dict(self.launcher, device='HETERO:CPU'))
-        self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA'))
+        self.config.validate(update_dict(self.launcher, device='HETERO:CPU,CPU'))
 
     def test_hetero_endswith_comma(self):
         with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA,'))
+            self.config.validate(update_dict(self.launcher, device='HETERO:CPU,CPU,'))
 
     def test_normal_multiple_devices(self):
         with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='CPU,FPGA'))
+            self.config.validate(update_dict(self.launcher, device='CPU,CPU'))
 
     def test_hetero_empty(self):
         with pytest.raises(ConfigError):

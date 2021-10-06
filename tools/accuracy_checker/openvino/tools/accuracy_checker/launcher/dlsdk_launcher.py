@@ -14,10 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import subprocess  # nosec - disable B404:import-subprocess check
 import multiprocessing
 from pathlib import Path
-import os
 import re
 import warnings
 from collections import OrderedDict
@@ -25,7 +23,7 @@ import numpy as np
 import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
-    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS,
+    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
@@ -96,7 +94,6 @@ class DLSDKLauncher(Launcher):
         self.dynamic_shapes_policy = self.get_value_from_config('_undefined_shapes_resolving_policy')
         self._set_variable = False
         self._async_mode = False
-        self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
         self._postpone_input_configuration = postpone_inputs_configuration
@@ -296,41 +293,9 @@ class DLSDKLauncher(Launcher):
                 )
             layers[layer_name].affinity = device
 
-    def _is_fpga(self):
-        device_list = map(lambda device: device.split('.')[0], self._devices_list())
-        return 'FPGA' in device_list
-
     def _is_vpu(self):
         device_list = map(lambda device: device.split('.')[0], self._devices_list())
         return contains_any(device_list, VPU_PLUGINS)
-
-    def _prepare_bitstream_firmware(self, config):
-        if not self._is_fpga():
-            return
-        compiler_mode = os.environ.get(FPGA_COMPILER_MODE_VAR)
-        if compiler_mode == '3':
-            return
-        bitstream = config.get('bitstream')
-        if bitstream:
-            previous_bitstream = config.get('_prev_bitstream', '')
-            if str(previous_bitstream) != str(bitstream):
-                print_info('programming bitstream: {}'.format(bitstream.name))
-                aocl_executable = config.get('_aocl')
-                if aocl_executable:
-                    subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
-                    os.environ[FPGA_COMPILER_MODE_VAR] = '3'
-                    self._set_variable = True
-                else:
-                    aocx_variable = 'DLA_AOCX'
-                    previous_bitstream = os.environ.get(aocx_variable)
-                    if previous_bitstream == str(bitstream):
-                        return
-                    os.environ[aocx_variable] = str(bitstream)
-                    if not os.environ.get(aocx_variable):
-                        warning('Warning: {} has not been set'.format(aocx_variable))
-            else:
-                os.environ[FPGA_COMPILER_MODE_VAR] = '3'
-                self._set_variable = True
 
     @property
     def num_requests(self):
@@ -475,7 +440,7 @@ class DLSDKLauncher(Launcher):
             print_info('Infer requests number:{}'.format(self.num_requests))
 
     def auto_num_requests(self, return_list=False):
-        concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4, 'FPGA': 3}
+        concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4}
         platform_list = self._devices_list()
         if 'CPU' in platform_list and len(platform_list) == 1:
             min_requests = [4, 5, 3]
@@ -960,5 +925,3 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
         if 'ie_core' in self.__dict__:
             del self.ie_core
-        if self._set_variable:
-            del os.environ[FPGA_COMPILER_MODE_VAR]

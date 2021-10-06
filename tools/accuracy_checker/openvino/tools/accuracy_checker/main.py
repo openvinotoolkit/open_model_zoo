@@ -241,12 +241,6 @@ def add_openvino_specific_args(parser):
         required=False
     )
     openvino_specific_args.add_argument(
-        '-b', '--bitstreams',
-        help='prefix path to bitstreams folder',
-        type=partial(get_path, file_or_directory=True),
-        required=False
-    )
-    openvino_specific_args.add_argument(
         '-M', '--model_optimizer',
         help='path to model optimizer directory',
         type=partial(get_path, is_directory=True),
@@ -316,12 +310,6 @@ def add_openvino_specific_args(parser):
         help='prefix path to the affinity maps',
         type=partial(get_path, file_or_directory=True),
         default=Path.cwd(),
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--aocl',
-        help='path to aocl executable for FPGA bitstream programming',
-        type=get_path,
         required=False
     )
     openvino_specific_args.add_argument(
