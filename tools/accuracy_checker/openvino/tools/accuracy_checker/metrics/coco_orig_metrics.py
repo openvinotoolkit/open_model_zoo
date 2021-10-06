@@ -34,7 +34,7 @@ from ..representation import (
 from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value, UnsupportedPackage
-from .metric import FullDatasetEvaluationMetric, PerImageEvaluationMetric
+from .metric import FullDatasetEvaluationMetric, PerImageEvaluationMetric, Metric
 from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
 
 try:
@@ -95,6 +95,16 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             label for label in label_map
             if label != self.dataset.metadata.get('background_label')
         ]
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.profiling_helper = Metric.provide(
+            self.__provider__.replace('_orig', ''), {}, self.dataset, self.name, profiler=profiler
+        )
+
+    def update(self, annotation, prediction):
+        if self.profiler:
+            self.profiling_helper.update(annotation, prediction)
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
@@ -467,7 +477,7 @@ class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
 
     def evaluate(self, annotations, predictions):
         if self.profiler:
-            self.profiler.finish()
+            self.profiling_helper.evaluate(annotations, predictions)
         return self.compute_precision_recall(annotations, predictions)[0][0]
 
 
@@ -567,7 +577,6 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
             })
 
         return annotation_data_to_store
-
 
 
 class MSCOCOorigRecall(MSCOCOorigBaseMetric):
