@@ -17,7 +17,7 @@ limitations under the License.
 import cv2
 import numpy as np
 
-from ..config import NumberField, StringField
+from ..config import NumberField
 from .preprocessor import Preprocessor
 
 
