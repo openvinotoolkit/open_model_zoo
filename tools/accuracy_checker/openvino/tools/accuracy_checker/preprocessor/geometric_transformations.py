@@ -244,7 +244,7 @@ class Padding(Preprocessor):
             ),
             'numpy_pad_mode': StringField(
                 optional=True, default='constant',
-                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
+                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'symmetric', 'wrap'],
                 description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             ),
             'enable_resize': BoolField(
