@@ -16,6 +16,7 @@ limitations under the License.
 
 import pytest
 pytest.importorskip('openvino.inference_engine')
+pytest.importorskip('cv2.gapi.ie.params')
 pytest.importorskip('openvino.tools.accuracy_checker.launcher.gapi_launcher')
 
 import cv2
