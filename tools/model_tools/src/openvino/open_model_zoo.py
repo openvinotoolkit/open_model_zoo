@@ -4,8 +4,8 @@ import argparse
 
 from pathlib import Path
 
-from  open_model_zoo.model_tools import (
-    _configuration, _common, downloader, converter
+from  openvino.model_zoo import (
+    _configuration, _common, omz_downloader, omz_converter
 )
 
 
@@ -98,7 +98,7 @@ class Model(BaseModel):
                  '--cache_dir=' + str(cache_dir),
                  '--precisions=' + str(precision)]
 
-        downloader.main(flags)
+        omz_downloader.main(flags)
 
         self.description = '{}\n\n    License: {}'.format(topology.description, topology.license_url)
         self.task_type = topology.task_type
@@ -114,7 +114,7 @@ class Model(BaseModel):
         self.bin_path = str(prefix) + '.bin'
 
         if not os.path.exists(self.model_path) or not os.path.exists(self.bin_path):
-            converter.main(['--name=' + model_name, '--precisions=' + precision,
+            omz_converter.main(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
 
     def load(self, ie, device='CPU'):

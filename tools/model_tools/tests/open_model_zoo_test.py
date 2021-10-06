@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import os
 
-import open_model_zoo.open_model_zoo as omz
+import openvino.open_model_zoo as omz
 
 from openvino.inference_engine import IECore
 
