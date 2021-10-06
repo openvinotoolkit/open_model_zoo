@@ -38,9 +38,7 @@ files:
   - name: ssd300.tar.gz
     size: 97789219
     sha256: e3eb9794a33eb77e6798f396df453123c249a1df554e42a3302eb4aa20a8f2ee
-    source:
-      $type: google_drive
-      id: 0BzKzrI_SkD1_TkFPTEQ1Z091SUE
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/ssd300/models_VGGNet_VOC0712Plus_SSD_300x300_ft.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

@@ -37,9 +37,7 @@ files:
   - name: densenet-169.caffemodel
     size: 57307526
     sha256: 8d45f2ab15f6329e2f80004692c58129cc4875ffe43ddf59433ebc2216189f15
-    source:
-      $type: google_drive
-      id: 0B7ubpZO7HnlCRWVVdUJjVVAyQXc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/densenet-169/DenseNet_169.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
