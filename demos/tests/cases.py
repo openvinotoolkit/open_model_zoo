@@ -136,7 +136,12 @@ NATIVE_DEMOS = [
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
+            ModelArg('googlenet-v1'),
+            ModelArg('googlenet-v1-tf'),
+            ModelArg('googlenet-v3'),
+            ModelArg('googlenet-v3-pytorch'),
             ModelArg('mixnet-l'),
+            ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
@@ -170,11 +175,14 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
-            '-m_fd': ModelArg('face-detection-adas-0001'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             '-m_es': ModelArg('open-closed-eye-0001'),
         }),
+        single_option_cases(
+            '-m_fd',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004')),
     )),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
@@ -186,11 +194,14 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
-            '-m_fd': ModelArg('face-detection-adas-0001'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             '-m_es': ModelArg('open-closed-eye-0001'),
         }),
+        single_option_cases(
+            '-m_fd',
+             ModelArg('face-detection-adas-0001'),
+             ModelArg('face-detection-retail-0004')),
     )),
 
     CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
@@ -252,6 +263,7 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
+        TestCase(options={'-m': ModelArg('face-detection-retail-0004')}),
         [
             TestCase(options={}),
             TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
