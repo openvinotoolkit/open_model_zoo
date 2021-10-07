@@ -27,7 +27,6 @@ class Classification(ImageModel):
         if self.h != self.w:
             raise RuntimeError('Model input has incorrect image shape. Must be NxN square. '
                                 'Got {} x {}.'.format(self.h, self.w))
-
         self.ntop = ntop
         self.labels = self._load_labels(labels)
         self._check_outputs()
@@ -36,19 +35,17 @@ class Classification(ImageModel):
         if 'Softmax' not in [node.get_type_name() for node in function.get_ops()]:
             logits = function.get_output_op(0)
             logits = logits.inputs()[0].get_source_output().get_node()
-            logits.set_friendly_name('logits')
-            probs_node = ng.softmax(logits, 1)
+            softmax_node = ng.softmax(logits, 1)
         else:
-            probs_node = function.get_output_op(0)
-            probs_node = probs_node.inputs()[0].get_source_output().get_node()
-            probs_node.set_friendly_name('probs')
+            softmax_node  = function.get_output_op(0)
+            softmax_node  = softmax_node.inputs()[0].get_source_output().get_node()
 
-        topk_node = ng.topk(probs_node, ntop, 1, "max", "value")
+        topk_node = ng.topk(softmax_node, ntop, 1, "max", "value")
         f = ng.Function(
             [ng.result(topk_node.outputs()[0], name='TopK_scores'),
              ng.result(topk_node.outputs()[1], name='TopK_indices')],
-            function.get_parameters(), 'classification_res')
-        self.net = IENetwork(ng.impl.Function.to_capsule(f))
+            function.get_parameters(), 'classification')
+        self.net = IENetwork(ng.Function.to_capsule(f))
         self.out_blob_names = list(self.net.outputs.keys())
         self.out_blob_names.sort() # sort names to make sure that out_blob_names[0] - scores, out_blob_names[1] - indices
 
@@ -78,7 +75,7 @@ class Classification(ImageModel):
             self.logger.warning("\tInserted 'other' label as first.")
         if out_size[1] != len(self.labels):
             raise RuntimeError("Model's number of classes and parsed "
-                              'labels must match ({} != {})'.format(out_size[1], len(self.labels)))
+                               'labels must match ({} != {})'.format(out_size[1], len(self.labels)))
 
     def postprocess(self, outputs, meta):
         scores = outputs[self.out_blob_names[0]].squeeze()
