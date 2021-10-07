@@ -130,10 +130,12 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: classification_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] --labels LABELS [-ntop NTOP]
+usage: classification_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] --labels LABELS [-ntop {1,2,3,4,5,6,7,8,9,10}]
                               [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop]
-                              [-o OUTPUT] [--pause PAUSE] [-limit OUTPUT_LIMIT] [--no_show]
-                              [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS] [-r]
+                              [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show] [--output_resolution OUTPUT_RESOLUTION]
+                              [-u UTILIZATION_MONITORS] [--reverse_input_channels]
+                              [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
+                              [--scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -165,7 +167,6 @@ Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
-  --pause PAUSE         Optional. Pause in ms between frames to show.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
@@ -175,9 +176,18 @@ Input/output options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
+Input transform options:
+  --reverse_input_channels
+                        Optional. Switch the input channels order from BGR to RGB.
+  --mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES
+                        Optional. Normalize input by subtracting the mean values per channel. Example: 255 255 255
+  --scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES
+                        Optional. Divide input by scale values per channel. Division is applied after mean values
+                        subtraction. Example: 255 255 255
+
 Debug options:
   -r, --raw_output_message
-                        Optional. Output inference results raw values showing
+                        Optional. Output inference results raw values showing.
 ```
 
 Running the application with the empty list of options yields an error message.
