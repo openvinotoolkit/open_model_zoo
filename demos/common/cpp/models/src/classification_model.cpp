@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 
+#include <ngraph/ngraph.hpp>
 #include "models/classification_model.h"
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
@@ -25,22 +26,22 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName, size_
 }
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
-    InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
-    const float *classificationData = outputMapped.as<float*>();
+    InferenceEngine::MemoryBlob::Ptr scoresBlob = infResult.outputsData.find(outputsNames[0])->second;
+    const float* scoresPtr = scoresBlob->rmap().as<float*>();
+    InferenceEngine::MemoryBlob::Ptr indicesBlob = infResult.outputsData.find(outputsNames[1])->second;
+    const int* indicesPtr = indicesBlob->rmap().as<int*>();
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
 
-    std::vector<unsigned> indices(infResult.getFirstOutputBlob()->size());
-    std::iota(std::begin(indices), std::end(indices), 0);
-    std::partial_sort(std::begin(indices), std::begin(indices) + nTop, std::end(indices),
-                    [&classificationData](unsigned l, unsigned r) {
-                        return classificationData[l] > classificationData[r];
-                    });
-    result->topLabels.reserve(nTop);
-    for (size_t i = 0; i < nTop; ++i) {
-        result->topLabels.emplace_back(indices[i], labels[indices[i]]);
+    std::vector<float> conf(scoresPtr, scoresPtr + scoresBlob->size());
+    std::vector<int> indices(indicesPtr, indicesPtr + indicesBlob->size());
+
+    result->topLabels.reserve(scoresBlob->size());
+    for (int i = 0; i < scoresBlob->size(); ++i) {
+        result->topLabels.emplace_back(indicesPtr[i], labels[indices[i]], scoresPtr[i]);
     }
+
     return retVal;
 }
 
@@ -93,8 +94,6 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const InferenceEngine::OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
-
-    outputsNames.push_back(outputsDataMap.begin()->first);
     InferenceEngine::Data& data = *outputsDataMap.begin()->second;
     const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 2 && outSizeVector.size() != 4)
@@ -111,4 +110,43 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
 
     data.setPrecision(InferenceEngine::Precision::FP32);
+
+    // --------------------------- Adding softmax and topK output blobs ---------------------------
+    if (auto ngraphFunction = (cnnNetwork).getFunction()) {
+        auto nodes = ngraphFunction->get_ops();
+        auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
+            [](auto op) { return std::string(op->get_type_name()) == "Softmax"; });
+
+        std::shared_ptr<ngraph::Node> softmaxNode;
+        if (softmaxNodeIt == nodes.end()) {
+            auto logitsNode = ngraphFunction->get_output_op(0)->input(0).get_source_output().get_node();
+            softmaxNode = std::make_shared<ngraph::op::v1::Softmax>(logitsNode->output(0), 1);
+        }
+        else {
+            softmaxNode = *softmaxNodeIt;
+        }
+        const auto k = std::make_shared<ngraph::op::Constant>(ngraph::element::i32, ngraph::Shape{}, std::vector<size_t>{nTop});
+        ngraph::op::v1::TopK::Mode mode = ngraph::op::v1::TopK::Mode::MAX;
+        ngraph::op::v1::TopK::SortType sort = ngraph::op::v1::TopK::SortType::SORT_VALUES;
+        std::shared_ptr<ngraph::Node> topkNode = std::make_shared<ngraph::op::v1::TopK>(softmaxNode, k, 1, mode, sort);
+
+        auto scores = std::make_shared<ngraph::op::Result>(topkNode->output(0));
+        auto indices = std::make_shared<ngraph::op::Result>(topkNode->output(1));
+        std::vector<std::shared_ptr<ngraph::op::v0::Result>> res({ scores, indices });
+        std::shared_ptr<ngraph::Function> f =
+            std::make_shared<ngraph::Function>(res, ngraphFunction->get_parameters(), "classification");
+
+        cnnNetwork = InferenceEngine::CNNNetwork(f);
+        ngraphFunction = cnnNetwork.getFunction();
+
+        for (auto& it : cnnNetwork.getOutputsInfo()) {
+            outputsNames.push_back(it.first);
+        }
+        // outputsNames[0] - scores, outputsNames[1] - indices
+        std::sort(outputsNames.begin(), outputsNames.end());
+    }
+    else {
+        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+    }
+
 }

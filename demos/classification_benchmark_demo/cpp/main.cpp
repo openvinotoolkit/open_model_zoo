@@ -282,12 +282,14 @@ int main(int argc, char *argv[]) {
                     throw std::invalid_argument("Renderer: image provided in metadata is empty");
                 }
                 PredictionResult predictionResult = PredictionResult::Incorrect;
+                std::string label = classificationResult.topLabels.front().label;
                 if (!FLAGS_gt.empty()) {
                     for (size_t i = 0; i < FLAGS_nt; i++) {
-                        unsigned predictedClass = classificationResult.topLabels[i].first;
+                        unsigned predictedClass = classificationResult.topLabels[i].id;
                         if (predictedClass == classificationImageMetaData.groundTruthId) {
                             predictionResult = PredictionResult::Correct;
                             correctPredictionsCount++;
+                            label = classificationResult.topLabels[i].label;
                             break;
                         }
                     }
@@ -295,7 +297,7 @@ int main(int argc, char *argv[]) {
                     predictionResult = PredictionResult::Unknown;
                 }
                 framesNum++;
-                gridMat.updateMat(outputImg, classificationResult.topLabels.front().second, predictionResult);
+                gridMat.updateMat(outputImg, label, predictionResult);
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(metrics, classificationResult.metaData->asRef<ImageMetaData>().timeStamp, accuracy, FLAGS_nt, isTestMode,
                                    !FLAGS_gt.empty(), presenter);
