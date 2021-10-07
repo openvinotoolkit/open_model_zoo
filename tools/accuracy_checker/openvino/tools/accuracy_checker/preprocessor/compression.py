@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ from ..config import NumberField
 from .preprocessor import Preprocessor
 
 
-class Compression(Preprocessor):
+class JPEGCompression(Preprocessor):
     __provider__ = 'jpeg_compression'
 
     @classmethod
