@@ -65,10 +65,10 @@ struct ClassificationResult : public ResultBase {
     struct Classification {
         unsigned int id;
         std::string label;
-        float confidence;
+        float score;
 
-        Classification(unsigned int id, const std::string& label, float confidence) :
-            id(id), label(label), confidence(confidence) {};
+        Classification(unsigned int id, const std::string& label, float score) :
+            id(id), label(label), score(score) {};
     };
 
     std::vector<Classification> topLabels;

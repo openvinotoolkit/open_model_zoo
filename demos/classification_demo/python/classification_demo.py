@@ -103,10 +103,10 @@ def build_argparser():
     return parser
 
 
-def draw_labels(frame, classifications, output_transform, labels):
+def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
-    class_id = classifications[0][0]
-    label_height = cv2.getTextSize(labels[class_id], cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
+    сlass_label = classifications[0][1]
+    label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
     initial_labels_pos =  frame.shape[0] - label_height * (2 * len(classifications) + 1)
 
     if (initial_labels_pos < 0):
@@ -114,8 +114,8 @@ def draw_labels(frame, classifications, output_transform, labels):
         log.warning('Too much labels to display on this frame, some will be omitted')
     offset_y = initial_labels_pos
 
-    for class_id, conf in classifications:
-        label = '{} {:.2f}'.format(labels[class_id], conf)
+    for _, сlass_label, score in classifications:
+        label = '{} {:.2f}'.format(сlass_label, score)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
         offset_y += label_height * 2
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
@@ -123,12 +123,12 @@ def draw_labels(frame, classifications, output_transform, labels):
     return frame
 
 
-def print_raw_results(classifications, frame_id, labels):
-    label_max_len = len(max([labels[cl[0]] for cl in classifications], key=len))
+def print_raw_results(classifications, frame_id):
+    label_max_len = len(max([cl[1] for cl in classifications], key=len))
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
-    for class_id, conf in classifications:
-        log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, labels[class_id], conf, width=label_max_len))
+    for class_id, class_label, score in classifications:
+        log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, class_label, score, width=label_max_len))
 
 
 def main():
@@ -174,11 +174,11 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(classifications) and args.raw_output_message:
-                print_raw_results(classifications, next_frame_id_to_show, model.labels)
+                print_raw_results(classifications, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
-            frame = draw_labels(frame, classifications, output_transform, model.labels)
+            frame = draw_labels(frame, classifications, output_transform)
             if delay or args.no_show:
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
@@ -236,11 +236,11 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(classifications) and args.raw_output_message:
-            print_raw_results(classifications, next_frame_id_to_show, model.labels)
+            print_raw_results(classifications, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
-        frame = draw_labels(frame, classifications, output_transform, model.labels)
+        frame = draw_labels(frame, classifications, output_transform)
         if delay or args.no_show:
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)

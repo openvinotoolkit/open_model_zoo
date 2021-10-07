@@ -80,4 +80,4 @@ class Classification(ImageModel):
     def postprocess(self, outputs, meta):
         scores = outputs[self.out_blob_names[0]].squeeze()
         indices = outputs[self.out_blob_names[1]].squeeze()
-        return list(zip(indices, scores))
+        return list(zip(indices, [self.labels[i] for i in indices], scores))

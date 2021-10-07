@@ -34,12 +34,9 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
 
-    std::vector<float> conf(scoresPtr, scoresPtr + scoresBlob->size());
-    std::vector<int> indices(indicesPtr, indicesPtr + indicesBlob->size());
-
     result->topLabels.reserve(scoresBlob->size());
     for (int i = 0; i < scoresBlob->size(); ++i) {
-        result->topLabels.emplace_back(indicesPtr[i], labels[indices[i]], scoresPtr[i]);
+        result->topLabels.emplace_back(indicesPtr[i], labels[indicesPtr[i]], scoresPtr[i]);
     }
 
     return retVal;
