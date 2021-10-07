@@ -22,19 +22,19 @@ task_type: question_answering
 files:
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1180008
-    sha256: c390d301ebd9d397711bea55e72c3b739edce984e8b1389a17adb5e0d1c19706
+    sha384: c390d301ebd9d397711bea55e72c3b739edce984e8b1389a17adb5e0d1c19706
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41893204
-    sha256: d827a81b21ec7df1d6d22894cc4ffa40acab93513f37a878e57a2ecb1ef72839
+    sha384: d827a81b21ec7df1d6d22894cc4ffa40acab93513f37a878e57a2ecb1ef72839
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1180008
-    sha256: 0eb6f7aa5c8c713ab280d3c773c3a00bb1ab7c1c76eab4099da08577a962961d
+    sha384: 0eb6f7aa5c8c713ab280d3c773c3a00bb1ab7c1c76eab4099da08577a962961d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41736942
-    sha256: 9f0c59a2d272f47bf0bfe7a2e0ba401af2fdc3a45d1f9de0ef19f028db5fc28c
+    sha384: 9f0c59a2d272f47bf0bfe7a2e0ba401af2fdc3a45d1f9de0ef19f028db5fc28c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

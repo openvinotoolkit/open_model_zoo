@@ -19,27 +19,27 @@ task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml
     size: 112650
-    sha256: 822e27d80acb329aff981d702dc9146d50753b91bfce3b2b976383a736d62145
+    sha384: 822e27d80acb329aff981d702dc9146d50753b91bfce3b2b976383a736d62145
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP32/text-recognition-0012.xml
   - name: FP32/text-recognition-0012.bin
     size: 47470852
-    sha256: 45cbfb77ee2d2f4e7b6b4182f48938e12fdb69b87a39586673394412f5316908
+    sha384: 45cbfb77ee2d2f4e7b6b4182f48938e12fdb69b87a39586673394412f5316908
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP32/text-recognition-0012.bin
   - name: FP16/text-recognition-0012.xml
     size: 112618
-    sha256: 5f973ddfba50124b338f064c90ada5eb7f1988833113371db75c025a9cdfde43
+    sha384: 5f973ddfba50124b338f064c90ada5eb7f1988833113371db75c025a9cdfde43
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP16/text-recognition-0012.xml
   - name: FP16/text-recognition-0012.bin
     size: 23735478
-    sha256: 080c4c68b9b47ab02af197c41d16136e61ba43ea086ec92c2d14bb281f0232d4
+    sha384: 080c4c68b9b47ab02af197c41d16136e61ba43ea086ec92c2d14bb281f0232d4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP16/text-recognition-0012.bin
   - name: FP16-INT8/text-recognition-0012.xml
     size: 147892
-    sha256: 90983a9620204d7b2407ecc80d5355cb32bdba1c4e144bea6959a5a8049db571
+    sha384: 90983a9620204d7b2407ecc80d5355cb32bdba1c4e144bea6959a5a8049db571
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
   - name: FP16-INT8/text-recognition-0012.bin
     size: 18217000
-    sha256: 5f17f20ce33f5db58ae4c5b15f27ba4076646ef1a2aad32d97d6bcdc367508f5
+    sha384: 5f17f20ce33f5db58ae4c5b15f27ba4076646ef1a2aad32d97d6bcdc367508f5
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

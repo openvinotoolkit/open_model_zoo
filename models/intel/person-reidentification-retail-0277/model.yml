@@ -18,27 +18,27 @@ task_type: object_attributes
 files:
   - name: FP32/person-reidentification-retail-0277.xml
     size: 573033
-    sha256: 22d6e13c6ba856416e23ab033bfde051c6e89696d21be2a7e98670d90a6140b4
+    sha384: 22d6e13c6ba856416e23ab033bfde051c6e89696d21be2a7e98670d90a6140b4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
   - name: FP32/person-reidentification-retail-0277.bin
     size: 8357560
-    sha256: d3f1959a6c6411ff3b24246f9e4b5c1510a827f3f51fb56143bc8c399853ac92
+    sha384: d3f1959a6c6411ff3b24246f9e4b5c1510a827f3f51fb56143bc8c399853ac92
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
   - name: FP16/person-reidentification-retail-0277.xml
     size: 572915
-    sha256: 6663176b9e908c52e3392b881651fff6ccfea8c7ba2558135134b90c975e92c3
+    sha384: 6663176b9e908c52e3392b881651fff6ccfea8c7ba2558135134b90c975e92c3
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
   - name: FP16/person-reidentification-retail-0277.bin
     size: 4178812
-    sha256: f809b4a16f6105d69eaa8c709894d0103064fe5322c333cde763fcab09d1647e
+    sha384: f809b4a16f6105d69eaa8c709894d0103064fe5322c333cde763fcab09d1647e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
   - name: FP16-INT8/person-reidentification-retail-0277.xml
     size: 1449896
-    sha256: 59514c514b452050939fce539be9aaa2cfc6f76016098ef1a3fc73cb62554fe0
+    sha384: 59514c514b452050939fce539be9aaa2cfc6f76016098ef1a3fc73cb62554fe0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.xml
   - name: FP16-INT8/person-reidentification-retail-0277.bin
     size: 2201582
-    sha256: bd4d2b2d1eec968c2cc2975df417e38b953c542f9ca6326e274e87bf5ad7b2fe
+    sha384: bd4d2b2d1eec968c2cc2975df417e38b953c542f9ca6326e274e87bf5ad7b2fe
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -22,7 +22,7 @@ task_type: object_attributes
 files:
   - name: osnet_ain_x1_0_vehicle_reid.onnx
     size: 8836743
-    sha256: 4aaad3e5db648618b0df3d2ff21c61323985ff9e50194c3d2edd4fb87c92d91f
+    sha384: 4aaad3e5db648618b0df3d2ff21c61323985ff9e50194c3d2edd4fb87c92d91f
     source:
       $type: google_drive
       id: 1MEtaIr_9mWuntGD9edydFl_T5waloNRm

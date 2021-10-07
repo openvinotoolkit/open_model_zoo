@@ -34,11 +34,11 @@ task_type: classification
 files:
   - name: timm-0.4.5-py3-none-any.whl
     size: 287415
-    sha256: 8699f644a60527005db07f31ceffef5349c4d144749e1243733c64220a7d6f92
+    sha384: 8699f644a60527005db07f31ceffef5349c4d144749e1243733c64220a7d6f92
     source: https://files.pythonhosted.org/packages/9e/89/d94f59780b5dd973154bf506d8ce598f6bfe7cc44dd445d644d6d3be8c39/timm-0.4.5-py3-none-any.whl
   - name: dm_nfnet_f0-604f9c3a.pth
     size: 285993610
-    sha256: 604f9c3a436da9ef5652b7d940efc40c026015552a0fda759acf6ba7e386cfae
+    sha384: 604f9c3a436da9ef5652b7d940efc40c026015552a0fda759acf6ba7e386cfae
     source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-dnf-weights/dm_nfnet_f0-604f9c3a.pth
 postprocessing:
   - $type: unpack_archive

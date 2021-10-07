@@ -19,7 +19,7 @@ task_type: instance_segmentation
 files:
   - name: mask_rcnn_resnet101_atrous_coco_2018_01_28.tar.gz
     size: 661899639
-    sha256: 67ac8d5f0974753e9a5b04d36376e20b3be55b5dcd6ce43bc25aed6c5583709d
+    sha384: 67ac8d5f0974753e9a5b04d36376e20b3be55b5dcd6ce43bc25aed6c5583709d
     source: http://download.tensorflow.org/models/object_detection/mask_rcnn_resnet101_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a02_resnet-26_alpha-0.250.tar
     size: 64256000
-    sha256: 29fba1f4f421f86bebcc5bd99c0d1936c20c63b3e5bb20b48665106469bd54b0
+    sha384: 29fba1f4f421f86bebcc5bd99c0d1936c20c63b3e5bb20b48665106469bd54b0
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a02_resnet-26_alpha-0.250.tar
 postprocessing:
   - $type: unpack_archive

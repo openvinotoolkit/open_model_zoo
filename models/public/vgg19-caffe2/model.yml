@@ -20,11 +20,11 @@ task_type: classification
 files:
   - name: predict_net.pb
     size: 2862
-    sha256: ebb8608fe80ee8bce096a60ecf3e6e8442eb118aaa0fa77d5d58b5dcff7dfb5f
+    sha384: ebb8608fe80ee8bce096a60ecf3e6e8442eb118aaa0fa77d5d58b5dcff7dfb5f
     source: https://s3.amazonaws.com/download.caffe2.ai/models/vgg19/predict_net.pb
   - name: init_net.pb
     size: 718338501
-    sha256: 492dbbbc7dd23cb052c66964714759f88370f3fa8542aa32556e93abc7beb69f
+    sha384: 492dbbbc7dd23cb052c66964714759f88370f3fa8542aa32556e93abc7beb69f
     source: https://s3.amazonaws.com/download.caffe2.ai/models/vgg19/init_net.pb
 framework: caffe2
 quantizable: yes

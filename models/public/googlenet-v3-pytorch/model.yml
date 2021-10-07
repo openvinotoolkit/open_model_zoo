@@ -26,7 +26,7 @@ description: >-
 task_type: classification
 files:
   - name: inception_v3_google-1a9a5a14.pth
-    sha256: 1a9a5a14f40645a370184bd54f4e8e631351e71399112b43ad0294a79da290c8
+    sha384: 1a9a5a14f40645a370184bd54f4e8e631351e71399112b43ad0294a79da290c8
     size: 108857766
     source: https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth
 framework: pytorch

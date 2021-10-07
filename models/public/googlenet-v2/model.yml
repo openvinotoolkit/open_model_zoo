@@ -28,11 +28,11 @@ task_type: classification
 files:
   - name: googlenet-v2.prototxt
     size: 60274
-    sha256: 18c77f01cca83c4cee973bfd8739968210dd6a1e5af1b857faaec230c5aa7d5a
+    sha384: 18c77f01cca83c4cee973bfd8739968210dd6a1e5af1b857faaec230c5aa7d5a
     source: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/d19caf526b7d8cad873ff91ba4cea602eadd58b3/deploy.prototxt
   - name: googlenet-v2.caffemodel
     size: 64445495
-    sha256: c6581a8e60e5ae8962183ff019986fc9dfacc5e5bd5247d76a0ff7fae8e0409a
+    sha384: c6581a8e60e5ae8962183ff019986fc9dfacc5e5bd5247d76a0ff7fae8e0409a
     source: https://github.com/lim0606/caffe-googlenet-bn/raw/d19caf526b7d8cad873ff91ba4cea602eadd58b3/snapshots/googlenet_bn_stepsize_6400_iter_1200000.caffemodel
 postprocessing:
   - $type: regex_replace

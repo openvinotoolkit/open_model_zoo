@@ -20,7 +20,7 @@ task_type: detection
 files:
   - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
     size: 51025348
-    sha256: 542445cce834dbfbb7df1991425d475e85a2d7ec68c60a4f262bb18aac10c8b2
+    sha384: 542445cce834dbfbb7df1991425d475e85a2d7ec68c60a4f262bb18aac10c8b2
     source: http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
 postprocessing:
   - $type: unpack_archive

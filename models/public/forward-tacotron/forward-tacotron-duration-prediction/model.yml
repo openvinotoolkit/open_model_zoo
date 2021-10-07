@@ -18,7 +18,7 @@ task_type: text_to_speech
 files:
   - name: forward-tacotron-duration-prediction.zip
     size: 54840281
-    sha256: bab718d6bb997f7b0dd807f98647cd8958cf9b811571301a34865a623af25bb1
+    sha384: bab718d6bb997f7b0dd807f98647cd8958cf9b811571301a34865a623af25bb1
     source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-duration-prediction.zip
 postprocessing:
   - $type: unpack_archive

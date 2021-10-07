@@ -19,27 +19,27 @@ task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-1040.xml
     size: 980908
-    sha256: 97882cb3da405b5dd380f66b969827a407e05635b8f88ef9a0792be9af85a6f2
+    sha384: 97882cb3da405b5dd380f66b969827a407e05635b8f88ef9a0792be9af85a6f2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.xml
   - name: FP32/instance-segmentation-security-1040.bin
     size: 52969864
-    sha256: 3a64d4c321c7e9b490ea7b8d19f8143b1d521fe370a15f299de39de066429b3f
+    sha384: 3a64d4c321c7e9b490ea7b8d19f8143b1d521fe370a15f299de39de066429b3f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.bin
   - name: FP16/instance-segmentation-security-1040.xml
     size: 980828
-    sha256: ff775aa45411b231ae41e37bfed78c08b0feba9ace0349c8a594269025b42ef3
+    sha384: ff775aa45411b231ae41e37bfed78c08b0feba9ace0349c8a594269025b42ef3
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.xml
   - name: FP16/instance-segmentation-security-1040.bin
     size: 26485214
-    sha256: 914e5804012e6769d335f5e9c9242959634bb29d4762307425192d52ec5a671a
+    sha384: 914e5804012e6769d335f5e9c9242959634bb29d4762307425192d52ec5a671a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.bin
   - name: FP16-INT8/instance-segmentation-security-1040.xml
     size: 1688757
-    sha256: 644ef1e88d23e8f947592d897d454a38d3830d50647e6be79c0724273ced487d
+    sha384: 644ef1e88d23e8f947592d897d454a38d3830d50647e6be79c0724273ced487d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.xml
   - name: FP16-INT8/instance-segmentation-security-1040.bin
     size: 21614048
-    sha256: 6230484885fcbf0b181cdcca989b9c8d7377ba24c44f366ebe098c87544f72aa
+    sha384: 6230484885fcbf0b181cdcca989b9c8d7377ba24c44f366ebe098c87544f72aa
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -22,21 +22,21 @@ task_type: detection
 files:
   - name: ctdet_coco_dlav0_1x.pth
     size: 221889662
-    sha256: 23a4ff7102c47c427bc1f24cec2059b8d837a0253363978d467a70e643b699d3
+    sha384: 23a4ff7102c47c427bc1f24cec2059b8d837a0253363978d467a70e643b699d3
     source:
       $type: google_drive
       id: 18yBxWOlhTo32_swSug_HM4q3BeWgxp_N
   - name: CenterNet/src/lib/models/model.py
     size: 3415
-    sha256: 29f17e75eb1fb3f6a9f5ca632922bcf932b1f6c63732eb1cdd043b5f8f849d30
+    sha384: 29f17e75eb1fb3f6a9f5ca632922bcf932b1f6c63732eb1cdd043b5f8f849d30
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/models/model.py
   - name: CenterNet/src/lib/models/networks/dlav0.py
     size: 22682
-    sha256: 44abd35b6e37fad46c4626d9eb0f5ea29f7b0ef539bd21e685f70e6e89fb398e
+    sha384: 44abd35b6e37fad46c4626d9eb0f5ea29f7b0ef539bd21e685f70e6e89fb398e
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/models/networks/dlav0.py
   - name: CenterNet/src/lib/opts.py
     size: 18696
-    sha256: 71a7cdc93eb3a9520a1b23a69e5166cff56b45300f162608cb4eeb77ba1116ec
+    sha384: 71a7cdc93eb3a9520a1b23a69e5166cff56b45300f162608cb4eeb77ba1116ec
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/opts.py
 postprocessing:
   # disable imports and usages of components we don't need

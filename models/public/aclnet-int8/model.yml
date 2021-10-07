@@ -28,7 +28,7 @@ task_type: sound_classification
 files:
   - name: aclnet_des_53_int8.onnx
     size: 10988855
-    sha256: 3a4b57b62616a1b3cb2a220b21e1a3c520371d84d3f884df721677dcaefbd1c5
+    sha384: 3a4b57b62616a1b3cb2a220b21e1a3c520371d84d3f884df721677dcaefbd1c5
     source: https://storage.openvinotoolkit.org/models_contrib/sound_classification/aclnet/2021-02-04/aclnet_des_53_int8.onnx
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]

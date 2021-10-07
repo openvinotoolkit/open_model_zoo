@@ -22,7 +22,7 @@ task_type: classification
 files:
   - name: efficientnet-b5.tar.gz
     size: 255918080
-    sha256: 088c222266c64608da87d8730b3f5bf22da7677fd128357d8040a0389aab338e
+    sha384: 088c222266c64608da87d8730b3f5bf22da7677fd128357d8040a0389aab338e
     source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckpts/efficientnet-b5.tar.gz
 postprocessing:
   - $type: unpack_archive

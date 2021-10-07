@@ -19,11 +19,11 @@ task_type: detection
 files:
   - name: faceboxes.py
     size: 4999
-    sha256: dadc02f4324565999f19affcdb26456b854b6ddbcba3892262fbee18b783c874
+    sha384: dadc02f4324565999f19affcdb26456b854b6ddbcba3892262fbee18b783c874
     source: https://raw.githubusercontent.com/zisianw/FaceBoxes.PyTorch/ab8478c22627690899114950cae27f8093424c95/models/faceboxes.py
   - name: FaceBoxesProd.pth
     size: 4072492
-    sha256: c0cb2b1e40710c0aa5fc32a8759b1496a0fe0a126c907ca0ffe35b4bd0709d09
+    sha384: c0cb2b1e40710c0aa5fc32a8759b1496a0fe0a126c907ca0ffe35b4bd0709d09
     source:
       $type: google_drive
       id: 1tRVwOlu0QtjvADQ2H7vqrRwsWEmaqioI

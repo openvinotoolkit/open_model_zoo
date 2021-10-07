@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a07_resnext-101_32x4d_alpha-0.250.tar
     size: 177950720
-    sha256: 00c2c7d7048eb0c07509414b4aff845cd1cc6f92b8414a2837b2344e6c6400d3
+    sha384: 00c2c7d7048eb0c07509414b4aff845cd1cc6f92b8414a2837b2344e6c6400d3
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a07_resnext-101_32x4d_alpha-0.250.tar
 postprocessing:
   - $type: unpack_archive

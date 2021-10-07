@@ -22,7 +22,7 @@ task_type: classification
 files:
   - name: anti-spoof-mn3.onnx
     size: 12270179
-    sha256: c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262
+    sha384: c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262
     source:
       $type: google_drive
       id: 1KmM2vwGBuKxy7RE9hz1m5D0yyh2N9Amo

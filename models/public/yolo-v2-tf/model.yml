@@ -21,7 +21,7 @@ task_type: detection
 files:
   - name: yolo-v2.pb
     size: 203970473
-    sha256: 37163e414a912ecc44ebdcf40ff172c748cfb08264141eadad1fdaf3f96ba369
+    sha384: 37163e414a912ecc44ebdcf40ff172c748cfb08264141eadad1fdaf3f96ba369
     source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
 model_optimizer_args:
   - --input_shape=[1,608,608,3]

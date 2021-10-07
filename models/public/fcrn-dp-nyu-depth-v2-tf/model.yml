@@ -24,7 +24,7 @@ framework: tf
 files:
   - name: NYU_FCRN-checkpoint.zip
     size: 472588519
-    sha256: 9d97ed165c4a5b3f085eb83b8814de1e883c6348da60da4b2568ddd64bb2d5c4
+    sha384: 9d97ed165c4a5b3f085eb83b8814de1e883c6348da60da4b2568ddd64bb2d5c4
     source: http://campar.in.tum.de/files/rupprecht/depthpred/NYU_FCRN-checkpoint.zip
 postprocessing:
   - $type: unpack_archive

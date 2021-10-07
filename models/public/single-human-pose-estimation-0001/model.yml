@@ -17,7 +17,7 @@ description: >-
 task_type: human_pose_estimation
 files:
   - name: single-human-pose-estimation-0001.tar.gz
-    sha256: 182c51075502643ada303a5f3a081b6adf943b711e5eddf80635582369588d34
+    sha384: 182c51075502643ada303a5f3a081b6adf943b711e5eddf80635582369588d34
     size: 151979155
     source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.tar.gz
 postprocessing:

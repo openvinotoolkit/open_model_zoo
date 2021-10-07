@@ -19,7 +19,7 @@ task_type: optical_character_recognition
 files:
   - name: license-plate-recognition-barrier-0007.tar.gz
     size: 20821887
-    sha256: 6c0b8651f0eead6de43e07491fd41809a4a7da141f1b5002dfd8dd207bdb1018
+    sha384: 6c0b8651f0eead6de43e07491fd41809a4a7da141f1b5002dfd8dd207bdb1018
     source: https://download.01.org/openvinotoolkit/training_toolbox_tensorflow/models/lpr/chinese_lp/license-plate-recognition-barrier-0007.tar.gz
 postprocessing:
   - $type: unpack_archive

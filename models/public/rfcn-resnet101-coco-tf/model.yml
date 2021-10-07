@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: rfcn_resnet101_coco_2018_01_28.tar.gz
     size: 652955004
-    sha256: e10d71260515cc0240d53ea8fc9e61669bc10c2df5e67ace682832113ac17205
+    sha384: e10d71260515cc0240d53ea8fc9e61669bc10c2df5e67ace682832113ac17205
     source: http://download.tensorflow.org/models/object_detection/rfcn_resnet101_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

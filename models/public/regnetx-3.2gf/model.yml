@@ -23,59 +23,59 @@ task_type: classification
 files:
   - name: configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
     size: 362
-    sha256: 166491e53c668ecc181692dde27221b4358f1b889e7726396690c24547e53f5f
+    sha384: 166491e53c668ecc181692dde27221b4358f1b889e7726396690c24547e53f5f
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
   - name: pycls/__init__.py
     size: 0
-    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    sha384: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/__init__.py
   - name: pycls/core/__init__.py
     size: 0
-    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    sha384: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/__init__.py
   - name: pycls/core/checkpoint.py
     size: 3497
-    sha256: 4b2e2221b17cc50e93c4f952fe447de419dbd605429ffb5cade44322a66bc019
+    sha384: 4b2e2221b17cc50e93c4f952fe447de419dbd605429ffb5cade44322a66bc019
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/checkpoint.py
   - name: pycls/core/net.py
     size: 3924
-    sha256: 40f39e68d462d9d001177a54966d8f63f8ebd9172e70df1916841119442b0f0a
+    sha384: 40f39e68d462d9d001177a54966d8f63f8ebd9172e70df1916841119442b0f0a
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/net.py
   - name: pycls/core/distributed.py
     size: 5410
-    sha256: a56e582f13999f1ec48413abad6538199389997c2e0fa9e1ea2189cbffe598ab
+    sha384: a56e582f13999f1ec48413abad6538199389997c2e0fa9e1ea2189cbffe598ab
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/distributed.py
   - name: pycls/core/config.py
     size: 10502
-    sha256: 88262db4930481b217baa9469ac347e49255866e010c3721a2b0dacd25d7af50
+    sha384: 88262db4930481b217baa9469ac347e49255866e010c3721a2b0dacd25d7af50
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/config.py
   - name: pycls/core/io.py
     size: 2603
-    sha256: c1e5463515448b26b3d946b0ae2d09dd25d79b4d77a64c7b6e06c5ff4423cc2b
+    sha384: c1e5463515448b26b3d946b0ae2d09dd25d79b4d77a64c7b6e06c5ff4423cc2b
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/io.py
   - name: pycls/models/__init__.py
     size: 317
-    sha256: d6ec4228397f264cad1b2731620a17f5c7e5312dde6ae38c5d2168c4e287c063
+    sha384: d6ec4228397f264cad1b2731620a17f5c7e5312dde6ae38c5d2168c4e287c063
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/__init__.py
   - name: pycls/models/blocks.py
     size: 6752
-    sha256: af87685d354323f7c8762f0682573e7b43b6e19d242f5f43d1d20eeadb4321cd
+    sha384: af87685d354323f7c8762f0682573e7b43b6e19d242f5f43d1d20eeadb4321cd
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/blocks.py
   - name: pycls/models/anynet.py
     size: 11457
-    sha256: 93c69e0983e7020e2b14cf03b97f50d7c54cde3036bd5c7edd17367e5c1b32b5
+    sha384: 93c69e0983e7020e2b14cf03b97f50d7c54cde3036bd5c7edd17367e5c1b32b5
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/anynet.py
   - name: pycls/models/regnet.py
     size: 2602
-    sha256: 3204c754001e69acbc127feef56099fc4bc9a38852a198a70d577a5f079276c2
+    sha384: 3204c754001e69acbc127feef56099fc4bc9a38852a198a70d577a5f079276c2
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/regnet.py
   - name: pycls/models/model_zoo.py
     size: 8982
-    sha256: 1e7298b43cb21a2843b163f9861393b9fafc1e5104a3ed892dff6fe22ea45d3b
+    sha384: 1e7298b43cb21a2843b163f9861393b9fafc1e5104a3ed892dff6fe22ea45d3b
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/model_zoo.py
   - name: ckpt/regnetx-3.2gf.pyth
     size: 122749825
-    sha256: 371c9802319a59857ec9829890963f704436b170921ce88e6d3eb1ba4fe6ee2c
+    sha384: 371c9802319a59857ec9829890963f704436b170921ce88e6d3eb1ba4fe6ee2c
     source: https://dl.fbaipublicfiles.com/pycls/dds_baselines/160906139/RegNetX-3.2GF_dds_8gpu.pyth
 postprocessing:
   - $type: regex_replace

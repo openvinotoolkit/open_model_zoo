@@ -18,27 +18,27 @@ task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1033.xml
     size: 57397
-    sha256: d8bcb26ba2d6bf5065ad78aa177c40a4383ff64ec0c4445c33c16f927b5721c7
+    sha384: d8bcb26ba2d6bf5065ad78aa177c40a4383ff64ec0c4445c33c16f927b5721c7
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
   - name: FP32/single-image-super-resolution-1033.bin
     size: 121780
-    sha256: ba6247c93395bc0649986f28dec0c745d543afcf667c732877b712e05564fb16
+    sha384: ba6247c93395bc0649986f28dec0c745d543afcf667c732877b712e05564fb16
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
   - name: FP16/single-image-super-resolution-1033.xml
     size: 57354
-    sha256: 3c54e36dc59dfe97738b85fc3d8070edf5ff244aa607f0a5a39a2d6b58c96759
+    sha384: 3c54e36dc59dfe97738b85fc3d8070edf5ff244aa607f0a5a39a2d6b58c96759
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
   - name: FP16/single-image-super-resolution-1033.bin
     size: 60938
-    sha256: 9a9d5a8cbd9520e4c282600feea95b31228d7de9716e8807acb53c572bd9cd31
+    sha384: 9a9d5a8cbd9520e4c282600feea95b31228d7de9716e8807acb53c572bd9cd31
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
   - name: FP16-INT8/single-image-super-resolution-1033.xml
     size: 139173
-    sha256: 61d300cfc847d40fdeb8faeef7a6ab8f845872c5ae0d69e6ae37cd038a029ffd
+    sha384: 61d300cfc847d40fdeb8faeef7a6ab8f845872c5ae0d69e6ae37cd038a029ffd
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
   - name: FP16-INT8/single-image-super-resolution-1033.bin
     size: 31672
-    sha256: 375b9854f11a4a9a51dd9b0a7081fca9e9009ea019ad9a96c7df592fc58f7505
+    sha384: 375b9854f11a4a9a51dd9b0a7081fca9e9009ea019ad9a96c7df592fc58f7505
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

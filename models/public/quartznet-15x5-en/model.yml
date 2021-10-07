@@ -23,15 +23,15 @@ task_type: speech_recognition
 files:
   - name: models/ruamel.yaml-0.17.2-py3-none-any.whl
     size: 101631
-    sha256: 0850def9ebca23b3a8c64c4b4115ebb6b364a10d49f89d289a26ee965e1e7d9d
+    sha384: 0850def9ebca23b3a8c64c4b4115ebb6b364a10d49f89d289a26ee965e1e7d9d
     source: https://files.pythonhosted.org/packages/82/b8/d5bc68c849d0a60b1acb3ad20fec5d23534733701f5db6b2cc029076bf72/ruamel.yaml-0.17.2-py3-none-any.whl
   - name: models/nemo_toolkit-0.11.0-py3-none-any.whl
     size: 622593
-    sha256: 627a14093d22e538b4e6962ebfd43ce4479a1f5710e54e96623762ebd8140fce
+    sha384: 627a14093d22e538b4e6962ebfd43ce4479a1f5710e54e96623762ebd8140fce
     source: https://files.pythonhosted.org/packages/70/68/7392874cb5fcb8a0317671a03a7b7f51cf7f2648614ef2546fc0f00726bc/nemo_toolkit-0.11.0-py3-none-any.whl
   - name: models/QuartzNet15x5-En-Base.nemo
     size: 71083664
-    sha256: 99020d0d844054c467f8107e1c6fb77db5cd4c5a0499b577031e62095e391082
+    sha384: 99020d0d844054c467f8107e1c6fb77db5cd4c5a0499b577031e62095e391082
     source: https://api.ngc.nvidia.com/v2/models/nvidia/multidataset_quartznet15x5/versions/2/files/QuartzNet15x5-En-Base.nemo
 postprocessing:
   - $type: unpack_archive

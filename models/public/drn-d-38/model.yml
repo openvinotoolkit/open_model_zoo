@@ -29,17 +29,17 @@ task_type: semantic_segmentation
 files:
   - name: drn_d_38_cityscapes.pth
     size: 104117210
-    sha256: 2d237561233af3fb36042686be54784c49a36c21159c7ecc7fbd7910f37ca8fa
+    sha384: 2d237561233af3fb36042686be54784c49a36c21159c7ecc7fbd7910f37ca8fa
     source:
       $type: google_drive
       id: 0B_4LoEXGO1TwT3g5SGtrVGRSYkU
   - name: models/drn.py
     size: 14175
-    sha256: debb567a8563100aff203196b2efebeb2e5366f7e5848c4c17b568b3fb044ff1
+    sha384: debb567a8563100aff203196b2efebeb2e5366f7e5848c4c17b568b3fb044ff1
     source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/drn.py
   - name: models/segment.py
     size: 26909
-    sha256: e39099d6bb2303240e3a2f5bd9ac753456b0d5dd2b96aae94db14a478f0504f3
+    sha384: e39099d6bb2303240e3a2f5bd9ac753456b0d5dd2b96aae94db14a478f0504f3
     source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/segment.py
 postprocessing:
   - $type: regex_replace

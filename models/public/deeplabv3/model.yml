@@ -19,7 +19,7 @@ task_type: semantic_segmentation
 files:
   - name: deeplabv3.tar.gz
     size: 23882985
-    sha256: cd506941e4f88fd053903913761df2e76ea00c01079cecfd35855304a4a5fb48
+    sha384: cd506941e4f88fd053903913761df2e76ea00c01079cecfd35855304a4a5fb48
     source: http://download.tensorflow.org/models/deeplabv3_mnv2_pascal_train_aug_2018_01_29.tar.gz
 postprocessing:
   - $type: unpack_archive

@@ -21,7 +21,7 @@ task_type: detection
 files:
   - name: pelee_coco.tar.gz
     size: 22501897
-    sha256: 7718e47fd0838faad6db5c79d7480cd20b9e80b1f6be39b8fcfb10c64c814122
+    sha384: 7718e47fd0838faad6db5c79d7480cd20b9e80b1f6be39b8fcfb10c64c814122
     source:
       $type: google_drive
       id: 1NXfmytr_55Njg8h6MXVflo3-tvhxYdm8

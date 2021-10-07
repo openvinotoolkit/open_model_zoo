@@ -18,19 +18,19 @@ task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
     size: 243387
-    sha256: 144c78e8208a4cc3f25af857854bc46baade92ae39743a8eb787829a7875387c
+    sha384: 144c78e8208a4cc3f25af857854bc46baade92ae39743a8eb787829a7875387c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
     size: 22112984
-    sha256: e1b2cd17644699369284e7a0c6113b0ae1d6411ddca6ceba2423a4cbe139072c
+    sha384: e1b2cd17644699369284e7a0c6113b0ae1d6411ddca6ceba2423a4cbe139072c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
     size: 243288
-    sha256: 47d990e905281145cb8ad8f308d8033067d84b54181c4041afab7b255c8c0940
+    sha384: 47d990e905281145cb8ad8f308d8033067d84b54181c4041afab7b255c8c0940
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
     size: 12348792
-    sha256: fcc76148a770e81bfbb3c2af30397ee54a52532bdbc97c3bd5a29e9f7836ba58
+    sha384: fcc76148a770e81bfbb3c2af30397ee54a52532bdbc97c3bd5a29e9f7836ba58
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

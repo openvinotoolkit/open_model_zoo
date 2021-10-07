@@ -26,19 +26,19 @@ task_type: monocular_depth_estimation
 files:
   - name: models/midas_net.py
     size: 2662
-    sha256: 0bf2e5295b69b3af9adafaf97e154186d29a808325435440aa68c7aa4d25f753
+    sha384: 0bf2e5295b69b3af9adafaf97e154186d29a808325435440aa68c7aa4d25f753
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/midas_net.py
   - name: models/base_model.py
     size: 355
-    sha256: a05c91a037f85ebc07f39b269f0784df577c25fb46f84b27b5fcbbd1e44236ff
+    sha384: a05c91a037f85ebc07f39b269f0784df577c25fb46f84b27b5fcbbd1e44236ff
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/base_model.py
   - name: models/blocks.py
     size: 3596
-    sha256: ba87812d0b5b247966471511d2d1a47fd6f492afb372bc49af6de3a46f4cf6c7
+    sha384: ba87812d0b5b247966471511d2d1a47fd6f492afb372bc49af6de3a46f4cf6c7
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/blocks.py
   - name: model.pt
     size: 422509849
-    sha256: 933c46ec14e4041122852d8d0acf822ff9f4b94fd07f0ff42fa593f135d57cab
+    sha384: 933c46ec14e4041122852d8d0acf822ff9f4b94fd07f0ff42fa593f135d57cab
     source: https://github.com/intel-isl/MiDaS/releases/download/v2_1/model-openvino.pt
 framework: pytorch
 postprocessing:

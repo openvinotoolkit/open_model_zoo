@@ -18,7 +18,7 @@ task_type: text_to_speech
 files:
   - name: wavernn-upsampler.zip
     size: 1496559
-    sha256: f6f3982f785ab2d78a30d8c08fef952c2bfaa89a835c15cd7c27798ff0b6d2c9
+    sha384: f6f3982f785ab2d78a30d8c08fef952c2bfaa89a835c15cd7c27798ff0b6d2c9
     source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-upsampler.zip
 postprocessing:
   - $type: unpack_archive

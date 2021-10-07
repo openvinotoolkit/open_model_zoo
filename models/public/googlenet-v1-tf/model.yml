@@ -21,27 +21,27 @@ task_type: classification
 files:
   - name: inception_v1_2016_08_28.tar.gz
     size: 24642554
-    sha256: 7a620c430fcaba8f8f716241f5148c4c47c035cce4e49ef02cfbe6cd1adf96a6
+    sha384: 7a620c430fcaba8f8f716241f5148c4c47c035cce4e49ef02cfbe6cd1adf96a6
     source: http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz
   - name: models/research/slim/nets/inception.py
     size: 1676
-    sha256: 626dc8ed0bd747d9f523062bdb0301b9740a4a31363c1601c9157834ac4ea3e9
+    sha384: 626dc8ed0bd747d9f523062bdb0301b9740a4a31363c1601c9157834ac4ea3e9
     source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception.py
   - name: models/research/slim/nets/inception_utils.py
     size: 3079
-    sha256: 746d308f90dd3feae2b46298bcc64a836a999c617e10523310416ce6ec275659
+    sha384: 746d308f90dd3feae2b46298bcc64a836a999c617e10523310416ce6ec275659
     source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_utils.py
   - name: models/research/slim/nets/inception_v1.py
     size: 16875
-    sha256: af1613056b50df10da13be66a859c35d72886facd07d175be47ccd5c9380a8ce
+    sha384: af1613056b50df10da13be66a859c35d72886facd07d175be47ccd5c9380a8ce
     source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_v1.py
   - name: models/research/slim/nets/nets_factory.py
     size: 7253
-    sha256: ec4ea091ece9ad0f89fdc1da05397ae0a0be7c46ebefa02834d59a5c908d426a
+    sha384: ec4ea091ece9ad0f89fdc1da05397ae0a0be7c46ebefa02834d59a5c908d426a
     source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/nets_factory.py
   - name: models/research/slim/tf_slim-1.1.0-py2.py3-none-any.whl
     size: 352133
-    sha256: fa2bab63b3925bd42601102e7f178dce997f525742596bf404fa8a6918e146ff
+    sha384: fa2bab63b3925bd42601102e7f178dce997f525742596bf404fa8a6918e146ff
     source: https://files.pythonhosted.org/packages/02/97/b0f4a64df018ca018cc035d44f2ef08f91e2e8aa67271f6f19633a015ff7/tf_slim-1.1.0-py2.py3-none-any.whl
 postprocessing:
   - $type: unpack_archive

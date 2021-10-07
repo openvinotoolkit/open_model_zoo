@@ -19,19 +19,19 @@ task_type: question_answering
 files:
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
     size: 1316805
-    sha256: 5ce4824e65eee791a0a791c622f4f06c2e5e7a46b4b04ac2f579f5c34f885610
+    sha384: 5ce4824e65eee791a0a791c622f4f06c2e5e7a46b4b04ac2f579f5c34f885610
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 1336377584
-    sha256: fd0c0d26f5de9cd300ed645c6e7b665bb2df92dc24c23f8218ab9c73e4cb9576
+    sha384: fd0c0d26f5de9cd300ed645c6e7b665bb2df92dc24c23f8218ab9c73e4cb9576
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
     size: 1315563
-    sha256: f5476f3bbf8ae1d8abffa01b631d0cda9860aa03c7e3a4a1818e64c6099d1312
+    sha384: f5476f3bbf8ae1d8abffa01b631d0cda9860aa03c7e3a4a1818e64c6099d1312
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 668188872
-    sha256: 4dd70583d1f0d2bdfd230da38111164bf04ce570731174b2b3b4906b99307a56
+    sha384: 4dd70583d1f0d2bdfd230da38111164bf04ce570731174b2b3b4906b99307a56
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a06_resnet-101_alpha-0.125.tar
     size: 179302400
-    sha256: 28fe5741d60232fa303292c632f8665cb10ed2f7c32617dae575bad14d4ac45a
+    sha384: 28fe5741d60232fa303292c632f8665cb10ed2f7c32617dae575bad14d4ac45a
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a06_resnet-101_alpha-0.125.tar
 postprocessing:
   - $type: unpack_archive

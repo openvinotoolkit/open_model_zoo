@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/vehicle-license-plate-detection-barrier-0106.xml
     size: 242320
-    sha256: 74fecd516d990371613330e4386d66879c7fbb445e45a6abeb043f022f323a45
+    sha384: 74fecd516d990371613330e4386d66879c7fbb445e45a6abeb043f022f323a45
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP32/vehicle-license-plate-detection-barrier-0106.bin
     size: 2573373
-    sha256: 7b19141e631acd08b16d5940144343d4afeae66c13f9daeb2cd3215ece6cfba0
+    sha384: 7b19141e631acd08b16d5940144343d4afeae66c13f9daeb2cd3215ece6cfba0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
   - name: FP16/vehicle-license-plate-detection-barrier-0106.xml
     size: 242253
-    sha256: 8177274a661f4e4e250828e9adaf5b48d23c033afb792b9c3fc6e051b0dbeb6e
+    sha384: 8177274a661f4e4e250828e9adaf5b48d23c033afb792b9c3fc6e051b0dbeb6e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP16/vehicle-license-plate-detection-barrier-0106.bin
     size: 1286755
-    sha256: 81ebfad23ceb6cb366a9b8bb44666c2ab2cb8366ca029c56f8c12b2fb5a2e14e
+    sha384: 81ebfad23ceb6cb366a9b8bb44666c2ab2cb8366ca029c56f8c12b2fb5a2e14e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
   - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
     size: 565981
-    sha256: afe6eca7bd5506f2bc81506de459cb2c25cfd774e2fa052d8177d88df05155df
+    sha384: afe6eca7bd5506f2bc81506de459cb2c25cfd774e2fa052d8177d88df05155df
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
     size: 693931
-    sha256: 94bf328341b7dade027a702ae30427604b4c64bd176284c207e4437752c8c5e4
+    sha384: 94bf328341b7dade027a702ae30427604b4c64bd176284c207e4437752c8c5e4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

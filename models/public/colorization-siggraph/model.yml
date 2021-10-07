@@ -25,19 +25,19 @@ task_type: colorization
 files:
   - name: ckpt/colorization-siggraph.pth
     size: 136787426
-    sha256: df00044c0a4d7c3edcecf6f75437ce346a66e7a42612d9b968e1a7e17dbc6f66
+    sha384: df00044c0a4d7c3edcecf6f75437ce346a66e7a42612d9b968e1a7e17dbc6f66
     source: https://colorizers.s3.us-east-2.amazonaws.com/siggraph17-df00044c.pth
   - name: model/__init__.py
     size: 96
-    sha256: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
+    sha384: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
   - name: model/base_color.py
     size: 454
-    sha256: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
+    sha384: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
   - name: model/siggraph17.py
     size: 7339
-    sha256: c78e3f2af8dd13d5fb7a9c7fc95f580f728f86a183b5ad2e12f6a48b282511bd
+    sha384: c78e3f2af8dd13d5fb7a9c7fc95f580f728f86a183b5ad2e12f6a48b282511bd
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/siggraph17.py
 postprocessing:
   - $type: regex_replace

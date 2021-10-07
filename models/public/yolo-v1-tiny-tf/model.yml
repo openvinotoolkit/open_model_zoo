@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: yolo-v1-tiny.pb
     size: 63501195
-    sha256: b0643910184ea5efbb93f708339eee3e0bc8c9c6b8bf67d51c5cfc32f329a507
+    sha384: b0643910184ea5efbb93f708339eee3e0bc8c9c6b8bf67d51c5cfc32f329a507
     source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v1/saved_model.pb
 model_optimizer_args:
   - --input_shape=[1,416,416,3]

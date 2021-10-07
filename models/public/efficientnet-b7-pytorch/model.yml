@@ -30,27 +30,27 @@ task_type: classification
 files:
   - name: model/gen_efficientnet.py
     size: 40997
-    sha256: 8613d48ca74611d3566d8c02cbf7c92aad6b16a708ffcf21183a7014fecdec09
+    sha384: 8613d48ca74611d3566d8c02cbf7c92aad6b16a708ffcf21183a7014fecdec09
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/gen_efficientnet.py
   - name: model/efficientnet_builder.py
     size: 18446
-    sha256: 69bb2adc49dc79c8860f36acca910bad6733e23b46ed80551248b90141d5e1b5
+    sha384: 69bb2adc49dc79c8860f36acca910bad6733e23b46ed80551248b90141d5e1b5
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/efficientnet_builder.py
   - name: model/helpers.py
     size: 1097
-    sha256: 0415f198b8a87cb34c9f9aed79f267043010fbd197e27df805bab9d070da82ed
+    sha384: 0415f198b8a87cb34c9f9aed79f267043010fbd197e27df805bab9d070da82ed
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/helpers.py
   - name: model/conv2d_helpers.py
     size: 6175
-    sha256: e6ba7e878dd28c6d0ccc9707205bf6b58bea664d7fee820d7101a6a8e48990a9
+    sha384: e6ba7e878dd28c6d0ccc9707205bf6b58bea664d7fee820d7101a6a8e48990a9
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/conv2d_helpers.py
   - name: model/__init__.py
     size: 32
-    sha256: e0bedda5f5e949b8ace7d4f5cdf80e7e664c0b0a935486b6152078fa61c80c1b
+    sha384: e0bedda5f5e949b8ace7d4f5cdf80e7e664c0b0a935486b6152078fa61c80c1b
     source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
   - name: tf-efficientnet-b7.pth
     size: 266843942
-    sha256: 076e3472fb198ec7c3091aecc73ff205bcca4a114f5862e2297a4c2720c91826
+    sha384: 076e3472fb198ec7c3091aecc73ff205bcca4a114f5862e2297a4c2720c91826
     source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_efficientnet_b7_aa-076e3472.pth
 postprocessing:
   - $type: regex_replace

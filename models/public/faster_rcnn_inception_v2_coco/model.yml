@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: faster_rcnn_inception_v2_coco.tar.gz
     size: 149119618
-    sha256: db3295e9a52d406540e84bdd056edeedbf938782a7bc4af7918aaa5dc30f0df5
+    sha384: db3295e9a52d406540e84bdd056edeedbf938782a7bc4af7918aaa5dc30f0df5
     source: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

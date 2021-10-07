@@ -20,7 +20,7 @@ task_type: classification
 files:
   - name: inception_resnet_v2_2018_04_27.tgz
     size: 225882079
-    sha256: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
+    sha384: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
     source: https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_resnet_v2_2018_04_27.tgz
 postprocessing:
   - $type: unpack_archive

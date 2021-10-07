@@ -23,7 +23,7 @@ description: >-
 task_type: action_recognition
 files:
   - name: i3d-rgb.frozen.pb
-    sha256: 77b3239c74c78be2c4c6747edd803deef8d4c8c3cf466c4c402a3db4f9d4b3a0
+    sha384: 77b3239c74c78be2c4c6747edd803deef8d4c8c3cf466c4c402a3db4f9d4b3a0
     size: 51046552
     source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
 framework: tf

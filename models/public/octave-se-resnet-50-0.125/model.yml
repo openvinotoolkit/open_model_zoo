@@ -31,7 +31,7 @@ task_type: classification
 files:
   - name: a05_se-resnet-50_alpha-0.125.tar
     size: 112947200
-    sha256: a080ed21c747b877697ca8a91843d2d83b15d1ad4702a09cd74126a3fcdffc52
+    sha384: a080ed21c747b877697ca8a91843d2d83b15d1ad4702a09cd74126a3fcdffc52
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a05_se-resnet-50_alpha-0.125.tar
 postprocessing:
   - $type: unpack_archive

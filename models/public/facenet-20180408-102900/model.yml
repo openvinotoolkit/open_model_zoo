@@ -19,7 +19,7 @@ task_type: face_recognition
 files:
   - name: 20180408-102900.zip
     size: 195479980
-    sha256: 2a32a4d6b797b0e35e065c674dfa2d60e9eb2372aa10728bd0b221abe12490ac
+    sha384: 2a32a4d6b797b0e35e065c674dfa2d60e9eb2372aa10728bd0b221abe12490ac
     source:
       $type: google_drive
       id: 1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz

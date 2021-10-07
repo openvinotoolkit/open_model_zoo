@@ -23,31 +23,31 @@ task_type: instance_segmentation
 files:
   - name: yolact/yolact.py
     size: 31516
-    sha256: b8d43734955dbcedddaa781643000d49309a10d7a3113d8333891d879459f8bb
+    sha384: b8d43734955dbcedddaa781643000d49309a10d7a3113d8333891d879459f8bb
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/yolact.py
   - name: yolact/backbone.py
     size: 17286
-    sha256: 66e53aa5bd7ad35f978a13f3f5c82728a7c073c463c2a2b22a67f924008ed6a7
+    sha384: 66e53aa5bd7ad35f978a13f3f5c82728a7c073c463c2a2b22a67f924008ed6a7
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/backbone.py
   - name: yolact/data/config.py
     size: 31172
-    sha256: f1386cb5787eb260638f127a8bb6d04843506c527aa85c655574967819238139
+    sha384: f1386cb5787eb260638f127a8bb6d04843506c527aa85c655574967819238139
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/data/config.py
   - name: yolact/utils/timer.py
     size: 3508
-    sha256: 082ecd0fdd58a9e66fa7e8e9618e22ed3886ca1ceef286aa9e265d98bf35cfd2
+    sha384: 082ecd0fdd58a9e66fa7e8e9618e22ed3886ca1ceef286aa9e265d98bf35cfd2
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/timer.py
   - name: yolact/utils/functions.py
     size: 6503
-    sha256: e3adc9e8121c0a20c95539bee00045f541427d883fdbbb8ca05a0d160203c902
+    sha384: e3adc9e8121c0a20c95539bee00045f541427d883fdbbb8ca05a0d160203c902
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/functions.py
   - name: yolact/layers/interpolate.py
     size: 412
-    sha256: e502fdd29086933d3a5aa10cfaa19b3063d97609e0aed217771001d9b87251a3
+    sha384: e502fdd29086933d3a5aa10cfaa19b3063d97609e0aed217771001d9b87251a3
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/layers/interpolate.py
   - name: yolact/yolact_resnet50_54_800000.pth
     size: 127300392
-    sha256: c12bb7a7e0343281db7f1407b376970bb52651f121d0b60bc4a49207acb6d6d7
+    sha384: c12bb7a7e0343281db7f1407b376970bb52651f121d0b60bc4a49207acb6d6d7
     source:
       $type: google_drive
       id: 1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0

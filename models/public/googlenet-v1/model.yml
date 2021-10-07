@@ -28,11 +28,11 @@ task_type: classification
 files:
   - name: googlenet-v1.prototxt
     size: 35862
-    sha256: fa36cd4112a3240a29600a5aa35333f31bec33daa1a6085b0af308a9f50f0c50
+    sha384: fa36cd4112a3240a29600a5aa35333f31bec33daa1a6085b0af308a9f50f0c50
     source: https://raw.githubusercontent.com/BVLC/caffe/88c96189bcbf3853b93e2b65c7b5e4948f9d5f67/models/bvlc_googlenet/deploy.prototxt
   - name: googlenet-v1.caffemodel
     size: 53533754
-    sha256: 6f7101e3a2183738a7125a0c5021ba82a1feb4228c5ca0924d991b6daf6f6fad
+    sha384: 6f7101e3a2183738a7125a0c5021ba82a1feb4228c5ca0924d991b6daf6f6fad
     source: http://dl.caffe.berkeleyvision.org/bvlc_googlenet.caffemodel
 postprocessing:
   - $type: regex_replace

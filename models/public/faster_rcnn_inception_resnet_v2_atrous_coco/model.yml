@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
     size: 672221478
-    sha256: d615532f464532620d742be6564bddaaaba3e5f9670c245c6309eb7842876c62
+    sha384: d615532f464532620d742be6564bddaaaba3e5f9670c245c6309eb7842876c62
     source: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

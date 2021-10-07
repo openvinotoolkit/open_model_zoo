@@ -31,7 +31,7 @@ task_type: classification
 files:
   - name: a03_resnet-50_alpha-0.125.tar
     size: 102748160
-    sha256: 1ad2c754a5569d6c297c10601fd62feed4d5fe36354167697315e644f5c913d4
+    sha384: 1ad2c754a5569d6c297c10601fd62feed4d5fe36354167697315e644f5c913d4
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a03_resnet-50_alpha-0.125.tar
 postprocessing:
   - $type: unpack_archive

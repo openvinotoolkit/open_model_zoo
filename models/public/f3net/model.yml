@@ -19,15 +19,15 @@ task_type: salient_object_detection
 files:
   - name: f3net/net.py
     size: 8656
-    sha256: e2afbe93d900a518c1e46ba260a73810641f174a80fd7fa022d3f514166b5a6e
+    sha384: e2afbe93d900a518c1e46ba260a73810641f174a80fd7fa022d3f514166b5a6e
     source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/net.py
   - name: f3net/dataset.py
     size: 4497
-    sha256: 9394eb1efc31d20610c31408fd08a567d7c89f394ceffcd745b6aad18ff0b7a9
+    sha384: 9394eb1efc31d20610c31408fd08a567d7c89f394ceffcd745b6aad18ff0b7a9
     source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/dataset.py
   - name: f3net/model-32
     size: 102506472
-    sha256: 88e567f915fb7d22db6922102e147d0401123d3600cd0de6c74a200c4fc69b36
+    sha384: 88e567f915fb7d22db6922102e147d0401123d3600cd0de6c74a200c4fc69b36
     source:
       $type: google_drive
       id: 1jcsmxZHL6DGwDplLp93H4VeN2ZjqBsOF

@@ -22,15 +22,15 @@ task_type: classification
 files:
   - name: dla.py
     size: 14499
-    sha256: cd3ea73af97f3456034f58392cc695fd6961f939adf9c80c1977e721efd7f8bc
+    sha384: cd3ea73af97f3456034f58392cc695fd6961f939adf9c80c1977e721efd7f8bc
     source: https://raw.githubusercontent.com/ucbdrive/dla/master/dla.py
   - name: dataset.py
     size: 1776
-    sha256: 6821c636a1a955417fc2beade5d73409a9eceb546ca004c993f913a818cbfb90
+    sha384: 6821c636a1a955417fc2beade5d73409a9eceb546ca004c993f913a818cbfb90
     source: https://raw.githubusercontent.com/ucbdrive/dla/master/dataset.py
   - name: ckpt/dla34.pth
     size: 63228658
-    sha256: ba72cf86426e6333d9e8c6c7a8cae5549879212e48ae3aaad4bc8a7d009c34e1
+    sha384: ba72cf86426e6333d9e8c6c7a8cae5549879212e48ae3aaad4bc8a7d009c34e1
     source: http://dl.yf.io/dla/models/imagenet/dla34-ba72cf86.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir

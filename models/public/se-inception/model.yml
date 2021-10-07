@@ -18,11 +18,11 @@ task_type: classification
 files:
   - name: se-inception.prototxt
     size: 66438
-    sha256: 57813dfc27113ce1bc714b069d574f80643ad58480e6f35bdf1dec690075c6b3
+    sha384: 57813dfc27113ce1bc714b069d574f80643ad58480e6f35bdf1dec690075c6b3
     source: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-BN-Inception.prototxt
   - name: se-inception.caffemodel
     size: 47855246
-    sha256: 0660aa2b867f7353794d3ac02081d9178ac0709e8d8d75c29290dba4bc10ce03
+    sha384: 0660aa2b867f7353794d3ac02081d9178ac0709e8d8d75c29290dba4bc10ce03
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-inception/SE-BN-Inception.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]

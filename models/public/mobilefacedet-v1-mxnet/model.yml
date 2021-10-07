@@ -20,11 +20,11 @@ task_type: detection
 files:
   - name: mobilefacedet_v1_mxnet-symbol.json
     size: 143406
-    sha256: ad7aa5dcc6aa7d21aa34564dc6245e378957ec85088614b6bb8e2e2560067a60
+    sha384: ad7aa5dcc6aa7d21aa34564dc6245e378957ec85088614b6bb8e2e2560067a60
     source: https://raw.githubusercontent.com/becauseofAI/MobileFace/128cea33b928dc9bb6d1963202b57a97f5661ccf/MobileFace_Detection/model/mobilefacedet_v1_mxnet-symbol.json
   - name: mobilefacedet_v1_mxnet-0000.params
     size: 31229887
-    sha256: 8cd238beec821ea8a11a6de4a5c4816b209add37c7d8fe77f4a349943dba75b8
+    sha384: 8cd238beec821ea8a11a6de4a5c4816b209add37c7d8fe77f4a349943dba75b8
     source: https://raw.githubusercontent.com/becauseofAI/MobileFace/128cea33b928dc9bb6d1963202b57a97f5661ccf/MobileFace_Detection/model/mobilefacedet_v1_mxnet-0000.params
 model_optimizer_args:
   - --input_shape=[1,256,256,3]

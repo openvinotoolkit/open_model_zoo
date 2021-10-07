@@ -21,7 +21,7 @@ task_type: detection
 files:
   - name: ssd_mobilenet_v1_coco.tar.gz
     size: 76541073
-    sha256: 8788f89108519fd1102b8a5c2ac861cf6d86603571b6ce5bbd1c245b7fe005e3
+    sha384: 8788f89108519fd1102b8a5c2ac861cf6d86603571b6ce5bbd1c245b7fe005e3
     source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

@@ -27,11 +27,11 @@ task_type: classification
 files:
   - name: alexnet.prototxt
     size: 3629
-    sha256: b564ba76416b4ac1e062c6621cbd80d9c19304ba152d9d791c75870f3182c4fa
+    sha384: b564ba76416b4ac1e062c6621cbd80d9c19304ba152d9d791c75870f3182c4fa
     source: https://raw.githubusercontent.com/BVLC/caffe/88c96189bcbf3853b93e2b65c7b5e4948f9d5f67/models/bvlc_alexnet/deploy.prototxt
   - name: alexnet.caffemodel
     size: 243862414
-    sha256: 4bff209a9837298157915ef50a4831a59636a6ca1a6b8ebacd990c3a5f3053e0
+    sha384: 4bff209a9837298157915ef50a4831a59636a6ca1a6b8ebacd990c3a5f3053e0
     source: http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel
 postprocessing:
   - $type: regex_replace
