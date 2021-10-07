@@ -35,7 +35,7 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
     auto retVal = std::unique_ptr<ResultBase>(result);
 
     result->topLabels.reserve(scoresBlob->size());
-    for (int i = 0; i < scoresBlob->size(); ++i) {
+    for (size_t i = 0; i < scoresBlob->size(); ++i) {
         result->topLabels.emplace_back(indicesPtr[i], labels[indicesPtr[i]], scoresPtr[i]);
     }
 
@@ -112,7 +112,7 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
         auto nodes = ngraphFunction->get_ops();
         auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
-            [](auto op) { return std::string(op->get_type_name()) == "Softmax"; });
+            [](const std::shared_ptr<ngraph::Node>& op) { return std::string(op->get_type_name()) == "Softmax"; });
 
         std::shared_ptr<ngraph::Node> softmaxNode;
         if (softmaxNodeIt == nodes.end()) {
