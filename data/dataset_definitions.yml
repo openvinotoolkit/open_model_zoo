@@ -1410,3 +1410,11 @@ datasets:
       data_dir: wavernn_io/rnn
       input_suffix: in
       reference_suffix: out
+
+  - name: LIVE_1
+    data_source: LIVE_1
+    annotation_conversion:
+      converter: image_processing
+      data_dir: LIVE_1
+      input_suffix: .bmp
+      target_suffix: .bmp

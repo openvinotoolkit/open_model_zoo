@@ -234,6 +234,8 @@ Accuracy Checker supports following set of preprocessors:
 * `trimap` - concatenates image data with alpha-channel based information for cut, keep and calculation zones in image.
   * `cut_treshold` - maximum level of alpha values in cut zone. Optional, default is 0.1.
   * `keep_treshold` - minimum level of alpha values in keep zone. Optional, default is 0.9. Pixels with alpha-channel values between `cut_threshold` and `keep_treshold` are in calculation zone.
+* `jpeg_compression` - compress the image into jpeg format.
+  * `quality_factor` - quality of compression, from 0 to 100 (the higher is the better).
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.
