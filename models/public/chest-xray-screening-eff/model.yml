@@ -22,7 +22,7 @@ files:
     size: 28916816
     source:
       $type: google_drive
-      id: 119nttgoJkHee6imXca_ocF2DItkA3ybv
+      id: 1wt7U0DKPXKGWx03bLsy28WgqUfTetRyw
 model_optimizer_args:
   - --input_shape=[1,3,1024,1024]
   - --input_model=$dl_dir/chest_xray_screening_eff.onnx

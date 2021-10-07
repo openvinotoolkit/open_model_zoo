@@ -1,10 +1,10 @@
 models:
   - name: chest-xray-screening-eff
-  launchers:
-    - framework: onnx_runtime
-      model: chest_xray_screening_eff.onnx
-      adapter: classification
-  datasets:
-    - name: rsna_pneumonia
-      metrics:
-        - type: auroc
+    launchers:
+      - framework: onnx_runtime
+        model: chest_xray_screening_eff.onnx
+        adapter: classification
+    datasets:
+      - name: rsna_pneumonia
+        metrics:
+          - type: auroc

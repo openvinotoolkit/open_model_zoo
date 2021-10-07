@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: DenseNet CNN architecture adapted and trained to identify
-    the 3 classes in 2D Chest radiograph images. 
+    the 3 classes in 2D Chest radiograph images.
 task_type: classification
 files:
   - name: chest_xray_screening.onnx
