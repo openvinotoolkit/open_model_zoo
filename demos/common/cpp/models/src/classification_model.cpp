@@ -134,8 +134,6 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
             std::make_shared<ngraph::Function>(res, ngraphFunction->get_parameters(), "classification");
 
         cnnNetwork = InferenceEngine::CNNNetwork(f);
-        ngraphFunction = cnnNetwork.getFunction();
-
         for (auto& it : cnnNetwork.getOutputsInfo()) {
             outputsNames.push_back(it.first);
         }
