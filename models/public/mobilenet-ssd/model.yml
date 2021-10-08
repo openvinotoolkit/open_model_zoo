@@ -33,9 +33,7 @@ files:
   - name: mobilenet-ssd.caffemodel
     size: 23147564
     sha256: 761c86fbae3d8361dd454f7c740a964f62975ed32f4324b8b85994edec30f6af
-    source:
-      $type: google_drive
-      id: 0B3gersZ2cHIxRm5PMWRoTkdHdHc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/mobilenet-ssd/MobileNetSSD_deploy.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,300,300]
   - --input=data

@@ -422,8 +422,8 @@ class ModelEvaluator(BaseEvaluator):
             except StopIteration:
                 break
 
-            queued_irs.append(ir_id)
             batch_input, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
+            queued_irs.append(ir_id)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
                                         context=(batch_id, batch_input_ids, batch_annotation))
 

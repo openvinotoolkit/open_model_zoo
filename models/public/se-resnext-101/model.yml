@@ -23,9 +23,7 @@ files:
   - name: se-resnext-101.caffemodel
     size: 196447403
     sha256: 78dc95c9b768fdb32a0a3981a686edaf655df82973b051d818bae523c9a93c90
-    source:
-      $type: google_drive
-      id: 0BwHV3BlNKkWleklsNzBiZlprblk
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-resnext-101/SE-ResNeXt-101.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
