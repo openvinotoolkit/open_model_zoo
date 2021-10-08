@@ -136,14 +136,21 @@ class NumpyBinReader(BaseReader):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            "dtype": StringField(optional=True, default='float32', description='data type for reading')
+            "dtype": StringField(optional=True, default='float32', description='data type for reading'),
+            'as_buffer': BoolField(optional=True, default=False, description='interpter binary data as buffere'),
+            'offset': NumberField(optional=True, default=0, value_type=int, min_value=0)
         })
         return params
 
     def configure(self):
         super().configure()
         self.dtype = self.get_value_from_config('dtype')
+        self.as_buffer = self.get_value_from_config('as_buffer')
+        self.offset = self.get_value_from_config('offset')
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
-        return np.fromfile(data_path, dtype=self.dtype)
+        if not self.as_buffer:
+            return np.fromfile(data_path, dtype=self.dtype)
+        buffer = Path(data_path).open('rb').read()
+        return np.frombuffer(buffer[self.offset:], dtype=self.dtype)
