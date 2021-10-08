@@ -125,9 +125,6 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
         if _progress_reporter:
             _progress_reporter.finish()
 
-        if self.model.store_encoder_predictions:
-            self.model.save_encoder_predictions()
-
     def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
