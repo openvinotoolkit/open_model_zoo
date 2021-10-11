@@ -67,7 +67,7 @@ def parse_args():
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested)')
-    parser.add_argument('--scope', default='base',
+    parser.add_argument('--scope', default='performance',
         help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
