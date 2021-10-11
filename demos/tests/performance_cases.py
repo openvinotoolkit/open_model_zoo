@@ -32,14 +32,15 @@ class PerformanceParser:
 
     def parse_metrics(self, output):
 
-        def get_metric(pattern):
-            metric = pattern.search(output)
+        def get_metric(name):
+            pattern = re.compile(r'{}: {}'.format(name, float_re))
+            metric = pattern.search(" ".join(output.split()))
             return metric.group(1) if metric else 'N/A'
 
-        latency_re = re.compile(r'Latency: (([0-9]+)\.[0-9]+)')
-        fps_re = re.compile(r'FPS: (([0-9]+)\.[0-9]+)')
-
-        return {'Latency': get_metric(latency_re), 'FPS': get_metric(fps_re)}
+        float_re = '(([0-9]+)\.[0-9]+)'
+        stages_to_parse = ('Latency', 'FPS', 'Decoding', 'Preprocessing',
+                           'Inference', 'Postprocessing', 'Rendering')
+        return {name : get_metric(name) for name in stages_to_parse}
 
     def write_to_csv(self, result, test_case, device):
         result['Nireq'] = test_case.options.get('-nireq', '-')
