@@ -253,7 +253,7 @@ class AmazonProductData(BaseFormatConverter):
 
         n_samples = len(seqs_mid)
         maxlen_x = np.max(lengths_x)
-        maxlen_x = max(maxlen, maxlen_x)
+        maxlen_x = max(maxlen, maxlen_x) if maxlen is not None else maxlen_x
 
         mid_his = np.zeros((n_samples, maxlen_x)).astype('int64')
         cat_his = np.zeros((n_samples, maxlen_x)).astype('int64')
