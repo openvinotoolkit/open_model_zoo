@@ -180,7 +180,7 @@ class AmazonProductData(BaseFormatConverter):
             "test_data": StringField(optional=True, default='local_test_splitByUser',
                                      description="test data filename."),
             "batch": NumberField(optional=True, default=1, description="Batch size"),
-            "max_len": NumberField(optional=True, default=100, description="Maximum sequence length"),
+            "max_len": NumberField(optional=True, default=None, description="Maximum sequence length"),
             "subsample_size": NumberField(optional=True, default=0, description="Number of sentences to process"),
             "uid_voc": StringField(optional=True, default='uid_voc.pkl', description="uid_voc filename"),
             "mid_voc": StringField(optional=True, default='mid_voc.pkl', description="mid_voc filename"),
@@ -229,14 +229,31 @@ class AmazonProductData(BaseFormatConverter):
         self.subsample_size = int(self.get_value_from_config('subsample_size'))
 
     @staticmethod
-    def prepare_data(source, target):
+    def prepare_data(source, target, maxlen=None):
         # x: a list of sentences
         lengths_x = [len(s[4]) for s in source]
         seqs_mid = [inp[3] for inp in source]
         seqs_cat = [inp[4] for inp in source]
+        if maxlen is not None:
+            new_seqs_mid = []
+            new_seqs_cat = []
+            new_lengths_x = []
+            for l_x, inp in zip(lengths_x, source):
+                if l_x > maxlen:
+                    new_seqs_mid.append(inp[3][l_x - maxlen:])
+                    new_seqs_cat.append(inp[4][l_x - maxlen:])
+                    new_lengths_x.append(maxlen)
+                else:
+                    new_seqs_mid.append(inp[3])
+                    new_seqs_cat.append(inp[4])
+                    new_lengths_x.append(l_x)
+            lengths_x = new_lengths_x
+            seqs_mid = new_seqs_mid
+            seqs_cat = new_seqs_cat
 
         n_samples = len(seqs_mid)
         maxlen_x = np.max(lengths_x)
+        maxlen_x = max(maxlen, maxlen_x) if maxlen is not None else maxlen_x
 
         mid_his = np.zeros((n_samples, maxlen_x)).astype('int64')
         cat_his = np.zeros((n_samples, maxlen_x)).astype('int64')
@@ -278,7 +295,7 @@ class AmazonProductData(BaseFormatConverter):
         iteration = 0
 
         for src, tgt in test_data:
-            uids, mids, cats, mid_his, cat_his, mid_mask, gt, sl = self.prepare_data(src, tgt)
+            uids, mids, cats, mid_his, cat_his, mid_mask, gt, sl = self.prepare_data(src, tgt, maxlen=self.max_len)
             c_input = input_folder / "{:02d}".format(subfolder)
             c_input = c_input / "{:06d}.npz".format(iteration)
 
