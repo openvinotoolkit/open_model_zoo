@@ -59,10 +59,6 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `record_mode` - allow get specific record from numpy array using `id_sep` as separator between field name and record id
 * `numpy_txt_reader`- read data stored in text format to numpy array.
 * `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
-* `numpy_bin_reader` - read binary file using numpy.
-  * `dtype` - data type for array reading (Optional, default `float32`).
-  * `as_buffer` - read binary file as buffer (Optional, default `False`).
-  * `offset` - offest for staring decoding array if `as_buffer` enabled (Optional, default 0).
 * `nifti_reader` - read NifTI data format
   * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default `False`)
   * `multi_frame` - allows reading of 3D images as sequence of 2D frames (optional, default `False`)

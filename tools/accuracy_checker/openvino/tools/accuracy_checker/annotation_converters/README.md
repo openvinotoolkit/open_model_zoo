@@ -791,8 +791,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to `Deepvariant WGS` preprocessed dataset file
   * `preprocessed_dir` - path to preprocessed data
   * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
-* `common_text_recognition` - converts annotation for text recognition tasks (e.g. optical character recognition, automatic speech recognition) to `CharacterRecognitionAnnotation`.
-  * `annotation_file` - path to file with annotation, where each line represented as `[input_file]` `[reference]`.
+
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

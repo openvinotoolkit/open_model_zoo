@@ -22,7 +22,6 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import NumberField, BoolField, StringField, ListField, PathField
 from ..representation import CharacterRecognitionPrediction
-from ..utils import read_txt
 
 # Will import kenlm later if necessary
 kenlm = None
@@ -690,40 +689,24 @@ class DumbDecoder(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'vocabulary_file': PathField(optional=True, description='Alphabet as vocab file'),
             'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False,
                                   description="Alphabet as list of strings."),
             'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
-            'blank_token_id': NumberField(optional=True, value_type=int),
-            'eos_token_id': NumberField(optional=True, value_type=int),
-            'replace_underscore': BoolField(
-                optional=True, description='Replace underscore by white spacte after decoding', default=False
-            )
+
         })
         return parameters
 
     def configure(self):
-        self.set_alphabet()
-        self.eos = self.get_value_from_config('eos_token_id') or -1
-        self.blank = self.get_value_from_config('blank_token_id') or -2
-        self.replace_underscore = self.get_value_from_config('replace_underscore')
+        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
         self.uppercase = self.get_value_from_config('uppercase')
-
-    def set_alphabet(self):
-        if 'vocabulary_file' in self.launcher_config:
-            self.alphabet = read_txt(self.get_value_from_config('vocabulary_file'), ignore_space=True)
-        else:
-            self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
-            self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         assert len(identifiers) == 1
-        decoded = ''.join(self.alphabet[t] for t in raw[0] if t != self.blank)
+        decoded = ''.join(self.alphabet[t] for t in raw[0])
         if self.uppercase:
             decoded = decoded.upper()
-        if self.replace_underscore:
-            decoded = decoded.replace('_', ' ')
-        return [CharacterRecognitionPrediction(identifiers[0], decoded)]
+        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
 
 
 class TextState:
