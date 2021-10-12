@@ -38,6 +38,7 @@
 #include <pipelines/async_pipeline.h>
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
+#include <models/jpeg_restoration_model.h>
 #include <pipelines/metadata.h>
 #include "visualizer.hpp"
 
@@ -45,7 +46,7 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
+static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -63,6 +64,8 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+static const char jc_message[] = "Optional. Flag of using compression for jpeg images. "
+    "Default value if false. Only for jr architecture type.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -76,6 +79,8 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
+DEFINE_bool(jc, false, jc_message);
+
 
 /**
 * \brief This function shows a help message
@@ -102,6 +107,7 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -jc                       " << jc_message << std::endl;
 }
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -130,12 +136,15 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type) {
+std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type, bool doCompression=false) {
     if (type == "sr") {
         return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, frameSize));
     }
     if (type == "deblur") {
         return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize));
+    }
+    if (type == "jr") {
+        return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
@@ -162,7 +171,7 @@ int main(int argc, char *argv[]) {
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core core;
-        std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
+        std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
