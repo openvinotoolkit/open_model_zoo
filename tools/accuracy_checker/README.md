@@ -6,27 +6,29 @@
    :maxdepth: 1
    :hidden:
    
-   omz_tools_accuracy_checker_adapters"
-   omz_tools_accuracy_checker_annotation_converters"
-   omz_tools_accuracy_checker_custom_evaluators"
-   omz_tools_accuracy_checker_data_readers"
-   omz_tools_accuracy_checker_caffe_launcher"
-   omz_tools_accuracy_checker_mxnet_launcher"
-   omz_tools_accuracy_checker_onnx_runtime_launcher"
-   omz_tools_accuracy_checker_opencv_launcher"
-   omz_tools_accuracy_checker_dlsdk_launcher"
-   omz_tools_accuracy_checker_pdpd_launcher"
-   omz_tools_accuracy_checker_pytorch_launcher"
-   omz_tools_accuracy_checker_tf2_launcher"
-   omz_tools_accuracy_checker_tf_lite_launcher"
-   omz_tools_accuracy_checker_tf_launcher"
-   omz_tools_accuracy_checker_configs"
-   omz_tools_accuracy_checker_metrics"
-   omz_tools_accuracy_checker_postprocessor"
-   omz_tools_accuracy_checker_preprocessor"
-   omz_tools_accuracy_checker_sample"
+   omz_tools_accuracy_checker_adapters
+   omz_tools_accuracy_checker_annotation_converters
+   omz_tools_accuracy_checker_custom_evaluators
+   omz_tools_accuracy_checker_data_readers
+   omz_tools_accuracy_checker_caffe_launcher
+   omz_tools_accuracy_checker_mxnet_launcher
+   omz_tools_accuracy_checker_onnx_runtime_launcher
+   omz_tools_accuracy_checker_opencv_launcher
+   omz_tools_accuracy_checker_dlsdk_launcher
+   omz_tools_accuracy_checker_pdpd_launcher
+   omz_tools_accuracy_checker_pytorch_launcher
+   omz_tools_accuracy_checker_tf2_launcher
+   omz_tools_accuracy_checker_tf_lite_launcher
+   omz_tools_accuracy_checker_tf_launcher
+   omz_tools_accuracy_checker_configs
+   omz_tools_accuracy_checker_metrics
+   omz_tools_accuracy_checker_postprocessor
+   omz_tools_accuracy_checker_preprocessor
+   omz_tools_accuracy_checker_sample
 
 @endsphinxdirective
+
+
 
 The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
 
