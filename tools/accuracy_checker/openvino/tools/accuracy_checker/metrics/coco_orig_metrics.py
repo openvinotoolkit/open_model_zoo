@@ -517,7 +517,6 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
     def _compute_iou(gt, dets, iscrowd):
         return iou_calc(list(dets), list(gt), iscrowd)
 
-
     @staticmethod
     def _prepare_predictions(prediction, label):
         if prediction.size == 0:
@@ -551,7 +550,6 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
         ann = np.array([annotation.mask[idx] for idx in annotation_ids])
 
         return ann[order], difficult_label[order], iscrowd_label[order]
-
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):

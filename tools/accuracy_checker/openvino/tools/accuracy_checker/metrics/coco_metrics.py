@@ -143,9 +143,6 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
             labels_stat[int(pc)] = label_report
         return labels_stat
 
-    def result_template(self):
-        return [0] * len(self.meta['names'])
-
 
 class MSCOCOAveragePrecision(MSCOCOBaseMetric):
     __provider__ = 'coco_precision'

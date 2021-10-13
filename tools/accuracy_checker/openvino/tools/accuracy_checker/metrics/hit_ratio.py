@@ -138,6 +138,3 @@ class LogLoss(PerImageEvaluationMetric):
 
     def reset(self):
         self.losses = []
-
-    def result_template(self):
-        return [0, 0]

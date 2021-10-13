@@ -116,8 +116,6 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self._create_meta()
 
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
 class MultiLabelAccuracy(MultiLabelMetric):
     __provider__ = 'multi_accuracy'

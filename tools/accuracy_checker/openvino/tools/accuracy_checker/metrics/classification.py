@@ -350,8 +350,6 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.profiler = profiler
         self.summary_helper = ClassificationProfilingSummaryHelper()
 
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -408,9 +406,6 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.video_avg_prob.reset()
         if self.profiler:
             self.profiler.reset()
-
-    def result_template(self):
-        return [0, 0]
 
 
 class ClassificationF1Score(PerImageEvaluationMetric):
@@ -485,9 +480,6 @@ class ClassificationF1Score(PerImageEvaluationMetric):
     def set_profiler(self, profiler):
         self.profiler = profiler
         self.summary_helper = ClassificationProfilingSummaryHelper()
-
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):

@@ -109,8 +109,6 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
             confusion_matrix[annotation_label, prediction_label] += 1
         return confusion_matrix
 
-    def result_template(self):
-        return [0] * self.meta['names']
 
 class AttributeClassificationAccuracy(AttributeClassificationMetric):
     """

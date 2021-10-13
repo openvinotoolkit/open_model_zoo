@@ -17,7 +17,6 @@ from datetime import datetime
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
-from csv import DictWriter
 
 import cv2
 
@@ -29,7 +28,6 @@ from .presenters import write_csv_result
 from .utils import (
     get_path,
     cast_to_bool,
-    check_file_existence,
     validate_print_interval,
     start_telemetry,
     end_telemetry,

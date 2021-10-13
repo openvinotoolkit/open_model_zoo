@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from argparse import Namespace
+from pathlib import Path
 from .config import ConfigReader
 from .evaluators import ModelEvaluator, ModuleEvaluator
 
@@ -23,13 +25,19 @@ EVALUATION_MODE = {
 }
 
 
-def get_metric_references(config_path, definitions_path, data_source, annotations_dir, subset=None, additional_info=None):
-    args = {'config': config_path, 'definitions': definitions_path, 'source': data_source, 'annotations': annotations_dir}
-    config, mode = ConfigReader.merge(args)
+def get_metric_references(config_path, definitions_path, subset=None, additional_info=None, return_header=True):
+    args = {'config': Path(config_path), 'definitions': Path(definitions_path)}
+    if additional_info:
+        args.update(additional_info)
+
+    config, mode = ConfigReader.merge(Namespace(**args))
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     report = []
-    for conf in config:
-        report.extend(evaluator_class.provide_metric_references(conf, subset, additional_info))
+    for conf in config[mode]:
+        header, template_report = evaluator_class.provide_metric_references(conf, subset)
+        report.extend(template_report)
+    if return_header:
+        return header, report
     return report

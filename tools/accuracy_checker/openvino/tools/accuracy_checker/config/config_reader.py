@@ -764,6 +764,19 @@ def process_config(
             merge_entry_paths(command_line_arg, config_entry, args)
 
 
+def select_arg_path(selected_argument, value_id, argument):
+    if isinstance(selected_argument, list):
+        if len(selected_argument) > 1:
+            if len(selected_argument) <= value_id:
+                raise ValueError('list of arguments for {} less than number of evaluations'.format(argument))
+            selected_argument = selected_argument[value_id]
+        else:
+            selected_argument = selected_argument[0]
+    if not isinstance(selected_argument, Path):
+        selected_argument = Path(selected_argument)
+    return selected_argument
+
+
 def merge_entry_paths(keys, value, args, value_id=0):
     for field, argument in keys.items():
         if not is_iterable(value) or field not in value:
@@ -784,15 +797,7 @@ def merge_entry_paths(keys, value, args, value_id=0):
             if arg_candidate not in args or not args[arg_candidate]:
                 continue
 
-            selected_argument = args[arg_candidate]
-            if isinstance(selected_argument, list):
-                if len(selected_argument) > 1:
-                    if len(selected_argument) <= value_id:
-                        raise ValueError('list of arguments for {} less than number of evaluations')
-                    selected_argument = selected_argument[value_id]
-                else:
-                    selected_argument = selected_argument[0]
-
+            selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
             if not selected_argument.is_dir():
                 raise ConfigError('argument: {} should be a directory'.format(argument))
 

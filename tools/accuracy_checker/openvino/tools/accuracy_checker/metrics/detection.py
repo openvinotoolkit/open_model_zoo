@@ -168,9 +168,6 @@ class BaseDetectionMetricMixin(Metric):
         if self.profiler:
             self.profiler.reset()
 
-    def result_template(self):
-        return [0] * len(self.meta['names'])
-
 
 class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """

@@ -67,6 +67,3 @@ class SISDRMetric(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         return [np.mean(self.buffer), np.std(self.buffer)]
-
-    def result_template(self):
-        return [0, 0]

@@ -81,8 +81,6 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         })
         self.magnitude = []
 
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
@@ -274,9 +272,6 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         self._create_meta()
         if self.profiler:
             self.profiler.finish()
-
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -687,9 +682,6 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)
         self.pck = np.zeros(self.num_joints)
-
-    def result_template(self):
-        return [0] * len(self.meta['names'])
 
 
 class EndPointError(BaseRegressionMetric):
