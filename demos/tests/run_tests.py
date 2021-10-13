@@ -185,8 +185,8 @@ def main():
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
-            print("\nRunning on pre-converted IRs...\n")
             dl_dir = args.models_dir
+            print(f"\nRunning on pre-converted IRs: {str(dl_dir)}\n")
         else:
             dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
 
