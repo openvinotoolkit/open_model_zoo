@@ -440,7 +440,10 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - output with bounding boxes in the format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
   * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
 * `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
-  * `alphabet` - model alphabet.
+  * `alphabet`- list of supported tokens. You can also use `vocabulary_file` if vocabulary is very large, txt file with accepted tokens list (each token should be located on own line represented as token_id).
+  * `blank_token_id` - token_id for blank token (Optional, used for blank label filtering after decoding).
+  * `eos_token_id` - token_id for end of string (Optional, used for eos token filtering after decoding).
+  * `replace_underscore` - allow replacing undescrore symbol to white space after decoding.
   * `uppercase` - produce prediction in uppercase, default is `True`.
 * `detr` - converts output of DETR models family to `DetectionPrediction`.
     * `scores_out` - output layer name with detection scores logits.
