@@ -407,6 +407,7 @@ class LPIPS(BaseRegressionMetric):
         if isinstance(lpips, UnsupportedPackage):
             lpips.raise_error(self.__provider__)
         self.dist_threshold = self.get_value_from_config('distance_threshold')
+        self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
         self.loss = self._create_loss()
 
     def lpips_differ(self, annotation_image, prediction_image):
@@ -421,7 +422,6 @@ class LPIPS(BaseRegressionMetric):
         results = super().evaluate(annotations, predictions)
         if self.dist_threshold:
             invalid_ratio = np.sum(np.array(self.magnitude) > self.dist_threshold) / len(self.magnitude)
-            self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
             results += (invalid_ratio, )
         return results
 

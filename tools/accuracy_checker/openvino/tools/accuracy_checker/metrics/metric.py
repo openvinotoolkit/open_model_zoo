@@ -231,6 +231,9 @@ class Metric(ClassProvider):
             return full_scheme
         return cls.parameters()
 
+    def result_template(self):
+        return 0
+
 
 class PerImageEvaluationMetric(Metric):
     def submit(self, annotation, prediction):

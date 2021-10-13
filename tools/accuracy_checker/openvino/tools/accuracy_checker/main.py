@@ -25,6 +25,7 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
+from .presenters import write_csv_result
 from .utils import (
     get_path,
     cast_to_bool,
@@ -441,41 +442,6 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('device: {}'.format(device.upper()))
     print_info('dataset: {}'.format(dataset))
     print_info('OpenCV version: {}'.format(cv2.__version__))
-
-
-def write_csv_result(csv_file, processing_info, metric_results, dataset_size, metrics_meta):
-    new_file = not check_file_existence(csv_file)
-    field_names = [
-        'model', 'launcher', 'device', 'dataset',
-        'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
-        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
-    model, launcher, device, tags, dataset = processing_info
-    main_info = {
-        'model': model,
-        'launcher': launcher,
-        'device': device.upper(),
-        'tags': ' '.join(tags) if tags else '',
-        'dataset': dataset,
-        'dataset_size': dataset_size
-    }
-
-    with open(csv_file, 'a+', newline='', encoding='utf-8') as f:
-        writer = DictWriter(f, fieldnames=field_names)
-        if new_file:
-            writer.writeheader()
-        for metric_result, metric_meta in zip(metric_results, metrics_meta):
-            writer.writerow({
-                **main_info,
-                'metric_name': metric_result['name'],
-                'metric_type': metric_result['type'],
-                'metric_value': metric_result['value'],
-                'metric_target': metric_meta.get('target', 'higher-better'),
-                'metric_scale': metric_meta.get('scale', 100),
-                'metric_postfix': metric_meta.get('postfix', '%'),
-                'ref': metric_result.get('ref', ''),
-                'abs_threshold': metric_result.get('abs_threshold', 0),
-                'rel_threshold': metric_result.get('rel_threshold', 0)
-            })
 
 
 def setup_profiling(logs_dir, evaluator):

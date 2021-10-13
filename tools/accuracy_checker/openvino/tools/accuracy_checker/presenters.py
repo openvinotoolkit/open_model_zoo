@@ -237,8 +237,7 @@ def get_result_format_parameters(meta, use_default_formatting):
     return postfix, scale, result_format
 
 
-def write_csv_result(csv_file, processing_info, metric_results, dataset_size, metrics_meta):
-    new_file = not check_file_existence(csv_file)
+def generate_csv_report(processing_info, metric_results, dataset_size, metrics_meta):
     field_names = [
         'model', 'launcher', 'device', 'dataset',
         'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
@@ -252,22 +251,29 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
         'dataset': dataset,
         'dataset_size': dataset_size
     }
+    rows = []
+    for metric_result, metric_meta in zip(metric_results, metrics_meta):
+        rows.append({
+            **main_info,
+            'metric_name': metric_result['name'],
+            'metric_type': metric_result['type'],
+            'metric_value': metric_result['value'],
+            'metric_target': metric_meta.get('target', 'higher-better'),
+            'metric_scale': metric_meta.get('scale', 100),
+            'metric_postfix': metric_meta.get('postfix', '%'),
+            'ref': metric_result.get('ref', ''),
+            'abs_threshold': metric_result.get('abs_threshold', 0),
+            'rel_threshold': metric_result.get('rel_threshold', 0),
+            'profiling_file': metric_result.get('profiling_file', '')
+        })
+    return field_names, rows
 
+
+def write_csv_result(csv_file, processing_info, metric_results, dataset_size, metrics_meta):
+    new_file = not check_file_existence(csv_file)
+    field_names, rows = generate_csv_report(processing_info, metric_results, dataset_size, metrics_meta)
     with open(csv_file, 'a+', newline='', encoding='utf-8') as f:
         writer = DictWriter(f, fieldnames=field_names)
         if new_file:
             writer.writeheader()
-        for metric_result, metric_meta in zip(metric_results, metrics_meta):
-            writer.writerow({
-                **main_info,
-                'metric_name': metric_result['name'],
-                'metric_type': metric_result['type'],
-                'metric_value': metric_result['value'],
-                'metric_target': metric_meta.get('target', 'higher-better'),
-                'metric_scale': metric_meta.get('scale', 100),
-                'metric_postfix': metric_meta.get('postfix', '%'),
-                'ref': metric_result.get('ref', ''),
-                'abs_threshold': metric_result.get('abs_threshold', 0),
-                'rel_threshold': metric_result.get('rel_threshold', 0),
-                'profiling_file': metric_result.get('profiling_file', '')
-            })
+        writer.writerows(rows)

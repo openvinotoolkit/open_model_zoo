@@ -688,3 +688,32 @@ class ModelEvaluator(BaseEvaluator):
         self.launcher.release()
         if self.adapter:
             self.adapter.release()
+
+    @classmethod
+    def provide_metric_references(cls, conf, subset):
+        processing_info = cls.get_processing_info(conf)
+        dataset_config = model_config['datasets'][0]
+        dataset_name = dataset_config['name']
+        dataset = Dataset(dataset_config)
+        dataset_metadata = dataset.metadata if dataset is not None else {}
+        dataset_size = len(orig_dataset)
+        ignore_config_refs = False
+        if subset is not None:
+            dataset_config['subsample_size'] = subset
+            new_dataset = Dataset(dataset_config)
+            if len(new_dataset) != len(orig_dataset):
+                ignore_config_refs = True
+                warning()
+                dataset_size = len(new_dataset)
+                dataset = new_dataset
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        extracted_results, extracted_meta = [], []
+        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(ignore_config_refs):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+        generate_csv_result(processing_info, metrics_results, dataset_size, metrics_meta)

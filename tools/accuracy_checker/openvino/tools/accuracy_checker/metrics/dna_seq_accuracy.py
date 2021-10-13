@@ -94,3 +94,6 @@ class DNASequenceAccuracy(PerImageEvaluationMetric):
 
     def reset(self):
         self.accuracy = []
+
+    def result_template(self):
+        return [0, 0]
