@@ -36,6 +36,8 @@ Super resolution:
 
 ![](./assets/parrots_restoration.png)
 
+For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
+
 ## How It Works
 
 Before running the demo, user must choose type of processing and model for this processing.\
