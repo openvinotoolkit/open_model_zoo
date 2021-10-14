@@ -120,6 +120,7 @@ class GAPILauncher(Launcher):
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         self.backend = self.get_value_from_config('backend')
+        print_info('backend: {}'.format(self.backend))
         self.device = self.get_value_from_config('device').upper() if self.backend == 'ie' else ''
         self.comp = None
         self.network_args = None
