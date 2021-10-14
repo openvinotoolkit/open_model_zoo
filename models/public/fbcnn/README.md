@@ -69,7 +69,7 @@ Restored image, name - `image_result`,  shape - `1, 3, 512, 512`, output data fo
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`.
+Channel order is `BGR`.
 
 ## Download a Model and Convert it into Inference Engine Format
 

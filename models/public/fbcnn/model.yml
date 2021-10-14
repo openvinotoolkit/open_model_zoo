@@ -35,6 +35,11 @@ postprocessing:
     pattern: 'x = x\[..., :h, :w\]|x = nn.ReplicationPad2d\(\(0, paddingRight, 0,
       paddingBottom\)\)\(x\)'
     replacement: '# \g<0>'
+  # add channels reversing to BGR to model output
+  - $type: regex_replace
+    file: net.py
+    pattern: 'return x,'
+    replacement: 'return x[:, [2, 1, 0], :, :],'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

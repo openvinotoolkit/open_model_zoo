@@ -3,7 +3,9 @@ models:
 
     launchers:
       - framework: dlsdk
-        adapter: image_processing
+        adapter:
+          type: image_processing
+          reverse_channels: True
         allow_reshape_input: True
 
     datasets:

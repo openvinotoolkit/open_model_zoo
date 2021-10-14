@@ -129,7 +129,6 @@ std::unique_ptr<ResultBase> JPEGRestorationModel::postprocess(InferenceResult& i
     }
 
     result->resultImage.convertTo(result->resultImage, CV_8UC3, 255);
-    cv::cvtColor(result->resultImage, result->resultImage, cv::COLOR_RGB2BGR);
 
     return std::unique_ptr<ResultBase>(result);
 }
