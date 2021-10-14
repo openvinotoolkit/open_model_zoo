@@ -22,9 +22,8 @@ from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None):
-        super().__init__(ie, model_path, resize_type=resize_type)
+    def __init__(self, model_executor, resize_type='standard', labels=None):
+        super().__init__(model_executor, resize_type=resize_type)
         self._check_io_number(1, 1)
         if isinstance(labels, (list, tuple)):
             self.labels = labels
@@ -34,18 +33,17 @@ class SegmentationModel(ImageModel):
         self.output_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        blob_name = next(iter(self.net.outputs))
-        blob = self.net.outputs[blob_name]
+        layer_name = self.model_executor.get_output_layers()[0]
+        layer_shape = self.model_executor.get_output_layer_shape(layer_name)
 
-        out_size = blob.shape
-        if len(out_size) == 3:
+        if len(layer_shape) == 3:
             self.out_channels = 0
-        elif len(out_size) == 4:
-            self.out_channels = out_size[1]
+        elif len(layer_shape) == 4:
+            self.out_channels = layer_shape[1]
         else:
-            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size))
+            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(layer_shape))
 
-        return blob_name
+        return layer_name
 
     def postprocess(self, outputs, meta):
         predictions = outputs[self.output_blob_name].squeeze()

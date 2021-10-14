@@ -28,17 +28,16 @@ class Model:
         logger(Logger): instance of the logger
     '''
 
-    def __init__(self, ie, model_path):
+    def __init__(self, model_executor):
         '''Abstract model constructor
 
         Args:
-            ie(openvino.core): instance of Inference Engine core, needs for model loading
-            model_path(str, Path): path to model's *.xml or *.onnx file
+            model_executor(ModelExecutor): allows working with Inference Engine model or Remote model
         '''
         self.logger = log.getLogger()
-        self.net = ie.read_network(model_path)
-        self.inputs = self.net.input_info
-        self.outputs = self.net.outputs
+        if not (hasattr(model_executor, 'inputs') and hasattr(model_executor, 'outputs')):
+            raise RuntimeError('ModelExecutor must have "inputs" and "outputs" attributes')
+        self.model_executor = model_executor
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -71,25 +70,27 @@ class Model:
             RuntimeError: if loaded model has unsupported number of input or output blob
         '''
         if not isinstance(number_of_inputs, tuple):
-            if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
+            if len(self.model_executor.inputs) != number_of_inputs and number_of_inputs != -1:
                 raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
-                    number_of_inputs, 's' if number_of_inputs !=1 else '', len(self.inputs), ', '.join(self.inputs)
+                    number_of_inputs, 's' if number_of_inputs !=1 else '',
+                    len(self.model_executor.inputs), ', '.join(self.model_executor.inputs)
                 ))
         else:
-            if not len(self.inputs) in number_of_inputs:
+            if not len(self.model_executor.inputs) in number_of_inputs:
                 raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
-                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]), len(self.inputs),
-                    ', '.join(self.inputs)
+                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
+                    len(self.model_executor.inputs), ', '.join(self.model_executor.inputs)
                 ))
 
         if not isinstance(number_of_outputs, tuple):
-            if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
+            if len(self.model_executor.outputs) != number_of_outputs and number_of_outputs != -1:
                 raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
-                    number_of_outputs, 's' if number_of_outputs !=1 else '', len(self.outputs), ', '.join(self.outputs)
+                    number_of_outputs, 's' if number_of_outputs !=1 else '',
+                    len(self.model_executor.outputs), ', '.join(self.model_executor.outputs)
                 ))
         else:
-            if not len(self.outputs) in number_of_outputs:
+            if not len(self.model_executor.outputs) in number_of_outputs:
                 raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
-                    ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]), len(self.outputs),
-                    ', '.join(self.outputs)
+                    ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
+                    len(self.model_executor.outputs), ', '.join(self.model_executor.outputs)
                 ))

@@ -32,6 +32,7 @@ from model_api.models import OutputTransform, SegmentationModel, SalientObjectDe
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 
+from model_executor import InferenceEngineExecutor
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
@@ -164,11 +165,11 @@ def build_argparser():
     return parser
 
 
-def get_model(ie, args):
+def get_model(executor, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(ie, args.model, labels=args.labels), SegmentationVisualizer(args.colors)
+        return SegmentationModel(executor, labels=args.labels), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
+        return SalientObjectDetectionModel(executor, labels=args.labels), SaliencyMapVisualizer()
 
 
 def print_raw_results(mask, frame_id, labels=None):
@@ -194,14 +195,16 @@ def main():
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    model, visualizer = get_model(ie, args)
     log.info('Reading model {}'.format(args.model))
-    log_blobs_info(model)
+    model_executor = InferenceEngineExecutor(ie, args.model, plugin_config, args.device, args.num_infer_requests)
+    model, visualizer = get_model(model_executor, args)
 
-    pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
+    log_blobs_info(model_executor)
+
+    pipeline = AsyncPipeline(model, model_executor)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    log_runtime_settings(model_executor.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0

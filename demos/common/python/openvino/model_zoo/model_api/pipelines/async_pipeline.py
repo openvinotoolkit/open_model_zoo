@@ -83,18 +83,11 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, plugin_config=None, device='CPU', max_num_requests=1):
+    def __init__(self, model, model_executor):
         self.model = model
+        self.model_executor = model_executor
 
-        self.exec_net = ie.load_network(network=self.model.net, device_name=device,
-                                        config=plugin_config, num_requests=max_num_requests)
-        if max_num_requests == 0:
-            # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
-            # +1 to use it as a buffer of the pipeline
-            self.exec_net = ie.load_network(network=self.model.net, device_name=device,
-                                            config=plugin_config, num_requests=len(self.exec_net.requests) + 1)
-
-        self.empty_requests = deque(self.exec_net.requests)
+        self.empty_requests = deque(self.model_executor.exec_net.requests)
         self.completed_request_results = {}
         self.callback_exceptions = {}
         self.event = threading.Event()
@@ -149,7 +142,7 @@ class AsyncPipeline:
         return len(self.completed_request_results) != 0
 
     def await_all(self):
-        for request in self.exec_net.requests:
+        for request in self.model_executor.exec_net.requests:
             request.wait()
 
     def await_any(self):

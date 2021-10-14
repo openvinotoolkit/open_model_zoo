@@ -31,7 +31,7 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, ie, model_path, resize_type=None):
+    def __init__(self, model_executor, resize_type=None):
         '''Image model constructor
 
         Calls the `Model` constructor first
@@ -39,11 +39,12 @@ class ImageModel(Model):
         Args:
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
         '''
-        super().__init__(ie, model_path)
+        super().__init__(model_executor)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+            self.n, self.c, self.h, self.w = self.model_executor.get_input_layer_shape(self.image_blob_name)
+
         self.image_layout = 'NCHW'
         if not resize_type:
             self.logger.warning('The resizer isn\'t set. The "standard" will be used')
@@ -57,11 +58,12 @@ class ImageModel(Model):
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []
-        for blob_name, blob in self.net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_names.append(blob_name)
-            elif len(blob.input_data.shape) == 2:
-                image_info_blob_names.append(blob_name)
+        for layer_name in self.model_executor.get_input_layers():
+            layer_shape = self.model_executor.get_input_layer_shape(layer_name)
+            if len(layer_shape) == 4:
+                image_blob_names.append(layer_name)
+            elif len(layer_shape) == 2:
+                image_info_blob_names.append(layer_name)
             else:
                 raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
         if not image_blob_names:
@@ -87,7 +89,7 @@ class ImageModel(Model):
             inputs: single image as 3D array in HWC layout
 
         Returns:
-            - The dict with processed image data
+            - The infer request with preprocessed image data
             - The dict with metadata
         '''
         image = inputs
@@ -98,8 +100,8 @@ class ImageModel(Model):
             resized_image = pad_image(resized_image, (self.w, self.h))
         resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
+        infer_request = self.model_executor.create_infer_request(self.image_blob_name, resized_image)
+        return infer_request, meta
 
     def _change_layout(self, image):
         if self.image_layout == 'NCHW':
