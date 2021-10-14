@@ -617,6 +617,7 @@ def create_command_line_mapping(config, default_value, value_map=None):
 
 def filtered(launcher, targets, args):
     target_tags = args.get('target_tags') or []
+    target_backends = args.get('target_backends')
     if target_tags:
         if not contains_any(target_tags, launcher.get('tags', [])):
             return True
@@ -625,6 +626,11 @@ def filtered(launcher, targets, args):
     target_framework = (args.get('target_framework') or config_framework).lower()
     if config_framework != target_framework:
         return True
+
+    if target_backends:
+        backend = launcher.get('backend')
+        if backend not in target_backends:
+            return True
 
     return targets and launcher.get('device', '').lower() not in targets
 
