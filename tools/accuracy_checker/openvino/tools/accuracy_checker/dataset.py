@@ -59,7 +59,7 @@ from .logging import print_info
 
 
 class Dataset:
-    def __init__(self, config_entry, delayed_annotation_loading=False):
+    def __init__(self, config_entry, delayed_annotation_loading=False, log=True):
         self.name = config_entry.get('name')
         self._config = config_entry
         self._batch = self.config.get('batch')
@@ -67,7 +67,7 @@ class Dataset:
         self.data_provider = None
         ConfigValidator('dataset', fields=self.parameters()).validate(self.config)
         if not delayed_annotation_loading:
-            self.create_data_provider()
+            self.create_data_provider(log)
 
     @classmethod
     def parameters(cls):
@@ -105,17 +105,19 @@ class Dataset:
         }
 
     @staticmethod
-    def load_annotation(config):
+    def load_annotation(config, log=True):
         def _convert_annotation():
-            print_info("Annotation conversion for {dataset_name} dataset has been started".format(
-                dataset_name=config['name']))
-            print_info("Parameters to be used for conversion:")
-            for key, value in config['annotation_conversion'].items():
-                print_info('{key}: {value}'.format(key=key, value=value))
+            if log:
+                print_info("Annotation conversion for {dataset_name} dataset has been started".format(
+                    dataset_name=config['name']))
+                print_info("Parameters to be used for conversion:")
+                for key, value in config['annotation_conversion'].items():
+                    print_info('{key}: {value}'.format(key=key, value=value))
             annotation, meta = Dataset.convert_annotation(config)
             if annotation is not None:
-                print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
-                    dataset_name=config['name']))
+                if log:
+                    print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
+                        dataset_name=config['name']))
             return annotation, meta
 
         def _run_dataset_analysis(meta):
@@ -131,10 +133,12 @@ class Dataset:
             meta_name = config.get('dataset_meta')
             if meta_name:
                 meta_name = Path(meta_name)
-                print_info("{dataset_name} dataset metadata will be saved to {file}".format(
-                    dataset_name=config['name'], file=meta_name))
-            print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
-                dataset_name=config['name'], file=Path(annotation_name)))
+                if log:
+                    print_info("{dataset_name} dataset metadata will be saved to {file}".format(
+                        dataset_name=config['name'], file=meta_name))
+            if log:
+                print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
+                    dataset_name=config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name, config)
 
         annotation, meta = None, None
@@ -142,9 +146,10 @@ class Dataset:
         if 'annotation' in config:
             annotation_file = Path(config['annotation'])
             if annotation_file.exists():
-                print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
-                    dataset_name=config['name'], file=annotation_file))
-                annotation = read_annotation(get_path(annotation_file))
+                if log:
+                    print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
+                        dataset_name=config['name'], file=annotation_file))
+                annotation = read_annotation(get_path(annotation_file), log)
                 meta = Dataset.load_meta(config)
                 use_converted_annotation = False
 
@@ -154,7 +159,7 @@ class Dataset:
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
         annotation = _create_subset(annotation, config)
-        dataset_analysis = config.get('analyze_datase', False)
+        dataset_analysis = config.get('analyze_dataset', False)
 
         if dataset_analysis:
             meta = _run_dataset_analysis(meta)
@@ -206,8 +211,8 @@ class Dataset:
 
         return info
 
-    def create_data_provider(self):
-        annotation, meta = self.load_annotation(self.config)
+    def create_data_provider(self, log=True):
+        annotation, meta = self.load_annotation(self.config, log=log)
         data_reader_config = self.config.get('reader', 'opencv_imread')
         data_source = self.config.get('data_source')
         if isinstance(data_reader_config, str):
@@ -360,7 +365,7 @@ class Dataset:
         return self.data_provider.labels
 
 
-def read_annotation(annotation_file: Path):
+def read_annotation(annotation_file: Path, log=True):
     annotation_file = Path(annotation_file)
 
     result = []
@@ -369,7 +374,8 @@ def read_annotation(annotation_file: Path):
         try:
             first_obj = loader.load()
             if isinstance(first_obj, DatasetConversionInfo):
-                describe_cached_dataset(first_obj)
+                if log:
+                    describe_cached_dataset(first_obj)
             else:
                 result.append(first_obj)
         except ModuleNotFoundError:
@@ -384,7 +390,8 @@ def read_annotation(annotation_file: Path):
             try:
                 first_obj = loader.load()
                 if isinstance(first_obj, DatasetConversionInfo):
-                    describe_cached_dataset(first_obj)
+                    if log:
+                        describe_cached_dataset(first_obj)
                 else:
                     result.append(first_obj)
             except EOFError:

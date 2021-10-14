@@ -112,7 +112,7 @@ class TestAnnotationConversion:
         )
         Dataset(config)
 
-        annotation_reader_mock.assert_called_once_with(Path('custom'))
+        annotation_reader_mock.assert_called_once_with(Path('custom'), True)
 
     def test_annotation_conversion_with_store_annotation(self, mocker):
         addition_options = {

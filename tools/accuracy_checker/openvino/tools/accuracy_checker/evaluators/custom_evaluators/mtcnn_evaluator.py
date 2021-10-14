@@ -795,7 +795,7 @@ class MTCNNEvaluator(BaseEvaluator):
         dataset_config = module_specific_params['datasets'][0]
         launcher_config = module_specific_params['launchers'][0]
         return (
-            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            model_name, launcher_config['framework'], launcher_config.get('device', 'CPU'), launcher_config.get('tags'),
             dataset_config['name']
         )
 

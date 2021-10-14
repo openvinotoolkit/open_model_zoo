@@ -310,6 +310,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         else:
             raise ConfigError('accuracy per class metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
+        self.meta['names'] = list(self.labels.values())
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))
@@ -336,7 +337,6 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         return result
 
     def evaluate(self, annotations, predictions):
-        self.meta['names'] = list(self.labels.values())
         if self.profiler:
             self.profiler.finish()
         return self.accuracy.evaluate()
@@ -349,6 +349,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def set_profiler(self, profiler):
         self.profiler = profiler
         self.summary_helper = ClassificationProfilingSummaryHelper()
+
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -370,6 +371,7 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.video_avg_prob = AverageProbMeter()
         self.previous_video_id = None
         self.previous_video_label = None
+        self.meta['names'] = ['clip_accuracy', 'video_accuracy']
 
     def update(self, annotation, prediction):
         if isinstance(annotation.identifier, list):
@@ -394,7 +396,6 @@ class ClipAccuracy(PerImageEvaluationMetric):
         return clip_accuracy
 
     def evaluate(self, annotations, predictions):
-        self.meta['names'] = ['clip_accuracy', 'video_accuracy']
         if self.profiler:
             self.profiler.finish()
         return [self.clip_accuracy.evaluate(), self.video_accuracy.evaluate()]
@@ -437,6 +438,10 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             raise ConfigError('classification_f1-scores metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
         self.cm = np.zeros((len(self.labels), len(self.labels)))
+        if self.pos_label is not None:
+            self.meta['names'] = [self.labels[self.pos_label]]
+        else:
+            self.meta['names'] = list(self.labels.values())
 
     def update(self, annotation, prediction):
         self.cm[annotation.label][prediction.label] += 1
@@ -464,10 +469,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             self.profiler.finish()
 
         if self.pos_label is not None:
-            self.meta['names'] = [self.labels[self.pos_label]]
             return f1_score[self.pos_label]
-
-        self.meta['names'] = list(self.labels.values())
         return f1_score if len(f1_score) == 2 else f1_score[0]
 
     def reset(self):

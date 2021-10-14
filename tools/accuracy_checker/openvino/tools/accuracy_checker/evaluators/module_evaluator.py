@@ -20,6 +20,10 @@ import sys
 import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
+from ..logging import warning
+from ..dataset import Dataset
+from ..presenters import generate_csv_report
+from ..metrics import MetricsExecutor
 
 
 # pylint:disable=R0904
@@ -142,6 +146,35 @@ class ModuleEvaluator(BaseEvaluator):
     def dataset_size(self):
         return self._internal_module.dataset_size
 
+    @classmethod
+    def provide_metric_references(cls, conf, subset, return_header=True):
+        processing_info = cls.get_processing_info(conf)
+        dataset_config = conf['module_config']['datasets'][0]
+        dataset = Dataset(dataset_config)
+        dataset_size = len(dataset)
+        ignore_config_refs = False
+        if subset is not None:
+            dataset_config['subsample_size'] = subset
+            new_dataset = Dataset(dataset_config)
+            if len(new_dataset) != len(dataset):
+                ignore_config_refs = True
+                warning('Subset is not matched with configuration. Reference values will be ignored')
+                dataset_size = len(new_dataset)
+                dataset = new_dataset
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        extracted_results, extracted_meta = [], []
+        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(ignore_config_refs):
+            result, metadata = result_presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+        header, report = generate_csv_report(processing_info, extracted_results, dataset_size, extracted_meta)
+        if not return_header:
+            return report
+        return header, report
 
 def load_module(model_cls, python_path=None):
     module_parts = model_cls.split(".")

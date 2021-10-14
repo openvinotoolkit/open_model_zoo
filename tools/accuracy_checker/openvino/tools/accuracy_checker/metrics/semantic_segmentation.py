@@ -112,6 +112,13 @@ class SegmentationAccuracy(SegmentationMetric):
 class SegmentationIOU(SegmentationMetric):
     __provider__ = 'mean_iou'
 
+    def configure(self):
+        super().configure()
+        cls_names = list(self.dataset.labels.values())
+        if self.ignore_label is not None:
+            cls_names = [cls_name for cls_id, cls_name in self.dataset.labels.items() if cls_id != self.ignore_label]
+        self.meta['names'] = cls_names
+
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
@@ -145,6 +152,10 @@ class SegmentationIOU(SegmentationMetric):
 
 class SegmentationMeanAccuracy(SegmentationMetric):
     __provider__ = 'mean_accuracy'
+
+    def configure(self):
+        super().configure()
+        self.meta['names'] = list(self.dataset.labels.values())
 
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
