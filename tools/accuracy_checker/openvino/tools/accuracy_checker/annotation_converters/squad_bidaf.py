@@ -28,6 +28,7 @@ try:
 except ImportError as import_error:
     nltk = UnsupportedPackage("nltk", import_error.msg)
 
+
 class SQUADConverterBiDAF(BaseFormatConverter):
     __provider__ = "squad_bidaf"
     annotation_types = (QuestionAnsweringBiDAFAnnotation, )
