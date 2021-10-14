@@ -124,7 +124,8 @@ class SQUADConverterEMB(BaseFormatConverter):
                 description='The maximum number of tokens for the question.',
                 optional=True, default=64, value_type=int
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'enable_padding': BoolField(optional=True, default=True, description='enable padding to max length')
         })
 
         return configuration_parameters
@@ -135,6 +136,7 @@ class SQUADConverterEMB(BaseFormatConverter):
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.lower_case = self.get_value_from_config('lower_case')
         vocab_file = str(self.get_value_from_config('vocab_file'))
+        self.enable_padding = self.get_value_from_config('enable_padding')
         with open(vocab_file, "r", encoding="utf-8") as r:
             self.vocab = {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
 
@@ -157,7 +159,7 @@ class SQUADConverterEMB(BaseFormatConverter):
         def add_sample(ids, max_len, context_pos_id, annotations):
             ids_len = min(max_len - 2, len(ids))
             ids = ids[:ids_len]
-            rest = max_len - (ids_len + 2)
+            rest = max_len - (ids_len + 2) if not self.enable_padding else 0
             assert rest >= 0
 
             annotations.append(QuestionAnsweringEmbeddingAnnotation(

@@ -128,7 +128,8 @@ class SQUADConverter(BaseFormatConverter):
                 description="When splitting up a long document into chunks, how much stride to take between chunks.",
                 optional=True, default=128, value_type=int
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'enable_padding': BoolField(optional=True, default=True, description='enable padding for max sequence len')
         })
 
         return configuration_parameters
@@ -142,6 +143,7 @@ class SQUADConverter(BaseFormatConverter):
         self.tokenizer = SquadWordPieseTokenizer(
             self.get_value_from_config('vocab_file'), self.lower_case, max_len=512
         )
+        self.enable_padding = self.get_value_from_config('enable_padding')
 
     @staticmethod
     def _load_examples(file):
@@ -205,7 +207,7 @@ class SQUADConverter(BaseFormatConverter):
                     span_doc_tokens if self.tokenizer.padding_side == "right" else truncated_query,
                     max_length=self.max_seq_length,
                     return_overflowing_tokens=True,
-                    pad_to_max_length=True,
+                    pad_to_max_length=self.enable_padding,
                     stride=self.max_seq_length - self.doc_stride - len(truncated_query) - sequence_pair_added_tokens,
                     truncation_strategy="only_second" if self.tokenizer.padding_side == "right" else "only_first",
                     return_token_type_ids=True,
