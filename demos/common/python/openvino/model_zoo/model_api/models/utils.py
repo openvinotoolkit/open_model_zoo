@@ -103,18 +103,18 @@ def load_labels(label_file):
     return labels_map
 
 
-def resize_image(image, size, keep_aspect_ratio=False):
+def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
     if not keep_aspect_ratio:
-        resized_frame = cv2.resize(image, size)
+        resized_frame = cv2.resize(image, size, interpolation=interpolation)
     else:
         h, w = image.shape[:2]
         scale = min(size[1] / h, size[0] / w)
-        resized_frame = cv2.resize(image, None, fx=scale, fy=scale)
+        resized_frame = cv2.resize(image, None, fx=scale, fy=scale, interpolation=interpolation)
     return resized_frame
 
 
-def resize_image_with_aspect(image, size):
-    return resize_image(image, size, keep_aspect_ratio=True)
+def resize_image_with_aspect(image, size, interpolation=cv2.INTER_LINEAR):
+    return resize_image(image, size, keep_aspect_ratio=True, interpolation=interpolation)
 
 
 def pad_image(image, size):
@@ -125,13 +125,13 @@ def pad_image(image, size):
     return image
 
 
-def resize_image_letterbox(image, size):
+def resize_image_letterbox(image, size, interpolation=cv2.INTER_LINEAR):
     ih, iw = image.shape[0:2]
     w, h = size
     scale = min(w / iw, h / ih)
     nw = int(iw * scale)
     nh = int(ih * scale)
-    image = cv2.resize(image, (nw, nh))
+    image = cv2.resize(image, (nw, nh), interpolation=interpolation)
     dx = (w - nw) // 2
     dy = (h - nh) // 2
     resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
@@ -143,6 +143,14 @@ RESIZE_TYPES = {
     'standard': resize_image,
     'fit_to_window': resize_image_with_aspect,
     'fit_to_window_letterbox': resize_image_letterbox,
+}
+
+
+INTERPOLATION_TYPES = {
+    'LINEAR': cv2.INTER_LINEAR,
+    'CUBIC': cv2.INTER_CUBIC,
+    'NEAREST': cv2.INTER_NEAREST,
+    'AREA': cv2.INTER_AREA,
 }
 
 
