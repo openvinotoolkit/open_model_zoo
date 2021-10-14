@@ -252,6 +252,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
+            TestCase(options={'-at': 'jr',
+                '-m': ModelArg('fbcnn')}
+            )
         ]
     )),
 
