@@ -291,6 +291,12 @@
    omz_models_model_wavernn
 
 
+.. raw:: html
+
+   <script>
+      window.TABLE_SORT = true;
+   </script>
+
 @endsphinxdirective
 
 OpenVINO&trade; toolkit provides a set of public pre-trained models

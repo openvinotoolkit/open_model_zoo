@@ -228,6 +228,12 @@
    omz_models_model_text_recognition_0015
 
 
+.. raw:: html
+
+   <script>
+      window.TABLE_SORT = true;
+   </script>
+
 @endsphinxdirective
 
 OpenVINO&trade; toolkit provides a set of Intel's pre-trained models
