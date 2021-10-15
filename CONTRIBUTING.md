@@ -155,7 +155,7 @@ task_type: classification
 files:
   - name: tf-densenet121.tar.gz
     size: 30597420
-    sha384: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+    sha384: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
     source:
       $type: google_drive
       id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
