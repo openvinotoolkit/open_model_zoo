@@ -326,7 +326,7 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/README.md)                                                          | PyTorch      | 0.901    | 4.770  | 0.184   |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/README.md)                                                  | Caffe        | 0.6907   | 58.572 | 6.686   |
 | [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/README.md)                                                                      | PyTorch      | 71.95%   | 260.1  | 31.03   |
-| [icnet-camvid-ava-0001](./icnet-camvid-ava-0001/README.md)                                                                      | PyTorch      | 75.42%   | 75.818 | 26.704  |                                                                          | PyTorch      | 71.95%   | 260.1  | 31.03   |
+| [icnet-camvid-ava-0001](./icnet-camvid-ava-0001/README.md)                                                                      | PyTorch      | 75.42%   | 75.818 | 26.704  |
 | [icnet-camvid-ava-sparse-30-0001](./icnet-camvid-ava-sparse-30-0001/README.md)                                                  | PyTorch      | 75.87%   | 75.818 | 26.704  |
 | [icnet-camvid-ava-sparse-60-0001](./icnet-camvid-ava-sparse-60-0001/README.md)                                                  | PyTorch      | 75.79%   | 75.818 | 26.704  |
 
@@ -378,9 +378,8 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md)                  | PyTorch      | 75.31%   | 134.513| 17.270  |
 | [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) - encoder                              | PyTorch      | 81.5%    | 16.56  | 1.86    |
 | [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) - decoder                              | PyTorch      | 81.5%    | 1.69   | 2.56    |
-
 | [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) - encoder      | PyTorch      | 70.5%    | 12.8447| 0.2017  |
-| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) - decoder      | PyTorch      | 70.5%    | 0.2017 | 2.5449  |  
+| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) - decoder      | PyTorch      | 70.5%    | 0.2017 | 2.5449  |
 
 
 ## Text Spotting
