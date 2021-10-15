@@ -18,7 +18,7 @@ task_type: detection
 files:
   - name: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
     size: 135664441
-    sha384: e8886ece7f3a0993678440305a98f5be649a90b314c95ca94565c23ed20b1fb0
+    sha384: e89adbaf822f508c30e77b9aa6e9a0a566493466617064c3ee7203d9210756f6d5cd5740140ce2c0df46514d37bb5023
     source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 postprocessing:
   - $type: unpack_archive

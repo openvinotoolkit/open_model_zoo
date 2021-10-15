@@ -19,19 +19,19 @@ task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-generation.xml
     size: 232924
-    sha384: c4c67949991e3d5f69c97f072afcbb5c0672d6c258b78a4f27dce076e2b6a5b3
+    sha384: a1dd56f33d09b6ee1c745788e626dbf5846688a28f62eafd58050737ce47a9f8070a19654803e4d45ed14a9b70a2f5f9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.xml
   - name: FP32/text-to-speech-en-multi-0001-generation.bin
     size: 51082860
-    sha384: 85b709e49e2bfcdf6e5f519d593658a47ee28a0a0dd2719a398bc60c88bd5edd
+    sha384: 34f69abdc93df984c7771149b2bc127509649230f7ef41fe9ea8f4eaea3ecbe1fd3856ac005079339fc89b071c46b08c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.bin
   - name: FP16/text-to-speech-en-multi-0001-generation.xml
     size: 232908
-    sha384: 2168f46f9c5e0a3f7ceb143a04285c8d839cdbfe43893294a84880586886df75
+    sha384: 56eb0e3a7fd49e1defbcfdff565df95342a696abc591f3312f9af2303563fe3b938cf590215fe082c77a88e64b4c79cf
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.xml
   - name: FP16/text-to-speech-en-multi-0001-generation.bin
     size: 25541540
-    sha384: 688ec9f7a883b1b805c0f1e5dd69c366cff7454622c44b108f107146fcbc0b33
+    sha384: 0a36ab0702b9fc6cfc1a2023b9ef46f1aa0d01d01e87c0bc011fbdf4b3806ed9f57448976e6658835b7c8d6f9d49de9b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

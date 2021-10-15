@@ -21,11 +21,11 @@ task_type: classification
 files:
   - name: predict_net.pb
     size: 77239
-    sha384: 820772d4e7b907599cba93ab0e7d2db0dc0b6e313e842a8729a0ea0354e4a719
+    sha384: c2bb28b1680d948ae273ea35e33ddddaccc4892e2db2e57a9869d26f877888d9495a7f806152738edc9168caeea38ce2
     source: https://s3.amazonaws.com/download.caffe2.ai/models/densenet121/predict_net.pb
   - name: init_net.pb
     size: 40785727
-    sha384: a3650579bc883a1755750994507c48d84d0f75d193e304eb8caf5031acb5f028
+    sha384: 90176032f71fb6928f3ef71147895809e0a3874a7948900eeb3d15aca69df701a4cca146ef97a402bd0183745dc7f5fe
     source: https://s3.amazonaws.com/download.caffe2.ai/models/densenet121/init_net.pb
 framework: caffe2
 quantizable: yes

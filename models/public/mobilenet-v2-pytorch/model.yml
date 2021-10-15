@@ -27,7 +27,7 @@ task_type: classification
 files:
   - name: mobilenet_v2-b0353104.pth
     size: 14212972
-    sha384: b03531047ffacf1e2488318dcd2aba1126cde36e3bfe1aa5cb07700aeeee9889
+    sha384: ca1be3e2eb8015c2876bfa6da5f35c9db9e2167281f972adfef6de332688d11ebe649f646e88f7410d8694e554a27613
     source: https://download.pytorch.org/models/mobilenet_v2-b0353104.pth
 framework: pytorch
 conversion_to_onnx_args:

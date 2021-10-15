@@ -18,19 +18,19 @@ task_type: human_pose_estimation
 files:
   - name: FP32/human-pose-estimation-0005.xml
     size: 1082819
-    sha384: faddff73d6645c2efd581979aad84d72888bab9e798e080429052d1f8a74437d
+    sha384: e0346c4508053a0df64828e18635ac608941a0685f0895ad68c42f8c9f96a12758150be505f3b94e1f412fcc55f1514d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0005/FP32/human-pose-estimation-0005.xml
   - name: FP32/human-pose-estimation-0005.bin
     size: 32601740
-    sha384: 51f8f34dbd3a2eab1265b8fa7aa9cbfb4a5c65c8beaadda92c9e3b4e311689ed
+    sha384: 5e5d7e1c1c456d1c6a40b723524f0c1171a2510680a3cdd724cda61f1ffadfc8b0a22635139ea8781ad9ccfdb26d0189
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0005/FP32/human-pose-estimation-0005.bin
   - name: FP16/human-pose-estimation-0005.xml
     size: 1082562
-    sha384: a14e7de99e9edfb38c990401301e6f823032a1ed0d42bed997dc865f797fe181
+    sha384: 4250714caf2f65bb7f4f8e9cba97f28a0cc582abdfb351f42e460aeaed249d0e406a233a4ac1687d15a247e2ba05770d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0005/FP16/human-pose-estimation-0005.xml
   - name: FP16/human-pose-estimation-0005.bin
     size: 16300908
-    sha384: 8d99a9efaf9b5df8bcc8d25811dcd595b6461ab28b8d60a03cea0f238eb7b813
+    sha384: da51ed5b8f5ce38155523ede9907ca8231b3b23cba0669304c7895a5f5e94c8de9f1b19568e8ce21698739bc89633451
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0005/FP16/human-pose-estimation-0005.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

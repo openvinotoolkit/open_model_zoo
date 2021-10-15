@@ -20,7 +20,7 @@ task_type: detection
 files:
   - name: retinanet_resnet50_coco_best_v2.1.0.pb
     size: 152890076
-    sha384: 0bc291e3217afac2aaafc0801d9e9dba02c292f01d6298ce04ba3cdd13dd3490
+    sha384: 0f51df51f4a58c5e0fe65e9ed69f7bb07819e73ebf975c86783e7a176634357b15c212a839c80a31f99a751c88d21683
     source: https://download.01.org/opencv/public_models/052020/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
 model_optimizer_args:
   - --input_shape=[1,1333,1333,3]

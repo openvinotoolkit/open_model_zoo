@@ -21,7 +21,7 @@ task_type: detection
 files:
   - name: yolo-v3-tiny-tf.zip
     size: 32836256
-    sha384: b872207db53b592de64c2a1f04420278a23707aa9a05549efd78778a947fc854
+    sha384: 675da89d10e73f2f5150b914ebb840fb9ef6901c08505ef02d141d64dd98c1a0d1ddc5ecd4ede6e1f9a8573ce1abee9f
     source: https://download.01.org/opencv/public_models/082020/yolo-v3-tiny-tf/yolo-v3-tiny-tf.zip
 postprocessing:
   - $type: unpack_archive

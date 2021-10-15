@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/yolo-v2-tiny-ava-0001.xml
     size: 37012
-    sha384: 27749dbcbc6cd1bcbd3f6329a16c20887b868f1f7fadeb58e960237f2c8a4dbf
+    sha384: 56b7f9c4d5f062b431fe81449b86057f4dfff728cd1d2488b7aeacf42b308eb6e5bc281f1defce2b50a3bbb68edbe408
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP32/yolo-v2-tiny-ava-0001.xml
   - name: FP32/yolo-v2-tiny-ava-0001.bin
     size: 63434896
-    sha384: d7d0219f039d9621efccc3c43e6c74ad6222ee7ba526901e9975ba5661433322
+    sha384: fb44b2ca04828542ea80c0f31f9c5f6e86627d448296f34435bc485c1a0210542f64a8d40acd4309b05d83da31894c78
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP32/yolo-v2-tiny-ava-0001.bin
   - name: FP16/yolo-v2-tiny-ava-0001.xml
     size: 36991
-    sha384: 52b15a4352d3c9f99c62ab5654751021f977ab8ebbe08296d625e53d57a005dc
+    sha384: 2a404227ff6c1a4087c0d3e1113f84eb955e8f76cdba120cdae05e5aa7257e639aef0afb9f452392a391841b4c4314c1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP16/yolo-v2-tiny-ava-0001.xml
   - name: FP16/yolo-v2-tiny-ava-0001.bin
     size: 31717450
-    sha384: a28d0eced820152c696375390124d6e63ed56048190f29982a0d5fd2ce8d2cf4
+    sha384: 0b40d67bf5c5b8bbfd8d821eadd07a51c652bbeb28003f1fbdc833dda35c172e055c0bec9d832a1369fb820d084de151
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP16/yolo-v2-tiny-ava-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-ava-0001.xml
     size: 76415
-    sha384: efd6dd66ecc968a976b72aa350d7a453265f40ad6232e1e3e63f3a5b98f71d18
+    sha384: 1d995298cf8db513a4196be5b02f13fec5905fefe9056c7f38fbe6c14f6f1ebe0464a3b6b98832221392616e2ac34a92
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP16-INT8/yolo-v2-tiny-ava-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-ava-0001.bin
     size: 15874674
-    sha384: 223f50d7864e84341882cff69783974d37f96d17aabb3057d8e8df34f160719b
+    sha384: 88919d7d8d1ef93b8cc68e163a42bca1b021a72cd3247f73af60fa3f489f0e3d7bb6de5d8a4b0f4ae0ad718c625fb30a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-0001/FP16-INT8/yolo-v2-tiny-ava-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

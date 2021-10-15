@@ -19,19 +19,19 @@ task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-0001-regression.xml
     size: 573812
-    sha384: 2fb090bd9b092f70250334b86948f8a0abb94509073b7ff8dafc414b15b22aba
+    sha384: f1e74e0a4ee58b9ae8ffb192f7d9d40f588e442b08e2c2032dbabb4e6be11838fef5dfdd4739cbdf402fb44c6b70477c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.xml
   - name: FP32/text-to-speech-en-0001-regression.bin
     size: 19851412
-    sha384: a9d31ead9743872334a5234e578ba68d89913e34170cf8730116a9b31a7274eb
+    sha384: f1e0327eda382eaf181281658a8c6c07d9113a50e2a6246b7d1b6efe4caf0e5c96d01bbb3057520ac4d7ada0642adc58
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.bin
   - name: FP16/text-to-speech-en-0001-regression.xml
     size: 573558
-    sha384: 444be84ad5e950330f437b7eea51f2b50fc9c6fb29e87affa9ed4f5b043b9426
+    sha384: 1b2034169aca7a74c421634aa2721ed107c41030783da16ed6660d170cd12992145c94e814b731c9a6a7d870e3675649
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.xml
   - name: FP16/text-to-speech-en-0001-regression.bin
     size: 9925782
-    sha384: 1a49ea264fe1f63caea922bc37168f4f5d6770077a532f6ab475ff8520f20dcb
+    sha384: 19169015055c826107816009a1f5467939ffd39aa01b2930b75432e13a93511080bcd4bf82884c33c2228811f2086ae2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

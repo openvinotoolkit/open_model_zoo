@@ -18,19 +18,19 @@ task_type: classification
 files:
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
     size: 103162
-    sha384: fd7c1791bc4b7deb88a0651b97af839bc87f135d5f6799e964065f81cdd3cee5
+    sha384: 0f81610cfff20a91e8a4f7caacc9ab90a2b786ad0ef7c8bb876c68a9e00c04d23cf3a7042c10e921ac70e5fc8a305bdf
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 4190944
-    sha384: 810f1b27051c187daa34dad9898104edaf2808aff0ffd1fb482c08df5c743860
+    sha384: ded916dd2f4915c08fa1cff7b2a0c44ccb37515a5858e8134862808d032e262d6bcd8212650257e97f0b86e83aaf914d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
     size: 103138
-    sha384: d84559e859079b3a2033d2e269226940ca559b0a851a3beb6e4f22fc11616ebf
+    sha384: 82b503e28562483daecaa843c499b12d660272c1f045d36c1b9afc1755825251879f29d8bdd44f6ae5ddb8730f6aade6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 2782084
-    sha384: 031e74abeddc9330a052d7b6719bec8d620263c5dd37f15f51fc9883726874ef
+    sha384: 3780755d60d1a6ca62ed971b0b223f5db2bb7f42c0fdfd3cd0f168e6e977b99d00d4d854ac21bb6692b7354310b62da3
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

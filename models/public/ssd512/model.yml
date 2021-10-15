@@ -37,7 +37,7 @@ task_type: detection
 files:
   - name: ssd512.tar.gz
     size: 100991061
-    sha384: 2d98a6ddd5b4cb0ba59a37fe5d50020457cfe104d45873c3ea43d1e6dcddd12d
+    sha384: 569b25de77ebd11c19fd9934dff148251505414cd3eec0f7419c60f5efc27666b20fc64df1131bc755f61d77335ad0e0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/ssd512/models_VGGNet_VOC0712Plus_SSD_512x512.tar.gz
 postprocessing:
   - $type: unpack_archive

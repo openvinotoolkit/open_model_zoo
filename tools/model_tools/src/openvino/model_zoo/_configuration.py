@@ -42,9 +42,8 @@ class ModelFile:
             sha384_str = validation.validate_string('"sha384"', file['sha384'])
 
             if not RE_SHA384SUM.fullmatch(sha384_str):
-                pass
-                # raise validation.DeserializationError(
-                #     '"sha384": got invalid hash {!r}'.format(sha384_str))
+                raise validation.DeserializationError(
+                    '"sha384": got invalid hash {!r}'.format(sha384_str))
 
             sha384 = bytes.fromhex(sha384_str)
 

@@ -19,10 +19,10 @@ task_type: classification
 files:
   - name: hbonet.py
     size: 12548
-    sha384: f272c67c5910cabca576a6001089b050ae995f6e340d9b3033a2e787c5fbc1ad
+    sha384: 7b069ad80839ed050c9ce5a10d389db1bd529a74b77858648ca168976bc9736fc30715d946e54e55445a5cb23edc4342
     source: https://raw.githubusercontent.com/d-li14/HBONet/e9a76c15e3847b0f032a7000fe0c8138d6f2eb10/models/imagenet/hbonet.py
   - name: hbonet_0_5.pth
-    sha384: 8b4ecae3dbdb93174115ad01f99af563b8ea940db0bcbfd1d4302419c6f859e1
+    sha384: 3aeecf2621a52826a166bb9c7b0fb300964da0af407b63e3cf979e775510144fc38931fd9a08cf724fe3139fc878d4db
     size: 10307426
     source: https://raw.githubusercontent.com/d-li14/HBONet/master/pretrained/hbonet_0_5.pth
 framework: pytorch

@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/vehicle-detection-0202.xml
     size: 200694
-    sha384: 7a0a66e34b2b66c4a50291e5e4f638c36d844c4b49347cde829f3ec411c665e9
+    sha384: 7ec74bd0d96e71ac51f13f9efaed35fe3b0f4f088a0f4cb4350d120c58c98f0999fb48ec52e74a1545085e04d1ca0e4d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP32/vehicle-detection-0202.xml
   - name: FP32/vehicle-detection-0202.bin
     size: 7269168
-    sha384: 5b9c9d0f5d6543fd6c27df7c09d2adc0fd0ae2fb67d803cbfaeabba6861d3de4
+    sha384: b14356dcfefb87d913bb85d35e697a118cc3d0837944d672a6dbea36ed02cc116d32f636a08c36a7d62eb8f41c0103fe
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP32/vehicle-detection-0202.bin
   - name: FP16/vehicle-detection-0202.xml
     size: 200631
-    sha384: 978c8c2bf77ee02f1a7ea920ceb4bdb3db99493fd0de24dd461102c57c25e782
+    sha384: 13219e91027dd83bea5f9eaba5e963d05214dfd672246ec579871b6c588ea32b8408af3650f4b9be2e31c0887a9cf0a0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP16/vehicle-detection-0202.xml
   - name: FP16/vehicle-detection-0202.bin
     size: 3634626
-    sha384: 6e612af65dd992a3013ffff91739a70b93230ac7a98646a1c274daf93f056edc
+    sha384: add1d413846fdaa02eb0e8aea96d3bb0c25d4d75cbc11986ade7911aa19bad7d03fdae7afc83f52322681308dedf0b5e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP16/vehicle-detection-0202.bin
   - name: FP16-INT8/vehicle-detection-0202.xml
     size: 482673
-    sha384: 899b9508a3fe2cadf9cd7021765cbc93ac1969369f968d26939217f6eae9a18f
+    sha384: f6682cc137cd795c52b42577b66c73745567a214c4850b7a33b17b8e4ae8271726d76c848391b0da8750d6fbd278ce1b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP16-INT8/vehicle-detection-0202.xml
   - name: FP16-INT8/vehicle-detection-0202.bin
     size: 1921616
-    sha384: 8ea4bab6809ad081ae7b9b93e03b99bed1ffee547d4615cdf18898e56c0e9a8b
+    sha384: 4c47ab4ebc0c896b41e2f2d75061421fca539b8dd9a9f68908d22c7a43f1fb1cd12d21e65e72c8d9a280ad4259d9c252
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/vehicle-detection-0202/FP16-INT8/vehicle-detection-0202.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -21,7 +21,7 @@ task_type: classification
 files:
   - name: mobilenet-v2-1.4-224.tar.gz
     size: 135977516
-    sha384: a20d0c8d698502dc6a620528871c97a588885df7737556243a3412b39fce85e0
+    sha384: fd257f73e8ee5280328903afa6bbd646dcf4e8ae7c090e3424cf05d973c0940fe02ee220a3a5a20ea51cb9caacbf4961
     source: https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz
 postprocessing:
   - $type: unpack_archive

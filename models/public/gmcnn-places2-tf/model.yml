@@ -22,7 +22,7 @@ task_type: image_inpainting
 files:
   - name: gmcnn-places2-tf.zip
     size: 46187310
-    sha384: 18df63c6e244029691a4ad0d33760d92d346df71fe2c5cafe228d1c39e23eb3d
+    sha384: 35fbd27cfab9f23fe0e5cf87cce3bb6b200af657f3a21054f0d430b1a2b430a004a128a9acd19e0ee3bb6983d48cbbba
     source: https://download.01.org/opencv/public_models/092020/gmcnn-places2-tf/gmcnn-places2-tf.zip
 postprocessing:
   - $type: unpack_archive

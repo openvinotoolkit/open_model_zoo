@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/yolo-v2-ava-0001.xml
     size: 84732
-    sha384: 88b3a5ab21e2a1eb6078834d91e4607d80246568141c9f748b5717aa8b63517a
+    sha384: 94fa2b370a9367d9e1f609b775f2bd6a901a81e7d8e8484bde35bb130700194c0f80f44a4853268c29788f67ec4a366a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
   - name: FP32/yolo-v2-ava-0001.bin
     size: 202580240
-    sha384: ec32cd3d02e629685dc818a8af5734630c1f778a8a715cef93444aeb1bc88132
+    sha384: 4d25c6def4815cfc68261ea8b646b3995db8d374f8e11760f21eeb026addab87c2ab0e751458f2a5dbd9ccee9d05a5dc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
   - name: FP16/yolo-v2-ava-0001.xml
     size: 84703
-    sha384: 124dfec7f7b8bedc55ae4adef87f388ba02ae56f41fc54c8570bd1d8895e770a
+    sha384: b3fa31cb8dbbea60cb465ddf3de2db07feb76350b2625823be23ece9db05ea676fd450fb76bc083d47eab5ed39104a35
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
   - name: FP16/yolo-v2-ava-0001.bin
     size: 101290122
-    sha384: 3d64e39d4c0378eaf870834a072725bc9e7320a5cc4ffa3422f13d0dcd170ddf
+    sha384: a687bb2b57479b05595bef2c0d2515766128271535f3c078178e533bfb08fd6982362121bb2ee44f3d68af67bfcce103
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
   - name: FP16-INT8/yolo-v2-ava-0001.xml
     size: 182973
-    sha384: a0ecd3a86f760a706732f62bc25d543c1df43679a154e85cce3647c2a19c2109
+    sha384: cba03125b8a09e4cc14bfc23f2a417514bc3aa75c1658ae00155d71431a47d425c000f2fadf6f2d807ed0a1caa4bde84
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
   - name: FP16-INT8/yolo-v2-ava-0001.bin
     size: 50697466
-    sha384: 5ff7998ee1139a19a3765cc4e2fb672022fbaf5007791dca657a3e0a339231b9
+    sha384: 1e799cff915cc09cd01026ee322ad70f10551e12c00f3fd3699cd8711a604214588743e78690b60392fafc31f6b5c790
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

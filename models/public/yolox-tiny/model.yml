@@ -24,35 +24,35 @@ task_type: detection
 files:
   - name: models/yolox.py
     size: 1374
-    sha384: a4d70f5ef75dfbb1da5394d886dc348c68cdfbb27ab725f36c313e981ba605ee
+    sha384: eb0fe479a6b65b1292644955e7c3717dab1271d5854a4ec5b3d671f18805848cbddd8541b779394daeb96acb7e3fba06
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolox.py
   - name: models/yolo_head.py
     size: 23223
-    sha384: 84bed77f74ce74de49f713a558729df1fac35f506a01f6b390313be9e24c9ba8
+    sha384: d48caa0874839ca3d45e5209db339733ecdafeb02af7216278544c995539beda6a07549a317cca0055ecba13c2b0ee50
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolo_head.py
   - name: models/yolo_pafpn.py
     size: 3540
-    sha384: bfeb522c87fc076659c804927751b503ef0185fe1cf8f9f7153369e9177a9627
+    sha384: 9037b1ec330b8071e9e8984410ebfc54119385a47fde1f02b9831a50f0383d5701b4e778a49be37d5252da029e956322
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolo_pafpn.py
   - name: models/darknet.py
     size: 6028
-    sha384: 37fd32ae7f7de29df646f7c457837834fcc0e4e08ce83034a6397092fbae6a62
+    sha384: 77cb6df3b46d6d9d98c4bdccaba8faeab817110a8133b2a57595e3028697076ecea604724c71a983d1d37b930d5ab671
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/darknet.py
   - name: models/network_blocks.py
     size: 6102
-    sha384: 250982431c53a5ed49c3e465266baeabe3e21a41eac941a8e5345c2e71e14a7d
+    sha384: 96f7f932abae06f57589c30e2e460a0c10064ca095c6a4a687271a19f0d38977dab1897db8f902c6883ba65477e6463d
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/network_blocks.py
   - name: models/losses.py
     size: 1663
-    sha384: 60e8d8586484c5e211e69e41588340c8160774d6b03d097a96662dd98a641d4e
+    sha384: 0c1373e269a1e99f9c77eb88cb9fc279f72cd4d0146d01ff108c10f3fd999a2fe15c1e56e31deeae92d26e5190d0c24c
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/losses.py
   - name: utils/boxes.py
     size: 4481
-    sha384: 1619780dc9b0c008880af3bf0ce498e43675688658c43fd2e5772622a747b992
+    sha384: 6f92071f17c19f8bcac4cf7d38901b4d48e40cbba81ca53c455bd2e17895b3c98c03de6dbb8be9bd12f2ab34cfa7fa0c
     source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/utils/boxes.py
   - name: yolox_tiny.pth
     size: 40726661
-    sha384: cc9aa3fa13339df8417cbce77432960ed44225ed040c7fcb6068f023792551fd
+    sha384: 9083e8c9e2388c0c1ddde44a97f0304a10f8ffc2219943a4b5280d9791b96d9998129c8ba34b5dd2902cfd715fcd8138
     source: https://github.com/Megvii-BaseDetection/storage/releases/download/0.0.1/yolox_tiny.pth
 postprocessing:
   - $type: regex_replace

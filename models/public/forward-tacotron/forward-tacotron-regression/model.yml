@@ -18,7 +18,7 @@ task_type: text_to_speech
 files:
   - name: forward-tacotron-regression.zip
     size: 29948456
-    sha384: 4a087de0f6126335f804bd4b15b672778d824e0f3538f6cc08710291c753ad29
+    sha384: c58dc63650b2f1b45a30891ff2669cf205f7b5fbafff65a4a2a37ddebb2ba4521110dabf27752121ce3ef8369439004e
     source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-regression.zip
 postprocessing:
   - $type: unpack_archive

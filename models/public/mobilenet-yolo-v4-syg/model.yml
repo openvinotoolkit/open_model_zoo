@@ -21,11 +21,11 @@ task_type: detection
 files:
   - name: mobilenet-yolo-v4-syg.pb
     size: 42004202
-    sha384: 47bd93b04b2dd1e29b985bbc9fc6f126342c8e8e140102b875946a3463528569
+    sha384: 8f931bc5bc0adcfaaaa2ddbad8c13838725fe61bfef24ff5ff23ad9268b392c40b3ecb2bbe736152060c7014ced80e6b
     source: https://github.com/legendary111/mobilenet-yolo-v4-syg/releases/download/files/mobilenet-yolo-v4-syg.pb
   - name: yolo_pb2ir.json
     size: 414
-    sha384: 0014370f7236a59cacdbc74bfea83327e0e99f1811f97a1ff6e2b9c70ce67618
+    sha384: 2c5236e29566a0d198e972630941840a98f2fcedce6d39b05dc61980166c29a7da9b55883c5dc8b568d682529c18430f
     source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-v4-syg/yolo_pb2ir.json
 model_optimizer_args:
   - --input_model=$dl_dir/mobilenet-yolo-v4-syg.pb

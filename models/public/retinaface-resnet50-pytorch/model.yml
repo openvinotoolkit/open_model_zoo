@@ -21,19 +21,19 @@ task_type: detection
 files:
   - name: models/retinaface.py
     size: 4865
-    sha384: 367da7b58830d340952b5676504b25d3af3b05992793fc29e100d6ebe17a24c9
+    sha384: def46f34640a3f597838f48a6defe1a08e2eb624251dde189cac46a3148bf9f1159bf259308fb74b0ba8a8a4f24a02e4
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/models/retinaface.py
   - name: models/net.py
     size: 4598
-    sha384: dbb885c0d7bd02865c38f6c9f06a03b0c586201a824f797c57ce87ca466a896f
+    sha384: 6d7791ce8526ddc9068552dff37023a048ef39b25c491e67ee91b0ef780ddba86d895cf88cae5ffc4a181e4849e8383a
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/models/net.py
   - name: data/config.py
     size: 928
-    sha384: 70a8c14459ee47637785b1537da839e03e30d6500dec89e42fb646447d1349ba
+    sha384: 2c139b1b41adf97f09437959fdc24490c7febfa886d4eeb017e63b8f08bda0407735e54de4c8c1ce14be12a18304cd3d
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/data/config.py
   - name: Resnet50_Final.pth
     size: 109497761
-    sha384: 6d1de9c2944f2ccddca5f5e010ea5ae64a39845a86311af6fdf30841b0a5a16d
+    sha384: 80453e582f22ff7786b1392fb0ffb54e0e220ffb71a1381ca05de77673b0da3afeae70540076776a448b0972976c7a3c
     source:
       $type: google_drive
       id: 14KX6VqF69MdSPk3Tr9PlDYbq7ArpdNUW

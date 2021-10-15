@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a04_resnext-50_32x4d_alpha-0.250.tar
     size: 100700160
-    sha384: e4f4d8438cb1cf6e349eb0e583e5cc6bf2754fe6093dc24471e893eb3b8c3944
+    sha384: cd7de5d38afa2e8cc6e73819f1a5fc27b9742c4e21787db5713e031e8acd7ade334011c3448693fbb8b141b2ea629ced
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a04_resnext-50_32x4d_alpha-0.250.tar
 postprocessing:
   - $type: unpack_archive

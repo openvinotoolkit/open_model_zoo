@@ -23,31 +23,31 @@ task_type: instance_segmentation
 files:
   - name: yolact/yolact.py
     size: 31516
-    sha384: b8d43734955dbcedddaa781643000d49309a10d7a3113d8333891d879459f8bb
+    sha384: 8e3b27af4ba4d68600fa37dc9c3716890f41306904c92da4a6f5ff1ee9447d1301835d62d33710a6833d7e8e02c744a1
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/yolact.py
   - name: yolact/backbone.py
     size: 17286
-    sha384: 66e53aa5bd7ad35f978a13f3f5c82728a7c073c463c2a2b22a67f924008ed6a7
+    sha384: 9f507122dfe8c164343d7f302668afc671f3d730e14a454d859e7ccff77e92a77ecf027cccce6eba9ae76f4a3f98594c
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/backbone.py
   - name: yolact/data/config.py
     size: 31172
-    sha384: f1386cb5787eb260638f127a8bb6d04843506c527aa85c655574967819238139
+    sha384: f7f77e46e09d6b2912dee1b9f4bde3a16e79b769eba43b0cac0c53070345bcf3d169752ae60159f134ee44d7a5d70670
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/data/config.py
   - name: yolact/utils/timer.py
     size: 3508
-    sha384: 082ecd0fdd58a9e66fa7e8e9618e22ed3886ca1ceef286aa9e265d98bf35cfd2
+    sha384: 4b2161e5216da3be3089b3d391da206ad3f69b596c9d55353e399de99fa69f17e42803b6a65ac1cbebd62910e6a90dc5
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/timer.py
   - name: yolact/utils/functions.py
     size: 6503
-    sha384: e3adc9e8121c0a20c95539bee00045f541427d883fdbbb8ca05a0d160203c902
+    sha384: 1940ef89ddc62704f1508673c81ed289689644f5c58b23bd1ccbbc2f29fddafd105c0f0f84c6ca2182a1c7343ae99def
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/functions.py
   - name: yolact/layers/interpolate.py
     size: 412
-    sha384: e502fdd29086933d3a5aa10cfaa19b3063d97609e0aed217771001d9b87251a3
+    sha384: f8780a33988fb04c0408f22735f72eb0780295ebc5f5c3a316fabdc1985e957b007deeb525f2980169c46c7e0bfcf407
     source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/layers/interpolate.py
   - name: yolact/yolact_resnet50_54_800000.pth
     size: 127300392
-    sha384: c12bb7a7e0343281db7f1407b376970bb52651f121d0b60bc4a49207acb6d6d7
+    sha384: 7ef5b5367fd30871c77814500bbecbaf32f0a9e5721bba0a1cc4479e78e4d6ed25363ebfe6982b94189a11da1e45cf78
     source:
       $type: google_drive
       id: 1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0

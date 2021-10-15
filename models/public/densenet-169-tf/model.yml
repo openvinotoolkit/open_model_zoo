@@ -21,7 +21,7 @@ task_type: classification
 files:
   - name: densenet169_weights_tf_dim_ordering_tf_kernels.h5
     size: 58541896
-    sha384: ae45d067431199a76e935bfa14a8becf0a77724f203ad07ce6bb1721236391cc
+    sha384: ce016db1b892e52fc784d96ec296b33ec94473d4c73b977175c2fb21bbcfbcf4f269ef15616a635ad337173ca3d0e813
     source: https://storage.googleapis.com/tensorflow/keras-applications/densenet/densenet169_weights_tf_dim_ordering_tf_kernels.h5
 model_optimizer_args:
   - --reverse_input_channels

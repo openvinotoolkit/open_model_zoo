@@ -21,11 +21,11 @@ task_type: detection
 files:
   - name: yolo-v3.pb
     size: 248128731
-    sha384: 8ed66d597a936924e98102a5fa16b38569452e17dbb52ddf2877e0f550f57952
+    sha384: 169977adef481096e57b73d0602ec9f0a85bd692ad90bd46afcf97d1d808ccfa3d1beb719d91cfd22e6e463e0b27a2bd
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolov3.pb
   - name: yolo-v3.json
     size: 384
-    sha384: 90f3ea735a2a8908b66dab744b9ec0425fd2564f7b9be6ebd1564dd38d28ec5c
+    sha384: 9367c59fbd1208675cfa40fc6ebe1c73c1d316e14d59fc7226d2773ed6d0e9d83b276a294db705ace92f60c7a83e1ad6
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
 model_optimizer_args:
   - --input_shape=[1,416,416,3]

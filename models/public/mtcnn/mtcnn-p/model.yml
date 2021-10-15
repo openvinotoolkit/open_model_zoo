@@ -31,11 +31,11 @@ task_type: detection
 files:
   - name: mtcnn-p.prototxt
     size: 2353
-    sha384: adc1756d8515d3ca3a6a186c0fadab66fcae04bd8d3c6388e2fe8797a626dde4
+    sha384: 372af5af8ba5c1820b587b64670ef957e40c5118f7775381d46e4eb88ec8f9cadb7abdeadfa3863459e17bf7b87318fd
     source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.prototxt
   - name: mtcnn-p.caffemodel
     size: 28163
-    sha384: d6085e7f48ba7e6b6f1b58964595f6bce5b97bcc4866751f7b4bdc98f920c096
+    sha384: abf640a47ec5b87724564741121a235581dd15f3782cf0b9380acfa45ef665974b97d8e8122114a66d9973696ae3b35e
     source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
 postprocessing:
   - $type: regex_replace

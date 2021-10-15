@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-2004.xml
     size: 1296909
-    sha384: 1a6beb3dd7f42960636e4eebad9046abc9666a340058745c04dffa9f129546a8
+    sha384: 4068510f2d5bce04b440d4a576062a861d364163bdd7b6a72c3d66ac31db5eb69bf541a2ac0ec7e81221d831a55a6f32
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.xml
   - name: FP32/person-vehicle-bike-detection-2004.bin
     size: 7811564
-    sha384: b9670aeea2b738fcaa36d3a399b45bb131a8990b7fdd3b864d8bc993fc1781e6
+    sha384: 2256a40e90f9c0778dae01187ebc5abaf9eb6ebc4c88352bb12ce7b0212b943f8a299061139ca1586bc1e45266824f43
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.bin
   - name: FP16/person-vehicle-bike-detection-2004.xml
     size: 1296737
-    sha384: 4600662a26bb34c828a12942cbc37a4d4b55d99ee42f4c28070cf39a273b9c17
+    sha384: 8c61102021677d0e02e185356e494bf9552ece535d2a80cd2d76f65e695518627462009cccc245dc1b0a3842b455d1a0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.xml
   - name: FP16/person-vehicle-bike-detection-2004.bin
     size: 3906004
-    sha384: b49072fef26ccb5d7d8fd3a64a3d8938c9f938510e2c391ca697bde54bc8fc9a
+    sha384: 4b7fe5676e3593411b259c26c6384682b1ead9bde50acc935cd00294442bee61dcc4ef38140c19c5c4d00d56630b9109
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.bin
   - name: FP16-INT8/person-vehicle-bike-detection-2004.xml
     size: 1858288
-    sha384: bf4f244d8e308e81f995c7ead3e644bb369acc1e650e8d8d1a96a9a0ba4a2da0
+    sha384: 63a0c6a797455fb5ed505fd723b26e6936b3d8e85f33412dc2432b8962165e216e20cdf3b8c59b56c3b4edae792c8e45
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.xml
   - name: FP16-INT8/person-vehicle-bike-detection-2004.bin
     size: 2055438
-    sha384: ebeedb8c98a43fed577aac85749c04ba4e29001874cc53ef4448fcbbfd037bf3
+    sha384: fd28f40790051abf63b7ddff5bb22a974988c6452d7b56f46b623868f1be944e8fb47fdc60ef63cf1b57bc9dd89e67f8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

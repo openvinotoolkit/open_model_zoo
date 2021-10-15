@@ -19,19 +19,19 @@ task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-poconetlike-0001.xml
     size: 1496368
-    sha384: 6e541ae374b739a7daf5fbcc437adc23c8d6e05eab3fdf88efec63ae233dc25e
+    sha384: a178d77627473c743f1913deb79bad3ea0722cc33ced12dfc885264a793e80b1e8fedf0790c292d51fa83eccd214cda4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
   - name: FP32/noise-suppression-poconetlike-0001.bin
     size: 29589616
-    sha384: 2761132d65d43933e5eef6acf763c013a68e0ee7d097f6ec5b0293e2d1c86863
+    sha384: a4fac74c9d2ca9a217464dc1e1ae8f4c8cec1187d9ec961043f6d49a11213cc1b11529d0b7d79a746cd1e05ad5af0809
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
   - name: FP16/noise-suppression-poconetlike-0001.xml
     size: 1496238
-    sha384: ee245abd973772daae2c42e24613892f0c81908050f9497721a535a68108bcdd
+    sha384: 3eb339ee2cc336d1cee65dfa7ad104186e57a9216b9b4a679a2384848e21e8412fabc5e98595c67c6abe4a19c9d63d5c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
   - name: FP16/noise-suppression-poconetlike-0001.bin
     size: 14795124
-    sha384: 6d6f42bb8d4efa35243385a2e7d4b3407cca13524c4946271775c7aefc06a1e5
+    sha384: a7079744ba378094b2285c28eb7f79454ca9ff778f86a28fb46ac3ec93c049632b4c5a0712f9067a166290bdf36e50a7
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

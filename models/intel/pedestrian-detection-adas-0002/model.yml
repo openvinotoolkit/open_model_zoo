@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/pedestrian-detection-adas-0002.xml
     size: 245104
-    sha384: dc4c590b351a7ce04cd8329b80cd0d72519aad7976980fc33d827825ba4775f6
+    sha384: 677956f4ed5d8321d10d728eb907c6a872bb1d623e5eacbae6054f8fb0458db4639983efa5bee6a1753610f77e35ef9b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
   - name: FP32/pedestrian-detection-adas-0002.bin
     size: 4660248
-    sha384: 249c964cbe38135cc5f2682288978652dd93aa4918e7043f96f894790f11c265
+    sha384: 73ae5a4a75e2ab2492d0bac7bd55ac55935f31c25566ebfa121248647f53e9e30f3201d7b959fbda5b002834cdff0711
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
   - name: FP16/pedestrian-detection-adas-0002.xml
     size: 245055
-    sha384: 39d623808956ebe550fbf3ef9837cb86dd304169e0eda79cc11ede581a935217
+    sha384: 8f3666672c95527709675596fe1a8ce4f6cb0450ddb3ee9a41d46d6dc134c552b2ab35bed5b53bc89d855284ff1c091f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
   - name: FP16/pedestrian-detection-adas-0002.bin
     size: 2330176
-    sha384: 693753b7466da913b537016b31e3012f8ce6a885ac0897e3986eeca66d4ef8e6
+    sha384: 6d13534345ed4d740eb4569c2b819ecc2e985c2740ec18914e659c9e94b29c35528b5c96162b12d5eb19109a67f9a96f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
   - name: FP16-INT8/pedestrian-detection-adas-0002.xml
     size: 478256
-    sha384: 0169dfc7c439f59939ea2c4de487ebeb43f20102c6f6f3800c2b6e6394c260c1
+    sha384: f263e7110ffcd392b2c86e6da3c65233928c402a4277b8de935c391c84d2bd8641e7efe45a0cdb4c3d5436226fbaf8a3
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.xml
   - name: FP16-INT8/pedestrian-detection-adas-0002.bin
     size: 1212524
-    sha384: 2e77060797f23a539fd41951f566268ad7f0ee06b842b13a149d9d6f744077c8
+    sha384: be05116c6ef364c585a6fbf33e2d9fc2caf9f3fe4219296074e73a5488541bb3b519ce24a5896fea1b994be0318c27ba
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

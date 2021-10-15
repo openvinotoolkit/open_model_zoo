@@ -25,75 +25,75 @@ task_type: semantic_segmentation
 files:
   - name: mit_semseg/lib/__init__.py
     size: 0
-    sha384: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    sha384: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/__init__.py
   - name: mit_semseg/lib/nn/__init__.py
     size: 110
-    sha384: 2600acab3ede0102ff0bd8e8f8d62b21e4fff97f99a95996aa14679b6ec30d01
+    sha384: 4050fd70a8d21b8aea922c6c0d73569cff84b28f66046ccb2113e83c8f12bf8f95db694b9a2bb42a08ad09a870dab9e7
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/__init__.py
   - name: mit_semseg/lib/nn/parallel/__init__.py
     size: 92
-    sha384: fa04ce76f0e4d7a130a7cefca60690b53238010bb11d65b1c305221c36d1aaa1
+    sha384: 7ca260234675a323f56408bea9267de912266a50093b1e0bfb189e0bfa7b5974c9fbf30df6d68e6c9277ef6c884a98eb
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/parallel/__init__.py
   - name: mit_semseg/lib/nn/parallel/data_parallel.py
     size: 3399
-    sha384: 3e4075dc485b063be061c308d88134a644d0b3bc1507f42f40abd3fc69977ee4
+    sha384: 410429adfdd581eecff4c6759a9fab2417812575459a06e43204fe7142347f31b0684fca9a16c112eeb399840751c4e9
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/parallel/data_parallel.py
   - name: mit_semseg/lib/nn/modules/batchnorm.py
     size: 13813
-    sha384: 42258e18cef5fb033e63f6e1a06c2897432c095a7177606ac6bb1119f5f2c856
+    sha384: 74a7edde7fabc84ce35f54b723010c5240e39182fa992b709cff57222b4c93eb191f736f225323cce18947b88b0a9039
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/batchnorm.py
   - name: mit_semseg/lib/nn/modules/comm.py
     size: 4278
-    sha384: a480d504d651eef51b8419254f00d97d5f0b2d9a4af590713605c0148725b234
+    sha384: 6d6bee53d49e2c8c1e6b41f4c66d4cb71aaffcd0b7ba1772822c555f5820138a50d3381186ea96098b7149606582eaaa
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/comm.py
   - name: mit_semseg/lib/nn/modules/__init__.py
     size: 449
-    sha384: 0701e2062245ab6c90b3df6934a21be5c942b44b13c2ebb70695433599af7a15
+    sha384: d206b7e26cd614aaea3b7fe4112b1d58a638c9ae71d4de479563f6fc60072899275b52454aa95875e65c039ebe97e51c
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/__init__.py
   - name: mit_semseg/lib/nn/modules/replicate.py
     size: 3226
-    sha384: 4498b873404fce05202d4f891262e249a95733816d3877e3aee3d2401138a6af
+    sha384: 9f662572ba39a396b98116ee8a4fe1b08fb5905fb2ba88cef3965a0827f6917409e7f25a5d1dcbf06acc986acea87d56
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/replicate.py
   - name: mit_semseg/models/__init__.py
     size: 53
-    sha384: 9117afeac26d724bdba6f9f35d54b7ddab81e33847e717071c6ed789a458d84b
+    sha384: 072644401a4048275a5d5a6ee354254b648a30ff3ad4a5e9c08f69bc75ef304f634d0346ce6389459969f993f63ca291
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/__init__.py
   - name: mit_semseg/models/hrnet.py
     size: 16811
-    sha384: f6e07d7448746b101a30f7b250896a9651b99fa6e02820afcfa69b93a8dd9a1d
+    sha384: 5399e58e38d4547dd44b37f36dce7acfe8a1eec323b0a64c58b94bc89164e7803b57feb0b218150811a099aa33f57f14
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/hrnet.py
   - name: mit_semseg/models/mobilenet.py
     size: 4938
-    sha384: 2462300b9863d40da75d2cbcf785015e53930c3ce37219cb9d4c24b468b63a34
+    sha384: cc215b3f04289d458cc59a4be74cbb4fbe225dce8069dad35bae8953ca39fd4319e540050eae4f0fccebf572fd832ead
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/mobilenet.py
   - name: mit_semseg/models/models.py
     size: 21185
-    sha384: fea2849abca35a260a64e852397bcccad64e2fd495fad668ad1622b5080033eb
+    sha384: 3f2710e28e9169a69aa553220c18038bda7ea4509114bae0b27e326680effe61c154fa47f86604a59e2f85a639644511
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/models.py
   - name: mit_semseg/models/resnet.py
     size: 6770
-    sha384: 685bb02446ce28eb1b110f3dfa9f6534a2ea34f50f09be0d7c165bd2c5c6c899
+    sha384: d1eb13b7aa05bbba2ef6b91094c183a6dbaca1a2df6ec1a93a6aae4015c63d086ba931f3670de1422ac0855f2f4047b7
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/resnet.py
   - name: mit_semseg/models/resnext.py
     size: 5367
-    sha384: 271a95bdabb9e2c00ecc2e6765b7521f708cda5312b4d78bfb895374f3509044
+    sha384: a4a6aa9c445c4e111a565456633e41946085e7dee4e16eb83389e6bf47e3d556d0b864921b9ce3759ece267d345ae91e
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/resnext.py
   - name: mit_semseg/models/utils.py
     size: 577
-    sha384: 55a8f41269be28c17e456e5ae1f246bf71354765739dceca1e45becd58cba5e2
+    sha384: 966c87730a8883fa54adcd1b3147c9ddd4e5a1a8aca51213e58029bf1dfba19ee976d67b93ae8ff7acb1e4d6f4e6b906
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/utils.py
   - name: mit_semseg/__init__.py
     size: 63
-    sha384: 7e58a465dbf83903f13d94ffce5b3353bcc8eb2154cd568bb405341f8a02ce5e
+    sha384: 6d7e00aba39cfd252198183cfcd63a51afb6bf841abb5d60b14316aa0ca7138f4c2e340480d30f2175a21c7b485db85f
     source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/__init__.py
   - name: ckpt/decoder_epoch_30.pth
     size: 4780389
-    sha384: 6060764940b620804befaca4df916de019c82c4e96ace00916991e223af37d1e
+    sha384: 943a8e1974c5f678fec59b3eb5d5859c9c95f82be607f10aac5261730d2e813274440b177970fb55a08f29f2bc5bdf89
     source: http://sceneparsing.csail.mit.edu/model/pytorch/ade20k-hrnetv2-c1/decoder_epoch_30.pth
   - name: ckpt/encoder_epoch_30.pth
     size: 262518297
-    sha384: 0bba1a5da1484b21a42f89e05459e434119c829d6aae64d1c6d3ae0c38d2b43c
+    sha384: e01539688455d218c189c41381f58e2d1e6383d7dad057cc921cada06fb3c0f014f6f72e7a44e4a082356d98417fddfb
     source: http://sceneparsing.csail.mit.edu/model/pytorch/ade20k-hrnetv2-c1/encoder_epoch_30.pth
 conversion_to_onnx_args:
   - --model-path=$config_dir

@@ -18,7 +18,7 @@ task_type: classification
 files:
   - name: open-closed-eye.onnx
     size: 46164
-    sha384: 4daa100034482525a26c9afb9297c16580a531189e66e3d2b2ac7d32becfd593
+    sha384: 2615bce53b55620c629db21b043057600ccc53466f053c0a8277c43577c2db21e48f330cf9b15213016d17cddb8cba27
     source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
 framework: onnx
 model_optimizer_args:

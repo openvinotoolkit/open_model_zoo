@@ -21,7 +21,7 @@ task_type: classification
 files:
   - name: mobilenet_v1_0.5_160.tgz
     size: 29958343
-    sha384: 6bbc9dd7892433e49b4b6ff6af2952183eaa6c1c0cb862868465377a29c77b0d
+    sha384: 7023a17e0f7dd48ffb3607ef1d7712702b1eb110d1a2c14f80bdf41b08148a07f9521a22250b5ef214b59a0bf62ef88b
     source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_0.5_160.tgz
 postprocessing:
   - $type: unpack_archive
