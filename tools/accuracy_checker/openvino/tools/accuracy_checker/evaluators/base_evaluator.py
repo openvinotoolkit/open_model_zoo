@@ -17,7 +17,6 @@ limitations under the License.
 from ..presenters import write_csv_result
 
 
-# base class for custom evaluators
 class BaseEvaluator:
     # create class instance using config
     @classmethod

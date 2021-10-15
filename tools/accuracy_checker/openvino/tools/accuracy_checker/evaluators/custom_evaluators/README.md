@@ -5,14 +5,12 @@ Suggested approach based on writing python module which will describe validation
 
 ## Implementation
 Adding new evaluator process similar with adding any other entities in the tool.
-Custom evaluator is the class which should be inherited from BaseEvaluator and overwrite all abstract methods.
+Custom evaluator is the class which should be inherited from BaseCustomEvaluator and overwrite methods necessary for the evaluator.
 
 The most important methods for overwriting:
 
 * `from_configs` - create new instance using configuration dictionary.
-* `process_dataset` - determine validation cycle across all data batches in dataset.
-* `compute_metrics` - metrics evaluation after dataset processing.
-* `reset` - reset evaluation progress
+* `_process` - determine validation cycle across all data batches in dataset.
 
 ## Configuration
 Each custom evaluation config should start with keyword `evaluation` and contain:
