@@ -14,11 +14,11 @@
    :hidden:
    :caption: Action Recognition Models
    
-      omz_models_model_action_recognition_0001
-      omz_models_model_asl_recognition_0004
-      omz_models_model_common_sign_language_0002
-      omz_models_model_driver_action_recognition_adas_0002
-      omz_models_model_weld_porosity_detection_0001
+   omz_models_model_action_recognition_0001
+   omz_models_model_asl_recognition_0004
+   omz_models_model_common_sign_language_0002
+   omz_models_model_driver_action_recognition_adas_0002
+   omz_models_model_weld_porosity_detection_0001
 
 .. toctree::
    :maxdepth: 1
