@@ -123,6 +123,7 @@ from .amazon import AmazonProductData
 from .wgs import WGSTFRecords, WGSPickleRecords
 from .sentence_similarity import SentenceSimilarityConverter
 from .common_text_recognition import CommonTextRecognition
+from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -245,5 +246,6 @@ __all__ = [
     'WGSTFRecords',
     'WGSPickleRecords',
     'SentenceSimilarityConverter',
-    'CommonTextRecognition'
+    'CommonTextRecognition',
+    'COCOFacialLandmarksRecognitionConverter'
 ]
