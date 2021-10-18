@@ -12,6 +12,20 @@ models:
             type: CONST_INPUT
             value: [[800, 1365, 1]]
 
+      - framework: opencv
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[800, 1365, 1]]
+            shape: 3
+          - name: image_tensor
+            type: INPUT
+            shape: 3, 800, 1365
+        adapter:
+          type: mask_rcnn
+          detection_out: reshape_do_2d
+          raw_masks_out: masks
+
     datasets:
       - name: ms_coco_mask_rcnn_short_91_classes
         metrics:

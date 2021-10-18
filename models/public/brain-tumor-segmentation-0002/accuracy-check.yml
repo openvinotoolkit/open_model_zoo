@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter:
           type: brain_tumor_segmentation
+      - framework: opencv
+        inputs:
+          - name: '0'
+            type: INPUT
+            shape: 4, 128, 128, 128
+        adapter:
+          type: brain_tumor_segmentation
 
     datasets:
       - name: BraTS_2017

@@ -40,6 +40,17 @@ models:
           - name: "Placeholder_1"
             type: INPUT
             value: '.*mask'
+      - framework: opencv
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+            shape: 3, 512, 680
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+            shape: 1, 512, 680
+        adapter: inpainting
 
     datasets:
       - name: inpainting_rect_masks

@@ -10,6 +10,14 @@ models:
         adapter:
           type: style_transfer
 
+      - framework: opencv
+        inputs:
+          - name: input1
+            type: INPUT
+            shape: 3, 224, 224
+        adapter:
+          type: style_transfer
+
     datasets:
       - name: ms_coco_style_transfer
         preprocessing:

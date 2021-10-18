@@ -15,6 +15,21 @@ models:
             type: INPUT
             value: bgr*
 
+      - framework: opencv
+        adapter:
+          type: background_matting_with_pha_and_fgr
+          alpha_out: pha
+          foreground_out: fgr
+        inputs:
+          - name: src
+            type: INPUT
+            value: com*
+            shape: 3, 720, 1280
+          - name: bgr
+            type: INPUT
+            value: bgr*
+            shape: 3, 720, 1280
+
     datasets:
       - name: HumanMattingClips120
         reader: pillow_imread

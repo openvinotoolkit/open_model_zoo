@@ -3,10 +3,11 @@ models:
 
     launchers:
       - framework: tf
-        model:   yolo-v2-tiny.pb
+        model: yolo-v2-tiny.pb
         adapter:
           type: yolo_v2
-          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282,
+            3.52778, 9.77052, 9.16828"
           num: 5
           coords: 4
           classes: 80
@@ -50,7 +51,20 @@ models:
       - framework: openvino
         adapter:
           type: yolo_v2
-          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282,
+            3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
+      - framework: opencv
+        inputs:
+          - name: image_input
+            type: INPUT
+            shape: 3, 416, 416
+        adapter:
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282,
+            3.52778, 9.77052, 9.16828"
           num: 5
           coords: 4
           classes: 80

@@ -1,5 +1,5 @@
 models:
-  - name:  rfcn-resnet101-coco-tf
+  - name: rfcn-resnet101-coco-tf
     launchers:
       - framework: openvino
         adapter: ssd
@@ -7,6 +7,17 @@ models:
           - name: image_info
             type: CONST_INPUT
             value: [[600, 600, 1]]
+
+      - framework: opencv
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 600, 1]]
+            shape: 3
+          - name: image_tensor
+            type: INPUT
+            shape: 3, 600, 600
+        adapter: ssd
 
     datasets:
       - name: ms_coco_detection_91_classes

@@ -7,6 +7,17 @@ models:
           outputs:
             - duration
             - embeddings
+      - framework: opencv
+        inputs:
+          - name: input_seq
+            type: INPUT
+            shape: 241
+        adapter:
+          type: multi_output_regression
+          outputs:
+            - duration
+            - embeddings
+
     datasets:
       - name: tacotron-io-duration-prediction
         metrics:

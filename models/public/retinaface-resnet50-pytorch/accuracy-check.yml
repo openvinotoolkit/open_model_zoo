@@ -7,6 +7,17 @@ models:
           bboxes_output: face_rpn_bbox_pred
           scores_output: face_rpn_cls_prob
           landmarks_output: face_rpn_landmark_pred
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 640, 640
+        adapter:
+          type: retinaface_pytorch
+          bboxes_output: face_rpn_bbox_pred
+          scores_output: face_rpn_cls_prob
+          landmarks_output: face_rpn_landmark_pred
+
     datasets:
       - name: wider
         preprocessing:

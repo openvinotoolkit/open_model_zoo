@@ -9,6 +9,14 @@ models:
             name: input
             layout: NCDHW
 
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            layout: NCDHW
+            shape: 3, 8, 224, 224
+        adapter: classification
+
     datasets:
       - name: jester
 

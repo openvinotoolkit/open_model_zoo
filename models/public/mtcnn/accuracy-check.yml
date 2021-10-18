@@ -95,6 +95,7 @@ evaluations:
             - name: data
               type: INPUT
               layout: NCWH
+              shape: 3, 720, 1280
           preprocessing:
             - type: bgr_to_rgb
             - type: pyramid
@@ -109,6 +110,7 @@ evaluations:
             - name: data
               type: INPUT
               layout: NCWH
+              shape: 3, 24, 24
           preprocessing:
             - type: bgr_to_rgb
 
@@ -120,11 +122,14 @@ evaluations:
             - name: data
               type: INPUT
               layout: NCWH
+              shape: 3, 48, 48
           preprocessing:
             - type: bgr_to_rgb
 
       launchers:
         - framework: openvino
+
+        - framework: opencv
 
       datasets:
         - name: wider

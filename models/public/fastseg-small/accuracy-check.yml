@@ -6,6 +6,15 @@ models:
           type: segmentation
           make_argmax: True
 
+      - framework: opencv
+        inputs:
+          - name: input0
+            type: INPUT
+            shape: 3, 1024, 2048
+        adapter:
+          type: segmentation
+          make_argmax: True
+
     datasets:
       - name: cityscapes
         preprocessing:

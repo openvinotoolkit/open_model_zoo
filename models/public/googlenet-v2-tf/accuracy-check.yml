@@ -4,6 +4,13 @@ models:
       - framework: openvino
         adapter: classification
 
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
     datasets:
       - name: imagenet_1001_classes
         preprocessing:

@@ -8,6 +8,16 @@ models:
           std: 1
           cast_to_uint8: False
 
+      - framework: opencv
+        inputs:
+          - name: input_1
+            type: INPUT
+            shape: 2, 256, 256
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: False
+
     datasets:
       - name: CalgaryCampinasSingleChannel_20perc_downsample
         postprocessing:

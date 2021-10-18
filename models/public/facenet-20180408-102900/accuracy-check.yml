@@ -7,6 +7,15 @@ models:
           type: reid
           joining_method: concatenation
 
+      - framework: opencv
+        inputs:
+          - name: image_batch/placeholder_port_0
+            type: INPUT
+            shape: 3, 160, 160
+        adapter:
+          type: reid
+          joining_method: concatenation
+
     datasets:
       - name: lfw_mtcnn_align
 

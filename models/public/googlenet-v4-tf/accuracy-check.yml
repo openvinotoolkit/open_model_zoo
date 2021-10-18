@@ -30,6 +30,12 @@ models:
     launchers:
       - framework: openvino
         adapter: classification
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 299, 299
+        adapter: classification
 
     datasets:
       - name: imagenet_1001_classes

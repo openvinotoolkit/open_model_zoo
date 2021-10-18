@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: tf
-        model:   yolo-v3.pb
+        model: yolo-v3.pb
         inputs:
           - name: 'input_1'
             type: INPUT
@@ -61,6 +61,22 @@ models:
 
     launchers:
       - framework: openvino
+        adapter:
+          type: yolo_v3
+          anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
+          num: 9
+          coords: 4
+          classes: 80
+          anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+          outputs:
+            - conv2d_58/Conv2D/YoloRegion
+            - conv2d_66/Conv2D/YoloRegion
+            - conv2d_74/Conv2D/YoloRegion
+      - framework: opencv
+        inputs:
+          - name: input_1
+            type: INPUT
+            shape: 3, 416, 416
         adapter:
           type: yolo_v3
           anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"

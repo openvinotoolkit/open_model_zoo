@@ -3,6 +3,13 @@ models:
     launchers:
       - framework: openvino
         adapter: mono_depth
+      - framework: opencv
+        inputs:
+          - name: image
+            type: INPUT
+            shape: 3, 384, 384
+        adapter: mono_depth
+
     datasets:
       - name: ReDWeb_V1
         preprocessing:

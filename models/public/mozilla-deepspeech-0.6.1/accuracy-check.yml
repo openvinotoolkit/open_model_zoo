@@ -13,7 +13,7 @@ models:
           lm_beta: 1.85
           lm_oov_score: -1000.
           lm_vocabulary_offset: 941235601
-          lm_vocabulary_length:   4463723
+          lm_vocabulary_length: 4463723
         inputs:
           - name: input_node
             type: INPUT
@@ -24,6 +24,33 @@ models:
           - name: previous_state_h
             type: LSTM_INPUT
             value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0'
+      - framework: opencv
+        inputs:
+          - name: input_node
+            type: INPUT
+            layout: NHWC
+            shape: 16, 19, 26
+          - name: previous_state_h
+            type: LSTM_INPUT
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0'
+            shape: 2048
+          - name: previous_state_c
+            type: LSTM_INPUT
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd:0'
+            shape: 2048
+        adapter:
+          type: ctc_beam_search_decoder_with_lm
+          probability_out: logits
+          logarithmic_prob: False
+          beam_size: 32
+          # Use option "accuracy_check [...] --model_attributes <path_to_lm>" to provide path to lm.binary.
+          lm_file: mozilla-deepspeech-0.6.1/lm.binary
+          lm_alpha: 0.75
+          lm_beta: 1.85
+          lm_oov_score: -1000.
+          lm_vocabulary_offset: 941235601
+          lm_vocabulary_length: 4463723
+
     datasets:
       - name: librispeech-test-clean
         reader:

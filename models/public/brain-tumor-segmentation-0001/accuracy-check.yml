@@ -7,6 +7,15 @@ models:
           type: brain_tumor_segmentation
           make_argmax: True
 
+      - framework: opencv
+        inputs:
+          - name: data_crop
+            type: INPUT
+            shape: 4, 128, 128, 128
+        adapter:
+          type: brain_tumor_segmentation
+          make_argmax: True
+
     datasets:
       - name: BraTS
 

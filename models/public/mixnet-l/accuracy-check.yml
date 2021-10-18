@@ -37,6 +37,12 @@ models:
     launchers:
       - framework: openvino
         adapter: classification
+      - framework: opencv
+        inputs:
+          - name: IteratorGetNext/placeholder_out_port_0
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
 
     datasets:
       - name: imagenet_1000_classes

@@ -33,6 +33,15 @@ models:
           type: detr
           scores_out: "scores"
           boxes_out: "boxes"
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 800, 1137
+        adapter:
+          type: detr
+          scores_out: "scores"
+          boxes_out: "boxes"
     datasets:
       - name: ms_coco_detection_91_classes
         reader: pillow_imread

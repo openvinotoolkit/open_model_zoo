@@ -5,7 +5,18 @@ models:
         allow_reshape_input: true
         adapter:
           type: wav2vec
-          alphabet: ['<pad>', '<s>', '</s>', '<unk>', '|', "E", "T", "A", "O", "N", "I", "H", "S", "R", "D", "L", "U", "M", "W", "C", "F", "G", "Y", "P", "B", "V", "K", "'", "X", "J", "Q", "Z"]
+          alphabet: [<pad>, <s>, </s>, <unk>, '|', E, T, A, O, N, I, H, S, R, D, L,
+            U, M, W, C, F, G, Y, P, B, V, K, "'", X, J, Q, Z]
+      - framework: opencv
+        inputs:
+          - name: inputs
+            type: INPUT
+            shape: 30480
+        allow_reshape_input: true
+        adapter:
+          type: wav2vec
+          alphabet: [<pad>, <s>, </s>, <unk>, '|', E, T, A, O, N, I, H, S, R, D, L,
+            U, M, W, C, F, G, Y, P, B, V, K, "'", X, J, Q, Z]
 
     datasets:
       - name: librispeech-test-clean

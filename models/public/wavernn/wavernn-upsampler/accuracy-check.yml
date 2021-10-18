@@ -12,6 +12,20 @@ models:
             type: INPUT
             layout: NHWC
         allow_reshape_input: True
+
+      - framework: opencv
+        adapter:
+          type: multi_output_regression
+          outputs:
+            - aux
+            - upsample_mels
+        inputs:
+          - name: mels
+            type: INPUT
+            layout: NHWC
+            shape: 200, 80
+        allow_reshape_input: True
+
     datasets:
       - name: wavernn-io-upsampler
         data_source: wavernn_io/upsampler

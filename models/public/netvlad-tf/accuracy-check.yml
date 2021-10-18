@@ -3,6 +3,13 @@ models:
     launchers:
       - framework: openvino
         adapter: reid
+      - framework: opencv
+        inputs:
+          - name: Placeholder
+            type: INPUT
+            shape: 3, 200, 300
+        adapter: reid
+
     datasets:
       - name: pitts30k_val
         reader: pillow_imread

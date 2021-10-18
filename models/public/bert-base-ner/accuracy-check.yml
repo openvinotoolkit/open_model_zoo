@@ -13,6 +13,22 @@ models:
           - name: 'token_type_ids'
             type: INPUT
             value: 'segment_ids'
+      - framework: opencv
+        inputs:
+          - name: "input_ids"
+            type: INPUT
+            value: "input_ids"
+            shape: 128
+          - name: "attention_mask"
+            type: INPUT
+            value: 'input_mask'
+            shape: 128
+          - name: 'token_type_ids'
+            type: INPUT
+            value: 'segment_ids'
+            shape: 128
+        adapter: bert_ner
+
     datasets:
       - name: CONLL2003_bert_cased
         reader:

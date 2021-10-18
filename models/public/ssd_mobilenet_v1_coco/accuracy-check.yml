@@ -1,7 +1,14 @@
 models:
-  - name:  ssd_mobilenet_v1_coco
+  - name: ssd_mobilenet_v1_coco
     launchers:
       - framework: openvino
+        adapter: ssd
+
+      - framework: opencv
+        inputs:
+          - name: image_tensor
+            type: INPUT
+            shape: 3, 300, 300
         adapter: ssd
 
     datasets:

@@ -33,6 +33,12 @@ models:
     launchers:
       - framework: openvino
         adapter: classification
+      - framework: opencv
+        inputs:
+          - name: map/TensorArrayStack/TensorArrayGatherV3
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
 
     datasets:
       - name: imagenet_1001_classes
