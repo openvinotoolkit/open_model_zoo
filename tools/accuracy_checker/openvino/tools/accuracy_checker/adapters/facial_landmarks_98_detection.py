@@ -1,6 +1,7 @@
 from ..adapters import Adapter
 from ..representation import FacialLandmarksHeatMapPrediction
 
+
 class FacialLandmarksAdapter(Adapter):
     __provider__ = 'facial_landmarks_detection'
 
