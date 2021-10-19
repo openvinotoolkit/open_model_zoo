@@ -1,6 +1,6 @@
 # Place Recognition Python\* Demo
 
-![example](./place_recognition.gif)
+![example](./place_recognition.png)
 
 This demo demonstrates how to run Place Recognition models using OpenVINO&trade;.
 
