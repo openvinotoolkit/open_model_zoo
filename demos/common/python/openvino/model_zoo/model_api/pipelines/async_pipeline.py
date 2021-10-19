@@ -83,7 +83,7 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, plugin_config, device='CPU', max_num_requests=1):
+    def __init__(self, ie, model, plugin_config=None, device='CPU', max_num_requests=1):
         self.model = model
 
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
