@@ -33,11 +33,10 @@ class PerformanceParser:
     def parse_metrics(self, output):
 
         def get_metric(name):
-            pattern = re.compile(r'{}: {}'.format(name, float_re))
+            pattern = re.compile(r'{}: (([0-9]+)\.[0-9]+)'.format(name))
             metric = pattern.search(" ".join(output.split()))
             return metric.group(1) if metric else 'N/A'
 
-        float_re = '(([0-9]+)\.[0-9]+)'
         stages_to_parse = ('Latency', 'FPS', 'Decoding', 'Preprocessing',
                            'Inference', 'Postprocessing', 'Rendering')
         return {name : get_metric(name) for name in stages_to_parse}
