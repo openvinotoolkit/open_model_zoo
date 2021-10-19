@@ -1,5 +1,7 @@
 # Face Detection MTCNN Python* Demo
 
+![example](../face_detection_mtcnn.gif)
+
 This demo demonstrates how to run `mtcnn` model using OpenVINO&trade;.
 
 ## How It Works
@@ -106,8 +108,6 @@ The demo reports
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 You can use both of these metrics to measure application-level performance.
-
-![example](./test.jpg)
 
 ## See Also
 

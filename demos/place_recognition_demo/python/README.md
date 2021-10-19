@@ -1,5 +1,7 @@
 # Place Recognition Python\* Demo
 
+![example](./place_recognition.gif)
+
 This demo demonstrates how to run Place Recognition models using OpenVINO&trade;.
 
 > **NOTE**: Only batch size of 1 is supported.
