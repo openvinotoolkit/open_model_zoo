@@ -42,9 +42,9 @@ class PerformanceParser:
         return {name : get_metric(name) for name in stages_to_parse}
 
     def write_to_csv(self, result, test_case, device):
-        result['Nireq'] = test_case.options.get('-nireq', '-')
-        result['Nstreams'] = test_case.options.get('-nstreams', '-')
-        result['Nthreads'] = test_case.options.get('-nthreads', '-')
+        result['Requests'] = test_case.options.get('-nireq', '-')
+        result['Streams'] = test_case.options.get('-nstreams', '-')
+        result['Threads'] = test_case.options.get('-nthreads', '-')
 
         if not os.path.isfile(self.filename):
             models_col = [f"Model {key}" for key in self.model_keys]
