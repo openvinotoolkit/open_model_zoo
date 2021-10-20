@@ -82,6 +82,11 @@ omz_converter --list models.lst
 * architecture_type = ssd
   - efficientdet-d0-tf
   - efficientdet-d1-tf
+  - face-detection-0200
+  - face-detection-0202
+  - face-detection-0204
+  - face-detection-0205
+  - face-detection-0206
   - face-detection-adas-0001
   - face-detection-retail-0004
   - face-detection-retail-0005
@@ -102,9 +107,9 @@ omz_converter --list models.lst
   - person-vehicle-bike-detection-2003
   - person-vehicle-bike-detection-2004
   - product-detection-0001
-  - rfcn-resnet101-coco-tf
   - retinaface-resnet50-pytorch
   - retinanet-tf
+  - rfcn-resnet101-coco-tf
   - ssd300
   - ssd512
   - ssd-resnet34-1200-onnx
