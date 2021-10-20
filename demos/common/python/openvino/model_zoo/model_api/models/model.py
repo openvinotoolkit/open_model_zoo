@@ -69,28 +69,30 @@ class Model:
         Raises:
             RuntimeError: if loaded model has unsupported number of input or output blob
         '''
+        model_input_layers = self.model_executor.get_input_layers()
         if not isinstance(number_of_inputs, tuple):
-            if len(self.model_executor.inputs) != number_of_inputs and number_of_inputs != -1:
+            if len(model_input_layers) != number_of_inputs and number_of_inputs != -1:
                 raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
                     number_of_inputs, 's' if number_of_inputs !=1 else '',
-                    len(self.model_executor.inputs), ', '.join(self.model_executor.inputs)
+                    len(model_input_layers), ', '.join(model_input_layers)
                 ))
         else:
-            if not len(self.model_executor.inputs) in number_of_inputs:
+            if not len(model_input_layers) in number_of_inputs:
                 raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
-                    len(self.model_executor.inputs), ', '.join(self.model_executor.inputs)
+                    len(model_input_layers), ', '.join(model_input_layers)
                 ))
 
+        model_output_layers = self.model_executor.get_output_layers()
         if not isinstance(number_of_outputs, tuple):
-            if len(self.model_executor.outputs) != number_of_outputs and number_of_outputs != -1:
+            if len(model_output_layers) != number_of_outputs and number_of_outputs != -1:
                 raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
                     number_of_outputs, 's' if number_of_outputs !=1 else '',
-                    len(self.model_executor.outputs), ', '.join(self.model_executor.outputs)
+                    len(model_output_layers), ', '.join(model_output_layers)
                 ))
         else:
-            if not len(self.model_executor.outputs) in number_of_outputs:
+            if not len(model_output_layers) in number_of_outputs:
                 raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
-                    len(self.model_executor.outputs), ', '.join(self.model_executor.outputs)
+                    len(model_output_layers), ', '.join(model_output_layers)
                 ))

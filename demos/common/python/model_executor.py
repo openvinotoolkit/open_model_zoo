@@ -80,6 +80,9 @@ class InferenceEngineExecutor(ModelExecutor):
     def create_infer_request(self, layer_name, data):
         return {layer_name: data}
 
+    def get_model_requests(self):
+        return self.exec_net.requests
+
 
 class RemoteExecutor(ModelExecutor):
     """

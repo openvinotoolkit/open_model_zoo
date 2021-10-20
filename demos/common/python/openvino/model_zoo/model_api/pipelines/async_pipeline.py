@@ -85,9 +85,8 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 class AsyncPipeline:
     def __init__(self, model, model_executor):
         self.model = model
-        self.model_executor = model_executor
-
-        self.empty_requests = deque(self.model_executor.exec_net.requests)
+        self.model_requests = model_executor.get_model_requests()
+        self.empty_requests = deque(self.model_requests)
         self.completed_request_results = {}
         self.callback_exceptions = {}
         self.event = threading.Event()
@@ -142,7 +141,7 @@ class AsyncPipeline:
         return len(self.completed_request_results) != 0
 
     def await_all(self):
-        for request in self.model_executor.exec_net.requests:
+        for request in self.model_requests:
             request.wait()
 
     def await_any(self):
