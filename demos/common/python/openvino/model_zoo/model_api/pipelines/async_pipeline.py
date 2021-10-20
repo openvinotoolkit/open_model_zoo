@@ -116,7 +116,7 @@ class AsyncPipeline:
             self.callback_exceptions.append(e)
         self.event.set()
 
-    def submit_data(self, inputs, id, meta):
+    def submit_data(self, inputs, id, meta=None):
         request = self.empty_requests.popleft()
         if len(self.empty_requests) == 0:
             self.event.clear()
