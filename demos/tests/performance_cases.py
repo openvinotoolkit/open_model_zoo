@@ -60,7 +60,7 @@ class PerformanceParser:
 
 
 DEMOS = [
-    BASE['interactive_face_detection_demo/cpp'],
+    BASE['interactive_face_detection_demo/cpp'].add_parser(PerformanceParser),
 
     BASE['object_detection_demo/python']
         .only_models(['person-detection-0200', 'yolo-v2-tf'])
@@ -68,7 +68,5 @@ DEMOS = [
         .add_test_cases(single_option_cases('-nireq', '3', '5'),
                         single_option_cases('-nstreams', '3', '4'),
                         single_option_cases('-nthreads', str(THREADS_NUM), str(THREADS_NUM - 2)))
+        .add_parser(PerformanceParser)
 ]
-
-
-DEMOS = [demo.add_parser(PerformanceParser) for demo in DEMOS]
