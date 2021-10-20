@@ -1339,4 +1339,3 @@ PYTHON_DEMOS = [
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
 
 BASE = { demo.subdirectory : demo for demo in DEMOS }
-
