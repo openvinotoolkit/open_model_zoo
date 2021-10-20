@@ -23,7 +23,7 @@ THREADS_NUM = os.cpu_count()
 
 class PerformanceParser:
     def __init__(self, demo):
-        self.filename = demo._exec_name.replace('/', '_') + '.csv'
+        self.filename = demo.subdirectory.replace('/', '_') + '.csv'
         self.model_keys = demo.model_keys
 
     def __call__(self, output, test_case, device):
