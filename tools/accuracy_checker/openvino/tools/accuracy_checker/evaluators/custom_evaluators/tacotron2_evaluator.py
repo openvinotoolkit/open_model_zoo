@@ -19,7 +19,6 @@ import numpy as np
 from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...launcher import create_launcher
 from ...utils import contains_all, sigmoid, generate_layer_name
 
 
@@ -496,12 +495,7 @@ def create_postnet(model_config, launcher, delayed_model_loading=False):
 class Tacotron2Evaluator(TextToSpeechEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_config = config['launchers'][0]
-        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
-            launcher_config['device'] = 'CPU'
-
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
         model = Synthesizer(
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading

@@ -19,58 +19,42 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import create_dataset_attributes
+from .base_custom_evaluator import BaseCustomEvaluator
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
-from ...launcher import create_launcher
 from ...launcher.input_feeder import PRECISION_TO_DTYPE
 from ...logging import print_info
 from ...preprocessor import PreprocessingExecutor
-from ...progress_reporters import ProgressReporter
 from ...representation import RawTensorPrediction, RawTensorAnnotation
 from ...utils import extract_image_representations, contains_all, get_path
 
 
-class CocosnetEvaluator(BaseEvaluator):
-    def __init__(
-            self, dataset_config, launcher, preprocessor_mask, preprocessor_image,
-            gan_model, check_model, orig_config
-    ):
-        self.launcher = launcher
-        self.dataset_config = dataset_config
+class CocosnetEvaluator(BaseCustomEvaluator):
+    def __init__(self, dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model,
+                 check_model, orig_config):
+        super().__init__(dataset_config, launcher, orig_config)
         self.preprocessor_mask = preprocessor_mask
         self.preprocessor_image = preprocessor_image
-        self.postprocessor = None
-        self.dataset = None
-        self.metric_executor = None
         self.test_model = gan_model
         self.check_model = check_model
-        self.config = orig_config
-        self._metrics_results = []
         self._part_by_name = {
             'gan_network': self.test_model,
         }
         if self.check_model:
             self._part_by_name.update({'verification_network': self.check_model})
+        self.adapter_type = self.test_model.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        launcher_config = config['launchers'][0]
-        dataset_config = config['datasets']
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
 
-        preprocessor_mask = PreprocessingExecutor(
-            dataset_config[0].get('preprocessing_mask')
-        )
-        preprocessor_image = PreprocessingExecutor(
-            dataset_config[0].get('preprocessing_image')
-        )
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
-
+        preprocessor_mask = PreprocessingExecutor(dataset_config[0].get('preprocessing_mask'))
+        preprocessor_image = PreprocessingExecutor(dataset_config[0].get('preprocessing_image'))
         network_info = config.get('network_info', {})
         cocosnet_network = network_info.get('cocosnet_network', {})
         verification_network = network_info.get('verification_network', {})
+
         if not delayed_model_loading:
             model_args = config.get('_models', [])
             models_is_blob = config.get('_model_is_blob')
@@ -98,18 +82,6 @@ class CocosnetEvaluator(BaseEvaluator):
             dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model, orig_config
         )
 
-    @staticmethod
-    def get_processing_info(config):
-        module_specific_params = config.get('module_config')
-        model_name = config['name']
-        launcher_config = module_specific_params['launchers'][0]
-        dataset_config = module_specific_params['datasets'][0]
-
-        return (
-            model_name, launcher_config['framework'], launcher_config.get('device', 'CPU'), launcher_config.get('tags'),
-            dataset_config['name']
-        )
-
     def _preprocessing_for_batch_input(self, batch_annotation, batch_inputs):
         for i, _ in enumerate(batch_inputs):
             for index_of_input, _ in enumerate(batch_inputs[i].data):
@@ -119,37 +91,9 @@ class CocosnetEvaluator(BaseEvaluator):
                 batch_inputs[i].data[index_of_input] = preprocessor.process(
                     images=[DataRepresentation(batch_inputs[i].data[index_of_input])],
                     batch_annotation=batch_annotation)[0].data
-
         return batch_inputs
 
-    def process_dataset(
-            self, subset=None,
-            num_images=None,
-            check_progress=False,
-            dataset_tag='',
-            output_callback=None,
-            allow_pairwise_subset=False,
-            dump_prediction_to_annotation=False,
-            **kwargs):
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-
-        self._annotations, self._predictions = [], []
-
-        self._create_subset(subset, num_images, allow_pairwise_subset)
-
-        if 'progress_reporter' in kwargs:
-            _progress_reporter = kwargs['progress_reporter']
-            _progress_reporter.reset(self.dataset.size)
-        else:
-            _progress_reporter = None if not check_progress else self._create_progress_reporter(
-                check_progress, self.dataset.size
-            )
-
-        metric_config = self._configure_intermediate_metrics_results(kwargs)
-        (compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
-         ignore_metric_reference) = metric_config
-
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self._preprocessing_for_batch_input(batch_annotation, batch_inputs)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
@@ -177,100 +121,20 @@ class CocosnetEvaluator(BaseEvaluator):
                     check_model_predictions = [
                         RawTensorPrediction(batch_identifier, item)
                         for batch_identifier, item in zip(batch_identifiers, check_model_predictions)]
-
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(check_model_annotations)
                     self._predictions.extend(check_model_predictions)
-
             if output_callback:
-                output_callback(
-                    raw_predictions,
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
-
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(batch_predictions))
-                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting,
-                        ignore_metric_reference=ignore_metric_reference
-                    )
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
-
-        if _progress_reporter:
-            _progress_reporter.finish()
-
-        return self._annotations, self._predictions
-
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
-        if self._metrics_results:
-            del self._metrics_results
-            self._metrics_results = []
-
-        for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions):
-            self._metrics_results.append(evaluated_metric)
-            if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
-        return self._metrics_results
-
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
-
-        result_presenters = self.metric_executor.get_metric_presenters()
-        extracted_results, extracted_meta = [], []
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            result, metadata = presenter.extract_result(metric_result)
-            if isinstance(result, list):
-                extracted_results.extend(result)
-                extracted_meta.extend(metadata)
-            else:
-                extracted_results.append(result)
-                extracted_meta.append(metadata)
-            if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-
-        return extracted_results, extracted_meta
-
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
-            return
-        result_presenters = self.metric_executor.get_metric_presenters()
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-
-    def release(self):
-        self.test_model.release()
-        if self.check_model:
-            self.check_model.release()
-        self.launcher.release()
-
-    def reset(self):
-        if self.metric_executor:
-            self.metric_executor.reset()
-        if hasattr(self, '_annotations'):
-            del self._annotations
-            del self._predictions
-            del self._input_ids
-        del self._metrics_results
-        self._annotations = []
-        self._predictions = []
-        self._input_ids = []
-        self._metrics_results = []
-        if self.dataset:
-            self.dataset.reset(self.postprocessor.has_processors)
+                output_callback(raw_predictions, metrics_result=metrics_result,
+                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
+            self._update_progress(progress_reporter, metric_config, batch_id, len(batch_predictions), csv_file)
 
     def load_model(self, network_list):
         for network_dict in network_list:
             self._part_by_name[network_dict['name']].load_model(network_dict, self.launcher)
 
-    def load_network(self, network_list):
-        for network_dict in network_list:
+    def load_network(self, network=None):
+        for network_dict in network:
             self._part_by_name[network_dict['name']].load_network(network_dict['model'], self.launcher)
 
     def get_network(self):
@@ -279,84 +143,6 @@ class CocosnetEvaluator(BaseEvaluator):
     def load_network_from_ir(self, models_list):
         model_paths = next(iter(models_list))
         next(iter(self._part_by_name.values())).load_model(model_paths, self.launcher)
-
-    def get_metrics_attributes(self):
-        if not self.metric_executor:
-            return {}
-        return self.metric_executor.get_metrics_attributes()
-
-    def register_metric(self, metric_config):
-        if isinstance(metric_config, str):
-            self.metric_executor.register_metric({'type': metric_config})
-        elif isinstance(metric_config, dict):
-            self.metric_executor.register_metric(metric_config)
-        else:
-            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
-
-    def register_postprocessor(self, postprocessing_config):
-        pass
-
-    def register_dumped_annotations(self):
-        pass
-
-    def select_dataset(self, dataset_tag):
-        if self.dataset is not None and isinstance(self.dataset_config, list):
-            return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-
-    def set_profiling_dir(self, profiler_dir):
-        self.metric_executor.set_profiling_dir(profiler_dir)
-
-    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    @staticmethod
-    def _create_progress_reporter(check_progress, dataset_size):
-        pr_kwargs = {}
-        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
-            pr_kwargs = {"print_interval": check_progress}
-
-        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
-
-    @staticmethod
-    def _configure_intermediate_metrics_results(config):
-        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
-        metric_interval, ignore_results_formatting, ignore_metric_reference = None, None, None
-        if compute_intermediate_metric_res:
-            metric_interval = config.get('metrics_interval', 1000)
-            ignore_results_formatting = config.get('ignore_results_formatting', False)
-            ignore_metric_reference = config.get('ignore_metric_reference', False)
-        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting, ignore_metric_reference
-
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        model_type = None
-        details = {}
-        metrics = self.dataset_config[0].get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        adapter_type = self.test_model.adapter.__provider__
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        if self.dataset is None:
-            self.select_dataset('')
-
-        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
-        return details
-
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):

@@ -19,7 +19,6 @@ from collections import OrderedDict
 from pathlib import Path
 import numpy as np
 from .asr_encoder_prediction_joint_evaluator import ASREvaluator
-from ...launcher import create_launcher
 from ...adapters import create_adapter
 from ...utils import generate_layer_name, contains_all, contains_any, get_path
 from ...logging import print_info
@@ -502,18 +501,11 @@ def create_joint(model_config, launcher, delayed_model_loading):
 class CustomASREvaluator(ASREvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_config = config['launchers'][0]
+        dataset_config, launcher, launcher_config = cls.get_dataset_and_launcher_info(config)
         adapter_config = launcher_config.get('adapter', {'type': 'dumb_decoder'})
-
-        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
-            launcher_config['device'] = 'CPU'
-
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         model = ASRModel(
-            config.get('network_info', {}), adapter_config, launcher,
-            config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            config.get('network_info', {}), adapter_config, launcher, config.get('_models', []),
+            config.get('_model_is_blob'), delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)
 
