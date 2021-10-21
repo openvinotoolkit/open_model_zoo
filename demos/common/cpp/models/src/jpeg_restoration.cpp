@@ -34,7 +34,7 @@ void JPEGRestorationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
 
     InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
+        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
     inputsNames.push_back(inputShapes.begin()->first);
     InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
@@ -43,7 +43,7 @@ void JPEGRestorationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
     if (outputInfo.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 output");
+        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
 
     outputsNames.push_back(outputInfo.begin()->first);
     InferenceEngine::Data& data = *outputInfo.begin()->second;

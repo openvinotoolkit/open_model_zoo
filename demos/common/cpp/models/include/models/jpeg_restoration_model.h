@@ -23,6 +23,7 @@ public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param inputImgSize size of image to set model input shape
+    /// @param jpegCompression flag allows to perform compression before the inference
     JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize, bool jpegCompression);
 
     std::shared_ptr<InternalModelData> preprocess(
