@@ -15,8 +15,6 @@
 """
 
 from time import perf_counter
-import threading
-from collections import deque
 from typing import Dict, Set
 
 from ..performance_metrics import PerformanceMetrics
@@ -83,67 +81,54 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 
 
 class AsyncPipeline:
-    def __init__(self, model, model_executor):
+    def __init__(self, model, model_adapter, inference_mode):
         self.model = model
-        self.model_requests = model_executor.get_model_requests()
-        self.empty_requests = deque(self.model_requests)
-        self.completed_request_results = {}
-        self.callback_exceptions = {}
-        self.event = threading.Event()
+        self.model_adapter = model_adapter
+        self.mode = inference_mode
 
-        self.inference_metrics = PerformanceMetrics()
+        self.completed_results = {}
+
         self.preprocess_metrics = PerformanceMetrics()
+        self.inference_metrics = PerformanceMetrics()
         self.postprocess_metrics = PerformanceMetrics()
 
-    def inference_completion_callback(self, status, callback_args):
-        try:
-            request, id, meta, preprocessing_meta, start_time = callback_args
-            if status != 0:
-                raise RuntimeError('Infer Request has returned status code {}'.format(status))
-            self.inference_metrics.update(start_time)
-            raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            self.completed_request_results[id] = (raw_outputs, meta, preprocessing_meta)
-            self.empty_requests.append(request)
-        except Exception as e:
-            self.callback_exceptions.append(e)
-        self.event.set()
-
-    def submit_data(self, inputs, id, meta=None):
-        request = self.empty_requests.popleft()
-        if len(self.empty_requests) == 0:
-            self.event.clear()
-        start_time = perf_counter()
+    def submit_data(self, inputs, id, meta):
+        preprocessing_start_time = perf_counter()
         inputs, preprocessing_meta = self.model.preprocess(inputs)
-        self.preprocess_metrics.update(start_time)
-        request.set_completion_callback(py_callback=self.inference_completion_callback,
-                                        py_data=(request, id, meta, preprocessing_meta, perf_counter()))
-        request.async_infer(inputs=inputs)
+        self.preprocess_metrics.update(preprocessing_start_time)
 
-    def get_raw_result(self, id):
-        if id in self.completed_request_results:
-            return self.completed_request_results.pop(id)
-        return None
+        infer_start_time = perf_counter()
+        if self.mode == 'Async':
+            callback_data = id, meta, preprocessing_meta, infer_start_time
+            self.model_adapter.async_infer(inputs, self.completed_results, callback_data)
+        else:
+            raw_result = self.model_adapter.infer(inputs)
+            self.completed_results[id] = (raw_result, meta, preprocessing_meta, infer_start_time)
 
     def get_result(self, id):
-        result = self.get_raw_result(id)
-        if result:
-            raw_result, meta, preprocess_meta = result
-            start_time = perf_counter()
+        if id in self.completed_results:
+            raw_result, meta, preprocess_meta, infer_start_time = self.completed_results.pop(id)
+            self.inference_metrics.update(infer_start_time)
+
+            postprocessing_start_time = perf_counter()
             result = self.model.postprocess(raw_result, preprocess_meta), meta
-            self.postprocess_metrics.update(start_time)
+            self.postprocess_metrics.update(postprocessing_start_time)
             return result
         return None
 
     def is_ready(self):
-        return len(self.empty_requests) != 0
-
-    def has_completed_request(self):
-        return len(self.completed_request_results) != 0
+        if self.mode == 'Async':
+            return self.model_adapter.is_ready()
+        return True
 
     def await_all(self):
-        for request in self.model_requests:
-            request.wait()
+        if self.mode == 'Async':
+            self.model_adapter.await_all()
 
     def await_any(self):
-        if len(self.empty_requests) == 0:
-            self.event.wait()
+        if self.mode == 'Async':
+            self.model_adapter.await_any()
+
+    def check_exceptions(self):
+        if self.mode == 'Async':
+            self.model_adapter.check_exceptions()

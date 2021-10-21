@@ -13,6 +13,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+
+import numpy as np
+
 from .model import Model
 from .utils import RESIZE_TYPES, pad_image, InputTransform
 
@@ -31,19 +34,20 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, model_executor, resize_type=None):
+    def __init__(self, model_adapter, resize_type=None):
         '''Image model constructor
 
         Calls the `Model` constructor first
 
         Args:
+            model_adapter(ModelAdapter): allows working with the specified executor
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
         '''
-        super().__init__(model_executor)
+        super().__init__(model_adapter)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.model_executor.get_input_layer_shape(self.image_blob_name)
+            self.n, self.c, self.h, self.w = self.model_adapter.get_input_layer_shape(self.image_blob_name)
 
         self.image_layout = 'NCHW'
         if not resize_type:
@@ -58,8 +62,8 @@ class ImageModel(Model):
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []
-        for layer_name in self.model_executor.get_input_layers():
-            layer_shape = self.model_executor.get_input_layer_shape(layer_name)
+        for layer_name in self.model_adapter.get_input_layers():
+            layer_shape = self.model_adapter.get_input_layer_shape(layer_name)
             if len(layer_shape) == 4:
                 image_blob_names.append(layer_name)
             elif len(layer_shape) == 2:
@@ -100,7 +104,11 @@ class ImageModel(Model):
             resized_image = pad_image(resized_image, (self.w, self.h))
         resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
-        infer_request = self.model_executor.create_infer_request(self.image_blob_name, resized_image)
+        # apply conversion int -> float
+        input_precision = self.model_adapter.get_input_layer_precision(self.image_blob_name)
+        if resized_image.dtype == np.uint8 and input_precision in ('DT_FLOAT', 'FP32'):
+            resized_image = resized_image.astype(np.float32)
+        infer_request = self.model_adapter.create_infer_request(self.image_blob_name, resized_image)
         return infer_request, meta
 
     def _change_layout(self, image):

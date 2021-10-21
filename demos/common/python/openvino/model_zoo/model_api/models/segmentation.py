@@ -22,8 +22,8 @@ from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, model_executor, resize_type='standard', labels=None):
-        super().__init__(model_executor, resize_type=resize_type)
+    def __init__(self, model_adapter, resize_type='standard', labels=None):
+        super().__init__(model_adapter, resize_type=resize_type)
         self._check_io_number(1, 1)
         if isinstance(labels, (list, tuple)):
             self.labels = labels
@@ -33,15 +33,15 @@ class SegmentationModel(ImageModel):
         self.output_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        layer_name = self.model_executor.get_output_layers()[0]
-        layer_shape = self.model_executor.get_output_layer_shape(layer_name)
+        layer_name = self.model_adapter.get_output_layers()[0]
+        layer_shape = self.model_adapter.get_output_layer_shape(layer_name)
 
         if len(layer_shape) == 3:
             self.out_channels = 0
         elif len(layer_shape) == 4:
             self.out_channels = layer_shape[1]
         else:
-            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(layer_shape))
+            raise Exception("Unexpected output layer shape {}. Only 4D and 3D output layers are supported".format(layer_shape))
 
         return layer_name
 

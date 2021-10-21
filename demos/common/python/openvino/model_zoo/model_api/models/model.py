@@ -24,20 +24,18 @@ class Model:
     The ``preprocess`` and ``postprocess`` method should be implemented in concrete class
 
     Attributes:
-        net(CNNNetwork): loaded network
+        model_adapter(ModelAdapter): allows working with the specified executor
         logger(Logger): instance of the logger
     '''
 
-    def __init__(self, model_executor):
+    def __init__(self, model_adapter):
         '''Abstract model constructor
 
         Args:
-            model_executor(ModelExecutor): allows working with Inference Engine model or Remote model
+            model_adapter(ModelAdapter): allows working with the specified executor
         '''
         self.logger = log.getLogger()
-        if not (hasattr(model_executor, 'inputs') and hasattr(model_executor, 'outputs')):
-            raise RuntimeError('ModelExecutor must have "inputs" and "outputs" attributes')
-        self.model_executor = model_executor
+        self.model_adapter = model_adapter
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -69,7 +67,7 @@ class Model:
         Raises:
             RuntimeError: if loaded model has unsupported number of input or output blob
         '''
-        model_input_layers = self.model_executor.get_input_layers()
+        model_input_layers = self.model_adapter.get_input_layers()
         if not isinstance(number_of_inputs, tuple):
             if len(model_input_layers) != number_of_inputs and number_of_inputs != -1:
                 raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
@@ -83,7 +81,7 @@ class Model:
                     len(model_input_layers), ', '.join(model_input_layers)
                 ))
 
-        model_output_layers = self.model_executor.get_output_layers()
+        model_output_layers = self.model_adapter.get_output_layers()
         if not isinstance(number_of_outputs, tuple):
             if len(model_output_layers) != number_of_outputs and number_of_outputs != -1:
                 raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
@@ -96,3 +94,9 @@ class Model:
                     ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
                     len(model_output_layers), ', '.join(model_output_layers)
                 ))
+
+    def infer(self, infer_request):
+        '''
+        Wrap the infer method of model adapter
+        '''
+        self.model_adapter.infer(infer_request)

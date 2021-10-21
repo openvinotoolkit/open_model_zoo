@@ -23,7 +23,6 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
@@ -32,10 +31,10 @@ from model_api.models import OutputTransform, SegmentationModel, SalientObjectDe
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 
-from model_executor import InferenceEngineExecutor
+from model_api.adapters import OpenvinoAdapter, RemoteAdapter
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_layers_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -117,6 +116,8 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -165,11 +166,11 @@ def build_argparser():
     return parser
 
 
-def get_model(executor, args):
+def get_model(adapter, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(executor, labels=args.labels), SegmentationVisualizer(args.colors)
+        return SegmentationModel(adapter, labels=args.labels), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(executor, labels=args.labels), SaliencyMapVisualizer()
+        return SalientObjectDetectionModel(adapter, labels=args.labels), SaliencyMapVisualizer()
 
 
 def print_raw_results(mask, frame_id, labels=None):
@@ -189,22 +190,22 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
     log.info('Reading model {}'.format(args.model))
-    model_executor = InferenceEngineExecutor(ie, args.model, plugin_config, args.device, args.num_infer_requests)
-    model, visualizer = get_model(model_executor, args)
 
-    log_blobs_info(model_executor)
+    if args.adapter == 'openvino':
+        inference_mode = 'Async'
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(args.model, plugin_config, args.device, args.num_infer_requests)
+        log_runtime_settings(model_adapter.get_model(), set(parse_devices(args.device)))
+    elif args.adapter == 'remote':
+        inference_mode = 'Sync'
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    pipeline = AsyncPipeline(model, model_executor)
+    model, visualizer = get_model(model_adapter, args)
+    log_layers_info(model_adapter)
 
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(model_executor.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model, model_adapter, inference_mode)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -242,8 +243,7 @@ def main():
             # Wait for empty request
             pipeline.await_any()
 
-        if pipeline.callback_exceptions:
-            raise pipeline.callback_exceptions[0]
+        pipeline.check_exceptions()
         # Process all completed requests
         results = pipeline.get_result(next_frame_id_to_show)
         if results:

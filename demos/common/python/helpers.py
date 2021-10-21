@@ -26,16 +26,16 @@ def resolution(value):
         raise RuntimeError('Сorrect format of --output_resolution parameter is "width"x"height".')
     return result
 
-def log_blobs_info(model_executor):
-    for input_layer in model_executor.get_input_layers():
+def log_layers_info(model_adapter):
+    for input_layer in model_adapter.get_input_layers():
         log.info('\tInput layer: {}, shape: {}, precision: {}'.format(input_layer,
-        model_executor.get_input_layer_shape(input_layer),
-        model_executor.get_input_layer_precision(input_layer),
+        model_adapter.get_input_layer_shape(input_layer),
+        model_adapter.get_input_layer_precision(input_layer),
     ))
-    for output_layer in model_executor.get_output_layers():
+    for output_layer in model_adapter.get_output_layers():
         log.info('\tOutput layer: {}, shape: {}, precision: {}'.format(output_layer,
-        model_executor.get_output_layer_shape(output_layer),
-        model_executor.get_output_layer_precision(output_layer),
+        model_adapter.get_output_layer_shape(output_layer),
+        model_adapter.get_output_layer_precision(output_layer),
     ))
 
 def log_runtime_settings(exec_net, devices):
