@@ -232,6 +232,8 @@ For example:
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 ```
 
+and once they built add demo build folder to `PYTHONPATH` environment varable.
+
 ### <a name="build_specific_demos"></a>Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
