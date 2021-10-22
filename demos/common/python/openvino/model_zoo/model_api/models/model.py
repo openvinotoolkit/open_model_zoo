@@ -95,8 +95,10 @@ class Model:
                     len(model_output_layers), ', '.join(model_output_layers)
                 ))
 
-    def infer(self, infer_request):
+    def __call__(self, input_data):
         '''
-        Wrap the infer method of model adapter
+        Applies the preprocessing, inference and postprocessing method of model wrapper
         '''
-        self.model_adapter.infer(infer_request)
+        infer_request, input_meta = self.preprocess(input_data)
+        raw_result = self.model_adapter.infer(infer_request)
+        return self.postprocess(raw_result, input_meta)
