@@ -1,6 +1,6 @@
 # Formula Recognition Python\* Demo
 
-![example](./demo_intro.gif)
+![example](./formula_recognition.gif)
 
 This demo shows how to run LaTeX formula recognition models. These models allow to get a LaTeX formula markup from the image.
 

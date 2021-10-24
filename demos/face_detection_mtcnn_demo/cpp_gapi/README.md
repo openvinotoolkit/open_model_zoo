@@ -1,6 +1,6 @@
 # G-API Face Detection MTCNN Demo
 
-![example](./fdmtcnn.jpg)
+![example](../face_detection_mtcnn.gif)
 
 This demo demonstrates how to run `mtcnn` model using OpenVINO&trade;.
 
