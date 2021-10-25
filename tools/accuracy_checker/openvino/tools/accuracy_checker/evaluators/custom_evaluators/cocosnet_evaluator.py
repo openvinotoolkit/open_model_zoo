@@ -43,7 +43,8 @@ class CocosnetEvaluator(BaseCustomEvaluator):
         }
         if self.check_model:
             self._part_by_name.update({'verification_network': self.check_model})
-        self.adapter_type = self.test_model.adapter.__provider__
+        if hasattr(self.test_model, 'adapter'):
+            self.adapter_type = self.test_model.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):

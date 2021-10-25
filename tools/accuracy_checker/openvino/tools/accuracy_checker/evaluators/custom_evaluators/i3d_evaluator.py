@@ -38,7 +38,8 @@ class I3DEvaluator(BaseCustomEvaluator):
             'flow_network': self.flow_model,
             'rgb_network': self.rgb_model
         }
-        self.adapter_type = self.adapter.__provider__
+        if self.adapter is not None:
+            self.adapter_type = self.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
