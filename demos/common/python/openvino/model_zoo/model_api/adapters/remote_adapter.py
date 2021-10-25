@@ -55,13 +55,26 @@ class RemoteAdapter(ModelAdapter):
     def get_output_layer_precision(self, output_layer_name):
         return self.metadata["outputs"][output_layer_name]['dtype']
 
-    def create_infer_request(self, input_layer_name, data):
+    def create_infer_request_data(self, input_layer_name, data):
         return ovmsclient.make_grpc_predict_request(
             {input_layer_name: data}, model_name=self.model_name
         )
 
-    def infer(self, infer_request):
-        return self.client.predict(infer_request).to_dict()
+    def sync_infer(self, infer_request_data):
+        return self.client.predict(infer_request_data).to_dict()
 
     def reshape_model(self, new_shape):
+        pass
+
+    def async_infer(self, infer_request_data, callback_fn, callback_data):
+        raw_result = self.sync_infer(infer_request_data)
+        callback_fn(0, (lambda x: x, raw_result, callback_data))
+
+    def is_ready(self):
+        return True
+
+    def await_all(self):
+        pass
+
+    def await_any(self):
         pass

@@ -97,8 +97,11 @@ class Model:
 
     def __call__(self, input_data):
         '''
-        Applies the preprocessing, inference and postprocessing method of model wrapper
+        Applies the preprocessing, synchronous inference and postprocessing method of model wrapper
         '''
         infer_request, input_meta = self.preprocess(input_data)
-        raw_result = self.model_adapter.infer(infer_request)
+        raw_result = self.model_adapter.sync_infer(infer_request)
         return self.postprocess(raw_result, input_meta)
+
+    def get_adapter(self):
+        return self.model_adapter

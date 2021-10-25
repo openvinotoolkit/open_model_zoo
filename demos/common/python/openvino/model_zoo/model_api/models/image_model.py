@@ -108,7 +108,7 @@ class ImageModel(Model):
         input_precision = self.model_adapter.get_input_layer_precision(self.image_blob_name)
         if resized_image.dtype == np.uint8 and input_precision in ('DT_FLOAT', 'FP32'):
             resized_image = resized_image.astype(np.float32)
-        infer_request = self.model_adapter.create_infer_request(self.image_blob_name, resized_image)
+        infer_request = self.model_adapter.create_infer_request_data(self.image_blob_name, resized_image)
         return infer_request, meta
 
     def _change_layout(self, image):

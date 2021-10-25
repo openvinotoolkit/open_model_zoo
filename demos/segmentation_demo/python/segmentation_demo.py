@@ -24,6 +24,8 @@ from time import perf_counter
 import cv2
 import numpy as np
 
+from openvino.inference_engine import IECore, get_version
+
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
@@ -193,19 +195,20 @@ def main():
     log.info('Reading model {}'.format(args.model))
 
     if args.adapter == 'openvino':
-        inference_mode = 'Async'
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(args.model, plugin_config, args.device, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(core, args.model, plugin_config, args.device, args.num_infer_requests)
         log_runtime_settings(model_adapter.get_model(), set(parse_devices(args.device)))
     elif args.adapter == 'remote':
-        inference_mode = 'Sync'
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
     model, visualizer = get_model(model_adapter, args)
     log_layers_info(model_adapter)
 
-    pipeline = AsyncPipeline(model, model_adapter, inference_mode)
+    pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0

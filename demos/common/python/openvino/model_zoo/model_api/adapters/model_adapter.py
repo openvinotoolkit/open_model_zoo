@@ -24,6 +24,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         - Loading the model with the specific executor
         - Accessing the information about input/output layers
         - Synchronous model inference
+        - Asynchronous model inference
         - The model reshaping
     '''
 
@@ -112,7 +113,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         '''
 
     @abc.abstractmethod
-    def create_infer_request(self, input_layer_name, data):
+    def create_infer_request_data(self, input_layer_name, data):
         '''
         Forms the infer request for infer method.
         It's called in Model Wrapper preprocess() method, after the preprocessing operations are done.
@@ -122,26 +123,73 @@ class ModelAdapter(metaclass=abc.ABCMeta):
             data: preprocessed numpy array tensor
 
         Returns:
-            - the infer request - it might be a dict or a custom structure for some executors
+            - the infer request data - it might be a dict or a custom structure for some executors
         '''
 
     @abc.abstractmethod
-    def infer(self, infer_request):
+    def sync_infer(self, infer_request_data):
         '''
         Performs the synchronous model inference. The infer is a blocking method.
 
         Args:
-            - infer_request: contains the data and is submitted to the model for inference
+            - infer_request_data: contains the data and is submitted to the model for inference
 
         Returns:
-            - the raw result inferred by the model
+            - raw result(dict) - model raw output in the following format:
+                { output_layer_name: raw_result }
         '''
 
     @abc.abstractmethod
     def reshape_model(self, new_shape):
         '''
-        Reshapes the model to fit the new input shape.
+        Reshapes the model input layers to fit the new input shape.
 
         Args:
-            - new_shape(dict): input_layer(str): new_shape(list) }
+            - new_shape(dict): the dictionary with input layers as keys and
+                list of new shape as values
+
+        Example of new_shape argument:
+            {
+                'input_layer_1': [1, 128, 128, 3],
+                'input_layer_2': [1, 128, 128, 3],
+            }
+        '''
+
+    @abc.abstractmethod
+    def async_infer(self, infer_request_data, callback_fn, callback_data):
+        '''
+        Performs the asynchronous model inference and sets
+        the callback for inference completion. Also, it should
+        define get_raw_result() function, which handles the result
+        of inference from the model.
+
+        Args:
+            - infer_request_data: contains the data and is submitted to the model for inference
+            - callback_fn: callback function
+            - callback_data: metadata, which will be picked up after inference is done
+        '''
+
+    @abc.abstractmethod
+    def is_ready(self):
+        '''
+        In case of asynchronous execution checks if one can submit input data
+        to the model for inference, or all infer requests are busy.
+
+        Returns:
+            - the boolean flag whether the input data can be
+                submitted to the model for inference or not
+        '''
+
+    @abc.abstractmethod
+    def await_all(self):
+        '''
+        In case of asynchronous execution waits the completion of all
+        busy infer requests.
+        '''
+
+    @abc.abstractmethod
+    def await_any(self):
+        '''
+        In case of asynchronous execution waits the completion of any
+        busy infer request until it becomes available for the data submission.
         '''

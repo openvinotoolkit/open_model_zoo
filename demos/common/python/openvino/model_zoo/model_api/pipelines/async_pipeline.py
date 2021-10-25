@@ -81,16 +81,24 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 
 
 class AsyncPipeline:
-    def __init__(self, model, model_adapter, inference_mode):
+    def __init__(self, model):
         self.model = model
-        self.model_adapter = model_adapter
-        self.mode = inference_mode
 
         self.completed_results = {}
+        self.callback_exceptions = []
 
         self.preprocess_metrics = PerformanceMetrics()
         self.inference_metrics = PerformanceMetrics()
         self.postprocess_metrics = PerformanceMetrics()
+
+    def callback(self, status, callback_args):
+        try:
+            get_result_fn, request, (id, meta, preprocessing_meta, start_time) = callback_args
+            if status != 0:
+                raise RuntimeError('Request has returned status code {}'.format(status))
+            self.completed_results[id] = (get_result_fn(request), meta, preprocessing_meta, start_time)
+        except Exception as e:
+            self.callback_exceptions.append(e)
 
     def submit_data(self, inputs, id, meta):
         preprocessing_start_time = perf_counter()
@@ -98,12 +106,8 @@ class AsyncPipeline:
         self.preprocess_metrics.update(preprocessing_start_time)
 
         infer_start_time = perf_counter()
-        if self.mode == 'Async':
-            callback_data = id, meta, preprocessing_meta, infer_start_time
-            self.model_adapter.async_infer(inputs, self.completed_results, callback_data)
-        else:
-            raw_result = self.model_adapter.infer(inputs)
-            self.completed_results[id] = (raw_result, meta, preprocessing_meta, infer_start_time)
+        callback_data = id, meta, preprocessing_meta, infer_start_time
+        self.model.get_adapter().async_infer(inputs, self.callback, callback_data)
 
     def get_result(self, id):
         if id in self.completed_results:
@@ -117,18 +121,14 @@ class AsyncPipeline:
         return None
 
     def is_ready(self):
-        if self.mode == 'Async':
-            return self.model_adapter.is_ready()
-        return True
+        return self.model.get_adapter().is_ready()
 
     def await_all(self):
-        if self.mode == 'Async':
-            self.model_adapter.await_all()
+        self.model.get_adapter().await_all()
 
     def await_any(self):
-        if self.mode == 'Async':
-            self.model_adapter.await_any()
+        self.model.get_adapter().await_any()
 
     def check_exceptions(self):
-        if self.mode == 'Async':
-            self.model_adapter.check_exceptions()
+        if self.callback_exceptions:
+            raise self.callback_exceptions[0]
