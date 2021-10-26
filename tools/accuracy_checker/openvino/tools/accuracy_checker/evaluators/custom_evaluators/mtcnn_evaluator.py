@@ -716,7 +716,7 @@ class MTCNNEvaluator(BaseCustomEvaluator):
             stage.release()
 
     def reset(self):
-        super.reset()
+        super().reset()
         for _, stage in self.stages.items():
             stage.reset()
 
