@@ -35,7 +35,8 @@ class ColorizationEvaluator(BaseCustomEvaluator):
             'colorization_network': self.test_model,
             'verification_network': self.check_model
         }
-        self.adapter_type = self.check_model.adapter.__provider__
+        if hasattr(self.check_model, 'adapter'):
+            self.adapter_type = self.check_model.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):

@@ -73,11 +73,11 @@ class TextRecognitionWithAttentionEvaluator(BaseCustomEvaluator):
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
     def reset(self):
-        super.reset()
+        super().reset()
         self.model.reset()
 
     def select_dataset(self, dataset_tag):
-        super.select_dataset(dataset_tag)
+        super().select_dataset(dataset_tag)
         if self.model.vocab is None:
             self.model.vocab = self.dataset.metadata.get('vocab')
 

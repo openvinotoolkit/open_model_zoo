@@ -31,7 +31,8 @@ class AutomaticSpeechRecognitionEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, model, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
         self.model = model
-        self.adapter_type = self.model.adapter.__provider__
+        if hasattr(self.model, 'adapter'):
+            self.adapter_type = self.model.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):

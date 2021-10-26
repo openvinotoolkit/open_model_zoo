@@ -667,7 +667,9 @@ class MTCNNEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, stages, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
         self.stages = stages
-        self.adapter_type = next(iter(self.stages.values())).adapter.__provider__
+        stage = next(iter(self.stages.values()))
+        if hasattr(stage, 'adapter') and stage.adapter is not None:
+            self.adapter_type = stage.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
@@ -714,7 +716,7 @@ class MTCNNEvaluator(BaseCustomEvaluator):
             stage.release()
 
     def reset(self):
-        super.reset()
+        super().reset()
         for _, stage in self.stages.items():
             stage.reset()
 
