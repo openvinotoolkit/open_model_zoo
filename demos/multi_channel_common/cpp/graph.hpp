@@ -44,6 +44,7 @@ private:
 
     bool printPerfReport;
     std::string deviceName;
+    std::string perf_hint;
 
     InferenceEngine::Core ie;
     std::queue<InferenceEngine::InferRequest::Ptr> availableRequests;
@@ -56,6 +57,7 @@ private:
     std::queue<BatchRequestDesc> busyBatchRequests;
 
     std::size_t maxRequests = 0;
+
 
     std::atomic_bool terminate = {false};
     std::mutex mtxAvalableRequests;
@@ -84,6 +86,7 @@ public:
         std::string cldnnConfigPath;
         std::string deviceName;
         PostLoadFunc postLoadFunc = nullptr;
+        std::string perf_hint = "tput";
     };
 
     explicit IEGraph(const InitParams& p);

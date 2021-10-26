@@ -38,9 +38,12 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 
 }  // namespace
 
+
+typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::nanoseconds ns;
+extern std::string duration_ms;
 void IEGraph::initNetwork(const std::string& deviceName) {
     auto cnnNetwork = ie.ReadNetwork(modelPath);
-
     if (deviceName.find("CPU") != std::string::npos) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::CPU_THROUGHPUT_AUTO}}, "CPU");
@@ -48,10 +51,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     if (deviceName.find("GPU") != std::string::npos) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::GPU_THROUGHPUT_AUTO}}, "GPU");
     }
-    if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = std::make_shared<InferenceEngine::Extension>(cpuExtensionPath);
-        ie.AddExtension(extension_ptr, "CPU");
-    }
+
     if (!cldnnConfigPath.empty()) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
     }
@@ -73,8 +73,25 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, deviceName);
-
+    auto startTime = Time::now();
+    if (deviceName.find("AUTO") != std::string::npos) {
+        network = ie.LoadNetwork(cnnNetwork, deviceName, {{CONFIG_KEY(PERFORMANCE_HINT), perf_hint},
+                                                      {CONFIG_KEY(PERFORMANCE_HINT_NUM_REQUESTS), std::to_string(maxRequests)}});
+    }
+    else
+    {
+        network = ie.LoadNetwork(cnnNetwork, deviceName);
+    }
+    auto double_to_string = [](const double number) {
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(0) << number;
+        return ss.str();
+    };
+    auto get_total_ms_time = [](Time::time_point& startTime) {
+        return std::chrono::duration_cast<ns>(Time::now() - startTime).count() * 0.000001;
+    };
+    duration_ms = double_to_string(get_total_ms_time(startTime));
+    slog::info << "Load network took " << duration_ms << " ms" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
@@ -196,7 +213,7 @@ IEGraph::IEGraph(const InitParams& p):
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    printPerfReport(p.reportPerf), deviceName(p.deviceName),
+    printPerfReport(p.reportPerf), deviceName(p.deviceName),perf_hint(p.perf_hint),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
