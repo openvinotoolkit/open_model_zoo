@@ -72,11 +72,6 @@ class TestTopologies(unittest.TestCase):
     def test_get_model_config(self):
         model = omz.Model.download_model('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.model_config, dict)
-
-    def test_infer_model(self):
-        model = omz.Model('colorization-v2', 'models/public/colorization-v2/FP32/colorization-v2.xml')
-        # dummy_inputs = np.zeros(input_shape)
-        # ie = IECore()
         
 
 if __name__ == '__main__':
