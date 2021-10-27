@@ -16,7 +16,7 @@ import numpy as np
 import ngraph
 
 from .detection_model import DetectionModel
-from .utils import Detection, clip_detections, nms, resize_image
+from .utils import Detection, clip_detections, nms, resize_image, INTERPOLATION_TYPES
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
@@ -392,3 +392,82 @@ class YOLOX(DetectionModel):
         y[:, 2] = x[:, 0] + x[:, 2] / 2
         y[:, 3] = x[:, 1] + x[:, 3] / 2
         return y
+
+
+class YoloV3ONNX(DetectionModel):
+    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox', labels=None, threshold=0.5):
+        if not resize_type:
+            resize_type = 'fit_to_window_letterbox'
+        super().__init__(ie, model_path, resize_type, labels=labels, threshold=threshold)
+        self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
+        self._check_io_number(2, 3)
+        self.classes = 80
+        self.bboxes_blob_name, self.scores_blob_name, self.indices_blob_name = self._get_outputs()
+
+    def _get_outputs(self):
+        bboxes_blob_name = None
+        scores_blob_name = None
+        indices_blob_name = None
+        for name, layer in self.net.outputs.items():
+            if layer.shape[-1] == 3:
+                indices_blob_name = name
+            elif layer.shape[2] == 4:
+                bboxes_blob_name = name
+            elif layer.shape[1] == self.classes:
+                scores_blob_name = name
+            else:
+                raise RuntimeError("Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
+                                   .format(self.classes, *[output.shape for output in self.net.outputs.values()]))
+        if self.net.outputs[bboxes_blob_name].shape[1] != self.net.outputs[scores_blob_name].shape[2]:
+            raise RuntimeError("Expected the same dimension for boxes and scores, but got {} and {}".format(
+                self.net.outputs[bboxes_blob_name].shape[1], self.net.outputs[scores_blob_name].shape[2]))
+        return bboxes_blob_name, scores_blob_name, indices_blob_name
+
+    def preprocess(self, inputs):
+        image = inputs
+        meta = {'original_shape': image.shape}
+        resized_image = self.resize(image, (self.w, self.h), interpolation=INTERPOLATION_TYPES['CUBIC'])
+        meta.update({'resized_shape': resized_image.shape})
+        resized_image = self._change_layout(resized_image)
+        dict_inputs = {
+            self.image_blob_name: resized_image,
+            self.image_info_blob_name: [image.shape[0], image.shape[1]]
+        }
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs)
+        detections = clip_detections(detections, meta['original_shape'])
+        return detections
+
+    def _parse_outputs(self, outputs):
+        boxes = outputs[self.bboxes_blob_name][0]
+        scores = outputs[self.scores_blob_name][0]
+        indices = outputs[self.indices_blob_name] if len(
+            outputs[self.indices_blob_name].shape) == 2 else outputs[self.indices_blob_name][0]
+
+        out_boxes, out_scores, out_classes = [], [], []
+        for idx_ in indices:
+            if idx_[0] == -1:
+                break
+            out_classes.append(idx_[1])
+            out_scores.append(scores[tuple(idx_[1:])])
+            out_boxes.append(boxes[idx_[2]])
+        transposed_boxes = np.array(out_boxes).T if out_boxes else ([], [], [], [])
+        mask = np.array(out_scores) > self.threshold
+
+        if mask.size == 0:
+            return []
+
+        out_classes, out_scores, transposed_boxes = (np.array(out_classes)[mask], np.array(out_scores)[mask],
+                                                     transposed_boxes[:, mask])
+
+        x_mins = transposed_boxes[1]
+        y_mins = transposed_boxes[0]
+        x_maxs = transposed_boxes[3]
+        y_maxs = transposed_boxes[2]
+
+        detections = [Detection(*det) for det in zip(x_mins, y_mins, x_maxs,
+                                                     y_maxs, out_scores, out_classes)]
+
+        return detections
