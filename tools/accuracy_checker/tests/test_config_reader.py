@@ -114,7 +114,7 @@ class TestConfigReader:
             'deprecated_ir_v7': False, 'transformations_config_dir': None, 'model_attributes': None
         })
         mocker.patch('openvino.tools.accuracy_checker.utils.get_path', return_value=Path.cwd())
-        mocker.patch('yaml.load', return_value=config)
+        mocker.patch('yaml.safe_load', return_value=config)
         mocker.patch('pathlib.Path.open')
 
         result = ConfigReader.merge(empty_args)

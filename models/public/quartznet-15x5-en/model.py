@@ -46,7 +46,7 @@ class QuartzNet(torch.nn.Module):
     def __init__(self, model_config, encoder_weights, decoder_weights):
         super().__init__()
         with open(model_config, 'r') as config:
-            model_args = YAML.load(config)
+            model_args = YAML.safe_load(config)
         _ = NeuralModuleFactory(placement=DeviceType.CPU)
 
         encoder_params = model_args['init_params']['encoder_params']['init_params']
