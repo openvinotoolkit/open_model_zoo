@@ -680,7 +680,7 @@ int main(int argc, char *argv[]) {
                 personReId.enabled() ? FLAGS_d_reid : ""
         };
 
-        for (auto && flag : deviceNames) {
+        for (auto&& flag : deviceNames) {
             if (flag.empty())
                 continue;
 
