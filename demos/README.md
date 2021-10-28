@@ -232,7 +232,7 @@ For example:
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 ```
 
-and once they built add demo build folder to `PYTHONPATH` environment varable.
+Once the modules are built, add the demo build folder to the `PYTHONPATH` environment variable.
 
 ### <a name="build_specific_demos"></a>Build Specific Demos
 
