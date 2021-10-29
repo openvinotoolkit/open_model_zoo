@@ -115,7 +115,7 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+                      required=True)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
@@ -200,15 +200,15 @@ def main():
         core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(core, args.model, plugin_config, args.device, args.num_infer_requests)
-        log_runtime_settings(model_adapter.get_model(), set(parse_devices(args.device)))
     elif args.adapter == 'remote':
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
     model, visualizer = get_model(model_adapter, args)
-    log_layers_info(model_adapter)
+    log_layers_info(model)
 
     pipeline = AsyncPipeline(model)
+    #log_runtime_settings(model_adapter.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -246,7 +246,8 @@ def main():
             # Wait for empty request
             pipeline.await_any()
 
-        pipeline.check_exceptions()
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
         # Process all completed requests
         results = pipeline.get_result(next_frame_id_to_show)
         if results:

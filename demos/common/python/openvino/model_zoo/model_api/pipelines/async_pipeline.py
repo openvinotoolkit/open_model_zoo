@@ -83,6 +83,7 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 class AsyncPipeline:
     def __init__(self, model):
         self.model = model
+        self.model.load()
 
         self.completed_results = {}
         self.callback_exceptions = []
@@ -107,11 +108,17 @@ class AsyncPipeline:
 
         infer_start_time = perf_counter()
         callback_data = id, meta, preprocessing_meta, infer_start_time
-        self.model.get_adapter().async_infer(inputs, self.callback, callback_data)
+        self.model.infer_async(inputs, self.callback, callback_data)
+
+    def get_raw_result(self, id):
+        if id in self.completed_results:
+            return self.completed_results.pop(id)
+        return None
 
     def get_result(self, id):
-        if id in self.completed_results:
-            raw_result, meta, preprocess_meta, infer_start_time = self.completed_results.pop(id)
+        result = self.get_raw_result(id)
+        if result:
+            raw_result, meta, preprocess_meta, infer_start_time = result
             self.inference_metrics.update(infer_start_time)
 
             postprocessing_start_time = perf_counter()
@@ -121,14 +128,10 @@ class AsyncPipeline:
         return None
 
     def is_ready(self):
-        return self.model.get_adapter().is_ready()
+        return self.model.is_ready()
 
     def await_all(self):
-        self.model.get_adapter().await_all()
+        self.model.await_all()
 
     def await_any(self):
-        self.model.get_adapter().await_any()
-
-    def check_exceptions(self):
-        if self.callback_exceptions:
-            raise self.callback_exceptions[0]
+        self.model.await_any()

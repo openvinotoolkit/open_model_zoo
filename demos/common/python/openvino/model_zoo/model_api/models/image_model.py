@@ -47,7 +47,7 @@ class ImageModel(Model):
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.model_adapter.get_input_layer_shape(self.image_blob_name)
+            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
 
         self.image_layout = 'NCHW'
         if not resize_type:
@@ -62,12 +62,11 @@ class ImageModel(Model):
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []
-        for layer_name in self.model_adapter.get_input_layers():
-            layer_shape = self.model_adapter.get_input_layer_shape(layer_name)
-            if len(layer_shape) == 4:
-                image_blob_names.append(layer_name)
-            elif len(layer_shape) == 2:
-                image_info_blob_names.append(layer_name)
+        for name, metadata in self.inputs.items():
+            if len(metadata.shape) == 4:
+                image_blob_names.append(name)
+            elif len(metadata.shape) == 2:
+                image_info_blob_names.append(name)
             else:
                 raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
         if not image_blob_names:
@@ -93,7 +92,7 @@ class ImageModel(Model):
             inputs: single image as 3D array in HWC layout
 
         Returns:
-            - The infer request with preprocessed image data
+            - the dict with preprocessed image data
             - The dict with metadata
         '''
         image = inputs
@@ -105,11 +104,11 @@ class ImageModel(Model):
         resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
         # apply conversion int -> float
-        input_precision = self.model_adapter.get_input_layer_precision(self.image_blob_name)
+        input_precision = self.inputs[self.image_blob_name].precision
         if resized_image.dtype == np.uint8 and input_precision in ('DT_FLOAT', 'FP32'):
             resized_image = resized_image.astype(np.float32)
-        infer_request = self.model_adapter.create_infer_request_data(self.image_blob_name, resized_image)
-        return infer_request, meta
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
 
     def _change_layout(self, image):
         if self.image_layout == 'NCHW':

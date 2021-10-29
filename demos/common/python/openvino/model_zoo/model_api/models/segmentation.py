@@ -33,8 +33,8 @@ class SegmentationModel(ImageModel):
         self.output_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        layer_name = self.model_adapter.get_output_layers()[0]
-        layer_shape = self.model_adapter.get_output_layer_shape(layer_name)
+        layer_name = next(iter(self.outputs))
+        layer_shape = self.outputs[layer_name].shape
 
         if len(layer_shape) == 3:
             self.out_channels = 0

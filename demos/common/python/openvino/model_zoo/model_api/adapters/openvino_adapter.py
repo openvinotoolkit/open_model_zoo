@@ -17,7 +17,7 @@
 import logging as log
 from collections import deque
 
-from .model_adapter import ModelAdapter
+from .model_adapter import ModelAdapter, Metadata
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -26,51 +26,44 @@ class OpenvinoAdapter(ModelAdapter):
     """
 
     def __init__(self, core, model_path, plugin_config, device, max_num_requests=1):
-        self.load_model(core, model_path, plugin_config, device, max_num_requests)
-        log.info('The model {} is loaded to {}'.format(model_path, device))
-        self.empty_requests = deque(self.exec_net.requests)
-
-    def load_model(self, core, model_path, plugin_config, device, max_num_requests):
+        self.core = core
+        self.model_path = model_path
+        self.plugin_config = plugin_config
+        self.device = device
+        self.max_num_requests = max_num_requests
         self.net = core.read_network(model_path)
-        self.exec_net = core.load_network(network=self.net, device_name=device,
-            config=plugin_config, num_requests=max_num_requests)
-        if max_num_requests == 0:
+
+    def load_model(self):
+        self.exec_net = self.core.load_network(self.net, self.device,
+            self.plugin_config, self.max_num_requests)
+        if self.max_num_requests == 0:
             # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
             # +1 to use it as a buffer of the pipeline
-            self.exec_net = core.load_network(network=self.net, device_name=device,
-                config=plugin_config, num_requests=len(self.exec_net.requests) + 1)
+            self.exec_net = self.core.load_network(self.net, self.device,
+                self.plugin_config, len(self.exec_net.requests) + 1)
+
+        log.info('The model {} is loaded to {}'.format(self.model_path, self.device))
+        self.empty_requests = deque(self.exec_net.requests)
 
     def get_input_layers(self):
-        return list(self.net.input_info.keys())
+        inputs = {}
+        for name, layer in self.net.input_info.items():
+            inputs[name] = Metadata(layer.input_data.shape, layer.input_data.precision)
+        return inputs
 
     def get_output_layers(self):
-        return list(self.net.outputs.keys())
-
-    def get_input_layer_shape(self, input_layer_name):
-        return self.net.input_info[input_layer_name].input_data.shape
-
-    def get_output_layer_shape(self, output_layer_name):
-        return self.net.outputs[output_layer_name].shape
-
-    def get_input_layer_precision(self, input_layer_name):
-        return self.net.input_info[input_layer_name].precision
-
-    def get_output_layer_precision(self, output_layer_name):
-        return self.net.outputs[output_layer_name].precision
-
-    def create_infer_request_data(self, input_layer_name, data):
-        return {input_layer_name: data}
-
-    def sync_infer(self, infer_request_data):
-        return self.exec_net.infer(infer_request_data)
+        outputs = {}
+        for name, layer in self.net.outputs.items():
+            outputs[name] = Metadata(layer.shape, layer.precision)
+        return outputs
 
     def reshape_model(self, new_shape):
-        self.net.reshape({self.image_blob_name: new_shape})
+        self.net.reshape(new_shape)
 
-    def get_model(self):
-        return self.exec_net
+    def infer_sync(self, dict_data):
+        return self.exec_net.infer(dict_data)
 
-    def async_infer(self, infer_request_data, callback_fn, callback_data):
+    def infer_async(self, dict_data, callback_fn, callback_data):
 
         def get_raw_result(request):
             self.empty_requests.append(request)
@@ -79,7 +72,7 @@ class OpenvinoAdapter(ModelAdapter):
         request = self.empty_requests.popleft()
         request.set_completion_callback(py_callback=callback_fn,
                                         py_data=(get_raw_result, request, callback_data))
-        request.async_infer(infer_request_data)
+        request.async_infer(dict_data)
 
     def is_ready(self):
         return len(self.empty_requests) != 0

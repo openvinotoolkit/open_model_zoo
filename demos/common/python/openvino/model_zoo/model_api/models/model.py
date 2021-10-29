@@ -36,6 +36,8 @@ class Model:
         '''
         self.logger = log.getLogger()
         self.model_adapter = model_adapter
+        self.inputs = self.get_input_layers()
+        self.outputs = self.get_output_layers()
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -67,41 +69,60 @@ class Model:
         Raises:
             RuntimeError: if loaded model has unsupported number of input or output blob
         '''
-        model_input_layers = self.model_adapter.get_input_layers()
         if not isinstance(number_of_inputs, tuple):
-            if len(model_input_layers) != number_of_inputs and number_of_inputs != -1:
+            if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
                 raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
                     number_of_inputs, 's' if number_of_inputs !=1 else '',
-                    len(model_input_layers), ', '.join(model_input_layers)
+                    len(self.inputs), ', '.join(self.inputs)
                 ))
         else:
-            if not len(model_input_layers) in number_of_inputs:
+            if not len(self.inputs) in number_of_inputs:
                 raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
-                    len(model_input_layers), ', '.join(model_input_layers)
+                    len(self.inputs), ', '.join(self.inputs)
                 ))
 
-        model_output_layers = self.model_adapter.get_output_layers()
         if not isinstance(number_of_outputs, tuple):
-            if len(model_output_layers) != number_of_outputs and number_of_outputs != -1:
+            if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
                 raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
                     number_of_outputs, 's' if number_of_outputs !=1 else '',
-                    len(model_output_layers), ', '.join(model_output_layers)
+                    len(self.outputs), ', '.join(self.outputs)
                 ))
         else:
-            if not len(model_output_layers) in number_of_outputs:
+            if not len(self.outputs) in number_of_outputs:
                 raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
-                    len(model_output_layers), ', '.join(model_output_layers)
+                    len(self.outputs), ', '.join(self.outputs)
                 ))
 
     def __call__(self, input_data):
         '''
         Applies the preprocessing, synchronous inference and postprocessing method of model wrapper
         '''
-        infer_request, input_meta = self.preprocess(input_data)
-        raw_result = self.model_adapter.sync_infer(infer_request)
+        dict_data, input_meta = self.preprocess(input_data)
+        raw_result = self.infer_sync(dict_data)
         return self.postprocess(raw_result, input_meta)
 
-    def get_adapter(self):
-        return self.model_adapter
+    def get_input_layers(self):
+        return self.model_adapter.get_input_layers()
+
+    def get_output_layers(self):
+        return self.model_adapter.get_output_layers()
+
+    def load(self):
+        self.model_adapter.load_model()
+
+    def infer_sync(self, dict_data):
+        return self.model_adapter.infer_sync(dict_data)
+
+    def infer_async(self, dict_data, callback_fn, callback_data):
+        self.model_adapter.infer_async(dict_data, callback_fn, callback_data)
+
+    def is_ready(self):
+        return self.model_adapter.is_ready()
+
+    def await_all(self):
+        self.model_adapter.await_all()
+
+    def await_any(self):
+        self.model_adapter.await_any()

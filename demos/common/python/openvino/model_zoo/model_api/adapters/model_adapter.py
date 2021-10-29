@@ -15,128 +15,55 @@
 """
 
 import abc
+from collections import namedtuple
+
+Metadata = namedtuple('Metadata', ['shape', 'precision', 'meta'])
+Metadata.__new__.__defaults__ = [],
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):
     '''
     An abstract Model Adapter with the following interface:
 
-        - Loading the model with the specific executor
+        - Reading the model from disk or other place
+        - Loading the model to the device
         - Accessing the information about input/output layers
+        - The model reshaping
         - Synchronous model inference
         - Asynchronous model inference
-        - The model reshaping
     '''
 
     @abc.abstractmethod
-    def __init__(self, model_name, config, *args):
-        '''An abstract Model Adapter constructor
-
-        Args:
-            model_name: specify the path / name of the model to load
-            config(dict): specify the config for the executor
-            *args: other arguments for loading the model depending from the adapter
+    def __init__(self):
         '''
-        self.load_model(model_name, config, *args)
+        An abstract Model Adapter constructor.
+        Reads the model from disk or other place.
+        '''
 
     @abc.abstractmethod
-    def load_model(self, model_name, config, *args):
+    def load_model(self):
         '''
-        Loading the model with the specific executor.
-
-        Args:
-            model_name: specify the path / name of the model to load
-            config(dict): specify the config for the executor
-            *args: other arguments for loading the model depending from the adapter
+        Loads the model on the device.
         '''
 
     @abc.abstractmethod
     def get_input_layers(self):
         '''
+        Gets the names of model input layers and for each layer creates the Metadata structure,
+           which contains the information about the layer shape, precision, meta (optional)
+
         Returns:
-            - the list with names of model input layers
+            - the dict containing Metadata for all input layers
         '''
 
     @abc.abstractmethod
     def get_output_layers(self):
         '''
-        Returns:
-            - the list with names of model output layers
-        '''
-
-    @abc.abstractmethod
-    def get_input_layer_shape(self, input_layer_name):
-        '''
-        Returns the shape of specified input layer by its name.
-
-        Args:
-            input_layer_name(str): name of input layer to refer
+        Gets the names of model output layers and for each layer creates the Metadata structure,
+           which contains the information about the layer shape, precision, meta (optional)
 
         Returns:
-            - the list represented the input 4D layer shape in NWHC or NCHW layout
-        '''
-
-    @abc.abstractmethod
-    def get_output_layer_shape(self, output_layer_name):
-        '''
-        Returns the shape of specified output layer by its name.
-
-        Args:
-            output_layer_name(str): name of output layer to refer
-
-        Returns:
-            - the list represented the output 4D layer shape
-        '''
-
-    @abc.abstractmethod
-    def get_input_layer_precision(self, input_layer_name):
-        '''
-        Returns the precision of specified input layer by its name.
-
-        Args:
-            input_layer_name(str): name of input layer to refer
-
-        Returns:
-            - the string representation of input layer precision
-        '''
-
-    @abc.abstractmethod
-    def get_output_layer_precision(self, output_layer_name):
-        '''
-        Returns the precision of specified output layer by its name.
-
-        Args:
-            output_layer_name(str): name of output layer to refer
-
-        Returns:
-            - the string representation of output layer precision
-        '''
-
-    @abc.abstractmethod
-    def create_infer_request_data(self, input_layer_name, data):
-        '''
-        Forms the infer request for infer method.
-        It's called in Model Wrapper preprocess() method, after the preprocessing operations are done.
-
-        Args:
-            input_layer_name(str): name of input layer
-            data: preprocessed numpy array tensor
-
-        Returns:
-            - the infer request data - it might be a dict or a custom structure for some executors
-        '''
-
-    @abc.abstractmethod
-    def sync_infer(self, infer_request_data):
-        '''
-        Performs the synchronous model inference. The infer is a blocking method.
-
-        Args:
-            - infer_request_data: contains the data and is submitted to the model for inference
-
-        Returns:
-            - raw result(dict) - model raw output in the following format:
-                { output_layer_name: raw_result }
+            - the dict containing Metadata for all output layers
         '''
 
     @abc.abstractmethod
@@ -146,17 +73,38 @@ class ModelAdapter(metaclass=abc.ABCMeta):
 
         Args:
             - new_shape(dict): the dictionary with input layers as keys and
-                list of new shape as values
-
-        Example of new_shape argument:
-            {
-                'input_layer_1': [1, 128, 128, 3],
-                'input_layer_2': [1, 128, 128, 3],
-            }
+                list of new shape as values in the following format:
+                {
+                    'input_layer_1': [1, 128, 128, 3],
+                    'input_layer_2': [1, 128, 128, 3],
+                    ...
+                }
         '''
 
     @abc.abstractmethod
-    def async_infer(self, infer_request_data, callback_fn, callback_data):
+    def infer_sync(self, dict_data):
+        '''
+        Performs the synchronous model inference. The infer is a blocking method.
+
+        Args:
+            - dict_data: it's submitted to the model for inference and has the following format:
+                {
+                    'input_layer_1': data_1,
+                    'input_layer_2': data_2,
+                    ...
+                }
+
+        Returns:
+            - raw result(dict) - model raw output in the following format:
+                {
+                    'output_layer_1': raw_result_1,
+                    'output_layer_2': raw_result_2,
+                    ...
+                }
+        '''
+
+    @abc.abstractmethod
+    def infer_async(self, dict_data, callback_fn, callback_data):
         '''
         Performs the asynchronous model inference and sets
         the callback for inference completion. Also, it should
@@ -164,9 +112,14 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         of inference from the model.
 
         Args:
-            - infer_request_data: contains the data and is submitted to the model for inference
-            - callback_fn: callback function
-            - callback_data: metadata, which will be picked up after inference is done
+            - dict_data: it's submitted to the model for inference and has the following format:
+                {
+                    'input_layer_1': data_1,
+                    'input_layer_2': data_2,
+                    ...
+                }
+            - callback_fn: the callback function, which is defined outside the adapter
+            - callback_data: the data for callback, that will be taken after the model inference is ended
         '''
 
     @abc.abstractmethod

@@ -16,7 +16,7 @@
 
 import ovmsclient
 
-from .model_adapter import ModelAdapter
+from .model_adapter import ModelAdapter, Metadata
 
 
 class RemoteAdapter(ModelAdapter):
@@ -25,49 +25,39 @@ class RemoteAdapter(ModelAdapter):
     """
 
     def __init__(self, model_name, config):
-        self.model_name = str(model_name)
-        self.load_model(config)
-
-    def load_model(self, config):
+        self.model_name = model_name
         self.client = ovmsclient.make_grpc_client(config=config)
         # ensure the model can be loaded
         ovmsclient.make_grpc_status_request(model_name=self.model_name)
 
         metadata_request = ovmsclient.make_grpc_metadata_request(model_name=self.model_name)
-        metadata_response = self.client.get_model_metadata(metadata_request)
-        self.metadata = metadata_response.to_dict()[1]
+        self.metadata = self.client.get_model_metadata(metadata_request).to_dict()[1]
+
+    def load_model(self):
+        pass
 
     def get_input_layers(self):
-        return list(self.metadata["inputs"].keys())
+        inputs = {}
+        for name, meta in self.metadata['inputs'].items():
+            inputs[name] = Metadata(meta['shape'], meta['dtype'])
+        return inputs
 
     def get_output_layers(self):
-        return list(self.metadata["outputs"].keys())
-
-    def get_input_layer_shape(self, input_layer_name):
-        return self.metadata["inputs"][input_layer_name]['shape']
-
-    def get_output_layer_shape(self, output_layer_name):
-        return self.metadata["outputs"][output_layer_name]['shape']
-
-    def get_input_layer_precision(self, input_layer_name):
-        return self.metadata["inputs"][input_layer_name]['dtype']
-
-    def get_output_layer_precision(self, output_layer_name):
-        return self.metadata["outputs"][output_layer_name]['dtype']
-
-    def create_infer_request_data(self, input_layer_name, data):
-        return ovmsclient.make_grpc_predict_request(
-            {input_layer_name: data}, model_name=self.model_name
-        )
-
-    def sync_infer(self, infer_request_data):
-        return self.client.predict(infer_request_data).to_dict()
+        outputs = {}
+        for name, meta in self.metadata['outputs'].items():
+            outputs[name] = Metadata(meta['shape'], meta['dtype'])
+        return outputs
 
     def reshape_model(self, new_shape):
         pass
 
-    def async_infer(self, infer_request_data, callback_fn, callback_data):
-        raw_result = self.sync_infer(infer_request_data)
+    def infer_sync(self, dict_data):
+        predict_request = ovmsclient.make_grpc_predict_request(
+            dict_data, model_name=self.model_name)
+        return self.client.predict(predict_request).to_dict()
+
+    def infer_async(self, dict_data, callback_fn, callback_data):
+        raw_result = self.infer_sync(dict_data)
         callback_fn(0, (lambda x: x, raw_result, callback_data))
 
     def is_ready(self):
