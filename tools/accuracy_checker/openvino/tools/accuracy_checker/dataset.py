@@ -57,6 +57,18 @@ from .data_readers import (
 )
 from .logging import print_info
 
+MODULES_RENAMING = {
+                    'accuracy_checker': 'openvino.tools.accuracy_checker',
+                    'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker':
+                        [
+                            'libs.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker',
+                            'openvino.tools.accuracy_checker',
+                            'thirdparty.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker',
+                        ],
+                    'thirdparty.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker':
+                        'openvino.tools.accuracy_checker',
+                }
+
 
 class Dataset:
     def __init__(self, config_entry, delayed_annotation_loading=False, log=True):
@@ -369,8 +381,9 @@ def read_annotation(annotation_file: Path, log=True):
     annotation_file = Path(annotation_file)
 
     result = []
+    loader_cls = pickle.Unpickler # nosec - disable B301:pickle check
     with annotation_file.open('rb') as file:
-        loader = pickle.Unpickler(file) # nosec - disable B301:pickle check
+        loader = loader_cls(file)
         try:
             first_obj = loader.load()
             if isinstance(first_obj, DatasetConversionInfo):
@@ -379,14 +392,8 @@ def read_annotation(annotation_file: Path, log=True):
             else:
                 result.append(first_obj)
         except ModuleNotFoundError:
-            loader = RenameUnpickler(
-                file,
-                {
-                    'accuracy_checker': 'openvino.tools.accuracy_checker',
-                    'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker':
-                        ['libs.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker',
-                         'openvino.tools.accuracy_checker']
-                })
+            loader_cls = RenameUnpickler
+            loader = loader_cls(file, MODULES_RENAMING)
             try:
                 first_obj = loader.load()
                 if isinstance(first_obj, DatasetConversionInfo):
@@ -400,7 +407,10 @@ def read_annotation(annotation_file: Path, log=True):
             return result
         while True:
             try:
-                result.append(BaseRepresentation.load(file, loader))
+                result.append(
+                    BaseRepresentation.load(file, loader_cls(file) if loader_cls != RenameUnpickler
+                    else loader_cls(file, MODULES_RENAMING))
+                )
             except EOFError:
                 break
 
