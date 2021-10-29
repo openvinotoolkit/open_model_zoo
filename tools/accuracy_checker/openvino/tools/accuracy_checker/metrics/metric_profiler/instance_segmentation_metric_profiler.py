@@ -61,8 +61,8 @@ class InstanceSegmentationProfiler(MetricProfiler):
                 continue
             label_id = self.valid_labels[idx] if self.valid_labels else class_id
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
-            gt = [gt_obj.tolist() for gt_obj in class_result['gt']]
-            dt = [dt_obj.tolist() for dt_obj in class_result['dt']]
+            gt = class_result['gt']
+            dt = class_result['dt']
             scores = (
                 class_result['scores'].tolist()
                 if not isinstance(class_result['scores'], list) else class_result['scores']
