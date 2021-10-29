@@ -29,7 +29,7 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, ie, model_path, resize_type=None,
+    def __init__(self, model_adapter, resize_type=None,
                  labels=None, threshold=None, iou_threshold=None):
         '''The Detection Model constructor
 
@@ -43,7 +43,7 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(ie, model_path, resize_type=resize_type)
+        super().__init__(model_adapter, resize_type=resize_type)
 
         if not self.image_blob_name:
             raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"

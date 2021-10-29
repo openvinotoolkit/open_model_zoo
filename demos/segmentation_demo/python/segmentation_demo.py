@@ -32,8 +32,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api.models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
-
 from model_api.adapters import OpenvinoAdapter, RemoteAdapter
+
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_layers_info, log_runtime_settings, log_latency_per_stage

@@ -36,8 +36,8 @@ class Model:
         '''
         self.logger = log.getLogger()
         self.model_adapter = model_adapter
-        self.inputs = self.get_input_layers()
-        self.outputs = self.get_output_layers()
+        self.inputs = self.model_adapter.get_input_layers()
+        self.outputs = self.model_adapter.get_output_layers()
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -103,14 +103,12 @@ class Model:
         raw_result = self.infer_sync(dict_data)
         return self.postprocess(raw_result, input_meta)
 
-    def get_input_layers(self):
-        return self.model_adapter.get_input_layers()
-
-    def get_output_layers(self):
-        return self.model_adapter.get_output_layers()
-
     def load(self):
         self.model_adapter.load_model()
+
+    def reshape(self, new_shape):
+        self.model_adapter.reshape_model(new_shape)
+        self.inputs = self.model_adapter.get_input_layers()
 
     def infer_sync(self, dict_data):
         return self.model_adapter.infer_sync(dict_data)
