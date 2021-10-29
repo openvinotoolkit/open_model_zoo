@@ -56,8 +56,9 @@ To download COCO dataset, you need to follow the steps below:
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
 
 * `val2017` - directory containing the COCO 2017 validation images
-* `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
-* `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
+* `annotations` - directory containing the COCO 2017 annotation files
+  * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
+  * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
 ### Datasets in dataset_definitions.yml
 * `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID.

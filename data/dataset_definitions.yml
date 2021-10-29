@@ -2,7 +2,7 @@ datasets:
   - name: ms_coco_mask_rcnn
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
     annotation: mscoco_mask_rcnn.pickle
@@ -12,7 +12,7 @@ datasets:
   - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017_short.json
+      annotation_file: annotations/instances_val2017_short.json
       has_background: True
       sort_annotations: True
     annotation: mscoco_mask_rcnn_short_80.pickle
@@ -22,7 +22,7 @@ datasets:
   - name: ms_coco_mask_rcnn_short_80_classes_without_background
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
     annotation: mscoco_mask_rcnn_short_80_without_bkgr.pickle
@@ -32,7 +32,7 @@ datasets:
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017_short.json
+      annotation_file: annotations/instances_val2017_short.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -57,7 +57,7 @@ datasets:
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -83,7 +83,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
       use_full_label_map: False
@@ -94,7 +94,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: False
@@ -102,10 +102,10 @@ datasets:
     dataset_meta: mscoco_det_80_bkgr.json
 
   - name: ms_coco_detection_90_class_without_background
-    data_source: MSCOCO/val2017
+    data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: MSCOCO/annotations/instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
       use_full_label_map: True
@@ -116,7 +116,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       sort_key: image_size
     annotation: mscoco_keypoints.pickle
     dataset_meta: mscoco_keypoints.json
@@ -129,7 +129,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       remove_empty_images: True
       sort_annotations: True
       sort_key: image_size
@@ -144,7 +144,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       remove_empty_images: False
       sort_annotations: True
       sort_key: image_size
@@ -399,7 +399,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -410,7 +410,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -957,7 +957,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_single_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
     annotation: mscoco_single_keypoints.pickle
     dataset_meta: mscoco_single_keypoints.json
     metrics:
