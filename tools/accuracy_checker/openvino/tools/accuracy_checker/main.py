@@ -81,6 +81,7 @@ def main():
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
                     print_results=True, ignore_results_formatting=args.ignore_result_formatting,
+                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
                     write_csv_result(

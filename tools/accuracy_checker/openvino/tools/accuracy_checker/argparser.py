@@ -172,6 +172,12 @@ def add_tool_settings_args(parser):
         required=False
     )
     tool_settings_args.add_argument(
+        '--ignore_metric_reference', help='disable comparing with metric reference during presenting result',
+        type=cast_to_bool,
+        default=False,
+        required=False
+    )
+    tool_settings_args.add_argument(
         '--stored_predictions',
         help='path to file with saved predictions. Used for development',
         # since at the first time file does not exist and then created we can not always check existence
