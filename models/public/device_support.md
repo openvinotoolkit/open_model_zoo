@@ -52,6 +52,7 @@
 | faster_rcnn_resnet50_coco | YES | YES | YES |
 | fastseg-large | YES | YES |    |
 | fastseg-small | YES | YES |    |
+| fbcnn | YES | YES | YES |
 | fcrn-dp-nyu-depth-v2-tf | YES | YES |    |
 | forward-tacotron-duration-prediction | YES |    |    |
 | forward-tacotron-regression | YES |    |    |

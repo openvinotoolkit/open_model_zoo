@@ -25,6 +25,8 @@ Visualizer::Visualizer(const std::string& type) {
         winName = "Image Processing Demo - Super Resolution (press A for help)";
     else if (type == "deblur")
         winName = "Image Processing Demo - Deblurring (press A for help)";
+    else if (type == "jr")
+        winName = "Image Processing Demo - JPEG Restoration (press A for help)";
 }
 
 cv::Size Visualizer::getSize() {
@@ -36,6 +38,10 @@ void Visualizer::handleKey(int key) {
     if (key == 'a') {
         isHelpShown = !isHelpShown;
     }
+    if (cv::getWindowProperty(winName, 0) < 0) {
+        mode = "result";
+        disableTrackbar();
+    }
     if (key == 'o') {
         mode = "orig";
         addTrackbar();
@@ -46,6 +52,7 @@ void Visualizer::handleKey(int key) {
     }
     if (key == 'r') {
         mode = "result";
+        cv::destroyWindow(winName);
         disableTrackbar();
     }
 }
@@ -107,6 +114,10 @@ void Visualizer::changeDisplayImg() {
     } else if (mode == "diff") {
         cv::Mat diffImg;
         cv::absdiff(inputImg, resultImg, diffImg);
+        double min, max;
+        cv::minMaxLoc(diffImg, &min, &max);
+        double scale = 255.0 / (max - min);
+        diffImg = (diffImg - min) * scale;
         diffImg(cv::Rect(0, 0, slider, resultImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, displayImg.rows)));
         markImage(displayImg, {"D", "R"}, static_cast<float>(slider) / resolution.width);
         drawSweepLine(displayImg);
@@ -141,10 +152,5 @@ void Visualizer::addTrackbar() {
 }
 
 void Visualizer::disableTrackbar() {
-    if (isTrackbarShown) {
-        cv::destroyWindow(winName);
-        isTrackbarShown = false;
-        cv::namedWindow(winName);
-        show();
-    }
+    isTrackbarShown = false;
 }

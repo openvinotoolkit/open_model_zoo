@@ -284,6 +284,14 @@ The task of image deblurring.
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/README.md) | 28.25Db  | 80.8919 | 2.1083   |
 
+## JPEG artifacts removal
+
+The task of restoration images from jpeg format.
+
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops     | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | ---------- | -------- |
+| FBCNN          | PyTorch\*      | [fbcnn](./fbcnn/README.md)                     | 34.34Db  | 1420.78235 | 71.922   |
+
 ## Salient object detection
 
  Salient object detection is a task-based on a visual attention mechanism,
