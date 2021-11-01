@@ -34,10 +34,18 @@ Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
+2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) python package of the corresponding version:
+
+```sh
+pip install openvino-dev
+```
+> **NOTE**: For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
+
 2. Install the tools with the following command:
 
 ```sh
-python setup.py install
+export OMZ_ROOT=<omz_dir>
+pip install .
 ```
 
 > **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
