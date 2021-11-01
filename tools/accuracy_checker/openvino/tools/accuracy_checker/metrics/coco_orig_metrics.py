@@ -34,7 +34,7 @@ from ..representation import (
 from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value, UnsupportedPackage
-from .metric import PerImageEvaluationMetric, Metric
+from .metric import FullDatasetEvaluationMetric, Metric, PerImageEvaluationMetric
 from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
 
 try:
@@ -56,7 +56,7 @@ if SHOULD_DISPLAY_DEBUG_IMAGES:
     import cv2
 
 
-class MSCOCOorigBaseMetric(PerImageEvaluationMetric):
+class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     annotation_types = (DetectionAnnotation, )
     prediction_types = (DetectionPrediction, )
 
