@@ -179,9 +179,11 @@ class AmazonProductData(BaseFormatConverter):
                                      description="Separator between input identifier and file identifier"),
             "test_data": StringField(optional=True, default='local_test_splitByUser',
                                      description="test data filename."),
-            "batch": NumberField(optional=True, default=1, description="Batch size"),
-            "max_len": NumberField(optional=True, default=None, description="Maximum sequence length"),
-            "subsample_size": NumberField(optional=True, default=0, description="Number of sentences to process"),
+            "batch": NumberField(optional=True, default=1, description="Batch size", value_type=int),
+            "max_len": NumberField(optional=True, default=None, description="Maximum sequence length", value_type=int),
+            "subsample_size": NumberField(
+                optional=True, default=0, description="Number of sentences to process", value_type=int
+            ),
             "uid_voc": StringField(optional=True, default='uid_voc.pkl', description="uid_voc filename"),
             "mid_voc": StringField(optional=True, default='mid_voc.pkl', description="mid_voc filename"),
             "cat_voc": StringField(optional=True, default='cat_voc.pkl', description="cat_voc filename"),
@@ -224,9 +226,9 @@ class AmazonProductData(BaseFormatConverter):
         self.mask = self.get_value_from_config('mask')
         self.seq_len = self.get_value_from_config('seq_len')
         self.skip_dump = self.get_value_from_config('skip_dump')
-        self.batch = int(self.get_value_from_config('batch'))
-        self.max_len = int(self.get_value_from_config('max_len'))
-        self.subsample_size = int(self.get_value_from_config('subsample_size'))
+        self.batch = self.get_value_from_config('batch')
+        self.max_len = self.get_value_from_config('max_len')
+        self.subsample_size = self.get_value_from_config('subsample_size')
 
     @staticmethod
     def prepare_data(source, target, maxlen=None):
