@@ -44,7 +44,7 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
         cur_words = len(annotation.label.split())
         self.score += cur_score
         self.words += cur_words
-        return cur_score / cur_words
+        return cur_score / cur_words if cur_words != 0 else 0
 
     def evaluate(self, annotations, predictions):
         return self.score / self.words if self.words != 0 else 0
@@ -70,7 +70,7 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
         cur_length = len(annotation.label)
         self.score += cur_score
         self.length += cur_length
-        return cur_score / cur_length
+        return cur_score / cur_length if cur_length != 0 else 0
 
     def evaluate(self, annotations, predictions):
         return self.score / self.length if self.length != 0 else 0
