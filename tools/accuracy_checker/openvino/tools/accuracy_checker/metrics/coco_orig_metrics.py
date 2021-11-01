@@ -35,7 +35,7 @@ from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value, UnsupportedPackage
 from .metric import FullDatasetEvaluationMetric, Metric, PerImageEvaluationMetric
-from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
+from .coco_metrics import COCO_THRESHOLDS, process_threshold
 
 try:
     from pycocotools.coco import COCO
@@ -491,28 +491,7 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
 
     def update(self, annotation, prediction):
         if self.profiler:
-            per_class_matching = {}
-            for _, label in enumerate(self.labels):
-                detections, scores, dt_difficult = self._prepare_predictions(prediction, label)
-                ground_truth, gt_difficult, iscrowd = self._prepare_annotations(annotation, label)
-                if not ground_truth.size:
-                    continue
-                iou = self._compute_iou(ground_truth, detections, iscrowd)
-                eval_result = self._evaluate_image(
-                    ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.threshold,
-                    True
-                )
-                eval_result['gt'] = annotation.to_polygon()[label]
-                eval_result['dt'] = annotation.to_polygon()[label]
-                per_class_matching[label] = eval_result
-            per_class_result = {k: compute_precision_recall(
-                self.threshold, [v])[0] for k, v in per_class_matching.items()
-                                }
-            for label, value in per_class_matching.items():
-                value['result'] = per_class_result[label]
-            self.profiler.update(
-                annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values()))
-            )
+            self.profiling_helper.update(annotation, prediction)
 
     @staticmethod
     def _compute_iou(gt, dets, iscrowd):

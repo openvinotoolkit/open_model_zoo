@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 import numpy as np
-from .base_profiler import MetricProfiler
+from .object_detection_metric_profiler import DetectionListProfiler
 
 
-class InstanceSegmentationProfiler(MetricProfiler):
+class InstanceSegmentationProfiler(DetectionListProfiler):
     __provider__ = 'instance_segmentation'
 
     def __init__(self, dump_iterations=100, report_type='csv', name=None):
@@ -56,13 +56,16 @@ class InstanceSegmentationProfiler(MetricProfiler):
     def generate_json_report(self, identifier, metric_result, metric_name):
         report = {'identifier': identifier, 'per_class_result': {}}
         per_class_results = {}
-        for idx, (class_id, class_result) in enumerate(metric_result.items()):
-            if not np.size(class_result['scores']):
+        totat_pred_boxes, total_gt_boxes, total_gt_matches, total_pred_matches = 0, 0, 0, 0
+        for idx, class_result in metric_result.items():
+            if not np.size(class_result['gt']) + np.size(class_result['dt']):
                 continue
-            label_id = self.valid_labels[idx] if self.valid_labels else class_id
+            label_id = idx
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
-            gt = class_result['gt']
-            dt = class_result['dt']
+            gt = [g.tolist() if not isinstance(g, list) else g for g in class_result['gt']]
+            dt = []
+            for dp in class_result['dt']:
+                dt.append([d.tolist() if not isinstance(d, list) else d for d in dp])
             scores = (
                 class_result['scores'].tolist()
                 if not isinstance(class_result['scores'], list) else class_result['scores']
@@ -71,11 +74,21 @@ class InstanceSegmentationProfiler(MetricProfiler):
             per_class_results[label_id] = {
                 'annotation_polygons': gt,
                 'prediction_polygons': dt,
+                'num_prediction_polygons': len(dt),
+                'num_annotation_polygons': len(gt),
                 'prediction_scores': scores,
                 'iou': iou,
             }
+            total_gt_boxes += len(gt)
+            totat_pred_boxes += len(dt)
             per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name))
+            total_pred_matches += sum(per_class_results[label_id]['prediction_matches'])
+            total_gt_matches += int(np.sum(np.array(per_class_results[label_id]['annotation_matches']) != 0))
         report['per_class_result'] = per_class_results
+        report['num_prediction_polygons'] = totat_pred_boxes
+        report['num_annotation_polygons'] = total_gt_boxes
+        report['total_annotation_matches'] = total_gt_matches
+        report['total_prediction_matches'] = total_pred_matches
         return report
 
     def per_instance_result(self, identifier, metric_result):
