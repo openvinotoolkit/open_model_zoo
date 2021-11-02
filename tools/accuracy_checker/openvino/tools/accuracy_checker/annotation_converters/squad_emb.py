@@ -159,7 +159,7 @@ class SQUADConverterEMB(BaseFormatConverter):
         def add_sample(ids, max_len, context_pos_id, annotations):
             ids_len = min(max_len - 2, len(ids))
             ids = ids[:ids_len]
-            rest = max_len - (ids_len + 2) if not self.enable_padding else 0
+            rest = max_len - (ids_len + 2) if self.enable_padding else 0
             assert rest >= 0
 
             annotations.append(QuestionAnsweringEmbeddingAnnotation(
