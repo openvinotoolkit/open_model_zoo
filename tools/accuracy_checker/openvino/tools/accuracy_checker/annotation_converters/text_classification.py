@@ -137,7 +137,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             segment_ids = []
             if self.class_token_first:
                 tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-                segment_ids.append(SEG_ID_CLS)
+                segment_ids.append(SEG_ID_CLS if not self.support_vocab else 1)
             for token in tokens_a:
                 tokens.append(token)
                 segment_ids.append(SEG_ID_A)
