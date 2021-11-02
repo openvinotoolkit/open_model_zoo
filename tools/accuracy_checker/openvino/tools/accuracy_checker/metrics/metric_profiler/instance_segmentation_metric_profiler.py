@@ -81,9 +81,9 @@ class InstanceSegmentationProfiler(DetectionListProfiler):
             }
             total_gt_boxes += len(gt)
             totat_pred_boxes += len(dt)
-            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name))
-            total_pred_matches += sum(per_class_results[label_id]['prediction_matches'])
-            total_gt_matches += int(np.sum(np.array(per_class_results[label_id]['annotation_matches']) != 0))
+            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name, aggregate=True))
+            total_pred_matches += per_class_results[label_id]['prediction_matches']
+            total_gt_matches += per_class_results[label_id]['annotation_matches']
         report['per_class_result'] = per_class_results
         report['num_prediction_polygons'] = totat_pred_boxes
         report['num_annotation_polygons'] = total_gt_boxes
@@ -134,11 +134,19 @@ class InstanceSegmentationProfiler(DetectionListProfiler):
         ]
 
     @staticmethod
-    def generate_result_matching(per_class_result, metric_name):
+    def generate_result_matching(per_class_result, metric_name, aggregate=False):
+        result = per_class_result['result']
+        if np.isnan(result):
+            result = -1
+        dt_matches = per_class_result['dt_matches'][0].tolist()
+        gt_matches = per_class_result['gt_matches'][0].tolist()
+        if aggregate:
+            dt_matches = int(sum(dt_matches))
+            gt_matches = int(np.sum(np.array(gt_matches) != 0))
         matching_result = {
-            'prediction_matches': per_class_result['dt_matches'][0].tolist(),
-            'annotation_matches': per_class_result['gt_matches'][0].tolist(),
-            metric_name: per_class_result['result']
+            'prediction_matches': dt_matches,
+            'annotation_matches': gt_matches,
+            'result': result,
         }
         return matching_result
 
