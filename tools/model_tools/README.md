@@ -37,7 +37,7 @@ Installation from source is as follows:
 2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) python package of the corresponding version:
 
 ```sh
-pip install openvino-dev
+pip install openvino-dev[caffe,caffe2,onnx,tensorflow2,pytorch,mxnet]
 ```
 > **NOTE**: For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
 
@@ -51,11 +51,7 @@ pip install .
 > **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
 > For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
 
-For the model converter, you will also need to install the OpenVINO&trade;
-toolkit and the prerequisite libraries for Model Optimizer. See the
-[OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
-
-To convert models from certain frameworks, you will also need to install
+To convert models from certain frameworks, you may also need to install
 additional dependencies.
 
 For models from Caffe2:
