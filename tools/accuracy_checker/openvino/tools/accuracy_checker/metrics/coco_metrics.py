@@ -454,7 +454,7 @@ class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision, MSCOCOSegmBase):
     __provider__ = 'coco_segm_precision'
 
 
-class MSCOCOSegmRecall(MSCOCOSegmBase, MSCOCORecall):
+class MSCOCOSegmRecall(MSCOCORecall, MSCOCOSegmBase):
     __provider__ = 'coco_segm_recall'
 
 
