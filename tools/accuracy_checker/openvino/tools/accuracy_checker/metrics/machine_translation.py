@@ -124,33 +124,36 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
             self.smooth_value = None
 
     def update(self, annotation, prediction):
+        correct = [0] * self.max_order
+        total = [0] * self.max_order
         reference_corpus = annotation.reference
         translation_corpus = prediction.translation
+        sys_len, ref_len = 0, 0
         for lines in zip([translation_corpus], [reference_corpus]):
             output, *refs = [self.tokenizer(' '.join(x)) for x in lines]
 
             output_len = len(output.split())
             ref_ngrams, _, closest_len = self.reference_stats(refs, output_len)
 
-            self.sys_len += output_len
-            self.ref_len += closest_len
-            correct = [0] * self.max_order
-            total = [0] * self.max_order
+            sys_len += output_len
+            ref_len += closest_len
 
             sys_ngrams = self.extract_ngrams(output, self.max_order)
             for ngram, value in sys_ngrams.items():
                 n = len(ngram.split())
                 correct[n - 1] += min(value, ref_ngrams.get(ngram, 0))
                 total[n - 1] += value
-            for i in range(self.max_order):
-                self.correct[i] += correct[i]
-                self.total[i] += total[i]
-            return self.calculate_score(correct, total)
+        for i in range(self.max_order):
+            self.correct[i] += correct[i]
+            self.total[i] += total[i]
+        self.sys_len += sys_len
+        self.ref_len += ref_len
+        return self.calculate_score(correct, total, sys_len, ref_len)
 
     def evaluate(self, annotations, predictions):
-        return self.calculate_score(self.correct, self.total)
+        return self.calculate_score(self.correct, self.total, self.sys_len, self.ref_len)
 
-    def calculate_score(self, correct, total):
+    def calculate_score(self, correct, total, sys_len, ref_len):
         def log(num):
             if num == 0.0:
                 return -9999999999
@@ -176,8 +179,8 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
             else:
                 precisions[n - 1] = correct[n - 1] / total[n - 1]
 
-        if self.sys_len < self.ref_len:
-            bp = math.exp(1 - self.ref_len / self.sys_len) if self.sys_len > 0 else 0.0
+        if sys_len < ref_len:
+            bp = math.exp(1 - ref_len / sys_len) if sys_len > 0 else 0.0
         else:
             bp = 1.0
 
