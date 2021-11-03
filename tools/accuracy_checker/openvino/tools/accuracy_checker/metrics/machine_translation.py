@@ -21,6 +21,7 @@ from .metric import PerImageEvaluationMetric
 from ..config import BoolField, NumberField, StringField
 from ..representation import MachineTranslationPrediction, MachineTranslationAnnotation
 
+
 class TokenizerRegexp:
     def __init__(self):
         self._re = [
@@ -133,14 +134,23 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
 
             self.sys_len += output_len
             self.ref_len += closest_len
+            correct = [0] * self.max_order
+            total = [0] * self.max_order
 
             sys_ngrams = self.extract_ngrams(output, self.max_order)
             for ngram, value in sys_ngrams.items():
                 n = len(ngram.split())
-                self.correct[n - 1] += min(value, ref_ngrams.get(ngram, 0))
-                self.total[n - 1] += value
+                correct[n - 1] += min(value, ref_ngrams.get(ngram, 0))
+                total[n - 1] += value
+            for i in range(self.max_order):
+                self.correct[i] += correct[i]
+                self.total[i] += total[i]
+            return self.calculate_score(correct, total)
 
     def evaluate(self, annotations, predictions):
+        return self.calculate_score(self.correct, self.total)
+
+    def calculate_score(self, correct, total):
         def log(num):
             if num == 0.0:
                 return -9999999999
@@ -151,20 +161,20 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
 
         for n in range(1, self.max_order + 1):
             if self.smooth_method == 'add-k' and n > 1:
-                self.correct[n - 1] += self.smooth_value
-                self.total[n - 1] += self.smooth_value
+                correct[n - 1] += self.smooth_value
+                total[n - 1] += self.smooth_value
 
-            if self.total[n - 1] == 0:
+            if total[n - 1] == 0:
                 break
 
-            if self.correct[n - 1] == 0:
+            if correct[n - 1] == 0:
                 if self.smooth_method == 'exp':
                     smooth_mteval *= 2
-                    precisions[n - 1] = 1 / (smooth_mteval * self.total[n - 1])
+                    precisions[n - 1] = 1 / (smooth_mteval * total[n - 1])
                 elif self.smooth_method == 'floor':
-                    precisions[n - 1] = 1. / (smooth_mteval * self.total[n - 1])
+                    precisions[n - 1] = 1. / (smooth_mteval * total[n - 1])
             else:
-                precisions[n - 1] = self.correct[n - 1] / self.total[n - 1]
+                precisions[n - 1] = correct[n - 1] / total[n - 1]
 
         if self.sys_len < self.ref_len:
             bp = math.exp(1 - self.ref_len / self.sys_len) if self.sys_len > 0 else 0.0
@@ -173,10 +183,6 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
 
         score = bp * math.exp(
             sum(map(log, precisions[:self.max_order])) / self.max_order)
-        pred_text, ref_text = [], []
-        for pred, annot in zip(predictions, annotations):
-            pred_text.append(' '.join(pred.translation))
-            ref_text.append(' '.join(annot.reference))
         return score
 
     @staticmethod
