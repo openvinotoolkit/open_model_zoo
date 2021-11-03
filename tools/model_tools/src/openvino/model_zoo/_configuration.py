@@ -14,7 +14,6 @@
 
 import collections
 import fnmatch
-import pyrx
 import re
 import shlex
 import sys

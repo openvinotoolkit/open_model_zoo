@@ -16,7 +16,7 @@ type: "//rec"
 required:
   description: "//str"
   task_type: "//str"
-  files: 
+  files:
     type: "//arr"
     contents:
       type: "//rec"
