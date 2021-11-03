@@ -23,11 +23,11 @@ task_type: image_processing
 files:
   - name: net.py
     size: 14063
-    sha256: e1afc1f6483d57b774365467393216508f29a708b576dc973bad41bae67e8d03
+    sha384: 993649cebed4f249b35f92a64d797916bba297e6ff58c1f0081402d6c61cf63b661a3388f67c74eafc6ca9e587bd5b5b
     source: https://raw.githubusercontent.com/jiaxi-jiang/FBCNN/f599bc58e1e2ebe1ab473350ce3c887f491143e1/models/network_fbcnn.py
   - name: ckpt/fbcnn_color.pth
     size: 287755111
-    sha256: 8b0e4ef23d59cf7ac934a342cb31a17619e4fa4a0b3374a9d78c5174312387e8
+    sha384: 11610eb602aa0b3f53568d572fadff03be04854dbc952d49a9b24d4edcba1eb42475b31c1496d669e0b549c431379128
     source: https://github.com/jiaxi-jiang/FBCNN/releases/download/v1.0/fbcnn_color.pth
 postprocessing:
   - $type: regex_replace
