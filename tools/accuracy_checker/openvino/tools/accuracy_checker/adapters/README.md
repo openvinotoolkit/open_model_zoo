@@ -274,6 +274,7 @@ AccuracyChecker supports following set of adapters:
   * `blank_label` - index of the CTC blank label (default 0).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
+  * `shift_labels` - shift label map ids on 1 if it represented without blank label on zero position (Optional, default False).
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
   * `eos_label` - label which should finish decoding (Optional, default `[s]`).
   * `start_label` - label which should start decoding (Optional).
