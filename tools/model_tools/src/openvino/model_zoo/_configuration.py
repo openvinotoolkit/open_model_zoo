@@ -216,7 +216,8 @@ def load_models(models_root, args):
                 validation.deserialization_context('In config "{}"'.format(config_path)):
 
             model = yaml.safe_load(config_file)
-            schema.check(model)
+            if not schema.check(model):
+                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
             for bad_key in ['name', 'subdirectory']:
                 if bad_key in model:
