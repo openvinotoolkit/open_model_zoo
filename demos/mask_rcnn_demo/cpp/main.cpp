@@ -7,17 +7,17 @@
  * @file mask_rcnn_demo/main.cpp
  * @example mask_rcnn_demo/main.cpp
  */
-#include <gflags/gflags.h>
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <map>
-#include <algorithm>
 #include <string>
 #include <vector>
-#include <iomanip>
 
-#include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 
+#include <gflags/gflags.h>
 #include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
@@ -25,7 +25,9 @@
 
 #include "mask_rcnn_demo.h"
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+using namespace ov::preprocess;
+
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -45,7 +47,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
 
@@ -54,63 +56,75 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        /** This vector stores paths to the processed images **/
+        // This vector stores paths to the processed images
         std::vector<std::string> imagePaths;
         parseInputFilesArguments(imagePaths);
-        if (imagePaths.empty()) throw std::logic_error("No suitable images were found");
+        if (imagePaths.empty())
+            throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load inference engine------------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
-
-        if (!FLAGS_l.empty()) {
-            // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-            auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
-            ie.AddExtension(extension_ptr, "CPU");
-        }
-        if (!FLAGS_c.empty()) {
-            // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
-        }
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::runtime::Core core;
 
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------Load network (Generated xml/bin files)-------------------------------------------
 
-        /** Read network model **/
-        auto network = ie.ReadNetwork(FLAGS_m);
-
-        // add DetectionOutput layer as output so we can get detected boxes and their probabilities
-        network.addOutput(FLAGS_detection_output_name.c_str(), 0);
+        // Read network model
+        std::shared_ptr<ov::Function> network = core.read_model(FLAGS_m);
+        slog::info << "model file: " << FLAGS_m << slog::endl;
+        slog::info << "model name: " << network->get_friendly_name() << slog::endl;
         // -----------------------------------------------------------------------------------------------------
 
         // -----------------------------Prepare input blobs-----------------------------------------------------
 
-        /** Taking information about all topology inputs **/
-        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
+        // Taking information about all topology inputs
+        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector outputs = network->outputs();
 
-        std::string imageInputName;
+        if(inputs.size() != 2 || outputs.size() != 2)
+            throw std::logic_error("Expected network with 2 inputs and 2 outputs");
 
-        for (const auto & inputInfoItem : inputInfo) {
-            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
-                imageInputName = inputInfoItem.first;
-                inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
-            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
-                inputInfoItem.second->setPrecision(InferenceEngine::Precision::FP32);
-            } else {
-                throw std::logic_error("Unsupported input shape with size = " + std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()));
-            }
+        for (const ov::Output<ov::Node> input : inputs)
+        {
+            slog::info << slog::endl;
+            const std::string name = input.get_any_name();
+            const ov::element::Type type = input.get_element_type();
+            const ov::Shape shape = input.get_shape();
+
+            slog::info << "input name: " << name << slog::endl;
+            slog::info << "input type: " << type << slog::endl;
+            slog::info << "input shape: " << shape << slog::endl;
         }
 
-        /** network dimensions for image input **/
-        const InferenceEngine::TensorDesc& inputDesc = inputInfo[imageInputName]->getTensorDesc();
-        IE_ASSERT(inputDesc.getDims().size() == 4);
-        size_t netBatchSize = getTensorBatch(inputDesc);
-        size_t netInputHeight = getTensorHeight(inputDesc);
-        size_t netInputWidth = getTensorWidth(inputDesc);
+        for (const ov::Output<ov::Node> output : outputs)
+        {
+            slog::info << slog::endl;
+            const std::string name = output.get_any_name();
+            const ov::element::Type type = output.get_element_type();
+            const ov::Shape shape = output.get_shape();
 
-        /** Collect images **/
+            slog::info << "output name: " << name << slog::endl;
+            slog::info << "output type: " << type << slog::endl;
+            slog::info << "output shape: " << shape << slog::endl;
+        }
+
+        size_t netBatchSize = 0;
+        size_t netInputHeight = 0;
+        size_t netInputWidth = 0;
+
+        const ov::Layout layout_nchw{ "NCHW" };
+
+        // network dimensions for image input
+        auto it = std::find_if(inputs.begin(), inputs.end(), [](const ov::Output<ov::Node>& obj) {return obj.get_shape().size() == 4;});
+        if (it != inputs.end()) {
+            netBatchSize = it->get_shape()[ov::layout::batch_idx(layout_nchw)];
+            netInputHeight = it->get_shape()[ov::layout::height_idx(layout_nchw)];
+            netInputWidth = it->get_shape()[ov::layout::width_idx(layout_nchw)];
+        }
+
+        // Collect images
         std::vector<cv::Mat> images;
 
         if (netBatchSize > imagePaths.size()) {
@@ -136,82 +150,95 @@ int main(int argc, char *argv[]) {
 
             images.push_back(image);
         }
-        if (images.empty()) throw std::logic_error("Valid input images were not found!");
-
+        if (images.empty())
+            throw std::logic_error("Valid input images were not found!");
         // -----------------------------------------------------------------------------------------------------
 
-        // ---------------------------Prepare output blobs------------------------------------------------------
-        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
-        for (auto & item : outputInfo) {
-            item.second->setPrecision(InferenceEngine::Precision::FP32);
-        }
-
         // -----------------------------------------------------------------------------------------------------
+/* TODO: not clear yet how to use PrePostProcessor for models with more than one input or output
+        network = PrePostProcessor().
+            input(InputInfo().
+                tensor(InputTensorInfo().
+                    set_element_type(ov::element::f32).
+//                                  set_spatial_static_shape(
+//                                      tensor_shape[ov::layout::height_idx(tensor_layout)],
+//                                      tensor_shape[ov::layout::width_idx(tensor_layout)]).
+                    set_layout({"NCHW"})).
+                preprocess(PreProcessSteps().
+                    resize(ResizeAlgorithm::RESIZE_LINEAR)).
+                network(InputNetworkInfo().
+                    set_layout("NCHW"))).
+            output(OutputInfo().
+                tensor(OutputTensorInfo().
+                    set_element_type(ov::element::f32))).
+            build(network);
+*/
 
         // -------------------------Load model to the device----------------------------------------------------
-        auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        ov::runtime::ExecutableNetwork executableNetwork = core.compile_model(network, FLAGS_d);
         logExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
         slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
         // -------------------------Create Infer Request--------------------------------------------------------
-        auto infer_request = executableNetwork.CreateInferRequest();
-
+        ov::runtime::InferRequest infer_request = executableNetwork.create_infer_request();
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------------Set input data--------------------------------------------------------
-        /** Iterate over all the input blobs **/
-        for (const auto & inputInfoItem : inputInfo) {
-            InferenceEngine::Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
+        // Iterate over all the input blobs
+        for (size_t idx = 0; idx < inputs.size(); idx++) {
+            ov::runtime::Tensor tensor = infer_request.get_input_tensor(idx);
+            ov::Shape shape = tensor.get_shape();
 
-            /** Fill first input tensor with images. First b channel, then g and r channels **/
-            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
-                /** Iterate over all input images **/
+            if (shape.size() == 4) {
                 for (size_t image_id = 0; image_id < images.size(); ++image_id)
-                    matToBlob(images[image_id], input, image_id);
+                    matToTensor(images[image_id], tensor, image_id);
             }
 
-            /** Fill second input tensor with image info **/
-            if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
-                InferenceEngine::LockedMemory<void> inputMapped =
-                    InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
-                auto data = inputMapped.as<float *>();
+            if (shape.size() == 2) {
+                float* data = tensor.data<float>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
                 data[2] = 1;
             }
         }
-
         // -----------------------------------------------------------------------------------------------------
 
-
         // ----------------------------Do inference-------------------------------------------------------------
-        infer_request.Infer();
+        infer_request.infer();
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Postprocess output blobs--------------------------------------------------
-        const auto do_blob = infer_request.GetBlob(FLAGS_detection_output_name.c_str());
-        InferenceEngine::LockedMemory<const void> doBlobMapped =
-            InferenceEngine::as<InferenceEngine::MemoryBlob>(do_blob)->rmap();
-        const auto do_data  = doBlobMapped.as<float*>();
+        float* do_data = nullptr;
+        float* masks_data = nullptr;
 
-        const auto masks_blob = infer_request.GetBlob(FLAGS_masks_name.c_str());
-        InferenceEngine::LockedMemory<const void> masksBlobMapped =
-            InferenceEngine::as<InferenceEngine::MemoryBlob>(masks_blob)->rmap();
-        const auto masks_data = masksBlobMapped.as<float*>();
+        size_t BOX_DESCRIPTION_SIZE = 0;
+
+        size_t BOXES = 0;
+        size_t C = 0;
+        size_t H = 0;
+        size_t W = 0;
+
+        for (size_t idx = 0; idx < outputs.size(); idx++) {
+            ov::runtime::Tensor tensor = infer_request.get_output_tensor(idx);
+            ov::Shape shape = tensor.get_shape();
+            size_t dims = shape.size();
+            if (dims == 2) {
+                do_data = tensor.data<float>();
+                // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
+                BOX_DESCRIPTION_SIZE = shape[1];
+            }
+            if (dims == 4) {
+                masks_data = tensor.data<float>();
+                BOXES = shape[ov::layout::batch_idx(layout_nchw)];
+                C = shape[ov::layout::channels_idx(layout_nchw)];
+                H = shape[ov::layout::height_idx(layout_nchw)];
+                W = shape[ov::layout::width_idx(layout_nchw)];
+            }
+        }
 
         const float PROBABILITY_THRESHOLD = 0.2f;
-        const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background
-        // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
-        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 2);
-        size_t BOX_DESCRIPTION_SIZE = do_blob->getTensorDesc().getDims().back();
-
-        const InferenceEngine::TensorDesc& masksDesc = masks_blob->getTensorDesc();
-        IE_ASSERT(masksDesc.getDims().size() == 4);
-        size_t BOXES = getTensorBatch(masksDesc);
-        size_t C = getTensorChannels(masksDesc);
-        size_t H = getTensorHeight(masksDesc);
-        size_t W = getTensorWidth(masksDesc);
-
+        // threshold used to determine whether mask pixel corresponds to object or to background
+        const float MASK_THRESHOLD = 0.5f;
 
         size_t box_stride = W * H * C;
 
@@ -222,22 +249,28 @@ int main(int argc, char *argv[]) {
             output_images.push_back(img.clone());
         }
 
-        /** Iterating over all boxes **/
+        // Iterating over all boxes
         for (size_t box = 0; box < BOXES; ++box) {
             float* box_info = do_data + box * BOX_DESCRIPTION_SIZE;
             auto batch = static_cast<int>(box_info[0]);
+
             if (batch < 0)
                 break;
             if (batch >= static_cast<int>(netBatchSize))
                 throw std::logic_error("Invalid batch ID within detection output box");
+
             float prob = box_info[2];
+
             float x1 = std::min(std::max(0.0f, box_info[3] * images[batch].cols), static_cast<float>(images[batch].cols));
             float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].rows), static_cast<float>(images[batch].rows));
             float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].cols), static_cast<float>(images[batch].cols));
             float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].rows), static_cast<float>(images[batch].rows));
+
             int box_width = static_cast<int>(x2 - x1);
             int box_height = static_cast<int>(y2 - y1);
+
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
+
             if (prob > PROBABILITY_THRESHOLD && box_width > 0 && box_height > 0) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
                 auto& color = CITYSCAPES_COLORS[color_index % arraySize(CITYSCAPES_COLORS)];
@@ -261,7 +294,9 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
+
         metrics.update(startTime);
+
         for (size_t i = 0; i < output_images.size(); i++) {
             std::string imgName = "out" + std::to_string(i) + ".png";
             cv::imwrite(imgName, output_images[i]);
