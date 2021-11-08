@@ -40,7 +40,8 @@ class ReidAdapter(Adapter):
                 optional=True, default='sum', description='method used to join embeddings',
                 choices=['sum', 'concatenation']
             ),
-            'target_out': StringField(optional=True, description='Target output layer name')
+            'target_out': StringField(optional=True, description='Target output layer name'),
+            'keep_shape': BoolField(optional=True, default=False, description='keep output embedding shape')
         })
 
         return parameters
@@ -52,6 +53,7 @@ class ReidAdapter(Adapter):
         self.grn_workaround = self.get_value_from_config('grn_workaround')
         self.joining_method = self.get_value_from_config('joining_method')
         self.target_out = self.get_value_from_config('target_out')
+        self.keep_shape = self.get_value_from_config('keep_shape')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -69,7 +71,7 @@ class ReidAdapter(Adapter):
             # workaround: GRN layer
             prediction = self._grn_layer(prediction)
 
-        return [ReIdentificationPrediction(identifier, embedding.reshape(-1))
+        return [ReIdentificationPrediction(identifier, embedding.reshape(-1) if not self.keep_shape else embedding)
                 for identifier, embedding in zip(identifiers, prediction)]
 
     @staticmethod
