@@ -103,12 +103,14 @@ class ImageModel(Model):
             resized_image = pad_image(resized_image, (self.w, self.h))
         resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
-        # apply conversion int -> float
-        input_precision = self.inputs[self.image_blob_name].precision
-        if resized_image.dtype == np.uint8 and input_precision in ('DT_FLOAT', 'FP32'):
-            resized_image = resized_image.astype(np.float32)
+        resized_image = self.int2float(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
+
+    def int2float(self, image):
+        if image.dtype == np.uint8 and self.inputs[self.image_blob_name].precision in ('DT_FLOAT', 'FP32'):
+            return image.astype(np.float32)
+        return image
 
     def _change_layout(self, image):
         if self.image_layout == 'NCHW':

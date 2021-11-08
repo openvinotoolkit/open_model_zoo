@@ -31,10 +31,11 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api.models import MonoDepthModel, OutputTransform
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
 from model_api.performance_metrics import PerformanceMetrics
+from model_api.adapters import OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings
+from helpers import resolution, log_layers_info, log_runtime_settings
 
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -52,6 +53,8 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
@@ -98,19 +101,23 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
     log.info('Reading model {}'.format(args.model))
-    model = MonoDepthModel(ie, args.model)
-    log_blobs_info(model)
 
-    pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
+    if args.adapter == 'openvino':
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        core = IECore()
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(core, args.model, plugin_config, args.device, args.num_infer_requests)
+    elif args.adapter == 'remote':
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    model = MonoDepthModel(model_adapter)
+    log_layers_info(model)
+
+    pipeline = AsyncPipeline(model)
+    #log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0

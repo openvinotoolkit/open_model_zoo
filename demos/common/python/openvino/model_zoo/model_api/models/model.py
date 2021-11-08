@@ -109,6 +109,7 @@ class Model:
     def reshape(self, new_shape):
         self.model_adapter.reshape_model(new_shape)
         self.inputs = self.model_adapter.get_input_layers()
+        self.outputs = self.model_adapter.get_output_layers()
 
     def infer_sync(self, dict_data):
         return self.model_adapter.infer_sync(dict_data)
