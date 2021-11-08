@@ -29,11 +29,12 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
-from helpers import log_runtime_settings
+from helpers import log_runtime_settings, log_layers_info
 
 from model_api.models import BertNamedEntityRecognition
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.adapters import OpenvinoAdapter, RemoteAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -52,6 +53,8 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
@@ -105,21 +108,24 @@ def main():
     preprocessing_total_time = (perf_counter() - preprocessing_start_time) * 1e3
     source = tuple(zip(sentences, preprocessed_sentences))
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    if args.adapter == 'openvino':
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        core = IECore()
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(core, args.model, args.device, plugin_config, args.num_infer_requests)
+    elif args.adapter == 'remote':
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
     log.info('Reading model {}'.format(args.model))
-    model = BertNamedEntityRecognition(ie, args.model, vocab, args.input_names)
+    model = BertNamedEntityRecognition(model_adapter, vocab, args.input_names)
     if max_sentence_length > model.max_length:
         model.reshape(max_sentence_length)
+    log_layers_info(model)
 
-    pipeline = AsyncPipeline(ie, model, plugin_config,
-                             device=args.device, max_num_requests=args.num_infer_requests)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model)
+    #log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     next_sentence_id = 0
     next_sentence_id_to_show = 0

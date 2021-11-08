@@ -25,11 +25,11 @@ class OpenvinoAdapter(ModelAdapter):
     Class that allows working with Inference Engine model, its input and output blobs
     """
 
-    def __init__(self, core, model_path, plugin_config, device, max_num_requests=1):
+    def __init__(self, core, model_path, device, plugin_config=None, max_num_requests=1):
         self.core = core
         self.model_path = model_path
-        self.plugin_config = plugin_config
         self.device = device
+        self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
         self.net = core.read_network(model_path)
 

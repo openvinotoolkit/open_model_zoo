@@ -98,7 +98,7 @@ def main():
         log.info('\tbuild: {}'.format(get_version()))
         core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(core, args.model, plugin_config, args.device, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(core, args.model, args.device, plugin_config, args.num_infer_requests)
     elif args.adapter == 'remote':
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
