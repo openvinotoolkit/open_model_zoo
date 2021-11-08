@@ -23,6 +23,8 @@ try:
 except ImportError:
     openvino_absent = True
 
+import ngraph
+
 from .model_adapter import ModelAdapter, Metadata
 from ..pipelines import parse_devices
 
@@ -83,12 +85,14 @@ class OpenvinoAdapter(ModelAdapter):
         inputs = {}
         for name, layer in self.net.input_info.items():
             inputs[name] = Metadata(layer.input_data.shape, layer.input_data.precision)
+        inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for name, layer in self.net.outputs.items():
             outputs[name] = Metadata(layer.shape, layer.precision)
+        outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
     def reshape_model(self, new_shape):
@@ -117,3 +121,14 @@ class OpenvinoAdapter(ModelAdapter):
 
     def await_any(self):
         self.exec_net.wait(num_requests=1)
+
+    def _get_meta_from_ngraph(self, layers_info):
+        ng_func = ngraph.function_from_cnn(self.net)
+        for node in ng_func.get_ordered_ops():
+            layer_name = node.get_friendly_name()
+            if layer_name not in layers_info.keys():
+                continue
+            layers_info[layer_name].meta = node._get_attributes()
+            layers_info[layer_name].type = node.get_type_name()
+        return layers_info
+

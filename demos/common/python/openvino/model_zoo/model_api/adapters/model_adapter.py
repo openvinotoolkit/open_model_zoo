@@ -16,9 +16,16 @@
 
 import abc
 from collections import namedtuple
+from dataclasses import dataclass
+from typing import Dict, List
 
-Metadata = namedtuple('Metadata', ['shape', 'precision', 'meta'])
-Metadata.__new__.__defaults__ = [],
+
+@dataclass
+class Metadata:
+    shape: List[int] = None
+    precision: str = ''
+    type: str = ''
+    meta: Dict = None
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):
