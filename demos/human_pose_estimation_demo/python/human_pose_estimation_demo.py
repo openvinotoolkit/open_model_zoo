@@ -30,7 +30,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import Core, OpenvinoAdapter
+from model_api.adapters import create_core, OpenvinoAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -178,7 +178,7 @@ def main():
     video_writer = cv2.VideoWriter()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-    model_adapter = OpenvinoAdapter(Core().ie, args.model, args.device, plugin_config, args.num_infer_requests)
+    model_adapter = OpenvinoAdapter(create_core(), args.model, args.device, plugin_config, args.num_infer_requests)
 
     start_time = perf_counter()
     frame = cap.read()

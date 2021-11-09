@@ -29,14 +29,13 @@ from .model_adapter import ModelAdapter, Metadata
 from ..pipelines import parse_devices
 
 
-class Core:
-    def __init__(self):
-        if openvino_absent:
-            raise ImportError('The OpenVINO package is not installed')
+def create_core():
+    if openvino_absent:
+        raise ImportError('The OpenVINO package is not installed')
 
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
-        self.ie = IECore()
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    return IECore()
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -104,8 +103,9 @@ class OpenvinoAdapter(ModelAdapter):
     def infer_async(self, dict_data, callback_fn, callback_data):
 
         def get_raw_result(request):
+            raw_result = {key: blob.buffer for key, blob in request.output_blobs.items()}
             self.empty_requests.append(request)
-            return {key: blob.buffer for key, blob in request.output_blobs.items()}
+            return raw_result
 
         request = self.empty_requests.popleft()
         request.set_completion_callback(py_callback=callback_fn,

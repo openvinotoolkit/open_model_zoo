@@ -342,6 +342,7 @@ class YOLOX(DetectionModel):
 
         preprocessed_image = self.input_transform(padded_image)
         preprocessed_image = preprocessed_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        preprocessed_image = self.int2float(preprocessed_image)
         preprocessed_image = preprocessed_image.reshape((self.n, self.c, self.h, self.w))
 
         dict_inputs = {self.image_blob_name: preprocessed_image}

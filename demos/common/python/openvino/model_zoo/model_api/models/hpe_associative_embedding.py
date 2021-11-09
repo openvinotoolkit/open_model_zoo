@@ -17,25 +17,23 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from .model import Model
+from .image_model import ImageModel
 from .utils import resize_image
 
 
-class HpeAssociativeEmbedding(Model):
-    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, delta=0.0, size_divisor=32, padding_mode='right_bottom'):
-        super().__init__(ie, model_path)
-        self.image_blob_name = self._get_inputs(self.net)
-        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
+class HpeAssociativeEmbedding(ImageModel):
+    def __init__(self, model_adapter, target_size, aspect_ratio, prob_threshold, delta=0.0, size_divisor=32, padding_mode='right_bottom'):
+        super().__init__(model_adapter)
+        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.outputs)
         try:
-            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.outputs)
         except ValueError:
             self.nms_heatmaps_blob_name = self.heatmaps_blob_name
-        self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
-        self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-1] / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+        self.embeddings_blob_name = find_layer_by_name('embeddings', self.outputs)
+        self.output_scale = self.w / self.outputs[self.heatmaps_blob_name].shape[-1]
 
         if target_size is None:
-            h, w = self.net.input_info[self.image_blob_name].input_data.shape[-2:]
-            target_size = min(h, w)
+            target_size = min(self.h, self.w)
         self.index_of_max_dimension = 0
         if aspect_ratio >= 1.0:  # img width >= height
             input_height, input_width = target_size, round(target_size * aspect_ratio)
@@ -44,13 +42,13 @@ class HpeAssociativeEmbedding(Model):
             input_height, input_width = round(target_size / aspect_ratio), target_size
         self.h = (input_height + size_divisor - 1) // size_divisor * size_divisor
         self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
-        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
-        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
+        default_input_shape = self.inputs[self.image_blob_name].shape
+        input_shape = {self.image_blob_name: [self.n, self.c, self.h, self.w]}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
-        self.net.reshape(input_shape)
+        super().reshape(input_shape)
 
         self.decoder = AssociativeEmbeddingDecoder(
-            num_joints=self.net.outputs[self.heatmaps_blob_name].shape[1],
+            num_joints=self.outputs[self.heatmaps_blob_name].shape[1],
             adjust=True,
             refine=True,
             delta=delta,
@@ -63,19 +61,6 @@ class HpeAssociativeEmbedding(Model):
             dist_reweight=True)
         self.size_divisor = size_divisor
         self.padding_mode = padding_mode
-
-    @staticmethod
-    def _get_inputs(net):
-        image_blob_name = None
-        for blob_name, blob in net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_name = blob_name
-            else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 4D input layers are supported'
-                                   .format(len(blob.shape), blob_name))
-        if image_blob_name is None:
-            raise RuntimeError('Failed to identify the input for the image.')
-        return image_blob_name
 
     def preprocess(self, inputs):
         img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)
@@ -95,6 +80,7 @@ class HpeAssociativeEmbedding(Model):
             'original_size': inputs.shape[:2],
             'resize_img_scale': resize_img_scale
         }
+        img = self.int2float(img)
         return {self.image_blob_name: img}, meta
 
     def postprocess(self, outputs, meta):

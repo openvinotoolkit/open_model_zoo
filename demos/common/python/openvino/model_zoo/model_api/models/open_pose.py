@@ -108,6 +108,7 @@ class OpenPose(ImageModel):
                      mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img[None]
+        img = self.int2float(img)
         return {self.image_blob_name: img}, resize_img_scale
 
     def postprocess(self, outputs, resize_img_scale):
