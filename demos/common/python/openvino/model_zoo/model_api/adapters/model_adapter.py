@@ -25,7 +25,7 @@ class Metadata:
     shape: List[int] = None
     precision: str = ''
     type: str = ''
-    meta: Dict = None
+    meta: Dict = {}
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):
