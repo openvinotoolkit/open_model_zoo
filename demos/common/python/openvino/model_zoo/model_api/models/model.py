@@ -125,3 +125,9 @@ class Model:
 
     def await_any(self):
         self.model_adapter.await_any()
+
+    def log_layers_info(self):
+        for name, metadata in self.inputs.items():
+            log.info('\tInput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))
+        for name, metadata in self.outputs.items():
+            log.info('\tOutput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))

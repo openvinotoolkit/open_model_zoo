@@ -25,19 +25,18 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
-from model_api.adapters import OpenvinoAdapter, RemoteAdapter
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import Core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_layers_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -241,24 +240,19 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('Reading model {}'.format(args.model))
-
     if args.adapter == 'openvino':
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
-        core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(core, args.model, args.device, plugin_config, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(Core().ie, args.model, args.device, plugin_config, args.num_infer_requests)
     elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
     model = get_model(model_adapter, args)
     model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
-    log_layers_info(model)
+    model.log_layers_info()
 
     detector_pipeline = AsyncPipeline(model)
-    #log_runtime_settings(model_adapter.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0

@@ -17,7 +17,24 @@
 import logging as log
 from collections import deque
 
+try:
+    from openvino.inference_engine import IECore, get_version
+    openvino_absent = False
+except ImportError:
+    openvino_absent = True
+
 from .model_adapter import ModelAdapter, Metadata
+from ..pipelines import parse_devices
+
+
+class Core:
+    def __init__(self):
+        if openvino_absent:
+            raise ImportError('The OpenVINO package is not installed')
+
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        self.ie = IECore()
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -25,25 +42,42 @@ class OpenvinoAdapter(ModelAdapter):
     Class that allows working with Inference Engine model, its input and output blobs
     """
 
-    def __init__(self, core, model_path, device, plugin_config=None, max_num_requests=1):
-        self.core = core
+    def __init__(self, ie, model_path, device, plugin_config=None, max_num_requests=1):
+        self.ie = ie
         self.model_path = model_path
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
-        self.net = core.read_network(model_path)
+        log.info('Reading model {}'.format(model_path))
+        self.net = self.ie.read_network(model_path)
 
     def load_model(self):
-        self.exec_net = self.core.load_network(self.net, self.device,
+        self.exec_net = self.ie.load_network(self.net, self.device,
             self.plugin_config, self.max_num_requests)
         if self.max_num_requests == 0:
             # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
             # +1 to use it as a buffer of the pipeline
-            self.exec_net = self.core.load_network(self.net, self.device,
+            self.exec_net = self.ie.load_network(self.net, self.device,
                 self.plugin_config, len(self.exec_net.requests) + 1)
 
         log.info('The model {} is loaded to {}'.format(self.model_path, self.device))
         self.empty_requests = deque(self.exec_net.requests)
+        self.log_runtime_settings()
+
+    def log_runtime_settings(self):
+        devices = set(parse_devices(self.device))
+        if 'AUTO' not in devices:
+            for device in devices:
+                try:
+                    nstreams = self.exec_net.get_config(device + '_THROUGHPUT_STREAMS')
+                    log.info('\tDevice: {}'.format(device))
+                    log.info('\t\tNumber of streams: {}'.format(nstreams))
+                    if device == 'CPU':
+                        nthreads = self.exec_net.get_config('CPU_THREADS_NUM')
+                        log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
+                except RuntimeError:
+                    pass
+        log.info('\tNumber of network infer requests: {}'.format(len(self.exec_net.requests)))
 
     def get_input_layers(self):
         inputs = {}

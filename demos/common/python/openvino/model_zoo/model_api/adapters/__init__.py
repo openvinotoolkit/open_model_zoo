@@ -15,10 +15,11 @@
 """
 
 
-from .openvino_adapter import OpenvinoAdapter
+from .openvino_adapter import Core, OpenvinoAdapter
 from .remote_adapter import RemoteAdapter
 
 __all__ = [
+    'Core',
     'OpenvinoAdapter',
     'RemoteAdapter',
 ]

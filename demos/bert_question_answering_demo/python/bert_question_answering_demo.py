@@ -23,18 +23,16 @@ from pathlib import Path
 from time import perf_counter
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
-from helpers import log_runtime_settings, log_layers_info
 
 from model_api.models import BertQuestionAnswering
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
-from model_api.adapters import OpenvinoAdapter, RemoteAdapter
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import Core, OpenvinoAdapter, RemoteAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -166,16 +164,13 @@ def main():
     total_latency = (perf_counter() - preprocessing_start_time) * 1e3
 
     if args.adapter == 'openvino':
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
-        core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(core, args.model, args.device, plugin_config, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(Core().ie, args.model, args.device, plugin_config, args.num_infer_requests)
     elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    log.info('Reading model {}'.format(args.model))
     model = BertQuestionAnswering(model_adapter, vocab, args.input_names, args.output_names,
                                   args.max_answer_token_num, args.model_squad_ver)
     if args.reshape:
@@ -190,10 +185,9 @@ def main():
         else:
             log.debug("\tSkipping network reshaping,"
                       " as (context length + max question length) exceeds the current (input) network sequence length")
-    log_layers_info(model)
+    model.log_layers_info()
 
     pipeline = AsyncPipeline(model)
-    #log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     if args.questions:
         def questions():

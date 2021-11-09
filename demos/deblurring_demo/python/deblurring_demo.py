@@ -21,19 +21,18 @@ from pathlib import Path
 from time import perf_counter
 
 import cv2
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.models import Deblurring
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
-from model_api.adapters import OpenvinoAdapter, RemoteAdapter
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import Core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import log_layers_info, log_runtime_settings, log_latency_per_stage
+from helpers import log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -90,16 +89,11 @@ def main():
     render_metrics = PerformanceMetrics()
     video_writer = cv2.VideoWriter()
 
-
-    log.info('Reading model {}'.format(args.model))
-
     if args.adapter == 'openvino':
-        log.info('OpenVINO Inference Engine')
-        log.info('\tbuild: {}'.format(get_version()))
-        core = IECore()
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(core, args.model, args.device, plugin_config, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(Core().ie, args.model, args.device, plugin_config, args.num_infer_requests)
     elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
@@ -109,10 +103,9 @@ def main():
         raise RuntimeError("Can't read an image from the input")
 
     model = Deblurring(model_adapter, frame.shape)
-    log_layers_info(model)
+    model.log_layers_info()
 
     pipeline = AsyncPipeline(model)
-    #log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 

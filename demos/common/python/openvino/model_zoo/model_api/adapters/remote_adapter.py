@@ -14,7 +14,11 @@
  limitations under the License.
 """
 
-import ovmsclient
+try:
+    import ovmsclient
+    ovmsclient_absent = False
+except ImportError:
+    ovmsclient_absent = True
 
 from .model_adapter import ModelAdapter, Metadata
 
@@ -25,6 +29,9 @@ class RemoteAdapter(ModelAdapter):
     """
 
     def __init__(self, model_name, config):
+        if ovmsclient_absent:
+            raise ImportError('The OVMSclient package is not installed')
+
         self.model_name = model_name
         self.client = ovmsclient.make_grpc_client(config=config)
         # ensure the model can be loaded
