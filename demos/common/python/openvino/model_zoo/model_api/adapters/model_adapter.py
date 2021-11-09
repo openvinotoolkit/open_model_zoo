@@ -15,8 +15,7 @@
 """
 
 import abc
-from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List
 
 
@@ -25,7 +24,7 @@ class Metadata:
     shape: List[int] = None
     precision: str = ''
     type: str = ''
-    meta: Dict = {}
+    meta: Dict = field(default_factory=dict)
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):
