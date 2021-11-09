@@ -131,4 +131,3 @@ class OpenvinoAdapter(ModelAdapter):
             layers_info[layer_name].meta = node._get_attributes()
             layers_info[layer_name].type = node.get_type_name()
         return layers_info
-
