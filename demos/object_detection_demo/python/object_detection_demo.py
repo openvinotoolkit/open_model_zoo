@@ -175,7 +175,7 @@ def get_model(model_adapter, args):
         return models.YOLO(model_adapter, labels=args.labels, resize_type=args.resize_type,
                            threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov3-onnx':
-        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        return models.YoloV3ONNX(model_adapter, labels=args.labels, resize_type=args.resize_type,
                                  threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(model_adapter, labels=args.labels,
