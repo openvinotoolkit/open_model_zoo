@@ -13,6 +13,9 @@
 #include <string>
 #include <chrono>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
+
 
 #include <inference_engine.hpp>
 
@@ -79,28 +82,28 @@ struct RiffWaveHeader {
 };
 
 
+const unsigned int fourcc(const char c[4]){
+    return (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | (c[0]);
+}
 void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWaveHeader& wave_header){
-    FILE *inp_wave = fopen(file_name.c_str(), "rb");
-    if (inp_wave == NULL) {
-        throw std::logic_error("fail to read " + file_name);
-    }
+    std::ifstream inp_wave(file_name, std::ios::in|std::ios::binary);
+    if(!inp_wave.is_open())
+        throw std::logic_error("fail to open " + file_name);
 
-    if (1 != fread(&wave_header, sizeof(RiffWaveHeader), 1, inp_wave)) {
-        fclose(inp_wave);
-        throw std::logic_error("fail to read header for " + file_name);
-    }
+    inp_wave.read((char*)&wave_header, sizeof(RiffWaveHeader));
 
     bool read_ok = true;
     // make sure it is actually a RIFF file
-    if (0 != memcmp(&wave_header.riff_tag, "RIFF", 4)) {
+
+    if (fourcc("RIFF") != wave_header.riff_tag) {
         std::cerr << "riff_tag != 'RIFF' for " << file_name << std::endl;
         read_ok = false;
     }
-    if (0 != memcmp(&wave_header.wave_tag, "WAVE", 4)) {
+    if (fourcc("WAVE") != wave_header.wave_tag) {
         std::cerr << "wave_tag != 'WAVE' for " << file_name << std::endl;
         read_ok = false;
     }
-    if (0 != memcmp(&wave_header.fmt_tag, "fmt ", 4)) {
+    if (fourcc("fmt ") != wave_header.fmt_tag) {
         std::cerr << "fmt_tag != 'fmt' for " << file_name << std::endl;
         read_ok = false;
     }
@@ -126,41 +129,26 @@ void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWave
         read_ok = false;
     }
     // make sure that data chunk follows file header
-    if (0 != memcmp(&wave_header.data_tag, "data", 4)) {
+    if (fourcc("data") != wave_header.data_tag) {
         std::cerr << "data_tag != 'data' for " << file_name << std::endl;
         read_ok = false;
     }
 
     if (!read_ok) {
-        fclose(inp_wave);
         throw std::logic_error("bad header for " + file_name);
     }
 
     size_t wave_size = wave_header.data_length / 2;
     wave.resize(wave_size);
-
-    if (1 != fread(&(wave.front()), wave_size*2, 1, inp_wave)) {
-        fclose(inp_wave);
-        throw std::logic_error("fail to read data for " + file_name);
-    }
-    fclose(inp_wave);
+    inp_wave.read((char*)&(wave.front()), wave_size*2);
 }
 
 void write_wav(const std::string& file_name, const std::vector<int16_t>& wave, const RiffWaveHeader& wave_header) {
-    FILE *out_wave = fopen(file_name.c_str(), "wb");
-    if (out_wave == NULL) {
-        throw std::logic_error("fail to write into " + file_name);
-    }
-
-    if (1 != fwrite(&wave_header, sizeof(RiffWaveHeader), 1, out_wave)) {
-        fclose(out_wave);
-        throw std::logic_error("fail to write header into " + file_name);
-    }
-    if (1 != fwrite(&wave.front(), wave.size() * 2, 1, out_wave)) {
-        fclose(out_wave);
-        throw std::logic_error("fail to write data into " + file_name);
-    }
-    fclose(out_wave);
+    std::ofstream out_wave(file_name, std::ios::out|std::ios::binary);
+    if(!out_wave.is_open())
+        throw std::logic_error("fail to open " + file_name);
+    out_wave.write((char*)&wave_header, sizeof(RiffWaveHeader));
+    out_wave.write((char*)&(wave.front()), wave.size()*2);
 }
 
 
@@ -221,7 +209,8 @@ int main(int argc, char *argv[]) {
         std::cout << "iter " << iter << std::endl;
         size_t inp_size = patch_size * iter;
         inp_wave_fp32.resize(inp_size, 0);
-        out_wave_fp32.resize(inp_size);
+        out_wave_fp32.resize(inp_size, 0);
+        std::cout << "inp_size " << inp_size << " " << inp_size/16000.0f << "sec" << std::endl;
 
         //convert sint16_t  to float
         float scale = 1.0f/std::numeric_limits<int16_t>::max();
