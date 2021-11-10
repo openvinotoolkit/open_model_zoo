@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
         size_t iter = 1 + ((inp_wave_s16.size()+FLAGS_delay) / patch_size);
         std::cout << "iter " << iter << std::endl;
         size_t inp_size = patch_size * iter;
-        inp_wave_fp32.resize(inp_size);
+        inp_wave_fp32.resize(inp_size, 0);
         out_wave_fp32.resize(inp_size);
 
         //convert short to float
