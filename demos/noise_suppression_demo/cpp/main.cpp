@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
                 continue;
             std::string out_state_name(inp_state_name);
             out_state_name.replace(0, 3, "out");
-            state_names.push_back(std::pair<std::string, std::string>(inp_state_name, out_state_name));
+            state_names.emplace_back(inp_state_name, out_state_name);
             const InferenceEngine::SizeVector& size = inputs[inp_state_name]->getInputData()->getTensorDesc().getDims();
             size_t tensor_size = 1;
             for(size_t s: size)
