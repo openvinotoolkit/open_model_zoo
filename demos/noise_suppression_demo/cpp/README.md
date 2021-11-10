@@ -44,10 +44,9 @@ Options:
 
     -h           Print a usage message.
     -i INPUT     Required. Path to a input WAV file.
-    -o OUTPUT    Required. Path to a output WAV file.
+    -o OUTPUT    Optional. Path to a output WAV file.
     -m MODEL     Required. Path to an .xml file with a trained model.
     -d DEVICE    Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
-    -delay DELAY Required. delay in samples that model adds during processing
 ```
 
 Running the application with an empty list of options yields an error message.
@@ -57,7 +56,6 @@ For example, to do inference on a CPU, run the following command:
 ```sh
 ./noise_suppression_demo \
   -m <path_to_model>/noise-suppression-poconetlike-0001.xml \
-  -delay 640 \ 
   -d CPU \
   -i noisy.wav \
   -o cleaned.wav
@@ -66,7 +64,7 @@ For example, to do inference on a CPU, run the following command:
 ## Demo Inputs
 
 The application reads audio wave from the INPUT WAV file. The INPUT file has to have 16kHZ discretization frequency and be mono.
-The OUTPUT,MODEL and DELAY are also required arguments.
+The MODEL is also required arguments.
 
 ## Demo Outputs
 The application outputs cleaned wave to OUTPUT WAV file.

@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <iomanip>
 
 #include <inference_engine.hpp>
 
@@ -20,18 +21,16 @@ typedef std::chrono::nanoseconds ns;
 
 static const char help_message[] = "Print a usage message.";
 static const char inp_wav_message[] = "Required. Path to a input WAV file.";
-static const char out_wav_message[] = "Required. Path to a output WAV file.";
+static const char out_wav_message[] = "Optional. Path to a output WAV file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char delay_message[] = "Optional. Delay in samples that model adds during processing. default 0";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
                                             "The demo will look for a suitable plugin for device specified.";
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", inp_wav_message);
-DEFINE_string(o, "", out_wav_message);
+DEFINE_string(o, "noise_suppression_demo_out.wav", out_wav_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
-DEFINE_int32(delay, 0, delay_message);
 
 static void showUsage() {
     std::cout << std::endl;
@@ -43,7 +42,6 @@ static void showUsage() {
     std::cout << "    -o OUTPUT    " << out_wav_message << std::endl;
     std::cout << "    -m MODEL     " << model_message << std::endl;
     std::cout << "    -d DEVICE    " << target_device_message << std::endl;
-    std::cout << "    -delay DELAY " << delay_message << std::endl;
 }
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -60,8 +58,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -o is not set");
     if (FLAGS_m.empty())
         throw std::logic_error("Parameter -m is not set");
-    if (FLAGS_delay<0)
-        throw std::logic_error("Parameter -delay is not set");
 
     return true;
 }
@@ -83,114 +79,95 @@ struct RiffWaveHeader {
 };
 
 
-bool read_wav(const std::string& file_name, std::vector<int16_t>& p_wave, RiffWaveHeader& p_wave_header)
-{
+void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWaveHeader& wave_header){
     FILE *inp_wave = fopen(file_name.c_str(), "rb");
-    if (inp_wave == NULL)
-    {
-        std::cerr << "fail to read " << file_name << std::endl;
-        return false;
+    if (inp_wave == NULL) {
+        throw std::logic_error("fail to read " + file_name);
     }
 
-    if (1 != fread(p_wave_header, sizeof(RiffWaveHeader), 1, inp_wave))
-    {
-        std::cerr << "fail to read header for " << file_name << std::endl;
-        return false;
+    if (1 != fread(&wave_header, sizeof(RiffWaveHeader), 1, inp_wave)) {
+        fclose(inp_wave);
+        throw std::logic_error("fail to read header for " + file_name);
     }
 
     bool read_ok = true;
     // make sure it is actually a RIFF file
-    if (0 != memcmp(&p_wave_header->riff_tag, "RIFF", 4))
-    {
+    if (0 != memcmp(&wave_header.riff_tag, "RIFF", 4)) {
         std::cerr << "riff_tag != 'RIFF' for " << file_name << std::endl;
         read_ok = false;
     }
-    if (0 != memcmp(&p_wave_header->wave_tag, "WAVE", 4))
-    {
+    if (0 != memcmp(&wave_header.wave_tag, "WAVE", 4)) {
         std::cerr << "wave_tag != 'WAVE' for " << file_name << std::endl;
         read_ok = false;
     }
-    if (0 != memcmp(&p_wave_header->fmt_tag, "fmt ", 4))
-    {
+    if (0 != memcmp(&wave_header.fmt_tag, "fmt ", 4)) {
         std::cerr << "fmt_tag != 'fmt' for " << file_name << std::endl;
         read_ok = false;
     }
 
     // only PCM
-    if (p_wave_header->data_format != 1)
-    {
+    if (wave_header.data_format != 1) {
         std::cerr << "data_format != kPCMFormat(1) for " << file_name << std::endl;
         read_ok = false;
     }
     // only mono
-    if (p_wave_header->num_of_channels != 1)
-    {
+    if (wave_header.num_of_channels != 1) {
         std::cerr << "num_of_channels != 1 for " << file_name << std::endl;
         read_ok = false;
     }
     // only 16 bit
-    if (p_wave_header->bits_per_sample != 16)
-    {
+    if (wave_header.bits_per_sample != 16) {
         std::cerr << "bits_per_sample != 16 for " << file_name << std::endl;
         read_ok = false;
     }
     // only 16KHz
-    if (p_wave_header->sampling_freq != 16000)
-    {
+    if (wave_header.sampling_freq != 16000) {
         std::cerr << "sampling_freq != 16000 for " << file_name << std::endl;
         read_ok = false;
     }
     // make sure that data chunk follows file header
-    if (0 != memcmp(&p_wave_header->data_tag, "data", 4))
-    {
+    if (0 != memcmp(&wave_header.data_tag, "data", 4)) {
         std::cerr << "data_tag != 'data' for " << file_name << std::endl;
         read_ok = false;
     }
 
-    if (!read_ok)
-    {
-        return false;
+    if (!read_ok) {
+        fclose(inp_wave);
+        throw std::logic_error("bad header for " + file_name);
     }
 
-    size_t wave_size = p_wave_header->data_length / 2;
-    p_wave->resize(wave_size);
+    size_t wave_size = wave_header.data_length / 2;
+    wave.resize(wave_size);
 
-    if (1 != fread(&(p_wave->front()), wave_size*2, 1, inp_wave))
-    {
-        std::cerr << "fail to read data for " << file_name << std::endl;
-        return false;
+    if (1 != fread(&(wave.front()), wave_size*2, 1, inp_wave)) {
+        fclose(inp_wave);
+        throw std::logic_error("fail to read data for " + file_name);
     }
-
-    return true;
+    fclose(inp_wave);
 }
 
-bool write_wav(const std::string& file_name, const std::vector<short>& wave, const RiffWaveHeader& wave_header) {
+void write_wav(const std::string& file_name, const std::vector<int16_t>& wave, const RiffWaveHeader& wave_header) {
     FILE *out_wave = fopen(file_name.c_str(), "wb");
     if (out_wave == NULL) {
-        std::cerr << "fail to write into " << file_name << std::endl;
-        return false;
+        throw std::logic_error("fail to write into " + file_name);
     }
 
     if (1 != fwrite(&wave_header, sizeof(RiffWaveHeader), 1, out_wave)) {
-        std::cerr << "fail to write header into " << file_name << std::endl;
-        return false;
+        fclose(out_wave);
+        throw std::logic_error("fail to write header into " + file_name);
     }
     if (1 != fwrite(&wave.front(), wave.size() * 2, 1, out_wave)) {
-        std::cerr << "fail to write data into " << file_name << std::endl;
-        return false;
+        fclose(out_wave);
+        throw std::logic_error("fail to write data into " + file_name);
     }
     fclose(out_wave);
-    return true;
 }
 
 
-int main(int argc, char *argv[])
-{
-    try
-    {
+int main(int argc, char *argv[]) {
+    try {
         // ------------------------------ Parsing and validating of input arguments --------------------------
-        if (!ParseAndCheckCommandLine(argc, argv))
-        {
+        if (!ParseAndCheckCommandLine(argc, argv)) {
             return EXIT_FAILURE;
         }
 
@@ -198,14 +175,12 @@ int main(int argc, char *argv[])
         InferenceEngine::Core ie;
 
         InferenceEngine::CNNNetwork network = ie.ReadNetwork(FLAGS_m);
-        InferenceEngine::OutputsDataMap outputs = network.getOutputsInfo();
         InferenceEngine::InputsDataMap inputs = network.getInputsInfo();
 
         //get state names pairs (inp,out)
         std::vector<std::pair<std::string, std::string>> state_names;
         size_t state_size = 0;
-        for(auto& inp: inputs)
-        {
+        for(auto& inp: inputs) {
             std::string inp_state_name = inp.first;
             if (inp_state_name.find("inp_state") == std::string::npos)
                 continue;
@@ -214,8 +189,7 @@ int main(int argc, char *argv[])
             state_names.emplace_back(inp_state_name, out_state_name);
             const InferenceEngine::SizeVector& size = inputs[inp_state_name]->getInputData()->getTensorDesc().getDims();
             size_t tensor_size = 1;
-            for(size_t s: size)
-            {
+            for(size_t s: size) {
                 tensor_size *= s;
             }
             std::cout << inp_state_name << "<-" << out_state_name << " " << tensor_size << " params" << std::endl;
@@ -236,42 +210,32 @@ int main(int argc, char *argv[])
         std::cout << "patch_size " << patch_size << std::endl;
 
         //read input wav file
-        std::vector<short> inp_wave_s16, out_wave_s16;
+        std::vector<int16_t> inp_wave_s16, out_wave_s16;
         std::vector<float> inp_wave_fp32, out_wave_fp32;
         RiffWaveHeader wave_header;
-        if (!read_wav(FLAGS_i, &inp_wave_s16, &wave_header))
-        {
-            return EXIT_FAILURE;
-        }
+        read_wav(FLAGS_i, inp_wave_s16, wave_header);
         out_wave_s16.resize(inp_wave_s16.size());
 
-        //fp32 input wave will be expanded to cover delay and to be divisible by patch_size
-        size_t iter = 1 + ((inp_wave_s16.size()+FLAGS_delay) / patch_size);
+        //fp32 input wave will be expanded to be divisible by patch_size
+        size_t iter = 1 + (inp_wave_s16.size() / patch_size);
         std::cout << "iter " << iter << std::endl;
         size_t inp_size = patch_size * iter;
         inp_wave_fp32.resize(inp_size, 0);
         out_wave_fp32.resize(inp_size);
 
-        //convert short to float
-        float scale = 1.0f/SHRT_MAX;
+        //convert sint16_t  to float
+        float scale = 1.0f/std::numeric_limits<int16_t>::max();
         size_t i=0;
-        for(; i < inp_wave_s16.size(); ++i)
-        {
+        for(; i < inp_wave_s16.size(); ++i) {
             inp_wave_fp32[i] = (float)inp_wave_s16[i] * scale;
-        }
-        for(;i<inp_size; ++i)
-        {//fill the rest by zeros
-            inp_wave_fp32[i] = 0.0f;
         }
 
         auto start_time = Time::now();
-        for(size_t i=0; i<iter; ++i)
-        {
+        for(size_t i=0; i<iter; ++i) {
             auto inputBlob = InferenceEngine::make_shared_blob<float>(inp_desc, &inp_wave_fp32[i * patch_size]);
             infer_request.SetBlob(input_name, inputBlob);  
 
-            for (auto &state_name: state_names)
-            {
+            for (auto &state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
                 const std::string& out_state_name = state_name.second;
 
@@ -307,26 +271,20 @@ int main(int argc, char *argv[])
 
         using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
         double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
-        slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
+        std::cout << "Metrics report:" << std::endl;
+        std::cout << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << std::endl;
 
-        //convert fp32 to short and crop start (because model delays signal)
-        for(size_t i=0; i < out_wave_s16.size(); ++i)
-        {
-            out_wave_s16[i] = (short)(out_wave_fp32[i+FLAGS_delay] * SHRT_MAX);
+        //convert fp32 to int16_t
+        for(size_t i=0; i < out_wave_s16.size(); ++i) {
+            out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
         }
-        if (!write_wav(FLAGS_o, out_wave_s16, wave_header))
-        {
-            return EXIT_FAILURE;
-        }
+        write_wav(FLAGS_o, out_wave_s16, wave_header);
     }
-    catch (const std::exception& error)
-    {
+    catch (const std::exception& error) {
         std::cerr << error.what() << std::endl;
         return EXIT_FAILURE;
     }
-    catch (...)
-    {
+    catch (...) {
         std::cerr << "Unknown/internal exception happened." << std::endl;
         return EXIT_FAILURE;
     }
