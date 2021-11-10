@@ -36,6 +36,7 @@ class RemoteAdapter(ModelAdapter):
         'DT_INT8' : 'I8',
         'DT_UINT8': 'U8',
     }
+
     def __init__(self, model_name, config):
         if ovmsclient_absent:
             raise ImportError('The OVMSclient package is not installed')

@@ -21,7 +21,7 @@ from typing import Dict, List
 
 @dataclass
 class Metadata:
-    shape: List[int] = None
+    shape: List[int] = field(default_factory=list)
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)

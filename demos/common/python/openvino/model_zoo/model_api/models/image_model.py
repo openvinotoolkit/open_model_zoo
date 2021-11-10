@@ -14,8 +14,6 @@
  limitations under the License.
 """
 
-import numpy as np
-
 from .model import Model
 from .utils import RESIZE_TYPES, pad_image, InputTransform
 
