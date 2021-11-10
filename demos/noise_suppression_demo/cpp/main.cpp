@@ -83,7 +83,7 @@ struct RiffWaveHeader {
 };
 
 
-bool read_wav(const std::string& file_name, std::vector<short>* p_wave, RiffWaveHeader* p_wave_header)
+bool read_wav(const std::string& file_name, std::vector<int16_t>& p_wave, RiffWaveHeader& p_wave_header)
 {
     FILE *inp_wave = fopen(file_name.c_str(), "rb");
     if (inp_wave == NULL)
