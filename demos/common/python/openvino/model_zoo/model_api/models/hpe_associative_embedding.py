@@ -80,7 +80,6 @@ class HpeAssociativeEmbedding(ImageModel):
             'original_size': inputs.shape[:2],
             'resize_img_scale': resize_img_scale
         }
-        img = self.int2float(img)
         return {self.image_blob_name: img}, meta
 
     def postprocess(self, outputs, meta):

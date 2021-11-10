@@ -81,7 +81,6 @@ class CTPN(DetectionModel):
             inputs = cv2.resize(inputs, (self.w2, self.h2))
 
         inputs = inputs.transpose((2, 0, 1)) # Change data layout from HWC to CHW
-        inputs = self.int2float(inputs)
         dict_inputs = {self.image_blob_name: inputs}
         return dict_inputs, meta
 

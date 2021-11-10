@@ -58,7 +58,6 @@ class Deblurring(ImageModel):
 
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
-        resized_image = self.int2float(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, image.shape[1::-1]
 

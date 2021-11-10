@@ -38,6 +38,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         - Synchronous model inference
         - Asynchronous model inference
     '''
+    precisions = ('FP32', 'I32', 'FP16', 'I16', 'I8', 'U8')
 
     @abc.abstractmethod
     def __init__(self):
@@ -56,7 +57,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
     def get_input_layers(self):
         '''
         Gets the names of model input layers and for each layer creates the Metadata structure,
-           which contains the information about the layer shape, precision, meta (optional)
+           which contains the information about the layer shape, blob precision in OpenVINO format, meta (optional)
 
         Returns:
             - the dict containing Metadata for all input layers
@@ -66,7 +67,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
     def get_output_layers(self):
         '''
         Gets the names of model output layers and for each layer creates the Metadata structure,
-           which contains the information about the layer shape, precision, meta (optional)
+           which contains the information about the layer shape, blob precision in OpenVINO format, meta (optional)
 
         Returns:
             - the dict containing Metadata for all output layers

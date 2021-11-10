@@ -342,7 +342,6 @@ class YOLOX(DetectionModel):
 
         preprocessed_image = self.input_transform(padded_image)
         preprocessed_image = preprocessed_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        preprocessed_image = self.int2float(preprocessed_image)
         preprocessed_image = preprocessed_image.reshape((self.n, self.c, self.h, self.w))
 
         dict_inputs = {self.image_blob_name: preprocessed_image}
@@ -433,7 +432,6 @@ class YoloV3ONNX(DetectionModel):
         resized_image = self.resize(image, (self.w, self.h), interpolation=INTERPOLATION_TYPES['CUBIC'])
         meta.update({'resized_shape': resized_image.shape})
         resized_image = self._change_layout(resized_image)
-        resized_image = self.int2float(resized_image)
         dict_inputs = {
             self.image_blob_name: resized_image,
             self.image_info_blob_name: [image.shape[0], image.shape[1]]

@@ -28,6 +28,14 @@ class RemoteAdapter(ModelAdapter):
     Class that allows working with Remote OpenVino Model Server model
     """
 
+    precisions = {
+        'DT_FLOAT': 'FP32',
+        'DT_INT32': 'I32',
+        'DT_HALF' : 'FP16',
+        'DT_INT16': 'I16',
+        'DT_INT8' : 'I8',
+        'DT_UINT8': 'U8',
+    }
     def __init__(self, model_name, config):
         if ovmsclient_absent:
             raise ImportError('The OVMSclient package is not installed')
@@ -46,13 +54,13 @@ class RemoteAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for name, meta in self.metadata['inputs'].items():
-            inputs[name] = Metadata(meta['shape'], meta['dtype'])
+            inputs[name] = Metadata(meta['shape'], self.precisions.get(meta['dtype'], meta['dtype']))
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for name, meta in self.metadata['outputs'].items():
-            outputs[name] = Metadata(meta['shape'], meta['dtype'])
+            outputs[name] = Metadata(meta['shape'], self.precisions.get(meta['dtype'], meta['dtype']))
         return outputs
 
     def reshape_model(self, new_shape):
