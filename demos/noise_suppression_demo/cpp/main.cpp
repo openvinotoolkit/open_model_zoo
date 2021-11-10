@@ -164,8 +164,7 @@ bool read_wav(const std::string& file_name, std::vector<short>* p_wave, RiffWave
     return true;
 }
 
-bool write_wav(const std::string& file_name, const std::vector<short>& wave, const RiffWaveHeader& wave_header)
-{
+bool write_wav(const std::string& file_name, const std::vector<short>& wave, const RiffWaveHeader& wave_header) {
     FILE *out_wave = fopen(file_name.c_str(), "wb");
     if (out_wave == NULL) {
         std::cerr << "fail to write into " << file_name << std::endl;
