@@ -455,7 +455,8 @@ class NormalizeAudio(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'int16mode': BoolField(optional=True, default=False, description="Normalization to int16 range"),
-            'per_frame': BoolField(optional=True, default=False, description='apply normalization to each frame separately')
+            'per_frame': BoolField(
+                optional=True, default=False, description='apply normalization to each frame separately')
         })
         return parameters
 
@@ -544,7 +545,7 @@ class RemoveDCandDither(Preprocessor):
         return image
 
     def process_feat(self, input_signal):
-        input_signal = lfilter([1, -1], [1, -self.alpha], input_signal)
+        input_signal = lfilter([1, -1], [1, -1 * self.alpha], input_signal)
         dither = np.random.random_sample(len(input_signal)) + np.random.random_sample(len(input_signal)) - 1
         spow = np.std(dither)
         out_signal = input_signal + 1e-6 * spow * dither
@@ -552,7 +553,7 @@ class RemoveDCandDither(Preprocessor):
 
 
 windows = {
-    'none': lambda x: numpy.ones((x,)),
+    'none': lambda x: np.ones((x,)),
     'hamming': np.hamming,
     'hanning': np.hanning,
     'blackman': np.blackman,

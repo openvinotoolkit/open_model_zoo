@@ -17,10 +17,21 @@ limitations under the License.
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..utils import read_txt, OrderedSet
 from ..representation import ReIdentificationClassificationAnnotation
+from ..config import NumberField
 
 
 class SpeakerReIdentificationDatasetConverter(FileBasedAnnotationConverter):
     __provider__ = 'speaker_reidentification'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'max_pairs': NumberField(optional=True, value_type=int)})
+        return params
+
+    def configure(self):
+        super().configure()
+        self.max_pairs = self.get_value_from_config('max_pairs')
 
     def convert(self, check_content=False, **kwargs):
         annotations = []
@@ -39,6 +50,13 @@ class SpeakerReIdentificationDatasetConverter(FileBasedAnnotationConverter):
             audio_files.add(audio1)
             audio_files.add(audio2)
         for audio in audio_files:
+            audio_positive = positive_pairs.get(audio, [])
+            audio_negative = negative_pairs.get(audio, [])
+            if self.max_pairs:
+                if len(audio_positive) > self.max_pairs:
+                    audio_positive = audio_positive[:self.max_pairs]
+                if len(audio_negative) > self.max_pairs:
+                    audio_negative = audio_negative[:self.max_pairs]
             annotations.append(ReIdentificationClassificationAnnotation(
-                audio, positive_pairs.get(audio, []), negative_pairs.get(audio, [])))
-        return ConverterReturn(annotations, None, None)
+                audio, audio_positive, audio_negative))
+        return ConverterReturn(annotations, {'no_recursion': True}, None)

@@ -113,7 +113,7 @@ class FFTSpectrogram(Preprocessor):
         frames = image.data
         if self.skip_channels:
             frames = frames.squeeze()
-        pspec = np.absolute(np.fft.fft(frames, n=self.num_fft))
+        pspec = np.abs(np.fft.fft(frames, n=self.num_fft))
         if self.magnutide_squared:
             pspec = np.square(pspec)
         image.data = pspec
@@ -127,6 +127,7 @@ class FFTSpectrogram(Preprocessor):
 
     def calculate_out_shape(self, data_shape):
         return [self.calculate_out_single_shape(ds) for ds in data_shape]
+
 
 class TriangleFiltering(Preprocessor):
     __provider__ = 'audio_triangle_filtering'

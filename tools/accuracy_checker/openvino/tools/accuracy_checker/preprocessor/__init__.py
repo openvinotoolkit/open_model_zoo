@@ -61,7 +61,8 @@ from .geometric_transformations import (
     Tiling,
     ImagePyramid,
     FaceDetectionImagePyramid,
-    WarpAffine
+    WarpAffine,
+    Transpose
 )
 from .crop import (
     Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
@@ -102,6 +103,8 @@ __all__ = [
     'ContextWindow',
     'RemoveDCandDither',
     'FFTSpectrogram',
+    'TruncateBucket',
+    'FrameSignalOverlappingWindow',
 
     'Resize',
     'Resize3D',
@@ -109,6 +112,7 @@ __all__ = [
     'Flip',
     'PointAligner',
     'Tiling',
+    'Transpose',
     'CropBraTS',
     'ImagePyramid',
     'FaceDetectionImagePyramid',
