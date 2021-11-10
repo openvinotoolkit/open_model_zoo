@@ -66,13 +66,12 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-typedef struct _RiffWaveHeader
-{
+struct RiffWaveHeader {
     unsigned int riff_tag;       /* "RIFF" string */
     int riff_length;             /* Total length */
-    unsigned int  wave_tag;      /* "WAVE" */
-    unsigned int  fmt_tag;       /* "fmt " string (note space after 't') */
-    int  fmt_length;             /* Remaining length */
+    unsigned int wave_tag;       /* "WAVE" */
+    unsigned int fmt_tag;        /* "fmt " string (note space after 't') */
+    int fmt_length;              /* Remaining length */
     short data_format;           /* Data format tag, 1 = PCM */
     short num_of_channels;       /* Number of channels in file */
     int sampling_freq;           /* Sampling frequency */
@@ -81,7 +80,7 @@ typedef struct _RiffWaveHeader
     short bits_per_sample;
     unsigned int data_tag;       /* "data" string */
     int data_length;             /* Raw data length */
-} RiffWaveHeader;
+};
 
 
 bool read_wav(const std::string& file_name, std::vector<short>* p_wave, RiffWaveHeader* p_wave_header)
