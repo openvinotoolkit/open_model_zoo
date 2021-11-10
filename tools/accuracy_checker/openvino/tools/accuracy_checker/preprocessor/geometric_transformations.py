@@ -751,3 +751,22 @@ class SimilarityTransfom(Preprocessor):
 
     def calculate_out_shape(self, data_shape):
         return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
+
+class Transpose(Preprocessor):
+    __provider__ = 'transpose'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'axes': ListField(value_type=int, description='axes order for transposing')
+        })
+        return params
+
+    def configure(self):
+        self.axes = self.get_value_from_config('axes')
+
+    def process(self, image, annotation_meta=None):
+        image.data = np.transpose(image.data, self.axes)
+        return image

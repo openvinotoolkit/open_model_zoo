@@ -42,7 +42,8 @@ class WavReader(BaseReader):
             'float_dtype': StringField(
                 choices=['float16', 'float32', 'float64'], optional=True, default='float32',
                 description='specifies precision for conversion to float '
-            )
+            ),
+            'flattenize': BoolField(optional=True, default=False, description='flattenize signal')
         })
         return params
 
@@ -53,6 +54,7 @@ class WavReader(BaseReader):
         self.float_dtype = self.get_value_from_config('float_dtype')
         if self.float_dtype == 'float64':
             self.float_dtype = 'float'
+        self.flattenize = self.get_value_from_config('flattenize')
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
@@ -75,6 +77,9 @@ class WavReader(BaseReader):
                 data = data.mean(0, keepdims=True)
             if self.to_float:
                 data = data.astype(self.float_dtype) / np.iinfo(self._samplewidth_types[sample_width]).max
+
+            if self.flattenize:
+                data = data.flatten()
 
         return data, {'sample_rate': sample_rate}
 

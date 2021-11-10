@@ -34,7 +34,8 @@ from .audio_preprocessing import (
     DCT,
     ClipCepstrum,
     TrimmingAudio,
-    AudioToMelSpectrogram
+    AudioToMelSpectrogram,
+    FFTSpectrogram
 )
 from .audio_preprocessing_ext import (
     SpliceFrame,
@@ -46,7 +47,10 @@ from .audio_preprocessing_ext import (
     ResampleAudio,
     ClipAudio,
     SamplesToFloat32,
-    NormalizeAudio
+    NormalizeAudio,
+    RemoveDCandDither,
+    TruncateBucket,
+    FrameSignalOverlappingWindow,
 )
 
 from .normalization import Normalize, Normalize3d
@@ -96,6 +100,8 @@ __all__ = [
     'PreemphFrame',
     'SignalPatching',
     'ContextWindow',
+    'RemoveDCandDither',
+    'FFTSpectrogram',
 
     'Resize',
     'Resize3D',

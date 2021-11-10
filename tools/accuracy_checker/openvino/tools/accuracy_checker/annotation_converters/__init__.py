@@ -124,6 +124,7 @@ from .wgs import WGSTFRecords, WGSPickleRecords
 from .sentence_similarity import SentenceSimilarityConverter
 from .common_text_recognition import CommonTextRecognition
 from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
+from .speaker_identification import SpeakerReIdentificationDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -247,5 +248,6 @@ __all__ = [
     'WGSPickleRecords',
     'SentenceSimilarityConverter',
     'CommonTextRecognition',
-    'COCOFacialLandmarksRecognitionConverter'
+    'COCOFacialLandmarksRecognitionConverter',
+    'SpeakerReIdentificationDatasetConverter',
 ]

@@ -16,8 +16,14 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, NumberField, BaseField, ConfigError
+from ..config import BoolField, NumberField, BaseField, ConfigError, StringField
 from ..preprocessor import Preprocessor
+from ..utils import UnsupportedPackage
+
+try:
+    from scipy.signal import lfilter
+except ImportError as error:
+    lfilter = UnsupportedPackage('scipy', error.msg)
 
 
 class SpliceFrame(Preprocessor):
@@ -449,19 +455,23 @@ class NormalizeAudio(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'int16mode': BoolField(optional=True, default=False, description="Normalization to int16 range"),
+            'per_frame': BoolField(optional=True, default=False, description='apply normalization to each frame separately')
         })
         return parameters
 
     def configure(self):
-
         self.int16mode = self.get_value_from_config('int16mode')
+        self.per_frame = self.get_value_from_config('per_frame')
 
     def process(self, image, annotation_meta=None):
         sound = image.data
         if self.int16mode:
             sound = sound / np.float32(0x8000)
         else:
-            sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
+            if not self.per_frame:
+                sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
+            else:
+                sound = np.array([(frame - np.mean(frame)) / (np.std(frame) + 1e-15) for frame in sound[0]])
 
         image.data = sound
 
@@ -510,3 +520,106 @@ class AddBatch(Preprocessor):
 
     def calculate_out_shape(self, data_shape):
         return [self.calculate_out_single_shape(ds) for ds in data_shape]
+
+
+class RemoveDCandDither(Preprocessor):
+    __provider__ = 'remove_dc_and_dither'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'alpha': NumberField(value_type=float, min_value=0, max_value=1, description='alpha'),
+        })
+        return params
+
+    def configure(self):
+        self.alpha = self.get_value_from_config('alpha')
+
+        if isinstance(lfilter, UnsupportedPackage):
+            lfilter.raise_error(self.__provider__)
+
+    def process(self, image, annotation_meta=None):
+        image.data = self.process_feat(image.data)
+        return image
+
+    def process_feat(self, input_signal):
+        input_signal = lfilter([1, -1], [1, -self.alpha], input_signal)
+        dither = np.random.random_sample(len(input_signal)) + np.random.random_sample(len(input_signal)) - 1
+        spow = np.std(dither)
+        out_signal = input_signal + 1e-6 * spow * dither
+        return out_signal
+
+
+windows = {
+    'none': lambda x: numpy.ones((x,)),
+    'hamming': np.hamming,
+    'hanning': np.hanning,
+    'blackman': np.blackman,
+    'bartlett': np.bartlett,
+}
+
+
+class FrameSignalOverlappingWindow(Preprocessor):
+    __provider__ = 'frame_signal_overlap'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'frame_len': NumberField(value_type=float, min_value=0, description='frame length'),
+            'frame_step': NumberField(value_type=float, min_value=0, description='frame step'),
+            'window': StringField(
+                optional=True, default='none', description='rolling window function', choices=windows)
+        })
+        return params
+
+    def configure(self):
+        self.frame_len = self.get_value_from_config('frame_len')
+        self.frame_step = self.get_value_from_config('frame_step')
+        self.window = windows[self.get_value_from_config('window')]
+
+    def process(self, image, annotation_meta=None):
+        def rolling_window(signal, window, step=1):
+            shape = signal.shape[:-1] + (signal.shape[-1] - window + 1, window)
+            strides = signal.strides + (signal.strides[-1],)
+            return np.lib.stride_tricks.as_strided(signal, shape=shape, strides=strides)[::step]
+
+        sample_rate = image.metadata.get('sample_rate')
+        if sample_rate is None:
+            raise RuntimeError('Operation "{}" can\'t resample audio: required original samplerate in metadata.'.
+                               format(self.__provider__))
+        frame_len = int(round(self.frame_len * sample_rate))
+        frame_step = int(round(self.frame_step * sample_rate))
+        signal_len = image.data.shape[1]
+        if signal_len <= frame_len:
+            num_frames = 1
+        else:
+            num_frames = 1 + int(np.ceil((1.0 * signal_len - frame_len) / frame_step))
+        padding = np.zeros((1, int((num_frames - 1) * frame_step + frame_len) - signal_len))
+        padded_signal = np.concatenate((image.data, padding), axis=1)
+        win = self.window(frame_len)
+        frames = rolling_window(padded_signal, window=frame_len, step=frame_step)
+        image.data = frames * win
+        return image
+
+
+class TruncateBucket(Preprocessor):
+    __provider__ = 'truncate_bucket'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'bucket': NumberField(value_type=int, min_value=1)})
+        return params
+
+    def configure(self):
+        self.bucket_size = self.get_value_from_config('bucket')
+
+    def process(self, image, annotation_meta=None):
+        if image.data.shape[1] < self.bucket_size:
+            return image
+        rsize = self.bucket_size
+        rstart = int((image.data.shape[1] - rsize) / 2)
+        image.data = image.data[:, rstart:rstart + rsize]
+        return image
