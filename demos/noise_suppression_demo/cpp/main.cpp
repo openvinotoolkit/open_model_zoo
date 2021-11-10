@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
         InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
         InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
 
-        //!!! Prepare input !!!
+        // Prepare input
         // get size of network input (pacth_size)
         std::string input_name("input");
         InferenceEngine::InputInfo::Ptr input = inputs[input_name];
