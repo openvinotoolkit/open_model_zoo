@@ -16,7 +16,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
