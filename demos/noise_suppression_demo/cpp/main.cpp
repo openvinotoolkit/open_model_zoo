@@ -15,7 +15,7 @@
 
 #include <inference_engine.hpp>
 
-typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::steady_clock Time;
 typedef std::chrono::nanoseconds ns;
 
 static const char help_message[] = "Print a usage message.";
