@@ -14,15 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 from collections import OrderedDict
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
+from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseTFModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, get_path
-from ...logging import print_info
+from ...utils import contains_all, contains_any, extract_image_representations
 
 
 def generate_name(prefix, with_prefix, layer_name):
@@ -63,152 +62,23 @@ class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
             self._update_progress(progress_reporter, metric_config, batch_id, len(prediction), csv_file)
 
 
-class BaseModel:
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.network_info = network_info
-        self.launcher = launcher
-
-    def predict(self, identifiers, input_data):
-        raise NotImplementedError
-
-    def release(self):
-        pass
-
-
-# pylint: disable=E0203
-class BaseDLSDKModel:
-    def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.default_model_suffix))
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
-        if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
-        else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape: {}\n'.format(
-                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-        print_info('{} - Output info'.format(self.default_model_suffix))
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(
-                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-
-    def automatic_model_search(self, network_info):
-        model = Path(network_info.get('srmodel', network_info.get('model')))
-        if model.is_dir():
-            is_blob = network_info.get('_model_is_blob')
-            if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list:
-                    model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        if model.suffix == '.blob':
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
-
-        return model, weights
-
-    def load_network(self, network, launcher):
-        self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
-        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
-            try:
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-                self.is_dynamic = True
-            except RuntimeError as e:
-                if launcher.dynamic_shapes_policy == 'dynamic':
-                    raise e
-                self.is_dynamic = False
-                self.exec_network = None
-        if not self.dynamic_inputs:
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.update_inputs_outputs_info()
-
-    def reshape_net(self, shape):
-        if self.is_dynamic:
-            return
-        if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.exec_network
-        self.network.reshape(shape)
-        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-        if not self.is_dynamic and self.dynamic_inputs:
-            return
-        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
-
-    def update_inputs_outputs_info(self):
-        raise NotImplementedError
-
-    def load_model(self, network_info, launcher, log=False):
-        model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, launcher)
-        else:
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        self.update_inputs_outputs_info()
-        if log:
-            self.print_input_output_info()
-
-
-def create_model(model_config, launcher, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': ModelDLSDKModel,
-        'tf': ModelTFModel,
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
-
-
-class SRFModel(BaseModel):
+class SRFModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if models_args and not delayed_model_loading:
             model = network_info.get('srmodel', {})
             if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['srmodel'] = models_args[0]
+                model['model'] = models_args[0]
                 model['_model_is_blob'] = is_blob
-            network_info.update({'sr_model': model})
+            network_info.update({'srmodel': model})
         if not contains_all(network_info, ['srmodel']) and not delayed_model_loading:
             raise ConfigError('network_info should contain srmodel field')
-        self.srmodel = create_model(network_info['srmodel'], launcher, delayed_model_loading)
+        self._model_mapping = {
+            'dlsdk': ModelDLSDKModel,
+            'tf': ModelTFModel,
+        }
+        self.srmodel = create_model(network_info['srmodel'], launcher, self._model_mapping, 'srmodel',
+                                    delayed_model_loading)
         self.feedback = self.srmodel.feedback
         self.init_feedback = self.srmodel.init_feedback
         self.fill_feedback = self.srmodel.fill_feedback
@@ -223,40 +93,15 @@ class SRFModel(BaseModel):
             predictions.append(prediction)
         return raw_outputs, predictions
 
-    def reset(self):
-        pass
-
-    def release(self):
-        self.srmodel.release()
-
-    def load_network(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(
-                network_dict.get('srmodel', network_dict.get('model')), launcher)
-        self.update_inputs_outputs_info()
-
-    def load_model(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict.get('name', 'srmodel')].load_model(network_dict, launcher)
-        self.update_inputs_outputs_info()
-
     def _add_raw_predictions(self, prediction):
         for key, output in prediction.items():
             if key not in self._raw_outs:
                 self._raw_outs[key] = []
             self._raw_outs[key].append(output)
 
-    def get_network(self):
-        return [{'name': 'srmodel', 'model': self.srmodel.network}]
-
-    def update_inputs_outputs_info(self):
-        if hasattr(self.srmodel, 'update_inputs_outputs_info'):
-            self.srmodel.update_inputs_outputs_info()
-
 
 class FeedbackMixin:
     def configure_feedback(self):
-
         self._idx_to_name = {}
         self._name_to_idx = {}
         self._feedback_name = self.network_info['feedback_input']
@@ -264,13 +109,11 @@ class FeedbackMixin:
         self._first_step = True
         self._inputs = self.network_info['inputs']
         self._feedback_inputs = {self._feedback_name: [t for t in self._inputs if t['name'] == self._feedback_name][0]}
-
         for input_info in self._inputs:
             idx = int(input_info['value'])
             self._idx_to_name[idx] = input_info['name']
             self._name_to_idx[input_info['name']] = idx
         self._feedback_idx = self._name_to_idx[self._feedback_name]
-
 
     def init_feedback(self, reader):
         info = self._feedback_inputs[self._feedback_name]
@@ -285,33 +128,20 @@ class FeedbackMixin:
         return data
 
 
-class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
-    default_model_suffix = 'srmodel'
-
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher)
-        self.is_dynamic = False
-        self.input_blob, self.output_blob = None, None
-        self.with_prefix = None
+class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.partial_shapes = {}
-
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
-
         self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
-            self.reshape_net({key: data.shape for key, data in input_data.items()})
+            self._reshape_input({key: data.shape for key, data in input_data.items()})
         raw_result = self.exec_network.infer(input_data)
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
-
-    def release(self):
-        del self.exec_network
-        del self.launcher
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -331,7 +161,7 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
 
         return fitted
 
-    def update_inputs_outputs_info(self):
+    def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         input_blob = next(iter(input_info))
@@ -348,15 +178,14 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
 
         self.with_prefix = with_prefix
 
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.set_input_and_output()
 
-class ModelTFModel(BaseModel, FeedbackMixin):
-    default_model_suffix = 'srmodel'
 
-    def __init__(self, network_info, launcher, *args, **kwargs):
-        super().__init__(network_info, launcher)
-        model = self.automatic_model_search(network_info)
-        self.inference_session = launcher.create_inference_session(str(model))
-
+class ModelTFModel(BaseTFModel, FeedbackMixin):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
@@ -374,11 +203,3 @@ class ModelTFModel(BaseModel, FeedbackMixin):
             fitted[name] = data
 
         return fitted
-
-    def release(self):
-        del self.inference_session
-
-    @staticmethod
-    def automatic_model_search(network_info):
-        model = Path(network_info['model'])
-        return model

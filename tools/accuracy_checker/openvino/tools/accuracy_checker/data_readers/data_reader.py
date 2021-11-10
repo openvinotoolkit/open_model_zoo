@@ -122,7 +122,7 @@ def deserialize_identifier(identifier):
 
 def create_identifier_key(identifier):
     if isinstance(identifier, list):
-        return ListIdentifier(tuple(identifier))
+        return ListIdentifier(tuple([create_identifier_key(elem) for elem in identifier]))
     if isinstance(identifier, ClipIdentifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):

@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 from functools import partial
-from collections import OrderedDict
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
+from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, get_path
-from ...logging import print_info
+from ...utils import contains_all, extract_image_representations
 
 
 class TextToSpeechEvaluator(BaseCustomEvaluator):
@@ -66,19 +64,9 @@ class TextToSpeechEvaluator(BaseCustomEvaluator):
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
 
-def create_network(model_config, launcher, suffix, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': TTSDLSDKModel
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, suffix, delayed_model_loading)
-
-
-class SequentialModel:
+class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher)
         if not delayed_model_loading:
             forward_tacotron_duration = network_info.get('forward_tacotron_duration', {})
             forward_tacotron_regression = network_info.get('forward_tacotron_regression', {})
@@ -102,16 +90,19 @@ class SequentialModel:
                 raise ConfigError(
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
-        self.forward_tacotron_duration = create_network(
-            network_info.get('forward_tacotron_duration', {}), launcher,
+        self._model_mapping = {
+            'dlsdk': TTSDLSDKModel
+        }
+        self.forward_tacotron_duration = create_model(
+            network_info.get('forward_tacotron_duration', {}), launcher, self._model_mapping,
             'duration_prediction_att', delayed_model_loading
         )
-        self.forward_tacotron_regression = create_network(
-            network_info.get('forward_tacotron_regression', {}), launcher,
+        self.forward_tacotron_regression = create_model(
+            network_info.get('forward_tacotron_regression', {}), launcher, self._model_mapping,
             'regression_att', delayed_model_loading
         )
-        self.melgan = create_network(
-            network_info.get('melgan', {}), launcher, "melganupsample", delayed_model_loading
+        self.melgan = create_model(
+            network_info.get('melgan', {}), launcher, self._model_mapping, "melganupsample", delayed_model_loading
         )
         if not delayed_model_loading:
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
@@ -159,11 +150,11 @@ class SequentialModel:
         length = np.expand_dims(length, axis=(1))
         return x < length
 
-    def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
+    def predict(self, identifiers, input_data, input_meta={}, input_names=[], callback=None):
         assert len(identifiers) == 1
 
         duration_input = dict(zip(input_names, input_data[0]))
-        duration_output = self.forward_tacotron_duration.predict(duration_input)
+        duration_output = self.forward_tacotron_duration.predict(identifiers, duration_input)
         if callback:
             callback(duration_output)
 
@@ -185,40 +176,27 @@ class SequentialModel:
             if self.duration_speaker_embeddings:
                 sp_emb_input = self.forward_tacotron_regression_input['speaker_embedding']
                 input_to_regression[sp_emb_input] = duration_input[self.duration_speaker_embeddings]
-            mels = self.forward_tacotron_regression.predict(input_to_regression)
+            mels = self.forward_tacotron_regression.predict(identifiers, input_to_regression)
         else:
-            mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
+            mels = self.forward_tacotron_regression.predict(identifiers,
+                                                            {self.forward_tacotron_regression_input: processed_emb})
         if callback:
             callback(mels)
         melgan_input = mels[self.mel_output]
         if np.ndim(melgan_input) != 3:
             melgan_input = np.expand_dims(melgan_input, 0)
         melgan_input = melgan_input[:, :, :self.max_mel_len]
-        audio = self.melgan.predict({self.melgan_input: melgan_input})
+        audio = self.melgan.predict(identifiers, {self.melgan_input: melgan_input})
 
         return audio, self.adapter.process(audio, identifiers, input_meta)
 
-    def release(self):
-        self.forward_tacotron_duration.release()
-        self.forward_tacotron_regression.release()
-        self.melgan.release()
-
     def load_model(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
+        super().load_model(network_list, launcher)
         self.update_inputs_outputs_info()
 
     def load_network(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
+        super().load_network(network_list, launcher)
         self.update_inputs_outputs_info()
-
-    def get_network(self):
-        return [
-            {'name': 'forward_tacotron_duration', 'model': self.forward_tacotron_duration.get_network()},
-            {'name': 'forward_tacotron_regression', 'model': self.forward_tacotron_regression.get_network()},
-            {'name': 'melgan', 'model': self.melgan.get_network()}
-        ]
 
     @staticmethod
     def build_index(duration, x):
@@ -270,132 +248,17 @@ class SequentialModel:
         self.with_prefix = with_prefix
 
 
-class TTSDLSDKModel:
-    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
-        self.network_info = network_info
-        self.default_model_suffix = suffix
-        self.is_dynamic = False
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
-        self.launcher = launcher
-
-    def predict(self, input_data):
+class TTSDLSDKModel(BaseDLSDKModel):
+    def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
-            self.reshape({k: v.shape for k, v in input_data.items()})
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
         return self.exec_network.infer(input_data)
-
-    def release(self):
-        del self.network
-        del self.exec_network
-
-    def reshape(self, input_shapes):
-        if not hasattr(self, 'is_dynamic'):
-            self.is_dynamic = False
-        if not self.is_dynamic:
-            del self.exec_network
-            self.network.reshape(input_shapes)
-            self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-            if not self.is_dynamic and self.dynamic_inputs:
-                self.exec_network = None
-                return
-            self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
-
-    def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        if model.is_dir():
-            is_blob = network_info.get('_model_is_blob')
-            if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list:
-                    model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        if model.suffix == '.blob':
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
-
-        return model, weights
-
-    def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.default_model_suffix))
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
-        if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
-        else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape: {}\n'.format(
-                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-        print_info('{} - Output info'.format(self.default_model_suffix))
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(
-                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-
-    def load_network(self, network, launcher):
-        self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
-        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
-            try:
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-                self.is_dynamic = True
-            except RuntimeError as e:
-                if launcher.dynamic_shapes_policy == 'dynamic':
-                    raise e
-                self.is_dynamic = False
-                self.exec_network = None
-        if not self.dynamic_inputs:
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-
-    def get_network(self):
-        return self.network
-
-    def load_model(self, network_info, launcher, log=False):
-        model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, launcher)
-        else:
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        if log:
-            self.print_input_output_info()
 
     @property
     def inputs(self):
         if self.network:
             return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
         return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
+
+    def set_input_and_output(self):
+        pass
