@@ -306,10 +306,10 @@ int main(int argc, char *argv[])
             }
         }
 
-        auto stop_time = Time::now();
-        double total_latency = static_cast<double>(std::chrono::duration_cast<ns>(stop_time - start_time).count()) * 1e-9;
-        std::cout << "Metrics report:" << std::endl;
-        std::cout << "\tTotal Latency: " << total_latency << " s for " << inp_size / 16000.0 << "s data. ratio=" << total_latency/(inp_size / 16000.0) << std::endl;
+        using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
+        double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
 
         //convert fp32 to short and crop start (because model delays signal)
         for(size_t i=0; i < out_wave_s16.size(); ++i)
