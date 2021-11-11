@@ -20,11 +20,11 @@ task_type: classification
 files:
   - name: predict_net.pb
     size: 6175
-    sha256: d20be00eb448d3952265620357132916aba8744b027937b56c469b001b46472b
+    sha384: 39d0085c126407c20d5e4823c6fa9294442fc714142c21b3d8e2bf4b23a83a933d78b62b5d4318f51b757389e15c6b1e
     source: https://s3.amazonaws.com/download.caffe2.ai/models/squeezenet/predict_net.pb
   - name: init_net.pb
     size: 6181001
-    sha256: d8115221de899d081a1a83785bf0dbaeea19463cdf7dbddba662cc7abb4f32dc
+    sha384: 5a4324a7778480b3c57e41a5c6c5cf03b9b6a2c08d7e995358a4d2192619eebeb041f6f925874f9a790fd2c53138e863
     source: https://s3.amazonaws.com/download.caffe2.ai/models/squeezenet/init_net.pb
 framework: caffe2
 conversion_to_onnx_args:

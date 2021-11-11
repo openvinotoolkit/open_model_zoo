@@ -23,7 +23,7 @@ task_type: classification
 files:
   - name: efficientnet-b7.tar.gz
     size: 492077218
-    sha256: b5705cc53da6fa3e953f8509063695ed50f7adebb2488144783e20df71d0fca8
+    sha384: 43ab0eb7f7bfd1f50610996608668de6b502ada5846698bdcacc0c0e22025f01958e278774c4f2eaddcab1a6355c71ea
     source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b7.tar.gz
 postprocessing:
   - $type: unpack_archive

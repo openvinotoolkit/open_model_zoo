@@ -21,7 +21,7 @@ description: >-
 task_type: "style_transfer"
 files:
   - name: fast-neural-style-mosaic-onnx.onnx
-    sha256: fa646dedade881243f8d5a2ceb7de2b93675b21fc24f7482894ac4851a9a0a47
+    sha384: 3333259b6f7014ecdcc6be4863322988935e23c9ae6bf9668aa6208a5991d2c603cd342881bab0a064f365e929eeb4d4
     source: https://media.githubusercontent.com/media/onnx/models/111fab38a5757c8fc8db0aa13e73fb330e516c42/vision/style_transfer/fast_neural_style/model/mosaic-9.onnx
     size: 6728029
 model_optimizer_args:

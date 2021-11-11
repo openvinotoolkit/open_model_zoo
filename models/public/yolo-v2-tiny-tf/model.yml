@@ -21,23 +21,23 @@ task_type: detection
 files:
   - name: yolov2-tiny.weights
     size: 44948600
-    sha256: 16f4e870f1aed83f0089cb69bfda6b53cb7b2a4a01721be56eaf5c899dfac45f
+    sha384: 48109100a3414fce39d57c8dd1feaee8714423e473f9d4dfd2cf8e1aa23f7e0e5920b9362ad7e3c804f24522e06fe536
     source: https://pjreddie.com/media/files/yolov2-tiny.weights
   - name: keras-YOLOv3-model-set/tools/model_converter/convert.py
     size: 12937
-    sha256: 12350fbfa942b66fad8a80af100bc14605c9cdcd8508f3eb5cf26647f64d733e
+    sha384: fd6d1550e3843bc4ae27d1cf53ade56606a01c2162d149bc58ed8d654dfbbe59754a2bfd8e8ca508ecee663b38f6e7bf
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/tools/model_converter/convert.py
   - name: keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py
     size: 8370
-    sha256: 1cc02cf4ec76760c05bc1635654247ba56b9a1864b63fd05534b836bc93e44e7
+    sha384: 1be7f22eafa2c9fd54457938bebbe4d572b7b2abdfed9a1fd720bbb52cdc96151839726957aa8c7dde9cd3abb332807e
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/tools/model_converter/keras_to_tensorflow.py
   - name: keras-YOLOv3-model-set/common/utils.py
     size: 5002
-    sha256: 90146775879f294e1f1a82c7e35a5be29d815b7a9b14dbe12ba29dd16b3d10a8
+    sha384: 7acd0f55fb4c1a0f00df46c2383309bc12715d66c09adb9bcb22d6aea2555ef0478d2d7147fe5cd8de770a23008e4958
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/common/utils.py
   - name: keras-YOLOv3-model-set/cfg/yolov2-tiny.cfg
     size: 1488
-    sha256: 58e8f4390c8080a90a40f3b7ec5868ee9ae32519f3c08f57d104e494de04b34d
+    sha384: bb52511d6b3c33a066bcd2e41a86d300c854e73b74b9064bb5bfe510ef8801315228abc5e5a89e7dacb3e0c330ed07cd
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/cfg/yolov2-tiny.cfg
 postprocessing:
   # disable imports that aren't needed for this model and code that uses them
