@@ -5,20 +5,21 @@ evaluations:
       network_info:
         forward_tacotron_duration: {}
 
-        forward_tacotron_regression: {}
-        forward_tacotron_regression_inputs:
-          data: data
-          data_mask: data_mask
-          pos_mask: pos_mask
+        forward_tacotron_regression:
+          inputs:
+            data: data
+            data_mask: data_mask
+            pos_mask: pos_mask
+          max_regression_len: '512'
 
-        melgan: {}
-        max_mel_len: '128'
-        max_regression_len: '512'
-        pos_mask_window: '4'
+        melgan:
+          max_mel_len: '128'
 
-        adapter:
-          type: regression
-          keep_shape: True
+      pos_mask_window: '4'
+
+      adapter:
+        type: regression
+        keep_shape: True
 
       launchers:
         - framework: dlsdk

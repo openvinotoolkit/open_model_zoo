@@ -40,9 +40,21 @@ class TextSpottingEvaluator(BaseCustomEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config['adapter']
+        meta = {}
+        if config.get('max_seq_len'):
+            meta.update({'max_seq_len': config['max_seq_len']})
+        if config.get('alphabet'):
+            meta.update({'alphabet': config['alphabet']})
+        if config.get('sos_index'):
+            meta.update({'sos_index': config['sos_index']})
+        if config.get('eos_index'):
+            meta.update({'eos_index': config['eos_index']})
+        if config.get('recognizer_confidence_threshold'):
+            meta.update({'recognizer_confidence_threshold': config['recognizer_confidence_threshold']})
         model = SequentialModel(
-            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            config.get('network_info', {}), launcher, config.get('_models', []), adapter_info, meta,
+            config.get('_model_is_blob'), delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)
 
@@ -70,7 +82,8 @@ class TextSpottingEvaluator(BaseCustomEvaluator):
 
 
 class SequentialModel(BaseCascadeModel):
-    def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, models_args, adapter_info, meta, is_blob=None,
+                 delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if not delayed_model_loading:
             detector = network_info.get('detector', {})
@@ -95,25 +108,24 @@ class SequentialModel(BaseCascadeModel):
         self._detector_mapping = {
             'dlsdk': DetectorDLSDKModel
         }
-        self._recognizer_mapping = {
-            'dlsdk': RecognizerDLSDKModel
+        self._encoder_mapping = {
+            'dlsdk': RecognizerEncoderDLSDKModel
+        }
+        self._decoder_mapping = {
+            'dlsdk': RecognizerDecoderDLSDKModel
         }
         self.detector = create_model(network_info.get('detector', {}), launcher, self._detector_mapping,
                                      'detector', delayed_model_loading)
         self.recognizer_encoder = create_model(network_info.get('recognizer_encoder', {}), launcher,
-                                               self._recognizer_mapping, 'encoder', delayed_model_loading)
+                                               self._encoder_mapping, 'encoder', delayed_model_loading)
         self.recognizer_decoder = create_model(network_info.get('recognizer_decoder', {}), launcher,
-                                               self._recognizer_mapping, 'decoder', delayed_model_loading)
-        self.recognizer_decoder_inputs = network_info['recognizer_decoder_inputs']
-        self.recognizer_decoder_outputs = network_info['recognizer_decoder_outputs']
-        self.recognizer_encoder_input = 'input'
-        self.recognizer_encoder_output = 'output'
-        self.max_seq_len = int(network_info['max_seq_len'])
-        self.adapter = create_adapter(network_info['adapter'])
-        self.alphabet = network_info['alphabet']
-        self.sos_index = int(network_info['sos_index'])
-        self.eos_index = int(network_info['eos_index'])
-        self.confidence_threshold = float(network_info.get('recognizer_confidence_threshold', '0'))
+                                               self._decoder_mapping, 'decoder', delayed_model_loading)
+        self.max_seq_len = int(meta.get('max_seq_len', 28))
+        self.adapter = create_adapter(adapter_info)
+        self.alphabet = meta.get('alphabet', '__abcdefghijklmnopqrstuvwxyz0123456789')
+        self.sos_index = int(meta.get('sos_index', 0))
+        self.eos_index = int(meta.get('eos_index', 1))
+        self.confidence_threshold = float(meta.get('recognizer_confidence_threshold', '0'))
         self.with_prefix = False
         self._part_by_name = {
             'detector': self.detector,
@@ -131,19 +143,19 @@ class SequentialModel(BaseCascadeModel):
         decoder_exec_net = self.recognizer_decoder.exec_network
         has_info = hasattr(decoder_exec_net, 'input_info')
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder_input: feature})
+            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder.input: feature})
             if callback:
                 callback(encoder_outputs)
 
-            feature = encoder_outputs[self.recognizer_encoder_output]
+            feature = encoder_outputs[self.recognizer_encoder.output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
             if has_info:
                 hidden_shape = decoder_exec_net.input_info[
-                    self.recognizer_decoder_inputs['prev_hidden']
+                    self.recognizer_decoder.inputs['prev_hidden']
                 ].input_data.shape
             else:
-                hidden_shape = decoder_exec_net.inputs[self.recognizer_decoder_inputs['prev_hidden']].shape
+                hidden_shape = decoder_exec_net.inputs[self.recognizer_decoder.inputs['prev_hidden']].shape
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
 
@@ -152,19 +164,19 @@ class SequentialModel(BaseCascadeModel):
             confidence = 1.0
             for _ in range(self.max_seq_len):
                 input_to_decoder = {
-                    self.recognizer_decoder_inputs['prev_symbol']: prev_symbol_index,
-                    self.recognizer_decoder_inputs['prev_hidden']: hidden,
-                    self.recognizer_decoder_inputs['encoder_outputs']: feature}
+                    self.recognizer_decoder.inputs['prev_symbol']: prev_symbol_index,
+                    self.recognizer_decoder.inputs['prev_hidden']: hidden,
+                    self.recognizer_decoder.inputs['encoder_outputs']: feature}
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
                 if callback:
                     callback(decoder_outputs)
-                decoder_output = decoder_outputs[self.recognizer_decoder_outputs['symbols_distribution']]
+                decoder_output = decoder_outputs[self.recognizer_decoder.outputs['symbols_distribution']]
                 softmaxed = softmax(decoder_output[0])
                 prev_symbol_index = np.argmax(decoder_output, axis=1)
                 confidence *= softmaxed[prev_symbol_index]
                 if prev_symbol_index == self.eos_index:
                     break
-                hidden = decoder_outputs[self.recognizer_decoder_outputs['cur_hidden']]
+                hidden = decoder_outputs[self.recognizer_decoder.outputs['cur_hidden']]
                 text += self.alphabet[int(prev_symbol_index)]
             texts.append(text if confidence >= self.confidence_threshold else '')
 
@@ -194,22 +206,22 @@ class SequentialModel(BaseCascadeModel):
                 self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
             self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
             self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
-            self.recognizer_encoder_input = generate_name(
-                'recognizer_encoder_', with_prefix, self.recognizer_encoder_input
+            self.recognizer_encoder.input = generate_name(
+                'recognizer_encoder_', with_prefix, self.recognizer_encoder.input
             )
-            self.recognizer_encoder_output = generate_name(
-                'recognizer_encoder_', with_prefix, self.recognizer_encoder_output
+            self.recognizer_encoder.output = generate_name(
+                'recognizer_encoder_', with_prefix, self.recognizer_encoder.output
             )
             recognizer_decoder_inputs = {
                 key: generate_name('recognizer_decoder_', with_prefix, value)
-                for key, value in self.recognizer_decoder_inputs.items()
+                for key, value in self.recognizer_decoder.inputs.items()
             }
             recognizer_decoder_outputs = {
                 key: generate_name('recognizer_decoder_', with_prefix, value)
-                for key, value in self.recognizer_decoder_outputs.items()
+                for key, value in self.recognizer_decoder.outputs.items()
             }
-            self.recognizer_decoder_inputs = recognizer_decoder_inputs
-            self.recognizer_decoder_outputs = recognizer_decoder_outputs
+            self.recognizer_decoder.inputs = recognizer_decoder_inputs
+            self.recognizer_decoder.outputs = recognizer_decoder_outputs
         self.with_prefix = with_prefix
 
 
@@ -279,3 +291,17 @@ class RecognizerDLSDKModel(BaseDLSDKModel):
 
     def set_input_and_output(self):
         pass
+
+
+class RecognizerEncoderDLSDKModel(RecognizerDLSDKModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.input = 'input'
+        self.output = 'output'
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class RecognizerDecoderDLSDKModel(RecognizerDLSDKModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.inputs = network_info['inputs']
+        self.outputs = network_info['outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)

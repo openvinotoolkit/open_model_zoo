@@ -23,7 +23,7 @@ from ...utils import contains_all, sigmoid, generate_layer_name
 
 
 class Synthesizer(BaseCascadeModel):
-    def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if not delayed_model_loading:
             encoder = network_info.get('encoder', {})
@@ -67,7 +67,7 @@ class Synthesizer(BaseCascadeModel):
                                     delayed_model_loading)
         self.postnet = create_model(network_info['postnet'], launcher, self._postnet_mapping, 'postnet',
                                     delayed_model_loading)
-        self.adapter = create_adapter(network_info['adapter'])
+        self.adapter = create_adapter(adapter_info)
 
         self.with_prefix = False
         self._part_by_name = {
@@ -455,8 +455,9 @@ class Tacotron2Evaluator(TextToSpeechEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config['adapter']
         model = Synthesizer(
-            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            config.get('network_info', {}), launcher, config.get('_models', []), adapter_info,
+            config.get('_model_is_blob'), delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)

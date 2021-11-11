@@ -37,8 +37,17 @@ class TextRecognitionWithAttentionEvaluator(BaseCustomEvaluator):
         model_type = config.get('model_type', 'SequentialFormulaRecognitionModel')
         if model_type not in MODEL_TYPES.keys():
             raise ValueError(f'Model type {model_type} is not supported')
+        meta = {}
+        if config.get('custom_label_map'):
+            meta.update({
+                'custom_label_map': config['custom_label_map']
+            })
+        if config.get('max_seq_len'):
+            meta.update({
+                'max_seq_len': config['max_seq_len']
+            })
         model = MODEL_TYPES[model_type](
-            config.get('network_info', {}), launcher, config.get('_models', []), {}, config.get('_model_is_blob'),
+            config.get('network_info', {}), launcher, config.get('_models', []), meta, config.get('_model_is_blob'),
             delayed_model_loading=delayed_model_loading
         )
         return cls(dataset_config, launcher, model, lowercase, orig_config)
@@ -78,7 +87,7 @@ class TextRecognitionWithAttentionEvaluator(BaseCustomEvaluator):
     def select_dataset(self, dataset_tag):
         super().select_dataset(dataset_tag)
         if self.model.vocab is None:
-            self.model.vocab = self.dataset.metadata.get('vocab')
+            self.model.vocab = self.dataset.metadata.get('vocab', {})
 
 
 class BaseSequentialModel(BaseCascadeModel):
@@ -108,7 +117,7 @@ class BaseSequentialModel(BaseCascadeModel):
                                                'decoder', delayed_model_loading=delayed_model_loading)
         self.sos_index = 0
         self.eos_index = 2
-        self.max_seq_len = int(network_info['max_seq_len'])
+        self.max_seq_len = int(meta.get('max_seq_len', 0))
         self._part_by_name = {
             'encoder': self.recognizer_encoder,
             'decoder': self.recognizer_decoder
@@ -149,7 +158,7 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             network_info, launcher, models_args, meta, is_blob=is_blob,
             delayed_model_loading=delayed_model_loading
         )
-        self.vocab = network_info['custom_label_map']
+        self.vocab = meta.get('custom_label_map')
         self.recognizer_encoder.inputs_mapping = {'imgs': 'imgs'}
         self.recognizer_encoder.outputs_mapping = {'features': 'features', 'decoder_hidden': 'decoder_hidden'}
         self.recognizer_decoder.inputs_mapping = {

@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
-from .base_models import BaseCascadeModel, BaseONNXModel
+from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import contains_all
@@ -46,7 +46,7 @@ def generate_name(prefix, with_prefix, layer_name):
 
 
 class SequentialModel(BaseCascadeModel):
-    def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if not delayed_model_loading:
             encoder = network_info.get('encoder', {})
@@ -66,9 +66,19 @@ class SequentialModel(BaseCascadeModel):
                 raise ConfigError(
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
-        self.encoder = create_encoder(network_info, launcher, delayed_model_loading)
-        self.decoder = create_decoder(network_info, launcher, delayed_model_loading)
-        self.adapter = create_adapter(network_info['adapter'])
+        self._encoder_mapping = {
+            'dlsdk': EncoderOpenVINOModel,
+            'onnx_runtime': EncoderONNXModel,
+        }
+        self._decoder_mapping = {
+            'dlsdk': DecoderOpenVINOModel,
+            'onnx_runtime': DecoderONNXModel
+        }
+        self.encoder = create_model(network_info['encoder'], launcher, self._encoder_mapping, 'encoder',
+                                    delayed_model_loading)
+        self.decoder = create_model(network_info['decoder'], launcher, self._decoder_mapping, 'decoder',
+                                    delayed_model_loading)
+        self.adapter = create_adapter(adapter_info)
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
@@ -129,9 +139,9 @@ class EncoderModel:
 
 
 class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
-    def __init__(self, network_info, launcher, suffix, nb_features, nb_used_features, delayed_model_loading=False):
-        self.nb_features = nb_features
-        self.nb_used_features = nb_used_features
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.nb_features = network_info.get('nb_features')
+        self.nb_used_features = network_info.get('nb_used_features')
         self.feature_input = network_info.get('feature_input')
         self.periods_input = network_info.get('periods_input')
         self.output = network_info.get('output')
@@ -146,11 +156,11 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
-    def __init__(self, network_info, launcher, suffix, nb_features, nb_used_features, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.is_dynamic = False
-        self.nb_features = nb_features
-        self.nb_used_features = nb_used_features
+        self.nb_features = network_info.get('nb_features')
+        self.nb_used_features = network_info.get('nb_used_features')
         self.feature_input = network_info.get('feature_input')
         self.periods_input = network_info.get('periods_input')
         self.output = network_info.get('output')
@@ -226,12 +236,12 @@ class DecoderModel:
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):
-    def __init__(self, network_info, launcher, suffix, frame_size, nb_features, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.is_dynamic = False
-        self.frame_size = frame_size
+        self.frame_size = network_info.get('frame_size')
         self.nb_frames = 1
-        self.nb_features = nb_features
+        self.nb_features = network_info.get('nb_features')
         self.rnn_units1 = network_info.get('rnn_units1')
         self.rnn_units2 = network_info.get('rnn_units2')
         self.input1 = network_info.get('input1')
@@ -255,10 +265,10 @@ class DecoderONNXModel(BaseONNXModel, DecoderModel):
 
 
 class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
-    def __init__(self, network_info, launcher, suffix, frame_size, nb_features, delayed_model_loading=False):
-        self.frame_size = frame_size
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.frame_size = network_info.get('frame_size')
         self.nb_frames = 1
-        self.nb_features = nb_features
+        self.nb_features = network_info.get('nb_features')
         self.rnn_units1 = network_info.get('rnn_units1')
         self.rnn_units2 = network_info.get('rnn_units2')
         self.input1 = network_info.get('input1')
@@ -274,42 +284,13 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
         return self.exec_network.infer(feed_dict)
 
 
-def create_encoder(model_config, launcher, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': EncoderOpenVINOModel,
-        'onnx_runtime': EncoderONNXModel,
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(
-        model_config['encoder'], launcher, 'encoder', model_config['nb_features'], model_config['nb_used_features'],
-        delayed_model_loading
-    )
-
-
-def create_decoder(model_config, launcher, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': DecoderOpenVINOModel,
-        'onnx_runtime': DecoderONNXModel
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(
-        model_config['decoder'], launcher, 'decoder', model_config['frame_size'],
-        model_config['nb_features'], delayed_model_loading
-    )
-
-
 class LPCNetEvaluator(TextToSpeechEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config['adapter']
         model = SequentialModel(
-            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            config.get('network_info', {}), launcher, config.get('_models', []), adapter_info,
+            config.get('_model_is_blob'), delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)

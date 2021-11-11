@@ -34,9 +34,11 @@ class TextToSpeechEvaluator(BaseCustomEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config['adapter']
+        pos_mask_window = config['pos_mask_window']
         model = SequentialModel(
-            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            config.get('network_info', {}), launcher, config.get('_models', []), adapter_info, pos_mask_window,
+            config.get('_model_is_blob'), delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)
 
@@ -65,7 +67,8 @@ class TextToSpeechEvaluator(BaseCustomEvaluator):
 
 
 class SequentialModel(BaseCascadeModel):
-    def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, models_args, adapter_info, pos_mask_window, is_blob=None,
+                 delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if not delayed_model_loading:
             forward_tacotron_duration = network_info.get('forward_tacotron_duration', {})
@@ -90,19 +93,25 @@ class SequentialModel(BaseCascadeModel):
                 raise ConfigError(
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
-        self._model_mapping = {
+        self._duration_mapping = {
             'dlsdk': TTSDLSDKModel
         }
+        self._regression_mapping = {
+            'dlsdk': RegressionDLSDKModel
+        }
+        self._melgan_mapping = {
+            'dlsdk': MelganDLSDKModel
+        }
         self.forward_tacotron_duration = create_model(
-            network_info.get('forward_tacotron_duration', {}), launcher, self._model_mapping,
+            network_info.get('forward_tacotron_duration', {}), launcher, self._duration_mapping,
             'duration_prediction_att', delayed_model_loading
         )
         self.forward_tacotron_regression = create_model(
-            network_info.get('forward_tacotron_regression', {}), launcher, self._model_mapping,
+            network_info.get('forward_tacotron_regression', {}), launcher, self._regression_mapping,
             'regression_att', delayed_model_loading
         )
         self.melgan = create_model(
-            network_info.get('melgan', {}), launcher, self._model_mapping, "melganupsample", delayed_model_loading
+            network_info.get('melgan', {}), launcher, self._melgan_mapping, "melganupsample", delayed_model_loading
         )
         if not delayed_model_loading:
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
@@ -110,7 +119,6 @@ class SequentialModel(BaseCascadeModel):
         else:
             self.forward_tacotron_duration_input = None
             self.melgan_input = None
-        self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
         self.duration_speaker_embeddings = (
             'speaker_embedding' if 'speaker_embedding' in self.forward_tacotron_regression_input else None
         )
@@ -118,10 +126,8 @@ class SequentialModel(BaseCascadeModel):
         self.embeddings_output = 'embeddings'
         self.mel_output = 'mel'
         self.audio_output = 'audio'
-        self.max_mel_len = int(network_info['max_mel_len'])
-        self.max_regression_len = int(network_info['max_regression_len'])
-        self.pos_mask_window = int(network_info['pos_mask_window'])
-        self.adapter = create_adapter(network_info['adapter'])
+        self.pos_mask_window = int(pos_mask_window)
+        self.adapter = create_adapter(adapter_info)
         self.adapter.output_blob = self.audio_output
 
         self.init_pos_mask(window_size=self.pos_mask_window)
@@ -132,6 +138,18 @@ class SequentialModel(BaseCascadeModel):
             'forward_tacotron_regression': self.forward_tacotron_regression,
             'melgan': self.melgan
         }
+
+    @property
+    def forward_tacotron_regression_input(self):
+        return self.forward_tacotron_regression.regression_input
+
+    @property
+    def max_mel_len(self):
+        return self.melgan.max_len
+
+    @property
+    def max_regression_len(self):
+        return self.forward_tacotron_regression.max_len
 
     def init_pos_mask(self, mask_sz=6000, window_size=4):
         mask_arr = np.zeros((1, 1, mask_sz, mask_sz), dtype=np.float32)
@@ -262,3 +280,16 @@ class TTSDLSDKModel(BaseDLSDKModel):
 
     def set_input_and_output(self):
         pass
+
+
+class RegressionDLSDKModel(TTSDLSDKModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.max_len = int(network_info['max_regression_len'])
+        self.regression_input = network_info['inputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class MelganDLSDKModel(TTSDLSDKModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.max_len = int(network_info['max_mel_len'])
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)

@@ -3,8 +3,9 @@ evaluations:
     module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
     module_config:
       network_info:
-
-        max_seq_len: '192'
+        recognizer_encoder: {}
+        recognizer_decoder: {}
+      max_seq_len: '192'
 
       launchers:
         - framework: dlsdk
