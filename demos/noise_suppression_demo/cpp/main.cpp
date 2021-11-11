@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
             state_size += tensor_size;
         }
         std::cout << state_size*1e-6 << "M params in all states" << std::endl;
-        
+
         InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
         InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
 
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         auto start_time = Time::now();
         for(size_t i=0; i<iter; ++i) {
             auto inputBlob = InferenceEngine::make_shared_blob<float>(inp_desc, &inp_wave_fp32[i * patch_size]);
-            infer_request.SetBlob(input_name, inputBlob);  
+            infer_request.SetBlob(input_name, inputBlob);
 
             for (auto &state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
