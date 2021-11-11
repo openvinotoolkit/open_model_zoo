@@ -607,6 +607,8 @@ class FrameSignalOverlappingWindow(Preprocessor):
 
 class TruncateBucket(Preprocessor):
     __provider__ = 'truncate_bucket'
+    shape_modificator = True
+    _dynamic_shapes = True
 
     @classmethod
     def parameters(cls):
@@ -624,3 +626,15 @@ class TruncateBucket(Preprocessor):
         rstart = int((image.data.shape[1] - rsize) / 2)
         image.data = image.data[:, rstart:rstart + rsize]
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
+    def calculate_out_shape_single(self, data_shape):
+        if data_shape[1] > self.bucket_size:
+            return data_shape[0], self.bucket_size
+        return data_shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_shape_single(ds) for ds in data_shape]

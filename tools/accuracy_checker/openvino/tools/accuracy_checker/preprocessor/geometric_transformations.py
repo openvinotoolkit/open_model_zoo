@@ -755,6 +755,8 @@ class SimilarityTransfom(Preprocessor):
 
 class Transpose(Preprocessor):
     __provider__ = 'transpose'
+    shape_modificator = True
+    _dynamic_shape = True
 
     @classmethod
     def parameters(cls):
@@ -770,3 +772,13 @@ class Transpose(Preprocessor):
     def process(self, image, annotation_meta=None):
         image.data = np.transpose(image.data, self.axes)
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shape
+
+    def calculate_out_shape(self, data_shape):
+        new_data_shape = []
+        for ds in data_shape:
+            new_data_shape.append([ds[a] for a in self.axes])
+        return new_data_shape
