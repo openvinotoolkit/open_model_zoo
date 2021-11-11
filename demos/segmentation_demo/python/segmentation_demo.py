@@ -116,7 +116,7 @@ def build_argparser():
                       required=True)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
-    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '

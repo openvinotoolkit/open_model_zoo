@@ -46,7 +46,7 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
-    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '

@@ -19,11 +19,10 @@ from collections import deque
 
 try:
     from openvino.inference_engine import IECore, get_version
+    import ngraph
     openvino_absent = False
 except ImportError:
     openvino_absent = True
-
-import ngraph
 
 from .model_adapter import ModelAdapter, Metadata
 from ..pipelines import parse_devices

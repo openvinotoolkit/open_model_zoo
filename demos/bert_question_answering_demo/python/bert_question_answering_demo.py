@@ -48,7 +48,7 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
-    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is OpenvinoAdapter.',
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--input_names",
