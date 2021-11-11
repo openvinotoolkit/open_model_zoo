@@ -225,7 +225,7 @@ class SegmentationFWAcc(SegmentationMetric):
 
 
 class SegmentationDSCAcc(PerImageEvaluationMetric):
-    __provider__ = 'dice'-
+    __provider__ = 'dice'
     annotation_types = (BrainTumorSegmentationAnnotation,)
     prediction_types = (BrainTumorSegmentationPrediction,)
     overall_metric = []

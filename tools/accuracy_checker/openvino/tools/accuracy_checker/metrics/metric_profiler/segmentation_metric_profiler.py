@@ -33,60 +33,60 @@ class SegmentationMetricProfiler(MetricProfiler):
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)
 
+    @staticmethid
+    def generate_profiling_json(self, identifier, cm, metric_result,
+                                prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
+        report = {'identifier': identifier}
+        dt_mask, gt_mask = {}, {}
+        for label, polygons in prediction_mask_polygon.items():
+            if label == ignore_label:
+                continue
+            dt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
+        for label, polygons in annotation_mask_polygon.items():
+            if label == ignore_label:
+                continue
+            gt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
+        report['confusion_matrix'] = cm.tolist()
+        report['prediction_mask'] = dt_mask
+        report['annotation_mask'] = gt_mask
+        report['result'] = np.mean(metric_result)
+        report['per_class_result'] = {
+            int(label): {'result': float(metric)} for label, metric in per_class_result.items()}
+
+        return report
+
     def generate_profiling_data(self, identifier, metric_name, cm, metric_result, predicted_mask,
                                 prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
-        scalar_metric = False
-        if not self.mask_as_polygon:
-            dumping_dir = self.out_dir / 'dumped'
-            if not dumping_dir.exists():
-                dumping_dir.mkdir(parents=True)
+        if self.report_type == 'json':
+            return self.generate_profiling_json(identifier, cm, metric_result,
+                                prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label)
+        dumping_dir = self.out_dir / 'dumped'
+        if not dumping_dir.exists():
+            dumping_dir.mkdir(parents=True)
         if self._last_profile and self._last_profile['identifier'] == identifier:
             report = self._last_profile
         else:
-            if not self.mask_as_polygon:
-                dumped_file_name = identifier.split('.')[0] + '.npy'
-                mask_file = dumping_dir / dumped_file_name
-                if not mask_file.parent.exists():
-                    mask_file.parent.mkdir(parents=True)
-                predicted_mask.dump(str(mask_file))
+            dumped_file_name = identifier.split('.')[0] + '.npy'
+            mask_file = dumping_dir / dumped_file_name
+            if not mask_file.parent.exists():
+                mask_file.parent.mkdir(parents=True)
+            predicted_mask.dump(str(mask_file))
             if not self.updated_fields:
                 self._create_fields(metric_result)
-            report = {'identifier': identifier}
-            if not self.mask_as_polygon:
-                report['predicted_mask'] = str(dumping_dir / dumped_file_name)
-            if self.report_type == 'json':
-                dt_mask, gt_mask = {}, {}
-                for label, polygons in prediction_mask_polygon.items():
-                    if label == ignore_label:
-                        continue
-                    dt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
-                for label, polygons in annotation_mask_polygon.items():
-                    if label == ignore_label:
-                        continue
-                    gt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
-                report['confusion_matrix'] = cm.tolist()
-                report['prediction_mask'] = dt_mask
-                report['annotation_mask'] = gt_mask
+            report = {'identifier': identifier, 'predicted_mask': str(dumping_dir / dumped_file_name)}
         if np.isscalar(metric_result) or np.size(metric_result) == 1:
-            scalar_metric = True
-        report['result' if self.report_type == 'json' else '{}_result'.format(metric_name)] = np.mean(metric_result)
-        if scalar_metric:
+            report['{}_result'.format(metric_name)] = np.mean(metric_result)
             return report
-        if not self.report_type == 'json':
-            if not self.names:
-                metrics_results = {
-                    'class {} ({})'.format(class_id, metric_name):
-                        result for class_id, result in enumerate(metric_result)
-                }
-            else:
-                metrics_results = {}
-                for name, result in zip(self.names, metric_result):
-                    metrics_results['{} ({})'.format(name, metric_name)] = result
-            report.update(metrics_results)
+        if not self.names:
+            metrics_results = {
+                'class {} ({})'.format(class_id, metric_name):
+                result for class_id, result in enumerate(metric_result)
+            }
         else:
-            report['per_class_result'] = {
-                int(label): {'result': float(metric)} for label, metric in per_class_result.items()}
-
+            metrics_results = {}
+            for name, result in zip(self.names, metric_result):
+                metrics_results['{} ({})'.format(name, metric_name)] = result
+        report.update(metrics_results)
         return report
 
     def _create_fields(self, metric_result):
