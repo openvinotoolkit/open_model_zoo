@@ -24,7 +24,7 @@ task_type: action_recognition
 files:
   - name: s3d-rgb-mobilenet-v3-large-stream-jester.onnx
     size: 16647750
-    sha256: af11997c274cd61637535638460b98fbfd602c2b8f57686f6235897b6a2cc20f
+    sha384: 4ed07ac7d6dc24c9c3369fbbd13e4539dd3803735440f460776715a904c5efd43fb740d4d6cfe7f61ce319ae7a25ab22
     source:
       $type: google_drive
       id: 1ZrqF1vp71WVi7SMo6QNa14mqyrhpuu2Q

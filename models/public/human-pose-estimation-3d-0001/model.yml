@@ -19,7 +19,7 @@ description: >-
 task_type: human_pose_estimation
 files:
   - name: human-pose-estimation-3d-0001.tar.gz
-    sha256: d2b158f07bd2f3d921bde1215829ac99afc7e63868d2d6738b24c7079db54efc
+    sha384: 14d1b70eb2d4102969b29c7716cbcdf9d1acd35839e044d2e62d69fbce4b98aa06cb954bb703d411cf991ffd809c6ea9
     size: 18421831
     source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/human-pose-estimation-3d.tar.gz
 postprocessing:

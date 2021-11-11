@@ -40,6 +40,7 @@ AccuracyChecker supports following set of adapters:
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer (Optional, default `True`).
   * `joining_method` - method used to join embeddings (optional, supported methods are `sum` and `concatenation`, default - `sum`).
   * `target_out` - target output layer name (Optional, if not provided first in the model will be used).
+  * `keep_shape` - allow keeping initial shape for predicted embedding (Optional, default `False`, it means that model output will be flattenized).
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
   * `anchors` - anchor values provided as comma-separated list or one of precomputed:
@@ -250,6 +251,7 @@ AccuracyChecker supports following set of adapters:
   * `max_candidates` - maximum detected candidates for considering (Optional, default 1000).
   * `unclip_ratio` - unclip ratio (Optional, default 2).
   * `min_size` - minimum box size (Optional, default 3).
+* `facial_landmarks_detection` - converting output of model for face landmark detection to `FacialLandmarksHeatMapPrediction`.
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
@@ -273,6 +275,7 @@ AccuracyChecker supports following set of adapters:
   * `blank_label` - index of the CTC blank label (default 0).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
+  * `shift_labels` - shift label map ids on 1 if it represented without blank label on zero position (Optional, default False).
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
   * `eos_label` - label which should finish decoding (Optional, default `[s]`).
   * `start_label` - label which should start decoding (Optional).
@@ -439,7 +442,10 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - output with bounding boxes in the format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
   * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
 * `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
-  * `alphabet` - model alphabet.
+  * `alphabet`- list of supported tokens. You can also use `vocabulary_file` if vocabulary is very large, txt file with accepted tokens list (each token should be located on own line represented as token_id).
+  * `blank_token_id` - token_id for blank token (Optional, used for blank label filtering after decoding).
+  * `eos_token_id` - token_id for end of string (Optional, used for eos token filtering after decoding).
+  * `replace_underscore` - allow replacing undescrore symbol to white space after decoding.
   * `uppercase` - produce prediction in uppercase, default is `True`.
 * `detr` - converts output of DETR models family to `DetectionPrediction`.
     * `scores_out` - output layer name with detection scores logits.

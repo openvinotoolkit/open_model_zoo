@@ -26,6 +26,7 @@ from ..launcher import create_launcher, DummyLauncher, InputFeeder, Launcher
 from ..launcher.loaders import StoredPredictionBatch
 from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
+from ..presenters import generate_csv_report
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
@@ -422,8 +423,8 @@ class ModelEvaluator(BaseEvaluator):
             except StopIteration:
                 break
 
-            queued_irs.append(ir_id)
             batch_input, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
+            queued_irs.append(ir_id)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
                                         context=(batch_id, batch_input_ids, batch_annotation))
 
@@ -688,3 +689,33 @@ class ModelEvaluator(BaseEvaluator):
         self.launcher.release()
         if self.adapter:
             self.adapter.release()
+
+    @classmethod
+    def provide_metric_references(cls, conf, subset, return_header=True):
+        processing_info = cls.get_processing_info(conf)
+        dataset_config = conf['datasets'][0]
+        dataset = Dataset(dataset_config, log=False)
+        dataset_size = len(dataset)
+        ignore_config_refs = False
+        if subset is not None:
+            dataset_config['subsample_size'] = subset
+            new_dataset = Dataset(dataset_config, log=False)
+            if len(new_dataset) != len(dataset):
+                ignore_config_refs = True
+                warning('Subset is not matched with configuration. Reference values will be ignored')
+                dataset_size = len(new_dataset)
+                dataset = new_dataset
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        extracted_results, extracted_meta = [], []
+        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(ignore_config_refs):
+            result, metadata = result_presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+        header, report = generate_csv_report(processing_info, extracted_results, dataset_size, extracted_meta)
+        if not return_header:
+            return report
+        return header, report

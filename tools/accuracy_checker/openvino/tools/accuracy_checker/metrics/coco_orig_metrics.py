@@ -34,8 +34,8 @@ from ..representation import (
 from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value, UnsupportedPackage
-from .metric import FullDatasetEvaluationMetric, PerImageEvaluationMetric
-from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
+from .metric import FullDatasetEvaluationMetric, Metric, PerImageEvaluationMetric
+from .coco_metrics import COCO_THRESHOLDS, process_threshold
 
 try:
     from pycocotools.coco import COCO
@@ -79,6 +79,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     def configure(self):
         threshold = process_threshold(self.get_value_from_config('threshold'))
+        self.config.pop('threshold', None)
         self.threshold = get_or_parse_value(threshold, COCO_THRESHOLDS)
         self.box_side_delta = int(self.get_value_from_config('include_boundaries'))
         if not self.dataset.metadata:
@@ -95,6 +96,16 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             label for label in label_map
             if label != self.dataset.metadata.get('background_label')
         ]
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.profiling_helper = Metric.provide(
+            self.__provider__.replace('_orig', ''), {'max_detections': 100}, self.dataset, self.name, profiler=profiler
+        )
+
+    def update(self, annotation, prediction):
+        if self.profiler:
+            self.profiling_helper.update(annotation, prediction)
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
@@ -462,12 +473,12 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         pass
 
 
-class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
+class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric, PerImageEvaluationMetric):
     __provider__ = 'coco_orig_precision'
 
     def evaluate(self, annotations, predictions):
         if self.profiler:
-            self.profiler.finish()
+            self.profiling_helper.evaluate(annotations, predictions)
         return self.compute_precision_recall(annotations, predictions)[0][0]
 
 
@@ -480,33 +491,11 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
 
     def update(self, annotation, prediction):
         if self.profiler:
-            per_class_matching = {}
-            for _, label in enumerate(self.labels):
-                detections, scores, dt_difficult = self._prepare_predictions(prediction, label)
-                ground_truth, gt_difficult, iscrowd = self._prepare_annotations(annotation, label)
-                if not ground_truth.size:
-                    continue
-                iou = self._compute_iou(ground_truth, detections, iscrowd)
-                eval_result = self._evaluate_image(
-                    ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.threshold,
-                    True
-                )
-                eval_result['gt'] = annotation.to_polygon()[label]
-                eval_result['dt'] = annotation.to_polygon()[label]
-                per_class_matching[label] = eval_result
-            per_class_result = {k: compute_precision_recall(
-                self.threshold, [v])[0] for k, v in per_class_matching.items()
-                                }
-            for label, value in per_class_matching.items():
-                value['result'] = per_class_result[label]
-            self.profiler.update(
-                annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values()))
-            )
+            self.profiling_helper.update(annotation, prediction)
 
     @staticmethod
     def _compute_iou(gt, dets, iscrowd):
         return iou_calc(list(dets), list(gt), iscrowd)
-
 
     @staticmethod
     def _prepare_predictions(prediction, label):
@@ -542,7 +531,6 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
 
         return ann[order], difficult_label[order], iscrowd_label[order]
 
-
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         encoded_masks = data.mask
@@ -567,7 +555,6 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
             })
 
         return annotation_data_to_store
-
 
 
 class MSCOCOorigRecall(MSCOCOorigBaseMetric):

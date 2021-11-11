@@ -52,6 +52,7 @@
 | faster_rcnn_resnet50_coco | YES | YES | YES |
 | fastseg-large | YES | YES |    |
 | fastseg-small | YES | YES |    |
+| fbcnn | YES | YES | YES |
 | fcrn-dp-nyu-depth-v2-tf | YES | YES |    |
 | forward-tacotron-duration-prediction | YES |    |    |
 | forward-tacotron-regression | YES |    |    |
@@ -165,7 +166,9 @@
 | yolo-v1-tiny-tf | YES | YES | YES |
 | yolo-v2-tf | YES | YES | YES |
 | yolo-v2-tiny-tf | YES | YES | YES |
+| yolo-v3-onnx | YES | | YES |
 | yolo-v3-tf | YES | YES | YES |
+| yolo-v3-tiny-onnx | YES | | |
 | yolo-v3-tiny-tf | YES | YES | YES |
 | yolo-v4-tf | YES | YES | YES |
 | yolo-v4-tiny-tf | YES | YES |    |

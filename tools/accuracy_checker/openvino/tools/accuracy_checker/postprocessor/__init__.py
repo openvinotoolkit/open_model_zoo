@@ -65,7 +65,8 @@ from .time_series_denormalize import TimeSeriesDenormalize
 from .interp import Interpolation
 from .invert_mask import InvertMask
 from .rescale_mask import RescaleMask
-
+from .facial_landmarks_98_postprocess import Heatmap2Keypoints
+from .text_similarity_pooling import SentenceSimilarityPooling
 
 __all__ = [
     'Postprocessor',
@@ -149,4 +150,8 @@ __all__ = [
 
     'InvertMask',
     'RescaleMask',
+
+    'Heatmap2Keypoints',
+
+    'SentenceSimilarityPooling'
 ]

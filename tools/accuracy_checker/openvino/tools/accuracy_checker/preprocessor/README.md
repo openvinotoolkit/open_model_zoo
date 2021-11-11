@@ -182,6 +182,7 @@ Accuracy Checker supports following set of preprocessors:
   * `overlap` - sets overlapping for clips in percents or samples (use `%` or `samples` suffixes respectively) (no overlapping by default), e.g. `25%`, `4000samples`
   * `max_clips` - sets the maximum number of clips (clips all record by default)
 * `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
+  * `per_frame` - calculate mean and std for each frame separately (Optional, default `False`).
 * `audio_to_mel_spectrogram` - performs all needed preprocessing to calculate MEL spectrogram from time-domain audio signal
   * `window_size` - size of time-domain signal frame, seconds
   * `window_stride` - intersection of frames in time-domain, seconds
@@ -234,6 +235,11 @@ Accuracy Checker supports following set of preprocessors:
 * `trimap` - concatenates image data with alpha-channel based information for cut, keep and calculation zones in image.
   * `cut_treshold` - maximum level of alpha values in cut zone. Optional, default is 0.1.
   * `keep_treshold` - minimum level of alpha values in keep zone. Optional, default is 0.9. Pixels with alpha-channel values between `cut_threshold` and `keep_treshold` are in calculation zone.
+* `jpeg_compression` - compress the image into jpeg format.
+  * `quality_factor` - quality of compression, from 0 to 100 (the higher is the better).
+* `transpose` - transpose data using specified axes order.
+  * `axes` - list of dimensions in transposing order.
+
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

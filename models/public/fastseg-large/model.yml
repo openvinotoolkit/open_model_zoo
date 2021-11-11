@@ -25,31 +25,31 @@ task_type: semantic_segmentation
 files:
   - name: mobilev3large-lraspp-f128-9cbabfde.pt
     size: 26476800
-    sha256: 9cbabfde06332879ebb2ef344506099f363efd377afdebdbdf548298ce18557e
+    sha384: f30098181481da6b3c4b2bc59896986e905e75768f5f454515dfd2a36433f11d292e503b1c9d0a7b05a8cfdcc2d58a3f
     source: https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f128-9cbabfde.pt
   - name: model/geffnet-1.0.0-py3-none-any.whl
     size: 39902
-    sha256: baca506fb5f95936c2428afaf875731a7185391b577e04790446ee1f06aac5fc
+    sha384: 5f52af3fe57f79f9b24198fea8a8beddd1f53f6333feb2beeb8616abdad2b753dd26c8b1af97be5eee04970ded28e299
     source: https://files.pythonhosted.org/packages/52/a2/d3f39e1e8c7f9717dd3195811b33238211b65e67c577abe23db49fecc654/geffnet-1.0.0-py3-none-any.whl
   - name: model/fastseg/model/mobilenetv3.py
     size: 4106
-    sha256: d9bb38212cb574387570baf2c949bd1e8075a76c6b87ef771c01d76f1b9dde95
+    sha384: ba0d92274dabf4372ee7ce523abe2d634525cc9863b81ddc0c7bb880f91552dbeca9b27001fa814effbab88e83a2677e
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/model/mobilenetv3.py
   - name: model/fastseg/model/lraspp.py
     size: 4882
-    sha256: 75e2b171a83ca54f5326f03dfe3f8fd370e49dcb9923e033c443dad4a396a50a
+    sha384: f2a9f10e7bf348690cb35a087fb255b6b822eb639b4fb4ad0ebab717efe4f4f423e10542a9fe6c48dd7c403ad54c059f
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/model/lraspp.py
   - name: model/fastseg/model/utils.py
     size: 1792
-    sha256: 29c4ee2054abf686ecabce30205cfe054a111d58cf7708595b5e9c08b038568e
+    sha384: df493f8e69a576a1ba4e428e56b0893418ee37bf09baade5186a202ff6f4e757879a2fbfb1275da90fec970f84369108
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/model/utils.py
   - name: model/fastseg/model/base.py
     size: 4236
-    sha256: 14a3997ad3cbc816b77df7df63338540ac7a57b07dc9b8c23428f749190f38cb
+    sha384: b0c919107bb436150b428977dd5ba1b8b1c1d5a76913a2be77cb6387796ae9f09f5f3801a2c587af08dc1e64a9d9f20d
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/model/base.py
   - name: model/fastseg/__init__.py
     size: 55
-    sha256: 160c9a92f85fbdb01bc22c41325b971778190917b4a6fecbffd6c355b862b57c
+    sha384: 365d191d43379f5b4b0de21b466743c22eb385b00f4156404396f58905f9ec479250bd5f01fa1a927a2d1f997d5d2251
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/__init__.py
 postprocessing:
   - $type: unpack_archive

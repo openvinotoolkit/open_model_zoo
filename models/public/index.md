@@ -156,8 +156,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) | 54.79% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/README.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
-| YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/README.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
-| YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
+| YOLO v3                              | Keras\* <br>ONNX\*       | [yolo-v3-tf](./yolo-v3-tf/README.md) <br>[yolo-v3-onnx](./yolo-v3-onnx/README.md) | 62.2759%/67.7221% <br> 48.30%/47.07%| 65.9843~65.998 | 61.9221~61.930 |
+| YOLO v3 Tiny                         | Keras\* <br>ONNX\*       | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) <br>[yolo-v3-tiny-onnx](./yolo-v3-tiny-onnx/README.md) | 35.9%/39.7% <br> 17.07%/13.64%| 5.582  | 8.848~8.8509 |
 | YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.23%/77.40%/50.26% | 129.5567	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
 | YOLOF                                | PyTorch\*                | [yolof](./yolof/README.md)           | 60.69%/66.23%/43.63% | 175.37942 | 48.228 |
@@ -283,6 +283,14 @@ The task of image deblurring.
 | Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/README.md) | 28.25Db  | 80.8919 | 2.1083   |
+
+## JPEG artifacts removal
+
+The task of restoration images from jpeg format.
+
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops     | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | ---------- | -------- |
+| FBCNN          | PyTorch\*      | [fbcnn](./fbcnn/README.md)                     | 34.34Db  | 1420.78235 | 71.922   |
 
 ## Salient object detection
 

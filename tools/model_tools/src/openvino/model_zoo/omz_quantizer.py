@@ -15,6 +15,7 @@
 import argparse
 import json
 import os
+import shutil
 import sys
 import tempfile
 
@@ -162,11 +163,10 @@ def main():
 
         pot_path = args.pot
         if pot_path is None:
-            if _common.get_package_path(args.python, 'openvino.tools.pot'):
-                # run POT as a module
-                pot_cmd_prefix = [str(args.python), '-m', 'openvino.tools.pot']
-            elif _common.get_package_path(args.python, 'pot'):
-                pot_cmd_prefix = [str(args.python), '-m', 'pot']
+            pot_executable = shutil.which('pot')
+
+            if pot_executable:
+                pot_cmd_prefix = [pot_executable]
             else:
                 try:
                     pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/post_training_optimization_tool/main.py'

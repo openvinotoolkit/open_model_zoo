@@ -115,6 +115,20 @@ class MetricsExecutor:
                 profiling_file=profiling_file
             )
 
+    def get_metric_result_template(self, ignore_refs):
+        for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+            profiling_file = None if functor.profiler is None else functor.profiler.report_file
+            yield presenter, EvaluationResult(
+                name=name,
+                metric_type=metric_type,
+                evaluated_value=functor.result_template,
+                reference_value=reference if not ignore_refs else None,
+                abs_threshold=abs_threshold,
+                rel_threshold=rel_threshold,
+                meta=functor.meta,
+                profiling_file=profiling_file
+            )
+
     def register_metric(self, metric_config_entry):
         type_ = 'type'
         identifier = 'name'
@@ -150,9 +164,9 @@ class MetricsExecutor:
             metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state, **metric_kwargs
         )
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
-        threshold_v = metric_config_entry.get(threshold)
-        abs_threshold_v = metric_config_entry.get(abs_threshold)
-        reference_v = metric_config_entry.get(reference)
+        threshold_v = metric_fn.config.get(threshold)
+        abs_threshold_v = metric_fn.config.get(abs_threshold)
+        reference_v = metric_fn.config.get(reference)
         if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
             raise ConfigError(
                 'reference value should be represented as number or dictionary with numbers for each submetric'

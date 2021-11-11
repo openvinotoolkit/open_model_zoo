@@ -9,6 +9,7 @@ retinaface-resnet50-pytorch
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
+face-detection-????
 face-detection-adas-????
 face-detection-retail-????
 faster-rcnn-resnet101-coco-sparse-60-0001

@@ -136,7 +136,12 @@ NATIVE_DEMOS = [
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
+            ModelArg('googlenet-v1'),
+            ModelArg('googlenet-v1-tf'),
+            ModelArg('googlenet-v3'),
+            ModelArg('googlenet-v3-pytorch'),
             ModelArg('mixnet-l'),
+            ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
@@ -170,11 +175,14 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
-            '-m_fd': ModelArg('face-detection-adas-0001'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             '-m_es': ModelArg('open-closed-eye-0001'),
         }),
+        single_option_cases(
+            '-m_fd',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004')),
     )),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
@@ -186,12 +194,27 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
-            '-m_fd': ModelArg('face-detection-adas-0001'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             '-m_es': ModelArg('open-closed-eye-0001'),
         }),
+        single_option_cases(
+            '-m_fd',
+             ModelArg('face-detection-adas-0001'),
+             ModelArg('face-detection-retail-0004')),
     )),
+
+    CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
+            model_keys=['-m_p', '-m_r', '-m_o'],
+            device_keys=['-d_p', '-d_r', '-d_o'],
+            test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00000002'),
+                          '-m_p': ModelArg('mtcnn-p'),
+                          '-m_r': ModelArg('mtcnn-r'),
+                          '-m_o': ModelArg('mtcnn-o')}),
+    )),
+
 
     CppDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -229,6 +252,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
+            TestCase(options={'-at': 'jr',
+                '-m': ModelArg('fbcnn')}
+            )
         ]
     )),
 
@@ -240,6 +266,7 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
+        TestCase(options={'-m': ModelArg('face-detection-retail-0004')}),
         [
             TestCase(options={}),
             TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
@@ -366,6 +393,11 @@ NATIVE_DEMOS = [
                     *single_option_cases('-m',
                         ModelArg('efficientdet-d0-tf'),
                         ModelArg('efficientdet-d1-tf'),
+                        ModelArg('face-detection-0200'),
+                        ModelArg('face-detection-0202'),
+                        ModelArg('face-detection-0204'),
+                        ModelArg('face-detection-0205'),
+                        ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1053,6 +1085,8 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),

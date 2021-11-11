@@ -1,9 +1,12 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +19,6 @@ import numpy as np
 from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...launcher import create_launcher
 from ...utils import contains_all, sigmoid, generate_layer_name
 
 
@@ -493,12 +495,7 @@ def create_postnet(model_config, launcher, delayed_model_loading=False):
 class Tacotron2Evaluator(TextToSpeechEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_config = config['launchers'][0]
-        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
-            launcher_config['device'] = 'CPU'
-
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
         model = Synthesizer(
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading

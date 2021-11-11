@@ -21,10 +21,8 @@ task_type: classification
 files:
   - name: tf-densenet161.tar.gz
     size: 110578586
-    sha256: f4745258b9fe2f234711a70e4192368f169bf0c1956087a210b08270dbe96ca7
-    source:
-      $type: google_drive
-      id: 0B_fUSpodN0t0NmZvTnZZa2plaHc
+    sha384: 656d4d945bb8ea94baeba1c07089c4045e3b58a629bcb13427a1d84f8c0ac775d12b2cb6e752894fcabb1ba7b9c17359
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/densenet-161-tf/tf-densenet161.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

@@ -86,7 +86,7 @@ try:
     from openvino_telemetry import Telemetry
 except ImportError:
     class Telemetry:
-        def __init__(self, app_name=None, app_version=None): pass
+        def __init__(self, tid=None, app_name=None, app_version=None): pass
 
         def start_session(self, category): pass
 
@@ -114,24 +114,24 @@ def command_string(args):
 def get_package_path(python_executable, package_name):
     completed_process = subprocess.run(
         [str(python_executable), '-c',
-            'import inspect, importlib, sys;'
+            'import importlib, sys;'
                 'print(importlib.import_module(sys.argv[1]).__file__)',
             package_name,
         ],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
         universal_newlines=True,
     )
 
     if completed_process.returncode != 0:
-        return None
+        return None, completed_process.stderr
 
     file_path = Path(completed_process.stdout.rstrip('\n'))
 
     # For a package, the file is __init__.py, so to get the package path,
     # take its parent directory.
-    return file_path.parent
+    return file_path.parent, completed_process.stderr
 
 def get_version():
     if VERSION_FILE and VERSION_FILE.is_file():
@@ -144,7 +144,7 @@ def get_version():
 @contextlib.contextmanager
 def telemetry_session(app_name, tool):
     version = get_version()
-    telemetry = Telemetry(app_name, version)
+    telemetry = Telemetry(tid='UA-17808594-29', app_name=app_name, app_version=version)
     telemetry.start_session('md')
     try:
         yield telemetry

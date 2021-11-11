@@ -174,8 +174,9 @@ class CTCGreedySearchDecoder(Adapter):
             ),
             'logits_output': StringField(optional=True, description='Logits output layer name'),
             'custom_label_map': DictField(optional=True, description='Label map'),
-            'vocabulary_file': PathField(optional=True, description='Vocabulary file')
-
+            'vocabulary_file': PathField(optional=True, description='Vocabulary file'),
+            'shift_labels': BoolField(
+                optional=True, default=False, description='shift labels taking into account blank label')
         })
         return parameters
 
@@ -195,6 +196,7 @@ class CTCGreedySearchDecoder(Adapter):
         if self.custom_label_map:
             labels = {int(k): v for k, v in self.custom_label_map.items()}
             self.custom_label_map = labels
+        self.shift = int(self.get_value_from_config('shift_labels'))
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
@@ -214,7 +216,7 @@ class CTCGreedySearchDecoder(Adapter):
         result = []
         for identifier, data in zip(identifiers, preds_index):
             seq = self.decode(data, self.blank_label)
-            decoded = ''.join(str(self.label_map[char]) for char in seq)
+            decoded = ''.join(str(self.label_map[char - self.shift]) for char in seq)
             result.append(CharacterRecognitionPrediction(identifier, decoded))
 
         return result

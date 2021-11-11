@@ -19,6 +19,7 @@ The Open Model Zoo includes the following demos:
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
 - [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
+- [Face Detection MTCNN C++ G-API\* Demo](./face_detection_mtcnn_demo/cpp_gapi/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images. G-API version.
 - [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.

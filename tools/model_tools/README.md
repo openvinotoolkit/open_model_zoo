@@ -284,8 +284,8 @@ The script will attempt to locate Model Optimizer using several methods:
    omz_converter --all --mo my/openvino/path/model_optimizer/mo.py
    ```
 
-2. Otherwise, if the selected Python executable can import the `mo` package,
-   then that package will be used.
+2. Otherwise, if the selected Python executable can find the `mo` entrypoint,
+   then it will be used.
 
 3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
    script has been executed, the environment variables set by that script will
@@ -380,8 +380,8 @@ The script will attempt to locate Post-Training Optimization Tool using several 
    omz_quantizer --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_tool/main.py
    ```
 
-2. Otherwise, if the selected Python executable can import the `pot` package,
-   then that package will be used.
+2. Otherwise, if the selected Python executable can find the `pot` entrypoint,
+   then it will be used.
 
 3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
    script has been executed, the environment variables set by that script will

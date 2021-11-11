@@ -30,7 +30,7 @@ class NullCache:
 
 class DirCache:
     _FORMAT = 1 # increment if backwards-incompatible changes to the format are made
-    _HASH_LEN = hashlib.sha256().digest_size
+    _HASH_LEN = hashlib.sha384().digest_size
 
     def __init__(self, cache_dir):
         self._cache_dir = cache_dir / str(self._FORMAT)
@@ -48,8 +48,8 @@ class DirCache:
         return self._hash_path(hash).exists()
 
     def get(self, model_file, path, reporter):
-        cache_path = self._hash_path(model_file.sha256)
-        cache_sha256 = hashlib.sha256()
+        cache_path = self._hash_path(model_file.sha384)
+        cache_sha384 = hashlib.sha384()
         cache_size = 0
 
         with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
@@ -61,12 +61,12 @@ class DirCache:
                 if cache_size > model_file.size:
                     reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
                     return False
-                cache_sha256.update(data)
+                cache_sha384.update(data)
                 destination_file.write(data)
         if cache_size < model_file.size:
             reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
             return False
-        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
+        return verify_hash(reporter, cache_sha384.digest(), model_file.sha384, path)
 
     def put(self, hash, path):
         staging_path = None

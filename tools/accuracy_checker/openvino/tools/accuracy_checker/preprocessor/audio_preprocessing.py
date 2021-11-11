@@ -90,6 +90,45 @@ class AudioSpectrogram(Preprocessor):
         return [self.calculate_out_single_shape(ds) for ds in data_shape]
 
 
+class FFTSpectrogram(Preprocessor):
+    __provider__ = 'fft'
+    shape_modificator = True
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'num_fft': NumberField(optional=True, default=512, description="Base of FFT, samples", value_type=int),
+            'magnitude_squared': BoolField(optional=True, default=True, description="Square spectrum magnitudes"),
+            'skip_channels': BoolField(optional=True, default=False, description="Skips channels dimension"),
+        })
+        return parameters
+
+    def configure(self):
+        self.num_fft = self.get_value_from_config('num_fft')
+        self.magnutide_squared = self.get_value_from_config('magnitude_squared')
+        self.skip_channels = self.get_value_from_config('skip_channels')
+
+    def process(self, image, annotation_meta=None):
+        frames = image.data
+        if self.skip_channels:
+            frames = frames.squeeze()
+        pspec = np.abs(np.fft.fft(frames, n=self.num_fft))
+        if self.magnutide_squared:
+            pspec = np.square(pspec)
+        image.data = pspec
+        return image
+
+    def calculate_out_single_shape(self, data_shape):
+        fake_input = np.zeros(data_shape)
+        if self.skip_channels:
+            fake_input = fake_input.squeeze()
+        return np.fft.fft(fake_input, n=self.num_fft).shape
+
+    def calculate_out_shape(self, data_shape):
+        return [self.calculate_out_single_shape(ds) for ds in data_shape]
+
+
 class TriangleFiltering(Preprocessor):
     __provider__ = 'audio_triangle_filtering'
     shape_modificator = True

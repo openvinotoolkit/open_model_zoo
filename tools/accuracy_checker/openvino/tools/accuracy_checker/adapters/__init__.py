@@ -77,6 +77,7 @@ from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
     SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
 )
+from .facial_landmarks_98_detection import FacialLandmarksAdapter
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
@@ -150,6 +151,7 @@ __all__ = [
     'DETRAdapter',
     'UltraLightweightFaceDetectionAdapter',
     'PPDetectionAdapter',
+    'FacialLandmarksAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',

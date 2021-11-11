@@ -19,7 +19,6 @@ from collections import OrderedDict
 import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
 from ...adapters import create_adapter
-from ...launcher import create_launcher
 from ...logging import print_info
 from ...utils import contains_any, contains_all, generate_layer_name, get_path, extract_image_representations
 from ...config import ConfigError
@@ -273,86 +272,31 @@ class OpenVINOFeedbackModel(FeedbackModel):
 class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_config = config['launchers'][0]
-        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
-            launcher_config['device'] = 'CPU'
-
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
         model = SegnetModel(
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)
 
-    def process_dataset(
-            self, subset=None,
-            num_images=None,
-            check_progress=False,
-            dataset_tag='',
-            output_callback=None,
-            allow_pairwise_subset=False,
-            dump_prediction_to_annotation=False,
-            calculate_metrics=True,
-            **kwargs):
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-
-        self._annotations, self._predictions = [], []
-
-        self._create_subset(subset, num_images, allow_pairwise_subset)
-        metric_config = self.configure_intermediate_metrics_results(kwargs)
-        (compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
-         ignore_metric_reference) = metric_config
-
-        if 'progress_reporter' in kwargs:
-            _progress_reporter = kwargs['progress_reporter']
-            _progress_reporter.reset(self.dataset.size)
-        else:
-            _progress_reporter = None if not check_progress else self._create_progress_reporter(
-                check_progress, self.dataset.size
-            )
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         previous_video_id = ''
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             if previous_video_id != batch_identifiers[0].video_id:
                 self.model.reset()
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, _ = extract_image_representations(batch_inputs)
-
             batch_raw_prediction, batch_prediction = self.model.predict(
                 batch_identifiers, batch_inputs_extr
             )
             self.model.set_feedback(batch_prediction[0].value)
             previous_video_id = batch_prediction[0].identifier.video_id
             annotation, prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-
-            metrics_result = None
-            if self.metric_executor and calculate_metrics:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    batch_input_ids, annotation, prediction
-                )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend(annotation)
-                    self._predictions.extend(prediction)
-
+            metrics_result = self._get_metrics_result(batch_input_ids, annotation, prediction, calculate_metrics)
             if output_callback:
-                output_callback(
-                    batch_raw_prediction[0],
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(prediction))
-                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting,
-                        ignore_metric_reference=ignore_metric_reference
-                    )
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
-
-        if _progress_reporter:
-            _progress_reporter.finish()
+                output_callback(batch_raw_prediction[0], metrics_result=metrics_result,
+                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
+            self._update_progress(progress_reporter, metric_config, batch_id, len(prediction), csv_file)
 
 
 class SegnetModel:

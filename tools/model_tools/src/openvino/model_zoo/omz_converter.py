@@ -16,6 +16,7 @@ import argparse
 import collections
 import json
 import os
+import shutil
 import string
 import sys
 
@@ -207,15 +208,17 @@ def main():
         mo_path = args.mo
 
         if mo_path is None:
-            mo_package_path = _common.get_package_path(args.python, 'mo')
+            mo_executable = shutil.which('mo')
 
-            if mo_package_path:
-                # run MO as a module
-                mo_cmd_prefix = [str(args.python), '-m', 'mo']
+            if mo_executable:
+                mo_cmd_prefix = [mo_executable]
+                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                if mo_package_path is None:
+                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
                 mo_dir = mo_package_path.parent
             else:
                 try:
-                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
+                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
                 except KeyError:
                     sys.exit('Unable to locate Model Optimizer. '
                         + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')

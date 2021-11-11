@@ -54,6 +54,9 @@ yolo-v2-tiny-tf
 yolo-v2-tiny-vehicle-detection-0001
 yolo-v3-tf
 yolo-v3-tiny-tf
+# For --architecture_type=yolov3-onnx
+yolo-v3-onnx
+yolo-v3-tiny-onnx
 # For --architecture_type=yolov4
 yolo-v4-tf
 yolo-v4-tiny-tf

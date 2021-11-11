@@ -86,10 +86,10 @@ Downloadable files. Each file is described by:
 
 * `name` - sets a file name after downloading
 * `size` - sets a file size
-* `sha256`  - sets a file hash sum
+* `sha384`  - sets a file hash sum
 * `source` - sets a direct link to a file *OR* describes a file access parameters
 
-> **TIP**: You can obtain a hash sum using the `sha256sum <file_name>` command on Linux\*.
+> **TIP**: You can obtain a hash sum using the `sha384sum <file_name>` command on Linux\*.
 
 If file is located on Google Drive\*, the `source` section must contain:
 - `$type: google_drive`
@@ -155,7 +155,7 @@ task_type: classification
 files:
   - name: tf-densenet121.tar.gz
     size: 30597420
-    sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+    sha384: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
     source:
       $type: google_drive
       id: 0B_fUSpodN0t0eW1sVk1aeWREaDA

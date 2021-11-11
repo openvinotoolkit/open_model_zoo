@@ -69,6 +69,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
     def configure(self):
         self.max_detections = self.get_value_from_config('max_detections')
         threshold = process_threshold(self.get_value_from_config('threshold'))
+        self.config.pop('threshold', None)
         self.thresholds = get_or_parse_value(threshold, COCO_THRESHOLDS)
         if not self.dataset:
             raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
@@ -120,13 +121,19 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         matched_classes = set(labels_stat)
         background = self.dataset.metadata.get('background_label')
         prediction_classes = np.unique([pred.labels for pred in predictions])
+        get_polygon = hasattr(predictions[0], 'to_polygon')
         for pc in prediction_classes:
             if pc == background or pc in matched_classes:
                 continue
-            prediction_boxes, _, _ = _prepare_prediction_boxes(
-                pc, predictions, True
-            )
-            conf = prediction_boxes[:, 0]
+            if not get_polygon:
+                prediction_boxes, _, _ = _prepare_prediction_boxes(
+                    pc, predictions, True
+                )
+                conf = prediction_boxes[:, 0] if not get_polygon else []
+                prediction_boxes = prediction_boxes[:, 1:]
+            else:
+                prediction_boxes = [p.to_polygon().get(pc, []) for p in predictions][0]
+                conf = [p.scores[p.labels == pc] for p in predictions][0]
             label_report = {
                 'precision': [],
                 'recall': [],
@@ -135,7 +142,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
                 'scores': conf,
                 'matched': defaultdict(list),
                 'gt': [],
-                'dt': prediction_boxes[:, 1:],
+                'dt': prediction_boxes,
                 'prediction_matches': 0,
                 'annotation_matches': 0,
                 'iou': []
@@ -413,28 +420,48 @@ class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
         return recalls
 
 
-class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
+class MSCOCOSegmBase(MSCOCOBaseMetric):
+    __provider__ = 'coco_segm'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation,)
+    prediction_types = (CoCoInstanceSegmentationPrediction,)
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
+
+    def update(self, annotation, prediction):
+        compute_iou, create_boxes = select_specific_parameters(annotation)
+        per_class_results = []
+        profile_boxes = self.profiler is not None
+        if profile_boxes:
+            annotation_polygons = annotation.to_polygon()
+            prediction_polygons = prediction.to_polygon()
+
+        for label_id, label in enumerate(self.labels):
+
+            detections, scores, dt_difficult = prepare_predictions(prediction, label, self.max_detections)
+            ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
+            iou = compute_iou(ground_truth, detections, annotation_boxes=boxes, annotation_areas=areas, iscrowd=iscrowd)
+            eval_result = evaluate_image(
+                ground_truth if not profile_boxes else annotation_polygons[label],
+                gt_difficult, iscrowd, detections if not profile_boxes else prediction_polygons[label],
+                dt_difficult, scores, iou, self.thresholds,
+                profile_boxes
+            )
+            self.matching_results[label_id].append(eval_result)
+            per_class_results.append(eval_result)
+
+        return per_class_results
+
+
+class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision, MSCOCOSegmBase):
     __provider__ = 'coco_segm_precision'
 
-    annotation_types = (CoCoInstanceSegmentationAnnotation,)
-    prediction_types = (CoCoInstanceSegmentationPrediction,)
 
-    def configure(self):
-        super().configure()
-        if isinstance(maskUtils, UnsupportedPackage):
-            maskUtils.raise_error(self.__provider__)
-
-
-class MSCOCOSegmRecall(MSCOCORecall):
+class MSCOCOSegmRecall(MSCOCORecall, MSCOCOSegmBase):
     __provider__ = 'coco_segm_recall'
-
-    annotation_types = (CoCoInstanceSegmentationAnnotation,)
-    prediction_types = (CoCoInstanceSegmentationPrediction,)
-
-    def configure(self):
-        super().configure()
-        if isinstance(maskUtils, UnsupportedPackage):
-            maskUtils.raise_error(self.__provider__)
 
 
 @singledispatch

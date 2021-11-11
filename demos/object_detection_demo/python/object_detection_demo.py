@@ -48,7 +48,8 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'yolof', 'yolox', 'faceboxes', 'centernet', 'ctpn',
+                      type=str, required=True, choices=('ssd', 'yolo', 'yolov3-onnx', 'yolov4', 'yolof', 'yolox',
+                                                        'faceboxes', 'centernet', 'ctpn',
                                                         'retinaface', 'ultra_lightweight_face_detection',
                                                         'retinaface-pytorch', 'detr'))
     args.add_argument('-i', '--input', required=True,
@@ -171,6 +172,9 @@ def get_model(ie, args):
     elif args.architecture_type == 'yolo':
         return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
                            threshold=args.prob_threshold)
+    elif args.architecture_type == 'yolov3-onnx':
+        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+                                 threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(ie, args.model, labels=args.labels,
                              threshold=args.prob_threshold, resize_type=args.resize_type,

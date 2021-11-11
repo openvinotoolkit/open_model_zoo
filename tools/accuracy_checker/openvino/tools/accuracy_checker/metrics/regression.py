@@ -23,6 +23,8 @@ import numpy as np
 from ..representation import (
     RegressionAnnotation,
     RegressionPrediction,
+    FacialLandmarksHeatMapAnnotation,
+    FacialLandmarksHeatMapPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
     FacialLandmarks3DAnnotation,
@@ -78,6 +80,7 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
         })
         self.magnitude = []
+
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
@@ -380,8 +383,8 @@ class RelativeL2Error(BaseRegressionMetric):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapAnnotation)
 
     def configure(self):
         self.meta.update({
@@ -426,8 +429,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):
@@ -455,6 +458,11 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             'target': 'higher-worse'
         })
         self.magnitude = []
+        self.meta['names'] = ['mean']
+        if self.calculate_std:
+            self.meta['names'].append('std')
+        if self.percentile:
+            self.meta['names'].append('{}th percentile'.format(self.percentile))
 
     def update(self, annotation, prediction):
         per_point_result = point_regression_differ(
@@ -475,18 +483,15 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         return avg_result
 
     def evaluate(self, annotations, predictions):
-        self.meta['names'] = ['mean']
         result = [np.mean(self.magnitude)]
 
         if self.calculate_std:
             result.append(np.std(self.magnitude))
-            self.meta['names'].append('std')
 
         if self.percentile:
             sorted_magnitude = np.sort(self.magnitude)
             index = len(self.magnitude) / 100 * self.percentile
             result.append(sorted_magnitude[int(index)])
-            self.meta['names'].append('{}th percentile'.format(self.percentile))
 
         if self.profiler:
             self.profiler.finish()
@@ -501,8 +506,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, )
-    prediction_types = (FacialLandmarks3DPrediction, )
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):
@@ -526,8 +531,12 @@ class NormalizedMeanError(PerImageEvaluationMetric):
         self.magnitude = []
 
     def update(self, annotation, prediction):
-        gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
-        pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
+        if self.only_2d:
+            gt = np.array([annotation.x_values, annotation.y_values]).T
+            pred = np.array([prediction.x_values, prediction.y_values]).T
+        else:
+            gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
+            pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
 
         diff = np.square(gt - pred)
         dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))

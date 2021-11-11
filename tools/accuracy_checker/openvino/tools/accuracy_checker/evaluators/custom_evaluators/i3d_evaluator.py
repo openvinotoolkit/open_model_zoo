@@ -19,43 +19,32 @@ from collections import OrderedDict
 import warnings
 import numpy as np
 
-from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import create_dataset_attributes
+from .base_custom_evaluator import BaseCustomEvaluator
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...launcher import create_launcher
 from ...data_readers import create_reader
 from ...utils import extract_image_representations, contains_all, get_path
-from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 from ...preprocessor import Crop, Resize
 
 
-class I3DEvaluator(BaseEvaluator):
+class I3DEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, adapter, rgb_model, flow_model, orig_config):
-        self.dataset_config = dataset_config
-        self.preprocessor = None
-        self.dataset = None
-        self.postprocessor = None
-        self.metric_executor = None
-        self.launcher = launcher
+        super().__init__(dataset_config, launcher, orig_config)
         self.adapter = adapter
         self.rgb_model = rgb_model
         self.flow_model = flow_model
-        self.config = orig_config
-        self._metrics_results = []
+        self._part_by_name = {
+            'flow_network': self.flow_model,
+            'rgb_network': self.rgb_model
+        }
+        if self.adapter is not None:
+            self.adapter_type = self.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_settings = config['launchers'][0]
-        supported_frameworks = ['dlsdk']
-        if not launcher_settings['framework'] in supported_frameworks:
-            raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
-        if 'device' not in launcher_settings:
-            launcher_settings['device'] = 'CPU'
-        launcher = create_launcher(launcher_settings, delayed_model_loading=True)
-        adapter = create_adapter(launcher_settings['adapter'])
+        dataset_config, launcher, launcher_config = cls.get_dataset_and_launcher_info(config)
+        adapter = create_adapter(launcher_config['adapter'])
         network_info = config.get('network_info', {})
         data_source = dataset_config[0].get('data_source', None)
         if not delayed_model_loading:
@@ -113,34 +102,7 @@ class I3DEvaluator(BaseEvaluator):
 
         return output
 
-    def process_dataset(
-            self, subset=None,
-            num_images=None,
-            check_progress=False,
-            dataset_tag='',
-            allow_pairwise_subset=False,
-            **kwargs):
-
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-        self._create_subset(subset, num_images, allow_pairwise_subset)
-
-        self._annotations, self._predictions = [], []
-
-        if 'progress_reporter' in kwargs:
-            _progress_reporter = kwargs['progress_reporter']
-            _progress_reporter.reset(self.dataset.size)
-        else:
-            _progress_reporter = None if not check_progress else self._create_progress_reporter(
-                check_progress, self.dataset.size
-            )
-
-        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
-        if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metrics_interval', 1000)
-            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
-            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
-
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         annotation, identifiers = self.get_dataset_info(self.dataset)
         for batch_id, (batch_annotation, batch_identifiers) in enumerate(zip(annotation, identifiers)):
             batch_inputs_images = self.rgb_model.prepare_data(batch_identifiers)
@@ -163,134 +125,7 @@ class I3DEvaluator(BaseEvaluator):
                 self.metric_executor.update_metrics_on_batch(
                     [batch_id], [batch_annotation], batch_prediction
                 )
-
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(batch_prediction))
-                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting,
-                        ignore_metric_reference=ignore_metric_reference
-                    )
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
-
-        if _progress_reporter:
-            _progress_reporter.finish()
-
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
-        if self._metrics_results:
-            del self._metrics_results
-            self._metrics_results = []
-
-        for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions
-        ):
-            self._metrics_results.append(evaluated_metric)
-            if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
-
-        return self._metrics_results
-
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
-            return
-        result_presenters = self.metric_executor.get_metric_presenters()
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
-
-        result_presenters = self.metric_executor.get_metric_presenters()
-        extracted_results, extracted_meta = [], []
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            result, metadata = presenter.extract_result(metric_result)
-            if isinstance(result, list):
-                extracted_results.extend(result)
-                extracted_meta.extend(metadata)
-            else:
-                extracted_results.append(result)
-                extracted_meta.append(metadata)
-            if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-
-        return extracted_results, extracted_meta
-
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
-    def release(self):
-        self.rgb_model.release()
-        self.flow_model.release()
-        self.launcher.release()
-
-    def reset(self):
-        if self.metric_executor:
-            self.metric_executor.reset()
-        if hasattr(self, '_annotations'):
-            del self._annotations
-            del self._predictions
-        del self._metrics_results
-        self._annotations = []
-        self._predictions = []
-        self._metrics_results = []
-        if self.dataset:
-            self.dataset.reset(self.postprocessor.has_processors)
-
-    @staticmethod
-    def get_processing_info(config):
-        module_specific_params = config.get('module_config')
-        model_name = config['name']
-        dataset_config = module_specific_params['datasets'][0]
-        launcher_config = module_specific_params['launchers'][0]
-        return (
-            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
-            dataset_config['name']
-        )
-
-    def select_dataset(self, dataset_tag):
-        if self.dataset is not None and isinstance(self.dataset_config, list):
-            return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-
-    @staticmethod
-    def _create_progress_reporter(check_progress, dataset_size):
-        pr_kwargs = {}
-        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
-            pr_kwargs = {"print_interval": check_progress}
-
-        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
-
-    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        model_type = None
-        details = {}
-        metrics = self.dataset_config[0].get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        adapter_type = self.adapter.__provider__
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        if self.dataset is None:
-            self.select_dataset('')
-
-        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
-        return details
+            self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
 
 class BaseModel:

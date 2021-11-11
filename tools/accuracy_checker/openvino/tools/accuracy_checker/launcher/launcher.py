@@ -124,7 +124,7 @@ class Launcher(ClassProvider):
         self.image_info_inputs = self.config.get('_list_image_infos', [])
         self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
         self._ignore_inputs = self.config.get('_list_ignore_inputs', [])
-        self._scale_factor_inputs = self.config.get('_list_scale_factor_inputs', [])
+        self._scale_factor_inputs = self.config.get('_list_scale_factors', [])
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
     @classmethod
@@ -155,7 +155,7 @@ class Launcher(ClassProvider):
             '_list_ignore_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description='List of ignored inputs'
             ),
-            '_list_scale_factor_inputs': ListField(
+            '_list_scale_factors': ListField(
                 allow_empty=True, optional=True, default=[], description='List of scale factor inputs'
             ),
             '_input_precision': ListField(

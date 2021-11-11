@@ -27,11 +27,11 @@ task_type: classification
 files:
   - name: timm-0.4.12-py3-none-any.whl
     size: 376973
-    sha256: dba6b1702b7d24bf9f0f1c2fc394b4ee28f93cde5404f1dc732d63ccd00533b6
+    sha384: e5030b792501314113ca804b3b00d35d89c40d0a92d53aa0c41e2a83697d11ef5ea8c73ed1c0bec28c4791047c9dd1b3
     source: https://files.pythonhosted.org/packages/90/fc/606bc5cf46acac3aa9bd179b3954433c026aaf88ea98d6b19f5d14c336da/timm-0.4.12-py3-none-any.whl
   - name: swin_tiny_patch4_window7_224.pth
     size: 114342173
-    sha256: 9f71c168d837d1b99dd1dc29e14990a7a9e8bdc5f673d46b04fe36fe15590ad3
+    sha384: 210021216e1f205617d885836b1ac59d725b8c41dbff8dc4c513e838911436b0b75e06529737e472d3167519a7c1a6ad
     source: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth
 postprocessing:
   - $type: unpack_archive

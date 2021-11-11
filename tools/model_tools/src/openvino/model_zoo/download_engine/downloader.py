@@ -87,7 +87,7 @@ class Downloader:
                     file.seek(0)
                     file.truncate()
                     progress.size = 0
-                    progress.hasher = hashlib.sha256()
+                    progress.hasher = hashlib.sha384()
 
                 self._process_download(reporter, chunk_iterable, size, progress, file)
 
@@ -109,7 +109,7 @@ class Downloader:
 
     def _try_retrieve_from_cache(self, reporter, model_file, destination):
         try:
-            if self.cache.has(model_file.sha256):
+            if self.cache.has(model_file.sha384):
                 reporter.job_context.check_interrupted()
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
@@ -145,8 +145,8 @@ class Downloader:
         with destination.open('w+b') as f:
             actual_hash = self._try_download(reporter, f, start_download, model_file.size)
 
-        if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.sha256, destination):
-            self._try_update_cache(reporter, self.cache, model_file.sha256, destination)
+        if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.sha384, destination):
+            self._try_update_cache(reporter, self.cache, model_file.sha384, destination)
             success = True
 
         reporter.print()

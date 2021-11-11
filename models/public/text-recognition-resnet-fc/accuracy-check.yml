@@ -88,7 +88,7 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
-            refernce: 0.9296
+            reference: 0.9296
 
       - name: ICDAR2013
         preprocessing:

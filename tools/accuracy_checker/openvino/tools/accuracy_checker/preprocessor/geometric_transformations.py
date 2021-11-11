@@ -244,7 +244,7 @@ class Padding(Preprocessor):
             ),
             'numpy_pad_mode': StringField(
                 optional=True, default='constant',
-                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
+                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'symmetric', 'wrap'],
                 description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             ),
             'enable_resize': BoolField(
@@ -751,3 +751,34 @@ class SimilarityTransfom(Preprocessor):
 
     def calculate_out_shape(self, data_shape):
         return [self.calculate_out_single_shape(ds) if is_image(ds) else ds for ds in data_shape]
+
+
+class Transpose(Preprocessor):
+    __provider__ = 'transpose'
+    shape_modificator = True
+    _dynamic_shape = True
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'axes': ListField(value_type=int, description='axes order for transposing')
+        })
+        return params
+
+    def configure(self):
+        self.axes = self.get_value_from_config('axes')
+
+    def process(self, image, annotation_meta=None):
+        image.data = np.transpose(image.data, self.axes)
+        return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shape
+
+    def calculate_out_shape(self, data_shape):
+        new_data_shape = []
+        for ds in data_shape:
+            new_data_shape.append([ds[a] for a in self.axes])
+        return new_data_shape

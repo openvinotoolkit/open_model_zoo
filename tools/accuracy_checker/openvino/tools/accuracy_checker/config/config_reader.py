@@ -28,7 +28,6 @@ ENTRIES_PATHS = {
     'launchers': {
         'cpu_extensions': 'extensions',
         'gpu_extensions': 'extensions',
-        'bitstream': 'bitstreams',
         'affinity_map': 'affinity_map',
         'predictions': 'source'
     },
@@ -83,14 +82,13 @@ LIST_ENTRIES_PATHS = {
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'source': 'DATA_DIR',
     'annotations': 'ANNOTATIONS_DIR',
-    'bitstreams': 'BITSTREAMS_DIR',
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
     'model_attributes': 'MODEL_ATTRIBUTES_DIR',
     'kaldi_bin_dir': 'KALDI_BIN_DIR'
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
-CONFIG_SHARED_PARAMETERS = ['bitstream']
+CONFIG_SHARED_PARAMETERS = []
 ACCEPTABLE_MODEL = [
     'caffe_model', 'caffe_weights',
     'tf_model', 'tf_meta',
@@ -619,6 +617,7 @@ def create_command_line_mapping(config, default_value, value_map=None):
 
 def filtered(launcher, targets, args):
     target_tags = args.get('target_tags') or []
+    target_backends = args.get('target_backends')
     if target_tags:
         if not contains_any(target_tags, launcher.get('tags', [])):
             return True
@@ -627,6 +626,11 @@ def filtered(launcher, targets, args):
     target_framework = (args.get('target_framework') or config_framework).lower()
     if config_framework != target_framework:
         return True
+
+    if target_backends:
+        backend = launcher.get('backend')
+        if backend not in target_backends:
+            return True
 
     return targets and launcher.get('device', '').lower() not in targets
 
@@ -766,6 +770,19 @@ def process_config(
             merge_entry_paths(command_line_arg, config_entry, args)
 
 
+def select_arg_path(selected_argument, value_id, argument):
+    if isinstance(selected_argument, list):
+        if len(selected_argument) > 1:
+            if len(selected_argument) <= value_id:
+                raise ValueError('list of arguments for {} less than number of evaluations'.format(argument))
+            selected_argument = selected_argument[value_id]
+        else:
+            selected_argument = selected_argument[0]
+    if not isinstance(selected_argument, Path):
+        selected_argument = Path(selected_argument)
+    return selected_argument
+
+
 def merge_entry_paths(keys, value, args, value_id=0):
     for field, argument in keys.items():
         if not is_iterable(value) or field not in value:
@@ -786,15 +803,7 @@ def merge_entry_paths(keys, value, args, value_id=0):
             if arg_candidate not in args or not args[arg_candidate]:
                 continue
 
-            selected_argument = args[arg_candidate]
-            if isinstance(selected_argument, list):
-                if len(selected_argument) > 1:
-                    if len(selected_argument) <= value_id:
-                        raise ValueError('list of arguments for {} less than number of evaluations')
-                    selected_argument = selected_argument[value_id]
-                else:
-                    selected_argument = selected_argument[0]
-
+            selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
             if not selected_argument.is_dir():
                 raise ConfigError('argument: {} should be a directory'.format(argument))
 
@@ -839,14 +848,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
         return launcher_entry
 
-    def _fpga_specific_args(launcher_entry):
-        if 'aocl' in arguments and arguments.aocl:
-            launcher_entry['_aocl'] = arguments.aocl
-
-        if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
-            if not arguments.bitstreams.is_dir():
-                launcher_entry['bitstream'] = arguments.bitstreams
-
     def _async_evaluation_args(launcher_entry):
         if 'async_mode' in arguments:
             launcher_entry['async_mode'] = arguments.async_mode
@@ -868,7 +869,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     launcher_entry.update(update_launcher_entry)
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
-    _fpga_specific_args(launcher_entry)
 
     if 'device_config' in arguments and arguments.device_config:
         merge_device_configs(launcher_entry, arguments.device_config)

@@ -22,14 +22,13 @@ from pathlib import Path
 import numpy as np
 
 from .mtcnn_evaluator_utils import calibrate_predictions, nms, cut_roi
-from ..base_evaluator import BaseEvaluator
+from .base_custom_evaluator import BaseCustomEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
-from ...launcher import create_launcher, InputFeeder
+from ...launcher import InputFeeder
 from ...preprocessor import PreprocessingExecutor
 from ...utils import extract_image_representations, read_pickle, contains_any, get_path
 from ...config import ConfigError
-from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
 
@@ -664,37 +663,24 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         return output_per_box
 
 
-class MTCNNEvaluator(BaseEvaluator):
+class MTCNNEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, stages, orig_config):
-        self.dataset_config = dataset_config
+        super().__init__(dataset_config, launcher, orig_config)
         self.stages = stages
-        self.launcher = launcher
-        self.dataset = None
-        self.postprocessor = None
-        self.metric_executor = None
-        self._annotations, self._predictions, self._metrics_results = [], [], []
-        self.config = orig_config
+        stage = next(iter(self.stages.values()))
+        if hasattr(stage, 'adapter') and stage.adapter is not None:
+            self.adapter_type = stage.adapter.__provider__
 
-    def process_dataset(
-            self, subset=None,
-            num_images=None,
-            check_progress=False,
-            dataset_tag='',
-            output_callback=None,
-            allow_pairwise_subset=False,
-            dump_prediction_to_annotation=False,
-            calculate_metrics=True,
-            **kwargs):
+    @classmethod
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        models_info = config['network_info']
+        stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
+        return cls(dataset_config, launcher, stages, orig_config)
+
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         def no_detections(batch_pred):
             return batch_pred[0].size == 0
-        self._prepare_dataset(dataset_tag)
-        self._create_subset(subset, num_images, allow_pairwise_subset)
-        _progress_reporter = self._prepare_progress_reporter(check_progress, kwargs.get('progress_reporter'))
-        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
-        if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metrics_interval', 1000)
-            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
-            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
@@ -717,109 +703,20 @@ class MTCNNEvaluator(BaseEvaluator):
                 if no_detections(batch_prediction):
                     break
             batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-            metrics_result = None
-            if self.metric_executor:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    batch_input_ids, batch_annotation, batch_prediction
-                )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend(batch_annotation)
-                    self._predictions.extend(batch_prediction)
+            metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
+                                                      calculate_metrics)
             if output_callback:
-                output_callback(
-                    list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
-                    metrics_result=metrics_result, element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(batch_prediction))
-                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting,
-                                         ignore_metric_reference=ignore_metric_reference)
-                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
-        if _progress_reporter:
-            _progress_reporter.finish()
+                output_callback(list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
+                                metrics_result=metrics_result, element_identifiers=batch_identifiers,
+                                dataset_indices=batch_input_ids)
+            self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
-        if self._metrics_results:
-            del self._metrics_results
-            self._metrics_results = []
-        for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions):
-            self._metrics_results.append(evaluated_metric)
-            if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
-        return self._metrics_results
-
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
-        result_presenters = self.metric_executor.get_metric_presenters()
-        extracted_results, extracted_meta = [], []
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            result, metadata = presenter.extract_result(metric_result)
-            if isinstance(result, list):
-                extracted_results.extend(result)
-                extracted_meta.extend(metadata)
-            else:
-                extracted_results.append(result)
-                extracted_meta.append(metadata)
-            if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-        return extracted_results, extracted_meta
-
-    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
-        if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
-            return
-        result_presenters = self.metrics_executor.get_metric_presenters()
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
-
-    @classmethod
-    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
-        launcher_config = config['launchers'][0]
-        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
-            launcher_config['device'] = 'CPU'
-        models_info = config['network_info']
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
-        stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-        return cls(dataset_config, launcher, stages, orig_config)
-
-    @staticmethod
-    def get_processing_info(config):
-        module_specific_params = config.get('module_config')
-        model_name = config['name']
-        dataset_config = module_specific_params['datasets'][0]
-        launcher_config = module_specific_params['launchers'][0]
-        return (
-            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
-            dataset_config['name']
-        )
-
-    def set_profiling_dir(self, profiler_dir):
-        self.metric_executor.set_profiling_dir(profiler_dir)
-
-    def release(self):
+    def _release_model(self):
         for _, stage in self.stages.items():
             stage.release()
-        self.launcher.release()
 
     def reset(self):
-        if self.metric_executor:
-            self.metric_executor.reset()
-        if hasattr(self, '_annotations'):
-            del self._annotations
-            del self._predictions
-        del self._metrics_results
-        self._annotations = []
-        self._predictions = []
-        self._input_ids = []
-        self._metrics_results = []
-        if self.dataset:
-            self.dataset.reset(self.postprocessor.has_processors)
+        super().reset()
         for _, stage in self.stages.items():
             stage.reset()
 
@@ -841,25 +738,6 @@ class MTCNNEvaluator(BaseEvaluator):
     def get_network(self):
         return [{'name': stage_name, 'model': stage.network} for stage_name, stage in self.stages.items()]
 
-    def get_metrics_attributes(self):
-        if not self.metric_executor:
-            return {}
-        return self.metric_executor.get_metrics_attributes()
-
-    def register_metric(self, metric_config):
-        if isinstance(metric_config, str):
-            self.metric_executor.register_metric({'type': metric_config})
-        elif isinstance(metric_config, dict):
-            self.metric_executor.register_metric(metric_config)
-        else:
-            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
-
-    def register_postprocessor(self, postprocessing_config):
-        pass
-
-    def register_dumped_annotations(self):
-        pass
-
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             return
@@ -867,50 +745,3 @@ class MTCNNEvaluator(BaseEvaluator):
         self.dataset, self.metric_executor, preprocessor, self.postprocessor = dataset_attributes
         for _, stage in self.stages.items():
             stage.update_preprocessing(preprocessor)
-
-    @staticmethod
-    def _create_progress_reporter(check_progress, dataset_size):
-        pr_kwargs = {}
-        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
-            pr_kwargs = {"print_interval": check_progress}
-        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
-
-    def _prepare_dataset(self, dataset_tag=''):
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-
-    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    def _prepare_progress_reporter(self, check_progress, progress_reporter=None):
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
-            return progress_reporter
-        return None if not check_progress else self._create_progress_reporter(check_progress, self.dataset.size)
-
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        model_type = None
-        details = {}
-        metrics = self.dataset_config[0].get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        adapter_type = next(iter(self.stages.values())).adapter.__provider__
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        if self.dataset is None:
-            self.select_dataset('')
-        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
-        return details

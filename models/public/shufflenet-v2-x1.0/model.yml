@@ -27,7 +27,7 @@ description: >-
 task_type: classification
 files:
   - name: shufflenetv2_x1-5666bf0f80.pth
-    sha256: 5666bf0f80d1e7f8fb61f6a65742b9c27c37f3208c1f087cdcd7c1ec1aa8b848
+    sha384: 95dbe93b68849d149e4964cfc2cef9d847da6da6f6d2618c661eaddaebc29772a9becad45a455d80cf59aab1d35b411e
     size: 9218294
     source: https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
 framework: pytorch

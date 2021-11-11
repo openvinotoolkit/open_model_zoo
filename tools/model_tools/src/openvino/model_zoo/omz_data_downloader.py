@@ -23,7 +23,7 @@ from openvino.model_zoo import _common
 def copy_data(output_dir):
     data_path = output_dir / 'data'
 
-    print('Copying fies from {} to {}'.format(_common.PACKAGE_DIR / 'data', data_path))
+    print('Copying files from {} to {}'.format(_common.PACKAGE_DIR / 'data', data_path))
 
     shutil.copytree(
         str(_common.PACKAGE_DIR / 'data'),
