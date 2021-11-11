@@ -100,7 +100,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     def set_profiler(self, profiler):
         self.profiler = profiler
         self.profiling_helper = Metric.provide(
-            self.__provider__.replace('_orig', ''), {}, self.dataset, self.name, profiler=profiler
+            self.__provider__.replace('_orig', ''), {'max_detections': 100}, self.dataset, self.name, profiler=profiler
         )
 
     def update(self, annotation, prediction):
@@ -473,7 +473,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         pass
 
 
-class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
+class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric, PerImageEvaluationMetric):
     __provider__ = 'coco_orig_precision'
 
     def evaluate(self, annotations, predictions):

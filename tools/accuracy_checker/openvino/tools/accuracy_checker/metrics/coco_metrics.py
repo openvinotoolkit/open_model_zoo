@@ -121,13 +121,19 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         matched_classes = set(labels_stat)
         background = self.dataset.metadata.get('background_label')
         prediction_classes = np.unique([pred.labels for pred in predictions])
+        get_polygon = hasattr(predictions[0], 'to_polygon')
         for pc in prediction_classes:
             if pc == background or pc in matched_classes:
                 continue
-            prediction_boxes, _, _ = _prepare_prediction_boxes(
-                pc, predictions, True
-            )
-            conf = prediction_boxes[:, 0]
+            if not get_polygon:
+                prediction_boxes, _, _ = _prepare_prediction_boxes(
+                    pc, predictions, True
+                )
+                conf = prediction_boxes[:, 0] if not get_polygon else []
+                prediction_boxes = prediction_boxes[:, 1:]
+            else:
+                prediction_boxes = [p.to_polygon().get(pc, []) for p in predictions][0]
+                conf = [p.scores[p.labels == pc] for p in predictions][0]
             label_report = {
                 'precision': [],
                 'recall': [],
@@ -136,7 +142,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
                 'scores': conf,
                 'matched': defaultdict(list),
                 'gt': [],
-                'dt': prediction_boxes[:, 1:],
+                'dt': prediction_boxes,
                 'prediction_matches': 0,
                 'annotation_matches': 0,
                 'iou': []
