@@ -170,7 +170,8 @@ class Dataset:
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
-        annotation = _create_subset(annotation, config)
+        no_recursion = (meta or {}).get('no_recursion', False)
+        annotation = _create_subset(annotation, config, no_recursion)
         dataset_analysis = config.get('analyze_dataset', False)
 
         if dataset_analysis:
@@ -417,7 +418,7 @@ def read_annotation(annotation_file: Path, log=True):
     return result
 
 
-def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
+def create_subset(annotation, subsample_size, subsample_seed, shuffle=True, no_recursion=False):
     if isinstance(subsample_size, str):
         if subsample_size.endswith('%'):
             try:
@@ -434,7 +435,7 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
         raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size)) from value_err
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
-    return make_subset(annotation, subsample_size, subsample_seed, shuffle)
+    return make_subset(annotation, subsample_size, subsample_seed, shuffle, no_recursion)
 
 
 def describe_cached_dataset(dataset_info):
@@ -737,7 +738,7 @@ class DataProvider:
         if subsample_size is not None:
             subsample_seed = self.dataset_config.get('subsample_seed', 666)
 
-            annotation = create_subset(annotation, subsample_size, subsample_seed)
+            annotation = create_subset(annotation, subsample_size, subsample_seed, meta.get('no_recursion', False))
 
         if self.dataset_config.get('analyze_dataset', False):
             if self.dataset_config.get('segmentation_masks_source'):
@@ -799,14 +800,14 @@ def ignore_subset_settings(config):
     return False
 
 
-def _create_subset(annotation, config):
+def _create_subset(annotation, config, no_recursion=False):
     subsample_size = config.get('subsample_size')
     if not ignore_subset_settings(config):
 
         if subsample_size is not None:
             subsample_seed = config.get('subsample_seed', 666)
             shuffle = config.get('shuffle', True)
-            annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+            annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle, no_recursion)
 
     elif subsample_size is not None:
         warnings.warn("Subset selection parameters will be ignored")

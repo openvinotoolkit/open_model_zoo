@@ -34,7 +34,8 @@ from .audio_preprocessing import (
     DCT,
     ClipCepstrum,
     TrimmingAudio,
-    AudioToMelSpectrogram
+    AudioToMelSpectrogram,
+    FFTSpectrogram
 )
 from .audio_preprocessing_ext import (
     SpliceFrame,
@@ -46,7 +47,10 @@ from .audio_preprocessing_ext import (
     ResampleAudio,
     ClipAudio,
     SamplesToFloat32,
-    NormalizeAudio
+    NormalizeAudio,
+    RemoveDCandDither,
+    TruncateBucket,
+    FrameSignalOverlappingWindow,
 )
 
 from .normalization import Normalize, Normalize3d
@@ -57,7 +61,8 @@ from .geometric_transformations import (
     Tiling,
     ImagePyramid,
     FaceDetectionImagePyramid,
-    WarpAffine
+    WarpAffine,
+    Transpose
 )
 from .crop import (
     Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
@@ -96,6 +101,10 @@ __all__ = [
     'PreemphFrame',
     'SignalPatching',
     'ContextWindow',
+    'RemoveDCandDither',
+    'FFTSpectrogram',
+    'TruncateBucket',
+    'FrameSignalOverlappingWindow',
 
     'Resize',
     'Resize3D',
@@ -103,6 +112,7 @@ __all__ = [
     'Flip',
     'PointAligner',
     'Tiling',
+    'Transpose',
     'CropBraTS',
     'ImagePyramid',
     'FaceDetectionImagePyramid',

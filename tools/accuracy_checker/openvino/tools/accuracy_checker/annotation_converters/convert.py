@@ -83,7 +83,7 @@ def build_argparser():
     return parser
 
 
-def make_subset(annotation, size, seed=666, shuffle=True):
+def make_subset(annotation, size, seed=666, shuffle=True, no_recursion=False):
     dtype_specific_subsets = {
         SentenceSimilarityAnnotation: make_subset_sentence_similarity,
         PlaceRecognitionAnnotation: make_subset_place_recognition,
@@ -100,25 +100,28 @@ def make_subset(annotation, size, seed=666, shuffle=True):
 
     for dtype, subset_func in dtype_specific_subsets.items():
         if isinstance(annotation[-1], dtype):
-            return subset_func(annotation, size, shuffle)
+            return subset_func(annotation, size, shuffle, no_recursion=no_recursion)
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
 
 
-def make_subset_pairwise(annotation, size, shuffle=True):
+def make_subset_pairwise(annotation, size, shuffle=True, no_recursion=False, **kwargs):
     def get_pairs(pairs_list):
         pairs_set = OrderedSet()
         for identifier in pairs_list:
-            next_annotation = next(
-                pair_annotation for pair_annotation in annotation if pair_annotation.identifier == identifier
-            )
-            positive_pairs = get_pairs(next_annotation.positive_pairs)
-            negative_pairs = get_pairs(next_annotation.negative_pairs)
+            next_annotation = annotation_dict[identifier]
+            if not no_recursion:
+                positive_pairs = get_pairs(next_annotation.positive_pairs)
+                negative_pairs = get_pairs(next_annotation.negative_pairs)
+            else:
+                positive_pairs = [annotation_dict[identifier] for identifier in next_annotation.positive_pairs]
+                negative_pairs = [annotation_dict[identifier] for identifier in next_annotation.negative_pairs]
             pairs_set.add(next_annotation)
             pairs_set |= positive_pairs
             pairs_set |= negative_pairs
 
         return pairs_set
+    annotation_dict = {ann.identifier: ann for ann in annotation}
 
     subsample_set = OrderedSet()
 
@@ -145,7 +148,7 @@ def make_subset_pairwise(annotation, size, shuffle=True):
     return list(subsample_set)
 
 
-def make_subset_reid(annotation, size, shuffle=True):
+def make_subset_reid(annotation, size, shuffle=True, **kwargs):
     subsample_set = OrderedSet()
     potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
     for ann_ind in potential_ann_ind:
@@ -176,7 +179,7 @@ def make_subset_reid(annotation, size, shuffle=True):
     return list(subsample_set)
 
 
-def make_subset_place_recognition(annotation, size, shuffle=True):
+def make_subset_place_recognition(annotation, size, shuffle=True, **kwargs):
     subsample_set = OrderedSet()
     potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
     queries_ids = [idx for idx, ann in enumerate(annotation) if ann.query]
@@ -202,7 +205,7 @@ def make_subset_place_recognition(annotation, size, shuffle=True):
     return [annotation[ind] for ind in subsample_set]
 
 
-def make_subset_sentence_similarity(annotation, size, shuffle=True):
+def make_subset_sentence_similarity(annotation, size, shuffle=True, **kwargs):
     subsample_set = OrderedSet()
     potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
     index_to_info = {
@@ -227,7 +230,7 @@ def make_subset_sentence_similarity(annotation, size, shuffle=True):
     return [annotation[ind] for ind in subsample_set]
 
 
-def make_subset_kaldi(annotation, size, shuffle=True):
+def make_subset_kaldi(annotation, size, shuffle=True, **kwargs):
     file_to_num_utterances = {}
     for ind, ann in enumerate(annotation):
         if ann.identifier.file not in file_to_num_utterances:

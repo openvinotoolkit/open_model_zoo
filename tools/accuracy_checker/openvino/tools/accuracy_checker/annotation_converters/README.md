@@ -566,7 +566,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/pytorch_toolkit/action_recognition/README.md#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/master/misc/pytorch_toolkit/action_recognition#preparation).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).
@@ -795,6 +795,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
 * `common_text_recognition` - converts annotation for text recognition tasks (e.g. optical character recognition, automatic speech recognition) to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to file with annotation, where each line represented as `[input_file]` `[reference]`.
+* `speaker_reidentification` - converts annotation for speaker/sound reidentification dataset to `ReidentificationClassificationAnnotation`.
+  * `annotation_file` - text file containing reidentification pairs in following format: `[is_positive] [audio_1] [audio_2]`, where `is_positive` - indicator that pair is positive (1 if speaker is the same, 0 if speakers are different), `audio_1` and `audio_2` are path to the first and the second audio files respectively.
+  * `max_pairs` - limit for selection pairs for each image (Optional, by default use all founded pairs in annotation).
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.
