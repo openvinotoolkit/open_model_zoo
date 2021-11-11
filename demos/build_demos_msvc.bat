@@ -18,7 +18,7 @@
 setlocal EnableDelayedExpansion
 set "ROOT_DIR=%~dp0"
 
-set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
+set "BUILD_DIR=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
 
 set SUPPORTED_VS_VERSIONS=VS2015 VS2017 VS2019
 
@@ -28,6 +28,14 @@ set BUILD_TARGETS=
 
 :argParse
 if not "%1" == "" (
+    if "%1" == "-h" (
+        goto usage
+    )
+    if "%1"=="-b" (
+        set BUILD_DIR=%2
+        shift & shift
+        goto argParse
+    )
     rem cmd.exe mangles -DENABLE_PYTHON=YES into -DENABLE_PYTHON YES,
     rem so it gets split into two arguments
     if "%1" == "-DENABLE_PYTHON" (
@@ -46,7 +54,7 @@ if not "%1" == "" (
 
     if not "%VS_VERSION%" == "" (
         echo Unexpected argument: "%1"
-        goto errorHandling
+        goto usage
     )
 
     if "%1"=="VS2015" (
@@ -122,23 +130,34 @@ if "%VS_VERSION%" == "" (
     )
 )
 
-if exist "%SOLUTION_DIR64%\CMakeCache.txt" del "%SOLUTION_DIR64%\CMakeCache.txt"
+if exist "%BUILD_DIR%\CMakeCache.txt" del "%BUILD_DIR%\CMakeCache.txt"
 
-echo Creating Visual Studio %VS_VERSION% %PLATFORM% files in %SOLUTION_DIR64%...
-cd "%ROOT_DIR%" && cmake -E make_directory "%SOLUTION_DIR64%"
+echo Creating Visual Studio %VS_VERSION% %PLATFORM% files in %BUILD_DIR%...
+cd "%ROOT_DIR%" && cmake -E make_directory "%BUILD_DIR%"
 
-cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !VS_VERSION!" -A %PLATFORM% %EXTRA_CMAKE_OPTS% "%ROOT_DIR%"
+cd "%BUILD_DIR%" && cmake -G "Visual Studio !VS_VERSION!" -A %PLATFORM% %EXTRA_CMAKE_OPTS% "%ROOT_DIR%"
 
 echo.
 echo ###############^|^| Build Open Model Zoo Demos using MS Visual Studio ^|^|###############
 echo.
 echo cmake --build . --config Release %BUILD_TARGETS%
-cmake --build . --config Release %BUILD_TARGETS%
+cmake --build . --config Release -j 4 %BUILD_TARGETS%
 
 if ERRORLEVEL 1 goto errorHandling
 
 echo Done.
-goto :eof
+exit /b
+
+:usage
+echo Build inference engine demos
+echo.
+echo Options:
+echo   -h                 Print the help message
+echo   -b=DEMOS_BUILD_DIR Specify the demo build directory
+echo   -DENABLE_PYTHON=y  Whether to build extension modules for Python demos
+echo   --target=TARGETS   A space sepparated list of demos to build. To build more than one specific demo use quotation marks ex. --target="classification_demo segmentation_demo"
+echo   VS_VERSION         The preferred Microsoft Visual Studio version
+exit /B 1
 
 :errorHandling
 echo Error

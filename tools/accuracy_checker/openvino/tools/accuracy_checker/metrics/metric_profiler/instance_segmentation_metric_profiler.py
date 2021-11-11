@@ -100,8 +100,8 @@ class InstanceSegmentationProfiler(DetectionListProfiler):
             dt = per_class_result['dt']
             gt = per_class_result['gt']
             matches_result = self.generate_result_matching(per_class_result, '')
-            dt_matched = matches_result['prediction_matches']
-            gt_matched = matches_result['annotation_matches']
+            dt_matched = matches_result.get('prediction_matches', [])
+            gt_matched = matches_result.get('annotation_matches', [])
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
@@ -138,8 +138,8 @@ class InstanceSegmentationProfiler(DetectionListProfiler):
         result = per_class_result['result']
         if np.isnan(result):
             result = -1
-        dt_matches = per_class_result['dt_matches'][0].tolist()
-        gt_matches = per_class_result['gt_matches'][0].tolist()
+        dt_matches = per_class_result['dt_matches'][0].tolist() if 'dt_matches' in per_class_result else []
+        gt_matches = per_class_result['gt_matches'][0].tolist() if 'gt_matches' in per_class_result else []
         if aggregate:
             dt_matches = int(sum(dt_matches))
             gt_matches = int(np.sum(np.array(gt_matches) != 0))

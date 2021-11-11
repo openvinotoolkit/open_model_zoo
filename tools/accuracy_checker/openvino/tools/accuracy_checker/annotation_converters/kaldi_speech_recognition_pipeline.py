@@ -205,14 +205,14 @@ class KaldiFeatureRegressionConverter(BaseFormatConverter):
 
         if not self.ivectors:
             pairs = []
-            for ark_file in self.data_dir.glob('*.{}'.format(self.file_ext)):
+            for ark_file in self.data_dir.glob('*{}'.format(self.file_ext)):
                 if self.data_dir == self.ref_data_dir and self.ref_file_suffix in ark_file.name:
                     continue
                 ref_file = self.ref_data_dir / ark_file.name.replace(self.file_ext, self.ref_file_suffix+self.file_ext)
                 pairs.append((ark_file, ref_file))
             return pairs
         triples = []
-        for ivector_file in self.data_dir.glob("*_ivector.{}".format(self.file_ext)):
+        for ivector_file in self.data_dir.glob("*_ivector{}".format(self.file_ext)):
             feats_file = self.data_dir / ivector_file.name.replace('_ivector', '')
             ref_file = self.ref_data_dir / ivector_file.name.replace('_ivector', self.ref_file_suffix)
             if not feats_file.exists() or not ref_file.exists():

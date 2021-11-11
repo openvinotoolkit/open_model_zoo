@@ -130,3 +130,6 @@ Accuracy Checker supports following set of postprocessors:
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
   * `min` - minimal value in range, optional, default 0.
   * `max`- maximal value in range.
+* `sentence_similarity_pooling` - pool words embeddings for sentence similarity task. Supported representations: `SentenceSimilarityAnnotation`, `ReidentificationPrediction`.
+  * `pooling type` - pooling type for embeddings - `mean` for mean pooling, `max` for max pooling (Optional, default `mean`).
+  * `remove_padding` - remove end of string padding from word embeddings (Optional, default `True`).

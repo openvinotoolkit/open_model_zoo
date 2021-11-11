@@ -40,6 +40,7 @@ AccuracyChecker supports following set of adapters:
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer (Optional, default `True`).
   * `joining_method` - method used to join embeddings (optional, supported methods are `sum` and `concatenation`, default - `sum`).
   * `target_out` - target output layer name (Optional, if not provided first in the model will be used).
+  * `keep_shape` - allow keeping initial shape for predicted embedding (Optional, default `False`, it means that model output will be flattenized).
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
   * `anchors` - anchor values provided as comma-separated list or one of precomputed:
@@ -274,6 +275,7 @@ AccuracyChecker supports following set of adapters:
   * `blank_label` - index of the CTC blank label (default 0).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
+  * `shift_labels` - shift label map ids on 1 if it represented without blank label on zero position (Optional, default False).
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
   * `eos_label` - label which should finish decoding (Optional, default `[s]`).
   * `start_label` - label which should start decoding (Optional).

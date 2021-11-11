@@ -25,11 +25,30 @@ error() {
 }
 trap 'error ${LINENO}' ERR
 
+usage() {
+    echo "Build inference engine demos"
+    echo
+    echo "Options:"
+    echo "  -h, --help                                      Print the help message"
+    echo "  -b=DEMOS_BUILD_DIR, --build_dir=DEMOS_BUILD_DIR Specify the demo build directory"
+    echo "  -DENABLE_PYTHON=y                               Whether to build extension modules for Python demos"
+    echo '  --target=TARGETS                                A space sepparated list of demos to build. To build more than one specific demo use quotation marks ex. --target="classification_demo segmentation_demo"'
+    echo
+    exit 1
+}
+
+build_dir=$HOME/omz_demos_build
 extra_cmake_opts=()
 build_targets=()
 
 for opt in "$@"; do
     case "$opt" in
+    -h | --help)
+        usage
+        ;;
+    -b=* | --build_dir=*)
+        build_dir=("${opt#*=}")
+        ;;
     -DENABLE_PYTHON=*)
         extra_cmake_opts+=("$opt")
         ;;
@@ -38,7 +57,7 @@ for opt in "$@"; do
         ;;
     *)
         printf "Unknown option: %q\n" "$opt"
-        exit 1
+        usage
         ;;
     esac
 done
@@ -69,8 +88,6 @@ if ! command -v cmake &>/dev/null; then
     printf "\n\nCMAKE is not installed. It is required to build Open Model Zoo demos. Please install it. \n\n"
     exit 1
 fi
-
-build_dir=$HOME/omz_demos_build
 
 OS_PATH=$(uname -m)
 NUM_THREADS="-j2"
