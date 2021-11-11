@@ -168,7 +168,7 @@ class SequentialModel(BaseCascadeModel):
         length = np.expand_dims(length, axis=(1))
         return x < length
 
-    def predict(self, identifiers, input_data, input_meta={}, input_names=[], callback=None):
+    def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
 
         duration_input = dict(zip(input_names, input_data[0]))

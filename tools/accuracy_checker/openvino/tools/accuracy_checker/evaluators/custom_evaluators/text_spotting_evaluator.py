@@ -133,7 +133,7 @@ class SequentialModel(BaseCascadeModel):
             'recognizer_decoder': self.recognizer_decoder
         }
 
-    def predict(self, identifiers, input_data, frame_meta={}, callback=None):
+    def predict(self, identifiers, input_data, frame_meta=None, callback=None):
         assert len(identifiers) == 1
 
         detector_outputs = self.detector.predict(identifiers, input_data)

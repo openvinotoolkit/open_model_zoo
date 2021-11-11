@@ -388,7 +388,8 @@ class ASRModel(BaseCascadeModel):
             while True:
                 y_hat = max(A)
                 A.remove(y_hat)
-                decoder_output, hidden, raw_outputs = self.decoder.predict(identifiers, y_hat.sequence[-1], hidden=y_hat.hidden)
+                decoder_output, hidden, raw_outputs = self.decoder.predict(identifiers, y_hat.sequence[-1],
+                                                                           hidden=y_hat.hidden)
                 if encoder_callback is not None:
                     encoder_callback(raw_outputs)
                 joint_output, raw_outputs = self.joint.predict(identifiers, (encoder_output, decoder_output))

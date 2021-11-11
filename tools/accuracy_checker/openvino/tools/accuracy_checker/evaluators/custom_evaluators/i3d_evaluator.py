@@ -126,7 +126,8 @@ class I3DCascadeModel(BaseCascadeModel):
         if self.rgb_model.output_blob != self.flow_model.output_blob:
             warnings.warn("Outputs for rgb and flow models have different names. "
                           "rgb model's output name: {}. flow model's output name: {}. Output name of rgb model "
-                          "will be used in combined output".format(self.rgb_model.output_blob, self.flow_model.output_blob))
+                          "will be used in combined output".format(self.rgb_model.output_blob,
+                                                                   self.flow_model.output_blob))
         self.output_blob = self.rgb_model.output_blob
 
         self._part_by_name = {

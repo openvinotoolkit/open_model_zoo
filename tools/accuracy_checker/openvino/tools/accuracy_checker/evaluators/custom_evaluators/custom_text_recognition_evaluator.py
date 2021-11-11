@@ -177,8 +177,8 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         assert len(identifiers) == 1
         input_data = np.array(input_data)
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        enc_res = self.recognizer_encoder.predict(
-            inputs={self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        enc_res = self.recognizer_encoder.predict(identifiers,
+                                                  {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
         if callback:
             callback(enc_res)
         features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
@@ -188,11 +188,13 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         logits = []
         for _ in range(self.max_seq_len):
 
-            dec_res = self.recognizer_decoder.predict(inputs={
-                self.recognizer_decoder.inputs_mapping['features']: features,
-                self.recognizer_decoder.inputs_mapping['hidden']: dec_state,
-                self.recognizer_decoder.inputs_mapping['decoder_input']: tgt,
-            })
+            dec_res = self.recognizer_decoder.predict(
+                identifiers,
+                {
+                    self.recognizer_decoder.inputs_mapping['features']: features,
+                    self.recognizer_decoder.inputs_mapping['hidden']: dec_state,
+                    self.recognizer_decoder.inputs_mapping['decoder_input']: tgt
+                 })
 
             dec_state = dec_res[self.recognizer_decoder.outputs_mapping['decoder_hidden']]
             logit = dec_res[self.recognizer_decoder.outputs_mapping['decoder_output']]
@@ -251,8 +253,8 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         assert len(identifiers) == 1
         input_data = np.array(input_data)
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        enc_res = self.recognizer_encoder.predict(
-            inputs={self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        enc_res = self.recognizer_encoder.predict(identifiers,
+                                                  {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
         if callback:
             callback(enc_res)
         row_enc_out = enc_res[self.recognizer_encoder.outputs_mapping['row_enc_out']]
@@ -264,13 +266,15 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         logits = []
         for _ in range(self.max_seq_len):
 
-            dec_res = self.recognizer_decoder.predict(inputs={
-                self.recognizer_decoder.inputs_mapping['row_enc_out']: row_enc_out,
-                self.recognizer_decoder.inputs_mapping['dec_st_c']: dec_states_c,
-                self.recognizer_decoder.inputs_mapping['dec_st_h']: dec_states_h,
-                self.recognizer_decoder.inputs_mapping['output_prev']: O_t,
-                self.recognizer_decoder.inputs_mapping['tgt']: tgt
-            })
+            dec_res = self.recognizer_decoder.predict(
+                identifiers,
+                {
+                    self.recognizer_decoder.inputs_mapping['row_enc_out']: row_enc_out,
+                    self.recognizer_decoder.inputs_mapping['dec_st_c']: dec_states_c,
+                    self.recognizer_decoder.inputs_mapping['dec_st_h']: dec_states_h,
+                    self.recognizer_decoder.inputs_mapping['output_prev']: O_t,
+                    self.recognizer_decoder.inputs_mapping['tgt']: tgt
+                })
             if callback:
                 callback(dec_res)
 
@@ -298,10 +302,10 @@ class RecognizerDLSDKModel(BaseDLSDKModel):
         self.inputs_mapping = inputs_mapping
         self.outputs_mapping = outputs_mapping
 
-    def predict(self, inputs, identifiers=None):
+    def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
-            self._reshape_input({k: v.shape for k, v in inputs.items()})
-        return self.exec_network.infer(inputs)
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
+        return self.exec_network.infer(input_data)
 
 
 MODEL_TYPES = {

@@ -78,7 +78,7 @@ class Synthesizer(BaseCascadeModel):
         self.max_decoder_steps = int(network_info.get('max_decoder_steps', 500))
         self.gate_threshold = float(network_info.get('gate_treshold', 0.6))
 
-    def predict(self, identifiers, input_data, input_meta={}, input_names=None, callback=None):
+    def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_outputs = self.encoder.predict(identifiers, input_data[0])
         if callback:
@@ -108,7 +108,8 @@ class Synthesizer(BaseCascadeModel):
 
             if n == scheduler[j]:
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
-                postnet_outs = self.postnet.predict(identifiers, {self.postnet.input_mapping['mel_outputs']: postnet_input})
+                postnet_outs = self.postnet.predict(identifiers,
+                                                    {self.postnet.input_mapping['mel_outputs']: postnet_input})
                 if callback:
                     callback(postnet_outs)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
@@ -125,7 +126,8 @@ class Synthesizer(BaseCascadeModel):
                 mel_outputs += [mel_outputs[-1]] * 10
                 n += 10
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
-                postnet_outs = self.postnet.predict(identifiers, {self.postnet.input_mapping['mel_outputs']: postnet_input})
+                postnet_outs = self.postnet.predict(identifiers,
+                                                    {self.postnet.input_mapping['mel_outputs']: postnet_input})
                 if callback:
                     callback(postnet_outs)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
