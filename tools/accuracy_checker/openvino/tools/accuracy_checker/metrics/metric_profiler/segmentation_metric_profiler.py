@@ -33,8 +33,8 @@ class SegmentationMetricProfiler(MetricProfiler):
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)
 
-    @staticmethid
-    def generate_profiling_json(self, identifier, cm, metric_result,
+    @staticmethod
+    def generate_profiling_json(identifier, cm, metric_result,
                                 prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
         report = {'identifier': identifier}
         dt_mask, gt_mask = {}, {}
