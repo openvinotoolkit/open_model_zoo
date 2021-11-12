@@ -37,21 +37,25 @@ class SegmentationMetricProfiler(MetricProfiler):
     def generate_profiling_json(identifier, cm, metric_result,
                                 prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
         report = {'identifier': identifier}
-        dt_mask, gt_mask = {}, {}
+        class_result = {}
         for label, polygons in prediction_mask_polygon.items():
             if label == ignore_label:
                 continue
-            dt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
+            class_result[int(label)] = {'prediction_mask': [polygon.tolist() for polygon in polygons]}
         for label, polygons in annotation_mask_polygon.items():
             if label == ignore_label:
                 continue
-            gt_mask[int(label)] = [polygon.tolist() for polygon in polygons]
+            if int(label) not in class_result:
+                class_result[int(label)] = {'prediction_mask': []}
+            class_result[int(label)].update({'annotation_mask': [polygon.tolist() for polygon in polygons]})
         report['confusion_matrix'] = cm.tolist()
-        report['prediction_mask'] = dt_mask
-        report['annotation_mask'] = gt_mask
         report['result'] = np.mean(metric_result)
-        report['per_class_result'] = {
-            int(label): {'result': float(metric)} for label, metric in per_class_result.items()}
+        if per_class_result:
+            for label, metric in per_class_result.items():
+                if int(label) not in class_result:
+                    continue
+                class_result[int(label)]['result'] = metric
+        report['per_class_result'] = class_result
 
         return report
 

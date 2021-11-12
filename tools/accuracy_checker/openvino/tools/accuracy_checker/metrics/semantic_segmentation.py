@@ -99,9 +99,17 @@ class SegmentationAccuracy(SegmentationMetric):
         cm = super().update(annotation, prediction)
         result = np.diag(cm).sum() / cm.sum()
         if self.profiler:
+            diagonal = np.diag(cm).astype(float)
+            per_class_count = cm.sum(axis=1)
+            acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan),
+                                where=per_class_count != 0)
+            acc_cls, labels = finalize_metric_result(
+                acc_cls, [key for key in self.dataset.labels if key != self.ignore_label]
+            )
+            per_class_result = dict(zip(labels, acc_cls))
             self.profiler.update(
                 annotation.identifier, self.name, cm, result,
-                prediction.mask, prediction.to_polygon(), annotation.to_polygon(), {}, self.ignore_label
+                prediction.mask, prediction.to_polygon(), annotation.to_polygon(), per_class_result, self.ignore_label
             )
         return result
 
@@ -206,9 +214,15 @@ class SegmentationFWAcc(SegmentationMetric):
         result = (freq[freq > 0] * iou[freq > 0]).sum()
 
         if self.profiler:
+            class_result = freq * iou
+            class_result[freq == 0] = np.nan
+            class_result, labels = finalize_metric_result(
+                class_result, list(self.dataset.labels)
+            )
+            per_class_result = dict(zip(labels, class_result))
             self.profiler.update(annotation.identifier, self.name, cm, result,
                                  prediction.mask, prediction.to_polygon(), annotation.to_polygon(),
-                                 {}, self.ignore_label)
+                                 per_class_result, self.ignore_label)
 
         return result
 
