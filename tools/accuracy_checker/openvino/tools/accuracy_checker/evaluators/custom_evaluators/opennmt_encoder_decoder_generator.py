@@ -536,7 +536,9 @@ class OpenNMTModel(BaseModel):
         for data in input_data:
             # encoder_state, memory, src_len = self.encoder.predict(identifiers, data)
             # encoder_state -> (h, c)
-            h, c, memory, src_len = self.encoder.predict(identifiers, data)
+            # h, c, memory, src_len = self.encoder.predict(identifiers, data)
+            h, c, memory, src_len = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
+                                                                       'src_len': np.array([len(data),])})
             if encoder_callback:
                 encoder_callback((h, c, memory, src_len))
             if self.store_encoder_predictions:
@@ -557,17 +559,26 @@ class OpenNMTModel(BaseModel):
                 decoder_input = decode_strategy.current_predictions.view().reshape([1, self.beams, 1])
                 # decoder_input = decode_strategy.get_decoder_input()
 
-                log_probs, attn = self._decode_and_generate(
-                    identifiers,
-                    decoder_input,
-                    memory_bank,
-                    self.batch,
-                    self.src_vocabs,
-                    memory_lengths=memory_lengths,
-                    src_map=src_map,
-                    step=step,
-                    batch_offset=decode_strategy.batch_offset,
-                )
+                # log_probs, attn = self._decode_and_generate(
+                #     identifiers,
+                #     decoder_input,
+                #     memory_bank,
+                #     self.batch,
+                #     self.src_vocabs,
+                #     memory_lengths=memory_lengths,
+                #     src_map=src_map,
+                #     step=step,
+                #     batch_offset=decode_strategy.batch_offset,
+                # )
+
+                # decoder_output, attn = self.decoder.predict(identifiers, (decoder_input, memory_bank, memory_lengths))
+                decoder_output, attn = self.decoder.predict(identifiers, {'input': decoder_input,
+                                                                          'memory': memory_bank,
+                                                                          'mem_len': memory_lengths})
+
+                # log_probs = self.generator.predict(identifiers, (decoder_output,))
+                log_probs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})
+                log_probs = log_probs[0]
 
                 decode_strategy.advance(log_probs, attn)
                 any_finished = decode_strategy.is_finished.any()
@@ -627,116 +638,98 @@ class OpenNMTModel(BaseModel):
             # predictions.append(prediction)
         return raw_outputs, predictions
 
-# self.alive_seq:
-    # tensor([[2, 40, 10, 54, 40],
-    #         [2, 40, 10, 4, 17],
-    #         [2, 40, 10, 54, 39],
-    #         [2, 10, 45, 17, 11],
-    #         [2, 10, 13, 17, 8]])
-
-# self.select_indices
-#     tensor([0, 1, 2, 4, 3])
-
-    # tensor([[2, 40, 10, 54, 40],
-    #         [2, 40, 10, 4, 17],
-    #         [2, 40, 10, 54, 39],
-    #         [2, 10, 13, 17, 8],
-    #         [2, 10, 45, 17, 11]])
-
-# self.alive_seq.index_select(0, self.select_indices)
-
-    def _decode_and_generate(
-        self,
-        identifiers,
-        decoder_in,
-        memory_bank,
-        batch,
-        src_vocabs,
-        memory_lengths,
-        src_map=None,
-        step=None,
-        batch_offset=None,
-    ):
-        # if self.copy_attn:
-        #     # Turn any copied words into UNKs.
-        #     decoder_in = decoder_in.masked_fill(
-        #         decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
-        #     )
-
-        # Decoder forward, takes [tgt_len, batch, nfeats] as input
-        # and [src_len, batch, hidden] as memory_bank
-        # in case of inference tgt_len = 1, batch = beam times batch_size
-        # in case of Gold Scoring tgt_len = actual length, batch = 1 batch
-
-        # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
-        # input_feed_batch, _ = input_feed.size()
-        # _, tgt_batch, _ = decoder_in.size()
-        # # aeq(tgt_batch, input_feed_batch)
-        # # END Additional args check.
-        #
-        # dec_state = self.model.decoder.state["hidden"]
-        # coverage = self.model.decoder.state["coverage"].squeeze(0) \
-        #     if self.model.decoder.state["coverage"] is not None else None
-        #
-        # # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
-        # #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-        # #     input_feed=input_feed, hidden=dec_state, coverage=coverage
-        # # )
-        # dec_out, dec_attn, dec_hidden, dec_input_feed = self.model.decoder(
-        #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-        #     input_feed=input_feed, hidden=dec_state
-        # )
-        #
-        # self.model.decoder.state["hidden"] = dec_hidden
-        # self.model.decoder.state["input_feed"] = dec_input_feed
-        # # self.model.decoder.state["coverage"] = dec_coverage
-        #
-        # # IMPORTANT^^^^^^
-        # # hidden_in = (h0, c0)
-        # # hidden_out = (h1, c1)
-
-        output, attn = self.decoder.predict(identifiers, (decoder_in, memory_bank, memory_lengths))
-
-        # Generator forward.
-        # if not self.copy_attn:
-        #     if "std" in dec_attn:
-        #         attn = dec_attn["std"]
-        #     else:
-        #         attn = None
-        #     log_probs = self.model.generator(dec_out.squeeze(0))
-        #
-        #     # returns [(batch_size x beam_size) , vocab ] when 1 step
-        #     # or [ tgt_len, batch_size, vocab ] when full sentence
-        # else:
-        #     # attn = dec_attn["copy"]
-        #     # scores = self.model.generator(
-        #     #     dec_out.view(-1, dec_out.size(2)),
-        #     #     attn.view(-1, attn.size(2)),
-        #     #     src_map,
-        #     # )
-        #     # # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
-        #     # if batch_offset is None:
-        #     #     scores = scores.view(-1, batch.batch_size, scores.size(-1))
-        #     #     scores = scores.transpose(0, 1).contiguous()
-        #     # else:
-        #     #     scores = scores.view(-1, self.beam_size, scores.size(-1))
-        #     # scores = collapse_copy_scores(
-        #     #     scores,
-        #     #     batch,
-        #     #     self._tgt_vocab,
-        #     #     src_vocabs,
-        #     #     batch_dim=0,
-        #     #     batch_offset=batch_offset,
-        #     # )
-        #     # scores = scores.view(decoder_in.size(0), -1, scores.size(-1))
-        #     # log_probs = scores.squeeze(0).log()
-        #     # # returns [(batch_size x beam_size) , vocab ] when 1 step
-        #     # # or [ tgt_len, batch_size, vocab ] when full sentence
-        #     pass
-
-        log_probs = self.generator.predict(identifiers, (output, ))
-
-        return log_probs[0], attn
+    # def _decode_and_generate(
+    #     self,
+    #     identifiers,
+    #     decoder_in,
+    #     memory_bank,
+    #     batch,
+    #     src_vocabs,
+    #     memory_lengths,
+    #     src_map=None,
+    #     step=None,
+    #     batch_offset=None,
+    # ):
+    #     # if self.copy_attn:
+    #     #     # Turn any copied words into UNKs.
+    #     #     decoder_in = decoder_in.masked_fill(
+    #     #         decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
+    #     #     )
+    #
+    #     # Decoder forward, takes [tgt_len, batch, nfeats] as input
+    #     # and [src_len, batch, hidden] as memory_bank
+    #     # in case of inference tgt_len = 1, batch = beam times batch_size
+    #     # in case of Gold Scoring tgt_len = actual length, batch = 1 batch
+    #
+    #     # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
+    #     # input_feed_batch, _ = input_feed.size()
+    #     # _, tgt_batch, _ = decoder_in.size()
+    #     # # aeq(tgt_batch, input_feed_batch)
+    #     # # END Additional args check.
+    #     #
+    #     # dec_state = self.model.decoder.state["hidden"]
+    #     # coverage = self.model.decoder.state["coverage"].squeeze(0) \
+    #     #     if self.model.decoder.state["coverage"] is not None else None
+    #     #
+    #     # # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
+    #     # #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
+    #     # #     input_feed=input_feed, hidden=dec_state, coverage=coverage
+    #     # # )
+    #     # dec_out, dec_attn, dec_hidden, dec_input_feed = self.model.decoder(
+    #     #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
+    #     #     input_feed=input_feed, hidden=dec_state
+    #     # )
+    #     #
+    #     # self.model.decoder.state["hidden"] = dec_hidden
+    #     # self.model.decoder.state["input_feed"] = dec_input_feed
+    #     # # self.model.decoder.state["coverage"] = dec_coverage
+    #     #
+    #     # # IMPORTANT^^^^^^
+    #     # # hidden_in = (h0, c0)
+    #     # # hidden_out = (h1, c1)
+    #
+    #     output, attn = self.decoder.predict(identifiers, (decoder_in, memory_bank, memory_lengths))
+    #
+    #     # Generator forward.
+    #     # if not self.copy_attn:
+    #     #     if "std" in dec_attn:
+    #     #         attn = dec_attn["std"]
+    #     #     else:
+    #     #         attn = None
+    #     #     log_probs = self.model.generator(dec_out.squeeze(0))
+    #     #
+    #     #     # returns [(batch_size x beam_size) , vocab ] when 1 step
+    #     #     # or [ tgt_len, batch_size, vocab ] when full sentence
+    #     # else:
+    #     #     # attn = dec_attn["copy"]
+    #     #     # scores = self.model.generator(
+    #     #     #     dec_out.view(-1, dec_out.size(2)),
+    #     #     #     attn.view(-1, attn.size(2)),
+    #     #     #     src_map,
+    #     #     # )
+    #     #     # # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
+    #     #     # if batch_offset is None:
+    #     #     #     scores = scores.view(-1, batch.batch_size, scores.size(-1))
+    #     #     #     scores = scores.transpose(0, 1).contiguous()
+    #     #     # else:
+    #     #     #     scores = scores.view(-1, self.beam_size, scores.size(-1))
+    #     #     # scores = collapse_copy_scores(
+    #     #     #     scores,
+    #     #     #     batch,
+    #     #     #     self._tgt_vocab,
+    #     #     #     src_vocabs,
+    #     #     #     batch_dim=0,
+    #     #     #     batch_offset=batch_offset,
+    #     #     # )
+    #     #     # scores = scores.view(decoder_in.size(0), -1, scores.size(-1))
+    #     #     # log_probs = scores.squeeze(0).log()
+    #     #     # # returns [(batch_size x beam_size) , vocab ] when 1 step
+    #     #     # # or [ tgt_len, batch_size, vocab ] when full sentence
+    #     #     pass
+    #
+    #     log_probs = self.generator.predict(identifiers, (output, ))
+    #
+    #     return log_probs[0], attn
 
     def reset(self):
         self.processing_frames_buffer = []
@@ -772,6 +765,7 @@ class OpenNMTModel(BaseModel):
         return [{'name': 'encoder', 'model': self.encoder.network},
                 {'name': 'decoder', 'model': self.decoder.network},
                 {'name': 'generator', 'model': self.generator.network}]
+
 
 class StatefulModel(BaseModel):
     state_names = []
@@ -851,18 +845,6 @@ class CommonDLSDKModel(BaseDLSDKModel, BaseModel):
 
         return {input_blob: np.array(input_data)}
 
-
-
-# class CommonEncoderModel(CommonDLSDKModel):
-#     def fit_to_input(self, input_data):
-#         if isinstance(input_data, list):
-#             src = np.array(input_data)
-#             src_len = np.array([len(input_data),])
-#             for _ in range(2):
-#                 src = np.expand_dims(src, -1)
-#             input_data = {'src': src, 'src_len': src_len}
-#         super().fit_to_input(input_data)
-#
 
 # mb = np.tile(memory_bank, (1, 5, 1))
 def tile(x, count, dim=0):
@@ -1595,14 +1577,14 @@ class EncoderDLSDKModel(CommonDLSDKModel):
     output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
     return_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
 
-    def fit_to_input(self, input_data):
-        if isinstance(input_data, list):
-            src = np.array(input_data)
-            src_len = np.array([len(input_data),])
-            for _ in range(2):
-                src = np.expand_dims(src, -1)
-            input_data = {'src': src, 'src_len': src_len}
-        return super().fit_to_input(input_data)
+    # def fit_to_input(self, input_data):
+    #     if isinstance(input_data, list):
+    #         src = np.array(input_data)
+    #         src_len = np.array([len(input_data),])
+    #         for _ in range(2):
+    #             src = np.expand_dims(src, -1)
+    #         input_data = {'src': src, 'src_len': src_len}
+    #     return super().fit_to_input(input_data)
 
 
 class DecoderDLSDKModel(StatefulModel, CommonDLSDKModel):
@@ -1616,12 +1598,12 @@ class DecoderDLSDKModel(StatefulModel, CommonDLSDKModel):
 
     hidden_size = 500
 
-    def fit_to_input(self, input_data):
-        if isinstance(input_data, tuple):
-            # input, memory_bank, mem_lengths
-            input_data = {'input': input_data[0], 'memory': input_data[1], 'mem_len': input_data[2]}
-# fill state & reshape model later in parents classes call
-        return super().fit_to_input(input_data)
+#     def fit_to_input(self, input_data):
+#         if isinstance(input_data, tuple):
+#             # input, memory_bank, mem_lengths
+#             input_data = {'input': input_data[0], 'memory': input_data[1], 'mem_len': input_data[2]}
+# # fill state & reshape model later in parents classes call
+#         return super().fit_to_input(input_data)
 
     def init_state(self, encoder_final):
         self.state = {}
@@ -1700,11 +1682,11 @@ class GeneratorDLSDKModel(CommonDLSDKModel):
     input_layers = ['input']
     output_layers = ['output']
 
-    def fit_to_input(self, input_data):
-        if isinstance(input_data, tuple):
-            input_data = {'input': input_data[0].squeeze()}
-        # fill state & reshape model later in parents classes call
-        return super().fit_to_input(input_data)
+    # def fit_to_input(self, input_data):
+    #     if isinstance(input_data, tuple):
+    #         input_data = {'input': input_data[0].squeeze()}
+    #     # fill state & reshape model later in parents classes call
+    #     return super().fit_to_input(input_data)
 
     # def predict(self, dec_output):
     #     input_data = {'input': dec_output}
