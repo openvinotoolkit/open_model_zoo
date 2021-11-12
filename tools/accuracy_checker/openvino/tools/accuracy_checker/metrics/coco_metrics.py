@@ -445,8 +445,8 @@ class MSCOCOSegmBase(MSCOCOBaseMetric):
             ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
             iou = compute_iou(ground_truth, detections, annotation_boxes=boxes, annotation_areas=areas, iscrowd=iscrowd)
             eval_result = evaluate_image(
-                ground_truth if not profile_boxes else annotation_polygons[label],
-                gt_difficult, iscrowd, detections if not profile_boxes else prediction_polygons[label],
+                ground_truth if not profile_boxes else annotation_polygons.get(label, []),
+                gt_difficult, iscrowd, detections if not profile_boxes else prediction_polygons.get(label, []),
                 dt_difficult, scores, iou, self.thresholds,
                 profile_boxes
             )
