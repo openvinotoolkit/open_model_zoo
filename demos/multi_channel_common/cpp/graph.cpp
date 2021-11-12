@@ -35,67 +35,7 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
         }
     }
 }
-
 }  // namespace
-
-void IEGraph::initNetwork(const std::string& deviceName) {
-    auto cnnNetwork = ie.ReadNetwork(modelPath);
-
-    if (deviceName.find("CPU") != std::string::npos) {
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::CPU_THROUGHPUT_AUTO}}, "CPU");
-    }
-    if (deviceName.find("GPU") != std::string::npos) {
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::GPU_THROUGHPUT_AUTO}}, "GPU");
-    }
-    if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = std::make_shared<InferenceEngine::Extension>(cpuExtensionPath);
-        ie.AddExtension(extension_ptr, "CPU");
-    }
-    if (!cldnnConfigPath.empty()) {
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
-    }
-
-    // Set batch size
-    if (batchSize > 1) {
-        auto inShapes = cnnNetwork.getInputShapes();
-        for (auto& pair : inShapes) {
-            auto& dims = pair.second;
-            if (!dims.empty()) {
-                dims[0] = batchSize;
-            }
-        }
-        cnnNetwork.reshape(inShapes);
-    }
-    InferenceEngine::ExecutableNetwork executableNetwork;
-    executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
-    logExecNetworkInfo(executableNetwork, modelPath, deviceName);
-    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
-    slog::info << "\tBatch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
-
-    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("Face Detection network should have only one input");
-    }
-    inputDataBlobName = inputInfo.begin()->first;
-
-    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    outputDataBlobNames.reserve(outputInfo.size());
-    for (const auto& i : outputInfo) {
-        outputDataBlobNames.push_back(i.first);
-    }
-
-    for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = std::make_shared<InferenceEngine::InferRequest>(executableNetwork.CreateInferRequest());
-        availableRequests.push(req);
-    }
-
-    if (postLoad != nullptr)
-        postLoad(outputDataBlobNames, cnnNetwork);
-
-    availableRequests.front()->StartAsync();
-    availableRequests.front()->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
-}
 
 void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
     assert(nullptr != getterFunc);
@@ -104,8 +44,9 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
     getter = std::move(getterFunc);
     postprocessing = std::move(postprocessingFunc);
     getterThread = std::thread([&]() {
+        const ov::Shape input_shape = availableRequests.front().get_input_tensor().get_shape();
+        std::vector<cv::Mat> imgsToProc(batchSize, cv::Mat(inSize, CV_8UC3));
         std::vector<std::shared_ptr<VideoFrame>> vframes;
-        std::vector<cv::Mat> imgsToProc(batchSize);
         while (!terminate) {
             vframes.clear();
             size_t b = 0;
@@ -120,7 +61,7 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
                 }
             }
 
-            InferenceEngine::InferRequest::Ptr req;
+            ov::runtime::InferRequest req;
             {
                 std::unique_lock<std::mutex> lock(mtxAvalableRequests);
                 condVarAvailableRequests.wait(lock, [&]() {
@@ -133,22 +74,8 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
                 availableRequests.pop();
             }
 
-            auto inputBlob = req->GetBlob(inputDataBlobName);
-            imgsToProc.resize(batchSize);
-            for (size_t i = 0; i < batchSize; i++) {
-                if (imgsToProc[i].empty()) {
-                    auto& dims = inputBlob->getTensorDesc().getDims();
-                    assert(4 == dims.size());
-                    auto height = static_cast<int>(dims[2]);
-                    auto width  = static_cast<int>(dims[3]);
-                    imgsToProc[i] = cv::Mat(height, width, CV_8UC3);
-                }
-            }
-
             auto preprocess = [&]() {
-                InferenceEngine::LockedMemory<void> buff = InferenceEngine::as<
-                    InferenceEngine::MemoryBlob>(inputBlob)->wmap();
-                float* inputPtr = static_cast<float*>(buff);
+                float* inputPtr = req.get_input_tensor().data<float>();
                 auto loopBody = [&](size_t i) {
                     cv::resize(vframes[i]->frame,
                                imgsToProc[i],
@@ -172,12 +99,12 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
                     preprocess();
                 }
                 auto startTime = std::chrono::high_resolution_clock::now();
-                req->StartAsync();
+                req.start_async();
                 std::unique_lock<std::mutex> lock(mtxBusyRequests);
                 busyBatchRequests.push({std::move(vframes), std::move(req), startTime});
             } else {
                 preprocess();
-                req->StartAsync();
+                req.start_async();
                 std::unique_lock<std::mutex> lock(mtxBusyRequests);
                 busyBatchRequests.push({std::move(vframes), std::move(req),
                                     std::chrono::high_resolution_clock::time_point()});
@@ -189,16 +116,36 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
 }
 
 IEGraph::IEGraph(const InitParams& p):
-    perfTimerPreprocess(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
-    perfTimerInfer(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
-    confidenceThreshold(0.5f), batchSize(p.batchSize),
-    modelPath(p.modelPath),
-    cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    maxRequests(p.maxRequests) {
-    assert(p.maxRequests > 0);
+        perfTimerPreprocess(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        perfTimerInfer(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        confidenceThreshold(0.5f), batchSize(p.batchSize),
+        modelPath(p.modelPath),
+        postRead(p.postReadFunc) {
+    std::shared_ptr<ov::Function> model = core.read_model(modelPath);
+    if (model->get_parameters().size() != 1) {
+        throw std::logic_error("Face Detection model must have only one input");
+    }
+    const ov::Layout inLyout{"NCHW"};
+    model = ov::preprocess::PrePostProcessor().input(ov::preprocess::InputInfo().tensor(ov::preprocess::InputTensorInfo().set_layout(inLyout))).build(model);
+    ov::Shape inShape = model->input().get_shape();
+    inSize = {int(inShape[ov::layout::width_idx(inLyout)]), int(inShape[ov::layout::height_idx(inLyout)])};
+    // Set batch size
+    inShape[ov::layout::batch_idx(inLyout)] = batchSize;
+    model->reshape({{model->input().get_any_name(), inShape}});
 
-    postLoad = p.postLoadFunc;
-    initNetwork(p.deviceName);
+    if (postRead != nullptr)
+        postRead(model);
+    core.set_config({{"CPU_BIND_THREAD", "NO"}}, "CPU");
+    ov::runtime::ExecutableNetwork net = core.compile_model(model, p.deviceName, {{"PERFORMANCE_HINT", "THROUGHPUT"}});
+    maxRequests = net.get_metric("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
+    logExecNetworkInfo(net, modelPath, p.deviceName);
+
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
+    slog::info << "\tBatch size is set to " << batchSize << slog::endl;
+
+    for (size_t i = 0; i < maxRequests; ++i) {
+        availableRequests.push(net.create_infer_request());
+    }
 }
 
 bool IEGraph::isRunning() {
@@ -206,15 +153,13 @@ bool IEGraph::isRunning() {
     return !terminate || !busyBatchRequests.empty();
 }
 
-InferenceEngine::SizeVector IEGraph::getInputDims() const {
-    assert(!availableRequests.empty());
-    auto inputBlob = availableRequests.front()->GetBlob(inputDataBlobName);
-    return inputBlob->getTensorDesc().getDims();
+ov::Shape IEGraph::getInputShape() {
+    return availableRequests.front().get_input_tensor().get_shape();
 }
 
 std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSize) {
     std::vector<std::shared_ptr<VideoFrame>> vframes;
-    InferenceEngine::InferRequest::Ptr req;
+    ov::runtime::InferRequest req;
     std::chrono::high_resolution_clock::time_point startTime;
     {
         std::unique_lock<std::mutex> lock(mtxBusyRequests);
@@ -231,23 +176,21 @@ std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSiz
         busyBatchRequests.pop();
     }
 
-    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY)) {
-        auto detections = postprocessing(req, outputDataBlobNames, frameSize);
-        for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
-            vframes[i]->detections = std::move(detections[i]);
-        }
-        if (perfTimerInfer.enabled()) {
-            auto endTime = std::chrono::high_resolution_clock::now();
-            perfTimerInfer.addValue(endTime - startTime);
-        }
+    req.wait();
+    auto detections = postprocessing(req, frameSize);
+    for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
+        vframes[i]->detections = std::move(detections[i]);
+    }
+    if (perfTimerInfer.enabled()) {
+        auto endTime = std::chrono::high_resolution_clock::now();
+        perfTimerInfer.addValue(endTime - startTime);
     }
 
-    if (nullptr != req) {
+    {
         std::unique_lock<std::mutex> lock(mtxAvalableRequests);
         availableRequests.push(std::move(req));
-        lock.unlock();
-        condVarAvailableRequests.notify_one();
     }
+    condVarAvailableRequests.notify_one();
 
     return vframes;
 }
@@ -264,23 +207,17 @@ IEGraph::~IEGraph() {
     terminate = true;
     {
         std::unique_lock<std::mutex> lock(mtxAvalableRequests);
-        bool ready = false;
-        while (!ready) {
+        while (availableRequests.size() != maxRequests) {
             std::unique_lock<std::mutex> lock(mtxBusyRequests);
             if (!busyBatchRequests.empty()) {
                 auto& req = busyBatchRequests.front().req;
-                if (nullptr != req) {
-                    req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
-                    availableRequests.push(std::move(req));
-                }
+                req.cancel();
+                availableRequests.push(std::move(req));
                 busyBatchRequests.pop();
             }
-            if (availableRequests.size() == maxRequests) {
-                ready = true;
-            }
         }
-        condVarAvailableRequests.notify_one();
     }
+    condVarAvailableRequests.notify_one();
     if (getterThread.joinable()) {
         getterThread.join();
     }

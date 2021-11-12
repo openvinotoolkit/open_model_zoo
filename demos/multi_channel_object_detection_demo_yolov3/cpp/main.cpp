@@ -1,8 +1,8 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 /**
-* \brief The entry point for the Inference Engine multichannel_yolo_detection demo application
+* \brief The entry point for the OpenVINIO multichannel_yolo_detection demo application
 * \file multichannel_yolo_detection/main.cpp
 * \example multichannel_yolo_detection/main.cpp
 */
@@ -51,12 +51,8 @@ void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
@@ -110,11 +106,11 @@ public:
 
     YoloParams() {}
 
-    YoloParams(const std::shared_ptr<ngraph::op::RegionYolo> regionYolo) {
+    YoloParams(const std::shared_ptr<ov::op::v0::RegionYolo> regionYolo) {
         coords = regionYolo->get_num_coords();
         classes = regionYolo->get_num_classes();
-        auto initialAnchors = regionYolo->get_anchors();
-        auto mask = regionYolo->get_mask();
+        const std::vector<float>& initialAnchors = regionYolo->get_anchors();
+        const std::vector<int64_t>& mask = regionYolo->get_mask();
         num = mask.size();
 
         computeAnchors(initialAnchors, mask);
@@ -155,19 +151,17 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void parseYOLOOutput(InferenceEngine::InferRequest::Ptr req,
-                       const std::string &outputName,
-                       const YoloParams &yoloParams, const unsigned long resized_im_h,
-                       const unsigned long resized_im_w, const unsigned long original_im_h,
-                       const unsigned long original_im_w,
-                       const double threshold, std::vector<DetectionObject> &objects) {
-    InferenceEngine::Blob::Ptr blob = req->GetBlob(outputName);
+void parseYOLOOutput(ov::runtime::Tensor tensor,
+                    const YoloParams &yoloParams, const unsigned long resized_im_h,
+                    const unsigned long resized_im_w, const unsigned long original_im_h,
+                    const unsigned long original_im_w,
+                    const double threshold, std::vector<DetectionObject> &objects) {
 
-    const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
-    const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
-    if (out_blob_h != out_blob_w)
-        throw std::runtime_error("Invalid size of output. It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
-        ", current W = " + std::to_string(out_blob_h));
+    const int height = static_cast<int>(tensor.get_shape()[2]);
+    const int width = static_cast<int>(tensor.get_shape()[3]);
+    if (height != width)
+        throw std::runtime_error("Invalid size of output. It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(height) +
+        ", current W = " + std::to_string(height));
 
     auto num = yoloParams.num;
     auto coords = yoloParams.coords;
@@ -175,10 +169,9 @@ void parseYOLOOutput(InferenceEngine::InferRequest::Ptr req,
 
     auto anchors = yoloParams.anchors;
 
-    auto side = out_blob_h;
+    auto side = height;
     auto side_square = side * side;
-    InferenceEngine::LockedMemory<const void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
-    const float *output_blob  = blobMapped.as<float *>();
+    const float* data = tensor.data<float>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;
@@ -186,16 +179,16 @@ void parseYOLOOutput(InferenceEngine::InferRequest::Ptr req,
         for (int n = 0; n < num; ++n) {
             int obj_index = EntryIndex(side, coords, classes, n * side * side + i, coords);
             int box_index = EntryIndex(side, coords, classes, n * side * side + i, 0);
-            float scale = output_blob[obj_index];
+            float scale = data[obj_index];
             if (scale < threshold)
                 continue;
-            double x = (col + output_blob[box_index + 0 * side_square]) / side * resized_im_w;
-            double y = (row + output_blob[box_index + 1 * side_square]) / side * resized_im_h;
-            double height = std::exp(output_blob[box_index + 3 * side_square]) * anchors[2 * n + 1];
-            double width = std::exp(output_blob[box_index + 2 * side_square]) * anchors[2 * n];
+            double x = (col + data[box_index + 0 * side_square]) / side * resized_im_w;
+            double y = (row + data[box_index + 1 * side_square]) / side * resized_im_h;
+            double height = std::exp(data[box_index + 3 * side_square]) * anchors[2 * n + 1];
+            double width = std::exp(data[box_index + 2 * side_square]) * anchors[2 * n];
             for (int j = 0; j < classes; ++j) {
                 int class_index = EntryIndex(side, coords, classes, n * side_square + i, coords + 1 + j);
-                float prob = scale * output_blob[class_index];
+                float prob = scale * data[class_index];
                 if (prob < threshold)
                     continue;
                 DetectionObject obj(x, y, height, width, j, prob,
@@ -251,35 +244,6 @@ DisplayParams prepareDisplayParams(size_t count) {
         params.points[i] = p;
     }
     return params;
-}
-
-std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& outputDataBlobNames,
-                                                InferenceEngine::CNNNetwork &network) {
-    std::map<std::string, YoloParams> __yoloParams;
-
-    for (auto &output_name : outputDataBlobNames) {
-        YoloParams params;
-
-        if (auto ngraphFunction = network.getFunction()) {
-            for (const auto op : ngraphFunction->get_ops()) {
-                if (op->get_friendly_name() == output_name) {
-                    auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
-                    if (!regionYolo) {
-                        throw std::runtime_error("Invalid output type: " +
-                            std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
-                    }
-
-                    params = regionYolo;
-                    break;
-                }
-            }
-        } else {
-            throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
-        }
-        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), params));
-    }
-
-    return __yoloParams;
 }
 
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
@@ -348,33 +312,27 @@ int main(int argc, char* argv[]) {
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
-
-        std::string modelPath = FLAGS_m;
-        std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size()) {
-            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
-        }
-
-        std::map<std::string, YoloParams> yoloParams;
-
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        std::vector<std::pair<size_t, YoloParams>> yoloParams;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
-        graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = modelPath;
-        graphParams.cpuExtPath      = FLAGS_l;
-        graphParams.cldnnConfigPath = FLAGS_c;
+        graphParams.modelPath       = FLAGS_m;
         graphParams.deviceName      = FLAGS_d;
-        graphParams.postLoadFunc    = [&yoloParams](const std::vector<std::string>& outputDataBlobNames,
-                                                    InferenceEngine::CNNNetwork &network) {
-                                                        yoloParams = GetYoloParams(outputDataBlobNames, network);
-                                                    };
+        graphParams.postReadFunc    = [&yoloParams](std::shared_ptr<ov::Function> model) {
+                                        for (const ov::Output<ov::Node>& out : model->outputs()) {
+                                            const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
+                                            if (!regionYolo) {
+                                                throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                                            }
+                                            yoloParams.emplace_back(out.get_index(), regionYolo);
+                                        }
+                                    };
 
-        std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
-        auto inputDims = network->getInputDims();
-        if (4 != inputDims.size()) {
-            throw std::runtime_error("Invalid network input dimensions");
+        IEGraph graph(graphParams);
+        auto inputShape = graph.getInputShape();
+        if (4 != inputShape.size()) {
+            throw std::runtime_error("Invalid model input dimensions");
         }
 
         VideoSources::InitParams vsParams;
@@ -383,8 +341,8 @@ int main(int argc, char* argv[]) {
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
         vsParams.realFps              = FLAGS_real_input_fps;
-        vsParams.expectedHeight = static_cast<unsigned>(inputDims[2]);
-        vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
+        vsParams.expectedHeight = static_cast<unsigned>(inputShape[2]);
+        vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
         DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
@@ -394,16 +352,15 @@ int main(int argc, char* argv[]) {
 
         std::vector<cv::Scalar> colors;
         if (yoloParams.size() > 0)
-            for (int i = 0; i < static_cast<int>(yoloParams.begin()->second.classes); ++i)
+            for (int i = 0; i < static_cast<int>(yoloParams.front().second.classes); ++i)
                 colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
 
-        network->start([&](VideoFrame& img) {
+        graph.start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [&yoloParams](InferenceEngine::InferRequest::Ptr req,
-                const std::vector<std::string>& outputDataBlobNames,
+        }, [&yoloParams](ov::runtime::InferRequest req,
                 cv::Size frameSize
                 ) {
             unsigned long resized_im_h = 416;
@@ -411,8 +368,8 @@ int main(int argc, char* argv[]) {
 
             std::vector<DetectionObject> objects;
             // Parsing outputs
-            for (auto &output_name :outputDataBlobNames) {
-                parseYOLOOutput(req, output_name, yoloParams[output_name], resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
+            for (const std::pair<size_t, YoloParams>& idxParams : yoloParams) {
+                parseYOLOOutput(req.get_output_tensor(idxParams.first), idxParams.second, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
@@ -436,7 +393,7 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
-        network->setDetectionConfidence(static_cast<float>(FLAGS_t));
+        graph.setDetectionConfidence(static_cast<float>(FLAGS_t));
 
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
@@ -471,10 +428,10 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning()) {
+        while (sources.isRunning() || graph.isRunning()) {
             bool readData = true;
             while (readData) {
-                auto br = network->getBatchData(params.frameSize);
+                auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
                     break;
                 }
@@ -510,15 +467,12 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_show_stats) {
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
-                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(slog::debug, slog::endl, sources.getStats(), graph.getStats(), output.getStats());
                     statStream.str(std::string());
-                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(statStream, '\n', sources.getStats(), graph.getStats(), output.getStats());
                 }
             }
         }
-
-        network.reset();
-
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;

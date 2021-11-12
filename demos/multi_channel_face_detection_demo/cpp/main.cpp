@@ -1,8 +1,8 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 /**
-* \brief The entry point for the Inference Engine multichannel_face_detection demo application
+* \brief The entry point for the OpenVINIO multichannel_face_detection demo application
 * \file multichannel_face_detection/main.cpp
 * \example multichannel_face_detection/main.cpp
 */
@@ -51,12 +51,8 @@ void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
@@ -203,27 +199,17 @@ int main(int argc, char* argv[]) {
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
-
-        std::string modelPath = FLAGS_m;
-        std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size()) {
-            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
-        }
-
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
-        graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = modelPath;
-        graphParams.cpuExtPath      = FLAGS_l;
-        graphParams.cldnnConfigPath = FLAGS_c;
+        graphParams.modelPath       = FLAGS_m;
         graphParams.deviceName      = FLAGS_d;
 
-        std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
-        auto inputDims = network->getInputDims();
+        IEGraph graph(graphParams);
+        auto inputDims = graph.getInputShape();
         if (4 != inputDims.size()) {
-            throw std::runtime_error("Invalid network input dimensions");
+            throw std::runtime_error("Invalid model input dimensions");
         }
 
         VideoSources::InitParams vsParams;
@@ -241,30 +227,21 @@ int main(int argc, char* argv[]) {
 
         size_t currentFrame = 0;
 
-        network->start([&](VideoFrame& img) {
+        graph.start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
-            auto output = req->GetBlob(outputDataBlobNames[0]);
-
-            InferenceEngine::LockedMemory<const void> outputMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(output)->rmap();
-            float* dataPtr = outputMapped.as<float *>();
-            InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
-            size_t total = 1;
-            for (auto v : svec) {
-                total *= v;
-            }
-
+        }, [](ov::runtime::InferRequest req, cv::Size frameSize) {
+            auto output = req.get_output_tensor();
+            float* dataPtr = output.data<float>();
 
             std::vector<Detections> detections(FLAGS_bs);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }
 
-            for (size_t i = 0; i < total; i+=7) {
+            for (size_t i = 0; i < output.get_size(); i+=7) {
                 float conf = dataPtr[i + 2];
                 if (conf > FLAGS_t) {
                     int idxInBatch = static_cast<int>(dataPtr[i]);
@@ -280,7 +257,7 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
-        network->setDetectionConfidence(static_cast<float>(FLAGS_t));
+        graph.setDetectionConfidence(static_cast<float>(FLAGS_t));
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
         std::mutex statMutex;
@@ -314,10 +291,10 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning()) {
+        while (sources.isRunning() || graph.isRunning()) {
             bool readData = true;
             while (readData) {
-                auto br = network->getBatchData(params.frameSize);
+                auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
                     break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
@@ -354,14 +331,12 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_show_stats) {
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
-                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(slog::debug, slog::endl, sources.getStats(), graph.getStats(), output.getStats());
                     statStream.str(std::string());
-                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(statStream, '\n', sources.getStats(), graph.getStats(), output.getStats());
                 }
             }
         }
-        network.reset();
-
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;

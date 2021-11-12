@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 /**
-* \brief The entry point for the Inference Engine multichannel_face_detection demo application
+* \brief The entry point for the OpenVINIO multichannel_face_detection demo application
 * \file multichannel_face_detection/main.cpp
 * \example multichannel_face_detection/main.cpp
 */
@@ -67,12 +67,8 @@ void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
@@ -203,27 +199,38 @@ int main(int argc, char* argv[]) {
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
-
-        std::string modelPath = FLAGS_m;
-        std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size()) {
-            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
-        }
-
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        struct {
+            size_t pafsId, heatMapsId;
+            int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
+        } postParams;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
-        graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = modelPath;
-        graphParams.cpuExtPath      = FLAGS_l;
-        graphParams.cldnnConfigPath = FLAGS_c;
+        graphParams.modelPath       = FLAGS_m;
         graphParams.deviceName      = FLAGS_d;
+        graphParams.postReadFunc    = [&postParams](std::shared_ptr<ov::Function>& model) {
+                                        const ov::Output<ov::Node> pafsOut = model->outputs()[0];
+                                        postParams.pafsId = pafsOut.get_index();
+                                        const ov::Output<ov::Node> heatMapsOut = model->outputs()[1];
+                                        postParams.heatMapsId = heatMapsOut.get_index();
+                                        const ov::Layout layout{"NCHW"};
+                                        model = ov::preprocess::PrePostProcessor()
+                                            .output(ov::preprocess::OutputInfo(postParams.pafsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
+                                            .output(ov::preprocess::OutputInfo(postParams.heatMapsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
+                                            .build(model);
+                                        postParams.pafsWidth = pafsOut.get_shape()[ov::layout::width_idx(layout)];
+                                        postParams.pafsHeight = pafsOut.get_shape()[ov::layout::height_idx(layout)];
+                                        postParams.pafsChannels = pafsOut.get_shape()[ov::layout::channels_idx(layout)];
+                                        postParams.heatMapsWidth = heatMapsOut.get_shape()[ov::layout::width_idx(layout)];
+                                        postParams.heatMapsHeight = heatMapsOut.get_shape()[ov::layout::height_idx(layout)];
+                                        postParams.heatMapsChannels = heatMapsOut.get_shape()[ov::layout::channels_idx(layout)];
+                                    };
 
-        std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
-        auto inputDims = network->getInputDims();
-        if (4 != inputDims.size()) {
-            throw std::runtime_error("Invalid network input dimensions");
+        IEGraph graph(graphParams);
+        auto inputShape = graph.getInputShape();
+        if (4 != inputShape.size()) {
+            throw std::runtime_error("Invalid model input dimensions");
         }
 
         VideoSources::InitParams vsParams;
@@ -232,8 +239,8 @@ int main(int argc, char* argv[]) {
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
         vsParams.realFps              = FLAGS_real_input_fps;
-        vsParams.expectedHeight = static_cast<unsigned>(inputDims[2]);
-        vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
+        vsParams.expectedHeight = static_cast<unsigned>(inputShape[2]);
+        vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
         DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
@@ -241,40 +248,24 @@ int main(int argc, char* argv[]) {
 
         size_t currentFrame = 0;
 
-        network->start([&](VideoFrame& img) {
+        graph.start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
-            auto pafsBlobIt   = req->GetBlob(outputDataBlobNames[0]);
-            auto pafsDesc     = pafsBlobIt->getTensorDesc();
-            auto pafsWidth    = getTensorWidth(pafsDesc);
-            auto pafsHeight   = getTensorHeight(pafsDesc);
-            auto pafsChannels = getTensorChannels(pafsDesc);
-            auto pafsBatch    = getTensorBatch(pafsDesc);
-
-            auto heatMapsBlobIt   = req->GetBlob(outputDataBlobNames[1]);
-            auto heatMapsDesc     = heatMapsBlobIt->getTensorDesc();
-            auto heatMapsWidth    = getTensorWidth(heatMapsDesc);
-            auto heatMapsHeight   = getTensorHeight(heatMapsDesc);
-            auto heatMapsChannels = getTensorChannels(heatMapsDesc);
-            std::vector<Detections> detections(pafsBatch);
-
-
-            InferenceEngine::LockedMemory<const void> heatMapsBlobMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(heatMapsBlobIt)->rmap();
-            InferenceEngine::LockedMemory<const void> pafsBlobMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(pafsBlobIt)->rmap();
-            for (size_t i = 0; i < pafsBatch; i++) {
+        }, [&postParams](ov::runtime::InferRequest req, cv::Size frameSize) {
+            std::vector<Detections> detections(FLAGS_bs);
+            float* heatMapsData = req.get_output_tensor(postParams.heatMapsId).data<float>();
+            float* pafsData = req.get_output_tensor(postParams.pafsId).data<float>();
+            for (size_t i = 0; i < FLAGS_bs; i++) {
                 std::vector<HumanPose> poses = postprocess(
-                heatMapsBlobMapped.as<float*>() + i * heatMapsWidth * heatMapsHeight * heatMapsChannels,
-                heatMapsWidth * heatMapsHeight,
-                keypointsNumber,
-                pafsBlobMapped.as<float*>() + i * pafsWidth * pafsHeight * pafsChannels,
-                pafsWidth * pafsHeight,
-                pafsChannels,
-                heatMapsWidth, heatMapsHeight, frameSize);
+                    heatMapsData + i * postParams.heatMapsWidth * postParams.heatMapsHeight * postParams.heatMapsChannels,
+                    postParams.heatMapsWidth * postParams.heatMapsHeight,
+                    keypointsNumber,
+                    pafsData + i * postParams.pafsWidth * postParams.pafsHeight * postParams.pafsChannels,
+                    postParams.pafsWidth * postParams.pafsHeight,
+                    postParams.pafsChannels,
+                    postParams.heatMapsWidth, postParams.heatMapsHeight, frameSize);
 
                 detections[i].set(new std::vector<HumanPose>(poses.size()));
                 for (decltype(poses.size()) j = 0; j < poses.size(); j++) {
@@ -318,10 +309,10 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning()) {
+        while (sources.isRunning() || graph.isRunning()) {
             bool readData = true;
             while (readData) {
-                auto br = network->getBatchData(params.frameSize);
+                auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
                     break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
@@ -358,15 +349,12 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_show_stats) {
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
-                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(slog::debug, slog::endl, sources.getStats(), graph.getStats(), output.getStats());
                     statStream.str(std::string());
-                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(statStream, '\n', sources.getStats(), graph.getStats(), output.getStats());
                 }
             }
         }
-
-        network.reset();
-
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;

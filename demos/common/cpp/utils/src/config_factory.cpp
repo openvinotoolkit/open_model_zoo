@@ -19,7 +19,6 @@
 #include <set>
 #include <string>
 
-#include <gpu/gpu_config.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
 

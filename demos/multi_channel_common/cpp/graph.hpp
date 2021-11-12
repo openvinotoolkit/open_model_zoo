@@ -15,7 +15,7 @@
 #include <string>
 #include <memory>
 
-#include <inference_engine.hpp>
+#include <openvino/openvino.hpp>
 
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
@@ -36,20 +36,12 @@ private:
     std::size_t batchSize;
 
     std::string modelPath;
-    std::string cpuExtensionPath;
-    std::string cldnnConfigPath;
-
-    std::string inputDataBlobName;
-    std::vector<std::string> outputDataBlobNames;
-
-    std::string deviceName;
-
-    InferenceEngine::Core ie;
-    std::queue<InferenceEngine::InferRequest::Ptr> availableRequests;
+    ov::runtime::Core core;
+    std::queue<ov::runtime::InferRequest> availableRequests;
 
     struct BatchRequestDesc {
         std::vector<std::shared_ptr<VideoFrame>> vfPtrVec;
-        InferenceEngine::InferRequest::Ptr req;
+        ov::runtime::InferRequest req;
         std::chrono::high_resolution_clock::time_point startTime;
     };
     std::queue<BatchRequestDesc> busyBatchRequests;
@@ -64,24 +56,19 @@ private:
 
     using GetterFunc = std::function<bool(VideoFrame&)>;
     GetterFunc getter;
-    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
+    using PostprocessingFunc = std::function<std::vector<Detections>(ov::runtime::InferRequest, cv::Size)>;
     PostprocessingFunc postprocessing;
-    using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetwork&)>;
-    PostLoadFunc postLoad;
+    using PostReadFunc = std::function<void (std::shared_ptr<ov::Function>)>;
+    PostReadFunc postRead;
     std::thread getterThread;
-
-    void initNetwork(const std::string& deviceName);
-
+    cv::Size inSize;
 public:
     struct InitParams {
         std::size_t batchSize = 1;
-        std::size_t maxRequests = 5;
         bool collectStats = false;
         std::string modelPath;
-        std::string cpuExtPath;
-        std::string cldnnConfigPath;
         std::string deviceName;
-        PostLoadFunc postLoadFunc = nullptr;
+        PostReadFunc postReadFunc = nullptr;
     };
 
     explicit IEGraph(const InitParams& p);
@@ -90,7 +77,7 @@ public:
 
     bool isRunning();
 
-    InferenceEngine::SizeVector getInputDims() const;
+    ov::Shape getInputShape();
 
     std::vector<std::shared_ptr<VideoFrame>> getBatchData(cv::Size windowSize);
 
