@@ -52,6 +52,8 @@ class SegmentationMetricProfiler(MetricProfiler):
         report['result'] = np.mean(metric_result)
         if per_class_result:
             for label, metric in per_class_result.items():
+                if int(label) not in class_result:
+                    continue
                 class_result[int(label)]['result'] = metric
         report['per_class_result'] = class_result
 
