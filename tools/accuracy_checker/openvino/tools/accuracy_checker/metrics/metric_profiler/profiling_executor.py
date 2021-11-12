@@ -110,3 +110,15 @@ class ProfilingExecutor:
         for profiler_id, profiler in self.profilers.items():
             reports[profiler_id] = profiler.last_report
         return reports
+
+    def update_annotation_and_prediction(self, annotation, prediction):
+        for profiler in self.profilers.values():
+            if profiler.required_postprocessing:
+                profiler.update_annotation_and_prediction(annotation, prediction)
+
+    @property
+    def required_postprocessing(self):
+        for profiler in self.profilers.values():
+            if profiler.required_postprocessing:
+                return True
+        return False
