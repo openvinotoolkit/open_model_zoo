@@ -310,6 +310,12 @@ class BaseModel:
     def release(self):
         pass
 
+    def fit_to_input(self, input_data):
+        pass
+
+    def propagate_output(self, output_data):
+        pass
+
 
 # pylint: disable=E0203
 class BaseDLSDKModel:
@@ -485,8 +491,7 @@ class OpenNMTModel(BaseModel):
         self._decoder_predictions = [] if self.store_decoder_predictions else None
         self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder, 'generator': self.generator}
         self._raw_outs = OrderedDict()
-        self.adapter = create_adapter(network_info.get('adapter', 'dumb_decoder'))
-        # self.adapter = None
+        self.adapter = create_adapter(network_info.get('adapter', 'nmt'))
 
         self.beams = 5
         self.pad = 1
@@ -529,11 +534,13 @@ class OpenNMTModel(BaseModel):
 
 
         for data in input_data:
-            encoder_state, memory, src_len = self.encoder.predict(identifiers, data)
+            # encoder_state, memory, src_len = self.encoder.predict(identifiers, data)
+            # encoder_state -> (h, c)
+            h, c, memory, src_len = self.encoder.predict(identifiers, data)
             if encoder_callback:
-                encoder_callback((encoder_state, memory, src_len))
+                encoder_callback((h, c, memory, src_len))
             if self.store_encoder_predictions:
-                self._encoder_predictions.append((encoder_state, memory, src_len))
+                self._encoder_predictions.append((h, c, memory, src_len))
             src_map = None
             (
                 fn_map_state,
@@ -541,7 +548,7 @@ class OpenNMTModel(BaseModel):
                 memory_lengths,
                 src_map,
             ) = decode_strategy.initialize(memory, src_len, src_map)
-            self.decoder.init_state(encoder_state)
+            self.decoder.init_state((h, c))
             if fn_map_state is not None:
                 self.decoder.map_state(fn_map_state)
 
@@ -551,6 +558,7 @@ class OpenNMTModel(BaseModel):
                 # decoder_input = decode_strategy.get_decoder_input()
 
                 log_probs, attn = self._decode_and_generate(
+                    identifiers,
                     decoder_input,
                     memory_bank,
                     self.batch,
@@ -595,13 +603,13 @@ class OpenNMTModel(BaseModel):
                     )
 
                 ddd = {
-                    'encoder_state': encoder_state,
+                    'encoder_state': (h, c),
                     'memory': memory,
                     'src_len': src_len,
                     'step': step,
                     'decoder_input': decoder_input,
-                    'decoder_state_h0': self.decoder.state['hidden'][0],
-                    'decoder_state_h1': self.decoder.state['hidden'][1],
+                    'decoder_state_h0': self.decoder.state['h'],
+                    'decoder_state_h1': self.decoder.state['c'],
                     'decoder_state_input_feed': self.decoder.state['input_feed'],
                     'any_finished': any_finished,
                     'select_indices': select_indices,
@@ -609,7 +617,10 @@ class OpenNMTModel(BaseModel):
                     'memory_bank': memory_bank,
                 }
                 np.savez("./debug_data/open_nmt_step_%d.npz" % step, **ddd)
-            predictions.append(decode_strategy.predictions)
+
+            prediction = np.array(decode_strategy.predictions)[...,:-1]
+            prediction = self.adapter.process({'pred': np.transpose(prediction, [2,1,0])}, identifiers, None)
+            predictions.append(prediction)
 
             # raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
             # raw_outputs.append(raw_output)
@@ -636,6 +647,7 @@ class OpenNMTModel(BaseModel):
 
     def _decode_and_generate(
         self,
+        identifiers,
         decoder_in,
         memory_bank,
         batch,
@@ -683,7 +695,7 @@ class OpenNMTModel(BaseModel):
         # # hidden_in = (h0, c0)
         # # hidden_out = (h1, c1)
 
-        attn, output = self.decoder.predict(decoder_in, memory_bank, memory_lengths)
+        output, attn = self.decoder.predict(identifiers, (decoder_in, memory_bank, memory_lengths))
 
         # Generator forward.
         # if not self.copy_attn:
@@ -722,9 +734,9 @@ class OpenNMTModel(BaseModel):
         #     # # or [ tgt_len, batch_size, vocab ] when full sentence
         #     pass
 
-        log_probs = self.generator.predict(output.squeeze())
+        log_probs = self.generator.predict(identifiers, (output, ))
 
-        return log_probs, attn
+        return log_probs[0], attn
 
     def reset(self):
         self.processing_frames_buffer = []
@@ -761,10 +773,38 @@ class OpenNMTModel(BaseModel):
                 {'name': 'decoder', 'model': self.decoder.network},
                 {'name': 'generator', 'model': self.generator.network}]
 
-class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
+class StatefulModel(BaseModel):
+    state_names = []
+    state_inputs = []
+    state_outputs = []
+    state = {}
+
+    def init_state(self, data):
+        self.state = {name: data[name] for name in self.state_names}
+
+    def preprocess_state(self, name, value):
+        return value
+
+    def fit_to_input(self, input_data):
+        for state_name, model_name in zip(self.state_names, self.state_inputs):
+            value = self.preprocess_state(state_name, self.state[state_name])
+            input_data[model_name] = value
+        return super().fit_to_input(input_data)
+
+    def propagate_output(self, data):
+        for state_name, model_name in zip(self.state_names, self.state_outputs):
+            self.state[state_name] = data[model_name]
+        super().propagate_output(data)
+
+    def map_state(self):
+        pass
+
+
+class CommonDLSDKModel(BaseDLSDKModel, BaseModel):
     default_model_suffix = 'encoder'
     input_layers = []
     output_layers = []
+    return_layers = []
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
@@ -778,7 +818,9 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
         results = self.exec_network.infer(input_data)
-        return (results['state.0'], results['state.1']), results['memory'], results['src_len']
+        self.propagate_output(results)
+        names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
+        return tuple([results[name] for name in names])
 
     def release(self):
         del self.exec_network
@@ -808,6 +850,8 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
+
+
 
 # class CommonEncoderModel(CommonDLSDKModel):
 #     def fit_to_input(self, input_data):
@@ -1548,7 +1592,8 @@ class BeamSearch(BeamSearchBase):
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
     input_layers = ['src', 'src_len',]
-    output_layers = ['memory', 'src_len', 'state.0', 'state.1']
+    output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
+    return_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, list):
@@ -1560,134 +1605,111 @@ class EncoderDLSDKModel(CommonDLSDKModel):
         return super().fit_to_input(input_data)
 
 
-class DecoderDLSDKModel(CommonDLSDKModel):
+class DecoderDLSDKModel(StatefulModel, CommonDLSDKModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
     output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
+    return_layers = ['output', 'attn']
+    state_names = ['h', 'c', 'input_feed']
+    state_inputs = ['h_0', 'c_0', 'input_feed.1']
+    state_outputs = ['h_1', 'c_1', 'input_feed']
 
     hidden_size = 500
 
+    def fit_to_input(self, input_data):
+        if isinstance(input_data, tuple):
+            # input, memory_bank, mem_lengths
+            input_data = {'input': input_data[0], 'memory': input_data[1], 'mem_len': input_data[2]}
+# fill state & reshape model later in parents classes call
+        return super().fit_to_input(input_data)
+
     def init_state(self, encoder_final):
         self.state = {}
-        # encoder_final = {tuple: 2}(tensor([[[-2.7412e-01, 2.2307e-01, 6.2228e-02, -5.5229e-02, -6.1341e-02,\n
-        # 2.0640e-01, 3.3893e-02, 7.4298e-04, -6.4537e-01, -2.9887e-02,\n - 8.3800e-03, 1.2292e-01, 1.2766e-01, -6.1408e-01, 3.0182e-03,\n - 1.8742e-03, 3.1618e-02, -8.0645e-02, 2.2937e-02, 5.5462e-02,\n
-        # 4.6654e-01, -1.9155e-01, -9.8324e-02, -5.1246e-01, 2.3397e-01,\n
-        # 7.2712e-02, 5.8344e-02, 8.3327e-03, -2.7703e-02, -2.7035e-01,\n
-        # 9.6433e-01, -2.6675e-02, -7.3549e-02, -2.6719e-01, -3.3957e-01,\n
-        # 6.8648e-04, 1.8804e-02, -1.6088e-02, 2.1493e-01, -8.8760e-02,\n
-        # 2.7494e-02, 4.1520e-02, 1.9755e-02, 3.1069e-01, -2.4410e-02,\n
-        # 2.0732e-01, -7.9655e-02, 2.9069e-01, 6.2205e-01, 1.5323e-02,\n - 1.4107e-01, 2.3460e-01, -1.7421e-01, -1.0560e-02, -4.7571e-01,\n - 4.4143e-01, 2.2972e-01, 1.3035e-01, -5.7180e-01, 3.4688e-02,\n - 2.5753e-02, 7.3816e-01, -1.1194e-01, -3.1533e-02, -6.5280e-02,\n - 5.6029e-01, -...
-        # 0 = {Tensor: 2}
-        # tensor([[[-2.7412e-01, 2.2307e-01, 6.2228e-02, -5.5229e-02, -6.1341e-02,\n
-        # 2.0640e-01, 3.3893e-02, 7.4298e-04, -6.4537e-01, -2.9887e-02,\n - 8.3800e-03, 1.2292e-01, 1.2766e-01, -6.1408e-01, 3.0182e-03,\n - 1.8742e-03, 3.1618e-02, -8.0645e-02, 2.2937e-02, 5.5462e-02,\n
-        # 4.6654e-01, -1.9155e-01, -9.8324e-02, -5.1246e-01, 2.3397e-01,\n
-        # 7.2712e-02, 5.8344e-02, 8.3327e-03, -2.7703e-02, -2.7035e-01,\n
-        # 9.6433e-01, -2.6675e-02, -7.3549e-02, -2.6719e-01, -3.3957e-01,\n
-        # 6.8648e-04, 1.8804e-02, -1.6088e-02, 2.1493e-01, -8.8760e-02,\n
-        # 2.7494e-02, 4.1520e-02, 1.9755e-02, 3.1069e-01, -2.4410e-02,\n
-        # 2.0732e-01, -7.9655e-02, 2.9069e-01, 6.2205e-01, 1.5323e-02,\n - 1.4107e-01, 2.3460e-01, -1.7421e-01, -1.0560e-02, -4.7571e-01,\n - 4.4143e-01, 2.2972e-01, 1.3035e-01, -5.7180e-01, 3.4688e-02,\n - 2.5753e-02, 7.3816e-01, -1.1194e-01, -3.1533e-02, -6.5280e-02,\n - 5.6029e-01, -1...
-        # T = {Tensor: 500}
-        # shape = {Size: 3}        torch.Size([2, 1, 500])
-        #
-        # 1 = {Tensor: 2}
-        # torch.Size([2, 1, 500])
-        #
-        # memory_bank = {Tensor: 7}
-        # tensor([[[-0.0101, -0.0095, 0.0026, ..., -0.0137, 0.0043, -0.0049]],\n\n[[-0.0020, 0.0014, 0.0012, ..., 0.0149,
-        #                                                                           0.0112, -0.0310]],\n\n[[0.0018,
-        #                                                                                                   0.0056,
-        #                                                                                                   -0.0004, ...,
-        #                                                                                                   -0.0113,
-        #                                                                                                   0.0031,
-        #                                                                                                   0.0301]],\n\n...,\n\
-        # n[[0.0115, 0.0152, 0.0365, ..., 0.0199, 0.0048, 0.0021]],\n\n[[0.0133, 0.0200, 0.0085, ..., 0.1286, 0.0100,
-        #                                                                0.0550]],\n\n[
-        #     [0.0056, 0.0013, -0.0021, ..., 0.0030, 0.0021, 0.0052]]])
-        # T = {Tensor: 500}
-        # shape = {Size: 3}        torch.Size([7, 1, 500])
-        #
-        # src = {Tensor: 7}        tensor([[[0]],\n\n[[6]],\n\n[[2]],\n\n[[16]],\n\n[[3]],\n\n[[7]],\n\n[[4]]])
-        # shape = {Size: 3}        torch.Size([7, 1, 1])
-        """Initialize decoder state with last state of the encoder."""
-        # def _fix_enc_hidden(hidden):
-        #     # The encoder hidden is  (layers*directions) x batch x dim.
-        #     # We need to convert it to layers x batch x (directions*dim).
-        #     if self.bidirectional_encoder:
-        #         hidden = torch.cat([hidden[0:hidden.size(0):2],
-        #                             hidden[1:hidden.size(0):2]], 2)
-        #     return hidden
-        #
-        # if isinstance(encoder_final, tuple):  # LSTM
-        #     self.state["hidden"] = tuple(_fix_enc_hidden(enc_hid)
-        #                                  for enc_hid in encoder_final)
-        # else:  # GRU
-        #     self.state["hidden"] = (_fix_enc_hidden(encoder_final), )
-        self.state["hidden"] = encoder_final
+        self.state["h"] = encoder_final[0]
+        self.state["c"] = encoder_final[1]
 
         # Init the input feed.
-        batch_size = self.state["hidden"][0].shape[1]
+        # batch_size = self.state["hidden"][0].shape[1]
+        batch_size = self.state["h"].shape[1]
         h_size = (batch_size, self.hidden_size)
         # self.state["input_feed"] = self.state["hidden"][0].data.new(*h_size).zero_().unsqueeze(0)
         self.state["input_feed"] = np.expand_dims(np.zeros(h_size), 0)
         # self.state["coverage"] = None
 
     def map_state(self, fn):
-        self.state["hidden"] = tuple(fn(h, 1) for h in self.state["hidden"])
-        self.state["input_feed"] = fn(self.state["input_feed"], 1)
+        for key in self.state_names:
+            self.state[key] = fn(self.state[key], 1)
+
+
+        # self.state["hidden"] = tuple(fn(h, 1) for h in self.state["hidden"])
+        # self.state["input_feed"] = fn(self.state["input_feed"], 1)
         # if self._coverage and self.state["coverage"] is not None:
         #     self.state["coverage"] = fn(self.state["coverage"], 1)
 
     # def detach_state(self):
     #     self.state["hidden"] = tuple(h.detach() for h in self.state["hidden"])
     #     self.state["input_feed"] = self.state["input_feed"].detach()
+    def preprocess_state(self, name, value):
+        return value.squeeze(0) if name == "input_feed" else value
 
-    def predict(self, input, memory_bank, mem_lengths):
-        # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
-        input_feed = self.state['input_feed'].squeeze(0)
+    # def predict(self, identifiers, input_data, callback=None):
+    #     input_data = self.fit_to_input(input_data)
+    #     results = self.exec_network.infer(input_data)
+    #     return (results['state.0'], results['state.1']), results['memory'], results['src_len']
 
-        # input_feed_batch, _ = input_feed.size()
-        # _, tgt_batch, _ = decoder_in.size()
-        # # aeq(tgt_batch, input_feed_batch)
-        # # END Additional args check.
-
-        h_0 = self.state["hidden"][0]
-        c_0 = self.state['hidden'][1]
-
-        # coverage = self.model.decoder.state["coverage"].squeeze(0) \
-        #     if self.model.decoder.state["coverage"] is not None else None
-
-        # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
-        #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-        #     input_feed=input_feed, hidden=dec_state, coverage=coverage
-        # )
-
-        input_data = {'c_0': c_0,
-                      'h_0': h_0,
-                      'input': input,
-                      'input_feed.1': input_feed,
-                      'mem_len': mem_lengths,
-                      'memory': memory_bank}
-        results = self.exec_network.infer(input_data)
-
-        # output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-
-        # self.model.decoder.state["hidden"] = dec_hidden
-        # self.model.decoder.state["input_feed"] = dec_input_feed
-
-        self.state["hidden"] = (results["h_1"], results["c_1"])
-        self.state["input_feed"] = results["input_feed"]
-
-        return results["attn"], results["output"]
+    # def predict(self, input, memory_bank, mem_lengths):
+    #     # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
+    #     input_feed = self.state['input_feed'].squeeze(0)
+    #
+    #     # input_feed_batch, _ = input_feed.size()
+    #     # _, tgt_batch, _ = decoder_in.size()
+    #     # # aeq(tgt_batch, input_feed_batch)
+    #     # # END Additional args check.
+    #
+    #     h_0 = self.state["hidden"][0]
+    #     c_0 = self.state['hidden'][1]
+    #
+    #     # coverage = self.model.decoder.state["coverage"].squeeze(0) \
+    #     #     if self.model.decoder.state["coverage"] is not None else None
+    #
+    #     # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
+    #     #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
+    #     #     input_feed=input_feed, hidden=dec_state, coverage=coverage
+    #     # )
+    #
+    #     input_data = {'c_0': c_0,
+    #                   'h_0': h_0,
+    #                   'input': input,
+    #                   'input_feed.1': input_feed,
+    #                   'mem_len': mem_lengths,
+    #                   'memory': memory_bank}
+    #     results = self.exec_network.infer(input_data)
+    #
+    #     # output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
+    #
+    #     # self.model.decoder.state["hidden"] = dec_hidden
+    #     # self.model.decoder.state["input_feed"] = dec_input_feed
+    #
+    #     self.state["hidden"] = (results["h_1"], results["c_1"])
+    #     self.state["input_feed"] = results["input_feed"]
+    #
+    #     return results["attn"], results["output"]
 
 class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
 
-    def predict(self, dec_output):
-        input_data = {'input': dec_output}
-        results = self.exec_network.infer(input_data)
-        return results['output']
+    def fit_to_input(self, input_data):
+        if isinstance(input_data, tuple):
+            input_data = {'input': input_data[0].squeeze()}
+        # fill state & reshape model later in parents classes call
+        return super().fit_to_input(input_data)
+
+    # def predict(self, dec_output):
+    #     input_data = {'input': dec_output}
+    #     results = self.exec_network.infer(input_data)
+    #     return results['output']
 
 class GNMTGlobalScorer(object):
     """NMT re-ranking.
@@ -1892,25 +1914,45 @@ class CommonONNXModel(BaseModel):
 
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
-    input_layers = []
-    output_layer = []
-
-    def fit_to_input(self, input_data):
-        frames, _, _ = input_data.shape
-        return {self.input_blob.name: input_data, '1': np.array([frames], dtype=np.int64)}
+    input_layers = ['src', 'src_len',]
+    output_layers = ['memory', 'src_len', 'state.0', 'state.1']
 
 
 class DecoderONNXModel(CommonONNXModel):
     default_model_suffix = 'decoder'
-    input_layers = ['input.1', '1', '2']
-    output_layers = ['151', '152', '153']
+    input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
+    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
 
+    def predict(self, input, memory_bank, mem_lengths):
+        # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
+        input_feed = self.state['input_feed'].squeeze(0)
+
+        h_0 = self.state["hidden"][0]
+        c_0 = self.state['hidden'][1]
+
+        input_data = {'c_0': c_0,
+                      'h_0': h_0,
+                      'input': input,
+                      'input_feed.1': input_feed,
+                      'mem_len': mem_lengths,
+                      'memory': memory_bank}
+
+        results = self.inference_session.run((self.output_blob.name, ), input_data)
+
+        self.state["hidden"] = (results["h_1"], results["c_1"])
+        self.state["input_feed"] = results["input_feed"]
+
+        return results["attn"], results["output"]
 
 class GeneratorONNXModel(CommonONNXModel):
     default_model_suffix = 'generator'
-    input_layers = ['0', '1']
-    output_layer = []
+    input_layers = ['input']
+    output_layers = ['output']
 
+    def predict(self, dec_output):
+        input_data = {'input': dec_output}
+        results = self.inference_session.run((self.output_blob.name, ), input_data)
+        return results['output']
 
 class DummyModel(BaseModel):
     def __init__(self, network_info, launcher):
