@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -14,8 +14,8 @@
 #include <vector>
 #include <set>
 
-#include <gpu/gpu_config.hpp>
 #include <inference_engine.hpp>
+#include <gpu/gpu_config.hpp>
 #include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
@@ -30,7 +30,7 @@
 
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -725,7 +725,7 @@ int main(int argc, char* argv[]) {
         }
 
         /** Graph tagging via config options**/
-        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
+        auto makeTagConfig = [&](const std::string& deviceName, const std::string& suffix) {
             std::map<std::string, std::string> config;
             if (FLAGS_tag && deviceName == "HDDL") {
                 config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;

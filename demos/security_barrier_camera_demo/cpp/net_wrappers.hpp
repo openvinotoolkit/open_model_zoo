@@ -1,18 +1,18 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <map>
 
 #include <inference_engine.hpp>
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
 
 class Detector {
 public:
@@ -27,7 +27,7 @@ public:
 
     Detector() = default;
     Detector(InferenceEngine::Core& ie, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
+            const bool autoResize, const std::map<std::string, std::string>& pluginConfig) :
         detectionTresholds{detectionTresholds}, ie_{ie} {
         auto network = ie.ReadNetwork(xmlPath);
         InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
@@ -131,8 +131,8 @@ private:
 class VehicleAttributesClassifier {
 public:
     VehicleAttributesClassifier() = default;
-    VehicleAttributesClassifier(InferenceEngine::Core& ie, const std::string & deviceName,
-        const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string> & pluginConfig) : ie_(ie) {
+    VehicleAttributesClassifier(InferenceEngine::Core& ie, const std::string& deviceName,
+        const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string>& pluginConfig) : ie_(ie) {
         auto network = ie.ReadNetwork(FLAGS_m_va);
         InferenceEngine::InputsDataMap attributesInputInfo(network.getInputsInfo());
         if (attributesInputInfo.size() != 1) {
@@ -213,8 +213,8 @@ private:
 class Lpr {
 public:
     Lpr() = default;
-    Lpr(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize,
-        const std::map<std::string, std::string> &pluginConfig) :
+    Lpr(InferenceEngine::Core& ie, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
+        const std::map<std::string, std::string>& pluginConfig) :
         ie_{ie} {
         auto network = ie.ReadNetwork(FLAGS_m_lpr);
 
@@ -294,7 +294,7 @@ public:
     }
 
     std::string getResults(InferenceEngine::InferRequest& inferRequest) {
-        static const char *const items[] = {
+        static const char* const items[] = {
                 "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "<Anhui>", "<Beijing>", "<Chongqing>", "<Fujian>",
                 "<Gansu>", "<Guangdong>", "<Guangxi>", "<Guizhou>",
@@ -352,7 +352,7 @@ public:
     }
 
 private:
-    int maxSequenceSizePerPlate;
+    int maxSequenceSizePerPlate = 0;
     std::string LprInputName;
     std::string LprInputSeqName;
     std::string LprOutputName;

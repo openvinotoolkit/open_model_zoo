@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
 #include <list>
 #include <limits>
-#include <functional>
-#include <fstream>
-#include <iomanip>
-#include <utility>
-#include <algorithm>
+#include <map>
+#include <string>
 #include <random>
-#include <iostream>
+#include <vector>
+#include <utility>
 
 #include <inference_engine.hpp>
 #include "openvino/openvino.hpp"

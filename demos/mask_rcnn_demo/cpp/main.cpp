@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,11 +17,11 @@
 
 #include "openvino/openvino.hpp"
 
-#include <gflags/gflags.h>
-#include <utils/args_helper.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
+#include "gflags/gflags.h"
+#include "utils/args_helper.hpp"
+#include "utils/ocv_common.hpp"
+#include "utils/performance_metrics.hpp"
+#include "utils/slog.hpp"
 
 #include "mask_rcnn_demo.h"
 
@@ -153,26 +153,6 @@ int main(int argc, char* argv[]) {
         if (images.empty())
             throw std::logic_error("Valid input images were not found!");
         // -----------------------------------------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------------------------------------
-/* TODO: not clear yet how to use PrePostProcessor for models with more than one input or output
-        network = PrePostProcessor().
-            input(InputInfo().
-                tensor(InputTensorInfo().
-                    set_element_type(ov::element::f32).
-//                                  set_spatial_static_shape(
-//                                      tensor_shape[ov::layout::height_idx(tensor_layout)],
-//                                      tensor_shape[ov::layout::width_idx(tensor_layout)]).
-                    set_layout({"NCHW"})).
-                preprocess(PreProcessSteps().
-                    resize(ResizeAlgorithm::RESIZE_LINEAR)).
-                network(InputNetworkInfo().
-                    set_layout("NCHW"))).
-            output(OutputInfo().
-                tensor(OutputTensorInfo().
-                    set_element_type(ov::element::f32))).
-            build(network);
-*/
 
         // -------------------------Load model to the device----------------------------------------------------
         ov::runtime::ExecutableNetwork executableNetwork = core.compile_model(network, FLAGS_d);
