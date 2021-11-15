@@ -53,7 +53,6 @@ class OpenvinoAdapter(ModelAdapter):
         
         if isinstance(model_path, (str, Path)):
             model_path_suffix = Path(model_path).suffix
-            print(model_path_suffix)
             if model_path_suffix == ".onnx":
                 if weights_path:
                     log.warning('For model in ONNX format should set only "model_path" parameter.'
