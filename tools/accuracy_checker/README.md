@@ -195,7 +195,7 @@ models:
     - name: dataset_name
 ```
 Optionally you can use global configuration. It may be useful for avoiding duplication if you have several models which need to be run on the same dataset.
-Example of global definitions file can be found at `<omz_dir>/data/dataset_definitions.yml`. Global definitions will be merged with evaluation config in the runtime by dataset name.
+Example of global definitions file can be found in the Github [repository](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml). Global definitions will be merged with evaluation config in the runtime by dataset name.
 Parameters of global configuration can be overwritten by local config. For example, if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config 227 will be used as resize parameter.
 You can use field `global_definitions` for specifying the path to global definitions directly in the model config or via command-line arguments (`-d`, `--definitions`).
 
@@ -224,7 +224,7 @@ all required preprocessing and postprocessing/filtering steps,
 and metrics that will be used for evaluation.
 
 If your dataset data is a well-known competition problem (COCO, Pascal VOC, and others) and/or can be potentially reused for other models,
-it is reasonable to declare it in some global configuration file (`<omz_dir>/data/dataset_definitions.yml`). This way in your local configuration file you can provide only
+it is reasonable to declare it in some global configuration file (`<omz_dir>/tools/accuracy_checker/dataset_definitions.yml`). This way in your local configuration file you can provide only
 `name`, and all required steps will be picked from the global one. To pass the path to this global configuration use `--definition` argument of CLI.
 
 If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. Find more detailed information about dataset preparation in [Dataset Preparation Guide](../../data/datasets.md).
