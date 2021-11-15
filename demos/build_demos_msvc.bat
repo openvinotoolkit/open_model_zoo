@@ -20,6 +20,7 @@ set "ROOT_DIR=%~dp0"
 
 set "BUILD_DIR=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
 
+
 set SUPPORTED_VS_VERSIONS=VS2015 VS2017 VS2019
 
 set VS_VERSION=
