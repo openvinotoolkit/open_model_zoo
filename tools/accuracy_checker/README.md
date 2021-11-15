@@ -41,8 +41,6 @@ The Accuracy Checker is an extensible, flexible and configurable Deep Learning a
 
 ### Prerequisites
 
-Install prerequisites first:
-
 #### 1. Python
 
 **Accuracy Checker** uses **Python 3**. Install it first:
