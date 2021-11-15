@@ -10,4 +10,4 @@ add_demo(NAME smart_classroom_demo_gapi
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
     DEPENDENCIES monitors utils_gapi
-    OPENCV_VERSION_REQUIRED 4.5.4)
+    OPENCV_VERSION_REQUIRED 4.5.3)

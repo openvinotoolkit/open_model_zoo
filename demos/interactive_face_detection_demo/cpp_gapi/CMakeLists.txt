@@ -9,4 +9,4 @@ add_demo(NAME interactive_face_detection_demo_gapi
     SOURCES ${MAIN_SRC}
     HEADERS ${MAIN_HEADERS}
     DEPENDENCIES monitors utils_gapi
-    OPENCV_VERSION_REQUIRED 4.5.4)
+    OPENCV_VERSION_REQUIRED 4.5.3)
