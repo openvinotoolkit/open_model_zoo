@@ -96,11 +96,12 @@ class MetricsExecutor:
         profile_results = OrderedDict()
 
         for idx, (input_id, single_annotation, single_prediction) in enumerate(zip(batch_ids, annotation, prediction)):
-            results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
             if profile:
                 if deprocessed_annotation is not None and deprocessed_prediction is not None:
                     self.profiler.update_annotation_and_prediction(
                         deprocessed_annotation[idx], deprocessed_prediction[idx])
+            results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
+            if profile:
                 profile_results[input_id] = self.profiler.get_last_report()
 
         return results, profile_results
