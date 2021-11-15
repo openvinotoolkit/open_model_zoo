@@ -7,13 +7,13 @@
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
 #include <utils/performance_metrics.hpp>
+#include <utils_gapi/stream_source.hpp>
 #include <ie_iextension.h>
 
 #include <opencv2/gapi/render.hpp>
 #include <opencv2/gapi/core.hpp>
 
 #include "initialize.hpp"
-#include "stream_source.hpp"
 #include "smart_classroom_demo_gapi.hpp"
 
 namespace util {
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
                                       FLAGS_r));
 
         /** ---------------- The execution part ---------------- **/
-        stream.setSource<custom::CustomCapSource>(cap);
+        stream.setSource<custom::CommonCapSrc>(cap);
 
         /** Service constants **/
         size_t work_num_frames = 0;
@@ -298,7 +298,7 @@ int main(int argc, char* argv[]) {
                 if (!stream.running()) {
                     /** TOP_K part. SPACE_KEY is pressed, monitoring enabled
                      *  Compile and start graph **/
-                    stream.setSource<custom::CustomCapSource>(cap);
+                    stream.setSource<custom::CommonCapSrc>(cap);
                     stream.start();
                 }
                 if (!stream.pull(std::move(out_vector))) {

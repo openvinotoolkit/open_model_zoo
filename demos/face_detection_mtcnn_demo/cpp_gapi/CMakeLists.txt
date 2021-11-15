@@ -9,4 +9,4 @@ add_demo(NAME face_detection_mtcnn_demo_gapi
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    DEPENDENCIES monitors)
+    DEPENDENCIES monitors utils_gapi)

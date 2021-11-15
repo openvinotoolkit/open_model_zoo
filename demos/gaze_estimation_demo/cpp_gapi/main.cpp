@@ -4,7 +4,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
@@ -12,7 +12,6 @@
 #include "utils.hpp"
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
-#include "stream_source.hpp"
 
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/core.hpp>
@@ -166,7 +165,7 @@ int main(int argc, char *argv[]) {
         };
         slog::info << "The Face Detection model " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
 
-        /** Get information about frame from cv::VideoCapture **/
+        /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
@@ -238,7 +237,7 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Point3f> out_gazes;
 
         /** ---------------- The execution part ---------------- **/
-        pipeline.setSource<custom::CustomCapSource>(cap);
+        pipeline.setSource<custom::CommonCapSrc>(cap);
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
         bool flipImage = false;

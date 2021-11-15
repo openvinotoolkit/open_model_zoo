@@ -142,6 +142,7 @@ find_package(ngraph REQUIRED)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
+add_subdirectory(common/cpp_gapi)
 add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories
