@@ -141,6 +141,6 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         return np.array(image_new)
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
-        if 'image_info' in image_metadata and self.to_dst_image_size:
+        if 'image_info' in image_metadata and self.to_dst_image_size and not self._deprocess_predictions:
             self.image_size = image_metadata['image_info']
         self.process_image(annotation, prediction)

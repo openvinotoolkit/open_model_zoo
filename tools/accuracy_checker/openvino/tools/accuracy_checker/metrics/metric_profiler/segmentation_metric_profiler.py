@@ -29,19 +29,24 @@ class SegmentationMetricProfiler(MetricProfiler):
         self.mask_as_polygon = report_type == 'json'
 
         super().__init__(dump_iterations, report_type, name)
+        self.required_postprocessing = True
+        self.annotation, self.prediction = None, None
 
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)
 
-    @staticmethod
-    def generate_profiling_json(identifier, cm, metric_result,
+    def generate_profiling_json(self, identifier, cm, metric_result,
                                 prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
         report = {'identifier': identifier}
         class_result = {}
+        if self.prediction is not None:
+            prediction_mask_polygon = self.prediction.to_polygon()
         for label, polygons in prediction_mask_polygon.items():
             if label == ignore_label:
                 continue
             class_result[int(label)] = {'prediction_mask': [polygon.tolist() for polygon in polygons]}
+        if self.annotation:
+            annotation_mask_polygon = self.annotation.to_polygon()
         for label, polygons in annotation_mask_polygon.items():
             if label == ignore_label:
                 continue
@@ -111,3 +116,7 @@ class SegmentationMetricProfiler(MetricProfiler):
 
     def set_dataset_meta(self, meta):
         self.dataset_meta = meta
+
+    def update_annotation_and_prediction(self, annotation, prediction):
+        self.annotation = annotation
+        self.prediction = prediction

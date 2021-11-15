@@ -69,7 +69,7 @@ class ExtendSegmentationMask(Postprocessor):
         return annotation, prediction
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
-        if all(annotation_ is None for annotation_ in annotation):
+        if all(annotation_ is None for annotation_ in annotation) or self.deprocessing_mode:
             return annotation, self._deprocess_prediction(prediction, image_metadata)
         return self.process_image(annotation, prediction)
 

@@ -69,6 +69,7 @@ class MetricProfiler(ClassProvider):
         self.storage = OrderedDict()
         self.write_result = self.write_csv_result if report_type == 'csv' else self.write_json_result
         self._last_profile = None
+        self.required_postprocessing = False
 
     def register_metric(self, metric_name):
         self.fields.append('{}_result'.format(metric_name))
@@ -192,6 +193,9 @@ class MetricProfiler(ClassProvider):
     @property
     def last_report(self):
         return self._last_profile
+
+    def update_annotation_and_prediction(self, annotation, prediction):
+        pass
 
 
 def create_profiler(metric_type, metric_name):

@@ -82,7 +82,8 @@ class MetricsExecutor:
 
         return metric_results
 
-    def update_metrics_on_batch(self, batch_ids, annotation, prediction, profile=False):
+    def update_metrics_on_batch(self, batch_ids, annotation, prediction,
+                                profile=False, deprocessed_annotation=None, deprocessed_prediction=None):
         """
         Updates metric value corresponding given batch.
 
@@ -94,7 +95,11 @@ class MetricsExecutor:
         results = OrderedDict()
         profile_results = OrderedDict()
 
-        for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
+        for idx, (input_id, single_annotation, single_prediction) in enumerate(zip(batch_ids, annotation, prediction)):
+            if profile:
+                if deprocessed_annotation is not None and deprocessed_prediction is not None:
+                    self.profiler.update_annotation_and_prediction(
+                        deprocessed_annotation[idx], deprocessed_prediction[idx])
             results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
             if profile:
                 profile_results[input_id] = self.profiler.get_last_report()

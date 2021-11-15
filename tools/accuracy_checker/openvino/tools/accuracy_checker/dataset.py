@@ -738,7 +738,8 @@ class DataProvider:
         if subsample_size is not None:
             subsample_seed = self.dataset_config.get('subsample_seed', 666)
 
-            annotation = create_subset(annotation, subsample_size, subsample_seed, meta.get('no_recursion', False))
+            annotation = create_subset(
+                annotation, subsample_size, subsample_seed, (meta or {}).get('no_recursion', False))
 
         if self.dataset_config.get('analyze_dataset', False):
             if self.dataset_config.get('segmentation_masks_source'):

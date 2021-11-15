@@ -67,6 +67,13 @@ class PostprocessingExecutor:
 
         return zipped_result[0:2]  # return changed annotations and predictions only
 
+    def deprocess_batch(self, annotations, predictions, metas=None):
+        if metas is None:
+            zipped_result = zipped_transform(self.deprocess_image, annotations, predictions)
+        else:
+            zipped_result = zipped_transform(self.deprocess_image, annotations, predictions, metas)
+        return zipped_result[0:2]  # return changed annotations and predictions only
+
     def full_process(self, annotations, predictions, metas=None):
         self.postprocessing_applyed = True
         return self.process_dataset(*self.process_batch(annotations, predictions, metas))
@@ -112,6 +119,16 @@ class PostprocessingExecutor:
 
     def reset(self):
         self.postprocessing_applyed = False
+
+    def deprocess_image(self, annotation, prediction, image_metadata=None):
+        self.postprocessing_applyed = True
+        for method in self._image_processors:
+            method.deprocessing_mode = True
+            annotation_entries, prediction_entries = method.get_entries(annotation, prediction)
+            method.process(annotation_entries, prediction_entries, image_metadata)
+            method.deprocessing_mode = False
+
+        return annotation, prediction
 
 
 class PostprocessorConfig(ConfigValidator):

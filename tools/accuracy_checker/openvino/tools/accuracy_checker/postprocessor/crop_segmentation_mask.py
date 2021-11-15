@@ -119,10 +119,11 @@ class CropOrPadSegmentationMask(Postprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 
     def process_image(self, annotation, prediction):
-        for ann in annotation:
-            if annotation is None:
-                continue
-            ann.mask = self.process_mask(ann.mask)
+        if not self.deprocessing_mode:
+            for ann in annotation:
+                if annotation is None:
+                    continue
+                ann.mask = self.process_mask(ann.mask)
         return annotation, prediction
 
     def process_mask(self, mask):

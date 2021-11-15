@@ -62,6 +62,7 @@ class Postprocessor(ClassProvider):
         self.meta = meta
         self.state = state
         self.image_size = None
+        self.deprocessing_mode = False
 
         self.annotation_source = self.get_value_from_config('annotation_source')
         if self.annotation_source and not isinstance(self.annotation_source, list):
@@ -216,7 +217,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         apply_to = self.get_value_from_config('apply_to')
         self._required_both = False
         self.apply_to = ApplyToOption(apply_to) if apply_to else None
-        self._deprocess_predictions = False
+        self._deprocess_predictions = self.deprocessing_mode
 
         if (self.annotation_source or self.prediction_source) and self.apply_to:
             raise ConfigError("apply_to and sources both provided. You need specify only one from them")
@@ -254,7 +255,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         return target_annotations, target_predictions
 
     def _choose_targets_using_apply_to(self, annotations, predictions):
-        if all(annotation is None for annotation in annotations):
+        if all(annotation is None for annotation in annotations) or self.deprocessing_mode:
             apply_to = ApplyToOption.PREDICTION
             self._deprocess_predictions = True
         else:
