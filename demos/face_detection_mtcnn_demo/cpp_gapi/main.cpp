@@ -2,6 +2,7 @@
 #include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
 #include <utils/ocv_common.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
@@ -11,7 +12,6 @@
 #include "face_detection_mtcnn_demo.hpp"
 #include "custom_kernels.hpp"
 #include "utils.hpp"
-#include "stream_source.hpp"
 
 const int MAX_PYRAMID_LEVELS = 13;
 
@@ -43,6 +43,7 @@ G_API_NET(MTCNNOutput, <custom::GMat3(cv::GMat)>, "custom.mtcnn_output");
 
 int main(int argc, char* argv[]) {
     try {
+        PerformanceMetrics metrics;
         /** Print info about Inference Engine **/
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        /** Get information about frame from cv::VideoCapture **/
+        /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
@@ -173,7 +174,7 @@ int main(int argc, char* argv[]) {
         auto pipeline_mtcnn = graph_mtcnn.compileStreaming(std::move(mtcnn_args));
 
         /** ---------------- The execution part ---------------- **/
-        pipeline_mtcnn.setSource<custom::CustomCapSource>(cap);
+        pipeline_mtcnn.setSource<custom::CommonCapSrc>(cap);
 
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
             Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
@@ -187,7 +188,6 @@ int main(int argc, char* argv[]) {
 
         /** Output Mat for result **/
         cv::Mat out_image;
-        PerformanceMetrics metrics;
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline_mtcnn.start();

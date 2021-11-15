@@ -129,7 +129,7 @@ macro(add_demo)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils utils_gapi gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)

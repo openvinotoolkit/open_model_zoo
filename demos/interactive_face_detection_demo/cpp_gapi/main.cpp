@@ -75,7 +75,7 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
             square_rect.width = bb_new_width;
             square_rect.height = bb_new_height;
 
-            out_faces.emplace_back(square_rect & surface);
+            out_faces.push_back(square_rect & surface);
         }
     }
 };
@@ -253,6 +253,7 @@ void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
         /** ---------- Parsing and validating input arguments ----------**/
         gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
         if (FLAGS_h) {
@@ -395,7 +396,7 @@ int main(int argc, char *argv[]) {
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
 
-         /** Get information about frame from cv::VideoCapture **/
+         /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             FLAGS_limit);
         const auto tmp = cap->read();
@@ -407,7 +408,7 @@ int main(int argc, char *argv[]) {
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
-        stream.setSource<custom::CustomCapSource>(cap);
+        stream.setSource<custom::CommonCapSrc>(cap);
 
         /** Save output result **/
         cv::VideoWriter videoWriter;
@@ -418,7 +419,6 @@ int main(int argc, char *argv[]) {
 
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
-        PerformanceMetrics metrics;
         stream.start();
         while (stream.pull(cv::GRunArgsP(out_vector))) {
             if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
