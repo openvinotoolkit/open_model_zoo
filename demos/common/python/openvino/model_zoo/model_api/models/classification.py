@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,14 +21,11 @@ from .image_model import ImageModel
 
 
 class Classification(ImageModel):
-    def __init__(self, ie, model_path, labels, ntop, resize_type='crop'):
+    def __init__(self, ie, model_path, ntop = 1, labels = None, resize_type='crop'):
         super().__init__(ie, model_path, resize_type=resize_type)
         self._check_io_number(1, 1)
-        if self.h != self.w:
-            raise RuntimeError('Model input has incorrect image shape. Must be NxN square. '
-                                'Got {} x {}.'.format(self.h, self.w))
         self.ntop = ntop
-        self.labels = self._load_labels(labels)
+        self.labels = self._load_labels(labels) if labels else None
         self._check_outputs()
 
         function = ng.function_from_cnn(self.net)
@@ -70,14 +67,18 @@ class Classification(ImageModel):
         if len(out_size) == 4 and (out_size[2] != 1 or out_size[3] != 1):
             raise RuntimeError('The Classification model wrapper supports topologies only with 4D '
                                'output which has last two dimensions of size 1')
-        if (out_size[1] == len(self.labels) + 1):
-            self.labels.insert(0, 'other')
-            self.logger.warning("\tInserted 'other' label as first.")
-        if out_size[1] != len(self.labels):
-            raise RuntimeError("Model's number of classes and parsed "
-                               'labels must match ({} != {})'.format(out_size[1], len(self.labels)))
+        if self.labels:
+            if (out_size[1] == len(self.labels) + 1):
+                self.labels.insert(0, 'other')
+                self.logger.warning("\tInserted 'other' label as first.")
+            if out_size[1] != len(self.labels):
+                raise RuntimeError("Model's number of classes and parsed "
+                                'labels must match ({} != {})'.format(out_size[1], len(self.labels)))
 
     def postprocess(self, outputs, meta):
-        scores = outputs[self.out_blob_names[0]].squeeze()
         indices = outputs[self.out_blob_names[1]].squeeze()
-        return list(zip(indices, [self.labels[i] for i in indices], scores))
+        scores = outputs[self.out_blob_names[0]].squeeze()
+        labels = [self.labels[i] if self.labels else "" for i in indices]
+        return list(zip(indices,
+                        labels,
+                        scores))

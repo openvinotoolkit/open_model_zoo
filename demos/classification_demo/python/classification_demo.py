@@ -53,8 +53,7 @@ def build_argparser():
                            'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('--labels', help='Required. Labels mapping file.', default=None,
-                                   required=True, type=Path)
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=Path)
     common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
@@ -105,30 +104,49 @@ def build_argparser():
 
 def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
-    сlass_label = classifications[0][1]
-    label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][1]
-    initial_labels_pos =  frame.shape[0] - label_height * (2 * len(classifications) + 1)
+    сlass_label = ""
+    if classifications:
+        сlass_label = classifications[0][1]
+    font_scale = 0.5
+    label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
+    initial_labels_pos =  frame.shape[0] - label_height * (int(1.5 * len(classifications)) + 1)
 
     if (initial_labels_pos < 0):
         initial_labels_pos = label_height
         log.warning('Too much labels to display on this frame, some will be omitted')
     offset_y = initial_labels_pos
 
-    for _, сlass_label, score in classifications:
-        label = '{} {:.2f}'.format(сlass_label, score)
-        label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, 0.75, 2)[0][0]
-        offset_y += label_height * 2
+    header = "Label:     Score:"
+    label_width = cv2.getTextSize(header, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
+    put_highlighted_text(frame, header, (frame.shape[1] - label_width, offset_y),
+        cv2.FONT_HERSHEY_COMPLEX, font_scale, (153, 76, 0), 2)
+
+    for idx, сlass_label, score in classifications:
+        label = '{}. {}    {:.2f}'.format(idx, сlass_label, score)
+        label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
+        offset_y += int(label_height * 1.5)
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
-            cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 210), 2)
+            cv2.FONT_HERSHEY_COMPLEX, font_scale,  (204, 102, 0), 2)
     return frame
 
 
 def print_raw_results(classifications, frame_id):
-    label_max_len = len(max([cl[1] for cl in classifications], key=len))
+    label_max_len = 0
+    if classifications:
+        label_max_len = len(max([cl[1] for cl in classifications], key=len))
+
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
-    log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
+
+    if label_max_len != 0:
+        log.debug(' Class ID | {:^{width}s}| Confidence '.format('Label', width=label_max_len))
+    else:
+        log.debug(' Class ID | Confidence ')
+
     for class_id, class_label, score in classifications:
-        log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, class_label, score, width=label_max_len))
+        if class_label != "":
+            log.debug('{:^9} | {:^{width}s}| {:^10f} '.format(class_id, class_label, score, width=label_max_len))
+        else:
+            log.debug('{:^9} | {:^10f} '.format(class_id, score))
 
 
 def main():
@@ -162,7 +180,8 @@ def main():
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
-
+    ESC_KEY = 27
+    key = -1
     while True:
         if async_pipeline.callback_exceptions:
             raise async_pipeline.callback_exceptions[0]
@@ -172,8 +191,7 @@ def main():
             classifications, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-
-            if len(classifications) and args.raw_output_message:
+            if args.raw_output_message:
                 print_raw_results(classifications, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
@@ -190,8 +208,6 @@ def main():
             if not args.no_show:
                 cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
-
-                ESC_KEY = 27
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
@@ -225,38 +241,38 @@ def main():
             # Wait for empty request
             async_pipeline.await_any()
 
-    async_pipeline.await_all()
-    # Process completed requests
-    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
-        results = async_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
+    if key not in {ord('q'), ord('Q'), ESC_KEY}:
+        async_pipeline.await_all()
+        # Process completed requests
+        for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
             results = async_pipeline.get_result(next_frame_id_to_show)
-        classifications, frame_meta = results
-        frame = frame_meta['frame']
-        start_time = frame_meta['start_time']
+            while results is None:
+                results = async_pipeline.get_result(next_frame_id_to_show)
+            classifications, frame_meta = results
+            frame = frame_meta['frame']
+            start_time = frame_meta['start_time']
 
-        if len(classifications) and args.raw_output_message:
-            print_raw_results(classifications, next_frame_id_to_show)
+            if args.raw_output_message:
+                print_raw_results(classifications, next_frame_id_to_show)
 
-        presenter.drawGraphs(frame)
-        rendering_start_time = perf_counter()
-        frame = draw_labels(frame, classifications, output_transform)
-        if delay or args.no_show:
-            render_metrics.update(rendering_start_time)
-            metrics.update(start_time, frame)
+            presenter.drawGraphs(frame)
+            rendering_start_time = perf_counter()
+            frame = draw_labels(frame, classifications, output_transform)
+            if delay or args.no_show:
+                render_metrics.update(rendering_start_time)
+                metrics.update(start_time, frame)
 
-        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-            video_writer.write(frame)
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+                video_writer.write(frame)
 
-        if not args.no_show:
-            cv2.imshow('Classification Results', frame)
-            key = cv2.waitKey(delay)
+            if not args.no_show:
+                cv2.imshow('Classification Results', frame)
+                key = cv2.waitKey(delay)
 
-            ESC_KEY = 27
-            # Quit.
-            if key in {ord('q'), ord('Q'), ESC_KEY}:
-                break
-            presenter.handleKey(key)
+                # Quit.
+                if key in {ord('q'), ord('Q'), ESC_KEY}:
+                    break
+                presenter.handleKey(key)
 
     if delay or args.no_show:
         metrics.log_total()
