@@ -16,7 +16,6 @@ limitations under the License.
 
 import cv2
 import numpy as np
-from ..logging import warning
 
 from .postprocessor import Postprocessor
 from .resize_segmentation_mask import ResizeSegmentationMask
