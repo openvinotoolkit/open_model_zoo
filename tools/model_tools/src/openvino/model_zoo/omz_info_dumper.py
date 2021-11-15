@@ -21,13 +21,17 @@ from pathlib import Path
 from openvino.model_zoo import _configuration, _common
 
 def to_info(model):
+    accuracy_config = _common.MODEL_ROOT / model.subdirectory / 'accuracy-check.yml'
+    model_config = _common.MODEL_ROOT / model.subdirectory / 'model.yml'
     return {
         'name': model.name,
         'composite_model_name': model.composite_model_name,
 
+        'accuracy_config': str(accuracy_config),
         'description': model.description,
         'framework': model.framework,
         'license_url': model.license_url,
+        'model_config': str(model_config),
         'precisions': sorted(model.precisions),
         'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
