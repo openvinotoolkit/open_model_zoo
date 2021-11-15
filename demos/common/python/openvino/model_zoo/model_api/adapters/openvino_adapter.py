@@ -16,6 +16,7 @@
 
 import logging as log
 from collections import deque
+from pathlib import Path
 
 try:
     from openvino.inference_engine import IECore, get_version
@@ -42,14 +43,31 @@ class OpenvinoAdapter(ModelAdapter):
     Class that allows working with Inference Engine model, its input and output blobs
     """
 
-    def __init__(self, ie, model_path, device, plugin_config=None, max_num_requests=1):
+    def __init__(self, ie, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
         self.ie = ie
         self.model_path = model_path
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
-        log.info('Reading model {}'.format(model_path))
-        self.net = self.ie.read_network(model_path)
+
+        
+        if isinstance(model_path, (str, Path)):
+            model_path_suffix = Path(model_path).suffix
+            if model_path_suffix == ".onnx":
+                if weights_path:
+                    log.warning('For model in ONNX format should set only "model_path" parameter.'
+                                'The "weights_path" will be omitted')
+                    weights_path = None
+            elif model_path_suffix == ".xml":
+                weights_path_suffix = Path(weights_path).suffix if weights_path else None
+                if weights_path_suffix and weights_path_suffix != ".bin":
+                    raise ValueError(f"Unsupported weights file extension: {weights_path_suffix}")
+            else:
+                raise ValueError(f"Unsupported model file extension: {model_path_suffix}")
+
+        self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
+        log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
+        self.net = ie.read_network(model_path, weights_path, self.model_from_buffer)
 
     def load_model(self):
         self.exec_net = self.ie.load_network(self.net, self.device,
@@ -60,7 +78,7 @@ class OpenvinoAdapter(ModelAdapter):
             self.exec_net = self.ie.load_network(self.net, self.device,
                 self.plugin_config, len(self.exec_net.requests) + 1)
 
-        log.info('The model {} is loaded to {}'.format(self.model_path, self.device))
+        log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
         self.empty_requests = deque(self.exec_net.requests)
         self.log_runtime_settings()
 

@@ -107,7 +107,8 @@ def main():
 
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-        model_adapter = OpenvinoAdapter(create_core(), args.model, args.device, plugin_config, args.num_infer_requests)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config, 
+                                        max_num_requests=args.num_infer_requests)
     elif args.adapter == 'remote':
         log.info('Reading model {}'.format(args.model))
         serving_config = {"address": "localhost", "port": 9000}
