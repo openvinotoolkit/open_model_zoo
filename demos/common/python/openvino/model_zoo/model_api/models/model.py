@@ -15,7 +15,7 @@
 """
 
 import logging as log
-
+from pathlib import Path
 
 class Model:
     '''An abstract model wrapper
@@ -28,7 +28,7 @@ class Model:
         logger(Logger): instance of the logger
     '''
 
-    def __init__(self, ie, model_path):
+    def __init__(self, ie, model_file, weights_file=None):
         '''Abstract model constructor
 
         Args:
@@ -36,7 +36,18 @@ class Model:
             model_path(str, Path): path to model's *.xml or *.onnx file
         '''
         self.logger = log.getLogger()
-        self.net = ie.read_network(model_path)
+        if isinstance(model_file, str):
+            path = Path(model_file)
+            if path.suffix == ".onnx":
+                weights_file = None
+            elif path.suffix in (".xml", ".bin"):
+                model_file = path.with_suffix(".xml")
+                weights_file = path.with_suffix(".bin")
+            else:
+                raise ValueError(f"Unsupported file extension: {path.suffix}")
+        init_from_buffer = isinstance(model_file, bytes)
+
+        self.net = ie.read_network(model_file, weights_file, init_from_buffer)
         self.inputs = self.net.input_info
         self.outputs = self.net.outputs
 

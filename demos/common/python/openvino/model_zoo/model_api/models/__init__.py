@@ -31,6 +31,29 @@ from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
 from .yolo import YOLO, YoloV3ONNX, YoloV4, YOLOF, YOLOX
 
+
+def get_model_class(name):
+    registry = {
+        'centernet': CenterNet,
+        'ctpn': CTPN,
+        'deblurring': Deblurring,
+        'detr': DETR,
+        'faceboxes': FaceBoxes,
+        'retinaface': RetinaFace,
+        'retinaface-pytorch': RetinaFacePyTorch,
+        'segmentation': SegmentationModel,
+        'salient_object_detection': SalientObjectDetectionModel,
+        'ssd': SSD,
+        'ultra_lightweight_face_detection': UltraLightweightFaceDetection,
+        'yolo': YOLO,
+        'yolov3-onnx': YoloV3ONNX,
+        'yolov4': YoloV4,
+        'yolof': YOLOF,
+        'yolox': YOLOX
+    }
+
+    return registry[str(name).lower()]
+
 __all__ = [
     'BertEmbedding',
     'BertNamedEntityRecognition',
