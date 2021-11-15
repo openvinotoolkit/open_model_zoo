@@ -178,7 +178,7 @@ def main():
     video_writer = cv2.VideoWriter()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-    model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config, 
+    model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                     max_num_requests=args.num_infer_requests)
 
     start_time = perf_counter()

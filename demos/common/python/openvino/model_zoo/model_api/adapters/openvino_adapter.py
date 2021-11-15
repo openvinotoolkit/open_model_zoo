@@ -49,7 +49,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
-        
+
         if isinstance(model_path, (str, Path)):
             model_path_suffix = Path(model_path).suffix
             if model_path_suffix == ".onnx":

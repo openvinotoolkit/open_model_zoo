@@ -170,7 +170,7 @@ def main():
 
     ie = create_core()
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config, 
+    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     model_emb = BertEmbedding(model_emb_adapter, vocab, args.input_names_emb)
     model_emb.log_layers_info()
@@ -187,7 +187,7 @@ def main():
             emb_pipeline = AsyncPipeline(model_emb)
 
     if args.model_qa:
-        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config, 
+        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config,
                                            max_num_requests=args.num_infer_requests)
         model_qa = BertQuestionAnswering(model_qa_adapter, vocab, args.input_names_qa, args.output_names_qa,
                                          args.max_answer_token_num, args.model_qa_squad_ver)
