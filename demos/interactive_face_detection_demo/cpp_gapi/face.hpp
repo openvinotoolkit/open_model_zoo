@@ -6,8 +6,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "utils.hpp"
-
 // -------------------------Describe detected face on a frame-------------------------------------------------
 
 struct Face {

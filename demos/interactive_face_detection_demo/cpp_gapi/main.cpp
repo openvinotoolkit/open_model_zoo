@@ -22,7 +22,6 @@
 #include <monitors/presenter.h>
 
 #include "interactive_face_detection_gapi.hpp"
-#include "utils.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
 
