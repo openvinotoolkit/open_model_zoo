@@ -323,12 +323,13 @@ class DLSDKLauncher(Launcher):
     def get_async_requests(self):
         return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
 
-    def _reshape_input(self, shapes):
+    def _reshape_input(self, shapes, make_dynamic=False):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         self.network.reshape(shapes)
-        if self.dyn_input_layers:
-            self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
+        self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
+        if self.dyn_input_layers and make_dynamic:
+            return
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -804,14 +805,17 @@ class DLSDKLauncher(Launcher):
             return
         config_inputs = self.config.get('inputs', [])
         input_shapes = {}
+        make_dynamic = False
         for input_config in config_inputs:
             if 'shape' in input_config:
                 input_shapes[input_config['name']] = input_config['shape']
+                if -1 in input_config['shape']:
+                    make_dynamic = True
         if not input_shapes:
             return
         orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
         orig_input_shapes.update(input_shapes)
-        self._reshape_input(orig_input_shapes)
+        self._reshape_input(orig_input_shapes, make_dynamic)
 
     def _configure_lstm_inputs(self):
         lstm_mapping = {}
