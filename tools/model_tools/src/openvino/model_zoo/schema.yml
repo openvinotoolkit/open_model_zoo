@@ -23,7 +23,7 @@ required:
       required:
         name: "//str"
         size: "//int"
-        sha256: "//str"
+        sha384: "//str"
         source:
           type: "//any"
           of:
