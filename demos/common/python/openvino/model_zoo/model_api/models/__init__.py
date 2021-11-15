@@ -22,6 +22,7 @@ from .detr import DETR
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
@@ -32,27 +33,21 @@ from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESI
 from .yolo import YOLO, YoloV3ONNX, YoloV4, YOLOF, YOLOX
 
 
-def get_model_class(name):
-    registry = {
-        'centernet': CenterNet,
-        'ctpn': CTPN,
-        'deblurring': Deblurring,
-        'detr': DETR,
-        'faceboxes': FaceBoxes,
-        'retinaface': RetinaFace,
-        'retinaface-pytorch': RetinaFacePyTorch,
-        'segmentation': SegmentationModel,
-        'salient_object_detection': SalientObjectDetectionModel,
-        'ssd': SSD,
-        'ultra_lightweight_face_detection': UltraLightweightFaceDetection,
-        'yolo': YOLO,
-        'yolov3-onnx': YoloV3ONNX,
-        'yolov4': YoloV4,
-        'yolof': YOLOF,
-        'yolox': YOLOX
-    }
+def get_all_subclasses(cls):
+    all_subclasses = []
 
-    return registry[str(name).lower()]
+    for subclass in cls.__subclasses__():
+        all_subclasses.append(subclass)
+        all_subclasses.extend(get_all_subclasses(subclass))
+
+    return all_subclasses
+
+def get_model_class(name):
+    for cls in get_all_subclasses(Model):
+        if cls.__name__.lower() == name:
+            return cls
+    raise ValueError("There is not model class with this name: {}".format(name))
+
 
 __all__ = [
     'BertEmbedding',
