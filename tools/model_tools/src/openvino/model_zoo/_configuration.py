@@ -188,6 +188,8 @@ def load_models(models_root, args):
 
     composite_models = []
 
+    schema = _common.get_schema()
+
     for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
         composite_model_name = composite_model_config.parent.name
         with validation.deserialization_context('In model "{}"'.format(composite_model_name)):
@@ -213,6 +215,8 @@ def load_models(models_root, args):
                 validation.deserialization_context('In config "{}"'.format(config_path)):
 
             model = yaml.safe_load(config_file)
+            if not schema.check(model):
+                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
             for bad_key in ['name', 'subdirectory']:
                 if bad_key in model:
