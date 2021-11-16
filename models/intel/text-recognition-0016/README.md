@@ -1,4 +1,4 @@
-# text-recognition-0015 (composite)
+# text-recognition-0016 (composite)
 
 ## Use Case and High-Level Description
 
