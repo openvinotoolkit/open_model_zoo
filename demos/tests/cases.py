@@ -200,8 +200,8 @@ NATIVE_DEMOS = [
         }),
         single_option_cases(
             '-m_fd',
-             ModelArg('face-detection-adas-0001'),
-             ModelArg('face-detection-retail-0004')),
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004')),
     )),
 
     CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
@@ -290,6 +290,7 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
+        TestCase(options={'-m': ModelArg('face-detection-retail-0004')}),
         [
             TestCase(options={}),
             TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
@@ -555,8 +556,8 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
-            device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
+            device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
