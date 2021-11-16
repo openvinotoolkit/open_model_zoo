@@ -9,4 +9,5 @@ add_demo(NAME face_detection_mtcnn_demo_gapi
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    DEPENDENCIES monitors utils_gapi)
+    DEPENDENCIES monitors utils_gapi
+    OPENCV_VERSION_REQUIRED 4.5.3)
