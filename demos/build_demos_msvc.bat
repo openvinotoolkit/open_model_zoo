@@ -18,7 +18,7 @@
 setlocal EnableDelayedExpansion
 set "ROOT_DIR=%~dp0"
 
-set "BUILD_DIR=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
+set "BUILD_DIR=C:\builds"
 
 set SUPPORTED_VS_VERSIONS=VS2015 VS2017 VS2019
 
