@@ -210,7 +210,7 @@ class ModelEvaluator:
             return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-        if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
+        if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata and self.adapter is not None:
             self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
 
     def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
