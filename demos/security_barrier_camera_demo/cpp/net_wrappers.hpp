@@ -239,6 +239,15 @@ public:
             "car", "van", "truck", "bus"
         };
 
+//        // 7 possible colors for each vehicle and we should select the one with the maximum probability
+//        InferenceEngine::LockedMemory<const void> colorsMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+//            inferRequest.GetBlob(outputNameForColor))->rmap();
+//        auto colorsValues = colorsMapped.as<float*>();
+//        // 4 possible types for each vehicle and we should select the one with the maximum probability
+//        InferenceEngine::LockedMemory<const void> typesMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+//            inferRequest.GetBlob(outputNameForType))->rmap();
+//        auto typesValues = typesMapped.as<float*>();
+
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
         ov::runtime::Tensor colorsMapped = inferRequest.get_tensor(outputNameForColor);
         const float* colorsValues = colorsMapped.data<float>();
