@@ -98,6 +98,7 @@ std::unique_ptr<ResultBase> LandmarksModel::postprocess(InferenceResult& infResu
         result->coordinates.push_back(cv::Point2f(normed_x, normed_y));
     }
     return retVal;
+    
 }
 
 std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& infResult) {
@@ -125,5 +126,11 @@ std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& i
     auto K = outputMapped->getTensorDesc().getDims()[1];
     auto H = outputMapped->getTensorDesc().getDims()[2];
     auto W = outputMapped->getTensorDesc().getDims()[3];
+
+    // we think that we have frame with right size for face _xywh2cs
+    double padding = 1.25;
+    cv::Point2f center(frameWidth*0.5, frameHeight*0.5);
+    cv::Point2f scale(frameWidth * padding /200.0, frameHeight * padding / 200.0);
+
 
 }*/

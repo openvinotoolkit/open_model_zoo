@@ -31,7 +31,7 @@ public:
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& infResult);
-    //std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& infResult);
+    std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& infResult);
     size_t frameHeight, frameWidth;
     int numberLandmarks;
     std::string postprocessType;// simple or heatmap
