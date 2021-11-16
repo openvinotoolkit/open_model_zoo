@@ -166,7 +166,7 @@ def main():
             pot_executable = shutil.which('pot')
 
             if pot_executable:
-                pot_cmd_prefix = [pot_executable]
+                pot_cmd_prefix = [str(args.python), '--', pot_executable]
             else:
                 try:
                     pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/post_training_optimization_tool/main.py'
