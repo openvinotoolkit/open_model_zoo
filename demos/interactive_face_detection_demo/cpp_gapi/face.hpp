@@ -4,6 +4,8 @@
 
 # pragma once
 
+#include <list>
+
 #include <opencv2/opencv.hpp>
 
 // -------------------------Describe detected face on a frame-------------------------------------------------
