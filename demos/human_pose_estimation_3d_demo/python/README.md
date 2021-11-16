@@ -50,7 +50,7 @@ omz_converter --list models.lst
 ### Prerequisites
 
 This demo application requires a native Python extension module to be built before you can run it.
-Refer to [Open Model Zoo Demos](../../README.md) for instructions on how to build it and prepare the environment for running the demo.
+Refer to [Open Model Zoo Demos](../../README.md) for instructions on how to build it and prepare the environment for running the demo. Once the demo is built with Python extension modules, add the path of the demo build folder to the `PYTHONPATH` environment variable.
 
 ## Running
 
