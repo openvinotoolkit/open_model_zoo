@@ -37,8 +37,9 @@ The text-recognition-0016-encoder model is a ResNeXt-101 like backbone with TPS 
 
 ### Inputs
 
-Image, name: `imgs`, shape: `1, 1, 64, 256` in the `1, C, H, W` format, where:
+Image, name: `imgs`, shape: `1, 1, 64, 256` in the `B, C, H, W` format, where:
 
+- `B` - batch size 
 - `C` - number of channels
 - `H` - image height
 - `W` - image width
@@ -51,7 +52,7 @@ Image, name: `imgs`, shape: `1, 1, 64, 256` in the `1, C, H, W` format, where:
 
 ## Decoder model specification
 
-The text-recognition-15-decoder model is a GRU based decoder with 2d attention module.
+The text-recognition-0016-decoder model is a GRU based decoder with 2d attention module.
 
 | Metric  | Value |
 | ------- | ----- |
