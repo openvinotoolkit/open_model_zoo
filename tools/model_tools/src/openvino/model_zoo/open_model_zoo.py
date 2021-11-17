@@ -1,3 +1,4 @@
+import re
 import cv2
 import os
 import argparse
@@ -111,21 +112,21 @@ class Model:
 
         return cls(name, model_path, description, task_type, subdirectory)
 
-    def load(self, ie, device='CPU'):
+    def _load(self, ie, device):
         self.net = ie.read_network(self.model_path)
         self.exec_net = ie.load_network(self.net, device)
 
-    def __call__(self, inputs, ie=None, device='CPU'):
+    def __call__(self, inputs, ie, device='CPU'):
         if self.exec_net is None:
-            self.load(ie, device)
+            self._load(ie, device)
 
         input_names = next(iter(self.net.input_info))
-        for input_name, value in inputs:
+        for input_name, value in inputs.items():
             if input_name not in input_names:
                 raise ValueError('Unknown input name {}'.format(input_name))
 
             input_shape = self.net.input_info[input_name].input_data.shape
-            if input_shape != value.shape:
+            if input_shape != list(value.shape):
                 value = cv2.resize(value, input_shape)
         res = self.exec_net.infer(inputs=inputs)
         return res
@@ -149,3 +150,14 @@ class Model:
                 self._model_config = yaml.safe_load(config_file)
 
         return self._model_config
+
+    def inputs(self, ie=None):
+        if self.net is None:
+            try:
+                self.net = ie.read_network(self.model_path)
+            except AttributeError:
+                raise TypeError('ie argumnet must be of IECore type.')
+        
+        input_blob = next(iter(self.net.input_info))
+
+        return input_blob
