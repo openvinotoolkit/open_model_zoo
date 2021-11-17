@@ -18,11 +18,11 @@ task_type: classification
 files:
   - name: se-resnet-101.prototxt
     size: 98677
-    sha256: c97375db60ad04e1196966c7149bd5cc98fbb9a34bdde511c26c922ba791903d
+    sha384: c661a0960ce1fb36121ce0edd636e3fc080f973b0a5f07f72b4a9809df2c9adacad2ac04b16ab7cb2612c0875c09d8a9
     source: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNet-101.prototxt
   - name: se-resnet-101.caffemodel
     size: 197806200
-    sha256: 09777ce1202087954ee34ae2566cf611d03d2d8195ced0fe51b612ebf951d729
+    sha384: 76e8d87cf23deb013ba8c03c05e66919477ecd1a1bf2ebe2d43e4539947d12f4eb22593b8bc4bc3cc00e9783071a52db
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-resnet-101/SE-ResNet-101.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]

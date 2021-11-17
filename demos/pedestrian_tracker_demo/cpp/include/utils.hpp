@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -24,7 +24,7 @@
 ///
 struct DetectionLogEntry {
     TrackedObjects objects;  ///< Detected objects.
-    int frame_idx;           ///< Processed frame index (-1 if N/A).
+    int64_t frame_idx;           ///< Processed frame index (-1 if N/A).
     double time_ms;          ///< Frame processing time in ms (-1 if N/A).
 
     ///
@@ -141,5 +141,4 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
 InferenceEngine::Core
 LoadInferenceEngine(const std::vector<std::string>& devices,
                     const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels,
-                    bool should_use_perf_counter);
+                    const std::string& custom_cldnn_kernels);

@@ -14,25 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 
 import pytest
 
-pytest.importorskip('accuracy_checker.launcher.dlsdk_launcher')
-import os
+pytest.importorskip('openvino.tools.accuracy_checker.launcher.dlsdk_launcher')
 import cv2
 import numpy as np
 
 from pathlib import Path
 from unittest.mock import PropertyMock
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher import DLSDKLauncher
-from accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
-from accuracy_checker.launcher.launcher import create_launcher
-from accuracy_checker.launcher.model_conversion import FrameworkParameters
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.launcher import DLSDKLauncher
+from openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
+from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
+from openvino.tools.accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
-from accuracy_checker.data_readers import DataRepresentation
-from accuracy_checker.utils import contains_all
+from openvino.tools.accuracy_checker.data_readers import DataRepresentation
+from openvino.tools.accuracy_checker.utils import contains_all
 try:
     import ngraph as ng
 except ImportError:
@@ -60,7 +59,8 @@ def mock_inference_engine(mocker):
 @pytest.fixture()
 def mock_inputs(mocker):
     mocker.patch(
-        'accuracy_checker.launcher.input_feeder.InputFeeder._parse_inputs_config', return_value=({}, ['data'], None)
+        'openvino.tools.accuracy_checker.launcher.input_feeder.InputFeeder._parse_inputs_config',
+        return_value=({}, ['data'], None)
     )
 
 
@@ -189,7 +189,7 @@ class TestDLSDKLauncherAffinity:
             })
 
         mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
@@ -212,7 +212,7 @@ class TestDLSDKLauncherAffinity:
         affinity_map = {'conv1': 'GPU'}
 
         mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
@@ -223,7 +223,7 @@ class TestDLSDKLauncherAffinity:
         affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
@@ -234,193 +234,9 @@ class TestDLSDKLauncherAffinity:
 class TestDLSDKLauncher:
     FAKE_MO_PATH = Path('/path/ModelOptimizer').absolute()
 
-    def test_program_bitsream_when_device_is_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        launcher = create_launcher(config, model_name='custom')
-        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
-        launcher.release()
-
-    def test_program_bitstream_when_fpga_in_hetero_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        launcher = create_launcher(config, model_name='custom')
-        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
-        launcher.release()
-
-    def test_does_not_program_bitstream_when_device_is_not_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:cpu,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-
-        subprocess_mock.assert_not_called()
-
-    def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
-        subprocess_mock = mocker.patch('subprocess.run')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-            '_aocl': Path('aocl')
-        }
-        create_launcher(config, model_name='custom')
-
-        subprocess_mock.assert_not_called()
-
-    def test_sets_dla_aocx_when_device_is_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
-
-    def test_sets_dla_aocx_when_fpga_in_hetero_device(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': Path('custom_bitstream'),
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-        os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
-
-    def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_when_hetero_without_fpga(self, mocker):
-        mocker.patch('os.environ')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:cpu,cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
-        mocker.patch('os.environ')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'hetero:fpga,cpu',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
-    def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
-        mocker.patch('os.environ')
-        mocker.patch('os.environ.get', return_value='3')
-
-        config = {
-            'framework': 'dlsdk',
-            'weights': 'custom_weights',
-            'model': 'custom_model',
-            'device': 'fpga',
-            'bitstream': 'custom_bitstream',
-            'adapter': 'classification',
-        }
-        create_launcher(config, model_name='custom')
-
-        os.environ.__setitem__.assert_not_called()
-
     def test_model_converted_from_caffe(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -429,7 +245,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             "device": 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -443,7 +258,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_with_mo_params(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -452,7 +267,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'mo_params': {'data_type': 'FP16'},
             'adapter': 'classification',
             'should_log_cmd': False
@@ -467,7 +281,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_with_mo_flags(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -476,7 +290,6 @@ class TestDLSDKLauncher:
             'caffe_model': '/path/to/source_models/custom_model',
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
-            'bitstream': Path('custom_bitstream'),
             'mo_flags': ['reverse_input_channels'],
             'adapter': 'classification',
             'should_log_cmd': False
@@ -498,8 +311,8 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             'mo_params': {'output_dir': '/path/to/output/models'}
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value='ModelOptimizer')
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value='ModelOptimizer')
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
         args = {
             'input_model': '/path/to/source_models/custom_model',
             'model_name': 'custom_model',
@@ -508,7 +321,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -516,7 +329,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_tf(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -537,7 +350,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_tf_checkpoint(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -565,8 +378,8 @@ class TestDLSDKLauncher:
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_model': '/path/to/source_models/custom_model',
@@ -576,7 +389,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         mo_path = str(self.FAKE_MO_PATH)
@@ -591,8 +404,8 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_model': '/path/to/source_models/custom_model',
@@ -602,7 +415,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -617,8 +430,8 @@ class TestDLSDKLauncher:
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_model': '/path/to/source_models/custom_model',
@@ -628,7 +441,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -643,8 +456,8 @@ class TestDLSDKLauncher:
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': 'od_api'
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_model': '/path/to/source_models/custom_model',
@@ -654,7 +467,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -669,8 +482,8 @@ class TestDLSDKLauncher:
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -680,7 +493,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -694,8 +507,8 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -705,7 +518,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -720,8 +533,8 @@ class TestDLSDKLauncher:
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -731,7 +544,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -747,8 +560,8 @@ class TestDLSDKLauncher:
             '_tf_custom_op_config_dir': 'config/dir',
             '_tf_obj_detection_api_pipeline_config_path': 'od_api'
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -758,7 +571,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -773,8 +586,8 @@ class TestDLSDKLauncher:
             'mo_params': {'transformations_config': 'ssd_v2_support.json'},
             '_transformations_config_dir': 'config/dir'
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -784,7 +597,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
@@ -798,8 +611,8 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             'mo_params': {'transformations_config': 'config.json'}
         }
-        mocker.patch('accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
-        prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
+        mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.find_mo', return_value=self.FAKE_MO_PATH)
+        prepare_args_patch = mocker.patch('openvino.tools.accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
             'input_meta_graph': '/path/to/source_models/custom_model',
@@ -809,7 +622,7 @@ class TestDLSDKLauncher:
         }
 
         mocker.patch(
-            'accuracy_checker.launcher.model_conversion.exec_mo_binary',
+            'openvino.tools.accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
 
@@ -818,7 +631,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_mxnet(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -839,7 +652,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_onnx(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -860,7 +673,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_kaldi(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -1166,15 +979,15 @@ class TestDLSDKLauncherConfig:
 
     def test_hetero_correct(self):
         self.config.validate(update_dict(self.launcher, device='HETERO:CPU'))
-        self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA'))
+        self.config.validate(update_dict(self.launcher, device='HETERO:CPU,CPU'))
 
     def test_hetero_endswith_comma(self):
         with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA,'))
+            self.config.validate(update_dict(self.launcher, device='HETERO:CPU,CPU,'))
 
     def test_normal_multiple_devices(self):
         with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='CPU,FPGA'))
+            self.config.validate(update_dict(self.launcher, device='CPU,CPU'))
 
     def test_hetero_empty(self):
         with pytest.raises(ConfigError):
@@ -1235,7 +1048,7 @@ class TestDLSDKLauncherConfig:
 
         with pytest.raises(ValueError):
             mocker.patch(
-                'accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher.inputs',
+                'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher.inputs',
                 new_callable=PropertyMock(return_value={'data1': [3, 227, 227], 'data2': [3, 227, 227]})
             )
             create_launcher(launcher_config)

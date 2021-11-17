@@ -1,108 +1,202 @@
 #!/usr/bin/env python3
+"""
+ Copyright (C) 2018-2021 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
 
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import cv2
 import numpy as np
 import logging as log
-from openvino.inference_engine import IECore
-import matplotlib.pyplot as plt
+from openvino.inference_engine import IECore, get_version
+
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
+from model_api.models import MonoDepthModel, OutputTransform
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.performance_metrics import PerformanceMetrics
+
+import monitors
+from images_capture import open_images_capture
+from helpers import resolution, log_blobs_info, log_runtime_settings
+
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+
+
+DEMO_NAME = "Depth Estimation"
+
+
+def build_argparser():
+    parser = ArgumentParser(add_help=False)
+    args = parser.add_argument_group('Options')
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
+    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
+                      required=True, type=Path)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images, video file or camera id.')
+    args.add_argument('-d', '--device', default='CPU', type=str,
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
+                           'acceptable. The demo will look for a suitable plugin for device specified. '
+                           'Default value is CPU.')
+
+    infer_args = parser.add_argument_group('Inference options')
+    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
+                            default=1, type=int)
+    infer_args.add_argument('-nstreams', '--num_streams',
+                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                                 'mode (for HETERO and MULTI device cases use format '
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                            default='', type=str)
+    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+
+    io_args = parser.add_argument_group('Input/output options')
+    io_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('-o', '--output', required=False,
+                         help='Optional. Name of the output file(s) to save.')
+    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If 0 is set, all frames are stored.')
+    io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
+    io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                         help='Optional. List of monitors to show initially.')
+
+    return parser
+
+
+def apply_color_map(depth_map, output_transform):
+    depth_map = output_transform.resize(depth_map)
+    depth_map = (depth_map * 255.0).astype(np.uint8)
+    return cv2.applyColorMap(depth_map, cv2.COLORMAP_INFERNO)
 
 
 def main():
-    # arguments
-    parser = ArgumentParser()
+    args = build_argparser().parse_args()
 
-    parser.add_argument(
-        "-m", "--model", help="Required. Path to an .xml file with a trained model", required=True, type=Path)
-    parser.add_argument(
-        "-i", "--input", help="Required. Path to a input image file", required=True, type=str)
-    parser.add_argument("-l", "--cpu_extension",
-        help="Optional. Required for CPU custom layers. Absolute MKLDNN (CPU)-targeted custom layers. "
-        "Absolute path to a shared library with the kernels implementations", type=str, default=None)
-    parser.add_argument("-d", "--device",
-        help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. "
-        "The demo will look for a suitable plugin for device specified. Default value is CPU", default="CPU", type=str)
+    cap = open_images_capture(args.input, args.loop)
 
-    args = parser.parse_args()
-
-    # logging
-    log.basicConfig(format="[ %(levelname)s ] %(message)s",
-                    level=log.INFO, stream=sys.stdout)
-
-    log.info("creating inference engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-    if args.cpu_extension and "CPU" in args.device:
-        ie.add_extension(args.cpu_extension, "CPU")
 
-    log.info("Loading network")
-    net = ie.read_network(args.model, args.model.with_suffix(".bin"))
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    assert len(net.input_info) == 1, "Expected model with only 1 input blob"
-    assert len(net.outputs) == 1, "Expected model with only 1 output blob"
+    log.info('Reading model {}'.format(args.model))
+    model = MonoDepthModel(ie, args.model)
+    log_blobs_info(model)
 
-    log.info("preparing input blobs")
-    input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
-    net.batch_size = 1
+    pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    # read and pre-process input image
-    _, _, height, width = net.input_info[input_blob].input_data.shape
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
-    image = cv2.imread(args.input, cv2.IMREAD_COLOR)
-    (input_height, input_width) = image.shape[:-1]
+    next_frame_id = 0
+    next_frame_id_to_show = 0
 
-    # resize
-    if (input_height, input_width) != (height, width):
-        log.info("Image is resized from {} to {}".format(
-            image.shape[:-1], (height, width)))
-        image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
+    metrics = PerformanceMetrics()
+    presenter = None
+    output_transform = None
+    video_writer = cv2.VideoWriter()
 
-    # prepare input
-    image = image.astype(np.float32)
-    image = image.transpose((2, 0, 1))
-    image_input = np.expand_dims(image, 0)
+    while True:
+        if pipeline.is_ready():
+            # Get new image/frame
+            start_time = perf_counter()
+            frame = cap.read()
+            if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
+                break
+            if next_frame_id == 0:
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
+                if args.output_resolution:
+                    output_resolution = output_transform.new_resolution
+                else:
+                    output_resolution = (frame.shape[1], frame.shape[0])
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
+                if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                                         cap.fps(), output_resolution):
+                    raise RuntimeError("Can't open video writer")
+            # Submit for inference
+            pipeline.submit_data(frame, next_frame_id, {'start_time': start_time})
+            next_frame_id += 1
+        else:
+            # Wait for empty request
+            pipeline.await_any()
 
-    # loading model to the plugin
-    log.info("loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
+        # Process all completed requests
+        results = pipeline.get_result(next_frame_id_to_show)
+        if results:
+            depth_map, frame_meta = results
+            depth_map = apply_color_map(depth_map, output_transform)
 
-    # start sync inference
-    log.info("starting inference")
-    res = exec_net.infer(inputs={input_blob: image_input})
+            start_time = frame_meta['start_time']
+            presenter.drawGraphs(depth_map)
+            metrics.update(start_time, depth_map)
 
-    # processing output blob
-    log.info("processing output blob")
-    disp = np.squeeze(res[out_blob][0])
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+                video_writer.write(depth_map)
+            next_frame_id_to_show += 1
 
-    # resize disp to input resolution
-    disp = cv2.resize(disp, (input_width, input_height), cv2.INTER_CUBIC)
+            if not args.no_show:
+                cv2.imshow(DEMO_NAME, depth_map)
+                key = cv2.waitKey(1)
+                if key == 27 or key == 'q' or key == 'Q':
+                    break
+                presenter.handleKey(key)
 
-    # rescale disp
-    disp_min = disp.min()
-    disp_max = disp.max()
+    pipeline.await_all()
+    # Process completed requests
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
+        results = pipeline.get_result(next_frame_id_to_show)
+        while results is None:
+            results = pipeline.get_result(next_frame_id_to_show)
+        depth_map, frame_meta = results
+        depth_map = apply_color_map(depth_map, output_transform)
 
-    if disp_max - disp_min > 1e-6:
-        disp = (disp - disp_min) / (disp_max - disp_min)
-    else:
-        disp.fill(0.5)
+        start_time = frame_meta['start_time']
 
-    # pfm
-    out = 'disp.pfm'
-    cv2.imwrite(out, disp)
+        presenter.drawGraphs(depth_map)
+        metrics.update(start_time, depth_map)
 
-    log.info("Disparity map was saved to {}".format(out))
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(depth_map)
 
-    # png
-    out = 'disp.png'
-    plt.imsave(out, disp, vmin=0, vmax=1, cmap='inferno')
+        if not args.no_show:
+            cv2.imshow(DEMO_NAME, depth_map)
+            key = cv2.waitKey(1)
+            if key == 27 or key == 'q' or key == 'Q':
+                break
+            presenter.handleKey(key)
 
-    log.info("Color-coded disparity image was saved to {}".format(out))
-
-    log.info("This demo is an API example, for any performance measurements please use "
-             "the dedicated benchmark_app tool from the openVINO toolkit\n")
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

@@ -12,23 +12,23 @@ When "ground truth" data applied, the color coding for the text, drawn above eac
 
 You can stop the demo by pressing "Esc" or "Q" button. After that, the average metrics values will be printed to the console.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -62,6 +62,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * hbonet-0.5
 * hbonet-1.0
 * inception-resnet-v2-tf
+* mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-0.50-160
 * mobilenet-v1-0.50-224
@@ -98,10 +99,12 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * se-resnet-50
 * se-resnext-101
 * se-resnext-50
+* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
 * squeezenet1.0
 * squeezenet1.1
 * squeezenet1.1-caffe2
+* swin-tiny-patch4-window7-224
 * vgg16
 * vgg19
 * vgg19-caffe2
@@ -153,7 +156,6 @@ Options:
       -l "<absolute_path>"    Required for CPU custom layers.Absolute path to a shared library with the kernels implementation.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with kernels description.
-    -pc                       Optional. Enables per-layer performance report.
     -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.
@@ -186,10 +188,21 @@ For example, use the following command-line command to run the application:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. After the completion, it prints average metrics values to the console.
+The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

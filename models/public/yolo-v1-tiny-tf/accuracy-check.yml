@@ -44,6 +44,7 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.5479
 
   - name: yolo-v1-tiny-tf
 
@@ -79,3 +80,4 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.5479

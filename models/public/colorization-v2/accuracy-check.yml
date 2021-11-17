@@ -23,5 +23,9 @@ models:
         metrics:
           - type: psnr
             presenter: print_vector
+            reference:
+              mean: 26.99
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.9

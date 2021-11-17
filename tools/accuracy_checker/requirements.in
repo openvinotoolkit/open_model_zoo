@@ -2,9 +2,9 @@
 tqdm>=4.54.1
 
 # image reading and preprocessing
-# scikit-image version will be changed to 0.18 after fixing tests (compare_ssim method has been removed in this version)
 # note: python 3.6 wheels is not available since 0.18
-scikit-image~=0.17.2
+scikit-image>=0.17.2
+
 # there is issue with resolving versions for python3.6, pin to specific version of lib
 imagecodecs~=2020.5.30;python_version<"3.7"
 imagecodecs;python_version>="3.7"
@@ -18,6 +18,7 @@ py-cpuinfo>=7.0.0
 
 # text detection
 shapely>=1.7.1
+pyclipper>=1.2.1
 
 # brain tumor segmentation
 nibabel>=3.2.1
@@ -29,6 +30,7 @@ pydicom>=2.1.2
 # nlp, tokenization
 sentencepiece>=0.1.95
 tokenizers>=0.10.1
+transformers>=4.5
 nltk>=3.5
 
 # editdistance calculation

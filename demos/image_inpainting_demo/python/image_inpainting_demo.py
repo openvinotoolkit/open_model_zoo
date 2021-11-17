@@ -12,15 +12,20 @@
  limitations under the License.
 """
 
+import sys
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_arg_parser():
@@ -29,7 +34,7 @@ def build_arg_parser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.",
                       required=True, type=Path)
-    args.add_argument("-i", "--input", type=str, default='', help="path to image.")
+    args.add_argument("-i", "--input", required=True, help="Required. Path to image.")
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
@@ -82,11 +87,8 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
     return mask
 
 
-def inpaint_auto(img, args):
-    ie = IECore()
-
-    inpainting_processor = ImageInpainting(ie, args.model, args.device)
-
+def inpaint_auto(img, inpainting_processor, args):
+    start_time = perf_counter()
     #--- Generating mask
     if args.auto_mask_random:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
@@ -106,10 +108,13 @@ def inpaint_auto(img, args):
     #--- Inpaint and show results
     output_image = inpainting_processor.process(masked_image, mask)
     concat_imgs = np.hstack((masked_image, output_image))
-    cv2.putText(concat_imgs, 'Performance: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    total_latency = (perf_counter() - start_time) * 1e3
     cv2.putText(concat_imgs, 'original', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
-    cv2.putText(concat_imgs, 'result', (concat_imgs.shape[1]-5-cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
-    cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    cv2.putText(concat_imgs, 'result', (concat_imgs.shape[1] - 5 - cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15),
+                cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
+    cv2.putText(concat_imgs, 'Latency: {:.1f} ms'.format(total_latency), (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     return concat_imgs, output_image
 
 def main():
@@ -118,16 +123,24 @@ def main():
     # Loading source image
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     if img is None:
-        print("Cannot load image " + args.input)
+        log.error("Cannot load image " + args.input)
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
-        print("Error: -ar and -ac options cannot be used together...")
+        log.error("-ar and -ac options cannot be used together")
         return -1
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
+
+    log.info('Reading model {}'.format(args.model))
+    inpainting_processor = ImageInpainting(ie, args.model, args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_auto(img, args)
+        concat_image, result = inpaint_auto(img, inpainting_processor, args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:
@@ -136,10 +149,10 @@ def main():
     else:
         # Inpainting with GUI
         if args.no_show:
-            print("Error: --no_show argument cannot be used in GUI mode")
+            log.error("--no_show argument cannot be used in GUI mode")
             return -1
-        InpaintingGUI(img, args.model, args.device).run()
+        InpaintingGUI(img, inpainting_processor).run()
     return 0
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main() or 0)

@@ -18,3 +18,6 @@ models:
           - type: filter
             min_confidence: 0.02
             apply_to: prediction
+        metrics:
+          - type: coco_precision
+            reference: 0.715

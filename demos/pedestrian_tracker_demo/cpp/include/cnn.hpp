@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,8 +17,8 @@
 /**
  * @brief Base class of config for network
  */
-struct CnnConfig {
-    explicit CnnConfig(const std::string& path_to_model)
+struct CnnConfigTracker {
+    explicit CnnConfigTracker(const std::string& path_to_model)
         : path_to_model(path_to_model) {}
 
     /** @brief Path to model description */
@@ -32,7 +32,7 @@ struct CnnConfig {
  */
 class CnnBase {
 public:
-    using Config = CnnConfig;
+    using Config = CnnConfigTracker;
 
     /**
      * @brief Constructor
@@ -51,10 +51,7 @@ public:
      */
     void Load();
 
-    /**
-     * @brief Prints performance report
-     */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
+    const std::string modelType = "Person Re-Identification";
 
 protected:
     /**
@@ -95,7 +92,7 @@ protected:
 
 class VectorCNN : public CnnBase {
 public:
-    VectorCNN(const CnnConfig& config,
+    VectorCNN(const CnnConfigTracker& config,
               const InferenceEngine::Core & ie,
               const std::string & deviceName);
 

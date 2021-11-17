@@ -19,8 +19,14 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 33.41
+              std: 4.47
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.991
+              std: 0.0079
 
   - name: gmcnn-places2-tf
 
@@ -42,5 +48,11 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 33.41
+              std: 4.47
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.991
+              std: 0.0079

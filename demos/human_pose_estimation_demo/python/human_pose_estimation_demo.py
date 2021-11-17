@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,18 +23,20 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-import models
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
+from model_api import models
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+
 import monitors
 from images_capture import open_images_capture
-from pipelines import get_user_config, AsyncPipeline
-from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -157,37 +159,45 @@ def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=def
     return img
 
 
-def print_raw_results(poses, scores):
-    log.info('Poses:')
+def print_raw_results(poses, scores, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     for pose, pose_score in zip(poses, scores):
         pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
-        log.info('{} | {:.2f}'.format(pose_str, pose_score))
+        log.debug('{} | {:.2f}'.format(pose_str, pose_score))
 
 
 def main():
     args = build_argparser().parse_args()
-    metrics = PerformanceMetrics()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    cap = open_images_capture(args.input, args.loop)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
+    log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args, frame.shape[1] / frame.shape[0])
+    log_blobs_info(model)
+
     hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Starting inference...')
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(hpe_pipeline.exec_net, set(parse_devices(args.device)))
+
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
 
     output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
     if args.output_resolution:
@@ -196,12 +206,10 @@ def main():
         output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
             output_resolution):
         raise RuntimeError("Can't open video writer")
 
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while True:
         if hpe_pipeline.callback_exceptions:
             raise hpe_pipeline.callback_exceptions[0]
@@ -213,10 +221,12 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
+                print_raw_results(poses, scores, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
+            rendering_start_time = perf_counter()
             frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -258,10 +268,12 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(poses) and args.raw_output_message:
-            print_raw_results(poses, scores)
+            print_raw_results(poses, scores, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
+        rendering_start_time = perf_counter()
         frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
@@ -275,8 +287,14 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          hpe_pipeline.preprocess_metrics.get_latency(),
+                          hpe_pipeline.inference_metrics.get_latency(),
+                          hpe_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

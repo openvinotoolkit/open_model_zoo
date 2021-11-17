@@ -32,3 +32,4 @@ models:
             include_boundaries: True
             presenter: print_scalar
             allow_multiple_matches_per_ignored: True
+            reference: 0.6371

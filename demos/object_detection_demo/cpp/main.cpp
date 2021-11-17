@@ -49,7 +49,6 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -72,13 +71,16 @@ static const char anchors_message[] = "Optional. A comma separated list of ancho
     "By default used default anchors for model. Only for YOLOV4 architecture type.";
 static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
     "By default used default masks for model. Only for YOLOV4 architecture type.";
+static const char reverse_input_channels_message[] = "Optional. Switch the input channels order from BGR to RGB.";
+static const char mean_values_message[] = "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+    "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -94,6 +96,9 @@ DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 DEFINE_string(anchors, "", anchors_message);
 DEFINE_string(masks, "", masks_message);
+DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
 * \brief This function shows a help message
@@ -114,7 +119,6 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -127,8 +131,11 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
-    std::cout << "    -anchors                  "      << anchors_message << std::endl;
-    std::cout << "    -masks                    "      << masks_message << std::endl;
+    std::cout << "    -anchors                  " << anchors_message << std::endl;
+    std::cout << "    -masks                    " << masks_message << std::endl;
+    std::cout << "    -reverse_input_channels   " << reverse_input_channels_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }
 
 class ColorPalette {
@@ -206,7 +213,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -240,24 +246,25 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+        slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto& obj : result.objects) {
         if (FLAGS_r) {
-            slog::info << " "
+            slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
-                << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
+                << std::setw(4) << int(obj.x) << " | "
+                << std::setw(4) << int(obj.y) << " | "
+                << std::setw(4) << int(obj.x + obj.width) << " | "
+                << std::setw(4) << int(obj.y + obj.height)
                 << slog::endl;
         }
         outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
-        auto color = palette[obj.labelID];
+        const auto& color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
         cv::putText(outputImg, obj.label + conf.str(),
@@ -280,8 +287,6 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -311,7 +316,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
@@ -344,11 +348,14 @@ int main(int argc, char *argv[]) {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
+        model->SetInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;
 
-        AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+        AsyncPipeline pipeline(
+            std::move(model),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -440,7 +447,7 @@ int main(int argc, char *argv[]) {
             }
         } // while(keepRunning)
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
         for (; framesProcessed <= frameNum; framesProcessed++) {
@@ -465,21 +472,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
-        metrics.printTotal();
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
-
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
@@ -491,6 +488,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

@@ -5,14 +5,14 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
+The models can be downloaded via [Model Downloader](../../tools/model_tools/README.md).
 
 > **TIP**: You also can download and profile Intel® pretrained models inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
 > [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
 > performance of deep learning models on various Intel® architecture
 > configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
 > <br>
-> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
 
 ## Object Detection Models
 
@@ -86,6 +86,7 @@ Age/Gender recognition after Face Detection).
 | [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/README.md) | 0.462 | 11.177 |
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/README.md) | 0.126 | 2.483 |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/README.md) | 0.021 | 0.191 |
+| [facial-landmarks-98-detection-0001](./facial-landmarks-98-detection-0001/README.md) | 0.6 | 9.66 |
 | [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/README.md)       | 0.042 | 4.595 |
 | [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/README.md) | 0.174 | 0.735 |
 | [person-attributes-recognition-crossroad-0234](./person-attributes-recognition-crossroad-0234/README.md) | 2.167 | 23.510 |
@@ -318,7 +319,7 @@ Deep Learning models for time series forecasting.
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../tools/model_tools/README.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
 
 ## Legal Information

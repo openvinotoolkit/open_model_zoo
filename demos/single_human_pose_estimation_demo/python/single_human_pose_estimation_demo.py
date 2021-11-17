@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
+from pathlib import Path
 import sys
+import logging as log
+from time import perf_counter
 import cv2
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from detector import Detector
 from estimator import HumanPoseEstimator
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
 import monitors
 from images_capture import open_images_capture
+from model_api.performance_metrics import PerformanceMetrics
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 def build_argparser():
     parser = argparse.ArgumentParser()
@@ -41,26 +47,39 @@ def build_argparser():
 
 
 def run_demo(args):
-    ie = IECore()
-    detector_person = Detector(ie, path_to_model_xml=args.model_od,
-                              device=args.device,
-                              label_class=args.person_label)
-
-    single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe,
-                                                  device=args.device)
     cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
+
+    log.info('Reading Object Detection model {}'.format(args.model_od))
+    detector_person = Detector(ie, args.model_od,
+                               device=args.device,
+                               label_class=args.person_label)
+    log.info('The Object Detection model {} is loaded to {}'.format(args.model_od, args.device))
+
+    log.info('Reading Human Pose Estimation model {}'.format(args.model_hpe))
+    single_human_pose_estimator = HumanPoseEstimator(ie, args.model_hpe,
+                                                     device=args.device)
+    log.info('The Human Pose Estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
+
+    delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
+    video_writer = cv2.VideoWriter()
+
+    frames_processed = 0
+    presenter = monitors.Presenter(args.utilization_monitors, 25)
+    metrics = PerformanceMetrics()
+
+    start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
-    delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
 
-    frames_processed = 0
-    presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
         bboxes = detector_person.detect(frame)
         human_poses = [single_human_pose_estimator.estimate(frame, bbox) for bbox in bboxes]
@@ -78,10 +97,7 @@ def run_demo(args):
             for id_kpt, kpt in enumerate(pose):
                 cv2.circle(frame, (int(kpt[0]), int(kpt[1])), 3, colors[id_kpt], -1)
 
-        cv2.putText(frame, 'summary: {:.1f} FPS (estimation: {:.1f} FPS / detection: {:.1f} FPS)'.format(
-            float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
-            float(1 / single_human_pose_estimator.infer_time),
-            float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        metrics.update(start_time, frame)
 
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
@@ -93,8 +109,13 @@ def run_demo(args):
             if key == 27:
                 break
             presenter.handleKey(key)
+
+        start_time = perf_counter()
         frame = cap.read()
-    print(presenter.reportMeans())
+
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == "__main__":

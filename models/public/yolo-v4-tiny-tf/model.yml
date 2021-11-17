@@ -23,27 +23,27 @@ task_type: detection
 files:
   - name: yolov4-tiny.weights
     size: 24251276
-    sha256: cf9fbfd0f6d4869b35762f56100f50ed05268084078805f0e7989efe5bb8ca87
+    sha384: ee417b9217aa806b93110e8c688c06f7d75778645372667712f989fc961175244162d9a74f402dfedc64b80b3a21e58d
     source: https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/yolov4-tiny.weights
   - name: keras-YOLOv3-model-set/tools/model_converter/convert.py
     size: 16060
-    sha256: 3604f84547ce4fd3073cb6283f9d66e249526b0ad22da1a46c27ce1caf5a9b5f
+    sha384: 6a72c81fce395d3d7f16b713fa70e539aabe53403baac7f6f1e7a51ad11e50cc37a708b96d9b239c89d1a1210d8edd7d
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6b4a0ee63771262363e8224b0ee915cad6c5e93e/tools/model_converter/convert.py
   - name: keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py
     size: 8370
-    sha256: 1cc02cf4ec76760c05bc1635654247ba56b9a1864b63fd05534b836bc93e44e7
+    sha384: 1be7f22eafa2c9fd54457938bebbe4d572b7b2abdfed9a1fd720bbb52cdc96151839726957aa8c7dde9cd3abb332807e
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/tools/model_converter/keras_to_tensorflow.py
   - name: keras-YOLOv3-model-set/common/utils.py
     size: 5002
-    sha256: 90146775879f294e1f1a82c7e35a5be29d815b7a9b14dbe12ba29dd16b3d10a8
+    sha384: 7acd0f55fb4c1a0f00df46c2383309bc12715d66c09adb9bcb22d6aea2555ef0478d2d7147fe5cd8de770a23008e4958
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/common/utils.py
   - name: keras-YOLOv3-model-set/yolo4/models/layers.py
     size: 15171
-    sha256: 569f5d4353c2a514a1fe63442a3f891cd83614c28cdd2d5cfb25b2bfcaf56286
+    sha384: b949a66aeac84fe0ff6990961c8b39d1dc6585e4ce206c2fbafa5ee5f1063f7a55424beeacf55932bf8afe621c308a3e
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/yolo4/models/layers.py
   - name: keras-YOLOv3-model-set/cfg/yolov4-tiny.cfg
     size: 3028
-    sha256: 92e2805d3fa67ffef969f44281714c96cd5ce7968425003948b7bcd0d03e6871
+    sha384: 387ffb240df5f9c81355145a72a5d6bba085db3118b0f61ad214d3d3491e957f3b3ab9498eb8b873c098404fa5235cb7
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6b4a0ee63771262363e8224b0ee915cad6c5e93e/cfg/yolov4-tiny.cfg
 postprocessing:
   # disable imports that aren't needed for this model and code that uses them
@@ -76,4 +76,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_model=$conv_dir/yolo-v4-tiny.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

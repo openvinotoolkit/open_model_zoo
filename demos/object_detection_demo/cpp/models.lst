@@ -9,6 +9,7 @@ retinaface-resnet50-pytorch
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
+face-detection-????
 face-detection-adas-????
 face-detection-retail-????
 faster-rcnn-resnet101-coco-sparse-60-0001
@@ -33,6 +34,7 @@ vehicle-detection-????
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
 # For -at yolo
+mobilenet-yolo-v4-syg
 person-vehicle-bike-detection-crossroad-yolov3-1020
 yolo-v1-tiny-tf
 yolo-v2-ava-0001
@@ -46,3 +48,4 @@ yolo-v3-tf
 yolo-v3-tiny-tf
 yolo-v4-tf
 yolo-v4-tiny-tf
+yolof

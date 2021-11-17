@@ -11,18 +11,18 @@ The text is then used to search named entities.
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -43,7 +43,7 @@ usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -v VOCAB, --vocab VOCAB
-                        Required. path to the vocabulary file with tokens
+                        Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
@@ -54,6 +54,17 @@ Options:
   -d DEVICE, --device DEVICE
                         Optional. Target device to perform inference
                         on. Default value is CPU
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests.
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases).
 ```
 
 ## Demo Inputs
@@ -65,13 +76,15 @@ from the command-line match the actual network inputs.
 
 ## Demo Outputs
 
-The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous)
-for each sentence in input text.
+The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous) for each sentence in input text.
+The application reports
+
+* **Latency**: total processing time required to process input data (from loading the vocab and processing the context as tokens to displaying the results).
 
 ## Example Demo Cmd-Line
 
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded and converted with the
-[Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
+[Model Downloader](../../../tools/model_tools/README.md) executed with "--name bert*"):
 
 ```sh
     python3 bert_named_entity_recognition_demo.py.py
@@ -86,17 +99,9 @@ You can use the following command to try the demo (assuming the model from the O
 Notice that when the original "context" (text from the url) do not fit the model input
 (128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
 
-## Demo Performance
-
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance, as certain tricks like batching,
-[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
-
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

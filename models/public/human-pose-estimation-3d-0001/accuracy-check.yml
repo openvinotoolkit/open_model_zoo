@@ -26,3 +26,4 @@ models:
 
         metrics:
           - type: mpjpe_multiperson
+            reference: 10.045
