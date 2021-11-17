@@ -18,13 +18,13 @@ The model is built on the ResNeXt-101 backbone with [TPS](https://arxiv.org/abs/
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
+| Text location requirements                     | Tight aligned crop |
+| Source framework                               | PyTorch\*          |
 | Accuracy on the alphanumeric subset of ICDAR13 | 0.9685             |
 | Accuracy on the alphanumeric subset of ICDAR03 | 0.9712             |
 | Accuracy on the alphanumeric subset of ICDAR15 | 0.8675             |
 | Accuracy on the alphanumeric subset of SVT     | 0.9474             |
 | Accuracy on the alphanumeric subset of IIIT5K  | 0.9347             |
-| Text location requirements                     | Tight aligned crop |
-| Source framework                               | PyTorch\*          |
 
 ## Encoder model specification
 
@@ -66,7 +66,7 @@ The text-recognition-15-decoder model is a GRU based decoder with 2d attention m
 
 ### Outputs
 
-1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the LSTM cell.
+1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the GRU cell.
 2.	Name: `decoder_output`, shape: `1, 40`. Classification confidence scores in the [0, 1] range
     for every letter.
 ## Use text-detection demo
