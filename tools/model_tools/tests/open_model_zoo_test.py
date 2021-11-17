@@ -71,7 +71,7 @@ class TestTopologies(unittest.TestCase):
         inputs = {input_name: np.zeros((1, 1, 256, 256))}
         output = model(inputs, ie)
         self.assertEqual(output[output_name].shape, (1, 2, 256, 256))
-        
+
 
 if __name__ == '__main__':
     unittest.main()

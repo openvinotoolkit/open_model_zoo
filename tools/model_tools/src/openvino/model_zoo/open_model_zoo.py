@@ -161,3 +161,14 @@ class Model:
         input_blob = next(iter(self.net.input_info))
 
         return input_blob
+
+    def outputs(self, ie=None):
+        if self.net is None:
+            try:
+                self.net = ie.read_network(self.model_path)
+            except AttributeError:
+                raise TypeError('ie argumnet must be of IECore type.')
+        
+        output_blob = next(iter(self.net.outputs))
+
+        return output_blob
