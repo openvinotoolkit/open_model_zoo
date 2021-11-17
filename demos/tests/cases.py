@@ -632,10 +632,10 @@ NATIVE_DEMOS = [
                                       '-tr_o_blb_nm': 'logits',
                                       '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'},
                              extra_models=[ModelArg('text-recognition-0015-decoder')]),
-                    TestCase(options={'-m_tr': ModelArg('text-recognition-0016-encoder'),
-                                       '-tr_pt_first': None,
-                                       '-tr_o_blb_nm': 'logits',
-                                       '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyz'},
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0016-encoder'), #TODO
+                                       '-tr_pt_first': None, #TODO
+                                       '-tr_o_blb_nm': 'logits', #TODO
+                                       '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyz'}, #TODO
                               extra_models=[ModelArg('text-recognition-0016-decoder')]), #TODO
                     TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                                       '-tr_pt_first': None}),
