@@ -518,7 +518,7 @@ void DetectionsProcessor::process() {
                         cv::Rect rect,
                         Context& context) {
 //                            attributesRequest.SetCompletionCallback([]{});  // destroy the stored bind object
-//                            attributesRequest.set_callback({});  // destroy the stored bind object
+                            attributesRequest.set_callback({});  // destroy the stored bind object
 
                             const std::pair<std::string, std::string>& attributes
                                 = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
@@ -561,7 +561,7 @@ void DetectionsProcessor::process() {
                         cv::Rect rect,
                         Context& context) {
 //                            lprRequest.SetCompletionCallback([]{});  // destroy the stored bind object
-//                            lprRequest.set_callback({});  // destroy the stored bind object
+                            lprRequest.set_callback({});  // destroy the stored bind object
 
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
@@ -624,7 +624,7 @@ void InferTask::process() {
                 ov::runtime::InferRequest& inferRequest,
                 Context& context) {
 //                    inferRequest.SetCompletionCallback([]{});  // destroy the stored bind object
-//                    inferRequest.set_callback({});  // destroy the stored bind object
+                    inferRequest.set_callback({});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
                         std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,

@@ -99,39 +99,28 @@ public:
             throw std::logic_error("Output should have 7 as a last dimension");
         }
 
-        InputTensorInfo inputTensorInfo;
+        PrePostProcessor ppp(network);
+
+        InputInfo& inputInfo = ppp.input();
+
+        InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
         if (FLAGS_auto_resize) {
             inputTensorInfo.set_layout({ "NHWC" });
-        }  else {
+        } else {
             inputTensorInfo.set_layout({ "NCHW" });
         }
 
-        PreProcessSteps preProcessSteps;
+        PreProcessSteps& preProcessSteps = inputInfo.preprocess();
         preProcessSteps.convert_element_type(ov::element::f32);
         if (FLAGS_auto_resize) {
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputNetworkInfo inputNetworkInfo;
+        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
         inputNetworkInfo.set_layout({ "NCHW" });
 
-        InputInfo inputInfo;
-        inputInfo.tensor(std::move(inputTensorInfo));
-        inputInfo.preprocess(std::move(preProcessSteps));
-        inputInfo.network(std::move(inputNetworkInfo));
-
-        OutputTensorInfo outputTensorInfo;
-        outputTensorInfo.set_element_type(ov::element::f32);
-
-        OutputInfo outputInfo;
-        outputInfo.tensor(std::move(outputTensorInfo));
-
-        PrePostProcessor ppp;
-        ppp.input(std::move(inputInfo));
-        ppp.output(std::move(outputInfo));
-
-        network = ppp.build(network);
+        network = ppp.build();
 
 //        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
         m_net = m_core.compile_model(network, deviceName, pluginConfig);
@@ -273,7 +262,10 @@ public:
         // type is the second output.
         outputNameForType = outputs[1].get_any_name();
 
-        InputTensorInfo inputTensorInfo;
+        PrePostProcessor ppp(network);
+
+        InputInfo& inputInfo = ppp.input();
+        InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
         if (FLAGS_auto_resize) {
             inputTensorInfo.set_layout({ "NHWC" });
@@ -281,35 +273,16 @@ public:
             inputTensorInfo.set_layout({ "NCHW" });
         }
 
-        InputNetworkInfo inputNetworkInfo;
-        inputNetworkInfo.set_layout({ "NCHW" });
-
-        PreProcessSteps preProcessSteps;
+        PreProcessSteps& preProcessSteps = inputInfo.preprocess();
         preProcessSteps.convert_element_type(ov::element::f32);
         if (FLAGS_auto_resize) {
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputInfo inputInfo;
-        inputInfo.tensor(std::move(inputTensorInfo));
-        inputInfo.preprocess(std::move(preProcessSteps));
-        inputInfo.network(std::move(inputNetworkInfo));
+        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
+        inputNetworkInfo.set_layout({ "NCHW" });
 
-        OutputTensorInfo outputTensorInfo;
-        outputTensorInfo.set_element_type(ov::element::f32);
-
-        OutputInfo outputColorInfo(outputNameForColor);
-        outputColorInfo.tensor(std::move(outputTensorInfo));
-
-        OutputInfo outputTypeInfo(outputNameForType);
-        outputTypeInfo.tensor(std::move(outputTensorInfo));
-
-        PrePostProcessor ppp;
-        ppp.input(std::move(inputInfo));
-        ppp.output(std::move(outputColorInfo));
-        ppp.output(std::move(outputTypeInfo));
-
-        network = ppp.build(network);
+        network = ppp.build();
 
 //        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
 //        logExecNetworkInfo(net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
@@ -488,33 +461,28 @@ public:
             }
         }
 
-        InputTensorInfo inputTensorInfo;
+        PrePostProcessor ppp(network);
+
+        InputInfo& inputInfo = ppp.input(LprInputName);
+
+        InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
         if (FLAGS_auto_resize) {
             inputTensorInfo.set_layout({ "NHWC" });
-        }
-        else {
+        } else {
             inputTensorInfo.set_layout({ "NCHW" });
         }
 
-        InputNetworkInfo inputNetworkInfo;
-        inputNetworkInfo.set_layout({ "NCHW" });
-
-        PreProcessSteps preProcessSteps;
+        PreProcessSteps& preProcessSteps = inputInfo.preprocess();
         preProcessSteps.convert_element_type(ov::element::f32);
         if (FLAGS_auto_resize) {
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputInfo inputInfo(LprInputName);
-        inputInfo.tensor(std::move(inputTensorInfo));
-        inputInfo.preprocess(std::move(preProcessSteps));
-        inputInfo.network(std::move(inputNetworkInfo));
+        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
+        inputNetworkInfo.set_layout({ "NCHW" });
 
-        PrePostProcessor ppp;
-        ppp.input(std::move(inputInfo));
-
-        network = ppp.build(network);
+        network = ppp.build();
 
 //        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
 //        logExecNetworkInfo(net, FLAGS_m_lpr, deviceName, "License Plate Recognition");

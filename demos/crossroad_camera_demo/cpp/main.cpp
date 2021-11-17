@@ -122,8 +122,8 @@ struct BaseDetection {
 };
 
 struct PersonDetection : BaseDetection {
-    int maxProposalCount;
-    int objectSize;
+    size_t maxProposalCount;
+    size_t objectSize;
     float width = 0.0f;
     float height = 0.0f;
     bool resultsFetched = false;
@@ -204,7 +204,7 @@ struct PersonDetection : BaseDetection {
         const ov::Layout tensor_layout{ "NHWC" };
 
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                           input(InputInfo().
                               tensor(InputTensorInfo().
                                   set_element_type(ov::element::u8).
@@ -221,14 +221,14 @@ struct PersonDetection : BaseDetection {
                           output(OutputInfo().
                               tensor(OutputTensorInfo().
                                   set_element_type(ov::element::f32))).
-                      build(network);
+                      build();
         } else {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                           input(InputInfo().
                                tensor(InputTensorInfo().
                                     set_element_type(ov::element::u8).
                                     set_layout({"NCHW"}))).
-                      build(network);
+                      build();
         }
 
         return network;
@@ -402,7 +402,7 @@ struct PersonAttribsDetection : BaseDetection {
         }
 
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                 input(InputInfo().
                     tensor(InputTensorInfo().
                         set_element_type(ov::element::u8).
@@ -414,14 +414,14 @@ struct PersonAttribsDetection : BaseDetection {
                     resize(ResizeAlgorithm::RESIZE_LINEAR)).
                 network(InputNetworkInfo().
                     set_layout("NCHW"))).
-                build(network);
+                build();
         } else {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                 input(InputInfo().
                     tensor(InputTensorInfo().
                         set_element_type(ov::element::u8).
                         set_layout({ "NCHW" }))).
-                build(network);
+                build();
         }
 
         inputName = network->input().get_any_name();
@@ -538,7 +538,7 @@ struct PersonReIdentification : BaseDetection {
         }
 
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                           input(InputInfo().
                               tensor(InputTensorInfo().
                                   set_element_type(ov::element::u8).
@@ -550,14 +550,14 @@ struct PersonReIdentification : BaseDetection {
                                   resize(ResizeAlgorithm::RESIZE_LINEAR)).
                               network(InputNetworkInfo().
                                   set_layout("NCHW"))).
-                      build(network);
+                      build();
         } else {
-            network = PrePostProcessor().
+            network = PrePostProcessor(network).
                           input(InputInfo().
                               tensor(InputTensorInfo().
                                   set_element_type(ov::element::u8).
                                   set_layout({ "NCHW" }))).
-                          build(network);
+                          build();
         }
 
         inputName = network->input().get_any_name();
