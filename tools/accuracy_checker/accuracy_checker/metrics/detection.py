@@ -302,18 +302,18 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels, profile_boxes)
 
         average_precisions = []
-        for label in labels_stat:
-            label_precision = labels_stat[label]['precision']
-            label_recall = labels_stat[label]['recall']
+        for value in labels_stat.values():
+            label_precision = value['precision']
+            label_recall = value['recall']
             label_miss_rate = 1 - label_recall
-            labels_stat[label]['miss_rate'] = label_miss_rate
+            value['miss_rate'] = label_miss_rate
             if label_recall.size:
                 ap = average_precision(label_precision, label_recall, self.integral)
                 average_precisions.append(ap)
             else:
                 average_precisions.append(np.nan)
-            labels_stat[label]['ap'] = average_precisions[-1]
-            labels_stat[label]['result'] = average_precisions[-1]
+            value['ap'] = average_precisions[-1]
+            value['result'] = average_precisions[-1]
         if profile_boxes:
             self._update_label_stat_for_non_matched_classes(labels_stat, predictions)
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(average_precisions))
@@ -376,16 +376,16 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
             [annotation], [prediction], valid_labels, self.profiler is not None
         )
         miss_rates = []
-        for label in labels_stat:
-            label_miss_rate = 1.0 - labels_stat[label]['recall']
-            label_fppi = labels_stat[label]['fppi']
+        for value in labels_stat.values():
+            label_miss_rate = 1.0 - value['recall']
+            label_fppi = value['fppi']
 
             position = bisect.bisect_left(label_fppi, self.fppi_level)
             m0 = max(0, position - 1)
             m1 = position if position < len(label_miss_rate) else m0
             miss_rates.append(0.5 * (label_miss_rate[m0] + label_miss_rate[m1]))
             if self.profiler:
-                labels_stat[label]['result'] = miss_rates[-1]
+                value['result'] = miss_rates[-1]
         if self.profiler:
             self.profiler.update(annotation[0].identifier, labels_stat, self.name, np.nanmean(miss_rates))
 
@@ -397,9 +397,9 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
 
         miss_rates = []
-        for label in labels_stat:
-            label_miss_rate = 1.0 - labels_stat[label]['recall']
-            label_fppi = labels_stat[label]['fppi']
+        for value in labels_stat.values():
+            label_miss_rate = 1.0 - value['recall']
+            label_fppi = value['fppi']
 
             position = bisect.bisect_left(label_fppi, self.fppi_level)
             m0 = max(0, position - 1)
@@ -437,15 +437,15 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEval
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels, profile_boxes)
 
         recalls = []
-        for label in labels_stat:
-            label_recall = labels_stat[label]['recall']
+        for value in labels_stat.values():
+            label_recall = value['recall']
             if label_recall.size:
                 max_recall = label_recall[-1]
                 recalls.append(max_recall)
             else:
                 recalls.append(np.nan)
             if profile_boxes:
-                labels_stat[label]['result'] = recalls[-1]
+                value['result'] = recalls[-1]
         if profile_boxes:
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(recalls))
 

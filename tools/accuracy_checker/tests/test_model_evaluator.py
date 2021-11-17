@@ -59,6 +59,7 @@ class TestModelEvaluator:
 
         self.metric = Mock()
         self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
+        self.metric.profiler = None
 
         self.evaluator = ModelEvaluator(
             self.launcher,
@@ -185,6 +186,7 @@ class TestModelEvaluatorAsync:
 
         self.metric = Mock()
         self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
+        self.metric.profiler = None
 
         self.evaluator = ModelEvaluator(
             self.launcher,

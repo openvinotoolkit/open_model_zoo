@@ -366,11 +366,16 @@ class ModelEvaluator(BaseEvaluator):
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
+        copy_annotations, copy_predictions = None, None
+        if self.metric_executor.profiler is not None and self.metric_executor.profiler.required_postprocessing:
+            copy_annotations, copy_predictions = copy.deepcopy(batch_annotations), copy.deepcopy(batch_predictions)
+            copy_annotations, copy_predictions = self.postprocessor.deprocess_batch(
+                copy_annotations, copy_predictions, batch_meta)
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
         )
         _, profile_result = self.metric_executor.update_metrics_on_batch(
-            batch_input_ids, annotations, predictions, enable_profiling
+            batch_input_ids, annotations, predictions, enable_profiling, copy_annotations, copy_predictions
         )
         if output_callback:
             callback_kwargs = {'profiling_result': profile_result} if enable_profiling else {}

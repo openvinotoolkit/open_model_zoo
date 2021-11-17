@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 import numpy as np
-from .base_profiler import MetricProfiler
+from .object_detection_metric_profiler import DetectionListProfiler
 
 
-class InstanceSegmentationProfiler(MetricProfiler):
+class InstanceSegmentationProfiler(DetectionListProfiler):
     __provider__ = 'instance_segmentation'
 
     def __init__(self, dump_iterations=100, report_type='csv', name=None):
@@ -56,13 +56,16 @@ class InstanceSegmentationProfiler(MetricProfiler):
     def generate_json_report(self, identifier, metric_result, metric_name):
         report = {'identifier': identifier, 'per_class_result': {}}
         per_class_results = {}
-        for idx, (class_id, class_result) in enumerate(metric_result.items()):
-            if not np.size(class_result['scores']):
+        totat_pred_boxes, total_gt_boxes, total_gt_matches, total_pred_matches = 0, 0, 0, 0
+        for idx, class_result in metric_result.items():
+            if not np.size(class_result['gt']) + np.size(class_result['dt']):
                 continue
-            label_id = self.valid_labels[idx] if self.valid_labels else class_id
+            label_id = idx
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
-            gt = [gt_obj.tolist() for gt_obj in class_result['gt']]
-            dt = [dt_obj.tolist() for dt_obj in class_result['dt']]
+            gt = [g.tolist() if not isinstance(g, list) else g for g in class_result['gt']]
+            dt = []
+            for dp in class_result['dt']:
+                dt.append([d.tolist() if not isinstance(d, list) else d for d in dp])
             scores = (
                 class_result['scores'].tolist()
                 if not isinstance(class_result['scores'], list) else class_result['scores']
@@ -71,11 +74,21 @@ class InstanceSegmentationProfiler(MetricProfiler):
             per_class_results[label_id] = {
                 'annotation_polygons': gt,
                 'prediction_polygons': dt,
+                'num_prediction_polygons': len(dt),
+                'num_annotation_polygons': len(gt),
                 'prediction_scores': scores,
                 'iou': iou,
             }
-            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name))
+            total_gt_boxes += len(gt)
+            totat_pred_boxes += len(dt)
+            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name, aggregate=True))
+            total_pred_matches += per_class_results[label_id]['prediction_matches']
+            total_gt_matches += per_class_results[label_id]['annotation_matches']
         report['per_class_result'] = per_class_results
+        report['num_prediction_polygons'] = totat_pred_boxes
+        report['num_annotation_polygons'] = total_gt_boxes
+        report['total_annotation_matches'] = total_gt_matches
+        report['total_prediction_matches'] = total_pred_matches
         return report
 
     def per_instance_result(self, identifier, metric_result):
@@ -87,8 +100,8 @@ class InstanceSegmentationProfiler(MetricProfiler):
             dt = per_class_result['dt']
             gt = per_class_result['gt']
             matches_result = self.generate_result_matching(per_class_result, '')
-            dt_matched = matches_result['prediction_matches']
-            gt_matched = matches_result['annotation_matches']
+            dt_matched = matches_result.get('prediction_matches', [])
+            gt_matched = matches_result.get('annotation_matches', [])
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
@@ -121,11 +134,19 @@ class InstanceSegmentationProfiler(MetricProfiler):
         ]
 
     @staticmethod
-    def generate_result_matching(per_class_result, metric_name):
+    def generate_result_matching(per_class_result, metric_name, aggregate=False):
+        result = per_class_result['result']
+        if np.isnan(result):
+            result = -1
+        dt_matches = per_class_result['dt_matches'][0].tolist() if 'dt_matches' in per_class_result else []
+        gt_matches = per_class_result['gt_matches'][0].tolist() if 'gt_matches' in per_class_result else []
+        if aggregate:
+            dt_matches = int(sum(dt_matches))
+            gt_matches = int(np.sum(np.array(gt_matches) != 0))
         matching_result = {
-            'prediction_matches': per_class_result['dt_matches'][0].tolist(),
-            'annotation_matches': per_class_result['gt_matches'][0].tolist(),
-            metric_name: per_class_result['result']
+            'prediction_matches': dt_matches,
+            'annotation_matches': gt_matches,
+            'result': result,
         }
         return matching_result
 

@@ -82,7 +82,8 @@ class MetricsExecutor:
 
         return metric_results
 
-    def update_metrics_on_batch(self, batch_ids, annotation, prediction, profile=False):
+    def update_metrics_on_batch(self, batch_ids, annotation, prediction,
+                                profile=False, deprocessed_annotation=None, deprocessed_prediction=None):
         """
         Updates metric value corresponding given batch.
 
@@ -94,7 +95,11 @@ class MetricsExecutor:
         results = OrderedDict()
         profile_results = OrderedDict()
 
-        for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
+        for idx, (input_id, single_annotation, single_prediction) in enumerate(zip(batch_ids, annotation, prediction)):
+            if profile:
+                if deprocessed_annotation is not None and deprocessed_prediction is not None:
+                    self.profiler.update_annotation_and_prediction(
+                        deprocessed_annotation[idx], deprocessed_prediction[idx])
             results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
             if profile:
                 profile_results[input_id] = self.profiler.get_last_report()
@@ -109,6 +114,20 @@ class MetricsExecutor:
                 metric_type=metric_type,
                 evaluated_value=functor(annotations, predictions),
                 reference_value=reference,
+                abs_threshold=abs_threshold,
+                rel_threshold=rel_threshold,
+                meta=functor.meta,
+                profiling_file=profiling_file
+            )
+
+    def get_metric_result_template(self, ignore_refs):
+        for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+            profiling_file = None if functor.profiler is None else functor.profiler.report_file
+            yield presenter, EvaluationResult(
+                name=name,
+                metric_type=metric_type,
+                evaluated_value=functor.result_template,
+                reference_value=reference if not ignore_refs else None,
                 abs_threshold=abs_threshold,
                 rel_threshold=rel_threshold,
                 meta=functor.meta,
@@ -150,9 +169,9 @@ class MetricsExecutor:
             metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state, **metric_kwargs
         )
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
-        threshold_v = metric_config_entry.get(threshold)
-        abs_threshold_v = metric_config_entry.get(abs_threshold)
-        reference_v = metric_config_entry.get(reference)
+        threshold_v = metric_fn.config.get(threshold)
+        abs_threshold_v = metric_fn.config.get(abs_threshold)
+        reference_v = metric_fn.config.get(reference)
         if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
             raise ConfigError(
                 'reference value should be represented as number or dictionary with numbers for each submetric'
