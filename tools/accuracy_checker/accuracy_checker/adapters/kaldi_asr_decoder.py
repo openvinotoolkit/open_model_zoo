@@ -16,7 +16,7 @@ limitations under the License.
 
 import os
 import struct
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import tempfile
 from pathlib import Path
 import numpy as np
@@ -130,7 +130,7 @@ class KaldiLatGenDecoder(Adapter):
             lattice_add_penalty_path, self.word_insertion_penalty
         )
         self.decoder_cmd = ' | '.join([latgen_cmd, scale_cmd, add_penalty_cmd, best_path_cmd])
-        self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd())
+        self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd()) # pylint: disable=R1732
 
     def reset(self):
         if self._temp_dir is not None:
@@ -221,8 +221,9 @@ class KaldiLatGenDecoder(Adapter):
 
         outfile = scores_file.with_suffix('.txt')
         with outfile.open('w') as f:
-            p = subprocess.Popen(self.decoder_cmd.format(scores_file), stdout=f, stderr=subprocess.PIPE, shell=True)
-            get_cmd_result(p)
+            with subprocess.Popen(self.decoder_cmd.format(scores_file),
+                                  stdout=f, stderr=subprocess.PIPE, shell=True) as p:
+                get_cmd_result(p)
         return self.get_transcript(outfile)
 
     def get_transcript(self, lattice_file):
@@ -236,4 +237,4 @@ class KaldiLatGenDecoder(Adapter):
         return transcripts
 
     def _create_temp_dir(self):
-        self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd())
+        self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd()) # pylint: disable=R1732

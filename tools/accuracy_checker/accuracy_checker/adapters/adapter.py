@@ -107,17 +107,17 @@ class Adapter(ClassProvider):
         pass
 
 class AdapterField(BaseField):
-    def validate(self, entry, field_uri_=None, fetch_only=False, validation_scheme=None):
-        errors_stack = super().validate(entry, field_uri_, fetch_only, validation_scheme)
+    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
+        errors_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
 
         if entry is None:
             return errors_stack
 
-        field_uri_ = field_uri_ or self.field_uri
+        field_uri = field_uri or self.field_uri
         if isinstance(entry, str):
             errors_stack.extend(
                 StringField(choices=Adapter.providers).validate(
-                    entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
+                    entry, field_uri or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
                 )
             )
         elif isinstance(entry, dict):
@@ -125,19 +125,19 @@ class AdapterField(BaseField):
                 type = StringField(choices=Adapter.providers)
 
             dict_adapter_validator = DictAdapterValidator(
-                field_uri_ or 'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
+                field_uri or 'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
             errors_stack.extend(dict_adapter_validator.validate(
-                entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
+                entry, field_uri or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
             ))
         else:
             if not fetch_only:
                 errors_stack.append(
                     self.build_error(
-                        entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary', validation_scheme
+                        entry, field_uri or 'adapter', 'adapter must be either string or dictionary', validation_scheme
                     ))
             else:
-                self.raise_error(entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary')
+                self.raise_error(entry, field_uri or 'adapter', 'adapter must be either string or dictionary')
         return errors_stack
 
 

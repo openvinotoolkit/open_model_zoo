@@ -19,9 +19,10 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField
-from ..representation import TextDetectionPrediction
 from ..postprocessor import NMS
+from ..representation import TextDetectionPrediction
 from ..utils import UnsupportedPackage
+
 try:
     from shapely.geometry import Polygon
 except ImportError as import_error:
@@ -890,14 +891,10 @@ class CRAFTTextDetectionAdapter(Adapter):
             niter = int(np.sqrt(size * min(w, h) / (w * h)) * 2)
             sx, ex, sy, ey = x - niter, x + w + niter + 1, y - niter, y + h + niter + 1
             # boundary check
-            if sx < 0:
-                sx = 0
-            if sy < 0:
-                sy = 0
-            if ex > img_w:
-                ex = img_w
-            if ey > img_h:
-                ey = img_h
+            sx = max(sx, 0)
+            sy = max(sy, 0)
+            ex = min(ex, img_w)
+            ey = min(ey, img_h)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))
             segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)
 

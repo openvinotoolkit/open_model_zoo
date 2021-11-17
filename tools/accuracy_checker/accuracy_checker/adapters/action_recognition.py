@@ -117,9 +117,9 @@ class ActionDetection(Adapter):
 
             self.add_conf_outs = []
             self.glob_layer_id_map = []
-            for head_id in range(len(self.head_sizes)):
+            for head_id, head_size in enumerate(self.head_sizes):
                 glob_layer_ids = []
-                for anchor_id in np.arange(start=1, stop=self.head_sizes[head_id] + 1):
+                for anchor_id in np.arange(start=1, stop=head_size + 1):
                     self.add_conf_outs.append(
                         '{}{}{}{}'.format(add_conf_out_prefix, head_id + 1, add_conf_out_suffix, anchor_id)
                     )

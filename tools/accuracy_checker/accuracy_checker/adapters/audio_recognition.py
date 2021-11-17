@@ -15,12 +15,14 @@ limitations under the License.
 """
 import math
 import string
+from itertools import groupby
 
 import numpy as np
 
 from ..adapters import Adapter
 from ..config import NumberField, BoolField, StringField, ListField, PathField
 from ..representation import CharacterRecognitionPrediction
+from ..utils import read_txt
 
 # Will import kenlm later if necessary
 kenlm = None
@@ -36,8 +38,8 @@ def require_kenlm():
     if kenlm is None:
         try:
             import kenlm as kenlm_imported  # pylint: disable=import-outside-toplevel
-        except ImportError:
-            raise ValueError("kenlm is not installed. Please install it with 'pip install pypi-kenlm'.")
+        except ImportError as import_err:
+            raise ValueError("kenlm is not installed. Please install it with 'pip install pypi-kenlm'.") from import_err
         kenlm = kenlm_imported
 
 
@@ -49,11 +51,11 @@ def require_ctcdecode_numpy():
     if ctcdecode_numpy is None:
         try:
             import ctcdecode_numpy as ctcdecode_numpy_imported  # pylint: disable=import-outside-toplevel
-        except ImportError:
+        except ImportError as impoer_err:
             raise ValueError(
                 "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
                 "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
-            )
+            ) from impoer_err
         ctcdecode_numpy = ctcdecode_numpy_imported
 
 
@@ -688,24 +690,40 @@ class DumbDecoder(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
+            'vocabulary_file': PathField(optional=True, description='Alphabet as vocab file'),
             'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False,
                                   description="Alphabet as list of strings."),
             'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
-
+            'blank_token_id': NumberField(optional=True, value_type=int),
+            'eos_token_id': NumberField(optional=True, value_type=int),
+            'replace_underscore': BoolField(
+                optional=True, description='Replace underscore by white spacte after decoding', default=False
+            )
         })
         return parameters
 
     def configure(self):
-        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
-        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+        self.set_alphabet()
+        self.eos = self.get_value_from_config('eos_token_id') or -1
+        self.blank = self.get_value_from_config('blank_token_id') or -2
+        self.replace_underscore = self.get_value_from_config('replace_underscore')
         self.uppercase = self.get_value_from_config('uppercase')
+
+    def set_alphabet(self):
+        if 'vocabulary_file' in self.launcher_config:
+            self.alphabet = read_txt(self.get_value_from_config('vocabulary_file'), ignore_space=True)
+        else:
+            self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+            self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         assert len(identifiers) == 1
-        decoded = ''.join(self.alphabet[t] for t in raw[0])
+        decoded = ''.join(self.alphabet[t] for t in raw[0] if t != self.blank)
         if self.uppercase:
             decoded = decoded.upper()
-        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
+        if self.replace_underscore:
+            decoded = decoded.replace('_', ' ')
+        return [CharacterRecognitionPrediction(identifiers[0], decoded)]
 
 
 class TextState:
@@ -802,3 +820,45 @@ def read_vocabulary_prefixes(lm_filename, vocab_offset, vocab_length):
         yield ''
 
     return set(all_prefixes_vocab(vocab_list))
+
+
+class Wav2VecDecoder(Adapter):
+    __provider__ = 'wav2vec'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'alphabet': ListField(allow_empty=False, description='supported tokens'),
+            'pad_token': StringField(optional=True, default='<pad>', description='padding token'),
+            'words_delimiter': StringField(optional=True, default='|', description='words delimiter tokens'),
+            'group_tokens': BoolField(optional=True, default=True, description='allow grouping repeated tokens'),
+            'lower_case': BoolField(optional=True, default=False, description='converts output to lower case'),
+            'cleanup_whitespaces': BoolField(optional=True, default=True, description='clean up extra white spaces')
+        })
+        return params
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet')
+        self.pad_token = self.get_value_from_config('pad_token')
+        self.words_delimiter = self.get_value_from_config('words_delimiter')
+        self.group_tokens = self.get_value_from_config('group_tokens')
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.cleanup_whitespaces = self.get_value_from_config('cleanup_whitespaces')
+
+    def process(self, raw, identifiers, frame_meta):
+        out_logits = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, logits in zip(identifiers, out_logits[self.output_blob]):
+            token_ids = np.argmax(logits, -1)
+            tokens = [self.alphabet[idx] for idx in token_ids if self.alphabet[idx]]
+            if self.group_tokens:
+                tokens = [token_group[0] for token_group in groupby(tokens)]
+            tokens = [t for t in tokens if t != self.pad_token]
+            res_string = ''.join([t if t != self.words_delimiter else ' ' for t in tokens]).strip()
+            if self.cleanup_whitespaces:
+                res_string = ' '.join(res_string.split(' '))
+            if self.lower_case:
+                res_string = res_string.lower()
+            results.append(CharacterRecognitionPrediction(identifier, res_string))
+        return results

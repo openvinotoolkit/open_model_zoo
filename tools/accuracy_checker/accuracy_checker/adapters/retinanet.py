@@ -1,9 +1,12 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -536,8 +539,8 @@ class RetinaNetTF2(Adapter):
             scores_trans = np.transpose(scores_in, [1, 0])
             scores_trans = np.reshape(scores_trans, [-1, num_anchors])
 
-            indices_ = np.argsort(-scores_trans)
-            top_k_scores = -1 * np.sort(-scores_trans)[:, :pre_nms_num_detections]
+            indices_ = np.argsort(-1 * scores_trans)
+            top_k_scores = -1 * np.sort(-1 * scores_trans)[:, :pre_nms_num_detections]
             top_k_indices = indices_[:, :pre_nms_num_detections]
 
             top_k_scores = np.reshape(top_k_scores,
