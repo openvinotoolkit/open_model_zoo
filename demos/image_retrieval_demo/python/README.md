@@ -29,7 +29,7 @@ The demo workflow is the following:
 
 ## Preparing to Run
 
-The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f24667329a58e8560ed4e01ef203e99def/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
 The demo dependencies should be installed before run. That can be achieved with the following command:
 
