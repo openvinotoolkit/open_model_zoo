@@ -39,7 +39,7 @@ The text-recognition-0016-encoder model is a ResNeXt-101 like backbone with TPS 
 
 Image, name: `imgs`, shape: `1, 1, 64, 256` in the `B, C, H, W` format, where:
 
-- `B` - batch size 
+- `B` - batch size
 - `C` - number of channels
 - `H` - image height
 - `W` - image width
@@ -70,6 +70,9 @@ The text-recognition-0016-decoder model is a GRU based decoder with 2d attention
 1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the GRU cell.
 2.	Name: `decoder_output`, shape: `1, 40`. Classification confidence scores in the [0, 1] range
     for every letter.
+
+Particularly, decoder output in every step is the probability distribution of the symbol on this timestamp. The model supports 40 symbols: 10 digits, 26 English alphabet letters and 4 special symbols(start of sequence symbol, end of sequence symbol, pad symbol and unknown symbol).
+> Note: that start and end symbols are not passed in the supported symbol set in the demo, as well as pad symbol. See parameter `-m_tr_ss` in the demo section for details.
 ## Use text-detection demo
 
 Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
