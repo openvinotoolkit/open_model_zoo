@@ -19,6 +19,7 @@ from .image_model import ImageModel
 
 
 class Deblurring(ImageModel):
+    __model__ = 'Deblurring'
     def __init__(self, model_adapter, input_image_shape):
         super().__init__(model_adapter)
         self._check_io_number(1, 1)

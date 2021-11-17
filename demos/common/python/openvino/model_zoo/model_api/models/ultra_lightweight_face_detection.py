@@ -20,6 +20,8 @@ from .utils import Detection, nms
 
 
 class UltraLightweightFaceDetection(DetectionModel):
+    __model__ = 'Ultra-Light-Weight-Face-Detection'
+
     def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:

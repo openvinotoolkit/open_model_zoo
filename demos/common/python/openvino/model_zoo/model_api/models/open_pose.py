@@ -27,6 +27,8 @@ from .image_model import ImageModel
 
 
 class OpenPose(ImageModel):
+    __model__ = 'OpenPose'
+
     def __init__(self, model_adapter, target_size, aspect_ratio, prob_threshold, size_divisor=8, upsample_ratio=1):
         super().__init__(model_adapter)
         self.pooled_heatmaps_blob_name = 'pooled_heatmaps'

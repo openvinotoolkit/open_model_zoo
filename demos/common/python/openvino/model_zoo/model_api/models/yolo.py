@@ -48,6 +48,8 @@ def sigmoid(x):
 
 
 class YOLO(DetectionModel):
+    __model__ = 'YOLO'
+
     class Params:
         # Magic numbers are copied from yolo samples
         def __init__(self, param, sides):
@@ -219,6 +221,7 @@ class YOLO(DetectionModel):
 
 
 class YoloV4(YOLO):
+    __model__ = 'YOLOV4'
     class Params:
         def __init__(self, classes, num, sides, anchors, mask):
             self.num = num
@@ -276,6 +279,8 @@ class YoloV4(YOLO):
 
 
 class YOLOF(YOLO):
+    __model__ = 'YOLOF'
+
     class Params:
         def __init__(self, classes, num, sides, anchors):
             self.num = num
@@ -320,6 +325,8 @@ class YOLOF(YOLO):
 
 
 class YOLOX(DetectionModel):
+    __model__ = 'YOLOX'
+
     def __init__(self, model_adapter, labels=None, threshold=0.5, iou_threshold=0.65):
         super().__init__(model_adapter, labels=labels,
                          threshold=threshold, iou_threshold=iou_threshold)
@@ -398,6 +405,8 @@ class YOLOX(DetectionModel):
 
 
 class YoloV3ONNX(DetectionModel):
+    __model__ = 'YOLOv3-ONNX'
+
     def __init__(self, model_adapter, resize_type='fit_to_window_letterbox', labels=None, threshold=0.5):
         if not resize_type:
             resize_type = 'fit_to_window_letterbox'

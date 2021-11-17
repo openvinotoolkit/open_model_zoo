@@ -38,6 +38,28 @@ class Model:
         self.model_adapter = model_adapter
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()
+    @classmethod
+    def get_model(cls, name):
+        subclasses = cls.get_subclasses()
+        # print(*[subclass.__model__ for subclass in subclasses], sep='\n')
+        for subclass in subclasses:
+            if name.lower() == subclass.__model__.lower():
+                return subclass
+        raise ValueError('There is no model with name "{}" in list: {}'.
+                         format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
+
+    @classmethod
+    def get_subclasses(cls):
+        all_subclasses = []
+        for subclass in cls.__subclasses__():
+            all_subclasses.append(subclass)
+            all_subclasses.extend(subclass.get_subclasses())
+        return all_subclasses
+
+    @classmethod
+    def available_wrappers(cls):
+        return [subclass.__model__ for subclass in cls.get_subclasses()]
+
 
     def preprocess(self, inputs):
         '''Interface for preprocess method

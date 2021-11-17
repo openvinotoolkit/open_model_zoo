@@ -26,6 +26,8 @@ class SSD(DetectionModel):
             resize_type = 'standard'
         super().__init__(model_adapter, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'SSD'
+
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self.output_parser = self._get_output_parser(self.image_blob_name)
 

@@ -22,6 +22,8 @@ from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
+    __model__ = 'Segmentation'
+
     def __init__(self, model_adapter, resize_type='standard', labels=None):
         super().__init__(model_adapter, resize_type=resize_type)
         self._check_io_number(1, 1)
@@ -60,6 +62,7 @@ class SegmentationModel(ImageModel):
 
 
 class SalientObjectDetectionModel(SegmentationModel):
+    __model__ = 'Salient-Object-Detection'
 
     def postprocess(self, outputs, meta):
         input_image_height = meta['original_shape'][0]

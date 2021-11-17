@@ -20,6 +20,8 @@ from .utils import Detection, softmax
 
 
 class DETR(DetectionModel):
+    __model__ = 'DETR'
+    
     def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:

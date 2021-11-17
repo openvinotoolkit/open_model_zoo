@@ -24,6 +24,8 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
 class RetinaFace(DetectionModel):
+    __model__ = 'RetinaFace'
+
     def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
@@ -50,6 +52,8 @@ class RetinaFace(DetectionModel):
 
 
 class RetinaFacePyTorch(DetectionModel):
+    __model__ = 'RetinaFace-PyTorch'
+
     def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:

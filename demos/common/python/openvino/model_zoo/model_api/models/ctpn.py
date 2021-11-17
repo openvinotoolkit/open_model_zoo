@@ -22,6 +22,8 @@ from .utils import Detection, nms, clip_detections
 
 
 class CTPN(DetectionModel):
+    __model__ = 'CTPN'
+    
     def __init__(self, model_adapter, input_size, threshold=0.9, iou_threshold=0.5):
         super().__init__(model_adapter, labels=['Text'],
                          threshold=threshold, iou_threshold=iou_threshold)
