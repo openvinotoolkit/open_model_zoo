@@ -26,13 +26,49 @@ class SegmentationMetricProfiler(MetricProfiler):
         self.updated_fields = False
         self.names = []
         self.metric_names = []
+        self.mask_as_polygon = report_type == 'json'
 
         super().__init__(dump_iterations, report_type, name)
+        self.required_postprocessing = True
+        self.annotation, self.prediction = None, None
 
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)
 
-    def generate_profiling_data(self, identifier, metric_name, cm, metric_result, predicted_mask):
+    def generate_profiling_json(self, identifier, cm, metric_result,
+                                prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
+        report = {'identifier': identifier}
+        class_result = {}
+        if self.prediction is not None:
+            prediction_mask_polygon = self.prediction.to_polygon()
+        for label, polygons in prediction_mask_polygon.items():
+            if label == ignore_label:
+                continue
+            class_result[int(label)] = {'prediction_mask': [polygon.tolist() for polygon in polygons]}
+        if self.annotation:
+            annotation_mask_polygon = self.annotation.to_polygon()
+        for label, polygons in annotation_mask_polygon.items():
+            if label == ignore_label:
+                continue
+            if int(label) not in class_result:
+                class_result[int(label)] = {'prediction_mask': []}
+            class_result[int(label)].update({'annotation_mask': [polygon.tolist() for polygon in polygons]})
+        report['confusion_matrix'] = cm.tolist()
+        report['result'] = np.mean(metric_result)
+        if per_class_result:
+            for label, metric in per_class_result.items():
+                if int(label) not in class_result:
+                    continue
+                class_result[int(label)]['result'] = metric
+        report['per_class_result'] = class_result
+
+        return report
+
+    def generate_profiling_data(self, identifier, metric_name, cm, metric_result, predicted_mask,
+                                prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label):
+        if self.report_type == 'json':
+            return self.generate_profiling_json(identifier, cm, metric_result,
+                                prediction_mask_polygon, annotation_mask_polygon, per_class_result, ignore_label)
         dumping_dir = self.out_dir / 'dumped'
         if not dumping_dir.exists():
             dumping_dir.mkdir(parents=True)
@@ -47,21 +83,19 @@ class SegmentationMetricProfiler(MetricProfiler):
             if not self.updated_fields:
                 self._create_fields(metric_result)
             report = {'identifier': identifier, 'predicted_mask': str(dumping_dir / dumped_file_name)}
-            if self.report_type == 'json':
-                report['confusion_matrix'] = cm.tolist()
         if np.isscalar(metric_result) or np.size(metric_result) == 1:
             report['{}_result'.format(metric_name)] = np.mean(metric_result)
             return report
         if not self.names:
             metrics_results = {
-                'class {} ({})'.format(class_id, metric_name): result for class_id, result in enumerate(metric_result)
+                'class {} ({})'.format(class_id, metric_name):
+                result for class_id, result in enumerate(metric_result)
             }
         else:
             metrics_results = {}
             for name, result in zip(self.names, metric_result):
                 metrics_results['{} ({})'.format(name, metric_name)] = result
         report.update(metrics_results)
-
         return report
 
     def _create_fields(self, metric_result):
@@ -82,3 +116,7 @@ class SegmentationMetricProfiler(MetricProfiler):
 
     def set_dataset_meta(self, meta):
         self.dataset_meta = meta
+
+    def update_annotation_and_prediction(self, annotation, prediction):
+        self.annotation = annotation
+        self.prediction = prediction

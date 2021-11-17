@@ -99,7 +99,18 @@ class SegmentationAccuracy(SegmentationMetric):
         cm = super().update(annotation, prediction)
         result = np.diag(cm).sum() / cm.sum()
         if self.profiler:
-            self.profiler.update(annotation.identifier, self.name, cm, result, prediction.mask)
+            diagonal = np.diag(cm).astype(float)
+            per_class_count = cm.sum(axis=1)
+            acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan),
+                                where=per_class_count != 0)
+            acc_cls, labels = finalize_metric_result(
+                acc_cls, [key for key in self.dataset.labels if key != self.ignore_label]
+            )
+            per_class_result = dict(zip(labels, acc_cls))
+            self.profiler.update(
+                annotation.identifier, self.name, cm, result,
+                prediction.mask, prediction.to_polygon(), annotation.to_polygon(), per_class_result, self.ignore_label
+            )
         return result
 
     def evaluate(self, annotations, predictions):
@@ -112,6 +123,13 @@ class SegmentationAccuracy(SegmentationMetric):
 class SegmentationIOU(SegmentationMetric):
     __provider__ = 'mean_iou'
 
+    def configure(self):
+        super().configure()
+        cls_names = list(self.dataset.labels.values())
+        if self.ignore_label is not None:
+            cls_names = [cls_name for cls_id, cls_name in self.dataset.labels.items() if cls_id != self.ignore_label]
+        self.meta['names'] = cls_names
+
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
@@ -119,8 +137,13 @@ class SegmentationIOU(SegmentationMetric):
         iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
         if self.ignore_label is not None:
             iou = np.delete(iou, self.ignore_label)
+        iou, labels = finalize_metric_result(iou, [key for key in self.dataset.labels if key != self.ignore_label])
         if self.profiler:
-            self.profiler.update(annotation.identifier, self.name, cm, iou, prediction.mask)
+            per_class_result = dict(zip(labels, iou))
+            self.profiler.update(
+                annotation.identifier, self.name, cm, iou, prediction.mask,
+                prediction.to_polygon(), annotation.to_polygon(), per_class_result, self.ignore_label
+            )
 
         return iou
 
@@ -146,13 +169,22 @@ class SegmentationIOU(SegmentationMetric):
 class SegmentationMeanAccuracy(SegmentationMetric):
     __provider__ = 'mean_accuracy'
 
+    def configure(self):
+        super().configure()
+        self.meta['names'] = list(self.dataset.labels.values())
+
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
         per_class_count = cm.sum(axis=1)
         acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
+        acc_cls, labels = finalize_metric_result(
+            acc_cls, [key for key in self.dataset.labels if key != self.ignore_label]
+        )
         if self.profiler:
-            self.profiler.update(annotation.identifier, self.name, cm, acc_cls, prediction.mask)
+            per_class_result = dict(zip(labels, acc_cls))
+            self.profiler.update(annotation.identifier, self.name, cm, acc_cls, prediction.mask,
+                                 prediction.to_polygon(), annotation.to_polygon(), per_class_result, self.ignore_label)
         return acc_cls
 
     def evaluate(self, annotations, predictions):
@@ -182,7 +214,15 @@ class SegmentationFWAcc(SegmentationMetric):
         result = (freq[freq > 0] * iou[freq > 0]).sum()
 
         if self.profiler:
-            self.profiler.update(annotation.identifier, self.name, cm, result, prediction.mask)
+            class_result = freq * iou
+            class_result[freq == 0] = np.nan
+            class_result, labels = finalize_metric_result(
+                class_result, list(self.dataset.labels)
+            )
+            per_class_result = dict(zip(labels, class_result))
+            self.profiler.update(annotation.identifier, self.name, cm, result,
+                                 prediction.mask, prediction.to_polygon(), annotation.to_polygon(),
+                                 per_class_result, self.ignore_label)
 
         return result
 
