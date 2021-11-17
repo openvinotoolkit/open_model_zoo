@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <openvino/openvino.hpp>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -44,7 +45,6 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
     getter = std::move(getterFunc);
     postprocessing = std::move(postprocessingFunc);
     getterThread = std::thread([&]() {
-        const ov::Shape input_shape = availableRequests.front().get_input_tensor().get_shape();
         std::vector<cv::Mat> imgsToProc(batchSize, cv::Mat(inSize, CV_8UC3));
         std::vector<std::shared_ptr<VideoFrame>> vframes;
         while (!terminate) {
@@ -126,7 +126,7 @@ IEGraph::IEGraph(const InitParams& p):
         throw std::logic_error("Face Detection model must have only one input");
     }
     const ov::Layout inLyout{"NCHW"};
-    model = ov::preprocess::PrePostProcessor().input(ov::preprocess::InputInfo().tensor(ov::preprocess::InputTensorInfo().set_layout(inLyout))).build(model);
+    model = ov::preprocess::PrePostProcessor(model).input(ov::preprocess::InputInfo().tensor(ov::preprocess::InputTensorInfo().set_layout(inLyout))).build();
     ov::Shape inShape = model->input().get_shape();
     inSize = {int(inShape[ov::layout::width_idx(inLyout)]), int(inShape[ov::layout::height_idx(inLyout)])};
     // Set batch size

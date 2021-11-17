@@ -22,6 +22,7 @@
 #include <random>
 #include <iostream>
 
+#include <inference_engine.hpp>
 #include <openvino/openvino.hpp>
 #include "utils/slog.hpp"
 #include "utils/args_helper.hpp"
@@ -45,6 +46,14 @@ T clamp(T value, T low, T high) {
 }
 
 // Redefine operator<< for LogStream to print IE version information.
+inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::Version& version) {
+    os << "OpenVINO Inference Engine" << slog::endl;
+    os << "\tversion: " << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR << "." << IE_VERSION_PATCH << slog::endl;
+    os << "\tbuild: " << version.buildNumber;
+
+    return os;
+}
+
 inline slog::LogStream& operator<<(slog::LogStream& os, const ov::Version& version) {
     return os << "OpenVINO" << slog::endl
         << "\tversion: " << OPENVINO_VERSION_MAJOR << "." << OPENVINO_VERSION_MINOR << "." << OPENVINO_VERSION_PATCH << slog::endl
@@ -110,6 +119,102 @@ static UNUSED const Color CITYSCAPES_COLORS[] = {
     { 81,  0,   81 }
 };
 
+inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.back();
+    } else {
+        throw std::runtime_error("Tensor does not have width dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.at(size - 2);
+    } else {
+        throw std::runtime_error("Tensor does not have height dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::C     ||
+        layout == InferenceEngine::Layout::CHW   ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::C:     return dims.at(0);
+            case InferenceEngine::Layout::NC:    return dims.at(1);
+            case InferenceEngine::Layout::CHW:   return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(1);
+            case InferenceEngine::Layout::NCDHW: return dims.at(1);
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::NC:    return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(0);
+            case InferenceEngine::Layout::NCDHW: return dims.at(0);
+            case InferenceEngine::Layout::CHW:      // [[fallthrough]]
+            case InferenceEngine::Layout::C:        // [[fallthrough]]
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+    }
+    return 0;
+}
+
 inline void showAvailableDevices() {
     ov::runtime::Core core;
     std::vector<std::string> devices = core.get_available_devices();
@@ -128,8 +233,17 @@ inline std::string fileNameNoExt(const std::string &filepath) {
     return filepath.substr(0, pos);
 }
 
-inline void logExecNetworkInfo(const ov::runtime::ExecutableNetwork& execNetwork, const std::string& modelName,
-    const std::string& deviceName, const std::string& modelType = "") {
+inline std::string getConfig(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& name) {
+    return execNetwork.GetConfig(name).as<std::string>();
+}
+
+inline std::string getConfig(const ov::runtime::ExecutableNetwork& execNetwork, const std::string& name) {
+    return execNetwork.get_config(name).as<std::string>();
+}
+
+template <typename ExecutableNetwork>
+inline void logExecNetworkInfo(const ExecutableNetwork& execNetwork, const std::string& modelName,
+        const std::string& deviceName, const std::string& modelType = "") {
     slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
@@ -140,10 +254,10 @@ inline void logExecNetworkInfo(const ov::runtime::ExecutableNetwork& execNetwork
         for (const auto& device : devices) {
             try {
                 slog::info << "\tDevice: " << device << slog::endl;
-                std::string nstreams = execNetwork.get_config(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                std::string nstreams = getConfig(execNetwork, device + "_THROUGHPUT_STREAMS");
                 slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
                 if (device == "CPU") {
-                    std::string nthreads = execNetwork.get_config("CPU_THREADS_NUM").as<std::string>();
+                    std::string nthreads = getConfig(execNetwork, "CPU_THREADS_NUM");
                     slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
                 }
             }

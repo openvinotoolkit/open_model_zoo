@@ -215,10 +215,10 @@ int main(int argc, char* argv[]) {
                                         const ov::Output<ov::Node> heatMapsOut = model->outputs()[1];
                                         postParams.heatMapsId = heatMapsOut.get_index();
                                         const ov::Layout layout{"NCHW"};
-                                        model = ov::preprocess::PrePostProcessor()
+                                        model = ov::preprocess::PrePostProcessor(model)
                                             .output(ov::preprocess::OutputInfo(postParams.pafsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
                                             .output(ov::preprocess::OutputInfo(postParams.heatMapsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
-                                            .build(model);
+                                            .build();
                                         postParams.pafsWidth = pafsOut.get_shape()[ov::layout::width_idx(layout)];
                                         postParams.pafsHeight = pafsOut.get_shape()[ov::layout::height_idx(layout)];
                                         postParams.pafsChannels = pafsOut.get_shape()[ov::layout::channels_idx(layout)];
