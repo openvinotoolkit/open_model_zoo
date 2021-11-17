@@ -25,14 +25,16 @@ from .utils import Detection, clip_detections
 class CenterNet(DetectionModel):
     __model__ = 'centernet'
     
-    def __init__(self, model_adapter, resize_type=None,
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, 3)
-        self._output_layer_names = sorted(self.outputs)
+        self._output_layer_names = sorted(self.net.outputs)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        return parameters
 
     def postprocess(self, outputs, meta):
         heat = outputs[self._output_layer_names[0]][0]

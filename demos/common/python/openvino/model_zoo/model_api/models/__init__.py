@@ -31,6 +31,8 @@ from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
 from .yolo import YOLO, YoloV3ONNX, YoloV4, YOLOF, YOLOX
+from .image_model import ImageModel
+from .detection_model import DetectionModel
 
 __all__ = [
     'BertEmbedding',
@@ -60,4 +62,6 @@ __all__ = [
     'YoloV4',
     'YOLOF',
     'YOLOX',
+    'DetectionModel',
+    'ImageModel'
 ]

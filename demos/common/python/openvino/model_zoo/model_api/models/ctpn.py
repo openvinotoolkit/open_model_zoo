@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+from .types import ListValue, NumericalValue
 import cv2
 import numpy as np
 
@@ -24,9 +25,8 @@ from .utils import Detection, nms, clip_detections
 class CTPN(DetectionModel):
     __model__ = 'CTPN'
     
-    def __init__(self, model_adapter, input_size, threshold=0.9, iou_threshold=0.5):
-        super().__init__(model_adapter, labels=['Text'],
-                         threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
@@ -50,7 +50,7 @@ class CTPN(DetectionModel):
             [0, -134, 15, 149]
         ])
 
-        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
+        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, self.input_size[1], self.input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         default_input_shape = self.inputs[self.image_blob_name].shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
@@ -68,6 +68,17 @@ class CTPN(DetectionModel):
         if boxes_data_repr.shape[1] == scores_data_repr.shape[1] * 2:
             return boxes_name, scores_name
         raise RuntimeError("One of outputs must be two times larger than another for the CTPN topology")
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.5),
+            'input_size': ListValue()
+        })
+        parameters['threshold'].update_default_value(0.9)
+        parameters['labels'].update_default_value(['Text'])
+        return parameters
 
     def preprocess(self, inputs):
         meta = {'original_shape': inputs.shape}

@@ -26,12 +26,8 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 class RetinaFace(DetectionModel):
     __model__ = 'RetinaFace'
 
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, (6, 9, 12))
 
         self.detect_masks = len(self.outputs) == 12
@@ -42,6 +38,13 @@ class RetinaFace(DetectionModel):
 
         self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
 
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
@@ -54,18 +57,21 @@ class RetinaFace(DetectionModel):
 class RetinaFacePyTorch(DetectionModel):
     __model__ = 'RetinaFace-PyTorch'
 
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter,  configuration)
         self._check_io_number(1, (2, 3))
 
         self.process_landmarks = len(self.outputs) == 3
         self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
 
-        self.labels = ['Face']
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['threshold'].update_default_value(0.5)
+        parameters['labels'].update_default_value(['Face'])
+        return parameters
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]

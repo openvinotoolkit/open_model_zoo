@@ -29,7 +29,7 @@ import numpy as np
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api import models
+from model_api.models import DetectionModel
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
@@ -47,11 +47,9 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True)
+    available_model_wrappers = [name.lower() for name in models.DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov3-onnx', 'yolov4', 'yolof', 'yolox',
-                                                        'faceboxes', 'centernet', 'ctpn',
-                                                        'retinaface', 'ultra_lightweight_face_detection',
-                                                        'retinaface-pytorch', 'detr'))
+                      type=str, required=True, choices=available_model_wrappers)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
@@ -166,40 +164,30 @@ class ColorPalette:
 
 
 def get_model(model_adapter, args):
-    if args.architecture_type == 'ssd':
-        return models.SSD(model_adapter, labels=args.labels, resize_type=args.resize_type,
-                          threshold=args.prob_threshold)
-    elif args.architecture_type == 'ctpn':
-        return models.CTPN(model_adapter, input_size=args.input_size, threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolo':
-        return models.YOLO(model_adapter, labels=args.labels, resize_type=args.resize_type,
-                           threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolov3-onnx':
-        return models.YoloV3ONNX(model_adapter, labels=args.labels, resize_type=args.resize_type,
-                                 threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolov4':
-        return models.YoloV4(model_adapter, labels=args.labels,
-                             threshold=args.prob_threshold, resize_type=args.resize_type,
-                             anchors=args.anchors, masks=args.masks)
-    elif args.architecture_type == 'yolof':
-        return models.YOLOF(model_adapter, labels=args.labels, resize_type=args.resize_type,
-                            threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolox':
-        return models.YOLOX(model_adapter, labels=args.labels, threshold=args.prob_threshold)
-    elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(model_adapter, threshold=args.prob_threshold)
-    elif args.architecture_type == 'centernet':
-        return models.CenterNet(model_adapter, labels=args.labels, threshold=args.prob_threshold)
-    elif args.architecture_type == 'retinaface':
-        return models.RetinaFace(model_adapter, threshold=args.prob_threshold)
-    elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(model_adapter, threshold=args.prob_threshold)
-    elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(model_adapter, threshold=args.prob_threshold)
-    elif args.architecture_type == 'detr':
-        return models.DETR(model_adapter, labels=args.labels, threshold=args.prob_threshold)
-    else:
-        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
+        return models.SSD(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+    MODEL = DetectionModel.get_model(args.architecture_type)
+        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
+        'resize_type': args.resize_type,
+        return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        'scale_values': args.scale_values,
+        'reverse_input_channels': args.reverse_input_channels,
+        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        'threshold': args.prob_threshold,
+        return models.YoloV4(ie, args.model, labels=args.labels,
+        return models.YOLOF(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        # 'iou_threshold': args.iou_threshold
+        'input_size': args.input_size, # The CTPN specific
+        return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
+        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
+        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
+        return models.DETR(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+    }
+    m_model = MODEL(ie, args.model, configuration)
+
+    return m_model
 
 
 def draw_detections(frame, detections, palette, labels, output_transform):
@@ -250,7 +238,6 @@ def main():
         model_adapter = RemoteAdapter(args.model, serving_config)
 
     model = get_model(model_adapter, args)
-    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
     model.log_layers_info()
 
     detector_pipeline = AsyncPipeline(model)

@@ -28,7 +28,9 @@ class Model:
         logger(Logger): instance of the logger
     '''
 
-    def __init__(self, model_adapter):
+    __model__ = 'Model-Wrapper'
+
+    def __init__(self, model_adapter, configuration):
         '''Abstract model constructor
 
         Args:
@@ -38,6 +40,10 @@ class Model:
         self.model_adapter = model_adapter
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()
+        for name, parameter in self.parameters().items():
+            self.__setattr__(name, parameter.default_value)
+        self.load_config(configuration)
+
     @classmethod
     def get_model(cls, name):
         subclasses = cls.get_subclasses()
@@ -60,6 +66,29 @@ class Model:
     def available_wrappers(cls):
         return [subclass.__model__ for subclass in cls.get_subclasses()]
 
+    @classmethod
+    def parameters(cls):
+        parameters = {}
+        return parameters
+
+    @classmethod
+    def info(cls):
+        for name, parameter in cls.parameters().items():
+            print(f"Attribute '{name}'")
+            print(parameter)
+
+    def load_config(self, config):
+        parameters = self.parameters()
+        for name, value in config.items():
+            if name in parameters:
+                errors = parameters[name].validate(value)
+                if errors:
+                    print(f"Error with {name} parameter:")
+                    print(*errors, sep='\n')
+                value = parameters[name].get_value(value)
+                self.__setattr__(name, value)
+            else:
+                print(f'The configuration parameter {name} not found in {self.__model__}, will be omitted')
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -103,6 +132,8 @@ class Model:
                     ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
                     len(self.inputs), ', '.join(self.inputs)
                 ))
+
+        print(f'Wrapper is {self.__model__}')
 
         if not isinstance(number_of_outputs, tuple):
             if len(self.outputs) != number_of_outputs and number_of_outputs != -1:

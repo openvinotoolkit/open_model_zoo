@@ -22,12 +22,8 @@ from .utils import Detection, softmax
 class DETR(DetectionModel):
     __model__ = 'DETR'
     
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
@@ -45,6 +41,13 @@ class DETR(DetectionModel):
         else:
             raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs)

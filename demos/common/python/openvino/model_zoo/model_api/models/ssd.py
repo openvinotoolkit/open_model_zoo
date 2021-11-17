@@ -15,21 +15,26 @@
 """
 import numpy as np
 
+from .types import NumericalValue
+
 from .detection_model import DetectionModel
 from .utils import Detection
 
 
 class SSD(DetectionModel):
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
     __model__ = 'SSD'
 
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self.output_parser = self._get_output_parser(self.image_blob_name)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)

@@ -13,6 +13,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+from ast import Str
+from .types import ListValue, NumericalValue, StringValue
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
 
@@ -29,8 +31,9 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, model_adapter, resize_type=None,
-                 labels=None, threshold=None, iou_threshold=None):
+    __model__ = 'abstract-detection'
+
+    def __init__(self, model_adapter, configuration):
         '''The Detection Model constructor
 
         Calls the ``ImageModel`` construtor first.
@@ -43,19 +46,26 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(model_adapter, resize_type=resize_type)
+        super().__init__(model_adapter, configuration)
 
         if not self.image_blob_name:
             raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
                                .format(len(self.image_blob_names)))
 
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
 
-        self.threshold = threshold
-        self.iou_threshold = iou_threshold
+    
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumericalValue(default_value=0.5),
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter")
+        })
+
+        return parameters
 
     def _resize_detections(self, detections, meta):
         '''Resizes detection bounding boxes according to initial image size
