@@ -23,9 +23,7 @@ files:
   - name: se-resnet-50.caffemodel
     size: 112602669
     sha256: 72880fde3bd29b324bb302c80f49a098b8970597494c56525fd410a8d2ed5993
-    source:
-      $type: google_drive
-      id: 0BwHV3BlNKkWlS2QwZHFzM3RjNzg
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-resnet-50/SE-ResNet-50.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
