@@ -68,7 +68,6 @@ PRECISION_STR_TO_TYPE = {
     'BOOL': Type.boolean
 }
 
-
 # pylint:disable=R0904
 class OpenVINOLauncher(Launcher):
     """
