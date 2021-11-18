@@ -17,7 +17,7 @@ limitations under the License.
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
-from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json
+from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json, string_to_tuple
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _SYG_CLASSES_DETECTION = (
@@ -91,6 +91,7 @@ def syg_prepare_detection_labels(dataset_meta, has_background=True):
 
     return reversed_label_map
 
+
 class PascalVOCSegmentationConverter(BaseFormatConverter):
     __provider__ = 'voc_segmentation'
     annotation_types = (SegmentationAnnotation, )
@@ -111,7 +112,8 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
-            )
+            ),
+            'labelmap_file': PathField(description='labelmap.txt in Datumaro format', optional=True)
         })
 
         return configuration_parameters
@@ -121,6 +123,9 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         self.image_dir = self.get_value_from_config('images_dir')
         dataset_meta_file = self.get_value_from_config('dataset_meta_file')
         self.dataset_meta = {} if not dataset_meta_file else read_json(dataset_meta_file)
+        labelmap_file = self.get_value_from_config('labelmap_file')
+        if labelmap_file is not None:
+            self.dataset_meta.update(self.read_labelmap(labelmap_file))
         if not self.image_dir:
             self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages', is_directory=True)
 
@@ -155,6 +160,21 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         }
 
         return ConverterReturn(annotations, meta, content_check_errors)
+
+    @staticmethod
+    def read_labelmap(input_file):
+        label_map = {}
+        segmentation_colors = []
+        idx = 0
+        for line in read_txt(input_file):
+            if line.startswith('#'):
+                continue
+            data = line.split(':')
+            label, color = data[:2]
+            label_map[idx] = label
+            segmentation_colors.append(string_to_tuple(color))
+            idx += 1
+        return {'label_map': label_map, 'segmentation_colors': segmentation_colors}
 
 
 class PascalVOCDetectionConverter(BaseFormatConverter):
