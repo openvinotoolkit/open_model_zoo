@@ -813,7 +813,11 @@ class DLSDKLauncher(Launcher):
                     make_dynamic = True
         if not input_shapes:
             return
-        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
+        orig_input_shapes = {
+            input_name: input_info.shape
+            if input_name not in self._partial_shapes else self._partial_shapes[input_name]
+            for input_name, input_info in self.inputs.items()
+        }
         orig_input_shapes.update(input_shapes)
         self._reshape_input(orig_input_shapes, make_dynamic)
 
