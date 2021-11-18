@@ -265,14 +265,16 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
-        TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
-        TestCase(options={'-m': ModelArg('face-detection-retail-0004')}),
         [
-            TestCase(options={}),
-            TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-            TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-            TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-            TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+            *combine_cases(
+                [
+                    TestCase(options={}),
+                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
+                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
+                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
+                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                ],
+            ),
             TestCase(options={
                 '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
@@ -280,6 +282,11 @@ NATIVE_DEMOS = [
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             })
         ],
+        single_option_cases(
+            '-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004'),
+        ),
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
@@ -289,14 +296,16 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
-        TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
-        TestCase(options={'-m': ModelArg('face-detection-retail-0004')}),
         [
-            TestCase(options={}),
-            TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-            TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-            TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-            TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+            *combine_cases(
+                [
+                    TestCase(options={}),
+                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
+                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
+                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
+                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                ],
+            ),
             TestCase(options={
                 '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
@@ -304,6 +313,11 @@ NATIVE_DEMOS = [
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             })
         ],
+        single_option_cases(
+            '-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004'),
+        ),
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
