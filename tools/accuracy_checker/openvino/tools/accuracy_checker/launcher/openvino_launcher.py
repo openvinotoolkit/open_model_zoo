@@ -184,6 +184,8 @@ class OpenVINOLauncher(Launcher):
         return None
 
     def predict(self, inputs, metadata=None, **kwargs):
+        if self.infer_request is None:
+            self.infer_request = self.exec_network.create_infer_request()
         if self._lstm_inputs:
             return self._predict_sequential(inputs, metadata)
 
