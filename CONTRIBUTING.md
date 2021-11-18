@@ -13,7 +13,7 @@ Open Model Zoo also supports models already in the ONNX format.
 
 ## Pull Request Requirements
 
-To contribute to OMZ, create a pull request (PR) in this repository using the `develop` branch.
+To contribute to OMZ, create a pull request (PR) in this repository using the `master` branch.
 Pull requests are strictly formalized and are reviewed by the OMZ maintainers for consistence and legal compliance.
 
 Each PR contributing a model must contain:
