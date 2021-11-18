@@ -161,7 +161,7 @@ class OpenVINOLauncher(Launcher):
                 for out_node, out_res in zip(self.exec_network.outputs, outputs)
             })
         if self.reset_memory_state:
-            for state in self.exec_network.requests[0].query_state():
+            for state in self.infer_request.query_state():
                 state.reset()
 
         if metadata is not None:
