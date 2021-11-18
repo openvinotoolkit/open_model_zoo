@@ -80,6 +80,7 @@ class ModelEvaluator(BaseEvaluator):
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         input_precision = launcher_config.get('_input_precision', [])
+        input_layouts = launcher_config.get('_input_layout', '')
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
@@ -93,7 +94,8 @@ class ModelEvaluator(BaseEvaluator):
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher_inputs, launcher.input_shape, launcher.fit_to_input,
-            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
+            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision,
+            input_layouts
         )
         if not postpone_model_loading:
             if input_precision:

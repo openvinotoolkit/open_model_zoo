@@ -348,9 +348,11 @@ class ConfigReader:
 
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
-                if input_precisions:
-                    for launcher in launchers:
+                for launcher in launchers:
+                    if input_precisions:
                         launcher['_input_precision'] = input_precisions
+                    if input_layout:
+                        launcher['_input_layout'] = input_layout
                 if 'models' not in arguments or not arguments.models:
                     return launchers
                 model_paths = arguments.models
@@ -373,6 +375,7 @@ class ConfigReader:
                 return updated_launchers
 
             input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+            input_layout = arguments.layout if 'layout' in arguments else None
 
             for model in config['models']:
                 for launcher_entry in model['launchers']:

@@ -69,7 +69,7 @@ INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'L
 class InputFeeder:
     def __init__(
             self, inputs_config, network_inputs, shape_checker, prepare_input_data=None, default_layout='NCHW',
-            dummy=False, input_precisions_list=None
+            dummy=False, input_precisions_list=None, input_layouts=None
     ):
         def fit_to_input(data, input_layer_name, layout, precision, template=None):
             layout_used = False
@@ -93,11 +93,11 @@ class InputFeeder:
         self.default_layout = default_layout
         self.dummy = dummy
         self.ordered_inputs = False
-        self.configure(inputs_config, input_precisions_list)
+        self.configure(inputs_config, input_precisions_list, input_layouts)
 
-    def configure(self, inputs_config, precisions_list):
+    def configure(self, inputs_config, precisions_list, layouts):
         if not self.dummy:
-            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list)
+            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list, layouts)
             self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
             self.image_info_inputs, self.orig_image_info_inputs, self.scale_factor_inputs = parsing_results[3:6]
             self.lstm_inputs = parsing_results[6]
@@ -309,8 +309,9 @@ class InputFeeder:
             infer_inputs.update(self.const_inputs)
         return inputs, templates
 
-    def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None):
+    def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None, layouts=None):
         precision_info = self.validate_input_precision(precisions_list)
+        layouts_info = self.validate_input_layouts(layouts, self.network_inputs)
         constant_inputs = {}
         non_constant_inputs_mapping = {}
         config_non_constant_inputs = []
@@ -346,7 +347,7 @@ class InputFeeder:
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
-                layout = input_.get('layout', default_layout)
+                layout = input_.get('layout', layouts_info.get(name, default_layout))
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
 
@@ -358,9 +359,9 @@ class InputFeeder:
         if config_non_constant_inputs and not_config_inputs:
             raise ConfigError('input value for {} are not presented in config.'.format(','.join(not_config_inputs)))
         non_constant_inputs = not_config_inputs + config_non_constant_inputs
-        if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)):
+        if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)) or layouts_info:
             inputs_entry = self.provide_input_config_for_not_config(
-                inputs_entry, precision_info, not_config_inputs, precisions
+                inputs_entry, precision_info, not_config_inputs, precisions, layouts_info
             )
 
         return (
@@ -457,6 +458,24 @@ class InputFeeder:
 
         return [batch_data], template_for_shapes
 
+    @staticmethod
+    def validate_input_layouts(parameter_string, input_names):
+        # Parse parameter string like "input0[value0],input1[value1]" or "[value]" (applied to all inputs)
+        return_value = {}
+        if parameter_string:
+            matches = re.findall(r'(.*?)\[(.*?)\],?', parameter_string)
+            if matches:
+                for match in matches:
+                    input_name, value = match
+                    if input_name != '':
+                        return_value[input_name] = value
+                    else:
+                        return_value = {k: value for k in input_names}
+                        break
+            else:
+                raise ConfigError(f"Can't parse input parameter: {parameter_string}")
+        return return_value
+
     def validate_input_precision(self, precisions_list):
         if not precisions_list:
             return {}
@@ -491,11 +510,13 @@ class InputFeeder:
         precisions[input_name] = input_precision
         return input_precision
 
-    def provide_input_config_for_not_config(self, inputs_entry, precision_info, not_config_inputs, precisions):
+    def provide_input_config_for_not_config(self, inputs_entry, precision_info, not_config_inputs, precisions, layouts):
         for input_name in not_config_inputs:
             input_config = {'name': input_name, 'type': 'INPUT'}
             precision = self.get_layer_precision(input_config, input_name, precision_info, precisions)
-            if precision is not None:
+            layout = layouts.get(input_name)
+            input_config['layout'] = layout
+            if precision is not None or layout is not None:
                 inputs_entry.append(input_config)
         return inputs_entry
 

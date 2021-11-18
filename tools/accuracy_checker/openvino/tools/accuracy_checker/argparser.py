@@ -69,6 +69,12 @@ def add_common_args(parser):
         required=False,
         nargs='+'
     )
+    common_args.add_argument(
+        '--layout',
+        help='Prompts how network layouts should be treated by application.'
+             'For example, "input1[NCHW],input2[NC]" or "[NCHW]" in case of one input size.',
+        required=False
+    )
 
 
 def add_config_filtration_args(parser):

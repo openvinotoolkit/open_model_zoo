@@ -165,7 +165,10 @@ class Launcher(ClassProvider):
             '_kaldi_log_file': PathField(
                 optional=True, description='File for saving Kaldi tools logs', check_exists=False
             ),
-            '_model_type': StringField(optional=True, description='hint for launcher for model search')
+            '_model_type': StringField(optional=True, description='hint for launcher for model search'),
+            '_input_layout': StringField(optional=True,
+                                         description='input layout in format input1[layout],input2[layout] or [layout]'
+                                         )
         }
 
     @classmethod
