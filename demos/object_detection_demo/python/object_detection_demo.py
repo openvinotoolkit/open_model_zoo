@@ -29,7 +29,7 @@ import numpy as np
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import DetectionModel
+from model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
@@ -47,7 +47,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True)
-    available_model_wrappers = [name.lower() for name in models.DetectionModel.available_wrappers()]
+    available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=available_model_wrappers)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
@@ -64,7 +64,7 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--resize_type', default=None, choices=models.RESIZE_TYPES.keys(),
+    common_model_args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
                                    help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
     common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
                                    help='Optional. The first image size used for CTPN model reshaping. '
@@ -201,7 +201,7 @@ def draw_detections(frame, detections, palette, labels, output_transform):
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
         cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                     (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-        if isinstance(detection, models.DetectionWithLandmarks):
+        if isinstance(detection, DetectionWithLandmarks):
             for landmark in detection.landmarks:
                 landmark = output_transform.scale(landmark)
                 cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
@@ -295,7 +295,7 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
                 if args.output_resolution:
                     output_resolution = output_transform.new_resolution
                 else:

@@ -64,7 +64,7 @@ class ImageModel(Model):
             'mean_values': ListValue(default_value=None, description='Mean values, applied to input layer data'),
             'scale_values': ListValue(default_value=None, description='Scale values, applied to input layer data'),
             'reverse_input_channels': BooleanValue(),
-            'resize_type': 
+            'resize_type':
                 StringValue(default_value=None, choices=tuple(RESIZE_TYPES.keys()),
                             description="Type of input image resizing"),
 

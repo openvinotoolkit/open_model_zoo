@@ -24,7 +24,7 @@ from .utils import Detection, clip_detections
 
 class CenterNet(DetectionModel):
     __model__ = 'centernet'
-    
+
     def __init__(self, model_adapter, configuration):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 3)

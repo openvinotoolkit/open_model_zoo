@@ -13,7 +13,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from ast import Str
 from .types import ListValue, NumericalValue, StringValue
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
@@ -55,7 +54,6 @@ class DetectionModel(ImageModel):
         if self.path_to_labels:
             self.labels = load_labels(self.path_to_labels)
 
-    
     @classmethod
     def parameters(cls):
         parameters = super().parameters()

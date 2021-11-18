@@ -15,8 +15,6 @@
 """
 import numpy as np
 
-from .types import NumericalValue
-
 from .detection_model import DetectionModel
 from .utils import Detection
 

@@ -18,6 +18,7 @@ from .model import Model
 
 class Bert(Model):
     __model__ = 'bert'
+
     def __init__(self, model_adapter, vocab, input_names):
         super().__init__(model_adapter)
         self.token_cls = [vocab['[CLS]']]
@@ -73,6 +74,7 @@ class Bert(Model):
 
 class BertNamedEntityRecognition(Bert):
     __model__ = 'bert-named-entity-recognition'
+
     def __init__(self, model_adapter, vocab, input_names):
         super().__init__(model_adapter, vocab, input_names)
 
@@ -102,6 +104,7 @@ class BertNamedEntityRecognition(Bert):
 
 class BertEmbedding(Bert):
     __model__ = 'bert-embedding'
+
     def __init__(self, model_adapter, vocab, input_names):
         super().__init__(model_adapter, vocab, input_names)
 
@@ -123,7 +126,7 @@ class BertEmbedding(Bert):
 
 class BertQuestionAnswering(Bert):
     __model__ = 'bert-question-answering'
-    
+
     def __init__(self, model_adapter, vocab, input_names, output_names,
                  max_answer_token_num, squad_ver):
         super().__init__(model_adapter, vocab, input_names)

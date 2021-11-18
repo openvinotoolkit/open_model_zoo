@@ -23,6 +23,7 @@ from .utils import resize_image
 
 class HpeAssociativeEmbedding(ImageModel):
     __model__ = 'HPE-assosiative-embeddings'
+
     def __init__(self, model_adapter, target_size, aspect_ratio, prob_threshold, delta=0.0, size_divisor=32, padding_mode='right_bottom'):
         super().__init__(model_adapter)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.outputs)

@@ -60,14 +60,14 @@ class NumericalValue(BaseValue):
         if not isinstance(value, self.value_type):
             errors.append(ValueError('Not type'))
         if len(self.choices):
-            if not value in self.choices:
+            if value not in self.choices:
                 errors.append(ValueError('Not in choices'))
         if self.min and value < self.min:
             errors.append(ValueError())
         if self.max and value > self.max:
             errors.append( ValueError())
-        return errors     
-        
+        return errors
+
     def __str__(self) -> str:
         info = super().__str__()
         info += f"\nAppropriate type is {self.value_type}"
@@ -89,18 +89,18 @@ class StringValue(BaseValue):
             return errors
         if not isinstance(value, str):
             errors.append(ValueError("Not string"))
-        if not value in self.choices:
+        if value not in self.choices:
             errors.append('Value "{}" not from choices {}'.format(value, self.choices))
         return errors
 
     def __str__(self) -> str:
         info = super().__str__()
-        info += f"\nAppropriate type is str"
+        info += "\nAppropriate type is str"
         if self.choices:
             info += f"\nAppropriate values are {self.choices}"
 
         return info
-        
+
 
 class BooleanValue(BaseValue):
     def __init__(self, **kwargs) -> None:
@@ -125,4 +125,3 @@ class ListValue(BaseValue):
         if not isinstance(value, (tuple, list)):
             errors.append(ValueError("Not a tuple/list"))   
         return errors 
-        

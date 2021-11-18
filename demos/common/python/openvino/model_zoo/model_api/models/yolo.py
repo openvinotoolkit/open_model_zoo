@@ -229,6 +229,7 @@ class YOLO(DetectionModel):
 
 class YoloV4(YOLO):
     __model__ = 'YOLOV4'
+
     class Params:
         def __init__(self, classes, num, sides, anchors, mask):
             self.num = num
