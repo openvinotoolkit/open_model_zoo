@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/text-detection-0003.xml
     size: 256837
-    sha256: f8a23b4edcacdc2902ff151dd63585577ba031b53d1b28ea5104a4e6a4558ac1
+    sha384: 31e613b695783a0e0fc3ff64eb74d6be8b50fbbc09e030a214edd5519b332d2f2c64bc78833c7cffb16bee676c09c1f1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP32/text-detection-0003.xml
   - name: FP32/text-detection-0003.bin
     size: 26986296
-    sha256: 39aeca6f1607ba8f67c7c5a3e25d34bca04ef11fbdc8aa32309999fa0751d94c
+    sha384: 2899e851dd4a3aed189d245e9768471ef04450669819b3bf2e936ddf5eb5ace0057c96ba11e0e95d0c742052356e80b8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP32/text-detection-0003.bin
   - name: FP16/text-detection-0003.xml
     size: 256757
-    sha256: aabb17576497e551557873a8fd5051d7c4810bb52303bc14cb0e9c2f593857fd
+    sha384: 1eebcb3ee6d4ae3d1a3abadac9da7bea45d109b45a63258d6c08425264b1b06be775786033d479ff88ec87840928aa42
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP16/text-detection-0003.xml
   - name: FP16/text-detection-0003.bin
     size: 13493072
-    sha256: 1a79e41ba34b5280b2d9db23478efd22425411902e49b9d0072d4526194b8755
+    sha384: 66fb9f9b1f895923c78578990facc15238ec317b17cb50383a66cd77592d44025cb9c33447ab5b436d61ab65f123241f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP16/text-detection-0003.bin
   - name: FP16-INT8/text-detection-0003.xml
     size: 659532
-    sha256: f7dd4d33daf0b5beead8b5945da216b3ff6197287e3f1dd7c51c82f1d0ddbf38
+    sha384: ff2b9d0a5da184337367e480c2d3b4cc03f17b013444f4f8503d9e0aa2bdc236420eab48b7c8dc9c1ce51fa8e8493643
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP16-INT8/text-detection-0003.xml
   - name: FP16-INT8/text-detection-0003.bin
     size: 6894808
-    sha256: 18b5ff8fbe1a99c4a9d148f4439ed806387abfb66530dc54dcac8f926541b0bd
+    sha384: 917185a72c900080ec8d3e4d9c23fdb513e485a933ff5cbe09a1de1c2a59745a589986321a699030de2c1d1ae2458abc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-detection-0003/FP16-INT8/text-detection-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

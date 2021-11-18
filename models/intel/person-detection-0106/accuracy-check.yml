@@ -21,3 +21,4 @@ models:
             use_numpy: True
         metrics:
           - type: coco_orig_precision
+            reference: 0.442

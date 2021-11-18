@@ -25,11 +25,30 @@ error() {
 }
 trap 'error ${LINENO}' ERR
 
+usage() {
+    echo "Build inference engine demos"
+    echo
+    echo "Options:"
+    echo "  -h, --help                                      Print the help message"
+    echo "  -b=DEMOS_BUILD_DIR, --build_dir=DEMOS_BUILD_DIR Specify the demo build directory"
+    echo "  -DENABLE_PYTHON=y                               Whether to build extension modules for Python demos"
+    echo '  --target=TARGETS                                A space sepparated list of demos to build. To build more than one specific demo use quotation marks ex. --target="classification_demo segmentation_demo"'
+    echo
+    exit 1
+}
+
+build_dir=$HOME/omz_demos_build
 extra_cmake_opts=()
 build_targets=()
 
 for opt in "$@"; do
     case "$opt" in
+    -h | --help)
+        usage
+        ;;
+    -b=* | --build_dir=*)
+        build_dir=("${opt#*=}")
+        ;;
     -DENABLE_PYTHON=*)
         extra_cmake_opts+=("$opt")
         ;;
@@ -38,7 +57,7 @@ for opt in "$@"; do
         ;;
     *)
         printf "Unknown option: %q\n" "$opt"
-        exit 1
+        usage
         ;;
     esac
 done
@@ -48,10 +67,10 @@ DEMOS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 printf "\nSetting environment variables for building demos...\n"
 
 if [ -z "$INTEL_OPENVINO_DIR" ]; then
-    if [ -e "$DEMOS_PATH/../../bin/setupvars.sh" ]; then
-        setvars_path="$DEMOS_PATH/../../bin/setupvars.sh"
-    elif [ -e "$DEMOS_PATH/../../../bin/setupvars.sh" ]; then
-        setvars_path="$DEMOS_PATH/../../../bin/setupvars.sh"
+    if [ -e "$DEMOS_PATH/../../setupvars.sh" ]; then
+        setvars_path="$DEMOS_PATH/../../setupvars.sh"
+    elif [ -e "$DEMOS_PATH/../../../setupvars.sh" ]; then
+        setvars_path="$DEMOS_PATH/../../../setupvars.sh"
     else
         printf "Error: Failed to set the environment variables automatically. To fix, run the following command:\n source <INSTALL_DIR>/bin/setupvars.sh\n where INSTALL_DIR is the OpenVINO installation directory.\n\n"
         exit 1
@@ -62,15 +81,13 @@ if [ -z "$INTEL_OPENVINO_DIR" ]; then
     fi
 else
     # case for run with `sudo -E`
-    source "$INTEL_OPENVINO_DIR/bin/setupvars.sh"
+    source "$INTEL_OPENVINO_DIR/setupvars.sh"
 fi
 
 if ! command -v cmake &>/dev/null; then
     printf "\n\nCMAKE is not installed. It is required to build Open Model Zoo demos. Please install it. \n\n"
     exit 1
 fi
-
-build_dir=$HOME/omz_demos_build
 
 OS_PATH=$(uname -m)
 NUM_THREADS="-j2"

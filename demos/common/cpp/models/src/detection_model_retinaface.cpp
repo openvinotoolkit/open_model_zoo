@@ -16,7 +16,6 @@
 
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
@@ -31,7 +30,6 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
 void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -55,7 +53,6 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
 
@@ -214,7 +211,7 @@ void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices
     auto start = sz[2] * sz[3] * anchorNum;
 
     for (auto i : indices) {
-        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;;
+        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;
         scores.push_back(memPtr[start + offset]);
     }
 }
@@ -337,10 +334,10 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         bboxes[i].right /= scaleX;
         bboxes[i].bottom /= scaleY;
 
-        desc.x = bboxes[i].left;
-        desc.y = bboxes[i].top;
-        desc.width = bboxes[i].getWidth();
-        desc.height = bboxes[i].getHeight();
+        desc.x = clamp(bboxes[i].left, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth(), 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight(), 0.f, (float)imgHeight);
         //--- Default label 0 - Face. If detecting masks then labels would be 0 - No Mask, 1 - Mask
         desc.labelID = shouldDetectMasks ? (masks[i] > maskThreshold) : 0;
         desc.label = labels[desc.labelID];
@@ -348,11 +345,13 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 
         //--- Scaling landmarks coordinates
         for (size_t l = 0; l < ModelRetinaFace::LANDMARKS_NUM && shouldDetectLandmarks; ++l) {
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x /= scaleX;
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y /= scaleY;
+            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x =
+                clamp(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x / scaleX, 0.f, (float)imgWidth);
+            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y =
+                clamp(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y / scaleY, 0.f, (float)imgHeight);
             result->landmarks.push_back(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l]);
         }
     }
 
-    return std::unique_ptr<ResultBase>(result);;
+    return std::unique_ptr<ResultBase>(result);
 }

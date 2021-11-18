@@ -32,6 +32,15 @@ models:
           - type: normalization
             mean: (0.485, 0.456, 0.406)
             std: (0.229, 0.224, 0.225)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.67
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.869
 
   - name: hbonet-0.5
 
@@ -53,3 +62,12 @@ models:
 
           - type: crop
             size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.67
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.869

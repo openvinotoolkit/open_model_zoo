@@ -8,3 +8,9 @@ models:
 
     datasets:
       - name: text_super_resolution_x3
+        metrics:
+          - type: psnr
+            scale_border: 4
+            presenter: print_vector
+            reference:
+              mean: 21.64

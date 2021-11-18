@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from accuracy_checker.utils import concat_lists, contains_all, contains_any, overrides, zipped_transform
+from openvino.tools.accuracy_checker.utils import concat_lists, contains_all, contains_any, overrides, zipped_transform
 
 
 def test_concat_lists():

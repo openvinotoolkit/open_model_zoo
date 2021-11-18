@@ -9,7 +9,7 @@ The Accuracy Checker is an extensible, flexible and configurable Deep Learning a
 > performance of deep learning models on various Intel® architecture
 > configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
 > <br>
-> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
 
 ### Prerequisites
 
@@ -93,7 +93,7 @@ Sometimes it can be useful to have opportunity to run the tool as script for deb
 For usage Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
 with following code:
 ```python
-from accuracy_checker.main import main
+from openvino.tools.accuracy_checker.main import main
 
 if __name__ == '__main__':
     main()
@@ -121,7 +121,6 @@ You may refer to `-h, --help` to full list of command line options. Some argumen
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 - `-d, --definitions` path to the global configuration file.
 - `-e, --extensions` directory with InferenceEngine extensions.
-- `-b, --bitstreams` directory with bitstream (for Inference Engine with fpga plugin).
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
@@ -139,7 +138,6 @@ You are also able to replace some command line arguments with environment variab
 * `MODELS_DIR` - equivalent of `-m`, `--models`.
 * `EXTENSIONS` - equivalent of `-e`, `--extensions`.
 * `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
-* `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
 * `MODEL_ATTRIBUTES_DIR` - equivalent of `--model_attributes`.
 
 #### Configuration
@@ -166,7 +164,7 @@ models:
     - name: dataset_name
 ```
 Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
-Example of global definitions file can be found [here](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml). Global definitions will be merged with evaluation config in the runtime by dataset name.
+Example of global definitions file can be found at `<omz_dir>/data/dataset_definitions.yml`. Global definitions will be merged with evaluation config in the runtime by dataset name.
 Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
 You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
@@ -178,17 +176,17 @@ Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_run
 Launcher description can have differences.
 Please view:
 
-- [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure OpenVINO launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
-- [How to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md)
-- [How to configure G-API launcher](accuracy_checker/launcher/gapi_launcher_readme.md)
-- [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
-- [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)
-- [How to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md)
-- [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
-- [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
-- [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
-- [How to configure PaddlePaddle Launcher](accuracy_checker/launcher/pdpd_launcher_readme.md)
+- [How to configure Caffe launcher](openvino/tools/accuracy_checker/launcher/caffe_launcher_readme.md)
+- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenCV launcher](openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md)
+- [How to configure G-API launcher](openvino/tools/accuracy_checker/launcher/gapi_launcher_readme.md)
+- [How to configure MXNet Launcher](openvino/tools/accuracy_checker/launcher/mxnet_launcher_readme.md)
+- [How to configure TensorFlow Launcher](openvino/tools/accuracy_checker/launcher/tf_launcher_readme.md)
+- [How to configure TensorFlow Lite Launcher](openvino/tools/accuracy_checker/launcher/tf_lite_launcher_readme.md)
+- [How to configure TensorFlow 2.0 Launcher](openvino/tools/accuracy_checker/launcher/tf2_launcher_readme.md)
+- [How to configure ONNX Runtime Launcher](openvino/tools/accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
+- [How to configure PyTorch Launcher](openvino/tools/accuracy_checker/launcher/pytorch_launcher_readme.md)
+- [How to configure PaddlePaddle Launcher](openvino/tools/accuracy_checker/launcher/pdpd_launcher_readme.md)
 
 ### Datasets
 
@@ -197,7 +195,7 @@ all required preprocessing and postprocessing/filtering steps,
 and metrics that will be used for evaluation.
 
 If your dataset data is a well-known competition problem (COCO, Pascal VOC, and others) and/or can be potentially reused for other models
-it is reasonable to declare it in some global configuration file ([definition file](dataset_definitions.yml)). This way in your local configuration file you can provide only
+it is reasonable to declare it in some global configuration file (`<omz_dir>/data/dataset_definitions.yml`). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
 If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](../../data/datasets.md).
@@ -222,7 +220,7 @@ You can convert annotation in-place using:
 or use existing annotation file and dataset meta:
 - `annotation` - path to annotation file, you must **convert annotation to representation of dataset problem first**, you may choose one of the converters from *annotation-converters* if there is already converter for your dataset or write your own.
 - `dataset_meta`: path to metadata file (generated by converter).
-More detailed information about annotation conversion you can find in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
+More detailed information about annotation conversion you can find in [Annotation Conversion Guide](openvino/tools/accuracy_checker/annotation_converters/README.md).
 
 example of dataset definition:
 
@@ -255,11 +253,11 @@ will be picked from the *definitions* file.
 
 You can find useful following instructions:
 
-- [How to convert annotations](accuracy_checker/annotation_converters/README.md)
-- [How to use preprocessing](accuracy_checker/preprocessor/README.md)
-- [How to use postprocessing](accuracy_checker/postprocessor/README.md)
-- [How to use metrics](accuracy_checker/metrics/README.md)
-- [How to use readers](accuracy_checker/data_readers/README.md)
+- [How to convert annotations](openvino/tools/accuracy_checker/annotation_converters/README.md)
+- [How to use preprocessing](openvino/tools/accuracy_checker/preprocessor/README.md)
+- [How to use postprocessing](openvino/tools/accuracy_checker/postprocessor/README.md)
+- [How to use metrics](openvino/tools/accuracy_checker/metrics/README.md)
+- [How to use readers](openvino/tools/accuracy_checker/data_readers/README.md)
 
 You may optionally provide `reference` field for metric, if you want the calculated metric
 tested against a specific value (i.e. reported in canonical paper).
@@ -280,7 +278,7 @@ metrics:
 
 Typical workflow for testing a new model includes:
 
-1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
+1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](openvino/tools/accuracy_checker/annotation_converters/README.md).
 2. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 3. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 4. Create entry in config file and execute.
@@ -289,4 +287,4 @@ Typical workflow for testing a new model includes:
 
 Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
 In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
-More details about custom evaluations can be found in the [related section](accuracy_checker/evaluators/custom_evaluators/README.md).
+More details about custom evaluations can be found in the [related section](openvino/tools/accuracy_checker/evaluators/custom_evaluators/README.md).

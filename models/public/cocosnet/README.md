@@ -19,7 +19,7 @@ For details see [paper](https://arxiv.org/abs/2004.05571) and [repository](https
 Metrics were calculated between generated images by model and real validation images from ADE20k dataset.
 For some GAN metrics (IS and FID) you need to use classification model as verification network.
 In our case it is [Inception-V3](../googlenet-v3/README.md) model.
-For details, please check Accuracy Checker [config](accuracy-check-pipelined.yml).
+For details, please check Accuracy Checker config `<omz_dir>/models/public/cocosnet/accuracy-check-pipelined.yml`.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
@@ -66,16 +66,16 @@ Output color order is `RGB`.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
 
 ## Legal Information

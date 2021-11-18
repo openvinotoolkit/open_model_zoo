@@ -12,6 +12,8 @@
 
 #include <vector>
 #include <cstdint>
+// cstddef is required to get size_t definition on GCC 6
+#include <cstddef>
 
 struct WordPrefixSetState {
   // Length of the current prefix

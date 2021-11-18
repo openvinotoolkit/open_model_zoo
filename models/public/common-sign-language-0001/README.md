@@ -4,7 +4,7 @@
 
 A human gesture recognition model for the Jester dataset recognition scenario
 (gesture-level recognition). The model uses an S3D framework with MobileNet V3 backbone.
-Please refer to the [Jester](https://20bn.com/datasets/jester) dataset specification
+Please refer to the [Jester](https://web.archive.org/web/20210722062232/https://20bn.com/datasets/jester/) dataset specification
 to see the list of gestures that are recognized by this model.
 
 The model accepts a stack of frames (8 frames) sampled with a constant frame rate (15 FPS)
@@ -65,16 +65,16 @@ Blob of the shape `1, 27` in the `B, C` format, where:
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
 
 ## Legal Information

@@ -18,46 +18,44 @@
 #include "utils/ocv_common.hpp"
 #include <utils/slog.hpp>
 
-using namespace InferenceEngine;
-
 DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
     ImageModel(modelFileName, false) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
 
-void DeblurringModel::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
+void DeblurringModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
 
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputShapes.begin()->first);
-    SizeVector& inSizeVector = inputShapes.begin()->second;
+    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
+    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+    inputInfo.setPrecision(InferenceEngine::Precision::U8);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
+    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
     if (outputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputInfo.begin()->first);
-    Data& data = *outputInfo.begin()->second;
-    data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    InferenceEngine::Data& data = *outputInfo.begin()->second;
+    data.setPrecision(InferenceEngine::Precision::FP32);
+    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's output is expected");
 
     changeInputSize(cnnNetwork);
 }
 
-void DeblurringModel::changeInputSize(CNNNetwork& cnnNetwork) {
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& inputDims = inputShapes.begin()->second;
+void DeblurringModel::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
 
     if (inputDims[2] % stride || inputDims[3] % stride)
         throw std::runtime_error("The shape of the model input must be divisible by stride");
@@ -72,7 +70,7 @@ void DeblurringModel::changeInputSize(CNNNetwork& cnnNetwork) {
     cnnNetwork.reshape(inputShapes);
 }
 
-std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     size_t h = image.rows;
     size_t w = image.cols;
@@ -85,11 +83,11 @@ std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& 
         cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right,
                            cv::BORDER_CONSTANT, 0);
     } else {
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
         cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
     }
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(resizedImage, frameBlob);
+    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    matToBlob(resizedImage, frameBlob);
 
     return std::make_shared<InternalImageModelData>(image.cols, image.rows);
 }
@@ -100,11 +98,11 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
+    InferenceEngine::LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const auto outputData = outMapped.as<float*>();
 
     std::vector<cv::Mat> imgPlanes;
-    const SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
     size_t outHeight = (int)(outSizeVector[2]);
     size_t outWidth = (int)(outSizeVector[3]);
     size_t numOfPixels = outWidth * outHeight;

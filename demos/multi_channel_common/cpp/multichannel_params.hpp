@@ -19,7 +19,6 @@ static const char model_path_message[] = "Required. Path to an .xml file with a 
 static const char target_device_message[] = "Optional. Specify the target device for a network (the list of available devices is shown below). "
                                             "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo looks for a suitable plugin for a specified device.";
-static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to an .xml file with the kernel descriptions";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -40,7 +39,6 @@ DEFINE_bool(loop, false, loop_message);
 DEFINE_uint32(duplicate_num, 1, duplication_channel_number_message);
 DEFINE_string(m, "", model_path_message);
 DEFINE_string(d, "CPU", target_device_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_message);

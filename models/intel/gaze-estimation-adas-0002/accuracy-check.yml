@@ -21,3 +21,6 @@ models:
         metrics:
           - type: angle_error
             presenter: print_vector
+            reference:
+              mean: 6.95
+              std: 3.58

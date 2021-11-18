@@ -27,6 +27,8 @@ models:
         metrics:
           - name: AP@masks
             type: coco_orig_segm_precision
+            reference: 0.3644
 
           - name: AP@boxes
             type: coco_orig_precision
+            reference: 0.3986

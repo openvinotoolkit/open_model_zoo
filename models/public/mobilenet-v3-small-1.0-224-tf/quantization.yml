@@ -1,0 +1,28 @@
+compression:
+  algorithms:
+    - name: MinMaxQuantization
+      params:
+        preset: mixed
+        stat_subset_size: 300
+    - name: BiasCorrection
+      params:
+        stat_subset_size: 300
+        ignored:
+          scope:
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_5/squeeze_excite/AvgPool/Mean
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_2/depthwise/depthwise
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_8/expand/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv/squeeze_excite/AvgPool/Mean
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_3/expand/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/Conv/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv/depthwise/depthwise
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_2/expand/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv/squeeze_excite/Mul/mul
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_2/Add/add
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_5/squeeze_excite/Mul/mul
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv/project/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_1/depthwise/depthwise
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_3/project/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_1/expand/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_1/project/Conv2D
+            - StatefulPartitionedCall/MobilenetV3small/expanded_conv_3/depthwise/depthwise

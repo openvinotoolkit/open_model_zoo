@@ -24,3 +24,4 @@ models:
             use_argmax: false
             ignore_label: 11
             presenter: print_vector
+            reference: 0.7542

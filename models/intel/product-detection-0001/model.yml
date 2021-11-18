@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/product-detection-0001.xml
     size: 323305
-    sha256: 042dd5c526b60f7c76c60c4fa969e40d7f0ef597f670a47fc80ca58c4dc64969
+    sha384: 731c73f3cef19694238ae8a0c7ce6c1e60cc7c6ebe78d5ff8cb01e1fe65da2f767be75e5643e2c8b087f71f69debee99
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.xml
   - name: FP32/product-detection-0001.bin
     size: 12850024
-    sha256: 49a49dfdbff2f7a794fcad60e872fa2e2b3f95c1f12e33fd49b975f3fa91439d
+    sha384: dc3e6fa2805627a6b96a4734a899bee296e6e7feed419764b7264deb4d686a29cc25730fbc1309456ccc1f77957bad49
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.bin
   - name: FP16/product-detection-0001.xml
     size: 323127
-    sha256: a217c33a208d61606b1b18f8481fc29c6cc832b4c7abc622d7336494cccfc19a
+    sha384: 525bd3f072620785415bcbe5649564f75e3fc3db6525592fffc1fd29e4f131873d1e0f350f67220fc4f59ec146f2b58d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.xml
   - name: FP16/product-detection-0001.bin
     size: 6425058
-    sha256: 4952708beb67fb5c8ea97f28358045a31d358af22dd0b82431d649b2ee4e0f95
+    sha384: 5e1c57999d4dc26c6a097b97af3a698f38664ecf96455253683536444853843f9e9615f17f7ec8885894136a59070fd8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.bin
   - name: FP16-INT8/product-detection-0001.xml
     size: 716994
-    sha256: a79257a7fc5d560d76969d4403caee174cbeaf9823aea77b8e311465a55e4cda
+    sha384: 2dd5695452d68bf0fc5c7836ac281f8266fb42525b2bc45f3ae884ff7be801c01c20d5bf008e1583055f75659e632fcc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.xml
   - name: FP16-INT8/product-detection-0001.bin
     size: 3364170
-    sha256: 4fd5a44c98a68bb7b46cae5020c1ac94272407b010d615b02290dc918f23b936
+    sha384: 44dabe31d4e9907f3506556a0baf61bee1e1167fe1f1ff2ff81571368e2ca73bdb1b74667e6b9d814c6b06ada0299096
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

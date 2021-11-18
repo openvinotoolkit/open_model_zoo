@@ -39,3 +39,10 @@ models:
         metrics:
           - type: mae
             presenter: print_vector
+            reference:
+              logits@mean: 1.350547
+              logits@std: 0.472648
+              h1@mean: 0
+              h1@std: 0
+              h2@mean: 0.08134
+              h2@std: 0.00799

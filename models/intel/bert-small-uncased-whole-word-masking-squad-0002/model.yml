@@ -21,19 +21,19 @@ task_type: question_answering
 files:
   - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
     size: 716185
-    sha256: 980954e394cf98a473144faa8a5f8a70b4354177e2b2adc8f7f34bc16b828013
+    sha384: ef7d8a8fce02fc7ef656251d63f575ff812315e0a8b0c46f762b9e088983fcd00ab3bf339fad70ad36a15daaf9cbcbc0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
   - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
     size: 164528332
-    sha256: 2789cb720ef8dc4296541af33485832397f312d2cd75abfd07bb215991bb5b9f
+    sha384: 0c80fbd28bfb9336722a716bdba02a39feacec0aef81bdf055a506a808899e2c191e2440f10dcd7923bfd6c91bf385e4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
   - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
     size: 715930
-    sha256: b601a436a77f129e766cc391168e387fd424774784cd5b80b188fb4e7a12b40c
+    sha384: fb200362fae9f24d1f76f681492f80d45e1f0eb2b714fe4bee1cd0607b870c5a41b49acc2be492b7d8719f2c9f189fe6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
   - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
     size: 82264244
-    sha256: 43e6cae76673287cd9c19dd431239f3fdc71a29a43065e5a02f4898ca691f848
+    sha384: 2793b3a6df64023783cc2e5ab2ee83a9719f4417d6bb41912b2a3f67025d552a908d8e1f469d9dc2617859e52196df9a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -20,19 +20,19 @@ task_type: question_answering
 files:
   - name: FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
     size: 1301867
-    sha256: 64e9e41b08f11d909a95fe346ca603007c24ce8cce6eef435da46381f7388977
+    sha384: 3873a8036617913ca66a5ec26b4a241ddb2bb0395e8440dde4307ea0e8b19fdcb20fc177e2b5163f0d0c4171e681fdc5
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
   - name: FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
     size: 1340567764
-    sha256: 071d13a1744c5c90d54e78a13f6c0dbe581128a06c996eb7b5fde4162e11f5f8
+    sha384: a026cb215aea6e133f0dceb781487c05bf190412f427987bf31b57c55cf730819ccd208865d47b0ffd7f2d62f3a59b3a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
   - name: FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
     size: 1300638
-    sha256: 503148f197b04ccb8816854de298b8fc85bfed55b97df6f48866ab0907b22189
+    sha384: a80f3d290900270526b8773a41e8776e91dcde600948ad6e0eb1d362f3a926b9085acfd80a8f4aca049991f572bf65b0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
   - name: FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
     size: 670283952
-    sha256: 0293b6998bd86d8c743781e10ab238d0a54019d9c45a3f780087387a574454ea
+    sha384: 923d86ac390cd69f86acf7b20bda7b07663a25cf72616ec303fd881f51778b215a789d7df9f9256ba5768cc1fa575895
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

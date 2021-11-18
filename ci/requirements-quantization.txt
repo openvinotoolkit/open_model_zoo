@@ -2,14 +2,18 @@
 
 addict==2.4.0
     # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
-click==7.1.2
-    # via nltk
+click==8.0.1
+    # via
+    #   nltk
+    #   sacremoses
 cycler==0.10.0
     # via matplotlib
+dataclasses==0.8
+    # via transformers
 decorator==4.4.2
     # via networkx
 defusedxml==0.7.1
@@ -18,15 +22,29 @@ defusedxml==0.7.1
     #   -r tools/accuracy_checker/requirements-core.in
 editdistance==0.5.3
     # via -r tools/accuracy_checker/requirements.in
-fast-ctc-decode==0.2.5
+fast-ctc-decode==0.3.0
     # via -r tools/accuracy_checker/requirements.in
-idna==2.10
+filelock==3.0.12
+    # via
+    #   huggingface-hub
+    #   transformers
+huggingface-hub==0.0.16
+    # via transformers
+idna==3.2
     # via requests
+imagecodecs==2020.5.30 ; python_version < "3.7"
+    # via -r tools/accuracy_checker/requirements.in
 imageio==2.9.0
     # via scikit-image
+importlib-metadata==4.8.1
+    # via
+    #   click
+    #   huggingface-hub
+    #   transformers
 joblib==1.0.1
     # via
     #   nltk
+    #   sacremoses
     #   scikit-learn
 jstyleson==0.0.2
     # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
@@ -43,12 +61,13 @@ networkx==2.5.1
     #   scikit-image
 nibabel==3.2.1
     # via -r tools/accuracy_checker/requirements.in
-nltk==3.5
+nltk==3.6.2
     # via -r tools/accuracy_checker/requirements.in
 numpy==1.19.5
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
     #   -r tools/accuracy_checker/requirements-core.in
+    #   imagecodecs
     #   imageio
     #   matplotlib
     #   nibabel
@@ -61,27 +80,35 @@ numpy==1.19.5
     #   scikit-learn
     #   scipy
     #   tifffile
-packaging==20.9
-    # via nibabel
+    #   transformers
+packaging==21.0
+    # via
+    #   huggingface-hub
+    #   nibabel
+    #   transformers
 pandas==1.1.5
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    # via
+    #   -r tools/accuracy_checker/requirements.in
+    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
 parasail==1.2.4
     # via -r tools/accuracy_checker/requirements.in
-pillow==8.1.2
+pillow==8.3.2
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
     #   matplotlib
     #   scikit-image
-py-cpuinfo==7.0.0
+py-cpuinfo==8.0.0
     # via -r tools/accuracy_checker/requirements.in
-pydicom==2.1.2
+pyclipper==1.3.0
+    # via -r tools/accuracy_checker/requirements.in
+pydicom==2.2.1
     # via -r tools/accuracy_checker/requirements.in
 pyparsing==2.4.7
     # via
     #   matplotlib
     #   packaging
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
@@ -90,16 +117,26 @@ pytz==2021.1
 pywavelets==1.1.1
     # via scikit-image
 pyyaml==5.4.1
-    # via -r tools/accuracy_checker/requirements-core.in
+    # via
+    #   -r tools/accuracy_checker/requirements-core.in
+    #   transformers
 rawpy==0.16.0
     # via -r tools/accuracy_checker/requirements.in
-regex==2021.3.17
-    # via nltk
-requests==2.25.1
-    # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+regex==2021.8.28
+    # via
+    #   nltk
+    #   sacremoses
+    #   transformers
+requests==2.26.0
+    # via
+    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+    #   huggingface-hub
+    #   transformers
+sacremoses==0.0.45
+    # via transformers
 scikit-image==0.17.2
     # via -r tools/accuracy_checker/requirements.in
-scikit-learn==0.24.1
+scikit-learn==0.24.2
     # via -r tools/accuracy_checker/requirements.in
 scipy==1.5.4
     # via
@@ -107,24 +144,39 @@ scipy==1.5.4
     #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
     #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.95
+sentencepiece==0.1.96
     # via -r tools/accuracy_checker/requirements.in
 shapely==1.7.1
     # via -r tools/accuracy_checker/requirements.in
-six==1.15.0
-    # via python-dateutil
-texttable==1.6.3
+six==1.16.0
+    # via
+    #   python-dateutil
+    #   sacremoses
+texttable==1.6.4
     # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-threadpoolctl==2.1.0
+threadpoolctl==2.2.0
     # via scikit-learn
 tifffile==2020.9.3
     # via scikit-image
-tokenizers==0.10.1
-    # via -r tools/accuracy_checker/requirements.in
-tqdm==4.60.0
+tokenizers==0.10.3
     # via
     #   -r tools/accuracy_checker/requirements.in
+    #   transformers
+tqdm==4.62.2
+    # via
+    #   -r tools/accuracy_checker/requirements.in
+    #   huggingface-hub
     #   nltk
     #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-urllib3==1.26.4
+    #   sacremoses
+    #   transformers
+transformers==4.10.0
+    # via -r tools/accuracy_checker/requirements.in
+typing-extensions==3.10.0.2
+    # via
+    #   huggingface-hub
+    #   importlib-metadata
+urllib3==1.26.6
     # via requests
+zipp==3.5.0
+    # via importlib-metadata

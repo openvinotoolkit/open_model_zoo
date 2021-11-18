@@ -58,7 +58,7 @@ bounding boxes. For each detection, the description has the format:
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
 - `confidence` - confidence for the predicted class
-- `label` - predicted class ID, in range [1, 91] across following [labels](../../../data/dataset_classes/coco_91cl.txt)
+- `label` - predicted class ID, in range [1, 91] across following labels at `<omz_dir>/data/dataset_classes/coco_91cl.txt`
 
 ### Converted Model
 
@@ -67,27 +67,27 @@ bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
-- `label` - predicted class ID, in range [0, 90] across following [labels](../../../data/dataset_classes/coco_91cl.txt)
+- `label` - predicted class ID, in range [0, 90] across following labels at `<omz_dir>/data/dataset_classes/coco_91cl.txt`
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
 
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/google/automl/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TF-AutoML.txt](../licenses/APACHE-2.0-TF-AutoML.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-TF-AutoML.txt`.

@@ -21,7 +21,7 @@ Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD.
 | Source framework                | Caffe\*               |
 
 Average Precision (AP) metric is described in: Mark Everingham et al.
-[The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
+[The PASCAL Visual Object Classes (VOC) Challenge](https://link.springer.com/article/10.1007/s11263-009-0275-4).
 
 Tested on challenging internal datasets with 1001 pedestrian and 12585 vehicles to detect.
 

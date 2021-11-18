@@ -18,11 +18,12 @@
 * @brief Base class of config for network
 */
 struct CnnConfig {
-    explicit CnnConfig(const std::string& path_to_model)
-        : path_to_model(path_to_model) {}
-
+    explicit CnnConfig(const std::string& path_to_model, const std::string& model_type = "")
+        : path_to_model(path_to_model), model_type(model_type) {}
     /** @brief Path to model description */
     std::string path_to_model;
+    /** @brief Model type*/
+    std::string model_type;
     /** @brief Maximal size of batch */
     int max_batch_size{1};
 
@@ -53,11 +54,6 @@ public:
    * @brief Loads network
    */
     void Load();
-
-    /**
-    * @brief Prints performance report
-    */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
 
 protected:
     /**
@@ -110,7 +106,6 @@ public:
     virtual void enqueue(const cv::Mat &frame) = 0;
     virtual void submitRequest() = 0;
     virtual void wait() = 0;
-    virtual void printPerformanceCounts(const std::string &fullDeviceName) = 0;
 };
 
 template <typename T>
@@ -125,7 +120,6 @@ public:
     void enqueue(const cv::Mat &) override {}
     void submitRequest() override {}
     void wait() override {}
-    void printPerformanceCounts(const std::string &) override {}
     std::vector<T> fetchResults() override { return {}; }
 };
 
@@ -151,10 +145,5 @@ public:
     void wait() override {
         if (!request || !isAsync) return;
         request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
-    }
-
-    void printPerformanceCounts(const std::string &fullDeviceName) override {
-        std::cout << "Performance counts for " << topoName << std::endl << std::endl;
-        ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
     }
 };

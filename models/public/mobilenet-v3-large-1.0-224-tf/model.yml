@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,21 +19,16 @@ description: >-
   For details see paper <https://arxiv.org/abs/1905.02244>.
 task_type: classification
 files:
-  - name: v3-large_224_1.0_float.tgz
-    size: 184251120
-    sha256: 9be8563f92022f412c82f2811d670888d6db998e2da9af3e71415fdde2f4f504
-    source: https://storage.googleapis.com/mobilenet_v3/checkpoints/v3-large_224_1.0_float.tgz
-postprocessing:
-  - $type: unpack_archive
-    format: gztar
-    file: v3-large_224_1.0_float.tgz
+  - name: weights_mobilenet_v3_large_224_1.0_float.h5
+    size: 22661472
+    sha384: 4e7e0ecab69b15ecde1e3f4c494826cece07169bdc14d7da29eb07bef718c32f532d952d0b3113ffaca95c2d6d9577b5
+    source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_large_224_1.0_float.h5
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
-  - --input=input
-  - --mean_values=input[127.5,127.5,127.5]
-  - --scale_values=input[127.5]
-  - --output=MobilenetV3/Predictions/Softmax
-  - --input_model=$dl_dir/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
+  - --input=input_1
+  - --output=StatefulPartitionedCall/MobilenetV3large/Predictions/Softmax
+  - --saved_model_dir=$dl_dir/mobilenet_v3_large_224_1.0_float.savedmodel
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

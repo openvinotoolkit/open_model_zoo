@@ -20,6 +20,7 @@ models:
             integral: 11point
             ignore_difficult: True
             presenter: print_scalar
+            reference: 0.67
 
   - name: mobilenet-ssd
     launchers:
@@ -38,3 +39,4 @@ models:
             integral: 11point
             ignore_difficult: True
             presenter: print_scalar
+            reference: 0.67

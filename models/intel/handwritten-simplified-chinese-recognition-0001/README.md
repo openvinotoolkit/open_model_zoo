@@ -2,13 +2,11 @@
 
 ## Use Case and High-Level Description
 
-This is a network for handwritten simplified Chinese text recognition scenario. It consists of a VGG16-like backbone,
-reshape layer and a fully connected layer.
-The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) dataset.
+This is a network for handwritten simplified Chinese text recognition scenario. The model consists of three parts, namely the residual convolutional neural network (CNN) as the feature extractor, and then a flatten operation followed  by a fully connected layer as the classifier for final prediction. The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) dataset.
 
 ## Example
 
-![](./assets/test.png) -> 的人不一了是他有为在责新中任自之我们
+![](./assets/handwritten-simplified-chinese-recognition-0001.png) -> 的人不一了是他有为在责新中任自之我们
 
 ## Specification
 

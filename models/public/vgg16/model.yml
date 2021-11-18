@@ -26,11 +26,11 @@ task_type: classification
 files:
   - name: vgg16.prototxt
     size: 4776
-    sha256: 9fdb04e3f5b9224af473e82441b05b76368dfa6dc841e80655303823e9770962
+    sha384: 02ecff319e3fab8e68232ad5a8a5a4d91f2f49b00f15b868674cd59ef33a4b0c216d751ae60c07411fa3fdf3af795faa
     source: https://gist.githubusercontent.com/ksimonyan/211839e770f7b538e2d8/raw/0067c9b32f60362c74f4c445a080beed06b07eb3/VGG_ILSVRC_16_layers_deploy.prototxt
   - name: vgg16.caffemodel
     size: 553432081
-    sha256: a6196bc498e45ea4cb2637114ae8db9410cf1556fd60a55ae93272371beba197
+    sha384: 8ed7890af721fa22a9a356c00ec8360984f572b37991d1a5d70993ece85a0d25d675f02ff27c443523be1b61b9bb3d15
     source: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_16_layers.caffemodel
 postprocessing:
   - $type: regex_replace

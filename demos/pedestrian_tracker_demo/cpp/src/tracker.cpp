@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -35,7 +35,7 @@ DetectionLog ConvertTracksToDetectionLog(const ObjectTracks& tracks) {
     DetectionLog log;
 
     // Combine detected objects by respective frame indices.
-    std::map<int, TrackedObjects> objects;
+    std::map<int64_t, TrackedObjects> objects;
     for (const auto& track : tracks)
         for (const auto& object : track.second) {
             auto itr = objects.find(object.frame_idx);
@@ -804,8 +804,8 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
         DrawPolyline(centers, colors_[idx % colors_.size()], &out_frame);
         std::stringstream ss;
         ss << idx;
-        cv::putText(out_frame, ss.str(), centers.back(), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 2.0,
-                    colors_[idx % colors_.size()], 3);
+        putHighlightedText(out_frame, ss.str(), centers.back(), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 0.95,
+                    colors_[idx % colors_.size()], 2);
         auto track = tracks().at(idx);
         if (track.lost) {
             cv::line(out_frame, active_track.second.back(),
@@ -814,10 +814,4 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
     }
 
     return out_frame;
-}
-
-void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {
-    if (descriptor_strong_) {
-        descriptor_strong_->PrintPerformanceCounts(fullDeviceName);
-    }
 }

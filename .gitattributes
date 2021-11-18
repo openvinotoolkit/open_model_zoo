@@ -7,6 +7,7 @@
 # so allow it.
 *.patch whitespace=-blank-at-eol
 
+.bandit -omz.package
 .editorconfig -omz.package
 .flake8 -omz.package
 .git* -omz.package
@@ -15,7 +16,7 @@
 /demos/build_demos.sh omz.package=l,m
 /demos/build_demos_msvc.bat omz.package=w
 /demos/tests/** -omz.package
-/tools/downloader/tests/** -omz.package
+/tools/model_tools/tests/** -omz.package
 
 * omz.package.component=dev
 /LICENSE omz.package.component=tools
@@ -37,6 +38,6 @@
 
 /tools/accuracy_checker/** omz.ci.job-for-change.ac
 /tools/accuracy_checker/configs/*.yml -omz.ci.job-for-change.ac
-/tools/downloader/** omz.ci.job-for-change.downloader
+/tools/model_tools/** omz.ci.job-for-change.downloader
 
 *.md omz.ci.job-for-change.documentation -omz.ci.job-for-change.ac -omz.ci.job-for-change.demos -omz.ci.job-for-change.downloader

@@ -12,7 +12,7 @@ For details see [paper](https://arxiv.org/abs/1512.03385),
 
 1. Install TensorFlow\*, version 1.14.0.
 2. Download [pre-trained weights](http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NHWC_jpg.tar.gz)
-3. Run example conversion code, available at [freeze_saved_model.py](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/public/resnet-50-tf/freeze_saved_model.py)
+3. Run example conversion code, available at `<omz_dir>/models/public/resnet-50-tf/freeze_saved_model.py`
 ```sh
 python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model --save_file path/to/resulting/frozen_graph.pb
 ```
@@ -76,16 +76,16 @@ Object classifier according to ImageNet classes, name: `softmax_tensor`,  shape:
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
 
 ## Legal Information

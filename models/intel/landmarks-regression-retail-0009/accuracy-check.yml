@@ -20,4 +20,12 @@ models:
         metrics:
           - type: per_point_normed_error
             presenter: print_vector
+            reference:
+              point_0_normed_error: 0.06802
+              point_1_normed_error: 0.061613
+              point_2_normed_error: 0.093053
+              point_3_normed_error: 0.067112
+              point_4_normed_error: 0.062814
+              mean: 0.070523
           - type: normed_error
+            reference: 0.0705

@@ -4,7 +4,7 @@ If you want to use prepared configs to run the Accuracy Checker tool and the Mod
 
 Each dataset description consists of the following sections:
 * instruction for downloading the dataset
-* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file ([dataset_definitions.yml](./dataset_definitions.yml))
+* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file (`<omz_dir>/data/dataset_definitions.yml`)
 * examples of using and presenting the dataset in the global configuration file
 
 More detailed information about using predefined configuration files you can find [here](../tools/accuracy_checker/configs/README.md).
@@ -56,8 +56,9 @@ To download COCO dataset, you need to follow the steps below:
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
 
 * `val2017` - directory containing the COCO 2017 validation images
-* `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
-* `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
+* `annotations` - directory containing the COCO 2017 annotation files
+  * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
+  * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
 ### Datasets in dataset_definitions.yml
 * `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID.
@@ -142,6 +143,28 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/README.md), [`ssd300`](../models/public/ssd300/README.md))
 * `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v1-tiny-tf`](../models/public/yolo-v1-tiny-tf/README.md))
 
+## [SYGData0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+
+### How download dataset
+
+To download SYGData0829 dataset, you need to follow the steps below:
+1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+2. Select [`SYGData0829.z01`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01)
+Select ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02)
+Select ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03)
+Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip)
+3. Unpack archive
+
+### Files layout
+* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
+    * `Annotations` - directory containing the SYGData0829 annotation files
+    * `JPEGImages` - directory containing the SYGData0829 images
+    * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
+		* `Main/val.txt` - image sets file for validation of detection tasks
+
+### Datasets in dataset_definitions.yml
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-v4-syg`](../models/public/mobilenet-yolo-v4-syg/README.md))
+
 ## [PASCAL-S](http://cbs.ic.gatech.edu/salobj/)
 
 ### How download dataset
@@ -172,7 +195,6 @@ To download CoNLL2003 dataset, you need to follow the steps below:
 ### Files layout
 
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
-
 * `CONLL-2003` - directory containing annotation files
     * `valid.txt` - annotation file for CoNLL2003 validation set
 
@@ -240,7 +262,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `images` - directory with converted images
         * `depth` -  directory with depth maps
 
-Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use [convert.py](../tools/accuracy_checker/accuracy_checker/annotation_converters/convert.py) and  following command line to get converted data .
+Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `convert_annotation` command line interface:
 
 ```sh
 convert_annotation nyu_depth_v2 --data_dir <DATASET_DIR>/nyudepthv2/val/official --allow_convert_data True

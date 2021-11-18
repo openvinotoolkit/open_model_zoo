@@ -26,7 +26,7 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
+def run_pipeline(capture, model_type, model, render_fn, raw_output, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(capture), parallel=False)
 
@@ -36,7 +36,7 @@ def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     elif model_type == 'i3d-rgb':
         pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel=False)
 
-    pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
+    pipeline.add_step("Render", RenderStep(render_fn, raw_output, fps=fps), parallel=True)
 
     pipeline.run()
     pipeline.close()
@@ -152,9 +152,10 @@ def softmax(x, axis=None):
 class RenderStep(PipelineStep):
     """Passes inference result to render function"""
 
-    def __init__(self, render_fn, fps):
+    def __init__(self, render_fn, raw_output, fps):
         super().__init__()
         self.render = render_fn
+        self.raw_output = raw_output
         self.fps = fps
         self._frames_processed = 0
         self._t0 = None
@@ -164,9 +165,8 @@ class RenderStep(PipelineStep):
         if item is None:
             return
         self._sync_time()
-        # status = None
         render_start = time.time()
-        status = self.render(*item, self._frames_processed, self.fps)
+        status = self.render(*item, self._frames_processed, self.raw_output, self.fps)
         self._render_time.update(time.time() - render_start)
 
         self._frames_processed += 1
