@@ -29,3 +29,4 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
+            reference: 0.9194

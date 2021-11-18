@@ -16,3 +16,9 @@ models:
 
     datasets:
       - name: super_resolution_x4
+        metrics:
+          - type: psnr
+            scale_border: 4
+            presenter: print_vector
+            reference:
+              mean: 29.29

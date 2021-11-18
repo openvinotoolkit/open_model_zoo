@@ -20,3 +20,11 @@ models:
           - type: f1-score
             calculate_average: False
             presenter: print_vector
+            reference:
+              has_backpack: 0.77
+              has_bag: 0.66
+              has_hat: 0.64
+              has_longhair: 0.83
+              has_longpants: 0.83
+              has_longsleeves: 0.21
+              is male: 0.91

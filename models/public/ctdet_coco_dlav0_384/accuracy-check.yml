@@ -25,3 +25,4 @@ models:
           - type: map
             integral: 11point
             presenter: print_scalar
+            reference: 0.4181

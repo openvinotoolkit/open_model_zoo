@@ -9,18 +9,18 @@ After computing audio features, running a neural network to get character probab
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_quartznet_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -41,7 +41,7 @@ optional arguments:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Path to an audio file in WAV PCM 16 kHz mono format
+                        Required. Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
@@ -62,9 +62,12 @@ An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/ho
 ## Demo Output
 
 The application prints the decoded text for the audio file.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

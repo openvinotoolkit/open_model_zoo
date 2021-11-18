@@ -65,6 +65,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        logExecNetworkInfo(net, xmlPath, deviceName, "Person Detection");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -82,11 +83,11 @@ public:
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
-            matU8ToBlob<uint8_t>(img, input);
+            matToBlob(img, input);
         }
     }
 
-    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::ostream* rawResults = nullptr) {
+    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         InferenceEngine::LockedMemory<const void> detectorOutputBlobMapped = InferenceEngine::as<
@@ -110,11 +111,10 @@ public:
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
             results.push_back(Result{label, confidence, rect});
-
-            if (rawResults) {
-                *rawResults << "[" << i << "," << label << "] element, prob = " << confidence
-                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")" << std::endl;
-            }
+            std::ostringstream rawResultsStream;
+            rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
+                << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
+            rawResults.push_back(rawResultsStream.str());
         }
         return results;
     }
@@ -167,6 +167,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        logExecNetworkInfo(net, xmlPath, deviceName, "Person Re-Identification");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -183,7 +184,7 @@ public:
             inferRequest.SetBlob(reIdInputName, roiBlob);
         } else {
             const cv::Mat& personImage = img(personRect);
-            matU8ToBlob<uint8_t>(personImage, roiBlob);
+            matToBlob(personImage, roiBlob);
         }
     }
 

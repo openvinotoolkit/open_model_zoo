@@ -15,6 +15,15 @@ models:
             size: 224
           - type: normalization
             mean: 104, 117, 123
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78506
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9445
 
   - name: se-resnet-152
     launchers:
@@ -28,3 +37,12 @@ models:
             size: 256
           - type: crop
             size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78506
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9445

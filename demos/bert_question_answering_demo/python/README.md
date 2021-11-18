@@ -11,28 +11,26 @@ The text is then used to search answers for user-provided questions.
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
 * bert-large-uncased-whole-word-masking-squad-0001
-* bert-large-uncased-whole-word-masking-squad-emb-0001
 * bert-large-uncased-whole-word-masking-squad-int8-0001
 * bert-small-uncased-whole-word-masking-squad-0001
 * bert-small-uncased-whole-word-masking-squad-0002
-* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
 The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
@@ -65,7 +63,7 @@ usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -v VOCAB, --vocab VOCAB
-                        Required. path to the vocabulary file with tokens
+                        Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
@@ -92,6 +90,17 @@ Options:
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
                         console)
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests.
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases).
 
 ```
 
@@ -125,6 +134,9 @@ Please see general [reshape intro and limitations](https://docs.openvinotoolkit.
 ## Demo Outputs
 
 The application outputs found answers to the same console.
+The application reports
+
+* **Latency**: total processing time required to process input data (from loading the vocab and processing the context as tokens to displaying the results).
 
 ## Classifying Documents with Long Texts
 
@@ -132,17 +144,9 @@ Notice that when the original "context" (text from the url) together with the qu
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the context into overlapping segments.
 Thus, for the long texts, the network is called multiple times. The results are then sorted by the probabilities.
 
-## Demo Performance
-
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance, as certain tricks like batching,
-[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
-
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

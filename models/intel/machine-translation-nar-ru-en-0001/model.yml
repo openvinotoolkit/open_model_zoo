@@ -19,19 +19,19 @@ task_type: machine_translation
 files:
   - name: FP32/machine-translation-nar-ru-en-0001.xml
     size: 918531
-    sha256: f6d97ed0a260ea80fb8cd51b1a8300d348b9fe2a34315db09842f921138b1edc
+    sha384: 8ed34651a2c227bc7fe85a25bef8b74303fea0cf5555d4410600754f811d4685c641c960d7e384190118284a16ecc123
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-ru-en-0001/FP32/machine-translation-nar-ru-en-0001.xml
   - name: FP32/machine-translation-nar-ru-en-0001.bin
     size: 251814396
-    sha256: 02402791b22d6621adf98d603fd22020e3f1c8291fd12cfcda51ec99d21bd40b
+    sha384: 23c1bad7d1608ca1715a5e77e9598fdc3ddd4f88b3860855bc5c53251ba4b85df58cfc49b478753836f9c3a63d324c39
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-ru-en-0001/FP32/machine-translation-nar-ru-en-0001.bin
   - name: FP16/machine-translation-nar-ru-en-0001.xml
     size: 918582
-    sha256: 4aaa2626476b8cfb36af1c1551cf26efc339801ed169a14444bca195837b4529
+    sha384: 1091343da67f5fdbaae952424f3f517de92c37a28c05617f6e0d2937a269466850378481c5f117079a4e4a501abf4049
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-ru-en-0001/FP16/machine-translation-nar-ru-en-0001.xml
   - name: FP16/machine-translation-nar-ru-en-0001.bin
     size: 125907314
-    sha256: a54d6f4191439c87df3ce9a71345f96992a75ba71cb380611cc89eb8bb5b9f84
+    sha384: 74c3ac24911c5b1abc52114036255217b2829670cb453664594973d8f2045e40ed7c712ff18a6004c060bd8a46b5013e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-ru-en-0001/FP16/machine-translation-nar-ru-en-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

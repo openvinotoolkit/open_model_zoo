@@ -10,7 +10,7 @@ before running it.
 
 import argparse
 import os
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 
 from pathlib import Path
@@ -71,13 +71,13 @@ def main():
     pc('ci/requirements-check-basics.txt',
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
-        *(f'tools/downloader/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
+        *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
         'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
     pc('ci/requirements-downloader.txt',
-        'tools/downloader/requirements.in')
+        'tools/model_tools/requirements.in')
     pc('ci/requirements-quantization.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
         openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',

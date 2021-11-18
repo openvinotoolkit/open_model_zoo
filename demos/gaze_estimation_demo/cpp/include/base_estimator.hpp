@@ -11,7 +11,6 @@ class BaseEstimator {
 public:
     void virtual estimate(const cv::Mat& image,
                           FaceInferenceResults& outputResults) = 0;
-    void virtual printPerformanceCounts() const = 0;
     virtual ~BaseEstimator() = default;
 };
 }  // namespace gaze_estimation

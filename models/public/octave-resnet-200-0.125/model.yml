@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a08_resnet-200_alpha-0.125.tar
     size: 260812800
-    sha256: d9ce49aa73e3f0f31ac659ddf812ff8a79242a058e6b53a7140c756d83413e58
+    sha384: d12ff6032906d051bd2c99ca1153a9a25443a60aaa8bba35dd5a5dab09091e296a3d1fda72f2afa29ca6440a5872a20f
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a08_resnet-200_alpha-0.125.tar
 postprocessing:
   - $type: unpack_archive

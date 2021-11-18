@@ -19,3 +19,4 @@ evaluations:
           metrics:
             - type: im2latex_match_images_metric
               max_pixel_column_diff: 0
+              reference: 0.705

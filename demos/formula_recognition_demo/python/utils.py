@@ -18,7 +18,7 @@ import json
 import logging as log
 import os
 import re
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import tempfile
 from enum import Enum
 from multiprocessing.pool import ThreadPool
@@ -27,7 +27,7 @@ from types import SimpleNamespace as namespace
 import cv2 as cv
 import numpy as np
 import sympy
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from tqdm import tqdm
 
 START_TOKEN = 0
@@ -86,7 +86,7 @@ def create_renderer():
     of latex formula could be performed
     """
     command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, check=False)
+                             stderr=subprocess.DEVNULL, check=False, shell=True) # shell=True is used to process case with no pdflatex installed on Windows
     if command.returncode != 0:
         renderer = None
         log.warning("pdflatex not installed, please, install it to use rendering")
@@ -119,20 +119,11 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-def read_net(model_xml, ie):
+def read_net(model_xml, ie, model_type):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Reading {} model {}'.format(model_type, model_xml))
     return ie.read_network(model_xml, model_bin)
-
-
-def print_stats(module):
-    perf_counts = module.requests[0].get_perf_counts()
-    print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                      'real_time, us'))
-    for layer, stats in perf_counts.items():
-        print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                          stats['status'], stats['real_time']))
 
 
 def change_layout(model_input):
@@ -157,14 +148,15 @@ class Model:
 
     def __init__(self, args, interactive_mode):
         self.args = args
-        log.info("Creating Inference Engine")
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
-        self.ie.set_config(
-            {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
-        self.encoder = read_net(self.args.m_encoder, self.ie)
-        self.dec_step = read_net(self.args.m_decoder, self.ie)
+        self.encoder = read_net(self.args.m_encoder, self.ie, 'Formula Recognition Encoder')
+        self.dec_step = read_net(self.args.m_decoder, self.ie, 'Formula Recognition Decoder')
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
+        log.info('The Formula Recognition Encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
+        log.info('The Formula Recognition Decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.READY
@@ -182,7 +174,6 @@ class Model:
                             for inp in os.listdir(self.args.input))
         else:
             inputs = [self.args.input]
-        log.info("Loading and preprocessing images")
         for filenm in tqdm(inputs):
             image_raw = cv.imread(filenm)
             assert image_raw is not None, "Error reading image {}".format(filenm)

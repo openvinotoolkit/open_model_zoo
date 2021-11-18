@@ -21,3 +21,5 @@ models:
           - type: psnr
             scale_border: 4
             presenter: print_vector
+            reference:
+              mean: 30.97

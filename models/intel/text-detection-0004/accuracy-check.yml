@@ -35,3 +35,4 @@ models:
           - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
+            reference: 0.7943

@@ -13,3 +13,7 @@ models:
             calculate_std: True
             percentile: 90
             presenter: print_vector
+            reference:
+              90th percentile: 0.143
+              mean: 0.106
+              std: 0.038

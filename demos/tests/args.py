@@ -55,7 +55,7 @@ class Arg:
 
 
 class ModelArg(Arg):
-    def __init__(self, name, precision='FP32'):
+    def __init__(self, name, precision=None):
         self.name = name
         self.precision = precision
 
@@ -64,7 +64,7 @@ class ModelArg(Arg):
 
     @property
     def required_models(self):
-        return [RequestedModel(self.name, [self.precision])]
+        return [RequestedModel(self.name, [])]
 
 
 class ModelFileArg(Arg):

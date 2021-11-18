@@ -20,8 +20,9 @@ public:
                        const std::string& deviceName);
     void estimate(const cv::Mat& image,
                   FaceInferenceResults& outputResults) override;
-    void printPerformanceCounts() const override;
     ~LandmarksEstimator() override;
+
+    const std::string modelType = "Facial Landmarks Estimation";
 
 private:
     IEWrapper ieWrapper;

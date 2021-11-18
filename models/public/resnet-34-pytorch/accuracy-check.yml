@@ -30,6 +30,15 @@ models:
           - type: normalization
             mean: (0.485, 0.456, 0.406)
             std: (0.229, 0.224, 0.225)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.733
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9142
 
   - name: resnet-34-pytorch
 
@@ -51,3 +60,12 @@ models:
             size: 224
             use_pillow: True
           - type: rgb_to_bgr
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.733
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9142

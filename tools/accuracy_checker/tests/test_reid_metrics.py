@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
-from accuracy_checker.metrics.reid import eval_cmc
+from openvino.tools.accuracy_checker.metrics.reid import eval_cmc
 
 
 class TestCMC:

@@ -28,11 +28,11 @@ task_type: detection
 files:
   - name: mobilenet-ssd.prototxt
     size: 29353
-    sha256: e781559c4f5beaec2a486ccd952af5b6fa408e9498761bf5f4fb80b4e9f0d25e
+    sha384: 71b465ac516f06b713807b850febe933547b741be15b3382723e7d4503a4d135ce8b13376d66b3bb1e4793cdd3338742
     source: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/ba00fc987b3eb0ba87bb99e89bf0298a2fd10765/MobileNetSSD_deploy.prototxt
   - name: mobilenet-ssd.caffemodel
     size: 23147564
-    sha256: 761c86fbae3d8361dd454f7c740a964f62975ed32f4324b8b85994edec30f6af
+    sha384: 21726b46b567b1d81241d8378305cf32185e03e0fc71c36ca85ccf34ad76f0ec7688494172a9e39139cd04fde50643af
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/mobilenet-ssd/MobileNetSSD_deploy.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,300,300]

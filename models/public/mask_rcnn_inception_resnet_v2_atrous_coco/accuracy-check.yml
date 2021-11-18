@@ -17,4 +17,6 @@ models:
 
         metrics:
           - type: coco_orig_segm_precision
+            reference: 0.3536
           - type: coco_orig_precision
+            reference: 0.3986

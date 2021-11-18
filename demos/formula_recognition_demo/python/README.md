@@ -1,6 +1,6 @@
 # Formula Recognition Python\* Demo
 
-![example](./demo_intro.gif)
+![example](./formula_recognition.gif)
 
 This demo shows how to run LaTeX formula recognition models. These models allow to get a LaTeX formula markup from the image.
 
@@ -64,6 +64,12 @@ Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
 `brew install texlive`
+
+If you face the `RuntimeError: dvipng is not installed` error, you need to install this library. For Linux, you can do it via
+`apt-get update && apt-get install dvipng`.
+You might also face the missing `standalone.cls` file problem, which could be fixed with the installation of `texlive-latex-extra` package. For Linux, it can be done using this command:
+`apt-get install texlive-latex-extra`.
+
 > Note: Other LaTeX systems should also work.
 
 ### Interactive mode
@@ -100,25 +106,25 @@ Navigation keys:
 The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
 This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 The demo has two preprocessing types: Crop and Pad to target shape and Resize and pad to target shape. Two preprocessing types are used for two different datasets as model trained with concrete font size, so if one wants to run the model on inputs with bigger font size (e.g. if input is photographed in 12Mpx, while model trained to imitate scans in ~3Mpx) they should first resize the input to make font size like in train set. Example of the target font size:
 ![font_size](./sample.png)
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst` file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst` file. This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -141,7 +147,7 @@ usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [-t CONF_THRESH] [-d DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
-                                   [--preprocessing_type {crop,resize}] [-pc]
+                                   [--preprocessing_type {crop,resize}]
                                    [--imgs_layer IMGS_LAYER]
                                    [--row_enc_out_layer ROW_ENC_OUT_LAYER]
                                    [--hidden_layer HIDDEN_LAYER]
@@ -190,7 +196,6 @@ Options:
                         Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
-  -pc, --perf_counts
   --imgs_layer IMGS_LAYER
                         Optional. Encoder input name for images. See README
                         for details.
@@ -263,4 +268,4 @@ The application outputs recognized formula into the console or into the file.
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

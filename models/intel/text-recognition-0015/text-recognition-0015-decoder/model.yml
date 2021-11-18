@@ -18,19 +18,19 @@ task_type: token_recognition
 files:
   - name: FP32/text-recognition-0015-decoder.xml
     size: 55509
-    sha256: 3374853a92a2557e45438985195ffbf8edf6e02504ddebeb5c200e220c471a1e
+    sha384: 20d747e5724c6286f8542c908b343b766c8605fa6448daeaaf791f582ceb496e07865d6a23bf44589bbecae1ec1dd662
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.xml
   - name: FP32/text-recognition-0015-decoder.bin
     size: 42516860
-    sha256: 74e5a8101eec7ae9931f9958948b0c0c6c9607f2566c0b06188cbd7e1874b5f5
+    sha384: be2fdb03cb98748790b1268512f2406c0d90fd603cd436f30434da2476e053c227282702fa51ccc684bb71caccf3f550
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.bin
   - name: FP16/text-recognition-0015-decoder.xml
     size: 55504
-    sha256: f79875212c0e6c7dcb38c8c732a5c169b586afc70fd06f6e8a917fd54fde8d88
+    sha384: 12e1ca286909963860795dcbbef3c8d37a3d91b5eccbc4d6119579c48441f9c656c7b39396ece3405f2a0e6ab396c693
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.xml
   - name: FP16/text-recognition-0015-decoder.bin
     size: 21258488
-    sha256: b9a8cc30a2f6e2dc086566cc7d4183789b893d3bc262a45755f4c0f5e4249db4
+    sha384: 4aff6e7905aab6f6f50daba44c58faceae6487595f84414e535dd11acad7930f0ffde60677bd5440e6815b73bd7037e3
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

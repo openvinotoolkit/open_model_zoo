@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from accuracy_checker.dependency import ClassProvider, get_opts
+from openvino.tools.accuracy_checker.dependency import ClassProvider, get_opts
 
 
 def test_get_opts_positional_and_kwargs():

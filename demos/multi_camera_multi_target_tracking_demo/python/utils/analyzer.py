@@ -221,6 +221,4 @@ def save_embeddings(scts, save_path, use_images=False, step=0):
                                  label_img=label_img_avg, global_step=step, tag='Average')
     summary_writer.add_embedding(embeddings_clust, metadata=metadata_clust,
                                  label_img=label_img_clust, global_step=step, tag='Clustered')
-    log.info('Embeddings have been saved successfully. To see the result use the following command: '
-             'tensorboard --logdir={}'.format(save_path))
     summary_writer.close()

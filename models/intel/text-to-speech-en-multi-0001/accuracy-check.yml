@@ -29,3 +29,6 @@ evaluations:
           metrics:
             - type: relative_l2_error
               presenter: print_vector
+              reference:
+                mean: 0.0002
+                std: 0.00011

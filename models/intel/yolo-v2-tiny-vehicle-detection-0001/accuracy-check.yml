@@ -30,6 +30,8 @@ models:
             integral: 11point
             ignore_difficult: false
             presenter: print_scalar
+            reference: 0.8864
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.9497

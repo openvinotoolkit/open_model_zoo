@@ -32,11 +32,11 @@ task_type: classification
 files:
   - name: repvgg.py
     size: 12745
-    sha256: a0ab4476f4fe6711e4f7cb394bd9e11879cc83bfa1cd6f1d190af53db6a9a464
+    sha384: 3d41d82d256eb4bb8b0216e177bcf84458cf4cb0dcd15809fee1e4c30d304bce7f3136caedc717e863c7e67b97c0d87d
     source: https://raw.githubusercontent.com/DingXiaoH/RepVGG/faba6fb5cbc27a3956e2e0522e27e065b824c757/repvgg.py
   - name: RepVGG-B3-200epochs-train.pth
     size: 492817293
-    sha256: ddb6ba07d090d7369486e7c90a2ebbd706af399cf40c619812fa52f6d91d928d
+    sha384: 647371bdfad380c1001d16c2dae0cd244974b11b2464933f7508c1ae3e82976eab2e0f940a5192a3a75db7363d0e8db4
     source:
       $type: google_drive
       id: 1wBpq5317iPKk3-qblBHnx35bY_WumAlU

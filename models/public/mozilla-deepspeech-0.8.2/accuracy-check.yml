@@ -57,3 +57,4 @@ models:
             step: 16
         metrics:
           - type: wer
+            reference: 0.0839

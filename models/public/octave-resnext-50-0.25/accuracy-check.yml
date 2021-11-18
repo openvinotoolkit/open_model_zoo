@@ -31,6 +31,15 @@ models:
             std: 59.88
 
             # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78772
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9418
 
   # DLSDK inference
   - name: octave-resnext-50-0.25
@@ -53,3 +62,12 @@ models:
             size: 224
 
             # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78772
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9418

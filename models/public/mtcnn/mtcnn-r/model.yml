@@ -32,11 +32,11 @@ task_type: detection
 files:
   - name: mtcnn-r.prototxt
     size: 3159
-    sha256: 077686e89e606354f425366afdb2018777d93c6450b50e2c12301f8a97f6bb47
+    sha384: c75ed855e1129678d3947455ebf78c4ffa8f8757dac72eda0987650bb7c447b3a8462d797b7916f45b847d9d37040d26
     source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.prototxt
   - name: mtcnn-r.caffemodel
     size: 407910
-    sha256: 39b20f7a57bb8176cc9466cea4dfd52da6a6f876de60c7ab222a309f2d0ca08c
+    sha384: 87b9a7262724688cb5825e2584b623110b1df2e44308abe5be1800cbcd7a37940e44547466cd016ce9141733b62fbd8f
     source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,24,24]

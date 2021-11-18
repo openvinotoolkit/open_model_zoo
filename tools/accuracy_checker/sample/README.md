@@ -21,12 +21,14 @@ tar xvf cifar-10-python.tar.gz -C sample
 ### 2. Evaluate sample topology
 
 Typically you need to write a configuration file describing evaluation process of your topology.
-There is already a config file for evaluating SampLeNet using OpenVINO framework, read it carefully. It runs Caffe model using Model Optimizer which requires installed Caffe. If you have not opportunity to use Caffe, please replace `caffe_model` and `caffe_weights` on
+There is already a config file for evaluating SampLeNet using the OpenVINO framework, so please read it carefully. It runs a Caffe model using Model Optimizer and requires that Caffe be installed. If you do not have Caffe installed, you can replace the `caffe_model` and `caffe_weights` keys with the following keys:
 
 ```yaml
 model: SampleNet.xml
 weights: SampleNet.bin
 ```
+
+Then run Accuracy Checker with the following command:
 
 ```bash
 accuracy_check -c sample/sample_config.yml -m data/test_models -s sample
@@ -36,11 +38,11 @@ Used options: `-c` path to evaluation config, `-m` directory where models are st
 
 If everything worked correctly, you should be able to get `75.02%` accuracy.
 
-Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, MXNet or OpenCV), or go directly to your topology!
+Now try edit config, to run SampLeNet on other device or framework (e.g., Caffe, MXNet or OpenCV), or go directly to your topology!
 
 ###  Additional useful resources
 
-* [config](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml) for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md).
-* [config](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/sample_blob_config.yml) for running SampleNet using compiled executable network blob.
+* config at `<omz_dir>/tools/accuracy_checker/sample/opencv_sample_config.yml` for running SampleNet via [OpenCV launcher](../openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md).
+* config at `<omz_dir>/tools/accuracy_checker/sample/sample_blob_config.yml` for running SampleNet using compiled executable network blob.
 
 >**NOTE**: Not all Inference Engine plugins support compiled network blob execution.

@@ -12,7 +12,7 @@ namespace gaze_estimation {
 EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
                                      const std::string& modelPath,
                                      const std::string& deviceName):
-                                     ieWrapper(ie, modelPath, deviceName) {
+                                     ieWrapper(ie, modelPath, modelType, deviceName) {
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
     outputBlobName = ieWrapper.expectSingleOutput();
@@ -87,10 +87,6 @@ void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& out
         // Landmarks collapsed and the eye takes no area on image, pretend it's closed
         outputResults.rightEyeState = false;
     }
-}
-
-void EyeStateEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
 }
 
 EyeStateEstimator::~EyeStateEstimator() {

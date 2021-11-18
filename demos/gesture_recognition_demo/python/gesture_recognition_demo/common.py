@@ -14,12 +14,14 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IECore  # pylint: disable=no-name-in-module
+import logging as log
+from openvino.inference_engine import IECore, get_version
 
 
 def load_ie_core(device, cpu_extension=None):
     """Loads IE Core"""
-
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if device == "CPU" and cpu_extension:
         ie.add_extension(cpu_extension, "CPU")
@@ -30,16 +32,18 @@ def load_ie_core(device, cpu_extension=None):
 class IEModel:  # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
+    def __init__(self, model_path, device, ie_core, num_requests, model_type, output_shape=None):
         """Constructor"""
         if model_path.endswith((".xml", ".bin")):
             model_path = model_path[:-4]
+        log.info('Reading {} model {}'.format(model_type, model_path + ".xml"))
         self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
         assert len(self.net.input_info) == 1, "One input is expected"
 
         self.exec_net = ie_core.load_network(network=self.net,
                                              device_name=device,
                                              num_requests=num_requests)
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path + ".xml", device))
 
         self.input_name = next(iter(self.net.input_info))
         if len(self.net.outputs) > 1:
@@ -65,8 +69,6 @@ class IEModel:  # pylint: disable=too-few-public-methods
             self.output_name = next(iter(self.net.outputs))
 
         self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
-        self.num_requests = num_requests
 
     def infer(self, data):
         """Runs model on the specified input"""

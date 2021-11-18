@@ -9,7 +9,7 @@ head from 1/16 scale feature map has nine clustered prior boxes.
 
 ## Example
 
-![](./assets/face-detection-retail-0001.png)
+![](./assets/face-detection-retail-0004.png)
 
 ## Specification
 

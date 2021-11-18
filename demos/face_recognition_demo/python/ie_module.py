@@ -14,25 +14,29 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 
 
 class Module:
-    def __init__(self, ie, model):
+    def __init__(self, ie, model, model_type):
         self.ie = ie
+        self.model_type = model_type
+        log.info('Reading {} model {}'.format(model_type, model))
         self.model = ie.read_network(model, model.with_suffix('.bin'))
+        self.model_path = model
         self.active_requests = 0
         self.clear()
 
     def deploy(self, device, plugin_config, max_requests=1):
         self.max_requests = max_requests
         self.exec_net = self.ie.load_network(self.model, device, config=plugin_config, num_requests=max_requests)
+        log.info('The {} model {} is loaded to {}'.format(self.model_type, self.model_path, device))
 
     def enqueue(self, input):
         self.clear()
 
         if self.max_requests <= self.active_requests:
-            logging.warning('Processing request rejected - too many requests')
+            log.warning('Processing request rejected - too many requests')
             return False
 
         self.exec_net.start_async(self.active_requests, input)
@@ -43,12 +47,10 @@ class Module:
         if self.active_requests <= 0:
             return
 
-        self.perf_stats = [None, ] * self.active_requests
         self.outputs = [None, ] * self.active_requests
         for i in range(self.active_requests):
             self.exec_net.requests[i].wait()
             self.outputs[i] = self.exec_net.requests[i].output_blobs
-            self.perf_stats[i] = self.exec_net.requests[i].get_perf_counts()
 
         self.active_requests = 0
 
@@ -56,11 +58,7 @@ class Module:
         self.wait()
         return self.outputs
 
-    def get_performance_stats(self):
-        return self.perf_stats
-
     def clear(self):
-        self.perf_stats = []
         self.outputs = []
 
     def infer(self, inputs):

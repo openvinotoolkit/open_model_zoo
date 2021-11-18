@@ -10,30 +10,31 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 On startup the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. Demo provides default mapping of classes to colors and optionally, allow to specify mapping of classes to colors from simple text file, with using `--colors` argument. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximize utilization of the device and overall processing performance.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
 * architecture_type = segmentation
   - deeplabv3
+  - drn-d-38
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
@@ -69,7 +70,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
-                        Optional. Default value is segmentation. Specify model's architecture type.
+                        Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -83,6 +84,7 @@ Common model options:
   -c COLORS, --colors COLORS
                         Optional. Path to a text file containing colors for
                         classes.
+  --labels LABELS       Optional. Labels mapping file.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -112,6 +114,10 @@ Input/output options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
   --only_masks          Optional. Display only masks. Could be switched by TAB key.
+
+Debug options:
+  -r, --raw_output_message
+                        Optional. Output inference results as mask histogram.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -154,4 +160,4 @@ You can use both of these metrics to measure application-level performance.
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

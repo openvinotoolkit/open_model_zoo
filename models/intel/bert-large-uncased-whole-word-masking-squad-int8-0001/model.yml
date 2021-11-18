@@ -20,19 +20,19 @@ task_type: question_answering
 files:
   - name: FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
     size: 2081295
-    sha256: 507243680a85395c8cbf3b72ee55733cbf2eccbbd6ac5d7c122580557bbe4358
+    sha384: cdda1c70ec061237fd4a53a959ea08f389346430f480b71c9ee17e59319d955c6e2f07d28eb380f6192b47d7eac5fea1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
   - name: FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
     size: 430404052
-    sha256: f726f4c5a89d5fa5f15491d8f9192039887fb5882a8007e49ce6673f5db7bdd2
+    sha384: c24c885b3f2dddb146f73169eb005c9072ebfa72e47bc2d3669ce417d0cae25c40780faa1e99bbb9869a8ea9a3f2690b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
   - name: FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
     size: 2079957
-    sha256: 9c81b84cee05260a17925dd75fe0a8536fe73347630f579501fc279ac4605beb
+    sha384: 25591b1d23dfe01f6767be951da1dd434e5ceb597d745e4a6c707e773a7c4cae70c7ee887848665b401e58d6864e33c8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
   - name: FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
     size: 366198058
-    sha256: 877bd072a0622fa64f6ab84d2ed93dc948ced1f14096045f9350af9cd1ed07e4
+    sha384: 584214fe1e4cad2540cb1015c2ebf4021b1262e7816f46622516b8968308cb5bb2e8a67de3684216c16f8bbf71257f4e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

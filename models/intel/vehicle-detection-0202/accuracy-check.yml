@@ -18,3 +18,4 @@ models:
         metrics:
           - type: coco_orig_precision
             include_boundaries: false
+            reference: 0.36

@@ -18,7 +18,7 @@
 import logging as log
 from pathlib import Path
 import sys
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
@@ -30,10 +30,13 @@ from image_retrieval_demo.visualizer import visualize
 from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
+from model_api.performance_metrics import PerformanceMetrics
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
 
 INPUT_SIZE = 224
 
@@ -107,23 +110,22 @@ def compute_metrics(positions):
 def time_elapsed(func, *args):
     """ Auxiliary function that helps measure elapsed time. """
 
-    start_time = time.perf_counter()
+    start_time = perf_counter()
     res = func(*args)
-    elapsed = time.perf_counter() - start_time
+    elapsed = perf_counter() - start_time
     return elapsed, res
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-
-    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
-                                   args.cpu_extension)
 
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
     frames = RoiDetectorOnVideo(cap)
+
+    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
+                                   args.cpu_extension)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
@@ -133,8 +135,10 @@ def main():
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
     video_writer = cv2.VideoWriter()
+    metrics = PerformanceMetrics()
 
     for image, view_frame in frames:
+        start_time = perf_counter()
         position = None
         sorted_indexes = []
 
@@ -165,6 +169,7 @@ def main():
                         img_retrieval.input_size, np.mean(compute_embeddings_times),
                         np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
+        metrics.update(start_time)
         if frames_processed == 0:
             if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                                      cap.fps(), (image.shape[1], image.shape[0])):
@@ -175,7 +180,10 @@ def main():
 
         if key == 27:
             break
-    print(presenter.reportMeans())
+
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
     if positions:
         compute_metrics(positions)

@@ -37,7 +37,7 @@ It is supposed that input is `BGR` in 0..255 range
 The output is a blob with the shape `1, 1000` in the format `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

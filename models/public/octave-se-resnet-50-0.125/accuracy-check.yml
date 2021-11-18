@@ -30,6 +30,15 @@ models:
             mean: (124,117,104)
             std: 59.88
             # Using accuracy metric, achieved result of public model - 78.2 / 93.9 (top 1 and top 5 respectively)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78706
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9409
 
   # DLSDK inference
   - name: octave-se-resnet-50-0.125
@@ -50,3 +59,12 @@ models:
           - type: crop
             size: 224
             # Using accuracy metric, achieved result of public model - 78.2 / 93.9 (top 1 and top 5 respectively)
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.78706
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9409

@@ -42,7 +42,6 @@ private:
     std::string inputDataBlobName;
     std::vector<std::string> outputDataBlobNames;
 
-    bool printPerfReport;
     std::string deviceName;
 
     InferenceEngine::Core ie;
@@ -78,7 +77,6 @@ public:
         std::size_t batchSize = 1;
         std::size_t maxRequests = 5;
         bool collectStats = false;
-        bool reportPerf = false;
         std::string modelPath;
         std::string cpuExtPath;
         std::string cldnnConfigPath;
@@ -108,6 +106,4 @@ public:
     };
 
     Stats getStats() const;
-
-    void printPerformanceCounts(std::string fullDeviceName);
 };

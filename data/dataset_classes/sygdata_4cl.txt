@@ -1,0 +1,4 @@
+motor
+truck
+bus
+car

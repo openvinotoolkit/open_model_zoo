@@ -22,9 +22,11 @@ models:
         metrics:
           - name: AP@masks
             type: coco_orig_segm_precision
+            reference: 0.28
 
           - name: AP@boxes
             type: coco_precision
+            reference: 0.3069
 
   - name: yolact-resnet50-fpn-pytorch
     launchers:
@@ -44,6 +46,8 @@ models:
         metrics:
           - name: AP@masks
             type: coco_orig_segm_precision
+            reference: 0.28
 
           - name: AP@boxes
             type: coco_precision
+            reference: 0.3069

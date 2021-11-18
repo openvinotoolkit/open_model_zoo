@@ -21,11 +21,11 @@ from typing import List
 
 import numpy as np
 
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.representation import (
     DetectionAnnotation, DetectionPrediction,
     SegmentationPrediction, SegmentationAnnotation,
     CoCoInstanceSegmentationAnnotation, CoCoInstanceSegmentationPrediction)
-from accuracy_checker.utils import get_path
+from openvino.tools.accuracy_checker.utils import get_path
 
 
 @contextmanager

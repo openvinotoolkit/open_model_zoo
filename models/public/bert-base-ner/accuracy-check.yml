@@ -23,5 +23,8 @@ models:
             - segment_ids
         metrics:
           - type: ner_accuracy
+            reference: 0.9915
           - type: ner_f_score
             presenter: print_vector
+            reference:
+              mean: 0.9445
