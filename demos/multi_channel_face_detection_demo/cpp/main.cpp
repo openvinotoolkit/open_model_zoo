@@ -35,6 +35,7 @@
 #include "threading.hpp"
 #include "graph.hpp"
 
+std::string duration_ms;
 namespace {
 
 /**
@@ -89,6 +90,14 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
     slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
+    if(FLAGS_d.find("AUTO") != std::string::npos && FLAGS_hint.empty())
+    {
+        slog::info << "\tHint:                      " << "tput" << slog::endl;
+        FLAGS_hint = "tput";
+    }
+    else
+        slog::info << "\tHint:                      " << FLAGS_hint << slog::endl;
+
     if (!FLAGS_l.empty()) {
         slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
     }
@@ -126,6 +135,7 @@ struct DisplayParams {
     cv::Size windowSize;
     cv::Size frameSize;
     size_t count;
+    std::string hint;
     cv::Point points[MAX_INPUTS];
 };
 
@@ -200,8 +210,15 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     drawStats();
 
     char str[256];
-    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
+    snprintf(str, sizeof(str), "Device: %s", FLAGS_d.c_str());
     cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    if (params.hint.empty()) {
+        snprintf(str, sizeof(str), "Load time: %s ms", duration_ms.c_str());
+        cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
+                    cv::Scalar(0, 255, 0), 2);
+    }
+    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
+    cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
     cv::imshow(params.name, windowImage);
 }
 
@@ -239,6 +256,13 @@ int main(int argc, char* argv[]) {
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
 
+        if (!FLAGS_hint.empty() && (FLAGS_hint == "throughput" ||  FLAGS_hint == "tput" || FLAGS_hint == "latency")) {
+            if (FLAGS_hint == "throughput" || FLAGS_hint == "tput")
+                graphParams.perf_hint = CONFIG_VALUE(THROUGHPUT);
+            else if (FLAGS_hint == "latency")
+                graphParams.perf_hint = CONFIG_VALUE(LATENCY);
+        }
+
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();
         if (4 != inputDims.size()) {
@@ -256,6 +280,7 @@ int main(int argc, char* argv[]) {
 
         VideoSources sources(vsParams);
         DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
+        params.hint = graphParams.perf_hint;
         sources.start();
 
         size_t currentFrame = 0;
@@ -325,6 +350,18 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
+            static float finalaverageFps = 0.0;
+            static float totalFps = 0.0;
+            static int count = 0;
+            count++;
+
+            if(averageFps != 0.0)
+            {
+                totalFps += static_cast<double>(1000.0f/averageFps);
+                finalaverageFps = totalFps / count;
+                slog::info << "\rAverage Throughput : " << finalaverageFps << " fps";
+            }
+
             displayNSources(result, averageFps, str, params, presenter);
             int key = cv::waitKey(1);
             presenter.handleKey(key);

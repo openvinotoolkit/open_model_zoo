@@ -33,6 +33,7 @@ static const char num_sampling_periods[] = "Optional. Number of sampling periods
 static const char show_statistics[] = "Optional. Enable statistics report";
 static const char real_input_fps[] = "Optional. Disable input frames caching, for maximum throughput pipeline";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char hint_message[] = "Optional. Enable throughput.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
@@ -52,3 +53,4 @@ DEFINE_uint32(n_sp, 10, num_sampling_periods);
 DEFINE_bool(show_stats, false, show_statistics);
 DEFINE_bool(real_input_fps, false, real_input_fps);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(hint, "", hint_message);
