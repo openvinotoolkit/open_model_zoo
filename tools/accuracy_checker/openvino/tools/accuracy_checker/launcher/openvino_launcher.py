@@ -102,7 +102,7 @@ class OpenVINOLauncher(Launcher):
                 self._model, self._weights = automatic_model_search(
                     self._model_name, self.get_value_from_config('model'),
                     self.get_value_from_config('weights'),
-                    self.get_value_from_config('_model_is_blob')
+                    self.get_value_from_config('_model_type')
                 )
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None

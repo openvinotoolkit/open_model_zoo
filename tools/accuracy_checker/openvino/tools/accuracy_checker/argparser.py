@@ -289,6 +289,11 @@ def add_openvino_specific_args(parser):
         required=False
     )
     openvino_specific_args.add_argument(
+        '--model_type',
+        help='model format for automatic search (e.g. blob, xml, onnx)',
+        required=False
+    )
+    openvino_specific_args.add_argument(
         '-C', '--converted_models',
         help='directory to store Model Optimizer converted models. Used for DLSDK launcher only',
         type=partial(get_path, is_directory=True),
