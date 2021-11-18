@@ -363,8 +363,12 @@ class ConfigReader:
                     for model_path in model_paths:
                         copy_launcher = copy.deepcopy(launcher)
                         copy_launcher['model'] = model_path
-                        if launcher['framework'] in ['dlsdk', 'g-api'] and 'model_is_blob' in arguments:
+                        if 'model_type' in arguments:
+                            copy_launcher['_model_type'] = arguments.model_type
+                        if launcher['framework'] in ['dlsdk', 'openvino', 'g-api'] and 'model_is_blob' in arguments:
                             copy_launcher['_model_is_blob'] = arguments.model_is_blob
+                            if arguments.model_is_blob:
+                                copy_launcher['_model_type'] = 'blob'
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
 
@@ -863,7 +867,7 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
         launcher_entry['_kaldi_log_file'] = kaldi_logs
 
-    if launcher_entry['framework'].lower() != 'dlsdk':
+    if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
 
     launcher_entry.update(update_launcher_entry)

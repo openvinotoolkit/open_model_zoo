@@ -19,7 +19,7 @@ from pathlib import Path
 import re
 import warnings
 import numpy as np
-from openvino.ie_api import Core, Tensor
+from openvino.ie_api import Core, AsyncInferQueue
 from openvino.pyopenvino import get_version
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
@@ -91,6 +91,7 @@ class OpenVINOLauncher(Launcher):
         self._partial_shapes = {}
         self.is_dynamic = False
         self.preprocessor = preprocessor
+        self.infer_request = None
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -143,6 +144,8 @@ class OpenVINOLauncher(Launcher):
         return None
 
     def predict(self, inputs, metadata=None, **kwargs):
+        if self.infer_request is None:
+            self.infer_request = self.exec_network.create_infer_request()
         if self._lstm_inputs:
             return self._predict_sequential(inputs, metadata)
 
@@ -152,7 +155,7 @@ class OpenVINOLauncher(Launcher):
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
 
-            outputs = self.exec_network.infer_new_request(inputs=infer_inputs)
+            outputs = self.infer_request.infer(inputs=infer_inputs)
             results.append({
                 out_node.get_node().friendly_name: out_res
                 for out_node, out_res in zip(self.exec_network.outputs, outputs)
@@ -250,9 +253,6 @@ class OpenVINOLauncher(Launcher):
     def num_requests(self, num_ireq: int):
         if num_ireq != self._num_requests:
             self._num_requests = num_ireq
-            self.load_network(self.network, log=False)
-            for _ in range(num_ireq):
-                self.exec_network.create_infer_request()
 
     @property
     def async_mode(self):
@@ -268,7 +268,9 @@ class OpenVINOLauncher(Launcher):
         self._async_mode = flag
 
     def get_async_requests(self):
-        return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
+        return [
+            AsyncInferRequestWrapper(ireq_id, self.exec_network.create_infer_request())
+            for ireq_id in range(self.num_requests)]
 
     def _reshape_input(self, shapes, make_dynamic=False):
         if hasattr(self, 'exec_network'):
@@ -286,7 +288,7 @@ class OpenVINOLauncher(Launcher):
         if not has_info:
             ie_input_info = self.network.inputs
         else:
-            ie_input_info = dict([(name, data.input_data) for name, data in self.network.input_info.items()])
+            ie_input_info = {name: data.input_data for name, data in self.network.input_info.items()}
         const_inputs_shapes = {
             input_name: ie_input_info[input_name].shape for input_name in self.const_inputs
         }
@@ -319,7 +321,7 @@ class OpenVINOLauncher(Launcher):
         #data = data.astype(PRECISION_TO_DTYPE[precision])
         if data_layout is not None:
             data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
-        input_layout = [0, 2, 3, 1] #self.inputs[input_blob].layout
+        #input_layout = [0, 2, 3, 1] #self.inputs[input_blob].layout
         return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
@@ -466,9 +468,7 @@ class OpenVINOLauncher(Launcher):
             self.original_outputs = list(self.exec_network.outputs.keys())
             has_info = hasattr(self.exec_network, 'input_info')
             if has_info:
-                ie_input_info = dict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
+                ie_input_info = {name: data.input_data for name, data in self.exec_network.input_info.items()}
             else:
                 ie_input_info = self.exec_network.inputs
             first_input = next(iter(ie_input_info))
@@ -523,8 +523,6 @@ class OpenVINOLauncher(Launcher):
                 self.exec_network = self.ie_core.compile_model(
                     self.network, self._device
                 )
-                for _ in range(self.num_requests):
-                    self.exec_network.create_infer_request()
 
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
@@ -538,8 +536,6 @@ class OpenVINOLauncher(Launcher):
             self.exec_network = self.ie_core.compile_model(
                 self.network, self._device
             )
-            for _ in self.num_requests:
-                self.exec_network.create_infer_request()
 
     @staticmethod
     def get_dynamic_inputs(network):
@@ -812,12 +808,39 @@ class OpenVINOLauncher(Launcher):
     def get_model_file_type(self):
         return self._model.suffix
 
+    def get_infer_queue(self, log=True):
+        if self.config.get('num_requests', 'AUTO') == 'AUTO':
+            num_requests = 0
+        else:
+            num_requests = self.num_requests
+        queue = AsyncInferQueue(self.exec_network, num_requests)
+        if log:
+            print_info('Prepared async infer queue with {} requests'.format(len(queue)))
+        return queue
+
+    def prepare_data_for_request(self,
+                                 inputs, batch_meta, batch_id, batch_input_ids,
+                                 batch_annotation, batch_identifiers):
+        infer_inputs = inputs[0]
+        if batch_meta is not None:
+            self._fill_meta(batch_meta)
+        context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
+        return infer_inputs, context
+
+    def get_result_from_request(self, request):
+        return [{
+            out.get_node().friendly_name: tensor.data for out, tensor
+            in zip(self.exec_network.outputs, request.output_tensors)}
+        ]
+
     def input_shape(self, input_name):
         return parse_partial_shape(self.inputs[input_name].get_partial_shape())
 
     def release(self):
         if 'network' in self.__dict__:
             del self.network
+        if 'infer_request' in self.__dict__:
+            del self.infer_request
         if 'exec_network' in self.__dict__:
             del self.exec_network
         if 'ie_core' in self.__dict__:

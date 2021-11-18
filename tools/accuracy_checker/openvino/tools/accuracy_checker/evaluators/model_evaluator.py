@@ -249,12 +249,6 @@ class ModelEvaluator(BaseEvaluator):
         return filled_inputs, batch_meta, inputs_template
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
-        def completion_callback(status_code, request_id):
-            if status_code:
-                warning('Request {} failed with status code {}'.format(request_id, status_code))
-            queued_irs.remove(request_id)
-            ready_irs.append(request_id)
-
         def prepare_dataset(store_only_mode):
             if self.dataset is None:
                 raise ConfigError('dataset entry is not assigned for execution')
@@ -278,9 +272,35 @@ class ModelEvaluator(BaseEvaluator):
 
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
+        dataset_iterator = iter(enumerate(self.dataset))
+        if hasattr(self.launcher, 'get_infer_queue'):
+            self.process_dataset_async_infer_queue(
+                dataset_iterator, metric_config, progress_reporter, stored_predictions,
+                **kwargs
+            )
+        else:
+            self.process_dataset_async_requests(
+                dataset_iterator, metric_config, progress_reporter, stored_predictions,
+                **kwargs
+            )
+
+    def process_dataset_async_requests(
+        self, dataset_iterator, metric_config, progress_reporter, stored_predictions, **kwargs):
+        if self.launcher.config['framework'] == 'openvino':
+            def completion_callback(request_id):
+                queued_irs.remove(request_id)
+                ready_irs.append(request_id)
+        else:
+            def completion_callback(status_code, request_id):
+                if status_code:
+                    warning('Request {} failed with status code {}'.format(request_id, status_code))
+                queued_irs.remove(request_id)
+                ready_irs.append(request_id)
+
         (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
-        dataset_iterator = iter(enumerate(self.dataset))
+        store_only = kwargs.get('store_only', False)
+        output_callback = kwargs.get('output_callback')
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
         queued_irs, ready_irs = [], []
@@ -317,6 +337,49 @@ class ModelEvaluator(BaseEvaluator):
                             self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
                                                       metric_interval)
 
+        if progress_reporter:
+            progress_reporter.finish()
+
+        if stored_predictions:
+            print_info("prediction objects are save to {}".format(stored_predictions))
+
+    def process_dataset_async_infer_queue(
+        self, dataset_iterator, metric_config, progress_reporter, stored_predictions, **kwargs):
+
+        def completion_callback(request, user_data):
+            batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta = user_data
+            batch_raw_predictions = self.launcher.get_result_from_request(request)
+            if stored_predictions:
+                self.prepare_prediction_to_store(
+                    batch_raw_predictions, batch_identifiers, batch_meta, stored_predictions
+                )
+            if not store_only:
+                self._process_batch_results(
+                    batch_raw_predictions, batch_annotation, batch_identifiers,
+                    batch_input_ids, batch_meta, False, output_callback)
+
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_identifiers))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting,
+                        ignore_metric_reference=ignore_metric_reference
+                    )
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
+                                              metric_interval)
+
+        (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
+        store_only = kwargs.get('store_only', False)
+        output_callback = kwargs.get('output_callback')
+        infer_queue = self.launcher.get_infer_queue()
+        infer_queue.set_callback(completion_callback)
+        for batch_id, dataset_item in dataset_iterator:
+            batch_input_ids, batch_annotation, batch_input, batch_identifiers = dataset_item
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
+            infer_queue.start_async(*self.launcher.prepare_data_for_request(
+                filled_inputs, batch_meta, batch_id, batch_input_ids, batch_annotation, batch_identifiers))
+        infer_queue.wait_all()
         if progress_reporter:
             progress_reporter.finish()
 
