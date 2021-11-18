@@ -13,7 +13,6 @@
 
 from collections import namedtuple
 import numpy as np
-import ngraph
 
 from .detection_model import DetectionModel
 from .utils import Detection, clip_detections, nms, resize_image, INTERPOLATION_TYPES
@@ -72,37 +71,41 @@ class YOLO(DetectionModel):
 
                 self.use_input_size = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
+    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'fit_to_window_letterbox'
-        super().__init__(ie, model_path, resize_type,
+        super().__init__(model_adapter, resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
+        self.is_tiny = len(self.outputs) == 2  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
         self._check_io_number(1, -1)
 
-        if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
-            self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+        if self.inputs[self.image_blob_name].shape[1] == 3:
+            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
             self.image_layout = 'NCHW'
         else:
-            self.n, self.h, self.w, self.c = self.net.input_info[self.image_blob_name].input_data.shape
+            self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
             self.image_layout = 'NHWС'
 
         self.yolo_layer_params = self._get_output_info()
 
     def _get_output_info(self):
-        def get_parent(node):
-            return node.inputs()[0].get_source_output().get_node()
-        ng_func = ngraph.function_from_cnn(self.net)
         output_info = {}
-        for node in ng_func.get_ordered_ops():
-            layer_name = node.get_friendly_name()
-            if layer_name not in self.net.outputs:
-                continue
-            shape = list(get_parent(node).shape)
-            yolo_params = self.Params(node._get_attributes(), shape[2:4])
-            output_info[layer_name] = (shape, yolo_params)
+        for name, info in self.outputs.items():
+            shape = info.shape
+            if len(shape) == 2:
+                # we use 32x32 cell as default, cause 1D tensor is V2 specific
+                cx = self.w // 32
+                cy = self.h // 32
+
+                bboxes = shape[1] // (cx*cy)
+                print(cx, cy, bboxes, self.w)
+                if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
+                    raise RuntimeError('The Yolo wrapper cannot reshape 2D output')
+                shape = (shape[0], bboxes, cy, cx)
+            params = self.Params(info.meta, shape[2:4])
+            output_info[name] = (shape, params)
         return output_info
 
     def postprocess(self, outputs, meta):
@@ -229,12 +232,12 @@ class YoloV4(YOLO):
             self.anchors = masked_anchors
             self.use_input_size = True
 
-    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox',
+    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
         self.anchors = anchors
         self.masks = masks
-        super().__init__(ie, model_path, resize_type,
+        super().__init__(model_adapter, resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):
@@ -243,7 +246,7 @@ class YoloV4(YOLO):
         if not self.masks:
             self.masks = [1, 2, 3, 3, 4, 5] if self.is_tiny else [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
-        outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
+        outputs = sorted(self.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
 
         output_info = {}
         num = 3
@@ -283,9 +286,9 @@ class YOLOF(YOLO):
             self.anchors = anchors
             self.use_input_size = True
 
-    def __init__(self, ie, model_path, resize_type='standard',
+    def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, resize_type,
+        super().__init__(model_adapter, resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):
@@ -293,7 +296,7 @@ class YOLOF(YOLO):
 
         output_info = {}
         num = 6
-        for i, (name, layer) in enumerate(self.net.outputs.items()):
+        for i, (name, layer) in enumerate(self.outputs.items()):
             shape = layer.shape
             classes = shape[1] // num - 4
             yolo_params = self.Params(classes, num, shape[2:4], anchors)
@@ -317,11 +320,11 @@ class YOLOF(YOLO):
 
 
 class YOLOX(DetectionModel):
-    def __init__(self, ie, model_path, labels=None, threshold=0.5, iou_threshold=0.65):
-        super().__init__(ie, model_path, labels=labels,
+    def __init__(self, model_adapter, labels=None, threshold=0.5, iou_threshold=0.65):
+        super().__init__(model_adapter, labels=labels,
                          threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, 1)
-        self.output_blob_name = next(iter(self.net.outputs))
+        self.output_blob_name = next(iter(self.outputs))
 
         self.expanded_strides = []
         self.grids = []
@@ -395,10 +398,10 @@ class YOLOX(DetectionModel):
 
 
 class YoloV3ONNX(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='fit_to_window_letterbox', labels=None, threshold=0.5):
+    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox', labels=None, threshold=0.5):
         if not resize_type:
             resize_type = 'fit_to_window_letterbox'
-        super().__init__(ie, model_path, resize_type, labels=labels, threshold=threshold)
+        super().__init__(model_adapter, resize_type, labels=labels, threshold=threshold)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self._check_io_number(2, 3)
         self.classes = 80
@@ -408,7 +411,7 @@ class YoloV3ONNX(DetectionModel):
         bboxes_blob_name = None
         scores_blob_name = None
         indices_blob_name = None
-        for name, layer in self.net.outputs.items():
+        for name, layer in self.outputs.items():
             if layer.shape[-1] == 3:
                 indices_blob_name = name
             elif layer.shape[2] == 4:
@@ -417,10 +420,10 @@ class YoloV3ONNX(DetectionModel):
                 scores_blob_name = name
             else:
                 raise RuntimeError("Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
-                                   .format(self.classes, *[output.shape for output in self.net.outputs.values()]))
-        if self.net.outputs[bboxes_blob_name].shape[1] != self.net.outputs[scores_blob_name].shape[2]:
+                                   .format(self.classes, *[output.shape for output in self.outputs.values()]))
+        if self.outputs[bboxes_blob_name].shape[1] != self.outputs[scores_blob_name].shape[2]:
             raise RuntimeError("Expected the same dimension for boxes and scores, but got {} and {}".format(
-                self.net.outputs[bboxes_blob_name].shape[1], self.net.outputs[scores_blob_name].shape[2]))
+                self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
         return bboxes_blob_name, scores_blob_name, indices_blob_name
 
     def preprocess(self, inputs):

@@ -17,16 +17,16 @@ from .model import Model
 
 
 class Bert(Model):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path)
+    def __init__(self, model_adapter, vocab, input_names):
+        super().__init__(model_adapter)
         self.token_cls = [vocab['[CLS]']]
         self.token_sep = [vocab['[SEP]']]
         self.token_pad = [vocab['[PAD]']]
         self.input_names = [i.strip() for i in input_names.split(',')]
-        if self.net.input_info.keys() != set(self.input_names):
+        if self.inputs.keys() != set(self.input_names):
             raise RuntimeError('The Bert model expects input names: {}, actual network input names: {}'.format(
-                self.input_names, list(self.net.input_info.keys())))
-        self.max_length = self.net.input_info[self.input_names[0]].input_data.shape[1]
+                self.input_names, list(self.inputs.keys())))
+        self.max_length = self.inputs[self.input_names[0]].shape[1]
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
@@ -62,19 +62,19 @@ class Bert(Model):
 
     def reshape(self, new_length):
         new_shapes = {}
-        for input_name, input_info in self.net.input_info.items():
+        for input_name, input_info in self.inputs.items():
             new_shapes[input_name] = [1, new_length]
-        default_input_shape = input_info.input_data.shape
-        self.net.reshape(new_shapes)
+        default_input_shape = input_info.shape
+        super().reshape(new_shapes)
         self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
         self.max_length = new_length
 
 
 class BertNamedEntityRecognition(Bert):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab, input_names)
+    def __init__(self, model_adapter, vocab, input_names):
+        super().__init__(model_adapter, vocab, input_names)
 
-        self.output_names = list(self.net.outputs)
+        self.output_names = list(self.outputs)
         if len(self.output_names) != 1:
             raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only 1 output")
 
@@ -99,10 +99,10 @@ class BertNamedEntityRecognition(Bert):
 
 
 class BertEmbedding(Bert):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab, input_names)
+    def __init__(self, model_adapter, vocab, input_names):
+        super().__init__(model_adapter, vocab, input_names)
 
-        self.output_names = list(self.net.outputs)
+        self.output_names = list(self.outputs)
         if len(self.output_names) != 1:
             raise RuntimeError("The BertEmbedding model wrapper supports only 1 output")
 
@@ -119,16 +119,16 @@ class BertEmbedding(Bert):
 
 
 class BertQuestionAnswering(Bert):
-    def __init__(self, ie, model_path, vocab, input_names, output_names,
+    def __init__(self, model_adapter, vocab, input_names, output_names,
                  max_answer_token_num, squad_ver):
-        super().__init__(ie, model_path, vocab, input_names)
+        super().__init__(model_adapter, vocab, input_names)
 
         self.max_answer_token_num = max_answer_token_num
         self.squad_ver = squad_ver
         self.output_names = [o.strip() for o in output_names.split(',')]
-        if self.net.outputs.keys() != set(self.output_names):
+        if self.outputs.keys() != set(self.output_names):
             raise RuntimeError('The BertQuestionAnswering model output names: {}, actual network output names: {}'.format(
-                self.output_names, list(self.net.outputs.keys())))
+                self.output_names, list(self.outputs.keys())))
 
     def form_request(self, inputs):
         c_data, q_tokens_id = inputs

@@ -22,8 +22,8 @@ from .utils import Detection, nms, clip_detections
 
 
 class CTPN(DetectionModel):
-    def __init__(self, ie, model_path, input_size, threshold=0.9, iou_threshold=0.5):
-        super().__init__(ie, model_path, labels=['Text'],
+    def __init__(self, model_adapter, input_size, threshold=0.9, iou_threshold=0.5):
+        super().__init__(model_adapter, labels=['Text'],
                          threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
@@ -50,13 +50,13 @@ class CTPN(DetectionModel):
 
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        default_input_shape = self.inputs[self.image_blob_name].shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
-        self.net.reshape(input_shape)
+        self.reshape(input_shape)
 
     def _get_outputs(self):
-        (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.net.outputs.items()
+        (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.outputs.items()
 
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
             raise RuntimeError("Unexpected output blob shape. Only 4D output blobs are supported")

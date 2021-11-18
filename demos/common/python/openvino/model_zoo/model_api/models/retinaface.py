@@ -24,24 +24,22 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
 class RetinaFace(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
+    def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
+        super().__init__(model_adapter, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, (6, 9, 12))
 
-        self.detect_masks = len(self.net.outputs) == 12
-        self.process_landmarks = len(self.net.outputs) > 6
+        self.detect_masks = len(self.outputs) == 12
+        self.process_landmarks = len(self.outputs) > 6
         self.mask_threshold = 0.5
         self.postprocessor = RetinaFacePostprocessor(detect_attributes=self.detect_masks,
                                                      process_landmarks=self.process_landmarks)
 
         self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
 
-        self._output_layer_names = self.net.outputs
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
@@ -52,21 +50,18 @@ class RetinaFace(DetectionModel):
 
 
 class RetinaFacePyTorch(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
+    def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'standard'
-        super().__init__(ie, model_path,  resize_type=resize_type,
+        super().__init__(model_adapter, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, (2, 3))
 
-        self.process_landmarks = len(self.net.outputs) == 3
+        self.process_landmarks = len(self.outputs) == 3
         self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
 
         self.labels = ['Face']
-
-        self._output_layer_names = self.net.outputs
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]

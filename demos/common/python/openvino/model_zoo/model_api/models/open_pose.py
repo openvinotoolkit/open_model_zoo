@@ -23,18 +23,17 @@ except ImportError:
     from numpy import clip
 from openvino.inference_engine import IENetwork
 
-from .model import Model
+from .image_model import ImageModel
 
 
-class OpenPose(Model):
-    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, size_divisor=8, upsample_ratio=1):
-        super().__init__(ie, model_path)
-        self.image_blob_name = self._get_inputs(self.net)
+class OpenPose(ImageModel):
+    def __init__(self, model_adapter, target_size, aspect_ratio, prob_threshold, size_divisor=8, upsample_ratio=1):
+        super().__init__(model_adapter)
         self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
         self.heatmaps_blob_name = 'heatmaps'
         self.pafs_blob_name = 'pafs'
 
-        function = ng.function_from_cnn(self.net)
+        function = ng.function_from_cnn(self.model_adapter.net)
         paf = function.get_output_op(0)
         paf_shape = paf.outputs()[0].get_shape()
         heatmap = function.get_output_op(1)
@@ -65,36 +64,26 @@ class OpenPose(Model):
              ng.result(pooled_heatmap, name=self.pooled_heatmaps_blob_name),
              ng.result(paf, name=self.pafs_blob_name)],
             function.get_parameters(), 'hpe')
-        self.net = IENetwork(ng.impl.Function.to_capsule(f))
 
-        self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-2] / self.net.outputs[self.heatmaps_blob_name].shape[-2]
+        self.model_adapter.net = IENetwork(ng.impl.Function.to_capsule(f))
+        self.inputs = self.model_adapter.get_input_layers()
+        self.outputs = self.model_adapter.get_output_layers()
+
+        self.output_scale = self.inputs[self.image_blob_name].shape[-2] / self.outputs[self.heatmaps_blob_name].shape[-2]
 
         if target_size is None:
-            target_size = self.net.input_info[self.image_blob_name].input_data.shape[-2]
+            target_size = self.inputs[self.image_blob_name].shape[-2]
         self.h = (target_size + size_divisor - 1) // size_divisor * size_divisor
         input_width = round(target_size * aspect_ratio)
         self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
-        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        default_input_shape = self.inputs[self.image_blob_name].shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
-        self.net.reshape(input_shape)
+        super().reshape(input_shape)
 
-        num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
+        num_joints = self.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
         self.decoder = OpenPoseDecoder(num_joints, score_threshold=prob_threshold)
         self.size_divisor = size_divisor
-
-    @staticmethod
-    def _get_inputs(net):
-        image_blob_name = None
-        for blob_name, blob in net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_name = blob_name
-            else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
-                                   .format(len(blob.shape), blob_name))
-        if image_blob_name is None:
-            raise RuntimeError('Failed to identify the input for the image.')
-        return image_blob_name
 
     @staticmethod
     def heatmap_nms(heatmaps, pooled_heatmaps):

@@ -25,18 +25,18 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -46,12 +46,14 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+                      required=True)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'yolov3-onnx', 'yolov4', 'yolof', 'yolox',
                                                         'faceboxes', 'centernet', 'ctpn',
                                                         'retinaface', 'ultra_lightweight_face_detection',
                                                         'retinaface-pytorch', 'detr'))
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -163,39 +165,39 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(ie, args):
+def get_model(model_adapter, args):
     if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        return models.SSD(model_adapter, labels=args.labels, resize_type=args.resize_type,
                           threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
-        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
+        return models.CTPN(model_adapter, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
-        return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        return models.YOLO(model_adapter, labels=args.labels, resize_type=args.resize_type,
                            threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov3-onnx':
-        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        return models.YoloV3ONNX(model_adapter, labels=args.labels, resize_type=args.resize_type,
                                  threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
-        return models.YoloV4(ie, args.model, labels=args.labels,
+        return models.YoloV4(model_adapter, labels=args.labels,
                              threshold=args.prob_threshold, resize_type=args.resize_type,
                              anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'yolof':
-        return models.YOLOF(ie, args.model, labels=args.labels, resize_type=args.resize_type,
+        return models.YOLOF(model_adapter, labels=args.labels, resize_type=args.resize_type,
                             threshold=args.prob_threshold)
     elif args.architecture_type == 'yolox':
-        return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.YOLOX(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
+        return models.FaceBoxes(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface':
-        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFace(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
+        return models.UltraLightweightFaceDetection(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFacePyTorch(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'detr':
-        return models.DETR(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.DETR(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
@@ -238,22 +240,20 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Reading model {}'.format(args.model))
-    model = get_model(ie, args)
+    model = get_model(model_adapter, args)
     model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
-    log_blobs_info(model)
+    model.log_layers_info()
 
-    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
-                                      device=args.device, max_num_requests=args.num_infer_requests)
-
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(detector_pipeline.exec_net, set(parse_devices(args.device)))
+    detector_pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0

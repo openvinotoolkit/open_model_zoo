@@ -23,17 +23,16 @@ from pathlib import Path
 from time import perf_counter
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
-from helpers import log_runtime_settings
 
 from model_api.models import BertEmbedding, BertQuestionAnswering
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -169,14 +168,12 @@ def main():
     visualizer = Visualizer(args.colors)
     total_latency = (perf_counter() - vocab_start_time) * 1e3
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
+    ie = create_core()
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Reading Bert Embedding model {}'.format(args.model_emb))
-    model_emb = BertEmbedding(ie, args.model_emb, vocab, args.input_names_emb)
+    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    model_emb = BertEmbedding(model_emb_adapter, vocab, args.input_names_emb)
+    model_emb.log_layers_info()
 
     # reshape BertEmbedding model to infer short questions and long contexts
     max_len_context = 384
@@ -185,21 +182,17 @@ def main():
     for new_length in [max_len_question, max_len_context]:
         model_emb.reshape(new_length)
         if new_length == max_len_question:
-            emb_exec_net = ie.load_network(model_emb.net, args.device)
+            emb_exec_net = ie.load_network(model_emb_adapter.net, args.device)
         else:
-            emb_pipeline = AsyncPipeline(
-                ie, model_emb, plugin_config, device=args.device, max_num_requests=args.num_infer_requests
-            )
-    log.info('The Bert Embedding model {} is loaded to {}'.format(args.model_emb, args.device))
-    log_runtime_settings(emb_pipeline.exec_net, set(parse_devices(args.device)))
+            emb_pipeline = AsyncPipeline(model_emb)
 
     if args.model_qa:
-        log.info('Reading Question Answering model {}'.format(args.model_qa))
-        model_qa = BertQuestionAnswering(ie, args.model_qa, vocab, args.input_names_qa, args.output_names_qa,
+        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config,
+                                           max_num_requests=args.num_infer_requests)
+        model_qa = BertQuestionAnswering(model_qa_adapter, vocab, args.input_names_qa, args.output_names_qa,
                                          args.max_answer_token_num, args.model_qa_squad_ver)
-        qa_pipeline = AsyncPipeline(ie, model_qa, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
-        log_runtime_settings(qa_pipeline.exec_net, set(parse_devices(args.device)))
-        log.info('The Question Answering model {} is loaded to {}'.format(args.model_qa, args.device))
+        model_qa.log_layers_info()
+        qa_pipeline = AsyncPipeline(model_qa)
 
     log.info("\t\tStage 1    (Calc embeddings for the context)")
     contexts_all = []

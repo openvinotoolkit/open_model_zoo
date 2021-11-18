@@ -23,18 +23,18 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -113,9 +113,11 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+                      required=True)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -164,11 +166,11 @@ def build_argparser():
     return parser
 
 
-def get_model(ie, args):
+def get_model(adapter, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(ie, args.model, labels=args.labels), SegmentationVisualizer(args.colors)
+        return SegmentationModel(adapter, labels=args.labels), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
+        return SalientObjectDetectionModel(adapter, labels=args.labels), SaliencyMapVisualizer()
 
 
 def print_raw_results(mask, frame_id, labels=None):
@@ -188,20 +190,19 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    model, visualizer = get_model(model_adapter, args)
+    model.log_layers_info()
 
-    model, visualizer = get_model(ie, args)
-    log.info('Reading model {}'.format(args.model))
-    log_blobs_info(model)
-
-    pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
-
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0

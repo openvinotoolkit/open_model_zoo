@@ -23,18 +23,18 @@ from time import perf_counter
 import cv2
 import numpy as np
 import logging as log
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.models import MonoDepthModel, OutputTransform
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.performance_metrics import PerformanceMetrics
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings
+from helpers import resolution
 
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -52,6 +52,8 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
@@ -98,19 +100,19 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    model = MonoDepthModel(model_adapter)
+    model.log_layers_info()
 
-    log.info('Reading model {}'.format(args.model))
-    model = MonoDepthModel(ie, args.model)
-    log_blobs_info(model)
-
-    pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
-
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0

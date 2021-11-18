@@ -20,14 +20,14 @@ from .utils import Detection
 
 
 class SSD(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
+    def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
+        super().__init__(model_adapter, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
-        self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
+        self.output_parser = self._get_output_parser(self.image_blob_name)
 
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)
@@ -40,23 +40,23 @@ class SSD(DetectionModel):
         detections = self._resize_detections(detections, meta)
         return detections
 
-    def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
+    def _get_output_parser(self, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
-            parser = SingleOutputParser(net.outputs)
+            parser = SingleOutputParser(self.outputs)
             self.logger.debug('\tUsing SSD model with single output parser')
             return parser
         except ValueError:
             pass
 
         try:
-            parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
+            parser = MultipleOutputParser(self.outputs, bboxes, scores, labels)
             self.logger.debug('\tUsing SSD model with multiple output parser')
             return parser
         except ValueError:
             pass
 
         try:
-            parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
+            parser = BoxesLabelsParser(self.outputs, self.inputs[image_blob_name].shape[2:][::-1])
             self.logger.debug('\tUsing SSD model with "boxes-labels" output parser')
             return parser
         except ValueError:
@@ -87,7 +87,7 @@ class SingleOutputParser:
         if len(all_outputs) != 1:
             raise ValueError('Network must have only one output.')
         self.output_name, output_data = next(iter(all_outputs.items()))
-        last_dim = np.shape(output_data)[-1]
+        last_dim = output_data.shape[-1]
         if last_dim != 7:
             raise ValueError('The last dimension of the output blob must be equal to 7, '
                              'got {} instead.'.format(last_dim))
@@ -123,7 +123,7 @@ class BoxesLabelsParser:
 
     @staticmethod
     def find_layer_bboxes_output(layers):
-        filter_outputs = [name for name, data in layers.items() if len(np.shape(data)) == 2 and np.shape(data)[-1] == 5]
+        filter_outputs = [name for name, data in layers.items() if len(data.shape) == 2 and data.shape[-1] == 5]
         if not filter_outputs:
             raise ValueError('Suitable output with bounding boxes is not found')
         if len(filter_outputs) > 1:

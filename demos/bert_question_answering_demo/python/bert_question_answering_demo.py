@@ -23,17 +23,16 @@ from pathlib import Path
 from time import perf_counter
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
-from helpers import log_runtime_settings
 
 from model_api.models import BertQuestionAnswering
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -49,6 +48,8 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
@@ -162,14 +163,16 @@ def main():
     c_tokens = text_to_tokens(context.lower(), vocab)
     total_latency = (perf_counter() - preprocessing_start_time) * 1e3
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Reading model {}'.format(args.model))
-    model = BertQuestionAnswering(ie, args.model, vocab, args.input_names, args.output_names,
+    model = BertQuestionAnswering(model_adapter, vocab, args.input_names, args.output_names,
                                   args.max_answer_token_num, args.model_squad_ver)
     if args.reshape:
         # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
@@ -183,11 +186,9 @@ def main():
         else:
             log.debug("\tSkipping network reshaping,"
                       " as (context length + max question length) exceeds the current (input) network sequence length")
+    model.log_layers_info()
 
-    pipeline = AsyncPipeline(ie, model, plugin_config,
-                             device=args.device, max_num_requests=args.num_infer_requests)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model)
 
     if args.questions:
         def questions():

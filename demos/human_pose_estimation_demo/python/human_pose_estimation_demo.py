@@ -23,18 +23,18 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -101,15 +101,15 @@ def build_argparser():
     return parser
 
 
-def get_model(ie, args, aspect_ratio):
+def get_model(model_adapter, args, aspect_ratio):
     if args.architecture_type == 'ae':
-        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+        model = models.HpeAssociativeEmbedding(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
                                                prob_threshold=args.prob_threshold)
     elif args.architecture_type == 'higherhrnet':
-        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+        model = models.HpeAssociativeEmbedding(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
                                                prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
     elif args.architecture_type == 'openpose':
-        model = models.OpenPose(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+        model = models.OpenPose(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
                                 prob_threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
@@ -177,26 +177,19 @@ def main():
     render_metrics = PerformanceMetrics()
     video_writer = cv2.VideoWriter()
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                    max_num_requests=args.num_infer_requests)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Reading model {}'.format(args.model))
-    model = get_model(ie, args, frame.shape[1] / frame.shape[0])
-    log_blobs_info(model)
+    model = get_model(model_adapter, args, frame.shape[1] / frame.shape[0])
+    model.log_layers_info()
 
-    hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
-
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(hpe_pipeline.exec_net, set(parse_devices(args.device)))
-
+    hpe_pipeline = AsyncPipeline(model)
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 
     output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)

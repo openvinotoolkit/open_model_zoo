@@ -20,32 +20,30 @@ from .utils import Detection, nms
 
 
 class UltraLightweightFaceDetection(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
+    def __init__(self, model_adapter, resize_type='standard',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         if not resize_type:
             resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
+        super().__init__(model_adapter, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self._check_io_number(1, 2)
         self.labels = ['Face']
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        bboxes_blob_name = None
-        scores_blob_name = None
-        for name, layer in self.net.outputs.items():
-            if layer.shape[2] == 4:
-                bboxes_blob_name = name
-            elif layer.shape[2] == 2:
-                scores_blob_name = name
-            else:
-                raise RuntimeError("Expected shapes [:,:,4] and [:,:2] for outputs, but got {} and {}"
-                                   .format(*[output.shape for output in self.net.outputs]))
-        if self.net.outputs[bboxes_blob_name].shape[1] != self.net.outputs[scores_blob_name].shape[1]:
+        (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
+
+        if bboxes_layer.shape[1] != scores_layer.shape[1]:
             raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
-                               .format(self.net.outputs[bboxes_blob_name].shape,
-                                       self.net.outputs[scores_blob_name].shape))
-        return bboxes_blob_name, scores_blob_name
+                               .format(bboxes_layer.shape, scores_layer.shape))
+
+        if bboxes_layer.shape[2] == 4:
+            return bboxes_blob_name, scores_blob_name
+        elif scores_layer.shape[2] == 4:
+            return scores_blob_name, bboxes_blob_name
+        else:
+            raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
+                               .format(bboxes_layer.shape, scores_layer.shape))
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)

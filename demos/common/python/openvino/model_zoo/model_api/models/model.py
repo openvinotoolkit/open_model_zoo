@@ -24,21 +24,20 @@ class Model:
     The ``preprocess`` and ``postprocess`` method should be implemented in concrete class
 
     Attributes:
-        net(CNNNetwork): loaded network
+        model_adapter(ModelAdapter): allows working with the specified executor
         logger(Logger): instance of the logger
     '''
 
-    def __init__(self, ie, model_path):
+    def __init__(self, model_adapter):
         '''Abstract model constructor
 
         Args:
-            ie(openvino.core): instance of Inference Engine core, needs for model loading
-            model_path(str, Path): path to model's *.xml or *.onnx file
+            model_adapter(ModelAdapter): allows working with the specified executor
         '''
         self.logger = log.getLogger()
-        self.net = ie.read_network(model_path)
-        self.inputs = self.net.input_info
-        self.outputs = self.net.outputs
+        self.model_adapter = model_adapter
+        self.inputs = self.model_adapter.get_input_layers()
+        self.outputs = self.model_adapter.get_output_layers()
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -73,23 +72,62 @@ class Model:
         if not isinstance(number_of_inputs, tuple):
             if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
                 raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
-                    number_of_inputs, 's' if number_of_inputs !=1 else '', len(self.inputs), ', '.join(self.inputs)
+                    number_of_inputs, 's' if number_of_inputs !=1 else '',
+                    len(self.inputs), ', '.join(self.inputs)
                 ))
         else:
             if not len(self.inputs) in number_of_inputs:
                 raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
-                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]), len(self.inputs),
-                    ', '.join(self.inputs)
+                    ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
+                    len(self.inputs), ', '.join(self.inputs)
                 ))
 
         if not isinstance(number_of_outputs, tuple):
             if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
                 raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
-                    number_of_outputs, 's' if number_of_outputs !=1 else '', len(self.outputs), ', '.join(self.outputs)
+                    number_of_outputs, 's' if number_of_outputs !=1 else '',
+                    len(self.outputs), ', '.join(self.outputs)
                 ))
         else:
             if not len(self.outputs) in number_of_outputs:
                 raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
-                    ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]), len(self.outputs),
-                    ', '.join(self.outputs)
+                    ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
+                    len(self.outputs), ', '.join(self.outputs)
                 ))
+
+    def __call__(self, input_data):
+        '''
+        Applies the preprocessing, synchronous inference and postprocessing method of model wrapper
+        '''
+        dict_data, input_meta = self.preprocess(input_data)
+        raw_result = self.infer_sync(dict_data)
+        return self.postprocess(raw_result, input_meta)
+
+    def load(self):
+        self.model_adapter.load_model()
+
+    def reshape(self, new_shape):
+        self.model_adapter.reshape_model(new_shape)
+        self.inputs = self.model_adapter.get_input_layers()
+        self.outputs = self.model_adapter.get_output_layers()
+
+    def infer_sync(self, dict_data):
+        return self.model_adapter.infer_sync(dict_data)
+
+    def infer_async(self, dict_data, callback_fn, callback_data):
+        self.model_adapter.infer_async(dict_data, callback_fn, callback_data)
+
+    def is_ready(self):
+        return self.model_adapter.is_ready()
+
+    def await_all(self):
+        self.model_adapter.await_all()
+
+    def await_any(self):
+        self.model_adapter.await_any()
+
+    def log_layers_info(self):
+        for name, metadata in self.inputs.items():
+            log.info('\tInput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))
+        for name, metadata in self.outputs.items():
+            log.info('\tOutput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))
