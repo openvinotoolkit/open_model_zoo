@@ -64,8 +64,8 @@ class ImageModel(Model):
                 description='Normalization values, which will be subtracted from image channels for image-input layer during preprocessing'
             ),
             'scale_values': ListValue(
-                default_value=None, 
-                description='Normalization values, which will divide the image channels for image-input layer'       
+                default_value=None,
+                description='Normalization values, which will divide the image channels for image-input layer'
             ),
             'reverse_input_channels': BooleanValue(default_value=False, description='Reverse the channel order'),
             'resize_type': StringValue(

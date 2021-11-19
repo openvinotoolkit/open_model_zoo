@@ -138,7 +138,7 @@ class ListValue(BaseValue):
                 for i, element in enumerate(value):
                     if not isinstance(element, self.value_type):
                         errors.append(ConfigurableValueError(f'Incorrect #{i} element type - {type(element)}: should be {self.value_type}'))
-        return errors 
+        return errors
 
 
 class DictValue(BaseValue):

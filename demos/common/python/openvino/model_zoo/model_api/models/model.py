@@ -105,7 +105,7 @@ class Model:
                 self.__setattr__(name, value)
             else:
                 log.warning(f'The parameter "{name}" not found in {self.__model__} wrapper, will be omitted')
-    
+
     def preprocess(self, inputs):
         '''Interface for preprocess method
         Args:
