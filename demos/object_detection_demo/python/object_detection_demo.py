@@ -211,7 +211,7 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model = get_model(ie, args)
+    configuration = {
         'resize_type': args.resize_type,
         'mean_values': args.mean_values,
         'scale_values': args.scale_values,

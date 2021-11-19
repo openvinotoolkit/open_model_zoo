@@ -76,7 +76,7 @@ class YOLO(DetectionModel):
 
     def __init__(self, model_adapter, configuraition):
         super().__init__(model_adapter, configuraition)
-        self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
+        self.is_tiny = len(self.outputs) == 2  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
         self._check_io_number(1, -1)
 

@@ -28,7 +28,7 @@ class CenterNet(DetectionModel):
     def __init__(self, model_adapter, configuration):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 3)
-        self._output_layer_names = sorted(self.net.outputs)
+        self._output_layer_names = sorted(self.outputs)
 
     @classmethod
     def parameters(cls):

@@ -45,8 +45,11 @@ class FaceBoxes(DetectionModel):
             return bboxes_blob_name, scores_blob_name
 
     @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
         parameters.update({
             'iou_threshold': NumericalValue(default_value=0.3)
+        })
         parameters['labels'].update_default_value(['Face'])
         return parameters
 

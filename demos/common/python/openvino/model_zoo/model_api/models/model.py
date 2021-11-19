@@ -56,9 +56,9 @@ class Model:
                          format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, name, ie, model_path, configuration):
+    def create_model(cls, name, model_adapter, configuration):
         Model = cls.get_model(name)
-        return Model(ie, model_path, configuration)
+        return Model(model_adapter, configuration)
 
     @classmethod
     def get_subclasses(cls):
