@@ -163,32 +163,6 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(model_adapter, args):
-        return models.SSD(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-    MODEL = DetectionModel.get_model(args.architecture_type)
-        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
-        'resize_type': args.resize_type,
-        return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-        'scale_values': args.scale_values,
-        'reverse_input_channels': args.reverse_input_channels,
-        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-        'threshold': args.prob_threshold,
-        return models.YoloV4(ie, args.model, labels=args.labels,
-        return models.YOLOF(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-        # 'iou_threshold': args.iou_threshold
-        'input_size': args.input_size, # The CTPN specific
-        return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
-        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
-        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
-        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
-        return models.DETR(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-    }
-    m_model = MODEL(ie, args.model, configuration)
-
-    return m_model
-
 
 def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
@@ -237,7 +211,16 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model = get_model(model_adapter, args)
+    model = get_model(ie, args)
+        'resize_type': args.resize_type,
+        'mean_values': args.mean_values,
+        'scale_values': args.scale_values,
+        'reverse_input_channels': args.reverse_input_channels,
+        'path_to_labels': args.labels,
+        'threshold': args.prob_threshold,
+        'input_size': args.input_size, # The CTPN specific
+    }
+    model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)
     model.log_layers_info()
 
     detector_pipeline = AsyncPipeline(model)
