@@ -111,7 +111,7 @@ class YOLO(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_threshold': NumericalValue(default_value=0.5),
+            'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
         })
         parameters['resize_type'].update_default_value('fit_to_window_letterbox')
         parameters['threshold'].update_default_value(0.5)
@@ -269,8 +269,8 @@ class YoloV4(YOLO):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'anchors': ListValue(),
-            'masks': ListValue(),
+            'anchors': ListValue(description="List of custom anchor values"),
+            'masks': ListValue(description="List of mask, applied to anchors for each output layer"),
         })
         return parameters
 
@@ -355,7 +355,7 @@ class YOLOX(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_threshold': NumericalValue(default_value=0.65),
+            'iou_threshold': NumericalValue(default_value=0.65, description="Threshold for NMS filtering"),
         })
         parameters['threshold'].update_default_value(0.5)
         return parameters

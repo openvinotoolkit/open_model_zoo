@@ -48,7 +48,7 @@ class FaceBoxes(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_threshold': NumericalValue(default_value=0.3)
+            'iou_threshold': NumericalValue(default_value=0.3, description="Threshold for NMS filtering")
         })
         parameters['labels'].update_default_value(['Face'])
         return parameters

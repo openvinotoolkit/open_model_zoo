@@ -59,13 +59,19 @@ class ImageModel(Model):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mean_values': ListValue(default_value=None, description='Mean values, applied to input layer data'),
-            'scale_values': ListValue(default_value=None, description='Scale values, applied to input layer data'),
-            'reverse_input_channels': BooleanValue(),
-            'resize_type':
-                StringValue(default_value=None, choices=tuple(RESIZE_TYPES.keys()),
-                            description="Type of input image resizing"),
-
+            'mean_values': ListValue(
+                default_value=None,
+                description='Normalization values, which will be subtracted from image channels for image-input layer during preprocessing'
+            ),
+            'scale_values': ListValue(
+                default_value=None, 
+                description='Normalization values, which will divide the image channels for image-input layer'       
+            ),
+            'reverse_input_channels': BooleanValue(default_value=False, description='Reverse the channel order'),
+            'resize_type': StringValue(
+                default_value=None, choices=tuple(RESIZE_TYPES.keys()),
+                description="Type of input image resizing"
+            ),
         })
         return parameters
 

@@ -30,7 +30,7 @@ class Deblurring(ImageModel):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.pop('resize_type')
+        parameters.pop('resize_type') # Uses own resizer
         return parameters
 
     def reshape(self, base_shape):

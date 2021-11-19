@@ -149,7 +149,7 @@ class BertQuestionAnswering(Bert):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'output_names': StringValue(),
+            'output_names': StringValue(description='Comma-separated names of output layers'),
             'max_answer_token_num': NumericalValue(),
             'squad_ver': StringValue(),
         })

@@ -49,7 +49,7 @@ class UltraLightweightFaceDetection(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_threshold': NumericalValue(default_value=0.5),
+            'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
         })
         parameters['resize_type'].update_default_value('standard')
         parameters['threshold'].update_default_value(0.5)
