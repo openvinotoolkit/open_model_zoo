@@ -27,7 +27,7 @@ import numpy as np
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
+from model_api.models import OutputTransform, SegmentationModel
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
@@ -166,13 +166,6 @@ def build_argparser():
     return parser
 
 
-def get_model(adapter, args):
-    if args.architecture_type == 'segmentation':
-        return SegmentationModel(adapter, labels=args.labels), SegmentationVisualizer(args.colors)
-    if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(adapter, labels=args.labels), SaliencyMapVisualizer()
-
-
 def print_raw_results(mask, frame_id, labels=None):
     log.debug(' ---------------- Frame # {} ---------------- '.format(frame_id))
     log.debug('     Class ID     | Pixels | Percentage ')
@@ -199,7 +192,11 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model, visualizer = get_model(model_adapter, args)
+    model = SegmentationModel.create_model(args.architecture_type, model_adapter, {'path_to_labels': args.labels})
+    if args.architecture_type == 'segmentation':
+        visualizer = SegmentationVisualizer(args.colors)
+    if args.architecture_type == 'salient_object_detection':
+        visualizer = SaliencyMapVisualizer()  
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)
