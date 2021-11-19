@@ -15,6 +15,7 @@
 """
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection
 
@@ -66,7 +67,7 @@ class SSD(DetectionModel):
             return parser
         except ValueError:
             pass
-        raise RuntimeError('Unsupported model outputs')
+        raise WrapperError(self.__model__, 'Unsupported model outputs')
 
     def _parse_outputs(self, outputs, meta):
         detections = self.output_parser(outputs)

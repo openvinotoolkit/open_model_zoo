@@ -13,7 +13,7 @@
 
 import numpy as np
 
-from .model import Model
+from .model import Model, WrapperError
 from .types import DictValue, NumericalValue, StringValue
 
 
@@ -27,7 +27,7 @@ class Bert(Model):
         self.token_pad = [self.vocab['[PAD]']]
         self.input_names = [i.strip() for i in self.input_names.split(',')]
         if self.inputs.keys() != set(self.input_names):
-            raise RuntimeError('The Bert model expects input names: {}, actual network input names: {}'.format(
+            raise WrapperError(self.__model__, 'The Wrapper expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.inputs.keys())))
         self.max_length = self.inputs[self.input_names[0]].shape[1]
 
@@ -89,8 +89,7 @@ class BertNamedEntityRecognition(Bert):
         super().__init__(model_adapter, configuration)
 
         self.output_names = list(self.outputs)
-        if len(self.output_names) != 1:
-            raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only 1 output")
+        self._check_io_number(-1, 1)
 
     def form_request(self, inputs):
         c_tokens_id = inputs
@@ -119,8 +118,7 @@ class BertEmbedding(Bert):
         super().__init__(model_adapter, configuration)
 
         self.output_names = list(self.outputs)
-        if len(self.output_names) != 1:
-            raise RuntimeError("The BertEmbedding model wrapper supports only 1 output")
+        self._check_io_number(-1, 1)
 
     def form_request(self, inputs):
         tokens_id, self.max_length = inputs
@@ -142,7 +140,7 @@ class BertQuestionAnswering(Bert):
 
         self.output_names = [o.strip() for o in self.output_names.split(',')]
         if self.outputs.keys() != set(self.output_names):
-            raise RuntimeError('The BertQuestionAnswering model output names: {}, actual network output names: {}'.format(
+            raise WrapperError(self.__model__, 'The Wrapper output names: {}, actual network output names: {}'.format(
                 self.output_names, list(self.outputs.keys())))
 
     @classmethod

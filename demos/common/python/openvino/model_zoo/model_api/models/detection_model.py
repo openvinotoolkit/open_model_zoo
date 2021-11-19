@@ -14,6 +14,7 @@
  limitations under the License.
 """
 from .types import ListValue, NumericalValue, StringValue
+from .model import WrapperError
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
 
@@ -46,7 +47,7 @@ class DetectionModel(ImageModel):
         super().__init__(model_adapter, configuration)
 
         if not self.image_blob_name:
-            raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
+            raise WrapperError(self.__model__, "The Wrapper supports only one image input, but {} found"
                                .format(len(self.image_blob_names)))
 
         if self.path_to_labels:
@@ -91,7 +92,7 @@ class DetectionModel(ImageModel):
         elif self.resize_type == 'standard':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
-            raise RuntimeError('Unknown resize type {}'.format(self.resize_type))
+            raise WrapperError(self.__model__, 'Unknown resize type {}'.format(self.resize_type))
         return clip_detections(detections, original_shape)
 
 

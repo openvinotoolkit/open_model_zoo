@@ -17,6 +17,7 @@
 import cv2
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .types import ListValue, NumericalValue
 from .utils import Detection, nms, clip_detections
@@ -61,13 +62,13 @@ class CTPN(DetectionModel):
         (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.outputs.items()
 
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
-            raise RuntimeError("Unexpected output blob shape. Only 4D output blobs are supported")
+            raise WrapperError(self.__model__, "Unexpected output blob shape. Only 4D output blobs are supported")
 
         if scores_data_repr.shape[1] == boxes_data_repr.shape[1] * 2:
             return scores_name, boxes_name
         if boxes_data_repr.shape[1] == scores_data_repr.shape[1] * 2:
             return boxes_name, scores_name
-        raise RuntimeError("One of outputs must be two times larger than another for the CTPN topology")
+        raise WrapperError(self.__model__, "One of outputs must be two times larger than another")
 
     @classmethod
     def parameters(cls):

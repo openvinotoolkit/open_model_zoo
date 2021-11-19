@@ -14,6 +14,7 @@
 from collections import namedtuple
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .types import ListValue, NumericalValue
 from .utils import Detection, clip_detections, nms, resize_image, INTERPOLATION_TYPES
@@ -101,7 +102,7 @@ class YOLO(DetectionModel):
                 bboxes = shape[1] // (cx*cy)
                 print(cx, cy, bboxes, self.w)
                 if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
-                    raise RuntimeError('The Yolo wrapper cannot reshape 2D output')
+                    raise WrapperError(self.__model__, 'The cannot reshape 2D output tensor into 4D')
                 shape = (shape[0], bboxes, cy, cx)
             params = self.Params(info.meta, shape[2:4])
             output_info[name] = (shape, params)
@@ -260,7 +261,7 @@ class YoloV4(YOLO):
             shape = layer.shape
             classes = shape[1] // num - 5
             if shape[1] % num != 0:
-                raise RuntimeError("The output blob {} has wrong 2nd dimension".format(name))
+                raise WrapperError(self.__model__, "The output blob {} has wrong 2nd dimension".format(name))
             yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
         return output_info
@@ -449,11 +450,13 @@ class YoloV3ONNX(DetectionModel):
             elif layer.shape[1] == self.classes:
                 scores_blob_name = name
             else:
-                raise RuntimeError("Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
+                raise WrapperError(self.__model__, 
+                                   "Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
                                    .format(self.classes, *[output.shape for output in self.outputs.values()]))
         if self.outputs[bboxes_blob_name].shape[1] != self.outputs[scores_blob_name].shape[2]:
-            raise RuntimeError("Expected the same dimension for boxes and scores, but got {} and {}".format(
-                self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
+            raise WrapperError(self.__model__, 
+                               "Expected the same dimension for boxes and scores, but got {} and {}"
+                               .format(self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
         return bboxes_blob_name, scores_blob_name, indices_blob_name
 
     @classmethod
