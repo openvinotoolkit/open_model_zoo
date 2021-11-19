@@ -13,27 +13,20 @@
 #include "graph.hpp"
 #include "threading.hpp"
 
-#ifdef USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
 namespace {
-
-void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
-    const int channels = img.channels();
-    const int height = img.rows;
-    const int width = img.cols;
-
-    float* ieData = reinterpret_cast<float*>(ieBuffer);
-    int bOffset = static_cast<int>(batch) * channels * width * height;
-    for (int c = 0; c < channels; c++) {
-        int cOffset = c * width * height;
-        for (int w = 0; w < width; w++) {
-            for (int h = 0; h < height; h++) {
-                ieData[bOffset + cOffset + h * width + w] =
-                        static_cast<float>(img.at<cv::Vec3b>(h, w)[c]);
-            }
-        }
+void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::runtime::Tensor tensor) {
+    static const ov::Layout layout{"NHWC"};
+    static const ov::Shape shape = tensor.get_shape();
+    static const size_t batchSize = shape[ov::layout::batch_idx(layout)];
+    static const cv::Size inSize{int(shape[ov::layout::width_idx(layout)]), int(shape[ov::layout::height_idx(layout)])};
+    static const size_t channels = shape[ov::layout::channels_idx(layout)];
+    static const size_t batchOffset = inSize.area() * channels;
+    assert(batchSize == frames.size()]);
+    assert(channels == 3);
+    const uint8_t* data = tensor.data<uint8_t>();
+    for (size_t i = 0; i < batchSize; ++i) {
+        assert(frames[i]->frame.channels() == channels);
+        cv::resize(frames[i]->frame, cv::Mat{inSize, CV_8UC3, (void*)(data + batchOffset * i)}, inSize);
     }
 }
 }  // namespace
@@ -45,7 +38,6 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
     getter = std::move(getterFunc);
     postprocessing = std::move(postprocessingFunc);
     getterThread = std::thread([&]() {
-        std::vector<cv::Mat> imgsToProc(batchSize, cv::Mat(inSize, CV_8UC3));
         std::vector<std::shared_ptr<VideoFrame>> vframes;
         while (!terminate) {
             vframes.clear();
@@ -74,36 +66,17 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
                 availableRequests.pop();
             }
 
-            auto preprocess = [&]() {
-                float* inputPtr = req.get_input_tensor().data<float>();
-                auto loopBody = [&](size_t i) {
-                    cv::resize(vframes[i]->frame,
-                               imgsToProc[i],
-                               imgsToProc[i].size());
-                    loadImgToIEGraph(imgsToProc[i], i, inputPtr);
-                };
-#ifdef USE_TBB
-                run_in_arena([&](){
-                    tbb::parallel_for<size_t>(0, batchSize, loopBody);
-                });
-#else
-                for (size_t i = 0; i < batchSize; i++) {
-                    loopBody(i);
-                }
-#endif
-            };
-
             if (perfTimerInfer.enabled()) {
                 {
                     ScopedTimer st(perfTimerPreprocess);
-                    preprocess();
+                    framesToTensor(vframes, req.get_input_tensor());
                 }
                 auto startTime = std::chrono::high_resolution_clock::now();
                 req.start_async();
                 std::unique_lock<std::mutex> lock(mtxBusyRequests);
                 busyBatchRequests.push({std::move(vframes), std::move(req), startTime});
             } else {
-                preprocess();
+                framesToTensor(vframes, req.get_input_tensor());
                 req.start_async();
                 std::unique_lock<std::mutex> lock(mtxBusyRequests);
                 busyBatchRequests.push({std::move(vframes), std::move(req),
@@ -125,10 +98,17 @@ IEGraph::IEGraph(const InitParams& p):
     if (model->get_parameters().size() != 1) {
         throw std::logic_error("Face Detection model must have only one input");
     }
-    const ov::Layout inLyout{"NCHW"};
-    model = ov::preprocess::PrePostProcessor(model).input(ov::preprocess::InputInfo().tensor(ov::preprocess::InputTensorInfo().set_layout(inLyout))).build();
+    const ov::Layout inLyout{"NHWC"};
+    model = ov::preprocess::PrePostProcessor(model).input(ov::preprocess::InputInfo()
+        .tensor(ov::preprocess::InputTensorInfo()
+            .set_element_type(ov::element::u8)
+            .set_layout(inLyout))
+        .preprocess(ov::preprocess::PreProcessSteps()
+            .convert_element_type(ov::element::f32)
+            .convert_layout("NCHW"))
+        .network(ov::preprocess::InputNetworkInfo().set_layout("NCHW"))
+    ).build();
     ov::Shape inShape = model->input().get_shape();
-    inSize = {int(inShape[ov::layout::width_idx(inLyout)]), int(inShape[ov::layout::height_idx(inLyout)])};
     // Set batch size
     inShape[ov::layout::batch_idx(inLyout)] = batchSize;
     model->reshape({{model->input().get_any_name(), inShape}});

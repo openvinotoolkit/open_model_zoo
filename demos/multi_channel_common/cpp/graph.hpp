@@ -61,7 +61,6 @@ private:
     using PostReadFunc = std::function<void (std::shared_ptr<ov::Function>)>;
     PostReadFunc postRead;
     std::thread getterThread;
-    cv::Size inSize;
 public:
     struct InitParams {
         std::size_t batchSize = 1;

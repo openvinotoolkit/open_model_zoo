@@ -49,9 +49,11 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
     }
     int batchOffset = batchIndex * width * height * channels;
 
-    cv::Mat resizedMat(mat);
+    cv::Mat resizedMat;
     if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
         cv::resize(mat, resizedMat, cv::Size(width, height));
+    } else {
+        resizedMat = mat;
     }
 
     InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
@@ -127,10 +129,10 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
 * @param batchIndex - batch index of an image inside of the tensor.
 */
 static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& tensor, int batchIndex = 0) {
-    ov::Shape tensorSize = tensor.get_shape();
-    const size_t width = tensorSize[3];
-    const size_t height = tensorSize[2];
-    const size_t channels = tensorSize[1];
+    ov::Shape tensorShape = tensor.get_shape();
+    const size_t width = tensorShape[3];
+    const size_t height = tensorShape[2];
+    const size_t channels = tensorShape[1];
     if (static_cast<size_t>(mat.channels()) != channels) {
         throw std::runtime_error("The number of channels for net input and image must match");
     }
@@ -139,9 +141,11 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
     }
     int batchOffset = batchIndex * width * height * channels;
 
-    cv::Mat resizedMat(mat);
+    cv::Mat resizedMat;
     if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
         cv::resize(mat, resizedMat, cv::Size(width, height));
+    } else {
+        resizedMat = mat;
     }
 
     if (tensor.get_element_type() == ov::element::Type_t::f32) {

@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
         }
         slog::info << ov::get_openvino_version() << slog::endl;
         struct {
-            size_t pafsId, heatMapsId;
+            ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
         IEGraph::InitParams graphParams;
@@ -210,21 +210,23 @@ int main(int argc, char* argv[]) {
         graphParams.modelPath       = FLAGS_m;
         graphParams.deviceName      = FLAGS_d;
         graphParams.postReadFunc    = [&postParams](std::shared_ptr<ov::Function>& model) {
-                                        const ov::Output<ov::Node> pafsOut = model->outputs()[0];
-                                        postParams.pafsId = pafsOut.get_index();
-                                        const ov::Output<ov::Node> heatMapsOut = model->outputs()[1];
-                                        postParams.heatMapsId = heatMapsOut.get_index();
-                                        const ov::Layout layout{"NCHW"};
+                                        postParams.pafsOut = model->outputs()[0];
+                                        postParams.heatMapsOut = model->outputs()[1];
+                                        const ov::Layout outLayout{"NCHW"};
                                         model = ov::preprocess::PrePostProcessor(model)
-                                            .output(ov::preprocess::OutputInfo(postParams.pafsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
-                                            .output(ov::preprocess::OutputInfo(postParams.heatMapsId).tensor(ov::preprocess::OutputTensorInfo().set_layout(layout)))
+                                            .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                                                .set_layout(outLayout)
+                                                .set_element_type(ov::element::f32)))
+                                            .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                                                .set_layout(outLayout)
+                                                .set_element_type(ov::element::f32)))
                                             .build();
-                                        postParams.pafsWidth = pafsOut.get_shape()[ov::layout::width_idx(layout)];
-                                        postParams.pafsHeight = pafsOut.get_shape()[ov::layout::height_idx(layout)];
-                                        postParams.pafsChannels = pafsOut.get_shape()[ov::layout::channels_idx(layout)];
-                                        postParams.heatMapsWidth = heatMapsOut.get_shape()[ov::layout::width_idx(layout)];
-                                        postParams.heatMapsHeight = heatMapsOut.get_shape()[ov::layout::height_idx(layout)];
-                                        postParams.heatMapsChannels = heatMapsOut.get_shape()[ov::layout::channels_idx(layout)];
+                                        postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
+                                        postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
+                                        postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
+                                        postParams.heatMapsWidth = postParams.heatMapsOut.get_shape()[ov::layout::width_idx(outLayout)];
+                                        postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
+                                        postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
                                     };
 
         IEGraph graph(graphParams);
@@ -255,8 +257,8 @@ int main(int argc, char* argv[]) {
             return sources.getFrame(camIdx, img);
         }, [&postParams](ov::runtime::InferRequest req, cv::Size frameSize) {
             std::vector<Detections> detections(FLAGS_bs);
-            float* heatMapsData = req.get_output_tensor(postParams.heatMapsId).data<float>();
-            float* pafsData = req.get_output_tensor(postParams.pafsId).data<float>();
+            float* heatMapsData = req.get_tensor(postParams.heatMapsOut).data<float>();
+            float* pafsData = req.get_tensor(postParams.pafsOut).data<float>();
             for (size_t i = 0; i < FLAGS_bs; i++) {
                 std::vector<HumanPose> poses = postprocess(
                     heatMapsData + i * postParams.heatMapsWidth * postParams.heatMapsHeight * postParams.heatMapsChannels,
