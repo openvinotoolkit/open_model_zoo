@@ -21,12 +21,17 @@ from .image_model import ImageModel
 class Deblurring(ImageModel):
     __model__ = 'Deblurring'
 
-    def __init__(self, model_adapter, input_image_shape):
-        super().__init__(model_adapter)
+    def __init__(self, model_adapter, configuration=None):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, 1)
         self.block_size = 32
-        self.reshape(input_image_shape)
         self.output_blob_name = self._get_outputs()
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.pop('resize_type')
+        return parameters
 
     def reshape(self, base_shape):
         h, w, _ = base_shape

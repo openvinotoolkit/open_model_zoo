@@ -104,6 +104,7 @@ def main():
         raise RuntimeError("Can't read an image from the input")
 
     model = Deblurring(model_adapter, frame.shape)
+    model.reshape(frame.shape)
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)
