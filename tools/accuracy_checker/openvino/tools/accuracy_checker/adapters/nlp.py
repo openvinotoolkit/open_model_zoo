@@ -165,9 +165,12 @@ class QuestionAnsweringAdapter(Adapter):
     def configure(self):
         self.start_token_logit_out = self.get_value_from_config('start_token_logits_output')
         self.end_token_logit_out = self.get_value_from_config('end_token_logits_output')
+        self.outputs_chacked = False
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_chacked:
+            self.select_output_blob(raw_output)
         result = []
         for identifier, start_token_logits, end_token_logits in zip(
                 identifiers, raw_output[self.start_token_logit_out], raw_output[self.end_token_logit_out]
@@ -177,6 +180,19 @@ class QuestionAnsweringAdapter(Adapter):
             )
 
         return result
+
+    def select_output_blob(self, outputs):
+        if self.start_token_logit_out not in outputs:
+            if self.start_token_logit_out.replace('/sink_port_0', '') in outputs:
+                self.start_token_logit_out = self.start_token_logit_out.replace('/sink_port_0', '')
+            elif '{}/sink_port_0'.format(self.start_token_logit_out) in outputs:
+                self.start_token_logit_out = '{}/sink_port_0'.format(self.start_token_logit_out)
+        if self.end_token_logit_out not in outputs:
+            if self.end_token_logit_out.replace('/sink_port_0', '') in outputs:
+                self.end_token_logit_out = self.end_token_logit_out.replace('/sink_port_0', '')
+            elif '{}/sink_port_0'.format(self.end_token_logit_out) in outputs:
+                self.end_token_logit_out = '{}/sink_port_0'.format(self.end_token_logit_out)
+        self.outputs_chacked = True
 
 
 class QuestionAnsweringEmbeddingAdapter(Adapter):
