@@ -191,7 +191,6 @@ class QuestionAnsweringAdapter(Adapter):
         self.end_token_logit_out = self.check_output_name(self.end_token_logit_out, outputs)
         self.outputs_checked = True
 
-
 class QuestionAnsweringEmbeddingAdapter(Adapter):
     __provider__ = 'bert_question_answering_embedding'
     prediction_types = (QuestionAnsweringEmbeddingPrediction, )
