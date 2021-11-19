@@ -28,7 +28,7 @@ class Model:
         logger(Logger): instance of the logger
     '''
 
-    __model__ = 'Model-Wrapper'
+    __model__ = None # Abstract wrappers has no name
 
     def __init__(self, model_adapter, configuration):
         '''Abstract model constructor
@@ -46,8 +46,9 @@ class Model:
 
     @classmethod
     def get_model(cls, name):
-        subclasses = cls.get_subclasses()
-        # print(*[subclass.__model__ for subclass in subclasses], sep='\n')
+        subclasses = [subclass for subclass in cls.get_subclasses() if subclass.__model__]
+        if cls.__model__:
+            subclasses.append(cls)
         for subclass in subclasses:
             if name.lower() == subclass.__model__.lower():
                 return subclass
@@ -64,7 +65,9 @@ class Model:
 
     @classmethod
     def available_wrappers(cls):
-        return [subclass.__model__ for subclass in cls.get_subclasses()]
+        available_classes = [cls] if cls.__model__ else []
+        available_classes.extend(cls.get_subclasses())
+        return [subclass.__model__ for subclass in available_classes if subclass.__model__]
 
     @classmethod
     def parameters(cls):

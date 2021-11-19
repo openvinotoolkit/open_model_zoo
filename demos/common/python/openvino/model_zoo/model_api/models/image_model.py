@@ -33,8 +33,6 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    __model__ = 'Abstract-Image-Model-Wrapper'
-
     def __init__(self, model_adapter, configuration):
         '''Image model constructor
 

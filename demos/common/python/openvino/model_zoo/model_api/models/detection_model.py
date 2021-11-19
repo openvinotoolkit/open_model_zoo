@@ -30,8 +30,6 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    __model__ = 'abstract-detection'
-
     def __init__(self, model_adapter, configuration):
         '''The Detection Model constructor
 
