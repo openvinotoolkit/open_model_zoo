@@ -65,6 +65,8 @@ def preprocess_input(image_name, height, width):
     # [h,w] -> [c,h,w]
     img = rsz[None, :, :]
     _, h, w = img.shape
+    # normalize to range [-1, 1]
+    img = cv2.normalize(img, img, -1, 1, cv2.NORM_MINMAX)
     # right edge padding
     pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width - w)), mode='edge')
     return pad_img
@@ -83,10 +85,9 @@ def main():
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
-    assert len(net.outputs) == 1, "Demo supports only single output topologies"
 
     input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
+    out_blob = 'output' # name of output blob of model
 
     characters = get_characters(args)
     codec = CTCCodec(characters, args.designated_characters, args.top_k)

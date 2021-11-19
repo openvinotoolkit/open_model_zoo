@@ -1,7 +1,6 @@
 # Handwritten Text Recognition Demo
 
-This example demonstrates an approach to recognize handwritten Japanese and simplified Chinese text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
-
+This example demonstrates an approach to recognize handwritten Japanese, simplified Chinese, and English text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release). For English, it supports the characters in [GNHK](https://goodnotes.com/gnhk/).
 ## How It Works
 
 The demo workflow is the following:
@@ -29,6 +28,7 @@ omz_converter --list models.lst
 
 * handwritten-japanese-recognition-0001
 * handwritten-simplified-chinese-recognition-0001
+* handwritten-english-recognition-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
