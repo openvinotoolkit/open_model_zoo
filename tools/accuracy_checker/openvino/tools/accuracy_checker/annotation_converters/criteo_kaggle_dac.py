@@ -64,7 +64,8 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         self.src = self.get_value_from_config('testing_file')
         self.binary = self.get_value_from_config('binary')
         self.batch = int(self.get_value_from_config('batch'))
-        self.max_ind_range = int(self.get_value_from_config('max_ind_range'))
+        max_ind_range = self.get_value_from_config('max_ind_range')
+        self.max_ind_range = int(max_ind_range) if max_ind_range is not None else max_ind_range
         self.subsample = int(self.get_value_from_config('subsample_size'))
         self.validation = self.get_value_from_config('validation')
         self.block = self.get_value_from_config('block')
