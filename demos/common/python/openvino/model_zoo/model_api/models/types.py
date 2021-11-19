@@ -125,3 +125,15 @@ class ListValue(BaseValue):
         if not isinstance(value, (tuple, list)):
             errors.append(ValueError("Not a tuple/list"))   
         return errors 
+
+class DictValue(BaseValue):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def validate(self, value):
+        errors = super().validate(value)
+        if not value:
+            return errors
+        if not isinstance(value, dict):
+            errors.append(ValueError('Not a dictionary'))
+        return errors

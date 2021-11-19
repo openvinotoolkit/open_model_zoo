@@ -243,7 +243,7 @@ class YoloV4(YOLO):
             self.anchors = masked_anchors
             self.use_input_size = True
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
 
     def _get_output_info(self):
@@ -302,7 +302,7 @@ class YOLOF(YOLO):
             self.anchors = anchors
             self.use_input_size = True
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
 
     def _get_output_info(self):
@@ -342,7 +342,7 @@ class YOLOF(YOLO):
 class YOLOX(DetectionModel):
     __model__ = 'YOLOX'
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 1)
         self.output_blob_name = next(iter(self.net.outputs))
@@ -430,7 +430,7 @@ class YOLOX(DetectionModel):
 class YoloV3ONNX(DetectionModel):
     __model__ = 'YOLOv3-ONNX'
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self._check_io_number(2, 3)

@@ -14,21 +14,31 @@
 import numpy as np
 
 from .model import Model
+from .types import DictValue, NumericalValue, StringValue
 
 
 class Bert(Model):
     __model__ = 'bert'
 
-    def __init__(self, model_adapter, vocab, input_names):
-        super().__init__(model_adapter)
-        self.token_cls = [vocab['[CLS]']]
-        self.token_sep = [vocab['[SEP]']]
-        self.token_pad = [vocab['[PAD]']]
-        self.input_names = [i.strip() for i in input_names.split(',')]
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
+        self.token_cls = [self.vocab['[CLS]']]
+        self.token_sep = [self.vocab['[SEP]']]
+        self.token_pad = [self.vocab['[PAD]']]
+        self.input_names = [i.strip() for i in self.input_names.split(',')]
         if self.inputs.keys() != set(self.input_names):
             raise RuntimeError('The Bert model expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.inputs.keys())))
         self.max_length = self.inputs[self.input_names[0]].shape[1]
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'vocab': DictValue(),
+            'input_names': StringValue(description='Comma-separated names of input layers'),
+        })
+        return parameters
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
@@ -75,8 +85,8 @@ class Bert(Model):
 class BertNamedEntityRecognition(Bert):
     __model__ = 'bert-named-entity-recognition'
 
-    def __init__(self, model_adapter, vocab, input_names):
-        super().__init__(model_adapter, vocab, input_names)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
 
         self.output_names = list(self.outputs)
         if len(self.output_names) != 1:
@@ -105,8 +115,8 @@ class BertNamedEntityRecognition(Bert):
 class BertEmbedding(Bert):
     __model__ = 'bert-embedding'
 
-    def __init__(self, model_adapter, vocab, input_names):
-        super().__init__(model_adapter, vocab, input_names)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
 
         self.output_names = list(self.outputs)
         if len(self.output_names) != 1:
@@ -127,16 +137,23 @@ class BertEmbedding(Bert):
 class BertQuestionAnswering(Bert):
     __model__ = 'bert-question-answering'
 
-    def __init__(self, model_adapter, vocab, input_names, output_names,
-                 max_answer_token_num, squad_ver):
-        super().__init__(model_adapter, vocab, input_names)
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
 
-        self.max_answer_token_num = max_answer_token_num
-        self.squad_ver = squad_ver
-        self.output_names = [o.strip() for o in output_names.split(',')]
+        self.output_names = [o.strip() for o in self.output_names.split(',')]
         if self.outputs.keys() != set(self.output_names):
             raise RuntimeError('The BertQuestionAnswering model output names: {}, actual network output names: {}'.format(
                 self.output_names, list(self.outputs.keys())))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'output_names': StringValue(),
+            'max_answer_token_num': NumericalValue(),
+            'squad_ver': StringValue(),
+        })
+        return parameters
 
     def form_request(self, inputs):
         c_data, q_tokens_id = inputs

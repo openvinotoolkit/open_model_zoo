@@ -30,7 +30,7 @@ class Model:
 
     __model__ = None # Abstract wrappers has no name
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         '''Abstract model constructor
 
         Args:
@@ -56,7 +56,7 @@ class Model:
                          format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, name, model_adapter, configuration):
+    def create_model(cls, name, model_adapter, configuration=None):
         Model = cls.get_model(name)
         return Model(model_adapter, configuration)
 

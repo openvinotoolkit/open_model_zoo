@@ -26,7 +26,7 @@ from .utils import Detection, nms
 class FaceBoxes(DetectionModel):
     __model__ = 'FaceBoxes'
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
         self.min_sizes = [[32, 64, 128], [256], [512]]

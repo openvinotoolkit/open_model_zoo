@@ -33,7 +33,7 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, model_adapter, configuration):
+    def __init__(self, model_adapter, configuration=None):
         '''Image model constructor
 
         Calls the `Model` constructor first
