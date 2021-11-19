@@ -17,6 +17,12 @@
 import logging as log
 
 
+class WrapperError(RuntimeError):
+    def __init__(self, wrapper_name, message):
+        self.message = f"{wrapper_name}: {message}"
+        super().__init__(self.message)
+
+
 class Model:
     '''An abstract model wrapper
 
@@ -52,7 +58,7 @@ class Model:
         for subclass in subclasses:
             if name.lower() == subclass.__model__.lower():
                 return subclass
-        raise ValueError('There is no model with name "{}" in list: {}'.
+        raise WrapperError(cls.__model__, 'There is no model with name "{}" in list: {}'.
                          format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
@@ -130,28 +136,26 @@ class Model:
         '''
         if not isinstance(number_of_inputs, tuple):
             if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
-                raise RuntimeError("Expected {} input blob{}, but {} found: {}".format(
+                raise WrapperError(self.__model__, "Expected {} input blob{}, but {} found: {}".format(
                     number_of_inputs, 's' if number_of_inputs !=1 else '',
                     len(self.inputs), ', '.join(self.inputs)
                 ))
         else:
             if not len(self.inputs) in number_of_inputs:
-                raise RuntimeError("Expected {} or {} input blobs, but {} found: {}".format(
+                raise WrapperError(self.__model__, "Expected {} or {} input blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
                     len(self.inputs), ', '.join(self.inputs)
                 ))
 
-        print(f'Wrapper is {self.__model__}')
-
         if not isinstance(number_of_outputs, tuple):
             if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
-                raise RuntimeError("Expected {} output blob{}, but {} found: {}".format(
+                raise WrapperError(self.__model__, "Expected {} output blob{}, but {} found: {}".format(
                     number_of_outputs, 's' if number_of_outputs !=1 else '',
                     len(self.outputs), ', '.join(self.outputs)
                 ))
         else:
             if not len(self.outputs) in number_of_outputs:
-                raise RuntimeError("Expected {} or {} output blobs, but {} found: {}".format(
+                raise WrapperError(self.__model__, "Expected {} or {} output blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
                     len(self.outputs), ', '.join(self.outputs)
                 ))
