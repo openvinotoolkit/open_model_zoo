@@ -97,13 +97,15 @@ class Model:
             if name in parameters:
                 errors = parameters[name].validate(value)
                 if errors:
-                    print(f"Error with {name} parameter:")
-                    print(*errors, sep='\n')
+                    log.error(f'Error with "{name}" parameter:')
+                    for error in errors:
+                        log.error(f"\t{error}")
+                    raise WrapperError(self.__model__, 'Incorrect user configuration')
                 value = parameters[name].get_value(value)
                 self.__setattr__(name, value)
             else:
-                print(f'The configuration parameter {name} not found in {self.__model__}, will be omitted')
-
+                log.warning(f'The parameter "{name}" not found in {self.__model__} wrapper, will be omitted')
+    
     def preprocess(self, inputs):
         '''Interface for preprocess method
         Args:

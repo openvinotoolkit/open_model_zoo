@@ -345,7 +345,7 @@ class YOLOX(DetectionModel):
     def __init__(self, model_adapter, configuration=None):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 1)
-        self.output_blob_name = next(iter(self.net.outputs))
+        self.output_blob_name = next(iter(self.outputs))
 
         self.expanded_strides = []
         self.grids = []

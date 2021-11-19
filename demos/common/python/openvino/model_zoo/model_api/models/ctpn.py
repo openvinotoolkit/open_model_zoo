@@ -14,11 +14,11 @@
  limitations under the License.
 """
 
-from .types import ListValue, NumericalValue
 import cv2
 import numpy as np
 
 from .detection_model import DetectionModel
+from .types import ListValue, NumericalValue
 from .utils import Detection, nms, clip_detections
 
 

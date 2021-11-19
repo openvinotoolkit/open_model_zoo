@@ -196,7 +196,7 @@ def main():
     if args.architecture_type == 'segmentation':
         visualizer = SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        visualizer = SaliencyMapVisualizer()  
+        visualizer = SaliencyMapVisualizer()
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)

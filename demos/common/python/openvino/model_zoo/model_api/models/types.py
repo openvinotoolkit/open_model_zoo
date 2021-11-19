@@ -14,11 +14,11 @@
  limitations under the License.
 """
 
-import logging as log
+class ConfigurableValueError(ValueError):
+    def __init__(self, message, prefix=None):
+        self.message = f'{prefix}: {message}' if prefix else message
+        super().__init__(self.message)
 
-class ConfigError(ValueError):
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
 
 class BaseValue:
     def __init__(self, description="No description available", default_value=None) -> None:
@@ -45,6 +45,7 @@ class BaseValue:
             info += f"\nThe default value is '{self.default_value}'"
         return info
 
+
 class NumericalValue(BaseValue):
     def __init__(self, value_type=float, choices=(), min=None, max=None, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -58,14 +59,15 @@ class NumericalValue(BaseValue):
         if not value:
             return errors
         if not isinstance(value, self.value_type):
-            errors.append(ValueError('Not type'))
+            errors.append(ConfigurableValueError(f'Incorrect value type {type(value)}: should be {self.value_type}'))
+            return errors
         if len(self.choices):
             if value not in self.choices:
-                errors.append(ValueError('Not in choices'))
-        if self.min and value < self.min:
-            errors.append(ValueError())
-        if self.max and value > self.max:
-            errors.append( ValueError())
+                errors.append(ConfigurableValueError(f'Incorrect value {value}: out of allowalbe list - {self.choices}'))
+        if self.min is not None and value < self.min:
+            errors.append(ConfigurableValueError(f'Incorrect value {value}: less than minimum allowable {self.min}'))
+        if self.max is not None and value > self.max:
+            errors.append(ConfigurableValueError(f'Incorrect value {value}: bigger than maximum allowable {self.min}'))
         return errors
 
     def __str__(self) -> str:
@@ -88,9 +90,9 @@ class StringValue(BaseValue):
         if not value:
             return errors
         if not isinstance(value, str):
-            errors.append(ValueError("Not string"))
+            errors.append(ConfigurableValueError(f'Incorrect value type {type(value)}: should be "str"'))
         if value not in self.choices:
-            errors.append('Value "{}" not from choices {}'.format(value, self.choices))
+            errors.append(ConfigurableValueError(f'Incorrect value {value}: out of allowalbe list - {self.choices}'))
         return errors
 
     def __str__(self) -> str:
@@ -111,20 +113,33 @@ class BooleanValue(BaseValue):
         if not value:
             return errors
         if not isinstance(value, bool):
-            errors.append(ValueError("Not the boolean"))
+            errors.append(ConfigurableValueError(f'Incorrect value type - {type(value)}: should be "bool"'))
         return errors
 
+
 class ListValue(BaseValue):
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, value_type=None, **kwargs) -> None:
         super().__init__(**kwargs)
+        self.value_type = value_type
 
     def validate(self, value):
         errors = super().validate(value)
         if not value:
             return errors
         if not isinstance(value, (tuple, list)):
-            errors.append(ValueError("Not a tuple/list"))   
+            errors.append(ConfigurableValueError(f'Incorrect value type - {type(value)}: should be list or tuple'))
+        if self.value_type:
+            if isinstance(self.value_type, BaseValue):
+                for i, element in enumerate(value):
+                    temp_errors = self.value_type.validate(element)
+                    if len(temp_errors) > 0:
+                        errors.extend([ConfigurableValueError(f'Incorrect #{i} element of the list'), *temp_errors])
+            else:
+                for i, element in enumerate(value):
+                    if not isinstance(element, self.value_type):
+                        errors.append(ConfigurableValueError(f'Incorrect #{i} element type - {type(element)}: should be {self.value_type}'))
         return errors 
+
 
 class DictValue(BaseValue):
     def __init__(self, **kwargs) -> None:
@@ -135,5 +150,5 @@ class DictValue(BaseValue):
         if not value:
             return errors
         if not isinstance(value, dict):
-            errors.append(ValueError('Not a dictionary'))
+            errors.append(ConfigurableValueError(f'Incorrect value type - {type(value)}: should be "dict"'))
         return errors
