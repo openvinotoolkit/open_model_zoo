@@ -44,12 +44,13 @@ pip install openvino-dev[caffe,caffe2,onnx,tensorflow2,pytorch,mxnet]
 2. Install the tools with the following command:
 
 ```sh
-export OMZ_ROOT=<omz_dir>
+pip install --upgrade pip
 pip install .
 ```
 
 > **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
 > For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
+> If you are using pip version lower than 21.3, you also need to set OMZ_ROOT variable: `export OMZ_ROOT=<omz_dir>`
 
 To convert models from certain frameworks, you may also need to install
 additional dependencies.
