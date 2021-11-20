@@ -195,20 +195,15 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
         slog::info << ov::get_openvino_version() << slog::endl;
-        IEGraph::InitParams graphParams;
-        graphParams.batchSize       = FLAGS_bs;
-        graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = FLAGS_m;
-        graphParams.deviceName      = FLAGS_d;
 
-        IEGraph graph(graphParams);
-        auto inputDims = graph.getInputShape();
-        if (4 != inputDims.size()) {
+        ov::runtime::Core core;
+        IEGraph graph{FLAGS_m, FLAGS_d, core, FLAGS_show_stats, FLAGS_bs};
+        ov::Shape inputShape = graph.getInputShape();
+        if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
 
@@ -218,8 +213,8 @@ int main(int argc, char* argv[]) {
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
         vsParams.realFps              = FLAGS_real_input_fps;
-        vsParams.expectedHeight = static_cast<unsigned>(inputDims[2]);
-        vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
+        vsParams.expectedHeight = static_cast<unsigned>(inputShape[2]);
+        vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
         DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
@@ -257,9 +252,6 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
-        graph.setDetectionConfidence(static_cast<float>(FLAGS_t));
-        std::vector<std::shared_ptr<VideoFrame>> batchRes;
-
         std::mutex statMutex;
         std::stringstream statStream;
 
@@ -284,6 +276,7 @@ int main(int argc, char* argv[]) {
 
         output.start();
 
+        std::vector<std::shared_ptr<VideoFrame>> batchRes;
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
@@ -296,7 +289,7 @@ int main(int argc, char* argv[]) {
             while (readData) {
                 auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
-                    break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
+                    break;  // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
                 for (size_t i = 0; i < br.size(); i++) {
                     // this approach waits for the next input image for sourceIdx. If provided a single image,
@@ -349,6 +342,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
     return 0;
 }

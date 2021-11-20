@@ -8,7 +8,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <openvino/openvino.hpp>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -23,10 +22,10 @@ void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::
     static const size_t batchOffset = inSize.area() * channels;
     assert(batchSize == frames.size()]);
     assert(channels == 3);
-    const uint8_t* data = tensor.data<uint8_t>();
+    uint8_t* data = tensor.data<uint8_t>();
     for (size_t i = 0; i < batchSize; ++i) {
         assert(frames[i]->frame.channels() == channels);
-        cv::resize(frames[i]->frame, cv::Mat{inSize, CV_8UC3, (void*)(data + batchOffset * i)}, inSize);
+        cv::resize(frames[i]->frame, cv::Mat{inSize, CV_8UC3, static_cast<void*>(data + batchOffset * i)}, inSize);
     }
 }
 }  // namespace
@@ -84,16 +83,16 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
             }
             condVarBusyRequests.notify_one();
         }
-        condVarBusyRequests.notify_one(); // notify that there will be no new InferRequests
+        condVarBusyRequests.notify_one();  // notify that there will be no new InferRequests
     });
 }
 
-IEGraph::IEGraph(const InitParams& p):
-        perfTimerPreprocess(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
-        perfTimerInfer(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
-        confidenceThreshold(0.5f), batchSize(p.batchSize),
-        modelPath(p.modelPath),
-        postRead(p.postReadFunc) {
+IEGraph::IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
+            bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc):
+        perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        batchSize(batchSize),
+        postRead(std::move(postReadFunc)) {
     std::shared_ptr<ov::Function> model = core.read_model(modelPath);
     if (model->get_parameters().size() != 1) {
         throw std::logic_error("Face Detection model must have only one input");
@@ -116,9 +115,9 @@ IEGraph::IEGraph(const InitParams& p):
     if (postRead != nullptr)
         postRead(model);
     core.set_config({{"CPU_BIND_THREAD", "NO"}}, "CPU");
-    ov::runtime::ExecutableNetwork net = core.compile_model(model, p.deviceName, {{"PERFORMANCE_HINT", "THROUGHPUT"}});
+    ov::runtime::ExecutableNetwork net = core.compile_model(model, device, {{"PERFORMANCE_HINT", "THROUGHPUT"}});
     maxRequests = net.get_metric("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
-    logExecNetworkInfo(net, modelPath, p.deviceName);
+    logExecNetworkInfo(net, modelPath, device);
 
     slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
     slog::info << "\tBatch size is set to " << batchSize << slog::endl;
@@ -173,14 +172,6 @@ std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSiz
     condVarAvailableRequests.notify_one();
 
     return vframes;
-}
-
-unsigned int IEGraph::getBatchSize() const {
-    return static_cast<unsigned int>(batchSize);
-}
-
-void IEGraph::setDetectionConfidence(float conf) {
-    confidenceThreshold = conf;
 }
 
 IEGraph::~IEGraph() {

@@ -167,7 +167,6 @@ public:
                           bool collectStats_,
                           const std::string& name,
                           size_t queueSize_,
-                          size_t pollingTimeMSec_,
                           bool realFps_):
         parent(p),
         stream(name),
@@ -268,7 +267,6 @@ class GeneralCaptureSource : public VideoSource {
     bool realFps;
 
     const size_t queueSize;
-    const size_t pollingTimeMSec;
 
     template<bool CollectStats>
     MatWithTimestamp readFrame();
@@ -278,7 +276,7 @@ class GeneralCaptureSource : public VideoSource {
 
 public:
     GeneralCaptureSource(bool async, bool collectStats_, const std::string& name, bool loopVideo,
-                size_t queueSize_, size_t pollingTimeMSec_, bool realFps_);
+                size_t queueSize_, bool realFps_);
 
     ~GeneralCaptureSource() override;
 
@@ -456,13 +454,12 @@ MatWithTimestamp GeneralCaptureSource::readFrame() {
 
 GeneralCaptureSource::GeneralCaptureSource(bool async, bool collectStats_,
                          const std::string& name, bool loopVideo, size_t queueSize_,
-                         size_t pollingTimeMSec_, bool realFps_):
+                         bool realFps_):
     perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
     isAsync(async),
     cap(openImagesCapture(name, loopVideo)),
     realFps(realFps_),
-    queueSize(queueSize_),
-    pollingTimeMSec(pollingTimeMSec_) {}
+    queueSize(queueSize_) {}
 
 GeneralCaptureSource::~GeneralCaptureSource() {
     stop();
@@ -568,8 +565,7 @@ VideoSources::VideoSources(const InitParams& p):
     isAsync(p.isAsync),
     collectStats(p.collectStats),
     realFps(p.realFps),
-    queueSize(p.queueSize),
-    pollingTimeMSec(p.pollingTimeMSec) {
+    queueSize(p.queueSize) {
         for (const std::string& input : split(p.inputs, ','))
             openVideo(input, isNumeric(input), p.loop);
     }
@@ -614,13 +610,13 @@ void VideoSources::openVideo(const std::string& source, bool native, bool loopVi
             if (loopVideo)
                 throw std::runtime_error("Looping video is not supported for .mjpeg when built with USE_LIBVA");
             newSrc.reset(new VideoSourceStreamFile(*this, isAsync, collectStats, source,
-                                            queueSize, pollingTimeMSec, realFps));
+                                            queueSize, realFps));
         else
             newSrc.reset(new GeneralCaptureSource(isAsync, collectStats, source, loopVideo,
-                                            queueSize, pollingTimeMSec, realFps));
+                                            queueSize, realFps));
 #else
         std::unique_ptr<VideoSource> newSrc(new GeneralCaptureSource(isAsync, collectStats, source, loopVideo,
-                                            queueSize, pollingTimeMSec, realFps));
+                                            queueSize, realFps));
 #endif
         inputs.emplace_back(std::move(newSrc));
     }

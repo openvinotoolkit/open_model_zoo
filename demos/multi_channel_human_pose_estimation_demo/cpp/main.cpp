@@ -194,43 +194,36 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-
-        // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
         slog::info << ov::get_openvino_version() << slog::endl;
+
+        ov::runtime::Core core;
         struct {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        IEGraph::InitParams graphParams;
-        graphParams.batchSize       = FLAGS_bs;
-        graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = FLAGS_m;
-        graphParams.deviceName      = FLAGS_d;
-        graphParams.postReadFunc    = [&postParams](std::shared_ptr<ov::Function>& model) {
-                                        postParams.pafsOut = model->outputs()[0];
-                                        postParams.heatMapsOut = model->outputs()[1];
-                                        const ov::Layout outLayout{"NCHW"};
-                                        model = ov::preprocess::PrePostProcessor(model)
-                                            .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                                                .set_layout(outLayout)
-                                                .set_element_type(ov::element::f32)))
-                                            .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                                                .set_layout(outLayout)
-                                                .set_element_type(ov::element::f32)))
-                                            .build();
-                                        postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
-                                        postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
-                                        postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
-                                        postParams.heatMapsWidth = postParams.heatMapsOut.get_shape()[ov::layout::width_idx(outLayout)];
-                                        postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
-                                        postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
-                                    };
-
-        IEGraph graph(graphParams);
-        auto inputShape = graph.getInputShape();
+        IEGraph graph(FLAGS_m, FLAGS_d, core, FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
+            postParams.pafsOut = model->outputs()[0];
+            postParams.heatMapsOut = model->outputs()[1];
+            const ov::Layout outLayout{"NCHW"};
+            model = ov::preprocess::PrePostProcessor(model)
+                .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                    .set_layout(outLayout)
+                    .set_element_type(ov::element::f32)))
+                .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                    .set_layout(outLayout)
+                    .set_element_type(ov::element::f32)))
+                .build();
+            postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
+            postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
+            postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
+            postParams.heatMapsWidth = postParams.heatMapsOut.get_shape()[ov::layout::width_idx(outLayout)];
+            postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
+            postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
+        });
+        ov::Shape inputShape = graph.getInputShape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
@@ -277,8 +270,6 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
-        std::vector<std::shared_ptr<VideoFrame>> batchRes;
-
         std::mutex statMutex;
         std::stringstream statStream;
 
@@ -304,6 +295,7 @@ int main(int argc, char* argv[]) {
 
         output.start();
 
+        std::vector<std::shared_ptr<VideoFrame>> batchRes;
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
@@ -316,7 +308,7 @@ int main(int argc, char* argv[]) {
             while (readData) {
                 auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
-                    break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
+                    break;  // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
                 for (size_t i = 0; i < br.size(); i++) {
                     // this approach waits for the next input image for sourceIdx. If provided a single image,
@@ -369,6 +361,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
     return 0;
 }

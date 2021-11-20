@@ -16,7 +16,6 @@
 #include <memory>
 
 #include <openvino/openvino.hpp>
-
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 #include "perf_timer.hpp"
@@ -30,13 +29,7 @@ class IEGraph{
 private:
     PerfTimer perfTimerPreprocess;
     PerfTimer perfTimerInfer;
-
-    float confidenceThreshold;
-
     std::size_t batchSize;
-
-    std::string modelPath;
-    ov::runtime::Core core;
     std::queue<ov::runtime::InferRequest> availableRequests;
 
     struct BatchRequestDesc {
@@ -58,19 +51,12 @@ private:
     GetterFunc getter;
     using PostprocessingFunc = std::function<std::vector<Detections>(ov::runtime::InferRequest, cv::Size)>;
     PostprocessingFunc postprocessing;
-    using PostReadFunc = std::function<void (std::shared_ptr<ov::Function>)>;
+    using PostReadFunc = std::function<void (std::shared_ptr<ov::Function>&)>;
     PostReadFunc postRead;
     std::thread getterThread;
 public:
-    struct InitParams {
-        std::size_t batchSize = 1;
-        bool collectStats = false;
-        std::string modelPath;
-        std::string deviceName;
-        PostReadFunc postReadFunc = nullptr;
-    };
-
-    explicit IEGraph(const InitParams& p);
+    explicit IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
+        bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc = nullptr);
 
     void start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 
@@ -79,10 +65,6 @@ public:
     ov::Shape getInputShape();
 
     std::vector<std::shared_ptr<VideoFrame>> getBatchData(cv::Size windowSize);
-
-    unsigned int getBatchSize() const;
-
-    void setDetectionConfidence(float conf);
 
     ~IEGraph();
 

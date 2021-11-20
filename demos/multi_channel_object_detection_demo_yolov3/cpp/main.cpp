@@ -308,29 +308,23 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
         slog::info << ov::get_openvino_version() << slog::endl;
-        std::vector<std::pair<size_t, YoloParams>> yoloParams;
-        IEGraph::InitParams graphParams;
-        graphParams.batchSize       = FLAGS_bs;
-        graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = FLAGS_m;
-        graphParams.deviceName      = FLAGS_d;
-        graphParams.postReadFunc    = [&yoloParams](std::shared_ptr<ov::Function> model) {
-                                        for (const ov::Output<ov::Node>& out : model->outputs()) {
-                                            const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
-                                            if (!regionYolo) {
-                                                throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
-                                            }
-                                            yoloParams.emplace_back(out.get_index(), regionYolo);
-                                        }
-                                    };
 
-        IEGraph graph(graphParams);
-        auto inputShape = graph.getInputShape();
+        ov::runtime::Core core;
+        std::vector<std::pair<size_t, YoloParams>> yoloParams;
+        IEGraph graph(FLAGS_m, FLAGS_d, core, FLAGS_show_stats, 1, [&yoloParams](std::shared_ptr<ov::Function>& model) {
+            for (const ov::Output<ov::Node>& out : model->outputs()) {
+                const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
+                if (!regionYolo) {
+                    throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                }
+                yoloParams.emplace_back(out.get_index(), regionYolo);
+            }
+        });
+        ov::Shape inputShape = graph.getInputShape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
@@ -393,10 +387,6 @@ int main(int argc, char* argv[]) {
             return detections;
         });
 
-        graph.setDetectionConfidence(static_cast<float>(FLAGS_t));
-
-        std::vector<std::shared_ptr<VideoFrame>> batchRes;
-
         std::mutex statMutex;
         std::stringstream statStream;
 
@@ -421,6 +411,7 @@ int main(int argc, char* argv[]) {
 
         output.start();
 
+        std::vector<std::shared_ptr<VideoFrame>> batchRes;
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
@@ -433,9 +424,11 @@ int main(int argc, char* argv[]) {
             while (readData) {
                 auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
-                    break;
+                    break;  // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
                 for (size_t i = 0; i < br.size(); i++) {
+                    // this approach waits for the next input image for sourceIdx. If provided a single image,
+                    // it may not show results, especially if -real_input_fps is enabled
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {
@@ -485,6 +478,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
     return 0;
 }
