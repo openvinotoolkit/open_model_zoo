@@ -19,12 +19,16 @@
 #include <opencv2/core/core.hpp>
 #include <utils/performance_metrics.hpp>
 
-class VideoFrame {  // VideoFrame can represent not a single image but the whole grid
+// VideoFrame can represent not a single image but the whole grid
+class VideoFrame {
 public:
     typedef std::shared_ptr<VideoFrame> Ptr;
 
     VideoFrame(unsigned sourceID, int64_t frameId, const cv::Mat& frame = cv::Mat()) :
-        sourceID{sourceID}, frameId{frameId}, frame{frame} {}
+        sourceID{sourceID}, frameId{frameId}, frame{frame}
+    {
+        return;
+    }
     virtual ~VideoFrame() = default;  // A user has to define how it is reconstructed
 
     const unsigned sourceID;
@@ -44,6 +48,7 @@ public:
     virtual void process() = 0;
     virtual ~Task() = default;
 
+    std::string name;
     VideoFrame::Ptr sharedVideoFrame;  // it is possible that two tasks try to draw on the same cvMat
     const float priority;
 };
@@ -124,7 +129,11 @@ private:
 void tryPush(const std::weak_ptr<Worker>& worker, std::shared_ptr<Task>&& task) {
     try {
         std::shared_ptr<Worker>(worker)->push(task);
-    } catch (const std::bad_weak_ptr&) {}
+    }
+    catch (const std::bad_weak_ptr& e)
+    {
+        throw e;
+    }
 }
 
 template <class C> class ConcurrentContainer {
