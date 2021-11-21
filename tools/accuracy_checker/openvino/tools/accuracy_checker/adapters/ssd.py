@@ -100,6 +100,7 @@ class PyTorchSSDDecoder(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
+        self.outputs_verified = False
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
@@ -114,6 +115,11 @@ class PyTorchSSDDecoder(Adapter):
         self.strides = [3, 3, 2, 2, 2, 2]
         self.scale_xy = 0.1
         self.scale_wh = 0.2
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
 
     @staticmethod
     def softmax(x, axis=0):
@@ -155,6 +161,8 @@ class PyTorchSSDDecoder(Adapter):
         """
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         batch_scores = raw_outputs[self.scores_out]
         batch_boxes = raw_outputs[self.boxes_out]

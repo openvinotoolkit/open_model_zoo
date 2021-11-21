@@ -82,10 +82,18 @@ class TextDetectionAdapter(Adapter):
         self.pixel_class_confidence_threshold = self.get_value_from_config('pixel_class_confidence_threshold')
         self.min_area = self.get_value_from_config('min_area')
         self.min_height = self.get_value_from_config('min_height')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.pixel_link_out = self.check_output_name(self.pixel_link_out, outputs)
+        self.pixel_class_out = self.check_output_name(self.pixel_class_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         results = []
         predictions = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(predictions)
 
         def _input_parameters(input_meta):
             input_shape = next(iter(input_meta.get('input_shape').values()))
@@ -286,9 +294,17 @@ class EASTTextDetectionAdapter(Adapter):
         self.box_thresh = self.get_value_from_config('box_threshold')
         if isinstance(Polygon, UnsupportedPackage):
             Polygon.raise_error(self.__provider__)
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.score_map_out = self.check_output_name(self.score_map_out, outputs)
+        self.geometry_map_out = self.check_output_name(self.geometry_map_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         score_maps = raw_outputs[self.score_map_out]
         geometry_maps = raw_outputs[self.geometry_map_out]
         is_nchw = score_maps.shape[1] == 1

@@ -13,7 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+#pylint:disable=no-name-in-module
+#pylint:disable=package-absolute-imports
 import multiprocessing
 from pathlib import Path
 import re
@@ -42,7 +43,7 @@ from ..utils import (
 )
 from .launcher import Launcher
 from ..logging import print_info
-from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
+from .input_feeder import PRECISION_TO_DTYPE
 
 
 format_map = {

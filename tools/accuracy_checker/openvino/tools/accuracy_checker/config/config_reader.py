@@ -347,40 +347,11 @@ class ConfigReader:
         profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
 
         def merge_models(config, arguments, update_launcher_entry):
-            def provide_models(launchers):
-                for launcher in launchers:
-                    if input_precisions:
-                        launcher['_input_precision'] = input_precisions
-                    if input_layout:
-                        launcher['_input_layout'] = input_layout
-                if 'models' not in arguments or not arguments.models:
-                    return launchers
-                model_paths = arguments.models
-                updated_launchers = []
-                model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
-                for launcher in launchers:
-                    if contains_any(launcher, ACCEPTABLE_MODEL):
-                        updated_launchers.append(launcher)
-                        continue
-                    for model_path in model_paths:
-                        copy_launcher = copy.deepcopy(launcher)
-                        copy_launcher['model'] = model_path
-                        if 'model_type' in arguments:
-                            copy_launcher['_model_type'] = arguments.model_type
-                        if launcher['framework'] in ['dlsdk', 'openvino', 'g-api'] and 'model_is_blob' in arguments:
-                            copy_launcher['_model_is_blob'] = arguments.model_is_blob
-                            if arguments.model_is_blob:
-                                copy_launcher['_model_type'] = 'blob'
-                        updated_launchers.append(copy_launcher)
-                return updated_launchers
-
-            input_precisions = arguments.input_precision if 'input_precision' in arguments else None
-            input_layout = arguments.layout if 'layout' in arguments else None
 
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
-                model['launchers'] = provide_models(model['launchers'])
+                model['launchers'] = provide_models(model['launchers'], arguments)
 
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry, arguments)
@@ -941,3 +912,40 @@ def merge_device_configs(launcher_entry, device_config_file):
             embedded_device_config[key].update(value)
     launcher_entry['device_config'] = embedded_device_config
     return launcher_entry
+
+
+def provide_precision_and_layout(launchers, input_precisions, input_layouts):
+    for launcher in launchers:
+        if input_precisions:
+            launcher['_input_precision'] = input_precisions
+        if input_layouts:
+            launcher['_input_layout'] = input_layouts
+
+
+def provide_model_type(launcher, arguments):
+    if 'model_type' in arguments:
+        launcher['_model_type'] = arguments.model_type
+    if launcher['framework'] in ['dlsdk', 'openvino', 'g-api'] and 'model_is_blob' in arguments:
+        launcher['_model_is_blob'] = arguments.model_is_blob
+        if arguments.model_is_blob:
+            launcher['_model_type'] = 'blob'
+
+def provide_models(launchers, arguments):
+    input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+    input_layout = arguments.layout if 'layout' in arguments else None
+    provide_precision_and_layout(launchers, input_precisions, input_layout)
+    if 'models' not in arguments or not arguments.models:
+        return launchers
+    model_paths = arguments.models
+    updated_launchers = []
+    model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
+    for launcher in launchers:
+        if contains_any(launcher, ACCEPTABLE_MODEL):
+            updated_launchers.append(launcher)
+            continue
+        for model_path in model_paths:
+            copy_launcher = copy.deepcopy(launcher)
+            copy_launcher['model'] = model_path
+            provide_model_type(copy_launcher, arguments)
+            updated_launchers.append(copy_launcher)
+    return updated_launchers

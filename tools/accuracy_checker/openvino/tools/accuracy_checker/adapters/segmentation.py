@@ -151,11 +151,20 @@ class BrainTumorSegmentationAdapter(Adapter):
         self.segmentation_out = self.get_value_from_config('segmentation_out')
         if self.segmentation_out:
             self.segmentation_out_bias = self.segmentation_out + '/add_'
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        if self.segmentation_out:
+            self.segmentation_out = self.check_output_name(self.segmentation_out, outputs)
+            self.segmentation_out_bias = self.check_output_name(self.segmentation_out_bias, outputs)
+        self.output_verified = True
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.output_verified:
+            self.select_output_blob(raw_outputs)
         if self.segmentation_out:
             if not contains_any(raw_outputs, [self.segmentation_out, self.segmentation_out_bias]):
                 raise ConfigError('segmentation output not found')

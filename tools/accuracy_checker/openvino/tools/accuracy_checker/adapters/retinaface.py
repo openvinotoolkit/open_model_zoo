@@ -82,9 +82,21 @@ class RetinaFaceAdapter(Adapter):
         else:
             self.landmark_std = 1.0
         self._anchor_plane_cache = {}
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        def generate_out_names(list_names, outputs):
+            return [self.check_output_name(out, outputs) for out in list_names]
+        self.bboxes_output = generate_out_names(self.bboxes_output, outputs)
+        self.scores_output = generate_out_names(self.scores_output, outputs)
+        self.landmarks_output = generate_out_names(self.landmarks_output, outputs)
+        self.type_scores_output = generate_out_names(self.type_scores_output, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_predictions)
         raw_predictions = self._repack_data_according_layout(raw_predictions, frame_meta[0])
         results = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
@@ -356,9 +368,19 @@ class RetinaFacePyTorchAdapter(Adapter):
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.variance = [0.1, 0.2]
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.bboxes_output = self.check_output_name(self.bboxes_output, outputs)
+        self.scores_output = self.check_output_name(self.scores_output, outputs)
+        if self.landmarks_output:
+            self.landmarks_output = self.check_output_name(self.landmarks_output, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_predictions)
         results = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
             image_size = meta['image_info'][:2]

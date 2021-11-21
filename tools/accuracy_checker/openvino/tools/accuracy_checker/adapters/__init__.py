@@ -51,7 +51,6 @@ from .attributes_recognition import (
 from .reidentification import ReidAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
-    MTCNNPAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter,
     FaceDetectionAdapter,
@@ -62,6 +61,7 @@ from .detection import (
     UltraLightweightFaceDetectionAdapter,
     PPDetectionAdapter
 )
+from .mtcnn import MTCNNPAdapter
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
     PersonVehicleDetectionRefinementAdapter
@@ -133,7 +133,6 @@ __all__ = [
     'ClassificationAdapter',
 
     'TFObjectDetectionAPIAdapter',
-    'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
     'RetinaNetTF2',
@@ -152,6 +151,7 @@ __all__ = [
     'UltraLightweightFaceDetectionAdapter',
     'PPDetectionAdapter',
     'FacialLandmarksAdapter',
+    'MTCNNPAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',

@@ -59,6 +59,7 @@ class HeadPoseEstimatorAdapter(Adapter):
         self.angle_yaw = self.get_value_from_config('angle_yaw')
         self.angle_pitch = self.get_value_from_config('angle_pitch')
         self.angle_roll = self.get_value_from_config('angle_roll')
+        self.outputs_verified = False
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -71,6 +72,8 @@ class HeadPoseEstimatorAdapter(Adapter):
         """
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
         for identifier, yaw, pitch, roll in zip(
                 identifiers,
                 raw_output[self.angle_yaw],
@@ -85,6 +88,12 @@ class HeadPoseEstimatorAdapter(Adapter):
             result.append(prediction)
 
         return result
+
+    def select_output_blob(self, outputs):
+        self.check_output_name(self.angle_yaw, outputs)
+        self.check_output_name(self.angle_pitch, outputs)
+        self.check_output_name(self.angle_roll, outputs)
+        self.outputs_verified = True
 
 
 class VehicleAttributesRecognitionAdapter(Adapter):
@@ -112,10 +121,13 @@ class VehicleAttributesRecognitionAdapter(Adapter):
         """
         self.color_out = self.get_value_from_config('color_out')
         self.type_out = self.get_value_from_config('type_out')
+        self.outputs_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         res = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
         for identifier, colors, types in zip(identifiers, raw_output[self.color_out], raw_output[self.type_out]):
             res.append(ContainerPrediction({
                 'color': ClassificationPrediction(identifier, colors.reshape(-1)),
@@ -123,6 +135,11 @@ class VehicleAttributesRecognitionAdapter(Adapter):
             }))
 
         return res
+
+    def select_output_blob(self, outputs):
+        self.check_output_name(self.color_out, outputs)
+        self.check_output_name(self.type_out, outputs)
+        self.outputs_verified = True
 
 
 class AgeGenderAdapter(Adapter):
@@ -141,6 +158,7 @@ class AgeGenderAdapter(Adapter):
     def configure(self):
         self.age_out = self.get_value_from_config('age_out')
         self.gender_out = self.get_value_from_config('gender_out')
+        self.outputs_verified = False
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, **kwargs):
@@ -166,6 +184,8 @@ class AgeGenderAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
         for identifier, age, gender in zip(identifiers, raw_output[self.age_out], raw_output[self.gender_out]):
             gender = gender.reshape(-1)
             age = age.reshape(-1)[0]*100
@@ -177,6 +197,11 @@ class AgeGenderAdapter(Adapter):
             }))
 
         return result
+
+    def select_output_blob(self, outputs):
+        self.age_out = self.check_output_name(self.age_out, outputs)
+        self.gender_out = self.check_output_name(self.gender_out, outputs)
+        self.outputs_verified = True
 
 
 class AgeRecognitionAdapter(Adapter):
@@ -193,6 +218,7 @@ class AgeRecognitionAdapter(Adapter):
 
     def configure(self):
         self.age_out = self.get_value_from_config('age_out')
+        self.output_verified = False
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, **kwargs):
@@ -218,8 +244,8 @@ class AgeRecognitionAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_output)
-        self.age_out = self.age_out or self.output_blob
+        if not self.output_verified:
+            self.select_output_blob(raw_output)
         prediction = raw_output[self.age_out]
         for identifier, output in zip(identifiers, prediction):
             age = np.argmax(output)
@@ -230,6 +256,15 @@ class AgeRecognitionAdapter(Adapter):
             }))
 
         return result
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.age_out:
+            self.age_out = self.check_output_name(self.age_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.age_out = self.output_blob
+        return
 
 
 class LandmarksRegressionAdapter(Adapter):

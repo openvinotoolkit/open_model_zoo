@@ -42,6 +42,13 @@ class CTDETAdapter(Adapter):
         self.center_heatmap_out = self.get_value_from_config('center_heatmap_out')
         self.width_height_out = self.get_value_from_config('width_height_out')
         self.regression_out = self.get_value_from_config('regression_out')
+        self.outpus_verified = False
+
+    def select_output_blob(self, outputs):
+        self.center_heatmap_out = self.check_output_name(self.center_heatmap_out, outputs)
+        self.width_height_out = self.check_output_name(self.width_height_out, outputs)
+        self.regression_out = self.check_output_name(self.regression_out, outputs)
+        self.outpus_verified = True
 
     @staticmethod
     def _gather_feat(feat, ind):
@@ -125,6 +132,8 @@ class CTDETAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         predictions_batch = self._extract_predictions(raw, frame_meta)
+        if not self.outpus_verified:
+            self.select_output_blob(predictions_batch)
         hm_batch = predictions_batch[self.center_heatmap_out]
         wh_batch = predictions_batch[self.width_height_out]
         reg_batch = predictions_batch[self.regression_out]

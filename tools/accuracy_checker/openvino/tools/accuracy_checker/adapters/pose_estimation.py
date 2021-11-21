@@ -74,9 +74,22 @@ class HumanPoseAdapter(Adapter):
                 )
             self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
             self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.outputs_verified = True
+        if self.concat_out:
+            self.concat_out = self.check_output_name(self.concat_out, outputs)
+            return
+        self.part_affinity_fields = self.check_output_name(self.part_affinity_fields, outputs)
+        self.keypoints_heatmap = self.check_output_name(self.keypoints_heatmap, outputs)
+        self._keypoints_heatmap_bias = self.check_output_name(self._keypoints_heatmap_bias, outputs)
+        self._part_affinity_fields_bias = self.check_output_name(self._part_affinity_fields_bias, outputs)
 
     def process(self, raw, identifiers, frame_meta):
         result = []
+        if not self.outputs_verified:
+            self.select_output_blob(raw)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:
             if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fields_bias]):
@@ -444,12 +457,21 @@ class StackedHourGlassNetworkAdapter(Adapter):
 
     def configure(self):
         self.score_map_out = self.get_value_from_config('score_map_output')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.score_map_out:
+            self.score_map_out = self.check_output_name(self.score_map_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.score_map_out = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if self.score_map_out is None:
+        if not self.output_verified:
             self.select_output_blob(raw_outputs)
-            self.score_map_out = self.output_blob
         score_map_batch = raw_outputs[self.score_map_out]
         result = []
         for identifier, score_map, meta in zip(identifiers, score_map_batch, frame_meta):

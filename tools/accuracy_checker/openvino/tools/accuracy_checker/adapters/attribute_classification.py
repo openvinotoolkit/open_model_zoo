@@ -42,12 +42,20 @@ class AttributeClassificationAdapter(Adapter):
     def configure(self):
         super().configure()
         self.output_layers = self.get_value_from_config('output_layer_map')
+        self.outputs_verified = False
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, **kwargs):
         return super().validate_config(
             config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
         )
+
+    def select_output_blob(self, outputs):
+        new_output_layers = {}
+        for attr, layer_name in self.output_layers.items():
+            new_output_layers[attr] = self.check_output_name(layer_name, outputs)
+        self.output_layers = new_output_layers
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -61,6 +69,8 @@ class AttributeClassificationAdapter(Adapter):
         result = []
         if isinstance(raw, dict):
             raw = [raw]
+        if not self.outputs_verified:
+            self.select_output_blob(raw)
         for identifier, raw_output in zip(identifiers, raw):
             container_dict = {}
             for layer_name, attribute in self.output_layers.items():

@@ -276,12 +276,11 @@ class ModelEvaluator(BaseEvaluator):
         metric_config = self._configure_metrics(kwargs, output_callback)
         dataset_iterator = iter(enumerate(self.dataset))
         if hasattr(self.launcher, 'get_infer_queue'):
-            self.process_dataset_async_infer_queue(
+            return self.process_dataset_async_infer_queue(
                 dataset_iterator, metric_config, progress_reporter, stored_predictions,
                 **kwargs
             )
-        else:
-            self.process_dataset_async_requests(
+        return self.process_dataset_async_requests(
                 dataset_iterator, metric_config, progress_reporter, stored_predictions,
                 **kwargs
             )
