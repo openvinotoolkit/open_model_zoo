@@ -13,9 +13,9 @@ struct MemState {
 #include <algorithm>
 #define PSAPI_VERSION 2
 #include <system_error>
-#include <windows.h>
-#include <pdhmsg.h>
-#include <psapi.h>
+#include <Windows.h>
+#include <PdhMsg.h>
+#include <Psapi.h>
 
 namespace {
 double getMemTotal() {
