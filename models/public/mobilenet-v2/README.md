@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[MobileNet V2](https://arxiv.org/abs/1801.04381)
+[MobileNet V2](https://arxiv.org/abs/1801.04381) is image classification model.
 
 ## Specification
 

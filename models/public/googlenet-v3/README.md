@@ -50,7 +50,7 @@ Expected color order: `BGR`.
 Object classifier according to ImageNet classes, name: `InceptionV3/Predictions/Softmax`, shape: `1, 1001` in `B, C` format, where:
 
 - `B` - batch size
-- `C` - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+- `C` - vector of probabilities for all dataset classes in [0, 1] range (0 class is background).
 
 ## Download a Model and Convert it into Inference Engine Format
 
