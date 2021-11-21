@@ -101,6 +101,7 @@ setup(
     extras_require={
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),
+        'paddle': read_text('requirements-paddle.in')
     },
     cmdclass={
         'build_py': CustomBuild,
