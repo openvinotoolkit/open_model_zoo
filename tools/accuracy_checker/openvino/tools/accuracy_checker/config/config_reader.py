@@ -596,12 +596,18 @@ def create_command_line_mapping(config, default_value, value_map=None):
 def filtered(launcher, targets, args):
     target_tags = args.get('target_tags') or []
     target_backends = args.get('target_backends')
+    use_new_api = args.get('use_new_api', False)
+    target_framework = args.get('target_framework', '')
+    if target_framework and target_framework == 'dlsdk' and use_new_api:
+        target_framework = 'openvino'
     if target_tags:
         if not contains_any(target_tags, launcher.get('tags', [])):
             return True
 
     config_framework = launcher['framework'].lower()
-    target_framework = (args.get('target_framework') or config_framework).lower()
+    if not target_framework:
+        target_framework = config_framework
+    target_framework = target_framework.lower()
     if config_framework != target_framework:
         return True
 
@@ -843,6 +849,11 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
     if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
+    if 'use_new_api' in arguments:
+        if launcher_entry['framework'].lower() == 'dlsdk' and arguments.use_new_api:
+            launcher_entry['framework'] = 'openvino'
+        elif launcher_entry['framework'].lower() == 'openvino' and not arguments.use_new_api:
+            launcher_entry['framework'] = 'dlsdk'
 
     launcher_entry.update(update_launcher_entry)
     _convert_models_args(launcher_entry)
@@ -929,6 +940,7 @@ def provide_model_type(launcher, arguments):
         launcher['_model_is_blob'] = arguments.model_is_blob
         if arguments.model_is_blob:
             launcher['_model_type'] = 'blob'
+
 
 def provide_models(launchers, arguments):
     input_precisions = arguments.input_precision if 'input_precision' in arguments else None

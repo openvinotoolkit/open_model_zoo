@@ -348,6 +348,10 @@ def add_openvino_specific_args(parser):
              'static - convert undefined shapes to static before execution',
         required=False, default='default'
     )
+    openvino_specific_args.add_argument(
+        '--use_new_api', type=cast_to_bool, help='switch to processing using OpenVINO 2.0 API', required=False,
+        default=False
+    )
 
 
 def build_arguments_parser():
