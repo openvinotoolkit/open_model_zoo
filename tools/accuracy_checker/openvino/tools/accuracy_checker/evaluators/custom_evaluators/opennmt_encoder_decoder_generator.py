@@ -491,7 +491,7 @@ class OpenNMTModel(BaseModel):
         self._decoder_predictions = [] if self.store_decoder_predictions else None
         self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder, 'generator': self.generator}
         self._raw_outs = OrderedDict()
-        self.adapter = create_adapter(network_info.get('adapter', 'nmt'))
+        self.adapter = create_adapter(launcher.config.get('adapter', 'nmt'))
 
         self.beams = 5
         self.pad = 1
@@ -503,11 +503,12 @@ class OpenNMTModel(BaseModel):
         self.min_length = 0
         self.batch = 1
 
-        self.alpha = 0
-        self.beta = 0
-        self.length_penalty = None
-        self.coverage_penalty = None
-        self.global_scorer = GNMTGlobalScorer(self.alpha, self.beta, self.length_penalty, self.coverage_penalty)
+        # self.alpha = 0
+        # self.beta = 0
+        # self.length_penalty = None
+        # self.coverage_penalty = None
+        # self.global_scorer = GNMTGlobalScorer(self.alpha, self.beta, self.length_penalty, self.coverage_penalty)
+        self.global_scorer = None
         self.src_vocabs = []
 
     def predict(self, identifiers, input_data, encoder_callback=None):
@@ -532,13 +533,17 @@ class OpenNMTModel(BaseModel):
             ban_unk_token=False,
         )
 
-
         for data in input_data:
+            # for model in (self.encoder, self.decoder, self.generator):
+            #     model.release()
+            #     model.initialize()
+
             # encoder_state, memory, src_len = self.encoder.predict(identifiers, data)
             # encoder_state -> (h, c)
             # h, c, memory, src_len = self.encoder.predict(identifiers, data)
             h, c, memory, src_len = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
-                                                                       'src_len': np.array([len(data),])})
+                                                                       'src_len.1': np.array([len(data),])})
+            # print(src_len)
             if encoder_callback:
                 encoder_callback((h, c, memory, src_len))
             if self.store_encoder_predictions:
@@ -637,99 +642,6 @@ class OpenNMTModel(BaseModel):
             # raw_outputs.append(raw_output)
             # predictions.append(prediction)
         return raw_outputs, predictions
-
-    # def _decode_and_generate(
-    #     self,
-    #     identifiers,
-    #     decoder_in,
-    #     memory_bank,
-    #     batch,
-    #     src_vocabs,
-    #     memory_lengths,
-    #     src_map=None,
-    #     step=None,
-    #     batch_offset=None,
-    # ):
-    #     # if self.copy_attn:
-    #     #     # Turn any copied words into UNKs.
-    #     #     decoder_in = decoder_in.masked_fill(
-    #     #         decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
-    #     #     )
-    #
-    #     # Decoder forward, takes [tgt_len, batch, nfeats] as input
-    #     # and [src_len, batch, hidden] as memory_bank
-    #     # in case of inference tgt_len = 1, batch = beam times batch_size
-    #     # in case of Gold Scoring tgt_len = actual length, batch = 1 batch
-    #
-    #     # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
-    #     # input_feed_batch, _ = input_feed.size()
-    #     # _, tgt_batch, _ = decoder_in.size()
-    #     # # aeq(tgt_batch, input_feed_batch)
-    #     # # END Additional args check.
-    #     #
-    #     # dec_state = self.model.decoder.state["hidden"]
-    #     # coverage = self.model.decoder.state["coverage"].squeeze(0) \
-    #     #     if self.model.decoder.state["coverage"] is not None else None
-    #     #
-    #     # # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
-    #     # #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-    #     # #     input_feed=input_feed, hidden=dec_state, coverage=coverage
-    #     # # )
-    #     # dec_out, dec_attn, dec_hidden, dec_input_feed = self.model.decoder(
-    #     #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-    #     #     input_feed=input_feed, hidden=dec_state
-    #     # )
-    #     #
-    #     # self.model.decoder.state["hidden"] = dec_hidden
-    #     # self.model.decoder.state["input_feed"] = dec_input_feed
-    #     # # self.model.decoder.state["coverage"] = dec_coverage
-    #     #
-    #     # # IMPORTANT^^^^^^
-    #     # # hidden_in = (h0, c0)
-    #     # # hidden_out = (h1, c1)
-    #
-    #     output, attn = self.decoder.predict(identifiers, (decoder_in, memory_bank, memory_lengths))
-    #
-    #     # Generator forward.
-    #     # if not self.copy_attn:
-    #     #     if "std" in dec_attn:
-    #     #         attn = dec_attn["std"]
-    #     #     else:
-    #     #         attn = None
-    #     #     log_probs = self.model.generator(dec_out.squeeze(0))
-    #     #
-    #     #     # returns [(batch_size x beam_size) , vocab ] when 1 step
-    #     #     # or [ tgt_len, batch_size, vocab ] when full sentence
-    #     # else:
-    #     #     # attn = dec_attn["copy"]
-    #     #     # scores = self.model.generator(
-    #     #     #     dec_out.view(-1, dec_out.size(2)),
-    #     #     #     attn.view(-1, attn.size(2)),
-    #     #     #     src_map,
-    #     #     # )
-    #     #     # # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
-    #     #     # if batch_offset is None:
-    #     #     #     scores = scores.view(-1, batch.batch_size, scores.size(-1))
-    #     #     #     scores = scores.transpose(0, 1).contiguous()
-    #     #     # else:
-    #     #     #     scores = scores.view(-1, self.beam_size, scores.size(-1))
-    #     #     # scores = collapse_copy_scores(
-    #     #     #     scores,
-    #     #     #     batch,
-    #     #     #     self._tgt_vocab,
-    #     #     #     src_vocabs,
-    #     #     #     batch_dim=0,
-    #     #     #     batch_offset=batch_offset,
-    #     #     # )
-    #     #     # scores = scores.view(decoder_in.size(0), -1, scores.size(-1))
-    #     #     # log_probs = scores.squeeze(0).log()
-    #     #     # # returns [(batch_size x beam_size) , vocab ] when 1 step
-    #     #     # # or [ tgt_len, batch_size, vocab ] when full sentence
-    #     #     pass
-    #
-    #     log_probs = self.generator.predict(identifiers, (output, ))
-    #
-    #     return log_probs[0], attn
 
     def reset(self):
         self.processing_frames_buffer = []
@@ -1261,14 +1173,14 @@ class BeamSearchBase(DecodeStrategy):
         self._prev_penalty = None
         self._coverage = None
 
-        self._stepwise_cov_pen = (
-            stepwise_penalty and self.global_scorer.has_cov_pen)
-        self._vanilla_cov_pen = (
-            not stepwise_penalty and self.global_scorer.has_cov_pen)
-        self._cov_pen = self.global_scorer.has_cov_pen
-        # self._stepwise_cov_pen = False
-        # self._vanilla_cov_pen = False
-        # self._cov_pen = False
+        # self._stepwise_cov_pen = (
+        #     stepwise_penalty and self.global_scorer.has_cov_pen)
+        # self._vanilla_cov_pen = (
+        #     not stepwise_penalty and self.global_scorer.has_cov_pen)
+        # self._cov_pen = self.global_scorer.has_cov_pen
+        self._stepwise_cov_pen = False
+        self._vanilla_cov_pen = False
+        self._cov_pen = False
 
         self.memory_lengths = None
 
@@ -1481,8 +1393,9 @@ class BeamSearchBase(DecodeStrategy):
         log_probs += self.topk_log_probs.view().reshape((_B * self.beam_size, 1))
         # if the sequence ends now, then the penalty is the current
         # length + 1, to include the EOS token
-        length_penalty = self.global_scorer.length_penalty(
-            step + 1, alpha=self.global_scorer.alpha)
+        # length_penalty = self.global_scorer.length_penalty(
+        #     step + 1, alpha=self.global_scorer.alpha)
+        length_penalty = 1
 
         curr_scores = log_probs / length_penalty
 
@@ -1561,8 +1474,6 @@ class BeamSearch(BeamSearchBase):
         (fn_map_state, memory_bank, src_map,
             target_prefix) = self.initialize_tile(
                 memory_bank, src_lengths, src_map, target_prefix)
-        # if device is None:
-        #     device = self.get_device_from_memory_bank(memory_bank)
         device = None
 
         super(BeamSearch, self).initialize_(
@@ -1570,24 +1481,36 @@ class BeamSearch(BeamSearchBase):
 
         return fn_map_state, memory_bank, self.memory_lengths, src_map
 
+class CommonOpenNMTDecoder(StatefulModel):
+    hidden_size = 500
+
+    def init_state(self, encoder_final):
+        self.state = {}
+        self.state["h"] = encoder_final[0]
+        self.state["c"] = encoder_final[1]
+
+        batch_size = self.state["h"].shape[1]
+        h_size = (batch_size, self.hidden_size)
+        self.state["input_feed"] = np.expand_dims(np.zeros(h_size, dtype=np.float32), 0)
+
+    def map_state(self, fn):
+        for key in self.state_names:
+            self.state[key] = fn(self.state[key], 1)
+
+    def preprocess_state(self, name, value):
+        return value.squeeze(0) if name == "input_feed" else value
+
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
-    input_layers = ['src', 'src_len',]
-    output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
-    return_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
-
-    # def fit_to_input(self, input_data):
-    #     if isinstance(input_data, list):
-    #         src = np.array(input_data)
-    #         src_len = np.array([len(input_data),])
-    #         for _ in range(2):
-    #             src = np.expand_dims(src, -1)
-    #         input_data = {'src': src, 'src_len': src_len}
-    #     return super().fit_to_input(input_data)
+    input_layers = ['src', 'src_len.1',]
+    # output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
+    # return_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
+    output_layers = ['state.0', 'state.1', 'memory', 'Convert_297', ]
+    return_layers = ['state.0', 'state.1', 'memory', 'Convert_297', ]
 
 
-class DecoderDLSDKModel(StatefulModel, CommonDLSDKModel):
+class DecoderDLSDKModel(CommonOpenNMTDecoder, CommonDLSDKModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
     output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
@@ -1596,282 +1519,37 @@ class DecoderDLSDKModel(StatefulModel, CommonDLSDKModel):
     state_inputs = ['h_0', 'c_0', 'input_feed.1']
     state_outputs = ['h_1', 'c_1', 'input_feed']
 
-    hidden_size = 500
-
-#     def fit_to_input(self, input_data):
-#         if isinstance(input_data, tuple):
-#             # input, memory_bank, mem_lengths
-#             input_data = {'input': input_data[0], 'memory': input_data[1], 'mem_len': input_data[2]}
-# # fill state & reshape model later in parents classes call
-#         return super().fit_to_input(input_data)
-
-    def init_state(self, encoder_final):
-        self.state = {}
-        self.state["h"] = encoder_final[0]
-        self.state["c"] = encoder_final[1]
-
-        # Init the input feed.
-        # batch_size = self.state["hidden"][0].shape[1]
-        batch_size = self.state["h"].shape[1]
-        h_size = (batch_size, self.hidden_size)
-        # self.state["input_feed"] = self.state["hidden"][0].data.new(*h_size).zero_().unsqueeze(0)
-        self.state["input_feed"] = np.expand_dims(np.zeros(h_size), 0)
-        # self.state["coverage"] = None
-
-    def map_state(self, fn):
-        for key in self.state_names:
-            self.state[key] = fn(self.state[key], 1)
-
-
-        # self.state["hidden"] = tuple(fn(h, 1) for h in self.state["hidden"])
-        # self.state["input_feed"] = fn(self.state["input_feed"], 1)
-        # if self._coverage and self.state["coverage"] is not None:
-        #     self.state["coverage"] = fn(self.state["coverage"], 1)
-
-    # def detach_state(self):
-    #     self.state["hidden"] = tuple(h.detach() for h in self.state["hidden"])
-    #     self.state["input_feed"] = self.state["input_feed"].detach()
-    def preprocess_state(self, name, value):
-        return value.squeeze(0) if name == "input_feed" else value
-
-    # def predict(self, identifiers, input_data, callback=None):
-    #     input_data = self.fit_to_input(input_data)
-    #     results = self.exec_network.infer(input_data)
-    #     return (results['state.0'], results['state.1']), results['memory'], results['src_len']
-
-    # def predict(self, input, memory_bank, mem_lengths):
-    #     # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
-    #     input_feed = self.state['input_feed'].squeeze(0)
-    #
-    #     # input_feed_batch, _ = input_feed.size()
-    #     # _, tgt_batch, _ = decoder_in.size()
-    #     # # aeq(tgt_batch, input_feed_batch)
-    #     # # END Additional args check.
-    #
-    #     h_0 = self.state["hidden"][0]
-    #     c_0 = self.state['hidden'][1]
-    #
-    #     # coverage = self.model.decoder.state["coverage"].squeeze(0) \
-    #     #     if self.model.decoder.state["coverage"] is not None else None
-    #
-    #     # dec_out, dec_attn, dec_hidden, dec_input_feed, dec_coverage = self.model.decoder(
-    #     #     decoder_in, memory_bank, memory_lengths=memory_lengths, step=step,
-    #     #     input_feed=input_feed, hidden=dec_state, coverage=coverage
-    #     # )
-    #
-    #     input_data = {'c_0': c_0,
-    #                   'h_0': h_0,
-    #                   'input': input,
-    #                   'input_feed.1': input_feed,
-    #                   'mem_len': mem_lengths,
-    #                   'memory': memory_bank}
-    #     results = self.exec_network.infer(input_data)
-    #
-    #     # output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-    #
-    #     # self.model.decoder.state["hidden"] = dec_hidden
-    #     # self.model.decoder.state["input_feed"] = dec_input_feed
-    #
-    #     self.state["hidden"] = (results["h_1"], results["c_1"])
-    #     self.state["input_feed"] = results["input_feed"]
-    #
-    #     return results["attn"], results["output"]
 
 class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
 
-    # def fit_to_input(self, input_data):
-    #     if isinstance(input_data, tuple):
-    #         input_data = {'input': input_data[0].squeeze()}
-    #     # fill state & reshape model later in parents classes call
-    #     return super().fit_to_input(input_data)
-
-    # def predict(self, dec_output):
-    #     input_data = {'input': dec_output}
-    #     results = self.exec_network.infer(input_data)
-    #     return results['output']
-
-class GNMTGlobalScorer(object):
-    """NMT re-ranking.
-
-    Args:
-       alpha (float): Length parameter.
-       beta (float):  Coverage parameter.
-       length_penalty (str): Length penalty strategy.
-       coverage_penalty (str): Coverage penalty strategy.
-
-    Attributes:
-        alpha (float): See above.
-        beta (float): See above.
-        length_penalty (callable): See :class:`penalties.PenaltyBuilder`.
-        coverage_penalty (callable): See :class:`penalties.PenaltyBuilder`.
-        has_cov_pen (bool): See :class:`penalties.PenaltyBuilder`.
-        has_len_pen (bool): See :class:`penalties.PenaltyBuilder`.
-    """
-
-    @classmethod
-    def from_opt(cls, opt):
-        return cls(
-            opt.alpha,
-            opt.beta,
-            opt.length_penalty,
-            opt.coverage_penalty)
-
-    def __init__(self, alpha, beta, length_penalty, coverage_penalty):
-        # self._validate(alpha, beta, length_penalty, coverage_penalty)
-        self.alpha = alpha
-        self.beta = beta
-        penalty_builder = PenaltyBuilder(coverage_penalty, length_penalty)
-        self.has_cov_pen = penalty_builder.has_cov_pen
-        # Term will be subtracted from probability
-        self.cov_penalty = penalty_builder.coverage_penalty
-
-        self.has_len_pen = penalty_builder.has_len_pen
-        # Probability will be divided by this
-        self.length_penalty = penalty_builder.length_penalty
-
-    @classmethod
-    def _validate(cls, alpha, beta, length_penalty, coverage_penalty):
-        # these warnings indicate that either the alpha/beta
-        # forces a penalty to be a no-op, or a penalty is a no-op but
-        # the alpha/beta would suggest otherwise.
-        if length_penalty is None or length_penalty == "none":
-            if alpha != 0:
-                print_info("Non-default `alpha` with no length penalty. `alpha` has no effect.")
-        else:
-            # using some length penalty
-            if length_penalty == "wu" and alpha == 0.:
-                print_info("Using length penalty Wu with alpha==0 is equivalent to using length penalty none.")
-        if coverage_penalty is None or coverage_penalty == "none":
-            if beta != 0:
-                print_info("Non-default `beta` with no coverage penalty. `beta` has no effect.")
-        else:
-            # using some coverage penalty
-            if beta == 0.:
-                print_info("Non-default coverage penalty with beta==0 is equivalent to using coverage penalty none.")
-
-class PenaltyBuilder(object):
-    """Returns the Length and Coverage Penalty function for Beam Search.
-
-    Args:
-        length_pen (str): option name of length pen
-        cov_pen (str): option name of cov pen
-
-    Attributes:
-        has_cov_pen (bool): Whether coverage penalty is None (applying it
-            is a no-op). Note that the converse isn't true. Setting beta
-            to 0 should force coverage length to be a no-op.
-        has_len_pen (bool): Whether length penalty is None (applying it
-            is a no-op). Note that the converse isn't true. Setting alpha
-            to 1 should force length penalty to be a no-op.
-        coverage_penalty (callable[[FloatTensor, float], FloatTensor]):
-            Calculates the coverage penalty.
-        length_penalty (callable[[int, float], float]): Calculates
-            the length penalty.
-    """
-
-    def __init__(self, cov_pen, length_pen):
-        self.has_cov_pen = not self._pen_is_none(cov_pen)
-        self.coverage_penalty = self._coverage_penalty(cov_pen)
-        self.has_len_pen = not self._pen_is_none(length_pen)
-        self.length_penalty = self._length_penalty(length_pen)
-
-    @staticmethod
-    def _pen_is_none(pen):
-        return pen == "none" or pen is None
-
-    def _coverage_penalty(self, cov_pen):
-        if cov_pen == "wu":
-            return self.coverage_wu
-        elif cov_pen == "summary":
-            return self.coverage_summary
-        elif self._pen_is_none(cov_pen):
-            return self.coverage_none
-        else:
-            raise NotImplementedError("No '{:s}' coverage penalty.".format(
-                cov_pen))
-
-    def _length_penalty(self, length_pen):
-        if length_pen == "wu":
-            return self.length_wu
-        elif length_pen == "avg":
-            return self.length_average
-        elif self._pen_is_none(length_pen):
-            return self.length_none
-        else:
-            raise NotImplementedError("No '{:s}' length penalty.".format(
-                length_pen))
-
-    # Below are all the different penalty terms implemented so far.
-    # Subtract coverage penalty from topk log probs.
-    # Divide topk log probs by length penalty.
-
-    def coverage_wu(self, cov, beta=0.):
-        """GNMT coverage re-ranking score.
-
-        See "Google's Neural Machine Translation System" :cite:`wu2016google`.
-        ``cov`` is expected to be sized ``(*, seq_len)``, where ``*`` is
-        probably ``batch_size x beam_size`` but could be several
-        dimensions like ``(batch_size, beam_size)``. If ``cov`` is attention,
-        then the ``seq_len`` axis probably sums to (almost) 1.
-        """
-
-        # penalty = -torch.min(cov, cov.clone().fill_(1.0)).log().sum(-1)
-        penalty = -np.min(cov, cov.clone().fill_(1.0)).log().sum(-1)
-        return beta * penalty
-
-    def coverage_summary(self, cov, beta=0.):
-        """Our summary penalty."""
-        # penalty = torch.max(cov, cov.clone().fill_(1.0)).sum(-1)
-        penalty = np.max(cov, cov.clone().fill_(1.0)).sum(-1)
-        penalty -= cov.size(-1)
-        return beta * penalty
-
-    def coverage_none(self, cov, beta=0.):
-        """Returns zero as penalty"""
-        # none = torch.zeros((1,), device=cov.device,
-        #                    dtype=torch.float)
-        none = np.zeros((1,), dtype=np.float)
-        if cov.dim() == 3:
-            none = np.expand_dims(none)
-        return none
-
-    def length_wu(self, cur_len, alpha=0.):
-        """GNMT length re-ranking score.
-
-        See "Google's Neural Machine Translation System" :cite:`wu2016google`.
-        """
-
-        return ((5 + cur_len) / 6.0) ** alpha
-
-    def length_average(self, cur_len, alpha=0.):
-        """Returns the current sequence length."""
-        return cur_len
-
-    def length_none(self, cur_len, alpha=0.):
-        """Returns unmodified scores."""
-        return 1.0
-
 
 class CommonONNXModel(BaseModel):
     default_model_suffix = 'encoder'
+    input_layers = []
+    output_layers = []
+    return_layers = []
 
     def __init__(self, network_info, launcher, *args, **kwargs):
         super().__init__(network_info, launcher)
         model = self.automatic_model_search(network_info)
         self.inference_session = launcher.create_inference_session(str(model))
-        self.input_blob = next(iter(self.inference_session.get_inputs()))
-        self.output_blob = next(iter(self.inference_session.get_outputs()))
+        self.input_blobs = self.inference_session.get_inputs()
+        self.output_blobs = self.inference_session.get_outputs()
 
     def predict(self, identifiers, input_data, callback=None):
         fitted = self.fit_to_input(input_data)
-        results = self.inference_session.run((self.output_blob.name, ), fitted)
-        return results, results[0]
+        names = tuple([blob.name for blob in self.output_blobs])
+        # results = self.inference_session.run(names, fitted)
+        results = dict(zip(names, self.inference_session.run(names, fitted)))
+        self.propagate_output(results)
+        names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
+        return tuple([results[name] for name in names])
 
     def fit_to_input(self, input_data):
-        return {self.input_blob.name: input_data[0]}
+        return {blob.name: input_data[blob.name] for blob in self.input_blobs}
 
     def release(self):
         del self.inference_session
@@ -1896,45 +1574,186 @@ class CommonONNXModel(BaseModel):
 
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
-    input_layers = ['src', 'src_len',]
-    output_layers = ['memory', 'src_len', 'state.0', 'state.1']
+    input_layers = ['src', 'src_len']
+    output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
 
 
-class DecoderONNXModel(CommonONNXModel):
+class DecoderONNXModel(CommonOpenNMTDecoder, CommonONNXModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
     output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-
-    def predict(self, input, memory_bank, mem_lengths):
-        # input_feed = self.model.decoder.state["input_feed"].squeeze(0)
-        input_feed = self.state['input_feed'].squeeze(0)
-
-        h_0 = self.state["hidden"][0]
-        c_0 = self.state['hidden'][1]
-
-        input_data = {'c_0': c_0,
-                      'h_0': h_0,
-                      'input': input,
-                      'input_feed.1': input_feed,
-                      'mem_len': mem_lengths,
-                      'memory': memory_bank}
-
-        results = self.inference_session.run((self.output_blob.name, ), input_data)
-
-        self.state["hidden"] = (results["h_1"], results["c_1"])
-        self.state["input_feed"] = results["input_feed"]
-
-        return results["attn"], results["output"]
+    return_layers = ['output', 'attn']
+    state_names = ['h', 'c', 'input_feed']
+    state_inputs = ['h_0', 'c_0', 'input_feed.1']
+    state_outputs = ['h_1', 'c_1', 'input_feed']
 
 class GeneratorONNXModel(CommonONNXModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
 
-    def predict(self, dec_output):
-        input_data = {'input': dec_output}
-        results = self.inference_session.run((self.output_blob.name, ), input_data)
-        return results['output']
+#
+# class GNMTGlobalScorer(object):
+#     """NMT re-ranking.
+#
+#     Args:
+#        alpha (float): Length parameter.
+#        beta (float):  Coverage parameter.
+#        length_penalty (str): Length penalty strategy.
+#        coverage_penalty (str): Coverage penalty strategy.
+#
+#     Attributes:
+#         alpha (float): See above.
+#         beta (float): See above.
+#         length_penalty (callable): See :class:`penalties.PenaltyBuilder`.
+#         coverage_penalty (callable): See :class:`penalties.PenaltyBuilder`.
+#         has_cov_pen (bool): See :class:`penalties.PenaltyBuilder`.
+#         has_len_pen (bool): See :class:`penalties.PenaltyBuilder`.
+#     """
+#
+#     @classmethod
+#     def from_opt(cls, opt):
+#         return cls(
+#             opt.alpha,
+#             opt.beta,
+#             opt.length_penalty,
+#             opt.coverage_penalty)
+#
+#     def __init__(self, alpha, beta, length_penalty, coverage_penalty):
+#         # self._validate(alpha, beta, length_penalty, coverage_penalty)
+#         self.alpha = alpha
+#         self.beta = beta
+#         penalty_builder = PenaltyBuilder(coverage_penalty, length_penalty)
+#         self.has_cov_pen = penalty_builder.has_cov_pen
+#         # Term will be subtracted from probability
+#         self.cov_penalty = penalty_builder.coverage_penalty
+#
+#         self.has_len_pen = penalty_builder.has_len_pen
+#         # Probability will be divided by this
+#         self.length_penalty = penalty_builder.length_penalty
+#
+#     @classmethod
+#     def _validate(cls, alpha, beta, length_penalty, coverage_penalty):
+#         # these warnings indicate that either the alpha/beta
+#         # forces a penalty to be a no-op, or a penalty is a no-op but
+#         # the alpha/beta would suggest otherwise.
+#         if length_penalty is None or length_penalty == "none":
+#             if alpha != 0:
+#                 print_info("Non-default `alpha` with no length penalty. `alpha` has no effect.")
+#         else:
+#             # using some length penalty
+#             if length_penalty == "wu" and alpha == 0.:
+#                 print_info("Using length penalty Wu with alpha==0 is equivalent to using length penalty none.")
+#         if coverage_penalty is None or coverage_penalty == "none":
+#             if beta != 0:
+#                 print_info("Non-default `beta` with no coverage penalty. `beta` has no effect.")
+#         else:
+#             # using some coverage penalty
+#             if beta == 0.:
+#                 print_info("Non-default coverage penalty with beta==0 is equivalent to using coverage penalty none.")
+#
+# class PenaltyBuilder(object):
+#     """Returns the Length and Coverage Penalty function for Beam Search.
+#
+#     Args:
+#         length_pen (str): option name of length pen
+#         cov_pen (str): option name of cov pen
+#
+#     Attributes:
+#         has_cov_pen (bool): Whether coverage penalty is None (applying it
+#             is a no-op). Note that the converse isn't true. Setting beta
+#             to 0 should force coverage length to be a no-op.
+#         has_len_pen (bool): Whether length penalty is None (applying it
+#             is a no-op). Note that the converse isn't true. Setting alpha
+#             to 1 should force length penalty to be a no-op.
+#         coverage_penalty (callable[[FloatTensor, float], FloatTensor]):
+#             Calculates the coverage penalty.
+#         length_penalty (callable[[int, float], float]): Calculates
+#             the length penalty.
+#     """
+#
+#     def __init__(self, cov_pen, length_pen):
+#         self.has_cov_pen = not self._pen_is_none(cov_pen)
+#         self.coverage_penalty = self._coverage_penalty(cov_pen)
+#         self.has_len_pen = not self._pen_is_none(length_pen)
+#         self.length_penalty = self._length_penalty(length_pen)
+#
+#     @staticmethod
+#     def _pen_is_none(pen):
+#         return pen == "none" or pen is None
+#
+#     def _coverage_penalty(self, cov_pen):
+#         if cov_pen == "wu":
+#             return self.coverage_wu
+#         elif cov_pen == "summary":
+#             return self.coverage_summary
+#         elif self._pen_is_none(cov_pen):
+#             return self.coverage_none
+#         else:
+#             raise NotImplementedError("No '{:s}' coverage penalty.".format(
+#                 cov_pen))
+#
+#     def _length_penalty(self, length_pen):
+#         if length_pen == "wu":
+#             return self.length_wu
+#         elif length_pen == "avg":
+#             return self.length_average
+#         elif self._pen_is_none(length_pen):
+#             return self.length_none
+#         else:
+#             raise NotImplementedError("No '{:s}' length penalty.".format(
+#                 length_pen))
+#
+#     # Below are all the different penalty terms implemented so far.
+#     # Subtract coverage penalty from topk log probs.
+#     # Divide topk log probs by length penalty.
+#
+#     def coverage_wu(self, cov, beta=0.):
+#         """GNMT coverage re-ranking score.
+#
+#         See "Google's Neural Machine Translation System" :cite:`wu2016google`.
+#         ``cov`` is expected to be sized ``(*, seq_len)``, where ``*`` is
+#         probably ``batch_size x beam_size`` but could be several
+#         dimensions like ``(batch_size, beam_size)``. If ``cov`` is attention,
+#         then the ``seq_len`` axis probably sums to (almost) 1.
+#         """
+#
+#         # penalty = -torch.min(cov, cov.clone().fill_(1.0)).log().sum(-1)
+#         penalty = -np.min(cov, cov.clone().fill_(1.0)).log().sum(-1)
+#         return beta * penalty
+#
+#     def coverage_summary(self, cov, beta=0.):
+#         """Our summary penalty."""
+#         # penalty = torch.max(cov, cov.clone().fill_(1.0)).sum(-1)
+#         penalty = np.max(cov, cov.clone().fill_(1.0)).sum(-1)
+#         penalty -= cov.size(-1)
+#         return beta * penalty
+#
+#     def coverage_none(self, cov, beta=0.):
+#         """Returns zero as penalty"""
+#         # none = torch.zeros((1,), device=cov.device,
+#         #                    dtype=torch.float)
+#         none = np.zeros((1,), dtype=np.float)
+#         if cov.dim() == 3:
+#             none = np.expand_dims(none)
+#         return none
+#
+#     def length_wu(self, cur_len, alpha=0.):
+#         """GNMT length re-ranking score.
+#
+#         See "Google's Neural Machine Translation System" :cite:`wu2016google`.
+#         """
+#
+#         return ((5 + cur_len) / 6.0) ** alpha
+#
+#     def length_average(self, cur_len, alpha=0.):
+#         """Returns the current sequence length."""
+#         return cur_len
+#
+#     def length_none(self, cur_len, alpha=0.):
+#         """Returns unmodified scores."""
+#         return 1.0
+#
 
 class DummyModel(BaseModel):
     def __init__(self, network_info, launcher):
