@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
-        IEGraph graph{FLAGS_m, FLAGS_d, core, params.count / FLAGS_bs, FLAGS_show_stats, FLAGS_bs};
+        IEGraph graph{FLAGS_m, FLAGS_d, core, roundUp(params.count, FLAGS_bs), FLAGS_show_stats, FLAGS_bs};
         ov::Shape inputShape = graph.getInputShape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");

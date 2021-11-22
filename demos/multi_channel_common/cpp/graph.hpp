@@ -21,7 +21,10 @@
 #include "perf_timer.hpp"
 #include "input.hpp"
 
-void loadImageToIEGraph(cv::Mat img, void* ie_buffer);
+static size_t roundUp(size_t enumerator, size_t denominator) {
+    assert(enumerator > 0);
+    return 1 + (enumerator - 1) / denominator;
+}
 
 class VideoFrame;
 
