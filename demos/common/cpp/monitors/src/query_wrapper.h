@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <pdh.h>
+#include <Pdh.h>
 class QueryWrapper {
 public:
     QueryWrapper();

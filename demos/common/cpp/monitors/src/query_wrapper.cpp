@@ -4,7 +4,7 @@
 
 #include "query_wrapper.h"
 
-#include <windows.h>
+#include <Windows.h>
 #include <system_error>
 
 QueryWrapper::QueryWrapper() {
