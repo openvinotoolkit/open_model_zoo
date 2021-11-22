@@ -199,12 +199,15 @@ int main(int argc, char* argv[]) {
         }
         slog::info << ov::get_openvino_version() << slog::endl;
 
+        const std::vector<std::string>& inputs = split(FLAGS_i, ',');
+        DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
+
         ov::runtime::Core core;
         struct {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        IEGraph graph(FLAGS_m, FLAGS_d, core, FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
+        IEGraph graph(FLAGS_m, FLAGS_d, core, params.count, FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
             postParams.pafsOut = model->outputs()[0];
             postParams.heatMapsOut = model->outputs()[1];
             const ov::Layout outLayout{"NCHW"};
@@ -229,7 +232,7 @@ int main(int argc, char* argv[]) {
         }
 
         VideoSources::InitParams vsParams;
-        vsParams.inputs               = FLAGS_i;
+        vsParams.inputs               = inputs;
         vsParams.loop                 = FLAGS_loop;
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
@@ -238,7 +241,6 @@ int main(int argc, char* argv[]) {
         vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
-        DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
         sources.start();
 
         size_t currentFrame = 0;

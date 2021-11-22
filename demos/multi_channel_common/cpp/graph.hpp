@@ -56,7 +56,7 @@ private:
     std::thread getterThread;
 public:
     explicit IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
-        bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc = nullptr);
+        size_t performanceHintNumRequests, bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc = nullptr);
 
     void start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 

@@ -566,7 +566,7 @@ VideoSources::VideoSources(const InitParams& p):
     collectStats(p.collectStats),
     realFps(p.realFps),
     queueSize(p.queueSize) {
-        for (const std::string& input : split(p.inputs, ','))
+        for (const std::string& input : p.inputs)
             openVideo(input, isNumeric(input), p.loop);
     }
 

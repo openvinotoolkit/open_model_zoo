@@ -88,7 +88,7 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
 }
 
 IEGraph::IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
-            bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc):
+            size_t performanceHintNumRequests, bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc):
         perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
         perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0),
         batchSize(batchSize),
@@ -115,7 +115,9 @@ IEGraph::IEGraph(const std::string& modelPath, const std::string& device, ov::ru
     if (postRead != nullptr)
         postRead(model);
     core.set_config({{"CPU_BIND_THREAD", "NO"}}, "CPU");
-    ov::runtime::ExecutableNetwork net = core.compile_model(model, device, {{"PERFORMANCE_HINT", "THROUGHPUT"}});
+    ov::runtime::ExecutableNetwork net = core.compile_model(model, device, {
+        {"PERFORMANCE_HINT", "THROUGHPUT"},
+        {"PERFORMANCE_HINT_NUM_REQUESTS", std::to_string(performanceHintNumRequests)}});
     maxRequests = net.get_metric("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
     logExecNetworkInfo(net, modelPath, device);
 

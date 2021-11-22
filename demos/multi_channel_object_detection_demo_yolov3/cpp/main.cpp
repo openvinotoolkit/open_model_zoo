@@ -313,9 +313,12 @@ int main(int argc, char* argv[]) {
         }
         slog::info << ov::get_openvino_version() << slog::endl;
 
+        const std::vector<std::string>& inputs = split(FLAGS_i, ',');
+        DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
+
         ov::runtime::Core core;
         std::vector<std::pair<size_t, YoloParams>> yoloParams;
-        IEGraph graph(FLAGS_m, FLAGS_d, core, FLAGS_show_stats, 1, [&yoloParams](std::shared_ptr<ov::Function>& model) {
+        IEGraph graph(FLAGS_m, FLAGS_d, core, params.count, FLAGS_show_stats, 1, [&yoloParams](std::shared_ptr<ov::Function>& model) {
             for (const ov::Output<ov::Node>& out : model->outputs()) {
                 const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
                 if (!regionYolo) {
@@ -330,7 +333,7 @@ int main(int argc, char* argv[]) {
         }
 
         VideoSources::InitParams vsParams;
-        vsParams.inputs               = FLAGS_i;
+        vsParams.inputs               = inputs;
         vsParams.loop                 = FLAGS_loop;
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
@@ -339,7 +342,6 @@ int main(int argc, char* argv[]) {
         vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
-        DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
         sources.start();
 
         size_t currentFrame = 0;
