@@ -91,7 +91,7 @@ class StringValue(BaseValue):
             return errors
         if not isinstance(value, str):
             errors.append(ConfigurableValueError(f'Incorrect value type {type(value)}: should be "str"'))
-        if value not in self.choices:
+        if len(self.choices)>0 and value not in self.choices:
             errors.append(ConfigurableValueError(f'Incorrect value {value}: out of allowalbe list - {self.choices}'))
         return errors
 

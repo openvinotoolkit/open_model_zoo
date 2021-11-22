@@ -48,7 +48,7 @@ class Model:
         self.outputs = self.model_adapter.get_output_layers()
         for name, parameter in self.parameters().items():
             self.__setattr__(name, parameter.default_value)
-        self.load_config(configuration)
+        self.load_config(configuration if configuration else {})
 
     @classmethod
     def get_model(cls, name):
@@ -84,12 +84,6 @@ class Model:
     def parameters(cls):
         parameters = {}
         return parameters
-
-    @classmethod
-    def info(cls):
-        for name, parameter in cls.parameters().items():
-            print(f"Attribute '{name}'")
-            print(parameter)
 
     def load_config(self, config):
         parameters = self.parameters()
