@@ -273,6 +273,7 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+  * `logits_output` - Name of the output layer of the network (Optional).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
   * `shift_labels` - shift label map ids on 1 if it represented without blank label on zero position (Optional, default False).
