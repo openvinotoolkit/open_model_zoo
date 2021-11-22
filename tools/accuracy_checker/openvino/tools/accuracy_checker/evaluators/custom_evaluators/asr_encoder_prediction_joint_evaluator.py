@@ -222,9 +222,21 @@ class CommonDLSDKModel(BaseDLSDKModel):
         return {input_blob: np.array(input_data)}
 
     def set_input_and_output(self):
-        super().set_input_and_output()
-        with_prefix = self.input_blob.startswith(self.default_model_suffix)
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
             for idx, inp in enumerate(self.input_layers):
                 self.input_layers[idx] = (
                     '_'.join([self.default_model_suffix, inp])
