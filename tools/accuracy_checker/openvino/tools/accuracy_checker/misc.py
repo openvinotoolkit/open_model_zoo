@@ -25,8 +25,8 @@ EVALUATION_MODE = {
 }
 
 
-def get_metric_references(config_path, definitions_path, subset=None, additional_info=None, return_header=True):
-    args = {'config': Path(config_path), 'definitions': Path(definitions_path)}
+def get_metric_references(config_path, definitions_path=None, subset=None, additional_info=None, return_header=True):
+    args = {'config': Path(config_path), 'definitions': Path(definitions_path) if definitions_path else None}
     if additional_info:
         args.update(additional_info)
 
