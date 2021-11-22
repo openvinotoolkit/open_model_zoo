@@ -78,7 +78,7 @@ Options:
                         character, until a designated one is found
 ```
 
-The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt`file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
+The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt` file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file, and for English it is the `<omz_dir>/data/dataset_classes/gnhk.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
 
 ```sh
 python handwritten_text_recognition_demo.py \
