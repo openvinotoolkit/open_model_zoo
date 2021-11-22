@@ -207,7 +207,7 @@ int main(int argc, char* argv[]) {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        IEGraph graph(FLAGS_m, FLAGS_d, core, params.count, FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
+        IEGraph graph(FLAGS_m, FLAGS_d, core, params.count / FLAGS_bs, FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
             postParams.pafsOut = model->outputs()[0];
             postParams.heatMapsOut = model->outputs()[1];
             const ov::Layout outLayout{"NCHW"};
