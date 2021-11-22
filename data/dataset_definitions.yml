@@ -1200,6 +1200,15 @@ datasets:
     annotation: scut_ept_recognition.pickle
     dataset_meta: scut_ept_recognition.json
 
+  - name: GNHK
+    data_source: gnhk
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: gnhk_char_list.txt
+      annotation_file: test_img_id_gt.txt
+    annotation: gnhk_recognition.pickle
+    dataset_meta: gnhk_recognition.json
+
   - name: ADEChallengeData2016
     annotation_conversion:
       converter: ade20k
