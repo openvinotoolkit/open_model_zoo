@@ -65,8 +65,6 @@ def preprocess_input(image_name, height, width):
     # [h,w] -> [c,h,w]
     img = rsz[None, :, :]
     _, h, w = img.shape
-    # normalize to range [-1, 1]
-    img = cv2.normalize(img, img, -1, 1, cv2.NORM_MINMAX)
     # right edge padding
     pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width - w)), mode='edge')
     return pad_img
