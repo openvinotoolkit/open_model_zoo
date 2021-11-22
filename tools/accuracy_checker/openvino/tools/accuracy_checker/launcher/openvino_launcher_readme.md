@@ -1,8 +1,8 @@
 # How to configure OpenVINO™ launcher
 
-OpenVINO™ launcher is one of the supported wrappers for easily launching models within Accuracy Checker tool. This launcher uses OpenVINO™ Inference Engine as inference backend and accepts for executing networks in OpenVINO™ supported formats.
-**Note:** Since OpenVINO™ 2022.1, API used as base for this launcher is deprecated, for usage new APO you can specify `--use_new_api True` in command line. More details about launcher with OpenVINO 2.0 API support can be found [here](openvino_launcher_readme.md)
-For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launchers section of your configuration file and provide following parameters:
+OpenVINO™ launcher is one of the supported wrappers for easily launching models within Accuracy Checker tool. This launcher uses OpenVINO™ Inference Engine with support API 2.0 as inference backend and accepts for executing networks in OpenVINO™ supported formats.
+
+For enabling OpenVINO™ launcher you need to add `framework: openvino` in launchers section of your configuration file and provide following parameters:
 
 * `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `GNA`, `MYRIAD`, `HDDL`,
     Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.
@@ -10,7 +10,7 @@ For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launcher
     If you have several devices in your machine, you are able to provide specific device id in such way: `<DEVICE>.<DEVICE_ID>` (e.g. `MYRIAD.1.2-ma2480`)
 
     It is possible to specify one or more devices via `-td, --target devices` command line argument. Target device will be selected from command line (in case when several devices provided, evaluations will be run one by one with all specified devices).
-* `model` - * `model` - path to model for your topology or compiled executable network. You also can provide path to directory with model for automatic model search inside directory and help to find it specifying `--model_type`. Supported model types: `xml`, `onnx`, `paddle`, `tf`, `blob`.
+* `model` - path to model for your topology or compiled executable network. You also can provide path to directory with model for automatic model search inside directory and help to find it specifying `--model_type`. Supported model types: `xml`, `onnx`, `paddle`, `tf`, `blob`.
 * `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
