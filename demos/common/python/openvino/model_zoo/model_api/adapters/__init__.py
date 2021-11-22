@@ -17,9 +17,11 @@
 
 from .openvino_adapter import create_core, OpenvinoAdapter
 from .remote_adapter import RemoteAdapter
+from .onnx_runtime_adapter import ONNXRuntimeAdapter
 
 __all__ = [
     'create_core',
     'OpenvinoAdapter',
     'RemoteAdapter',
+    'ONNXRuntimeAdapter',
 ]

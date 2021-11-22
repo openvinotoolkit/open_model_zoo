@@ -32,7 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api import models
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter, ONNXRuntimeAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -53,7 +53,7 @@ def build_argparser():
                                                         'retinaface', 'ultra_lightweight_face_detection',
                                                         'retinaface-pytorch', 'detr'))
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'remote', 'onnx'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -232,6 +232,8 @@ def print_raw_results(detections, labels, frame_id):
 
 
 def main():
+    DEMO_WINDOW_CAPTION = 'Detection Results'
+
     args = build_argparser().parse_args()
     if args.architecture_type != 'yolov4' and args.anchors:
         log.warning('The "--anchors" options works only for "-at==yolov4". Option will be omitted')
@@ -244,10 +246,15 @@ def main():
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
+        DEMO_WINDOW_CAPTION = f'{DEMO_WINDOW_CAPTION} (OpenVINO)'
     elif args.adapter == 'remote':
         log.info('Reading model {}'.format(args.model))
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
+        DEMO_WINDOW_CAPTION = f'{DEMO_WINDOW_CAPTION} (Remote Server)'
+    elif args.adapter == 'onnx':
+        model_adapter = ONNXRuntimeAdapter(args.model)
+        DEMO_WINDOW_CAPTION = f'{DEMO_WINDOW_CAPTION} (ONNX Runtime)'
 
     model = get_model(model_adapter, args)
     model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
@@ -289,7 +296,7 @@ def main():
             next_frame_id_to_show += 1
 
             if not args.no_show:
-                cv2.imshow('Detection Results', frame)
+                cv2.imshow(DEMO_WINDOW_CAPTION, frame)
                 key = cv2.waitKey(1)
 
                 ESC_KEY = 27
@@ -349,7 +356,7 @@ def main():
             video_writer.write(frame)
 
         if not args.no_show:
-            cv2.imshow('Detection Results', frame)
+            cv2.imshow(DEMO_WINDOW_CAPTION, frame)
             key = cv2.waitKey(1)
 
             ESC_KEY = 27
