@@ -206,3 +206,8 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=Non
         order = order[np.where(overlap <= thresh)[0] + 1]
 
     return keep
+
+
+def softmax(logits, axis=None):
+    exp = np.exp(logits)
+    return exp / np.sum(exp, axis=axis)

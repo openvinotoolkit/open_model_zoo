@@ -30,10 +30,11 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api import models
 from model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
 from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -44,6 +45,8 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -54,7 +57,7 @@ def build_argparser():
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=Path)
-    common_model_args.add_argument('-ntop', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
+    common_model_args.add_argument('-topk', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
     infer_args = parser.add_argument_group('Inference options')
@@ -155,22 +158,20 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     delay = int(cap.get_type() in {'VIDEO', 'CAMERA'})
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Reading model {}'.format(args.model))
-    model = models.Classification(ie, args.model, ntop=args.ntop, labels=args.labels)
+    model = models.Classification(model_adapter, topk=args.topk, labels=args.labels)
     model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
-    log_blobs_info(model)
+    model.log_layers_info()
 
-    async_pipeline = AsyncPipeline(ie, model, plugin_config,
-                                      device=args.device, max_num_requests=args.num_infer_requests)
-
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(async_pipeline.exec_net, set(parse_devices(args.device)))
+    async_pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0

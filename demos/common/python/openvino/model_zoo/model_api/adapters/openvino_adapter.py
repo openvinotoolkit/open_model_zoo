@@ -138,12 +138,22 @@ class OpenvinoAdapter(ModelAdapter):
     def await_any(self):
         self.exec_net.wait(num_requests=1)
 
-    def _get_meta_from_ngraph(self, layers_info):
+    def _get_meta_from_ngraph(self, layers_info = None):
         ng_func = ngraph.function_from_cnn(self.net)
+        get_all_layers = False
+        if layers_info is None:
+            layers_info = {}
+            get_all_layers = True
+
         for node in ng_func.get_ordered_ops():
             layer_name = node.get_friendly_name()
-            if layer_name not in layers_info.keys():
-                continue
-            layers_info[layer_name].meta = node._get_attributes()
-            layers_info[layer_name].type = node.get_type_name()
+            if get_all_layers:
+                layers_info[layer_name] = Metadata(type = node.get_type_name(), meta = node._get_attributes())
+            else:
+                if layer_name not in layers_info.keys():
+                    continue
+                layers_info[layer_name].meta = node._get_attributes()
+                layers_info[layer_name].type = node.get_type_name()
+
         return layers_info
+
