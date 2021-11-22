@@ -27,7 +27,7 @@ import numpy as np
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api import models
+from model_api.models import ImageModel, OutputTransform
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter
@@ -38,6 +38,11 @@ from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
+ARCHITECTURES = {
+    'ae': 'HPE-assosiative-embeddings',
+    'higherhrnet': 'HPE-assosiative-embeddings',
+    'openpose': 'openpose'
+}
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -99,21 +104,6 @@ def build_argparser():
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
     return parser
-
-
-def get_model(model_adapter, args, aspect_ratio):
-    if args.architecture_type == 'ae':
-        model = models.HpeAssociativeEmbedding(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                               prob_threshold=args.prob_threshold)
-    elif args.architecture_type == 'higherhrnet':
-        model = models.HpeAssociativeEmbedding(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                               prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
-    elif args.architecture_type == 'openpose':
-        model = models.OpenPose(model_adapter, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                prob_threshold=args.prob_threshold)
-    else:
-        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-    return model
 
 
 default_skeleton = ((15, 13), (13, 11), (16, 14), (14, 12), (11, 12), (5, 11), (6, 12), (5, 6),
@@ -186,13 +176,20 @@ def main():
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    model = get_model(model_adapter, args, frame.shape[1] / frame.shape[0])
+    config = {
+        'target_size': args.tsize,
+        'aspect_ratio': frame.shape[1] / frame.shape[0],
+        'prob_threshold': args.prob_threshold,
+        'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific 
+        'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific 
+    }
+    model = ImageModel.create_model(ARCHITECTURES[args.architecture_type] ,model_adapter, config)
     model.log_layers_info()
 
     hpe_pipeline = AsyncPipeline(model)
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 
-    output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+    output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
     if args.output_resolution:
         output_resolution = output_transform.new_resolution
     else:
