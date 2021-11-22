@@ -59,6 +59,16 @@ class ClassificationAdapter(Adapter):
         self.fixed_output = self.get_value_from_config('fixed_output')
         self.fixed_output_index = int(self.get_value_from_config('fixed_output_index'))
         self.label_as_array = self.get_value_from_config('label_as_array')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.classification_out:
+            self.classification_out = self.check_output_name(self.classification_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.classification_out = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -69,8 +79,8 @@ class ClassificationAdapter(Adapter):
         Returns:
             list of ClassificationPrediction objects
         """
-        if self.classification_out is not None:
-            self.output_blob = self.classification_out
+        if not self.output_verified:
+            self.select_output_blob(raw)
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
         raw_prediction = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_prediction)

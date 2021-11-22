@@ -32,12 +32,21 @@ class SalientObjectDetection(Adapter):
 
     def configure(self):
         self.salient_map_output = self.get_value_from_config('salient_map_output')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.salient_map_output:
+            self.salient_map_output = self.check_output_name(self.salient_map_output, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.salient_map_output = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
-        if self.salient_map_output is None:
+        if not self.output_verified:
             self.select_output_blob(raw_output)
-            self.salient_map_output = self.output_blob
         result = []
         for identifier, mask in zip(identifiers, raw_output[self.salient_map_output]):
             mask = 1/(1 + np.exp(-mask))

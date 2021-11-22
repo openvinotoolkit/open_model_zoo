@@ -62,14 +62,29 @@ class YolactAdapter(Adapter):
         self.proto_out = self.get_value_from_config('proto_out')
         self.conf_thresh = self.get_value_from_config('confidence_threshold')
         self.max_num_detections = self.get_value_from_config('max_detections')
+        self.outputs_verified = False
         if not self.loc_out and not self.prior_out and not self.boxes_out:
             raise ConfigError('loc_out and prior_out or boxes_out should be provided')
         if not self.boxes_out and not (self.prior_out and self.loc_out):
             raise ConfigError('both loc_out and prior_out should be provided')
 
+    def select_output_blob(self, outputs):
+        if self.loc_out:
+            self.loc_out = self.check_output_name(self.loc_out, outputs)
+        self.conf_out = self.check_output_name(self.conf_out, outputs)
+        if self.prior_out:
+            self.prior_out = self.check_output_name(self.prior_out, outputs)
+        if self.boxes_out:
+            self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.mask_out = self.check_output_name(self.mask_out, outputs)
+        self.proto_out = self.check_output_name(self.proto_out, outputs)
+        self.outputs_verified = True
+
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         for batch_id, (identifier, conf, masks, proto, meta) in enumerate(zip(
                 identifiers, raw_outputs[self.conf_out],
                 raw_outputs[self.mask_out], raw_outputs[self.proto_out], frame_meta

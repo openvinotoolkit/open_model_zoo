@@ -17,9 +17,9 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField, ConfigError
+from ..config import ConfigValidator, StringField
 from ..representation import PoseEstimationPrediction
-from ..utils import UnsupportedPackage, contains_all
+from ..utils import UnsupportedPackage
 
 try:
     from scipy.optimize import linear_sum_assignment
@@ -37,15 +37,12 @@ class AssociativeEmbeddingAdapter(Adapter):
         parameters.update({
             'heatmaps_out': StringField(
                 description="Name of output layer with keypoints heatmaps.",
-                optional=True
             ),
             'nms_heatmaps_out': StringField(
                 description="Name of output layer with keypoints heatmaps after NMS.",
-                optional=True
             ),
             'embeddings_out': StringField(
                 description="Name of output layer with associative embeddings.",
-                optional=True
             ),
         })
         return parameters
@@ -73,12 +70,19 @@ class AssociativeEmbeddingAdapter(Adapter):
             tag_threshold=1,
             use_detection_val=True,
             ignore_too_much=False)
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.heatmaps = self.check_output_name(self.heatmaps, outputs)
+        self.nms_heatmaps = self.check_output_name(self.nms_heatmaps, outputs)
+        self.embeddings = self.check_output_name(self.embeddings, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not contains_all(raw_outputs, (self.heatmaps, self.nms_heatmaps, self.embeddings)):
-            raise ConfigError('Some of the outputs are not found')
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         raw_output = zip(identifiers, raw_outputs[self.heatmaps][None],
                          raw_outputs[self.nms_heatmaps][None],
                          raw_outputs[self.embeddings][None], frame_meta)

@@ -34,10 +34,20 @@ class NoiseSuppressionAdapter(Adapter):
 
     def configure(self):
         self._output_blob = self.get_value_from_config('output_blob')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self._output_blob:
+            self._output_blob = self.check_output_name(self._output_blob, outputs)
+            return
+        super().select_output_blob(outputs)
+        self._output_blob = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
-        if self._output_blob is None:
-            self._output_blob = self.output_blob
+        if not self.output_verified:
+            self.select_output_blob(raw)
         raw_prediction = self._extract_predictions(raw, frame_meta)
         result = []
         for identifier, signal in zip(identifiers, raw_prediction[self._output_blob]):

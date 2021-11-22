@@ -297,8 +297,18 @@ class ActionDetection(Adapter):
 
         self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
         self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
-        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
-        if not contains_all(raw_outputs, self.add_conf_outs) and contains_all(raw_outputs, add_conf_with_bias):
-            self.add_conf_outs = add_conf_with_bias
-
         self.outputs_verified = True
+        if contains_all(raw_outputs, self.add_conf_outs):
+            return
+        add_conf_result = [layer_name + '/sink_port_0' for layer_name in self.add_conf_outs]
+        if contains_all(raw_outputs, add_conf_result):
+            self.add_conf_outs = add_conf_result
+            return
+        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
+        if contains_all(raw_outputs, add_conf_with_bias):
+            self.add_conf_outs = add_conf_with_bias
+            return
+        add_conf_with_bias_result = [layer_name + '/add_/sink_port_0' for layer_name in self.add_conf_outs]
+        if contains_all(raw_outputs, add_conf_with_bias_result):
+            self.add_conf_outs = add_conf_with_bias_result
+        return

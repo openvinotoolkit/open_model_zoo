@@ -25,6 +25,7 @@ DetectionLayerOutput = namedtuple(
     ['prob_name', 'reg_name', 'anchor_index', 'anchor_size', 'win_scale', 'win_length', 'win_trans_x', 'win_trans_y']
 )
 
+
 class HeadDetectionAdapter(Adapter):
     __provider__ = 'head_detection'
     predcition_types = (DetectionPrediction, )
@@ -59,6 +60,13 @@ class HeadDetectionAdapter(Adapter):
             raise ConfigError('There must be equal number of layer names, anchor sizes, '
                               'window scales, and window sizes')
         self.output_layers = self.generate_output_layer_info()
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        for out_layer in self.output_layers:
+            out_layer.prob_name = self.check_output_name(out_layer.prob_name, outputs)
+            out_layer.reg_name = self.check_output_name(out_layer.reg_name, outputs)
+        self.outputs_verified = True
 
     def generate_output_layer_info(self):
         output_layers = []
@@ -96,6 +104,8 @@ class HeadDetectionAdapter(Adapter):
         base_prob_idx = 0
         base_reg_idx = 0
         result = []
+        if not self.outputs_verified:
+            self.select_output_blob(raw)
         for batch_index, identifier in enumerate(identifiers):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             for layer in self.output_layers:

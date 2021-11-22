@@ -51,6 +51,19 @@ class Adapter(ClassProvider):
     def configure(self):
         pass
 
+    @staticmethod
+    def check_output_name(output_name, outputs, suffix='/sink_port_0'):
+        outputs = outputs[0] if isinstance(outputs, list) else outputs
+        if output_name in outputs:
+            return output_name
+        if suffix in output_name:
+            preprocessed_output_name = output_name.replace(suffix, '')
+        else:
+            preprocessed_output_name = '{}{}'.format(output_name, suffix)
+        if preprocessed_output_name in outputs:
+            return preprocessed_output_name
+        return output_name
+
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix='', **kwargs):
         if cls.__name__ == Adapter.__name__:

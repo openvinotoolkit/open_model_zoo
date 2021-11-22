@@ -30,16 +30,28 @@ class QuantilesPredictorAdapter(Adapter):
                 allow_empty=False,
                 description="preds[i]->quantile[i] mapping."
             ),
-            "output_name": StringField()
+            "output_name": StringField(optional=True, description='name of target output layer')
         })
         return parameters
 
     def configure(self):
         self.quantiles = self.get_value_from_config('quantiles')
         self.output_name = str(self.get_value_from_config('output_name'))
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.output_name:
+            self.check_output_name(self.output_name, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.output_name = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.output_verified:
+            self.select_output_blob(raw_outputs)
         output = raw_outputs[self.output_name]
         preds = TimeSeriesForecastingQuantilesPrediction(identifiers[0])
         for k, v in self.quantiles.items():

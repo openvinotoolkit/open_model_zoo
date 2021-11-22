@@ -13,15 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+#pylint:disable=no-name-in-module
+#pylint:disable=package-absolute-imports
 import multiprocessing
 from pathlib import Path
 import re
 import warnings
-from collections import OrderedDict
 import numpy as np
-import openvino.inference_engine as ie
-
+from openvino.ie_api import Core, AsyncInferQueue
+from openvino.pyopenvino import get_version
+from openvino.impl import Type, PartialShape
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
@@ -31,6 +32,7 @@ from .dlsdk_launcher_config import (
     automatic_model_search
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
+
 from ..config import ConfigError
 from ..logging import warning
 from ..utils import (
@@ -38,37 +40,44 @@ from ..utils import (
     contains_any,
     string_to_tuple,
     get_or_parse_value,
-    UnsupportedPackage
 )
 from .launcher import Launcher
 from ..logging import print_info
-from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
+from .input_feeder import PRECISION_TO_DTYPE
 
-try:
-    from openvino.inference_engine import Blob, TensorDesc  # pylint:disable=W9902
-except ImportError:
-    try:
-        # old structures names compatibilities
-        from openvino.inference_engine import IEBlob, IETensorDesc # pylint:disable=W9902
 
-        Blob = IEBlob
-        TensorDesc = IETensorDesc
-    except ImportError:
-        Blob, TensorDesc = None, None
+format_map = {
+      'f32': np.float32,
+      'i32': np.int32,
+      'i64': np.int64,
+      'fp16': np.float16,
+      'i16': np.int16,
+      'u16': np.uint16,
+      'i8': np.int8,
+      'u8': np.uint8,
+      'boolean': np.uint8
+}
 
-try:
-    import ngraph as ng
-except ImportError as error:
-    ng = UnsupportedPackage('ngraph', error)
+PRECISION_STR_TO_TYPE = {
+    'FP32': Type.f32,
+    'FP16': Type.f16,
+    'U8': Type.u8,
+    'U16': Type.u16,
+    'I8': Type.i8,
+    'I16': Type.i16,
+    'I32': Type.i32,
+    'I64': Type.i64,
+    'BOOL': Type.boolean
+}
 
 
 # pylint:disable=R0904
-class DLSDKLauncher(Launcher):
+class OpenVINOLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.
     """
 
-    __provider__ = 'dlsdk'
+    __provider__ = 'openvino'
 
     @classmethod
     def parameters(cls):
@@ -83,10 +92,12 @@ class DLSDKLauncher(Launcher):
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
-        self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
+        self.ie_core = Core()
+        if self.ie_config:
+            self.ie_core.set_config(self.ie_config)
         self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
-            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
+            'OpenVINO_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
         )
         dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
         device = self.config['device'].split('.')
@@ -101,13 +112,13 @@ class DLSDKLauncher(Launcher):
         self._preprocess_steps = []
         self.disable_resize_to_input = False
         self._do_reshape = False
-        self._use_set_blob = False
         self._output_layouts = {}
         self._output_precisions = {}
         self.dyn_input_layers = []
         self._partial_shapes = {}
         self.is_dynamic = False
         self.preprocessor = preprocessor
+        self.infer_request = None
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -122,6 +133,7 @@ class DLSDKLauncher(Launcher):
                 )
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
+            self.try_to_set_default_layout()
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._target_layout_mapping = {}
@@ -137,6 +149,21 @@ class DLSDKLauncher(Launcher):
             field_uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading).validate(
                 config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only)
 
+    def try_to_set_default_layout(self):
+        if self.get_value_from_config('_model_type') == 'tf':
+            self.default_layout = 'NHWC'
+        input_nodes = self.network.inputs if self.network else self.exec_network.inputs
+        for input_node in input_nodes:
+            shape = parse_partial_shape(input_node.get_node().partial_shape)
+            if len(shape) != 4:
+                continue
+            if shape[-1] in [1, 3, 4]:
+                self.default_layout = 'NHWC'
+                return
+        self.default_layout = 'NCHW'
+        return
+
+
     @property
     def device(self):
         return self._device
@@ -144,14 +171,10 @@ class DLSDKLauncher(Launcher):
     @property
     def inputs(self):
         if self.network is None:
-            has_info = hasattr(self.exec_network, 'input_info')
-            if not has_info:
-                return self.exec_network.inputs
-            return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
-        has_info = hasattr(self.network, 'input_info')
-        if has_info:
-            return OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
-        return self.network.inputs
+            inputs = self.exec_network.inputs
+        else:
+            inputs = self.network.inputs
+        return {input_info.get_node().friendly_name: input_info.get_node() for input_info in inputs}
 
     @property
     def batch(self):
@@ -160,7 +183,7 @@ class DLSDKLauncher(Launcher):
     @property
     def output_blob(self):
         if hasattr(self, 'original_outputs'):
-            return next(iter(self.original_outputs))
+            return next(iter(self.original_outputs)).get_node().friendly_name
         return None
 
     def predict(self, inputs, metadata=None, **kwargs):
@@ -172,32 +195,20 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
-            if self._use_set_blob:
-                has_info = hasattr(self.exec_network, 'input_info')
-                for key, input_data in infer_inputs.items():
-                    if has_info:
-                        ie_input_info = OrderedDict([
-                            (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                        ])
-                    else:
-                        ie_input_info = self.exec_network.inputs
-                    layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
-                    tensor_desc = TensorDesc(ie_input_info[key].precision, input_data.shape, layout)
-                    preprocess_info = self._preprocess_info.get(key)
-                    if preprocess_info is not None:
-                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data), preprocess_info)
-                    else:
-                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
-            result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
-            results.append(result)
+            if self.infer_request is None:
+                self.infer_request = self.exec_network.create_infer_request()
+            outputs = self.infer_request.infer(inputs=infer_inputs)
+            results.append({
+                out_node.get_node().friendly_name: out_res
+                for out_node, out_res in zip(self.exec_network.outputs, outputs)
+            })
         if self.reset_memory_state:
-            for state in self.exec_network.requests[0].query_state():
+            for state in self.infer_request.query_state():
                 state.reset()
 
         if metadata is not None:
             self._fill_meta(metadata)
         self._do_reshape = False
-        self._use_set_blob = self.disable_resize_to_input
 
         return results
 
@@ -206,7 +217,11 @@ class DLSDKLauncher(Launcher):
         results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
-            output_result = self.exec_network.infer(feed_dict)
+            out_tensors = self.exec_network.infer_new_request(feed_dict)
+            output_result = {
+                out_node.get_node().friendly_name: out_tensor
+                for out_node, out_tensor in zip(self.exec_network.outputs, out_tensors)
+            }
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
 
@@ -249,22 +264,13 @@ class DLSDKLauncher(Launcher):
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
-        automatic_affinity = self.ie_core.query_network(self.network, self._device)
+        auto_affinity = self.ie_core.query_network(self.network, self._device)
         custom_affinity = read_yaml(affinity_map_path)
         for layer in custom_affinity:
-            if layer not in automatic_affinity:
+            if layer not in auto_affinity:
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
-        if hasattr(self.network, 'layers'):
-            self._set_affinity_via_layers(custom_affinity, automatic_affinity)
-            return
-        if isinstance(ng, UnsupportedPackage):
-            ng.raise_error('affinity setting')
-        self._set_affinity_ng(custom_affinity, automatic_affinity)
-
-    def _set_affinity_ng(self, custom_affinity, auto_affinity):
-        ng_function = ng.function_from_cnn(self.network)
-        for node in ng_function.get_ordered_ops():
-            layer_name = node.get_friendly_name()
+        for node in self.network.get_ordered_ops():
+            layer_name = node.friendly_name
             device = custom_affinity.get(layer_name, auto_affinity.get(layer_name))
             if device is None:
                 continue
@@ -275,23 +281,7 @@ class DLSDKLauncher(Launcher):
                         device=device, layer=layer_name, configuration=self._device
                     )
                 )
-            rt_info = node.get_rt_info()
-            rt_info["affinity"] = device
-
-    def _set_affinity_via_layers(self, custom_affinity, automatic_affinity):
-        layers = self.network.layers
-        for layer_name in layers:
-            device = custom_affinity.get(layer_name, automatic_affinity.get(layer_name))
-            if device is None:
-                continue
-            if device not in self._devices_list():
-                raise ConfigError(
-                    'Device \'{device}\' set for \'{layer}\' layer is not present in '
-                    'provided configuration \'{configuration}\''.format(
-                        device=device, layer=layer_name, configuration=self._device
-                    )
-                )
-            layers[layer_name].affinity = device
+            node.rt_info["affinity"] = device
 
     def _is_vpu(self):
         device_list = map(lambda device: device.split('.')[0], self._devices_list())
@@ -305,7 +295,6 @@ class DLSDKLauncher(Launcher):
     def num_requests(self, num_ireq: int):
         if num_ireq != self._num_requests:
             self._num_requests = num_ireq
-            self.load_network(self.network, log=False)
 
     @property
     def async_mode(self):
@@ -321,40 +310,20 @@ class DLSDKLauncher(Launcher):
         self._async_mode = flag
 
     def get_async_requests(self):
-        return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
+        return [
+            AsyncInferRequestWrapper(ireq_id, self.exec_network.create_infer_request())
+            for ireq_id in range(self.num_requests)]
 
     def _reshape_input(self, shapes, make_dynamic=False):
         if hasattr(self, 'exec_network'):
             del self.exec_network
-        self.network.reshape(shapes)
+        if self.infer_request is not None:
+            self.infer_request = None
+        self.network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         if self.dyn_input_layers and make_dynamic:
             return
-        self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
-
-    def _set_batch_size(self, batch_size):
-        # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
-        # save const inputs without changes
-        has_info = hasattr(self.network, 'input_info')
-        if not has_info:
-            ie_input_info = self.network.inputs
-        else:
-            ie_input_info = OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
-        const_inputs_shapes = {
-            input_name: ie_input_info[input_name].shape for input_name in self.const_inputs
-        }
-        new_non_const_input_shapes = {}
-        for layer_name, layer in ie_input_info.items():
-            if layer_name in const_inputs_shapes:
-                continue
-            layer_shape = (
-                layer.shape if layer_name not in self._partial_shapes else list(self._partial_shapes[layer_name])
-            )
-            ind_batch = layer.layout.find('N')
-            if ind_batch != -1:
-                layer_shape[ind_batch] = batch_size
-            new_non_const_input_shapes[layer_name] = layer_shape
-        self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
+        self.exec_network = self.ie_core.compile_model(self.network, self.device)
 
     def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
@@ -368,23 +337,11 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
-        precision = self.inputs[input_blob].precision
-        data = data.astype(PRECISION_TO_DTYPE[precision])
-        if data_layout is not None:
-            data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
-        input_layout = self.inputs[input_blob].layout
-        layout_mismatch = (
-            data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
-        )
-        if layout_mismatch and Blob is not None and self.network is None or input_blob in self._preprocess_info:
-            self._target_layout_mapping[input_blob] = data_layout
-            self._use_set_blob = True
-            return data
         return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
         if log:
-            print_info('IE version: {}'.format(ie.get_version()))
+            print_info('IE version: {}'.format(get_version()))
         if self._is_multi():
             self._prepare_multi_device(log)
         else:
@@ -522,13 +479,11 @@ class DLSDKLauncher(Launcher):
         compiled_model = model_path.suffix == '.blob'
         if compiled_model:
             self.network = None
-            self.exec_network = self.ie_core.import_network(str(self._model), self._device)
+            self.exec_network = self.ie_core.import_model(str(self._model), self._device)
             self.original_outputs = list(self.exec_network.outputs.keys())
             has_info = hasattr(self.exec_network, 'input_info')
             if has_info:
-                ie_input_info = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
+                ie_input_info = {name: data.input_data for name, data in self.exec_network.input_info.items()}
             else:
                 ie_input_info = self.exec_network.inputs
             first_input = next(iter(ie_input_info))
@@ -552,9 +507,7 @@ class DLSDKLauncher(Launcher):
             self.network.add_outputs(preprocessed_outputs)
         if input_shapes is not None:
             self.network.reshape(input_shapes)
-        self._batch = self.config.get('batch', self.network.batch_size)
-        if self._batch != self.network.batch_size:
-            self._set_batch_size(self._batch)
+        self._batch = self.config.get('batch', 1)
         affinity_map_path = self.config.get('affinity_map')
         if affinity_map_path and self._is_hetero():
             self._set_affinity(affinity_map_path)
@@ -580,21 +533,22 @@ class DLSDKLauncher(Launcher):
             if preprocessing:
                 self._set_preprocess(preprocessing)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
-                self.exec_network = self.ie_core.load_network(
-                    self.network, self._device, num_requests=self.num_requests
+                self.exec_network = self.ie_core.compile_model(
+                    self.network, self._device
                 )
 
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
+        self.try_to_set_default_layout()
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
         if self.network:
-            self.exec_network = self.ie_core.load_network(
-                self.network, self._device, num_requests=self.num_requests
+            self.exec_network = self.ie_core.compile_model(
+                self.network, self._device
             )
 
     @staticmethod
@@ -605,35 +559,16 @@ class DLSDKLauncher(Launcher):
             return -1 in data_info.shape or not data_info.shape
 
         inputs_with_undefined_shapes = []
-        outputs_with_undefined_shapes = []
         partial_shapes = {}
         if network is None:
             return inputs_with_undefined_shapes, partial_shapes
 
-        for input_name, input_info in network.input_info.items():
-            if is_dynamic(input_info.input_data):
-                inputs_with_undefined_shapes.append(input_name)
-        for out_name, out_info in network.outputs.items():
-            if is_dynamic(out_info):
-                outputs_with_undefined_shapes.append(out_name)
-        if (inputs_with_undefined_shapes or outputs_with_undefined_shapes) and not isinstance(ng, UnsupportedPackage):
-            if hasattr(ng, 'partial_shape_from_data'):
-                for input_name in inputs_with_undefined_shapes:
-                    partial_shapes[input_name] = parse_partial_shape(ng.partial_shape_from_data(
-                        network.input_info[input_name].input_data
-                    ))
-                for out_name in outputs_with_undefined_shapes:
-                    partial_shapes[out_name] = parse_partial_shape(
-                        ng.partial_shape_from_data(network.outputs[out_name])
-                    )
-
-            else:
-                ng_function = ng.function_from_cnn(network)
-                for node in ng_function.get_ordered_ops():
-                    node_name = node.get_friendly_name()
-                    if node_name not in inputs_with_undefined_shapes:
-                        continue
-                    partial_shapes[node_name] = node.get_partial_shape()
+        for input_info in network.inputs:
+            input_node = input_info.get_node()
+            input_shape = input_node.get_partial_shape()
+            if is_dynamic(input_shape):
+                inputs_with_undefined_shapes.append(input_node.friendly_name)
+                partial_shapes[input_node.friendly_name] = input_shape
 
         return inputs_with_undefined_shapes, partial_shapes
 
@@ -644,37 +579,37 @@ class DLSDKLauncher(Launcher):
         for input_name in self.dyn_input_layers:
             partial_shape = self._partial_shapes[input_name]
             layout = self.inputs[input_name].layout
+            if str(layout) == '[...]':
+                layout = self.get_layout_from_config(input_name)
+            if not layout:
+                return False
             for dim, layout_dim in zip(partial_shape, layout):
                 if dim == -1 and layout_dim != 'N':
                     return False
         return True
 
+    def get_layout_from_config(self, input_name):
+        for input_config in self.config.get('inputs', []):
+            if input_config.get('name', '') != input_name:
+                continue
+            return input_config.get('layout', '')
+        return ''
+
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
         self.load_network(log=log)
+        self.try_to_set_default_layout()
 
     def read_network(self, model, weights):
-        if 'read_network' in ie.IECore.__dict__:
-            network = self.ie_core.read_network(model=str(model), weights=str(weights))
-        else:
-            network = ie.IENetwork(model=str(model), weights=str(weights))
+        network = self.ie_core.read_model(model=str(model), weights=str(weights))
         return network
 
     def inputs_info_for_meta(self):
-        if not self.dyn_input_layers:
-            return {
-                layer_name: layer.shape for layer_name, layer in self.inputs.items()
-                if layer_name not in self.const_inputs + self.image_info_inputs
-            }
-        input_shapes = {}
-        for layer_name, layer in self.inputs.items():
-            if layer_name in self.const_inputs + self.image_info_inputs:
-                continue
-            input_shapes[layer_name] = (
-                layer.shape if layer_name not in self.dyn_input_layers else self._partial_shapes.get(layer_name, [])
-            )
-        return input_shapes
+        return {
+            layer_name: parse_partial_shape(layer.get_partial_shape()) for layer_name, layer in self.inputs.items()
+            if layer_name not in self.const_inputs + self.image_info_inputs
+        }
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
@@ -690,7 +625,7 @@ class DLSDKLauncher(Launcher):
                 if not hasattr(self, 'exec_network') or self.exec_network is None:
                     self.is_dynamic = True
                     self.load_network(self.network)
-                self.exec_network.infer(input_data[0])
+                self.exec_network.infer_new_request(input_data[0])
                 return
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
@@ -709,12 +644,13 @@ class DLSDKLauncher(Launcher):
                     raise e
                 self.is_dynamic = False
         if not self.is_dynamic:
-            self._set_batch_size(self._batch)
             self.load_network(self.network)
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
+        if precision is None:
+            precision = format_map[self.inputs[layer_name].element_type.get_type_name()]
         if layer_name in self.dyn_input_layers:
-            layer_rang = len(self._partial_shapes[layer_name])
+            layer_rang = len(parse_partial_shape(self._partial_shapes[layer_name]))
             input_template = template.get(layer_name) if template else template
             data, l_template = self._data_to_blob_dyn(layer_rang, data, layout, input_template)
             layer_shape = data.shape
@@ -722,6 +658,7 @@ class DLSDKLauncher(Launcher):
                 template[layer_name] = l_template
         else:
             layer_shape = tuple(self.inputs[layer_name].shape)
+            precision = format_map[self.inputs[layer_name].element_type.get_type_name()]
             data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
@@ -790,15 +727,13 @@ class DLSDKLauncher(Launcher):
         return np.array(data)
 
     def _set_precision(self):
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
         config_inputs = self.config.get('inputs', [])
         for input_config in config_inputs:
             if 'precision' in input_config:
                 if self.network:
-                    if not has_info:
-                        self.network.inputs[input_config['name']].precision = input_config['precision'].upper()
-                    else:
-                        self.network.input_info[input_config['name']].precision = input_config['precision'].upper()
+                    self.inputs[input_config['name']].set_element_type(
+                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()]
+                    )
 
     def _set_input_shape(self):
         if not self.network:
@@ -813,11 +748,7 @@ class DLSDKLauncher(Launcher):
                     make_dynamic = True
         if not input_shapes:
             return
-        orig_input_shapes = {
-            input_name: input_info.shape
-            if input_name not in self._partial_shapes else self._partial_shapes[input_name]
-            for input_name, input_info in self.inputs.items()
-        }
+        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
         orig_input_shapes.update(input_shapes)
         self._reshape_input(orig_input_shapes, make_dynamic)
 
@@ -841,45 +772,26 @@ class DLSDKLauncher(Launcher):
 
     def _print_input_output_info(self):
         print_info('Input info:')
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
         if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
+            network_inputs = self.network.inputs
             network_outputs = self.network.outputs
         else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
+            network_inputs = self.exec_network.inputs
             network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info(
-                '\tshape: {}\n'.format(
-                    input_info.shape if name not in self.dyn_input_layers else self._partial_shapes.get(name, [])
-                )
-            )
+        for input_info in network_inputs:
+            input_node = input_info.get_node()
+            print_info('\tLayer name: {}'.format(input_node.friendly_name))
+            print_info('\tprecision: {}'.format(input_node.element_type.get_type_name()))
+            print_info('\tshape: {}\n'.format(parse_partial_shape(input_node.get_partial_shape())))
         print_info('Output info')
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            if not hasattr(output_info, 'is_dynamic'):
-                shape = output_info.shape
-            else:
-                if output_info.is_dynamic:
-                    shape = self._partial_shapes.get(name, [])
-                else:
-                    shape = output_info.shape
+        for output_info in network_outputs:
+            out_node = output_info.get_node()
+            print_info('\tLayer name: {}'.format(out_node.friendly_name))
+            precision = out_node.get_output_element_type(0).get_type_name()
+            print_info('\tprecision: {}'.format(precision))
+            shape = parse_partial_shape(out_node.get_output_partial_shape(0))
             print_info('\tshape: {}\n'.format(shape))
-            self._output_precisions[name] = PRECISION_TO_DTYPE[output_info.precision]
-            self._output_layouts[name] = output_info.layout
+            self._output_precisions[out_node.friendly_name] = format_map[precision]
 
     def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
@@ -904,7 +816,7 @@ class DLSDKLauncher(Launcher):
             self.load_network(self.network)
             self._preprocess_steps = preprocess_steps
             return
-        preprocess_info_by_input = OrderedDict()
+        preprocess_info_by_input = {}
         preprocess_info = preprocess.preprocess_info
         for input_name in self.inputs:
             if input_name in self.const_inputs + self.image_info_inputs:
@@ -921,14 +833,39 @@ class DLSDKLauncher(Launcher):
     def get_model_file_type(self):
         return self._model.suffix
 
+    def get_infer_queue(self, log=True):
+        if self.config.get('num_requests', 'AUTO') == 'AUTO':
+            num_requests = 0
+        else:
+            num_requests = self.num_requests
+        queue = AsyncInferQueue(self.exec_network, num_requests)
+        if log:
+            print_info('Prepared async infer queue with {} requests'.format(len(queue)))
+        return queue
+
+    def prepare_data_for_request(self,
+                                 inputs, batch_meta, batch_id, batch_input_ids,
+                                 batch_annotation, batch_identifiers):
+        infer_inputs = inputs[0]
+        if batch_meta is not None:
+            self._fill_meta(batch_meta)
+        context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
+        return infer_inputs, context
+
+    def get_result_from_request(self, request):
+        return [{
+            out.get_node().friendly_name: tensor.data for out, tensor
+            in zip(self.exec_network.outputs, request.output_tensors)}
+        ]
+
     def input_shape(self, input_name):
-        if input_name in self._partial_shapes:
-            return self._partial_shapes[input_name]
-        return self.inputs[input_name].shape
+        return parse_partial_shape(self.inputs[input_name].get_partial_shape())
 
     def release(self):
         if 'network' in self.__dict__:
             del self.network
+        if 'infer_request' in self.__dict__:
+            del self.infer_request
         if 'exec_network' in self.__dict__:
             del self.exec_network
         if 'ie_core' in self.__dict__:

@@ -69,6 +69,12 @@ def add_common_args(parser):
         required=False,
         nargs='+'
     )
+    common_args.add_argument(
+        '--layout',
+        help='Prompts how network layouts should be treated by application.'
+             'For example, "input1[NCHW],input2[NC]" or "[NCHW]" in case of one input size.',
+        required=False
+    )
 
 
 def add_config_filtration_args(parser):
@@ -289,6 +295,11 @@ def add_openvino_specific_args(parser):
         required=False
     )
     openvino_specific_args.add_argument(
+        '--model_type',
+        help='model format for automatic search (e.g. blob, xml, onnx)',
+        required=False
+    )
+    openvino_specific_args.add_argument(
         '-C', '--converted_models',
         help='directory to store Model Optimizer converted models. Used for DLSDK launcher only',
         type=partial(get_path, is_directory=True),
@@ -336,6 +347,10 @@ def add_openvino_specific_args(parser):
              'dynamic - enforce network execution with dynamic shapes, '
              'static - convert undefined shapes to static before execution',
         required=False, default='default'
+    )
+    openvino_specific_args.add_argument(
+        '--use_new_api', type=cast_to_bool, help='switch to processing using OpenVINO 2.0 API', required=False,
+        default=False
     )
 
 

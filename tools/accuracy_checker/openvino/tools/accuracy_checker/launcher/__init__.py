@@ -78,6 +78,13 @@ except ImportError as import_error:
     )
 
 try:
+    from .openvino_launcher import OpenVINOLauncher #pylint:disable=package-absolute-imports
+except ImportError as import_error:
+    OpenVINOLauncher = unsupported_launcher(
+        'openvino', "OpenVINO isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
+try:
     from .pdpd_launcher import PaddlePaddleLauncher
 except ImportError as import_error:
     PaddlePaddleLauncher = unsupported_launcher(

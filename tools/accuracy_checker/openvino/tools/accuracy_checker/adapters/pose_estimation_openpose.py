@@ -66,6 +66,7 @@ class OpenPoseAdapter(Adapter):
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
         self.concat_out = self.part_affinity_fields is None and self.keypoints_heatmap is None
+        self.outputs_verified = False
         if not self.concat_out:
             contains_both = self.part_affinity_fields is not None and self.keypoints_heatmap is not None
             if not contains_both:
@@ -81,9 +82,21 @@ class OpenPoseAdapter(Adapter):
             block_reduce.raise_error(self.__provider__)
         self.nms = HeatmapNMS(kernel=2 * int(np.round(6 / 7 * self.upscale_factor)) + 1)
 
+    def select_output_blob(self, outputs):
+        self.outputs_verified = True
+        if self.concat_out:
+            self.concat_out = self.check_output_name(self.concat_out, outputs)
+            return
+        self.part_affinity_fields = self.check_output_name(self.part_affinity_fields, outputs)
+        self.keypoints_heatmap = self.check_output_name(self.keypoints_heatmap, outputs)
+        self._keypoints_heatmap_bias = self.check_output_name(self._keypoints_heatmap_bias, outputs)
+        self._part_affinity_fields_bias = self.check_output_name(self._part_affinity_fields_bias, outputs)
+
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         if not self.concat_out:
             if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fields_bias]):
                 raise ConfigError('part affinity fields output not found')

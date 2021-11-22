@@ -1,8 +1,8 @@
 # How to configure OpenVINO™ launcher
 
-OpenVINO™ launcher is one of the supported wrappers for easily launching models within Accuracy Checker tool. This launcher uses OpenVINO™ Inference Engine as inference backend and accepts for executing networks in OpenVINO™ supported formats.
-**Note:** Since OpenVINO™ 2022.1, API used as base for this launcher is deprecated, for usage new APO you can specify `--use_new_api True` in command line. More details about launcher with OpenVINO 2.0 API support can be found [here](openvino_launcher_readme.md)
-For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launchers section of your configuration file and provide following parameters:
+OpenVINO™ launcher is one of the supported wrappers for easily launching models within Accuracy Checker tool. This launcher uses OpenVINO™ Inference Engine with support API 2.0 as inference backend and accepts for executing networks in OpenVINO™ supported formats.
+
+For enabling OpenVINO™ launcher you need to add `framework: openvino` in launchers section of your configuration file and provide following parameters:
 
 * `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `GNA`, `MYRIAD`, `HDDL`,
     Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.

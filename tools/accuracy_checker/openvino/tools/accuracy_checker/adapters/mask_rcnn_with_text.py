@@ -66,9 +66,16 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         self.texts_out = self.get_value_from_config('texts_out')
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.mask_processor = self.mask_to_result if not self.scores_out else self.mask_to_result_old
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        super().select_output_blob(outputs)
+        self.texts_out = self.check_output_name(self.texts_out, outputs)
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         classes = raw_outputs[self.classes_out]
         if self.scores_out:

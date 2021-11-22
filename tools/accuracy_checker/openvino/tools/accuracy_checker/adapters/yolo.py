@@ -1,9 +1,12 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -388,6 +391,7 @@ class YoloV3Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV3Adapter.PRECOMPUTED_ANCHORS)
         self.threshold = self.get_value_from_config('threshold')
         self.outputs = self.get_value_from_config('outputs')
+        self.outputs_verified = False
         anchor_masks = self.get_value_from_config('anchor_masks')
         self.masked_anchors = None
         if anchor_masks is not None:
@@ -423,6 +427,11 @@ class YoloV3Adapter(Adapter):
         else:
             self.processor = YoloOutputProcessor()
 
+    def select_output_blob(self, outputs):
+        upd_outputs = [self.check_output_name(out, outputs) for out in self.outputs]
+        self.outputs = upd_outputs
+        self.outputs_verified = True
+
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
@@ -435,6 +444,8 @@ class YoloV3Adapter(Adapter):
         result = []
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         batch = len(identifiers)
         out_precision = frame_meta[0].get('output_precision', {})
         out_layout = frame_meta[0].get('output_layout', {})
@@ -531,9 +542,18 @@ class YoloV3ONNX(Adapter):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.indices_out = self.get_value_from_config('indices_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.indices_out = self.check_output_name(self.indices_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         result = []
         indicies_out = raw_outputs[self.indices_out]
         if len(indicies_out.shape) == 2:
@@ -574,7 +594,13 @@ class YoloV3TF2(Adapter):
 
     def configure(self):
         self.outputs = self.get_value_from_config('outputs')
+        self.outputs_verified = False
         self.score_threshold = self.get_value_from_config('score_threshold')
+
+    def select_output_blob(self, outputs):
+        upd_outs = [self.check_output_name(out, outputs) for out in self.outputs]
+        self.outputs = upd_outs
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         result = []
@@ -582,6 +608,8 @@ class YoloV3TF2(Adapter):
         is_nchw = input_shape[1] == 3
         input_size = min(input_shape[1], input_shape[2]) if not is_nchw else min(input_shape[2], input_shape[3])
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         batch = len(identifiers)
         predictions = [[] for _ in range(batch)]
         for blob in self.outputs:
@@ -673,7 +701,7 @@ class YolorAdapter(Adapter):
                                      description="Minimal objectiveness score value for valid detections."),
             'num': NumberField(value_type=int, optional=True, min_value=1, default=5,
                                description="Num parameter from DarkNet configuration file."),
-            'output_name': StringField(optional=True, default=None, description="Name of output.")
+            'output_name': StringField(optional=True, description="Name of output.")
         })
         return parameters
 
@@ -684,6 +712,16 @@ class YolorAdapter(Adapter):
         self.expanded_strides = []
         self.grids = []
         self.img_size = []
+        self.output_verifed = False
+
+    def select_output_blob(self, outputs):
+        self.output_verifed = True
+        if self.output_name:
+            self.output_name = self.check_output_name(self.output_name, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.output_name = self.output_blob
+        return
 
     @staticmethod
     def xywh2xyxy(x):
@@ -700,9 +738,8 @@ class YolorAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_outputs)
-        self.output_name = self.output_name or self.output_blob
-
+        if not self.output_verifed:
+            self.select_output_blob(raw_outputs)
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_name], frame_meta):
             _, _, h, w = next(iter(meta.get('input_shape').values()))
             self.set_strides_grids((w, h))
