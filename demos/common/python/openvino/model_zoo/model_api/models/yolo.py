@@ -450,11 +450,11 @@ class YoloV3ONNX(DetectionModel):
             elif layer.shape[1] == self.classes:
                 scores_blob_name = name
             else:
-                raise WrapperError(self.__model__, 
+                raise WrapperError(self.__model__,
                                    "Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
                                    .format(self.classes, *[output.shape for output in self.outputs.values()]))
         if self.outputs[bboxes_blob_name].shape[1] != self.outputs[scores_blob_name].shape[2]:
-            raise WrapperError(self.__model__, 
+            raise WrapperError(self.__model__,
                                "Expected the same dimension for boxes and scores, but got {} and {}"
                                .format(self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
         return bboxes_blob_name, scores_blob_name, indices_blob_name

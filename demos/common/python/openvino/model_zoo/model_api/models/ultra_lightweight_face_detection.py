@@ -34,7 +34,7 @@ class UltraLightweightFaceDetection(DetectionModel):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise WrapperError(self.__model__, 
+            raise WrapperError(self.__model__,
                                "Expected the same second dimension for boxes and scores, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 
@@ -43,7 +43,7 @@ class UltraLightweightFaceDetection(DetectionModel):
         elif scores_layer.shape[2] == 4:
             return scores_blob_name, bboxes_blob_name
         else:
-            raise WrapperError(self.__model__, 
+            raise WrapperError(self.__model__,
                                "Expected shape [:,:,4] for bboxes output, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 

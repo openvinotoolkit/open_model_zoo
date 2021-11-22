@@ -94,9 +94,9 @@ class OpenPose(ImageModel):
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
-            'prob_threshold': NumericalValue(), 
+            'prob_threshold': NumericalValue(),
             'umpsample_ratio': NumericalValue(default_value=1, value_type=int),
-            'size_divisor': NumericalValue(default_value=8, value_type=int), 
+            'size_divisor': NumericalValue(default_value=8, value_type=int),
         })
         return parameters
 

@@ -148,7 +148,7 @@ class BertQuestionAnswering(Bert):
         parameters = super().parameters()
         parameters.update({
             'output_names': StringValue(description='Comma-separated names of output layers'),
-            'max_answer_token_num': NumericalValue(),
+            'max_answer_token_num': NumericalValue(value_type=int),
             'squad_ver': StringValue(),
         })
         return parameters

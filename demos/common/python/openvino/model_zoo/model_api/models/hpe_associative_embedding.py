@@ -72,9 +72,9 @@ class HpeAssociativeEmbedding(ImageModel):
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
-            'prob_threshold': NumericalValue(), 
+            'prob_threshold': NumericalValue(),
             'delta': NumericalValue(default_value=0.0),
-            'size_divisor': NumericalValue(default_value=32, value_type=int), 
+            'size_divisor': NumericalValue(default_value=32, value_type=int),
             'padding_mode': StringValue(default_vaue='right_bottom', choices=('center', 'right_bottom')),
         })
         return parameters
