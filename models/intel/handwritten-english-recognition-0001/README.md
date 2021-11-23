@@ -15,8 +15,10 @@ The network is able to recognize English text consisting of characters in the [G
 | ------------------------- | --------- |
 | GFlops                    | 1.3182    |
 | MParams                   | 0.1413    |
-| Accuracy on GNHK test set | 81.5%     |
+| Accuracy on GNHK test subset (excluding images wider than 2000px after resized to height 96px with aspect ratio) | 81.5%     |
 | Source framework          | PyTorch\* |
+
+> **Note:** to achieve the accuracy, images from the GNHK test set should be preprocessed into single-line text images, using the coordinates from the accompanying JSON annotation files in the GNHK dataset, and then binarized using adaptive thresholding.
 
 ## Accuracy Values
 
