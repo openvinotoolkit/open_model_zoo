@@ -110,7 +110,7 @@ def draw_labels(frame, classifications, output_transform):
     сlass_label = ""
     if classifications:
         сlass_label = classifications[0][1]
-    font_scale = 0.5
+    font_scale = 0.7
     label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
     initial_labels_pos =  frame.shape[0] - label_height * (int(1.5 * len(classifications)) + 1)
 
@@ -122,14 +122,14 @@ def draw_labels(frame, classifications, output_transform):
     header = "Label:     Score:"
     label_width = cv2.getTextSize(header, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
     put_highlighted_text(frame, header, (frame.shape[1] - label_width, offset_y),
-        cv2.FONT_HERSHEY_COMPLEX, font_scale, (153, 76, 0), 2)
+        cv2.FONT_HERSHEY_COMPLEX, font_scale, (255,0,0), 2)
 
     for idx, сlass_label, score in classifications:
         label = '{}. {}    {:.2f}'.format(idx, сlass_label, score)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
         offset_y += int(label_height * 1.5)
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
-            cv2.FONT_HERSHEY_COMPLEX, font_scale,  (204, 102, 0), 2)
+            cv2.FONT_HERSHEY_COMPLEX, font_scale, (255,0,0), 2)
     return frame
 
 
