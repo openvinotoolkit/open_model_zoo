@@ -20,7 +20,7 @@ void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::
     static const cv::Size inSize{int(shape[ov::layout::width_idx(layout)]), int(shape[ov::layout::height_idx(layout)])};
     static const size_t channels = shape[ov::layout::channels_idx(layout)];
     static const size_t batchOffset = inSize.area() * channels;
-    assert(batchSize == frames.size()]);
+    assert(batchSize == frames.size());
     assert(channels == 3);
     uint8_t* data = tensor.data<uint8_t>();
     for (size_t i = 0; i < batchSize; ++i) {

@@ -21,7 +21,7 @@
 #include "perf_timer.hpp"
 #include "input.hpp"
 
-static size_t roundUp(size_t enumerator, size_t denominator) {
+static constexpr size_t roundUp(size_t enumerator, size_t denominator) noexcept {
     assert(enumerator > 0);
     return 1 + (enumerator - 1) / denominator;
 }
