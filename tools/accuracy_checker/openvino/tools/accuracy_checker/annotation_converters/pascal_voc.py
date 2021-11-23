@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
