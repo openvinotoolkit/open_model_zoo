@@ -43,6 +43,7 @@ from ..utils import (
 from .launcher import Launcher
 from ..logging import print_info
 
+
 format_map = {
       'f32': np.float32,
       'i32': np.int32,
