@@ -14,6 +14,9 @@
 
 #include <inference_engine.hpp>
 
+#include "openvino/core/layout.hpp"
+#include "openvino/openvino.hpp"
+
 /**
 * @brief Base class of config for network
 */
@@ -28,7 +31,8 @@ struct CnnConfig {
     int max_batch_size{1};
 
     /** @brief Inference Engine */
-    InferenceEngine::Core ie;
+    // InferenceEngine::Core ie;
+    ov::runtime::Core ie;
     /** @brief Device name */
     std::string deviceName;
 };
@@ -63,7 +67,8 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void Infer(const cv::Mat& frame,
-               const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
+            //    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
+               const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& results_fetcher) const;
 
     /**
    * @brief Run network in batch mode
@@ -72,18 +77,22 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
+                    const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
     Config config_;
     /** @brief Net inputs info */
-    InferenceEngine::InputsDataMap inInfo_;
+    // InferenceEngine::InputsDataMap inInfo_;
+    ov::OutputVector inInfo_;
     /** @brief Net outputs info */
-    InferenceEngine::OutputsDataMap outInfo_;
+    // InferenceEngine::OutputsDataMap outInfo_;
+    ov::OutputVector outInfo_;
     /** @brief IE network */
-    InferenceEngine::ExecutableNetwork executable_network_;
+    // InferenceEngine::ExecutableNetwork executable_network_;
+    ov::runtime::ExecutableNetwork executable_network_;
     /** @brief IE InferRequest */
-    mutable InferenceEngine::InferRequest infer_request_;
+    // mutable InferenceEngine::InferRequest infer_request_;
+    mutable ov::runtime::InferRequest infer_request_;
     /** @brief Name of the input blob input blob */
     std::string input_blob_name_;
     /** @brief Names of output blobs */
@@ -125,7 +134,8 @@ public:
 
 class BaseCnnDetection : public AsyncAlgorithm {
 protected:
-    InferenceEngine::InferRequest::Ptr request;
+    // InferenceEngine::InferRequest::Ptr request;
+    std::shared_ptr<ov::runtime::InferRequest> request;
     const bool isAsync;
     std::string topoName;
 
@@ -134,16 +144,20 @@ public:
                               isAsync(isAsync) {}
 
     void submitRequest() override {
+        // if (request == nullptr) return;
         if (request == nullptr) return;
         if (isAsync) {
-            request->StartAsync();
+            // request->StartAsync();
+            request->start_async();
         } else {
-            request->Infer();
+            // request->Infer();
+            request->infer();
         }
     }
 
     void wait() override {
         if (!request || !isAsync) return;
-        request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+        // request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+        request->wait();
     }
 };

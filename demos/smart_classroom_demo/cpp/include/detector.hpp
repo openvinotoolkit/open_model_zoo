@@ -12,6 +12,8 @@
 
 #include "cnn.hpp"
 
+#include "openvino/openvino.hpp"
+
 namespace detection {
 
 struct DetectedObject {
@@ -39,7 +41,8 @@ struct DetectorConfig : public CnnConfig {
 class FaceDetection : public AsyncDetection<DetectedObject>, public BaseCnnDetection {
 private:
     DetectorConfig config_;
-    InferenceEngine::ExecutableNetwork net_;
+    // InferenceEngine::ExecutableNetwork net_;
+    ov::runtime::ExecutableNetwork net_;
     std::string input_name_;
     std::string output_name_;
     int max_detections_count_ = 0;

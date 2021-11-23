@@ -29,6 +29,11 @@
 #include "logger.hpp"
 #include "smart_classroom_demo.hpp"
 
+#include "openvino/core/layout.hpp"
+#include "openvino/openvino.hpp"
+
+using namespace ov::preprocess;
+
 namespace {
 
 class Visualizer {
@@ -387,10 +392,11 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     }
     return face_track_id_to_label;
 }
-
-bool checkDynamicBatchSupport(const InferenceEngine::Core& ie, const std::string& device)  {
+// bool checkDynamicBatchSupport(const InferenceEngine::Core& ie, const std::string& device)  {
+bool checkDynamicBatchSupport(const ov::runtime::Core& core, const std::string& device)  {
     try  {
-        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
+        // if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES) # oldreplaced
+        if (core.get_config(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)// ov::runtime::Parameter???
             return false;
     }
     catch(const std::exception&)  {
@@ -543,8 +549,9 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+        // slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        // InferenceEngine::Core ie;
+        ov::runtime::Core core;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
@@ -559,19 +566,23 @@ int main(int argc, char* argv[]) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
+                    // ie.AddExtension(extension_ptr, "CPU");
+                    core.add_extension(extension_ptr);
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for other plugins not CPU
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                core.set_config({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
 
             if (device.find("CPU") != std::string::npos) {
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                     InferenceEngine::PluginConfigParams::YES}}, "CPU");
             } else if (device.find("GPU") != std::string::npos) {
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                     InferenceEngine::PluginConfigParams::YES}}, "GPU");
             }
 
@@ -583,7 +594,8 @@ int main(int argc, char* argv[]) {
             // Load action detector
             ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
-            action_config.ie = ie;
+            // action_config.ie = ie;
+            action_config.ie = core;
             action_config.is_async = true;
             action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
             action_config.action_confidence_threshold = static_cast<float>(FLAGS_t_ar);
@@ -599,7 +611,7 @@ int main(int argc, char* argv[]) {
             // Load face detector
             detection::DetectorConfig face_config(fd_model_path);
             face_config.deviceName = FLAGS_d_fd;
-            face_config.ie = ie;
+            face_config.ie = core;
             face_config.is_async = true;
             face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
             face_config.input_h = FLAGS_inh_fd;
@@ -618,7 +630,8 @@ int main(int argc, char* argv[]) {
 
             detection::DetectorConfig face_registration_det_config(fd_model_path);
             face_registration_det_config.deviceName = FLAGS_d_fd;
-            face_registration_det_config.ie = ie;
+            // face_registration_det_config.ie = ie;
+            face_registration_det_config.ie = core;
             face_registration_det_config.is_async = false;
             face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
@@ -626,19 +639,23 @@ int main(int argc, char* argv[]) {
 
             CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            // if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            if (checkDynamicBatchSupport(core, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
             else
                 reid_config.max_batch_size = 1;
-            reid_config.ie = ie;
+            // reid_config.ie = ie;
+            reid_config.ie = core;
 
             CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            // if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            if (checkDynamicBatchSupport(core, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
             else
                 landmarks_config.max_batch_size = 1;
-            landmarks_config.ie = ie;
+            // landmarks_config.ie = ie;
+            landmarks_config.ie = core;
 
             face_recognizer.reset(new FaceRecognizerDefault(
                 landmarks_config, reid_config,
@@ -801,7 +818,6 @@ int main(int argc, char* argv[]) {
                             }
                         }
                     }
-
 
                     for (const auto& action : tracked_actions) {
                         auto box_color = white_color;

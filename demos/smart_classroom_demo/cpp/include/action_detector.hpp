@@ -12,6 +12,9 @@
 
 #include "cnn.hpp"
 
+#include "openvino/core/layout.hpp"
+#include "openvino/openvino.hpp"
+
 /**
 * @brief Class for detection with action info
 */
@@ -119,9 +122,11 @@ public:
 
 private:
     ActionDetectorConfig config_;
-    InferenceEngine::ExecutableNetwork net_;
+    // InferenceEngine::ExecutableNetwork net_;
+    ov::runtime::ExecutableNetwork net_;
     std::string input_name_;
-    InferenceEngine::BlobMap outputs_;
+    // InferenceEngine::BlobMap outputs_;
+    std::map<std::string, ov::runtime::Tensor> outputs_;
 
     int enqueued_frames_ = 0;
     float width_ = 0;
