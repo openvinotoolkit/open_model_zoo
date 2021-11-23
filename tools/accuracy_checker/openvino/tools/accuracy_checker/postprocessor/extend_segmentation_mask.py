@@ -60,7 +60,13 @@ class ExtendSegmentationMask(Postprocessor):
             height, width = annotation_mask.shape[-2:]
             if dst_width < width or dst_height < height:
                 warning('size for extending should be not less current mask size. resize operation will be applied')
-                annotation_.mask = self._resize(annotation_.mask, dst_height, dst_width, False)
+                pad_width = min(dst_width, width)
+                pad_height = min(dst_height, height)
+                pad = self.pad_func(dst_width, dst_height, pad_width, pad_height)
+                extended_mask = cv2.copyMakeBorder(
+                    annotation_mask, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.filling_label
+                )
+                annotation_.mask = self._resize(extended_mask, dst_height, dst_width, True)
                 continue
 
 
