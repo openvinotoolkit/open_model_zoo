@@ -32,27 +32,28 @@ class MetricsExecutor:
     Class for evaluating metrics according to dataset configuration entry.
     """
 
-    def __init__(self, metrics_config, dataset=None, state=None, ignore_dataset_meta=True):
+    def __init__(self, metrics_config, dataset=None, state=None, ignore_dataset_meta=True, postpone_metrics=False):
         self.state = state or {}
         dataset_name = dataset.name if dataset else ''
-        if not metrics_config:
-            raise ConfigError('{} dataset config must specify "{}"'.format(dataset_name, 'metrics'))
-
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
         self.profiler_dir = None
         self.profiler = None
-        if self.profile_metrics:
-            profiler_type = dataset.config.get('_report_type', 'csv')
-            self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
-            self.profiler_dir = dataset.config.get('_profiler_log_dir')
-            self.profiler.set_dataset_meta(self._dataset.metadata)
+        if not postpone_metrics:
+            if self.profile_metrics:
+                profiler_type = dataset.config.get('_report_type', 'csv')
+                self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+                self.profiler_dir = dataset.config.get('_profiler_log_dir')
+                self.profiler.set_dataset_meta(self._dataset.metadata)
 
-        self.metrics = []
-        self.need_store_predictions = False
-        self._metric_names = set()
-        for metric_config_entry in metrics_config:
-            self.register_metric(metric_config_entry, ignore_dataset_meta)
+            self.metrics = []
+            self.need_store_predictions = False
+            self._metric_names = set()
+            if not metrics_config:
+                raise ConfigError('{} dataset config must specify "{}"'.format(dataset_name, 'metrics'))
+
+            for metric_config_entry in metrics_config:
+                self.register_metric(metric_config_entry, ignore_dataset_meta)
 
     @classmethod
     def parameters(cls):
@@ -127,18 +128,12 @@ class MetricsExecutor:
         abs_threshold = 'abs_threshold'
         rel_threshold = 'rel_threshold'
         presenter = 'presenter'
-        for metric_config in  metrics:
+        for metric_config in metrics:
             metric_type = metric_config.get(type_)
             metric_cls = Metric.resolve(metric_type)
             metric_meta = metric_cls.get_common_meta()
 
             metric_identifier = metric_config.get(identifier, metric_type)
-            if metric_identifier in self._metric_names:
-                raise ConfigError(
-                    'non-unique metric identifier {}, please define metric name field with unique value'.format(
-                        metric_identifier)
-                )
-            self._metric_names.add(metric_identifier)
             metric_presenter = BasePresenter.provide(metric_config.get(presenter, 'print_scalar'))
             abs_threshold_v = metric_config.get(abs_threshold)
             rel_threshold_v = metric_config.get(rel_threshold)
@@ -150,17 +145,18 @@ class MetricsExecutor:
             profiling_file = None
             values = 0
             if reference_v is not None and isinstance(reference_v, dict):
-                values = [0] * len(reference_v)
-            result_template = EvaluationResult(name=metric_identifier,
-                    metric_type=metric_type,
-                    evaluated_value=values,
-                    reference_value=reference_v if not ignore_refs else None,
-                    abs_threshold=abs_threshold_v,
-                    rel_threshold=rel_threshold_v,
-                    meta=metric_meta,
-                    profiling_file=profiling_file
+                num_results = len(reference_v) - 1 if metric_meta.get('calculate_mean', True) else len(reference_v)
+                values = [0] * num_results
+            yield metric_presenter, EvaluationResult(
+                name=metric_identifier,
+                metric_type=metric_type,
+                evaluated_value=values,
+                reference_value=reference_v if not ignore_refs else None,
+                abs_threshold=abs_threshold_v,
+                rel_threshold=rel_threshold_v,
+                meta=metric_meta,
+                profiling_file=profiling_file
             )
-            metric_presenter.
 
     def register_metric(self, metric_config_entry, ignore_dataset_meta=False):
         type_ = 'type'

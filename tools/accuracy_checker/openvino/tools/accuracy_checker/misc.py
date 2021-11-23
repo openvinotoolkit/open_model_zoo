@@ -37,7 +37,7 @@ def get_metric_references(config_path, definitions_path=None, subset=None, addit
     report = []
     for conf in config[mode]:
         header, template_report = evaluator_class.provide_metric_references(conf, subset)
-        report.extend(template_report)
+        report.extend(template_report if isinstance(template_report, list) else [template_report])
     if return_header:
         return header, report
     return report

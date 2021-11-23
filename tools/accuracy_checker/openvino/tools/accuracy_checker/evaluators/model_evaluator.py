@@ -761,14 +761,14 @@ class ModelEvaluator(BaseEvaluator):
             self.adapter.release()
 
     @classmethod
-    def provide_metric_references(cls, conf, subset, return_header=True):
+    def provide_metric_references(cls, conf, return_header=True):
         processing_info = cls.get_processing_info(conf)
         dataset_config = conf['datasets'][0]
-        metric_dispatcher = MetricsExecutor([])
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), postpone_metrics=True)
         extracted_results, extracted_meta = [], []
         for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(
             dataset_config.get('metrics', []), False):
-            result, metadata = result_presenter.extract_result(metric_result)
+            result, metadata = result_presenter.extract_result(metric_result, names_from_refs=True)
             if isinstance(result, list):
                 extracted_results.extend(result)
                 extracted_meta.extend(metadata)

@@ -37,7 +37,7 @@ class BasePresenter(ClassProvider):
     def write_result(self, evaluation_result, ignore_results_formatting=False, ignore_metric_reference=False):
         raise NotImplementedError
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         raise NotImplementedError
 
 
@@ -57,7 +57,7 @@ class ScalarPrintPresenter(BasePresenter):
             postfix=postfix, scale=scale, result_format=result_format
         )
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         value, ref, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         if isinstance(ref, dict):
             ref = ref.get(name)
@@ -132,10 +132,16 @@ class VectorPrintPresenter(BasePresenter):
                 result_format=result_format
             )
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         value, reference, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         len_value = len(value) if not np.isscalar(value) and np.ndim(value) > 0 else 1
         value_names_orig = meta.get('names', list(range(0, len_value)))
+        if names_from_refs and isinstance(reference, dict):
+            calculate_mean = meta.get('calculate_mean', True)
+            if calculate_mean:
+                value_names_orig = [name for name in reference if name != 'mean']
+            else:
+                value_names_orig = list(reference.keys())
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]
         if np.isscalar(value) or np.size(value) <= 1:
             value_name = value_names[0] if value_names and 'names' in meta else name

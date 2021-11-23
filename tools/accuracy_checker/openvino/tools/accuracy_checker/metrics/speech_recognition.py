@@ -37,7 +37,6 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
             editdistance.raise_error(self.__provider__)
         self.words = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
@@ -52,6 +51,12 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     def reset(self):
         self.words, self.score = 0, 0
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta
+
 
 class SpeechRecognitionCER(PerImageEvaluationMetric):
     __provider__ = 'cer'
@@ -63,7 +68,6 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
             editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         cur_score = editdistance.eval(annotation.label, prediction.label)
@@ -78,6 +82,12 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
     def reset(self):
         self.length, self.score = 0, 0
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta
+
 
 class SpeechRecognitionSER(PerImageEvaluationMetric):
     __provider__ = 'ser'
@@ -88,7 +98,6 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
     def configure(self):
         self.length = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         # remove extra whitespaces
@@ -104,3 +113,9 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
 
     def reset(self):
         self.length, self.score = 0, 0
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta

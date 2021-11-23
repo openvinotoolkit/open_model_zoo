@@ -26,13 +26,6 @@ class SalienceMapMAE(PerImageEvaluationMetric):
 
     def configure(self):
         self.errors = []
-        self.meta.update({
-            'names': ['mean', 'std'],
-            'scale': 1,
-            'postfix': ' ',
-            'calculate_mean': False,
-            'target': 'higher-worse'
-        })
         self.cnt = 0
 
     def update(self, annotation, prediction):
@@ -54,6 +47,18 @@ class SalienceMapMAE(PerImageEvaluationMetric):
         self.errors = []
         self.cnt = 0
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'names': ['mean', 'std'],
+            'scale': 1,
+            'postfix': ' ',
+            'calculate_mean': False,
+            'target': 'higher-worse'
+        })
+        return meta
+
 
 class SalienceMapFMeasure(PerImageEvaluationMetric):
     __provider__ = 'salience_f-measure'
@@ -62,10 +67,6 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
 
     def configure(self):
         self.recalls, self.precisions, self.fmeasure = [], [], []
-        self.meta.update({
-            'names': ['f-measure', 'recall', 'precision'],
-            'calculate_mean': False,
-        })
 
     def update(self, annotation, prediction):
         sum_label = 2 * np.mean(prediction.mask)
@@ -97,6 +98,15 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
 
     def reset(self):
         self.recalls, self.precisions, self.fmeasure = [], [], []
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'names': ['f-measure', 'recall', 'precision'],
+            'calculate_mean': False,
+        })
+        return meta
 
 
 class SalienceEMeasure(PerImageEvaluationMetric):
