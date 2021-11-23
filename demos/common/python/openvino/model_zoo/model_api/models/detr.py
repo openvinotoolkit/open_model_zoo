@@ -55,7 +55,7 @@ class DETR(DetectionModel):
 
         x_mins, y_mins, x_maxs, y_maxs = self.box_cxcywh_to_xyxy(boxes)
 
-        scores = softmax(scores)
+        scores = np.array([softmax(logit) for logit in scores])
         labels = np.argmax(scores[:, :-1], axis=-1)
         det_scores = np.max(scores[:, :-1], axis=-1)
 

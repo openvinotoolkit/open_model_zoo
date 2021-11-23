@@ -241,8 +241,8 @@ def main():
             # Wait for empty request
             async_pipeline.await_any()
 
+    async_pipeline.await_all()
     if key not in {ord('q'), ord('Q'), ESC_KEY}:
-        async_pipeline.await_all()
         # Process completed requests
         for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
             results = async_pipeline.get_result(next_frame_id_to_show)
