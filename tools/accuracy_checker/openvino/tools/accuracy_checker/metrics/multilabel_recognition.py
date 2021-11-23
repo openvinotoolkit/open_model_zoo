@@ -119,6 +119,7 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         meta['scale'] = 1
         meta['postfix'] = ''
         meta['calculate_mean'] = False
+        return meta
 
 
 class MultiLabelAccuracy(MultiLabelMetric):

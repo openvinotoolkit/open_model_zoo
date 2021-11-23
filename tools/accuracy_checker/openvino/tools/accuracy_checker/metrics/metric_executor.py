@@ -121,7 +121,8 @@ class MetricsExecutor:
                 profiling_file=profiling_file
             )
 
-    def get_metric_result_template(self, metrics, ignore_refs):
+    @staticmethod
+    def get_metric_result_template(metrics, ignore_refs):
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'

@@ -49,9 +49,6 @@ class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
         parameters = super().parameters()
         return parameters
 
-    def configure(self):
-        super().configure()
-
     def evaluate(self, annotations, predictions):
         quantiles = list(predictions[0].preds.keys())
         quantiles.sort()

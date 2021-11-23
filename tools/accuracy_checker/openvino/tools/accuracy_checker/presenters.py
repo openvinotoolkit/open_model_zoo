@@ -138,10 +138,7 @@ class VectorPrintPresenter(BasePresenter):
         value_names_orig = meta.get('names', list(range(0, len_value)))
         if names_from_refs and isinstance(reference, dict):
             calculate_mean = meta.get('calculate_mean', True)
-            if calculate_mean:
-                value_names_orig = [name for name in reference if name != 'mean']
-            else:
-                value_names_orig = list(reference.keys())
+            value_names_orig = [name for name in reference if name != 'mean'] if calculate_mean else list(reference.keys())
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]
         if np.isscalar(value) or np.size(value) <= 1:
             value_name = value_names[0] if value_names and 'names' in meta else name

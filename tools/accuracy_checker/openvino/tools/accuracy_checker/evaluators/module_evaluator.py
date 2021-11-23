@@ -20,8 +20,6 @@ import sys
 import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
-from ..logging import warning
-from ..dataset import Dataset
 from ..presenters import generate_csv_report
 from ..metrics import MetricsExecutor
 
