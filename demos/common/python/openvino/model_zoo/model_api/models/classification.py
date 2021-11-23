@@ -15,8 +15,6 @@
 """
 
 import numpy as np
-import ngraph as ng
-from openvino.inference_engine import IENetwork
 from .utils import softmax
 
 from .image_model import ImageModel
