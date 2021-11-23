@@ -20,8 +20,9 @@ import numpy as np
 from .postprocessor import Postprocessor
 from .resize_segmentation_mask import ResizeSegmentationMask
 from ..representation import SegmentationAnnotation, SegmentationPrediction
-from ..config import NumberField, ConfigError, StringField
+from ..config import NumberField, StringField
 from ..preprocessor.geometric_transformations import padding_func
+from ..logging import warning
 
 
 class ExtendSegmentationMask(Postprocessor):
@@ -58,7 +59,10 @@ class ExtendSegmentationMask(Postprocessor):
             dst_height, dst_width = prediction_.mask.shape[-2:]
             height, width = annotation_mask.shape[-2:]
             if dst_width < width or dst_height < height:
-                raise ConfigError('size for extending should be not less current mask size')
+                warning('size for extending should be not less current mask size. resize operation will be applied')
+                annotation_.mask = self._resize(annotation_.mask, dst_height, dst_width, False)
+                continue
+
 
             pad = self.pad_func(dst_width, dst_height, width, height)
             extended_mask = cv2.copyMakeBorder(
@@ -75,18 +79,6 @@ class ExtendSegmentationMask(Postprocessor):
 
     @staticmethod
     def _deprocess_prediction(prediction, meta):
-        def _resize(entry, height, width):
-            if len(entry.shape) == 2:
-                entry = ResizeSegmentationMask.segm_resize(entry, width, height)
-                return entry
-
-            entry_mask = []
-            for class_mask in entry:
-                resized_mask = ResizeSegmentationMask.segm_resize(class_mask, width, height)
-                entry_mask.append(resized_mask)
-            entry = np.array(entry_mask)
-
-            return entry
         geom_ops = meta.get('geometric_operations', [])
         pad = geom_ops[-1].parameters['pad'] if geom_ops and geom_ops[-1].type == 'padding' else [0, 0, 0, 0]
         image_h, image_w = meta['image_size'][:2]
@@ -96,7 +88,21 @@ class ExtendSegmentationMask(Postprocessor):
             pred_mask = prediction_.mask[pad[0]:pred_w-pad[2], pad[1]:pred_h-pad[3]]
             pred_h, pred_w = pred_mask.shape[-2:]
             if (pred_h, pred_w) != (image_h, image_w):
-                pred_mask = _resize(pred_mask, image_h, image_w)
+                pred_mask = ExtendSegmentationMask._resize(pred_mask, image_h, image_w)
             prediction_.mask = pred_mask
 
         return prediction
+
+    @staticmethod
+    def _resize(entry, height, width, per_class=True):
+        if len(entry.shape) == 2 or not per_class:
+            entry = ResizeSegmentationMask.segm_resize(entry, width, height)
+            return entry
+
+        entry_mask = []
+        for class_mask in entry:
+            resized_mask = ResizeSegmentationMask.segm_resize(class_mask, width, height)
+            entry_mask.append(resized_mask)
+        entry = np.array(entry_mask)
+
+        return entry
