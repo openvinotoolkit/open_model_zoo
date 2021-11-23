@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+from pathlib import Path
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
@@ -169,16 +169,16 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         else:
             image_root = self.image_dir
             mask_root = self.mask_dir
-        images = list(image_root.glob('{}.*'.format(image_id)))
+        images = list(Path(image_root).glob('{}.*'.format(image_id)))
         if not images:
             image_file = '{}.jpg'.format(relative_image_subdir + '/' + image_id if relative_image_subdir else image_id)
         else:
             image_file = images[0].name if not relative_image_subdir else relative_image_subdir + '/' + images[0].name
-        masks = list(mask_root.glob('{}.*'.format(image_id)))
+        masks = list(Path(mask_root).glob('{}.*'.format(image_id)))
         if not masks:
             mask_file = '{}.png'.format(relative_image_subdir + '/' + image_id if relative_image_subdir else image_id)
         else:
-            mask_file = images[0].name if not relative_image_subdir else relative_image_subdir + '/' + images[0].name
+            mask_file = masks[0].name if not relative_image_subdir else relative_image_subdir + '/' + masks[0].name
         return image_file, mask_file
 
 
