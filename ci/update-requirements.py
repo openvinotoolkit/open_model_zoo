@@ -82,6 +82,7 @@ def main():
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
         openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
         openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
+    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
 
 if __name__ == '__main__':
     main()
