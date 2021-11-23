@@ -67,30 +67,6 @@ PRECISION_STR_TO_TYPE = {
     'BOOL': Type.boolean
 }
 
-format_map = {
-      'f32': np.float32,
-      'i32': np.int32,
-      'i64': np.int64,
-      'fp16': np.float16,
-      'i16': np.int16,
-      'u16': np.uint16,
-      'i8': np.int8,
-      'u8': np.uint8,
-      'boolean': np.uint8
-}
-
-PRECISION_STR_TO_TYPE = {
-    'FP32': Type.f32,
-    'FP16': Type.f16,
-    'U8': Type.u8,
-    'U16': Type.u16,
-    'I8': Type.i8,
-    'I16': Type.i16,
-    'I32': Type.i32,
-    'I64': Type.i64,
-    'BOOL': Type.boolean
-}
-
 
 # pylint:disable=R0904
 class OpenVINOLauncher(Launcher):
