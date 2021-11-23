@@ -66,7 +66,7 @@ class ExtendSegmentationMask(Postprocessor):
                 extended_mask = cv2.copyMakeBorder(
                     annotation_mask, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.filling_label
                 )
-                annotation_.mask = self._resize(extended_mask, dst_height, dst_width, True)
+                annotation_.mask = self._resize(extended_mask, dst_height, dst_width, False)
                 continue
 
 
