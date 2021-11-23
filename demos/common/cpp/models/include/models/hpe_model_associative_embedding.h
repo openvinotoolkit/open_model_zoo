@@ -15,6 +15,7 @@
 */
 #pragma once
 #include "model_base.h"
+#include "utils/image_utils.h"
 
 class HpeAssociativeEmbedding : public ModelBase {
 public:
@@ -25,7 +26,7 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold,
-                            float delta = 0.0, std::string paddingMode = "right_bottom");
+                            float delta = 0.0, RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -40,7 +41,7 @@ protected:
     int targetSize;
     float confidenceThreshold;
     float delta;
-    std::string paddingMode;
+    RESIZE_MODE resizeMode;
 
     std::string embeddingsBlobName;
     std::string heatmapsBlobName;

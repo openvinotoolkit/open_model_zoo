@@ -113,7 +113,7 @@ def get_models_from_configs(directory):
     model_configs = directory.glob('**/model.yml')
     for model in model_configs:
         with model.open("r", encoding="utf-8") as file:
-            models[model.parent.name] = (model, yaml.load(file))
+            models[model.parent.name] = (model, yaml.safe_load(file))
         if not models[model.parent.name][1]:
             logging.error("File {} is empty. It will be ignored.".format(model))
             del models[model.parent.name]

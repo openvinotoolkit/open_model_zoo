@@ -58,7 +58,7 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ### Converted model
 
@@ -66,22 +66,22 @@ The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
 
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/zhanghang1989/ResNeSt/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
 
 [*] Other names and brands may be claimed as the property of others.

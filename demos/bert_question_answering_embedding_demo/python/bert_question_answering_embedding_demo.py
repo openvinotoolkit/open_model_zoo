@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,19 +15,26 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-import sys
-import time
+
 import logging as log
+import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 
-from openvino.inference_engine import IECore
-
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-from tokens_bert import text_to_tokens, load_vocab_file
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
 from html_reader import get_paragraphs
+
+from model_api.models import BertEmbedding, BertQuestionAnswering
+from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -67,6 +74,8 @@ def build_argparser():
                       help="Optional. Names for outputs in MODEL_QA network. For example 'output_s,output_e'",
                       default='output_s,output_e',
                       required=False, type=str)
+    args.add_argument("--model_qa_squad_ver", help="Optional. SQUAD version used for QuestionAnswering model fine tuning",
+                      default="1.2", required=False, type=str)
     args.add_argument("-a", "--max_answer_token_num",
                       help="Optional. Maximum number of tokens in exact answer",
                       default=15,
@@ -79,296 +88,238 @@ def build_argparser():
     args.add_argument('-c', '--colors', action='store_true',
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
+    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
+                      default=0, type=int)
+    args.add_argument('-nstreams', '--num_streams',
+                      help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                           'mode (for HETERO and MULTI device cases use format '
+                           '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                      default='', type=str)
+    args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                      help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
     return parser
 
 
+def update_answers_list(answers, output, c_data):
+    same = [i for i, ans in enumerate(answers) if ans[1:3] == output[1:3] and ans[3] in c_data.context]
+    if not same:
+        answers.append((*output, c_data.context))
+    else:
+        assert len(same) == 1
+        prev_score = answers[same[0]][0]
+        answers[same[0]] = (max(output[0], prev_score), *output[1:], c_data.context)
+
+
+class Visualizer:
+    def __init__(self, use_colors):
+        self.use_colors = use_colors
+
+    def mark(self, text):
+        return "\033[91m" + text + "\033[0m" if self.use_colors else "*" + text + "*"
+
+    @staticmethod
+    def show_closest_contexts(distances_filtered):
+        for (dist, c_data) in distances_filtered:
+            log.info("\n\t Embedding distance: {}\n\t Context: {}".format(dist, c_data.context.strip()))
+        print('\n')
+
+    def show_answers(self, answers):
+        for score, s, e, context in answers:
+            marked_answer = self.mark(context[s:e])
+            context_str = context[:s] + marked_answer + context[e:]
+            log.info("Answer: {}\n\t Score: {:0.2f}\n\t Context: {}".format(marked_answer, score, context_str))
+
+
+class ContextSource:
+    def __init__(self, paragraphs, vocab, c_window_len):
+        self.paragraphs = paragraphs
+        self.c_tokens = [text_to_tokens(par.lower(), vocab) for par in paragraphs]
+        self.c_window_len = c_window_len
+        self.par_id = -1
+        self.get_next_paragraph()
+
+    def get_data(self):
+        c_data = self.window.get_context_data(self.paragraphs[self.par_id])
+        self.window.move()
+        if self.window.is_over():
+            self.get_next_paragraph()
+        return c_data
+
+    def get_next_paragraph(self):
+        self.par_id += 1
+        if not self.is_over():
+            if self.c_tokens[self.par_id][0]:
+                self.window = ContextWindow(self.c_window_len, *self.c_tokens[self.par_id])
+            else:
+                self.get_next_paragraph()
+
+    def is_over(self):
+        return self.par_id == len(self.paragraphs)
+
+
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    log.info("Creating Inference Engine")
-    ie = IECore()
-
-    #read model to calculate embedding
-    model_xml_emb = args.model_emb
-    model_bin_emb = model_xml_emb.with_suffix(".bin")
-
-    log.info("Loading embedding network files:\n\t{}\n\t{}".format(model_xml_emb, model_bin_emb))
-    ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
-    input_names_model_emb = list(ie_encoder_emb.input_info.keys())
-    input_names_emb = args.input_names_emb.split(',')
-    log.info("Expected embedding input names: {}".format(input_names_emb))
-    log.info("Network embedding input names: {}".format(input_names_model_emb))
-    # check input names
-    if set(input_names_model_emb) != set(input_names_emb):
-        log.error("Unexpected embedding network input names")
-        raise Exception("Unexpected embedding network input names")
-
-    # check outputs
-    output_names_model_emb = list(ie_encoder_emb.outputs.keys())
-    if len(output_names_model_emb)>1:
-        log.error("Expected only single output in embedding network but {} outputs detected".format(output_names_model_emb))
-        raise Exception("Unexpected number of embedding network outputs")
-
-
-    #reshape embedding model to infer short questions and long contexts
-    ie_encoder_exec_emb_dict = {}
-    max_length_c = 384
-    max_length_q = 32
-
-    for length in [max_length_q, max_length_c]:
-        new_shapes = {}
-        for i, input_info in ie_encoder_emb.input_info.items():
-            new_shapes[i] = [1, length]
-            log.info("Reshaped input {} from {} to the {}".format(
-                i,
-                input_info.input_data.shape,
-                new_shapes[i]))
-        log.info("Attempting to reshape the context embedding network to the modified inputs...")
-
-        try:
-            ie_encoder_emb.reshape(new_shapes)
-            log.info("Successful!")
-        except RuntimeError:
-            log.error("Failed to reshape the embedding network")
-            raise
-
-        # Loading model to the plugin
-        log.info("Loading model to the plugin")
-        ie_encoder_exec_emb_dict[length] = ie.load_network(network=ie_encoder_emb, device_name=args.device)
-
-    # Read model for final exact qa
-    if args.model_qa:
-        model_xml = args.model_qa
-        model_bin = model_xml.with_suffix(".bin")
-        log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-
-        ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)
-        ie_encoder_qa.batch_size = 1
-
-        input_names_qa = args.input_names_qa.split(',')
-        output_names_qa = args.output_names_qa.split(',')
-        log.info("Expected input->output names: {}->{}".format(input_names_qa, output_names_qa))
-
-        #check input and output names
-        input_names_model_qa = list(ie_encoder_qa.input_info.keys())
-        output_names_model_qa = list(ie_encoder_qa.outputs.keys())
-        log.info("Network input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
-        if set(input_names_model_qa) != set(input_names_qa) or set(output_names_model_qa) != set(output_names_qa):
-            log.error("Unexpected network input or output names")
-            raise Exception("Unexpected network input or output names")
-
-        # Loading model to the plugin
-        log.info("Loading model to the plugin")
-        ie_encoder_qa_exec = ie.load_network(network=ie_encoder_qa, device_name=args.device)
-
-        max_length_qc = ie_encoder_qa.input_info[input_names_qa[0]].input_data.shape[1]
-
-    #load vocabulary file for all models
-    log.info("Loading vocab file:\t{}".format(args.vocab))
-    vocab = load_vocab_file(args.vocab)
-    log.info("{} tokens loaded".format(len(vocab)))
-
-    #define function to infer embedding
-    def calc_emb(tokens_id, max_length):
-        num = min(max_length - 2, len(tokens_id))
-
-        # forms the request
-        pad_len = max_length - num - 2
-        tok_cls = [vocab['[CLS]']]
-        tok_sep = [vocab['[SEP]']]
-        tok_pad = [vocab['[PAD]']]
-
-        dtype = np.int32
-        inputs = {
-            input_names_emb[0]: np.array([tok_cls + tokens_id[:num] + tok_sep + tok_pad * pad_len], dtype=dtype),
-            input_names_emb[1]: np.array([[1]     + [1] * num       + [1]     + [0]     * pad_len], dtype=dtype),
-            input_names_emb[2]: np.array([[0]     + [0] * num       + [0]     + tok_pad * pad_len], dtype=dtype),
-            input_names_emb[3]: np.arange(max_length, dtype=dtype)[None, :]
-        }
-
-        # calc embedding
-        ie_encoder_exec_emb = ie_encoder_exec_emb_dict[max_length]
-
-        t_start = time.perf_counter()
-        res = ie_encoder_exec_emb.infer(inputs=inputs)
-        t_end = time.perf_counter()
-        log.info("embedding calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
-            max_length,
-            1 / (t_end - t_start),
-            t_end - t_start
-        ))
-
-
-        res = res[output_names_model_emb[0]]
-        return res.squeeze(0)
-
-    #small class to store context as text and tokens and its embedding vector
-    class ContextData:
-        def __init__(self, context, c_tokens_id, c_tokens_se):
-            self.context = context
-            self.c_tokens_id = c_tokens_id
-            self.c_tokens_se = c_tokens_se
-            self.c_emb = calc_emb(self.c_tokens_id, max_length_c)
-
     paragraphs = get_paragraphs(args.input)
+
+    vocab_start_time = perf_counter()
+    vocab = load_vocab_file(args.vocab)
+    log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
+    visualizer = Visualizer(args.colors)
+    total_latency = (perf_counter() - vocab_start_time) * 1e3
+
+    ie = create_core()
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    model_emb = BertEmbedding(model_emb_adapter, vocab, args.input_names_emb)
+    model_emb.log_layers_info()
+
+    # reshape BertEmbedding model to infer short questions and long contexts
+    max_len_context = 384
+    max_len_question = 32
+
+    for new_length in [max_len_question, max_len_context]:
+        model_emb.reshape(new_length)
+        if new_length == max_len_question:
+            emb_exec_net = ie.load_network(model_emb_adapter.net, args.device)
+        else:
+            emb_pipeline = AsyncPipeline(model_emb)
+
+    if args.model_qa:
+        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config,
+                                           max_num_requests=args.num_infer_requests)
+        model_qa = BertQuestionAnswering(model_qa_adapter, vocab, args.input_names_qa, args.output_names_qa,
+                                         args.max_answer_token_num, args.model_qa_squad_ver)
+        model_qa.log_layers_info()
+        qa_pipeline = AsyncPipeline(model_qa)
+
+    log.info("\t\tStage 1    (Calc embeddings for the context)")
+    contexts_all = []
+    start_time = perf_counter()
+
+    # get context as string and then encode it into token id list
+    # calculate number of tokens for context in each request.
+    # reserve 3 positions for special tokens [CLS] q_tokens [SEP] c_tokens [SEP]
+    if args.model_qa:
+        # to make context be able to pass model_qa together with question
+        c_window_len = model_qa.max_length - (max_len_question + 3)
+    else:
+        # to make context be able to pass model_emb without question
+        c_window_len = max_len_context - 2
+
+    def calc_question_embedding(tokens_id):
+        num = min(max_len_question - 2, len(tokens_id))
+        inputs, _ = model_emb.preprocess((tokens_id[:num], max_len_question))
+        raw_result = emb_exec_net.infer(inputs)
+        return model_emb.postprocess(raw_result, None)
+
+    source = ContextSource(paragraphs, vocab, c_window_len)
+    next_window_id = 0
+    next_window_id_to_show = 0
     contexts_all = []
 
-    log.info("Indexing {} paragraphs...".format(len(paragraphs)))
-    for par in paragraphs:
-        c_tokens_id, c_tokens_se = text_to_tokens(par.lower(), vocab)
-        if not c_tokens_id:
+    while True:
+        if emb_pipeline.callback_exceptions:
+            raise emb_pipeline.callback_exceptions[0]
+        results = emb_pipeline.get_result(next_window_id_to_show)
+        if results:
+            embedding, meta = results
+            meta['c_data'].emb = embedding
+            contexts_all.append(meta['c_data'])
+            next_window_id_to_show += 1
             continue
 
-        # get context as string and then encode it into token id list
-        # calculate number of tokens for context in each request.
-        # reserve 3 positions for special tokens
-        # [CLS] q_tokens [SEP] c_tokens [SEP]
-        if args.model_qa:
-            #to make context be able to pass model_qa together with question
-            c_wnd_len = max_length_qc - (max_length_q + 3)
-        else:
-            #to make context be able to pass model_emb without question
-            c_wnd_len = max_length_c - 2
-
-        # token num between 2 neighbours context windows
-        # 1/2 means that context windows are interleaved by half
-        c_stride = c_wnd_len // 2
-
-        # init scan window
-        c_s, c_e = 0, min(c_wnd_len, len(c_tokens_id))
-
-        # iterate while context window is not empty
-        while c_e > c_s:
-            contexts_all.append(ContextData(par, c_tokens_id[c_s:c_e], c_tokens_se[c_s:c_e]))
-
-            # check that context window reach the end
-            if c_e == len(c_tokens_id):
+        if emb_pipeline.is_ready():
+            if source.is_over():
                 break
+            c_data = source.get_data()
+            num = min(max_len_context - 2, len(c_data.c_tokens_id))
+            emb_pipeline.submit_data((c_data.c_tokens_id[:num], max_len_context), next_window_id, {'c_data': c_data})
+            next_window_id += 1
+        else:
+            emb_pipeline.await_any()
 
-            # move to next window position
-            c_s, c_e = c_s+c_stride, c_e+c_stride
+    emb_pipeline.await_all()
+    for window_id in range(next_window_id_to_show, next_window_id):
+        results = emb_pipeline.get_result(window_id)
+        while results is None:
+            results = emb_pipeline.get_result(window_id)
+        embedding, meta = results
+        meta['c_data'].emb = embedding
+        contexts_all.append(meta['c_data'])
+        next_window_id_to_show += 1
 
-            shift_left = max(0, c_e - len(c_tokens_id))
-            c_s, c_e = c_s -shift_left, c_e-shift_left
-            assert c_s >= 0, "start can be left of 0 only with window less than len but in this case we can not be here"
+    total_latency += (perf_counter() - start_time) * 1e3
+    context_embeddings_time = total_latency
 
     if args.questions:
         def questions():
             for question in args.questions:
-                log.info("Question: {}".format(question))
+                log.info("\n\tQuestion: {}".format(question))
                 yield question
     else:
         def questions():
             while True:
-                yield input('Type question (empty string to exit):')
+                yield input('\n\tType a question (empty string to exit): ')
 
-    # loop on user's or prepared questions
     for question in questions():
         if not question.strip():
             break
 
-        log.info("---Stage 1---Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))
+        start_time = perf_counter()
+        log.info("\t\tStage 2    (Calc question embedding and compare with {} context embeddings)".format(len(contexts_all)))
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
-
-        q_emb = calc_emb(q_tokens_id, max_length_q)
-        distances = [(np.linalg.norm(c.c_emb - q_emb, 2), c) for c in contexts_all]
+        q_emb = calc_question_embedding(q_tokens_id)
+        distances = [(np.linalg.norm(context.emb - q_emb, 2), context) for context in contexts_all]
         distances.sort(key=lambda x: x[0])
         keep_num = min(args.best_n, len(distances))
         distances_filtered = distances[:keep_num]
 
-        #print short list
-        print("The closest contexts to question:")
-        for i, (dist, c_data) in enumerate(distances_filtered):
-            print("#{}: embedding distance {} for context '{}'".format(i + 1, dist, c_data.context))
+        log.info("The closest {} contexts to question filtered from {} context embeddings:".format(keep_num, len(distances)))
+        visualizer.show_closest_contexts(distances_filtered)
 
-        #run model_qa if available to find exact answer to question in filtered in contexts
         if args.model_qa:
-
-            log.info("---Stage 2---Looking for exact answers in {} contexts filtered in from {}".format(keep_num, len(distances)))
-            # array of answers from each context_data
             answers = []
+            next_context_id = 0
+            next_context_id_to_show = 0
 
-            for dist, c_data in distances_filtered:
-                #forms the request
-                tok_cls = [vocab['[CLS]']]
-                tok_sep = [vocab['[SEP]']]
-                tok_pad = [vocab['[PAD]']]
-                req_len = len(q_tokens_id) + len(c_data.c_tokens_id) + 3
-                pad_len = max_length_qc - req_len
-                assert pad_len >= 0
+            while True:
+                if qa_pipeline.callback_exceptions:
+                    raise qa_pipeline.callback_exceptions[0]
+                results = qa_pipeline.get_result(next_context_id_to_show)
+                if results:
+                    next_context_id_to_show += 1
+                    output, meta = results
+                    update_answers_list(answers, output, meta['c_data'])
+                    continue
 
-                input_ids = tok_cls + q_tokens_id + tok_sep + c_data.c_tokens_id + tok_sep + tok_pad*pad_len
-                token_type_ids = [0] * (len(q_tokens_id)+2) + [1] * (len(c_data.c_tokens_id)+1) + tok_pad * pad_len
-                attention_mask = [1] * req_len + [0] * pad_len
-
-                #create numpy inputs for IE
-                inputs = {
-                    input_names_qa[0]: np.array([input_ids], dtype=np.int32),
-                    input_names_qa[1]: np.array([attention_mask], dtype=np.int32),
-                    input_names_qa[2]: np.array([token_type_ids], dtype=np.int32),
-                }
-                if len(input_names_qa) > 3:
-                    inputs['position_ids'] = np.arange(max_length_qc, dtype=np.int32)[None, :]
-
-                #infer by IE
-                t_start = time.perf_counter()
-                res = ie_encoder_qa_exec.infer(inputs=inputs)
-                t_end = time.perf_counter()
-                log.info(
-                    "Exact answer calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
-                        max_length_qc,
-                        1 / (t_end - t_start),
-                        t_end - t_start
-                    ))
-
-                #get start-end scores for context
-                def get_score(name):
-                    out = np.exp(res[name].reshape((max_length_qc, )))
-                    return out / out.sum(axis=-1)
-                score_s = get_score(output_names_qa[0])
-                score_e = get_score(output_names_qa[1])
-
-                # find product of all start-end combinations to find the best one
-                c_s_idx = len(q_tokens_id) + 2 # index of first context token in tensor
-                c_e_idx = max_length_qc-(1+pad_len) # index of last+1 context token in tensor
-                score_mat = np.matmul(
-                    score_s[c_s_idx:c_e_idx].reshape((len(c_data.c_tokens_id), 1)),
-                    score_e[c_s_idx:c_e_idx].reshape((1, len(c_data.c_tokens_id)))
-                )
-                # reset candidates with end before start
-                score_mat = np.triu(score_mat)
-                # reset long candidates (>max_answer_token_num)
-                score_mat = np.tril(score_mat, args.max_answer_token_num - 1)
-                # find the best start-end pair
-                max_s, max_e = divmod(score_mat.flatten().argmax(), score_mat.shape[1])
-                max_score = score_mat[max_s, max_e]
-
-                # convert to context text start-end index
-                max_s = c_data.c_tokens_se[max_s][0]
-                max_e = c_data.c_tokens_se[max_e][1]
-
-                # check that answers list does not have answer yet
-                # it could be because of context windows overlapping
-                same = [i for i, a in enumerate(answers) if a[1] == max_s and a[2]==max_e and a[3] is c_data.context]
-                if same:
-                    assert len(same) == 1
-                    #update exist answer record
-                    a = answers[same[0]]
-                    answers[same[0]] = (max(max_score, a[0]), max_s, max_e, c_data.context)
+                if qa_pipeline.is_ready():
+                    if next_context_id == len(distances_filtered):
+                        break
+                    _, c_data = distances_filtered[next_context_id]
+                    qa_pipeline.submit_data((c_data, q_tokens_id), next_context_id, {'c_data': c_data})
+                    next_context_id += 1
                 else:
-                    #add new record
-                    answers.append((max_score, max_s, max_e, c_data.context))
+                    qa_pipeline.await_any()
 
-            def mark(txt):
-                return "\033[91m" + txt + "\033[0m" if args.colors else "*" + txt + "*"
+            qa_pipeline.await_all()
+            for context_id in range(next_context_id_to_show, next_context_id):
+                results = qa_pipeline.get_result(context_id)
+                while results is None:
+                    results = qa_pipeline.get_result(context_id)
+                output, meta = results
+                update_answers_list(answers, output, meta['c_data'])
 
-            #print top 3 results
-            answers.sort(key=lambda x: -x[0])
-            log.info("---Stage 3---Find best 3 answers from {} results of Stage 1".format(len(answers)))
-            for score, s, e, context in answers[:3]:
-                print("Answer (score: {:0.2f}): {}".format(score, mark(context[s:e])))
-                print(context[:s] + mark(context[s:e]) + context[e:])
+            log.info("\t\tStage 3    (Show top 3 answers from {} closest contexts of Stage 1)".format(len(answers)))
+            answers = sorted(answers, key=lambda x: -x[0])[:3]
+            visualizer.show_answers(answers)
+
+        total_latency += (perf_counter() - start_time) * 1e3
+
+    log.info("Metrics report:")
+    log.info("\tContext embeddings latency (stage 1): {:.1f} ms".format(context_embeddings_time))
+    log.info("\tLatency (all stages): {:.1f} ms".format(total_latency))
 
 
 if __name__ == '__main__':

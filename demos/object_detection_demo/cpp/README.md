@@ -29,7 +29,7 @@ need to pull Inference Engine demos helpers to your app
 
 On startup, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 This demo operates in asynchronous manner by using "Infer Requests" that encapsulate the inputs/outputs and separates *scheduling and waiting for result*,
 as shown in code mockup below:
@@ -56,20 +56,20 @@ For more details on the requests-based Inference Engine API, including the Async
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -82,6 +82,11 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * architecture_type = ssd
   - efficientdet-d0-tf
   - efficientdet-d1-tf
+  - face-detection-0200
+  - face-detection-0202
+  - face-detection-0204
+  - face-detection-0205
+  - face-detection-0206
   - face-detection-adas-0001
   - face-detection-retail-0004
   - face-detection-retail-0005
@@ -102,8 +107,9 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-vehicle-bike-detection-2003
   - person-vehicle-bike-detection-2004
   - product-detection-0001
-  - rfcn-resnet101-coco-tf
+  - retinaface-resnet50-pytorch
   - retinanet-tf
+  - rfcn-resnet101-coco-tf
   - ssd300
   - ssd512
   - ssd-resnet34-1200-onnx
@@ -119,6 +125,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - vehicle-license-plate-detection-barrier-0106
   - vehicle-license-plate-detection-barrier-0123
 * architecture_type = yolo
+  - mobilenet-yolo-v4-syg
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v3-tf
   - yolo-v3-tiny-tf
@@ -134,6 +141,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-vehicle-detection-0001
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+  - yolof
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -160,7 +168,6 @@ Options:
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -labels "<path>"          Optional. Path to a file with labels mapping.
-    -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -iou_t                    Optional. Filtering intersection over union threshold for overlapping boxes.
@@ -174,7 +181,10 @@ Options:
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
     -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
-    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.
+    -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
+    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
+    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -209,10 +219,17 @@ The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/model_tools/README.md)

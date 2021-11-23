@@ -17,9 +17,9 @@ limitations under the License.
 import numpy as np
 import pytest
 from unittest.mock import MagicMock, call
-from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.presenters import ScalarPrintPresenter, VectorPrintPresenter, EvaluationResult
-from accuracy_checker.representation import ClassificationAnnotation, ClassificationPrediction
+from openvino.tools.accuracy_checker.metrics import MetricsExecutor
+from openvino.tools.accuracy_checker.presenters import ScalarPrintPresenter, VectorPrintPresenter, EvaluationResult
+from openvino.tools.accuracy_checker.representation import ClassificationAnnotation, ClassificationPrediction
 
 
 class TestPresenter:
@@ -59,7 +59,7 @@ class TestPresenter:
             MetricsExecutor(config, None)
 
     def test_scalar_presenter_with_scalar_data(self, mocker):
-        mock_write_scalar_result = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_result = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -84,7 +84,7 @@ class TestPresenter:
         )
 
     def test_scalar_presenter_with_vector_data(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
@@ -109,7 +109,7 @@ class TestPresenter:
         )
 
     def test_default_format_for_scalar_presenter_with_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
@@ -134,12 +134,12 @@ class TestPresenter:
         )
 
     def test_reference_value_for_scalar_presenter(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value=45.6,
+            reference_value=0.456,
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -159,12 +159,12 @@ class TestPresenter:
         )
 
     def test_reference_value_for_scalar_presenter_with_ignore_results_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value=45.6,
+            reference_value=0.456,
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -184,12 +184,12 @@ class TestPresenter:
         )
 
     def test_reference_value_for_scalar_presenter_with_ref_values_dict(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value={'vector_metric': 45.6},
+            reference_value={'vector_metric': 0.456},
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -209,12 +209,12 @@ class TestPresenter:
         )
 
     def test_reference_value_for_scalar_presenter_with_ref_values_dict_no_value(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.456],
-            reference_value={'other_metric': 45.6},
+            reference_value={'other_metric': 0.456},
             abs_threshold=None,
             rel_threshold=None,
             meta={},
@@ -233,8 +233,33 @@ class TestPresenter:
             result_format='{:.2f}'
         )
 
+    def test_specific_format_for_scalar_presenter(self, mocker):
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        result = EvaluationResult(
+            name='vector_metric',
+            metric_type='metric',
+            evaluated_value=[0.456],
+            reference_value=None,
+            abs_threshold=None,
+            rel_threshold=None,
+            meta={'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'},
+            profiling_file=None
+        )
+        presenter = ScalarPrintPresenter()
+        presenter.write_result(result)
+        mock_write_scalar_res.assert_called_once_with(
+            np.mean(result.evaluated_value),
+            result.name,
+            result.reference_value,
+            result.abs_threshold,
+            result.rel_threshold,
+            postfix='km/h',
+            scale=0.5,
+            result_format='{:.4f}'
+        )
+
     def test_specific_format_for_scalar_presenter_with_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
@@ -259,7 +284,7 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_scaler_data(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -285,11 +310,11 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_scaler_data_compare_with_reference(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=0.4,
+            evaluated_value=40,
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -311,11 +336,11 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_scaler_data_compare_with_reference_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=0.4,
+            evaluated_value=40,
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -337,7 +362,7 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -363,11 +388,11 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element_compare_with_reference(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=[0.4],
+            evaluated_value=[40],
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -389,11 +414,11 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element_compare_with_reference_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
-            evaluated_value=[0.4],
+            evaluated_value=[40],
             reference_value=42,
             abs_threshold=None,
             rel_threshold=None,
@@ -415,7 +440,7 @@ class TestPresenter:
         )
 
     def test_vector_presenter_with_vector_data_with_default_postfix_and_scale(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
@@ -438,14 +463,14 @@ class TestPresenter:
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.abs_threshold, result.rel_threshold,
-                None, value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
+                np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
+                None, value_name='mean', postfix='%', scale=100, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_has_default_format_with_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
@@ -468,18 +493,18 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.abs_threshold, result.rel_threshold, None,
+                np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold, None,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_default_formatting_compare_with_ref(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
-            evaluated_value=[0.4, 0.6],
+            evaluated_value=[40, 60],
             reference_value=49,
             abs_threshold=None,
             rel_threshold=None,
@@ -498,18 +523,18 @@ class TestPresenter:
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.abs_threshold, result.rel_threshold,
-                (1.0, 0.02040816326530612), value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
+                np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
+                (1.0, 0.02040816326530612), value_name='mean', postfix='%', scale=100, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_has_default_format_with_ignore_formatting_compare_with_ref(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
-            evaluated_value=[0.4, 0.6],
+            evaluated_value=[40, 60],
             reference_value=49,
             abs_threshold=None,
             rel_threshold=None,
@@ -528,7 +553,7 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.abs_threshold, result.rel_threshold,
+                np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
                 (1.0, 0.02040816326530612),
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
@@ -536,7 +561,7 @@ class TestPresenter:
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_has_specific_format_with_ignore_formatting(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -559,7 +584,7 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.reference_value,
+                np.mean(result.evaluated_value), result.name, result.reference_value,
                 result.abs_threshold, result.rel_threshold,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
@@ -567,7 +592,7 @@ class TestPresenter:
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_scalar_postfix(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -589,14 +614,14 @@ class TestPresenter:
                 postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 100)), result.name,
-                result.abs_threshold, result.rel_threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1, result_format='{:.2f}'
+                np.mean(result.evaluated_value), result.name,
+                result.abs_threshold, result.rel_threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=100, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_scalar_scale(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -619,15 +644,15 @@ class TestPresenter:
                 postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name, None,
+                np.mean(result.evaluated_value), result.name, None,
                 result.abs_threshold, result.rel_threshold,
-                value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
+                value_name='mean', postfix='%', scale=10, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_vector_scale(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -635,7 +660,7 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
+            meta={'names': ['class1', 'class2'], 'scale': [1, 1]},
             profiling_file=None
         )
         presenter = VectorPrintPresenter()
@@ -650,7 +675,7 @@ class TestPresenter:
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
+                np.mean(result.evaluated_value), result.name,
                 result.abs_threshold, result.rel_threshold,
                 None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
             )
@@ -658,12 +683,12 @@ class TestPresenter:
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_dict_ref(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
-            evaluated_value=[0.4, 0.6],
-            reference_value={'class1': 0.4, 'class2': 0.5},
+            evaluated_value=[4, 6],
+            reference_value={'class1': 4, 'class2': 5},
             abs_threshold=None,
             rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
@@ -677,19 +702,14 @@ class TestPresenter:
                 postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
             ),
             call(
-                result.evaluated_value[1], result.name, None, None, (0.7, 1.4), postfix='%',
+                result.evaluated_value[1], result.name, None, None, (1, 0.2), postfix='%',
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
-            ),
-            call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
-                result.abs_threshold, result.rel_threshold,
-                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
     def test_vector_presenter_with_vector_data_with_dict_ref_without_represented_classes(self, mocker):
-        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        mock_write_scalar_res = mocker.patch('openvino.tools.accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='scalar_metric',
             metric_type='metric',
@@ -697,7 +717,7 @@ class TestPresenter:
             reference_value={'class3': 0.4, 'class4': 0.5},
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
+            meta={'names': ['class1', 'class2'], 'scale': [1, 1]},
             profiling_file=None
         )
         presenter = VectorPrintPresenter()
@@ -712,7 +732,7 @@ class TestPresenter:
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
+                np.mean(result.evaluated_value), result.name,
                 result.abs_threshold, result.rel_threshold,
                 None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
             )

@@ -24,7 +24,7 @@ task_type: speech_recognition
 files:
   - name: deepspeech-0.6.1-models.tar.gz
     size: 1229020343
-    sha256: 5d51fb06c531511b8a86b2d738262647d48fe008364f9936b2e52732e323892a
+    sha384: ad9ceb672c21ccb93f6c16432c172d1d08e403a9925a9466552538de9642878af7c459c863bbe721483f644385c5677d
     source: https://github.com/mozilla/DeepSpeech/releases/download/v0.6.1/deepspeech-0.6.1-models.tar.gz
 postprocessing:
   - $type: unpack_archive

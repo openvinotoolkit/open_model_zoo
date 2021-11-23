@@ -19,8 +19,9 @@ public:
                       const std::string& modelPath,
                       const std::string& deviceName);
     void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
-    void printPerformanceCounts() const override;
     ~EyeStateEstimator() override;
+
+    const std::string modelType = "Eye State Estimation";
 
 private:
     cv::Rect createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale = 1.8) const;

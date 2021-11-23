@@ -16,3 +16,4 @@ models:
         metrics:
           - name: AP
             type: coco_orig_keypoints_precision
+            reference: 0.6904

@@ -25,8 +25,8 @@ public:
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     SegmentationModel(const std::string& modelFileName, bool useAutoResize);
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    static std::vector<std::string> loadLabels(const std::string& labelFilename);
+
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

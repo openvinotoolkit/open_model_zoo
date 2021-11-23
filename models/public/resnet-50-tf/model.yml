@@ -21,7 +21,7 @@ task_type: classification
 files:
   - name: resnet_v1-50.pb
     size: 102170160
-    sha256: 7c186a471a30682cdee02b246eeb0bfd93fc71d9fa53834d69f8101e664d12f8
+    sha384: d1097f41df917e56e927b38867bc0748a7b136b8a3441ce7d2002bbb6894b2bc167835146d0a9fc10b5c94b9d7f6f156
     source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
 model_optimizer_args:
   - --input_shape=[1,224,224,3]

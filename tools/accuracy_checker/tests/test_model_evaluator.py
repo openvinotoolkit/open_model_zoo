@@ -16,7 +16,7 @@ limitations under the License.
 
 from unittest.mock import Mock, MagicMock
 
-from accuracy_checker.evaluators import ModelEvaluator
+from openvino.tools.accuracy_checker.evaluators import ModelEvaluator
 
 
 class TestModelEvaluator:
@@ -59,6 +59,7 @@ class TestModelEvaluator:
 
         self.metric = Mock()
         self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
+        self.metric.profiler = None
 
         self.evaluator = ModelEvaluator(
             self.launcher,
@@ -116,7 +117,7 @@ class TestModelEvaluator:
         assert not self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
 
         self.evaluator.process_dataset('path', None)
@@ -129,7 +130,7 @@ class TestModelEvaluator:
         assert self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_with_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = True
 
         self.evaluator.process_dataset('path', None)
@@ -185,6 +186,7 @@ class TestModelEvaluatorAsync:
 
         self.metric = Mock()
         self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
+        self.metric.profiler = None
 
         self.evaluator = ModelEvaluator(
             self.launcher,
@@ -206,28 +208,31 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
+        self.launcher.dyn_input_layers = False
+
 
         self.evaluator.process_dataset(None, None)
 
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.get_async_requests.called
+        assert self.launcher.get_infer_queue.called
 
     def test_process_dataset_with_storing_predictions_and_without_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
         self.dataset.multi_infer = False
+        self.launcher.dyn_input_layers = False
 
         self.evaluator.process_dataset('path', None)
 
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.get_async_requests.called
+        assert self.launcher.get_infer_queue.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
-        mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
+        mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
 
         self.evaluator.process_dataset('path', None)
@@ -243,6 +248,7 @@ class TestModelEvaluatorAsync:
     def test_switch_to_sync_predict_if_need_reshaping(self):
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = True
+        self.launcher.dynamic_shapes_policy = 'static'
         self.preprocessor.has_multi_infer_transformations = False
 
         self.evaluator.process_dataset(None, None)

@@ -24,3 +24,7 @@ evaluations:
 
           metrics:
             - type: clip_accuracy
+              reference:
+                clip_accuracy: 0.920221
+                video_accuracy: 0.938253
+                mean: 0.929237

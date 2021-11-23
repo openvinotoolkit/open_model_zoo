@@ -13,7 +13,7 @@ Open Model Zoo also supports models already in the ONNX format.
 
 ## Pull Request Requirements
 
-To contribute to OMZ, create a pull request (PR) in this repository using the `develop` branch.
+To contribute to OMZ, create a pull request (PR) in this repository using the `master` branch.
 Pull requests are strictly formalized and are reviewed by the OMZ maintainers for consistence and legal compliance.
 
 Each PR contributing a model must contain:
@@ -51,8 +51,8 @@ demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 ### Tests
 
 Your PR must pass next tests:
-* Model is downloadable by the `tools/downloader/downloader.py` script. See [Configuration file](#configuration-file) for details.
-* Model is convertible by the `tools/downloader/converter.py` script. See [Model conversion](#model-conversion) for details.
+* Model is downloadable by the `tools/model_tools/downloader.py` script. See [Configuration file](#configuration-file) for details.
+* Model is convertible by the `tools/model_tools/converter.py` script. See [Model conversion](#model-conversion) for details.
 * Model is usable by demo or sample and provides adequate results. See [Demo](#demo) for details.
 * Model passes accuracy validation. See [Accuracy validation](#accuracy-validation) for details.
 
@@ -76,7 +76,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`open_model_zoo.model_tools._common`](tools/downloader/src/open_model_zoo/model_tools/_common.py) module.
+[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
 
 **`files`**
 
@@ -86,10 +86,10 @@ Downloadable files. Each file is described by:
 
 * `name` - sets a file name after downloading
 * `size` - sets a file size
-* `sha256`  - sets a file hash sum
+* `sha384`  - sets a file hash sum
 * `source` - sets a direct link to a file *OR* describes a file access parameters
 
-> **TIP**: You can obtain a hash sum using the `sha256sum <file_name>` command on Linux\*.
+> **TIP**: You can obtain a hash sum using the `sha384sum <file_name>` command on Linux\*.
 
 If file is located on Google Drive\*, the `source` section must contain:
 - `$type: google_drive`
@@ -135,7 +135,7 @@ Conversion parameters (learn more in the [Model conversion](#model-conversion) s
 
 **`framework`**
 
-Framework of the original model (see [here](tools/downloader/README.md#model-information-dumper-usage) for details).
+Framework of the original model (see [here](tools/model_tools/README.md#model-information-dumper-usage) for details).
 
 **`license`**
 
@@ -155,7 +155,7 @@ task_type: classification
 files:
   - name: tf-densenet121.tar.gz
     size: 30597420
-    sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+    sha384: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
     source:
       $type: google_drive
       id: 0B_fUSpodN0t0eW1sVk1aeWREaDA

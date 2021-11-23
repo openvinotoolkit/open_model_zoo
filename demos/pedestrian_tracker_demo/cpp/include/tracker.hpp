@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -301,15 +301,10 @@ public:
     ///
     void DropForgottenTracks();
 
-    ///
-    /// \brief Prints reid performance counter
-    ///
-    void PrintReidPerformanceCounts(std::string fullDeviceName) const;
-
 private:
     struct Match {
-        int frame_idx1;
-        int frame_idx2;
+        int64_t frame_idx1;
+        int64_t frame_idx2;
         cv::Rect rect1;
         cv::Rect rect2;
         cv::Rect pr_rect1;

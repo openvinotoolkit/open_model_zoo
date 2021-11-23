@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
@@ -30,7 +29,6 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
 void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
     if (inputInfo.size() != 1) {
@@ -39,7 +37,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
          throw std::logic_error("Expected 3-channel input");
@@ -60,8 +58,6 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
 
     if (outputInfo.size() != 2) {
@@ -149,7 +145,7 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
         for (size_t i = 0; i < featureMaps[k].first; ++i) {
             for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
-                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
+                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);
                 }
                 else {
                     calculateAnchors(anchors, { j + 0.5f }, { i + 0.5f }, minSizes[k][0], steps[k]);
@@ -232,10 +228,10 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = scores.second[i];
-        desc.x = bboxes[i].left / scaleX;
-        desc.y = bboxes[i].top / scaleY;
-        desc.width = bboxes[i].getWidth() / scaleX;
-        desc.height = bboxes[i].getHeight() / scaleY;
+        desc.x = clamp(bboxes[i].left / scaleX, 0.f, (float)imgWidth);
+        desc.y = clamp(bboxes[i].top / scaleY, 0.f, (float)imgHeight);
+        desc.width = clamp(bboxes[i].getWidth() / scaleX, 0.f, (float)imgWidth);
+        desc.height = clamp(bboxes[i].getHeight() / scaleY, 0.f, (float)imgHeight);
         desc.labelID =  0;
         desc.label = labels[0];
 

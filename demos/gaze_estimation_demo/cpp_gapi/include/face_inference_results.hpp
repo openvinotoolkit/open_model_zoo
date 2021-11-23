@@ -5,6 +5,7 @@
 #pragma once
 
 #include <opencv2/core/core.hpp>
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 struct FaceInferenceResults {
@@ -23,6 +24,6 @@ struct FaceInferenceResults {
 
     cv::Point3f gazeVector;
 
-    friend std::ostream& operator<<(std::ostream& os, const FaceInferenceResults& faceInferenceResults);
+    friend slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults);
 };
 }  // namespace gaze_estimation

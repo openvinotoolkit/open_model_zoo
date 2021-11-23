@@ -25,7 +25,7 @@ Vocabulary file is located under corresponding model configuration directory, `<
 | im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 70.5%     |
 | Source framework                                                       | PyTorch\* |
 
-Im2latex-match-images metric is calculated by [this algorithm](../../../tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py )
+Im2latex-match-images metric is calculated by `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/metrics/im2latex_images_match.py`
 
 ## Encoder model specification
 

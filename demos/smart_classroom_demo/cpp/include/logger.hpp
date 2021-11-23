@@ -15,6 +15,7 @@
 #include <sstream>
 #include <details/ie_exception.hpp>
 #include "tracker.hpp"
+#include <utils/slog.hpp>
 
 #include "actions.hpp"
 
@@ -23,10 +24,11 @@ private:
     bool write_logs_;
     std::ofstream act_stat_log_stream_;
     cv::FileStorage act_det_log_stream_;
-    std::ostream& log_stream_;
+    slog::LogStream& log_stream_;
+
 
 public:
-    explicit DetectionsLogger(std::ostream& stream, bool enabled,
+    explicit DetectionsLogger(slog::LogStream& stream, bool enabled,
                               const std::string& act_stat_log_file,
                               const std::string& act_det_log_file);
 

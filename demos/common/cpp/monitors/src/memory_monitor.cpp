@@ -13,9 +13,9 @@ struct MemState {
 #include <algorithm>
 #define PSAPI_VERSION 2
 #include <system_error>
-#include <windows.h>
-#include <pdhmsg.h>
-#include <psapi.h>
+#include <Windows.h>
+#include <PdhMsg.h>
+#include <Psapi.h>
 
 namespace {
 double getMemTotal() {
@@ -189,11 +189,11 @@ std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
 }
 
 double MemoryMonitor::getMeanMem() const {
-    return memSum / samplesNumber;
+    return samplesNumber ? memSum / samplesNumber : 0;
 }
 
 double MemoryMonitor::getMeanSwap() const {
-    return swapSum / samplesNumber;
+    return samplesNumber ? swapSum / samplesNumber : 0;
 }
 
 double MemoryMonitor::getMaxMem() const {

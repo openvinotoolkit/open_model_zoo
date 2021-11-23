@@ -16,7 +16,7 @@
 """
 
 import colorsys
-import logging
+import logging as log
 import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
@@ -25,20 +25,20 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
+from model_api import models
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
-import models
 import monitors
-from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -46,11 +46,14 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+                      required=True)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn',
+                      type=str, required=True, choices=('ssd', 'yolo', 'yolov3-onnx', 'yolov4', 'yolof', 'yolox',
+                                                        'faceboxes', 'centernet', 'ctpn',
                                                         'retinaface', 'ultra_lightweight_face_detection',
-                                                        'retinaface-pytorch'))
+                                                        'retinaface-pytorch', 'detr'))
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'remote'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -63,8 +66,8 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                                   help='Optional. Keeps aspect ratio on resize.')
+    common_model_args.add_argument('--resize_type', default=None, choices=models.RESIZE_TYPES.keys(),
+                                   help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
     common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
                                    help='Optional. The first image size used for CTPN model reshaping. '
                                         'Default: 600 600. Note that submitted images should have the same resolution, '
@@ -109,11 +112,11 @@ def build_argparser():
                                            'BGR to RGB.')
     input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
                                       help='Optional. Normalize input by subtracting the mean '
-                                           'values per channel. Example: 255 255 255')
+                                           'values per channel. Example: 255.0 255.0 255.0')
     input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
                                       help='Optional. Divide input by scale values per channel. '
                                            'Division is applied after mean values subtraction. '
-                                           'Example: 255 255 255')
+                                           'Example: 255.0 255.0 255.0')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
@@ -126,7 +129,7 @@ class ColorPalette:
         assert n > 0
 
         if rng is None:
-            rng = random.Random(0xACE)
+            rng = random.Random(0xACE) # nosec - disable B311:random check
 
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]
@@ -162,73 +165,70 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(ie, args):
-    input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
-    common_args = (ie, args.model, input_transform)
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface',
-                                  'retinaface-pytorch') and not input_transform.is_trivial:
-        raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
-
+def get_model(model_adapter, args):
     if args.architecture_type == 'ssd':
-        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return models.SSD(model_adapter, labels=args.labels, resize_type=args.resize_type,
+                          threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
-        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
+        return models.CTPN(model_adapter, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
-        return models.YOLO(ie, args.model, labels=args.labels,
-                           threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
+        return models.YOLO(model_adapter, labels=args.labels, resize_type=args.resize_type,
+                           threshold=args.prob_threshold)
+    elif args.architecture_type == 'yolov3-onnx':
+        return models.YoloV3ONNX(model_adapter, labels=args.labels, resize_type=args.resize_type,
+                                 threshold=args.prob_threshold)
     elif args.architecture_type == 'yolov4':
-        return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
+        return models.YoloV4(model_adapter, labels=args.labels,
+                             threshold=args.prob_threshold, resize_type=args.resize_type,
                              anchors=args.anchors, masks=args.masks)
+    elif args.architecture_type == 'yolof':
+        return models.YOLOF(model_adapter, labels=args.labels, resize_type=args.resize_type,
+                            threshold=args.prob_threshold)
+    elif args.architecture_type == 'yolox':
+        return models.YOLOX(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(*common_args, threshold=args.prob_threshold)
+        return models.FaceBoxes(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return models.CenterNet(*common_args, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface':
-        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFace(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
+        return models.UltraLightweightFaceDetection(model_adapter, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFacePyTorch(model_adapter, threshold=args.prob_threshold)
+    elif args.architecture_type == 'detr':
+        return models.DETR(model_adapter, labels=args.labels, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
-def draw_detections(frame, detections, palette, labels, threshold, output_transform):
-    size = frame.shape[:2]
+def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
     for detection in detections:
-        if detection.score > threshold:
-            class_id = int(detection.id)
-            color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), size[1])
-            ymax = min(int(detection.ymax), size[0])
-            xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-            cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
-                        (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if isinstance(detection, models.DetectionWithLandmarks):
-                for landmark in detection.landmarks:
-                    landmark = output_transform.scale(landmark)
-                    cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
+        class_id = int(detection.id)
+        color = palette[class_id]
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+        xmin, ymin, xmax, ymax = detection.get_coords()
+        xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
+        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
+        cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
+                    (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+        if isinstance(detection, models.DetectionWithLandmarks):
+            for landmark in detection.landmarks:
+                landmark = output_transform.scale(landmark)
+                cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
     return frame
 
 
-def print_raw_results(size, detections, labels, threshold):
-    log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
+def print_raw_results(detections, labels, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
+    log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
-        if detection.score > threshold:
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), size[1])
-            ymax = min(int(detection.ymax), size[0])
-            class_id = int(detection.id)
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                     .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+        xmin, ymin, xmax, ymax = detection.get_coords()
+        class_id = int(detection.id)
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+        log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
+                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -238,28 +238,29 @@ def main():
     if args.architecture_type != 'yolov4' and args.masks:
         log.warning('The "--masks" options works only for "-at==yolov4". Option will be omitted')
 
-    log.info('Initializing Inference Engine...')
-    ie = IECore()
-
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Loading network...')
-
-    model = get_model(ie, args)
-
-    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
-                                      device=args.device, max_num_requests=args.num_infer_requests)
-
     cap = open_images_capture(args.input, args.loop)
+
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'remote':
+        log.info('Reading model {}'.format(args.model))
+        serving_config = {"address": "localhost", "port": 9000}
+        model_adapter = RemoteAdapter(args.model, serving_config)
+
+    model = get_model(model_adapter, args)
+    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
+    model.log_layers_info()
+
+    detector_pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -275,10 +276,12 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+                print_raw_results(objects, model.labels, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
+            rendering_start_time = perf_counter()
+            frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -334,10 +337,12 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+            print_raw_results(objects, model.labels, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
-        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
+        rendering_start_time = perf_counter()
+        frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -353,8 +358,14 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          detector_pipeline.preprocess_metrics.get_latency(),
+                          detector_pipeline.inference_metrics.get_latency(),
+                          detector_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

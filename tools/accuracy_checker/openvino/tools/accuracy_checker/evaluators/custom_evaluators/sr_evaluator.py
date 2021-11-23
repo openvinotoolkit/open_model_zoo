@@ -1,0 +1,384 @@
+"""
+Copyright (c) 2018-2021 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+from pathlib import Path
+from collections import OrderedDict
+import numpy as np
+
+from .base_custom_evaluator import BaseCustomEvaluator
+from ...adapters import create_adapter
+from ...config import ConfigError
+from ...utils import contains_all, contains_any, extract_image_representations, get_path
+from ...logging import print_info
+
+
+def generate_name(prefix, with_prefix, layer_name):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+
+class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
+    def __init__(self, dataset_config, launcher, model, orig_config):
+        super().__init__(dataset_config, launcher, orig_config)
+        self.model = model
+        if hasattr(self.model, 'adapter'):
+            self.adapter_type = self.model.adapter.__provider__
+
+    @classmethod
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        model = SRFModel(
+            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
+            delayed_model_loading
+        )
+        return cls(dataset_config, launcher, model, orig_config)
+
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
+        self.model.init_feedback(self.dataset.data_reader)
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            self.model.fill_feedback(batch_inputs)
+            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
+            batch_inputs_extr, _ = extract_image_representations(batch_inputs)
+            batch_raw_prediction, batch_prediction = self.model.predict(
+                batch_identifiers, batch_inputs_extr
+            )
+            annotation, prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
+            self.model.feedback(prediction)
+            metrics_result = self._get_metrics_result(batch_input_ids, annotation, prediction, calculate_metrics)
+            if output_callback:
+                output_callback(batch_raw_prediction[0], metrics_result=metrics_result,
+                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
+            self._update_progress(progress_reporter, metric_config, batch_id, len(prediction), csv_file)
+
+
+class BaseModel:
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.network_info = network_info
+        self.launcher = launcher
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
+    def release(self):
+        pass
+
+
+# pylint: disable=E0203
+class BaseDLSDKModel:
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_suffix))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape: {}\n'.format(
+                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+        print_info('{} - Output info'.format(self.default_model_suffix))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info.get('srmodel', network_info.get('model')))
+        if model.is_dir():
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list:
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list and not blob_list:
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
+                    if not model_list:
+                        model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+        if model.suffix == '.blob':
+            return model, None
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
+
+        return model, weights
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.update_inputs_outputs_info()
+
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
+
+    def update_inputs_outputs_info(self):
+        raise NotImplementedError
+
+    def load_model(self, network_info, launcher, log=False):
+        model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            self.network = launcher.read_network(str(model), str(weights))
+            self.load_network(self.network, launcher)
+        else:
+            self.exec_network = launcher.ie_core.import_network(str(model))
+        self.update_inputs_outputs_info()
+        if log:
+            self.print_input_output_info()
+
+
+def create_model(model_config, launcher, delayed_model_loading=False):
+    launcher_model_mapping = {
+        'dlsdk': ModelDLSDKModel,
+        'tf': ModelTFModel,
+    }
+    framework = launcher.config['framework']
+    model_class = launcher_model_mapping.get(framework)
+    if not model_class:
+        raise ValueError('model for framework {} is not supported'.format(framework))
+    return model_class(model_config, launcher, delayed_model_loading)
+
+
+class SRFModel(BaseModel):
+    def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
+        super().__init__(network_info, launcher)
+        if models_args and not delayed_model_loading:
+            model = network_info.get('srmodel', {})
+            if not contains_any(model, ['model', 'onnx_model']) and models_args:
+                model['srmodel'] = models_args[0]
+                model['_model_is_blob'] = is_blob
+            network_info.update({'sr_model': model})
+        if not contains_all(network_info, ['srmodel']) and not delayed_model_loading:
+            raise ConfigError('network_info should contain srmodel field')
+        self.srmodel = create_model(network_info['srmodel'], launcher, delayed_model_loading)
+        self.feedback = self.srmodel.feedback
+        self.init_feedback = self.srmodel.init_feedback
+        self.fill_feedback = self.srmodel.fill_feedback
+        self._part_by_name = {'srmodel': self.srmodel}
+        self._raw_outs = OrderedDict()
+
+    def predict(self, identifiers, input_data):
+        predictions, raw_outputs = [], []
+        for data in input_data:
+            output, prediction = self.srmodel.predict(identifiers, data)
+            raw_outputs.append(output)
+            predictions.append(prediction)
+        return raw_outputs, predictions
+
+    def reset(self):
+        pass
+
+    def release(self):
+        self.srmodel.release()
+
+    def load_network(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(
+                network_dict.get('srmodel', network_dict.get('model')), launcher)
+        self.update_inputs_outputs_info()
+
+    def load_model(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict.get('name', 'srmodel')].load_model(network_dict, launcher)
+        self.update_inputs_outputs_info()
+
+    def _add_raw_predictions(self, prediction):
+        for key, output in prediction.items():
+            if key not in self._raw_outs:
+                self._raw_outs[key] = []
+            self._raw_outs[key].append(output)
+
+    def get_network(self):
+        return [{'name': 'srmodel', 'model': self.srmodel.network}]
+
+    def update_inputs_outputs_info(self):
+        if hasattr(self.srmodel, 'update_inputs_outputs_info'):
+            self.srmodel.update_inputs_outputs_info()
+
+
+class FeedbackMixin:
+    def configure_feedback(self):
+
+        self._idx_to_name = {}
+        self._name_to_idx = {}
+        self._feedback_name = self.network_info['feedback_input']
+        self._feedback_data = {self._feedback_name: None}
+        self._first_step = True
+        self._inputs = self.network_info['inputs']
+        self._feedback_inputs = {self._feedback_name: [t for t in self._inputs if t['name'] == self._feedback_name][0]}
+
+        for input_info in self._inputs:
+            idx = int(input_info['value'])
+            self._idx_to_name[idx] = input_info['name']
+            self._name_to_idx[input_info['name']] = idx
+        self._feedback_idx = self._name_to_idx[self._feedback_name]
+
+
+    def init_feedback(self, reader):
+        info = self._feedback_inputs[self._feedback_name]
+        self._feedback_data[self._feedback_name] = reader.read(info['initializer'])
+
+    def feedback(self, data):
+        data = data[0]
+        self._feedback_data[self._feedback_name] = data[0].value
+
+    def fill_feedback(self, data):
+        data[0].data[self._feedback_idx] = self._feedback_data[self._feedback_name]
+        return data
+
+
+class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
+    default_model_suffix = 'srmodel'
+
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        super().__init__(network_info, launcher)
+        self.is_dynamic = False
+        self.input_blob, self.output_blob = None, None
+        self.with_prefix = None
+        self.partial_shapes = {}
+
+        if not delayed_model_loading:
+            self.load_model(network_info, launcher, log=True)
+
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
+        self.configure_feedback()
+
+    def predict(self, identifiers, input_data):
+        input_data = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self.reshape_net({key: data.shape for key, data in input_data.items()})
+        raw_result = self.exec_network.infer(input_data)
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result
+
+    def release(self):
+        del self.exec_network
+        del self.launcher
+
+    def fit_to_input(self, input_data):
+        has_info = hasattr(self.exec_network, 'input_info')
+        if has_info:
+            input_info = self.exec_network.input_info
+        else:
+            input_info = self.exec_network.inputs
+
+        fitted = {}
+        for name, info in input_info.items():
+            data = input_data[self._name_to_idx[name]]
+            data = np.expand_dims(data, axis=0)
+            data = np.transpose(data, [0, 3, 1, 2])
+            if not info.input_data.is_dynamic:
+                assert tuple(info.input_data.shape) == np.shape(data)
+            fitted[name] = data
+
+        return fitted
+
+    def update_inputs_outputs_info(self):
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if (with_prefix != self.with_prefix) and with_prefix:
+            self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
+                                                            self.network_info['feedback_input']])
+            for inp in self.network_info['inputs']:
+                inp['name'] = '_'.join([self.default_model_suffix, inp['name']])
+                if 'blob' in inp.keys():
+                    inp['blob'] = '_'.join([self.default_model_suffix, inp['blob']])
+            self.network_info['adapter']['target_out'] = '_'.join([self.default_model_suffix,
+                                                                   self.network_info['adapter']['target_out']])
+
+        self.with_prefix = with_prefix
+
+
+class ModelTFModel(BaseModel, FeedbackMixin):
+    default_model_suffix = 'srmodel'
+
+    def __init__(self, network_info, launcher, *args, **kwargs):
+        super().__init__(network_info, launcher)
+        model = self.automatic_model_search(network_info)
+        self.inference_session = launcher.create_inference_session(str(model))
+
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
+        self.configure_feedback()
+
+    def predict(self, identifiers, input_data):
+        input_data = self.fit_to_input(input_data)
+        raw_result = self.inference_session.predict([input_data])
+        result = self.adapter.process(raw_result, identifiers, [{}])
+        return raw_result, result
+
+    def fit_to_input(self, input_data):
+        fitted = {}
+        for idx, data in enumerate(input_data):
+            name = self._idx_to_name[idx]
+            data = np.expand_dims(data, axis=0)
+            fitted[name] = data
+
+        return fitted
+
+    def release(self):
+        del self.inference_session
+
+    @staticmethod
+    def automatic_model_search(network_info):
+        model = Path(network_info['model'])
+        return model

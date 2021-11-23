@@ -18,9 +18,10 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     int fontFace,
     double fontScale,
     cv::Scalar color,
-    int thickness) {
+    int thickness,
+    MetricTypes metricType) {
     update(lastRequestStartTime);
-    paintMetrics(frame, position, fontFace, fontScale, color, thickness);
+    paintMetrics(frame, position, fontFace, fontScale, color, thickness, metricType);
 }
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
@@ -44,19 +45,23 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     }
 }
 
-void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace, double fontScale, cv::Scalar color, int thickness) const {
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace,
+    double fontScale, cv::Scalar color, int thickness, MetricTypes metricType) const {
     // Draw performance stats over frame
     Metrics metrics = getLast();
 
     std::ostringstream out;
-    if (!std::isnan(metrics.latency)) {
+    if (!std::isnan(metrics.latency) &&
+        (metricType == PerformanceMetrics::MetricTypes::LATENCY || metricType == PerformanceMetrics::MetricTypes::ALL)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
         putHighlightedText(frame, out.str(), position, fontFace, fontScale, color, thickness);
     }
-    if (!std::isnan(metrics.fps)) {
+    if (!std::isnan(metrics.fps) &&
+        (metricType == PerformanceMetrics::MetricTypes::FPS || metricType == PerformanceMetrics::MetricTypes::ALL)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
-        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, fontFace, fontScale, color, thickness);
+        int offset = metricType == PerformanceMetrics::MetricTypes::ALL ? 30 : 0;
+        putHighlightedText(frame, out.str(), {position.x, position.y + offset}, fontFace, fontScale, color, thickness);
     }
 }
 
@@ -92,10 +97,18 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
     return metrics;
 }
 
-void PerformanceMetrics::printTotal() const {
+void PerformanceMetrics::logTotal() const {
     Metrics metrics = getTotal();
 
-    std::ostringstream out;
-    out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms\nFPS: " << metrics.fps << '\n';
-    std::cout << out.str();
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;
+    slog::info << "\tFPS: " << metrics.fps << slog::endl;
+}
+
+void logLatencyPerStage(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
+    slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(1) <<
+        readLat << " ms" << slog::endl;
+    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;
+    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;
+    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;
+    slog::info << "\tRendering:\t" << renderLat << " ms" << slog::endl;
 }

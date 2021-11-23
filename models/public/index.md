@@ -5,7 +5,7 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/downloader/README.md) and other automation tools.
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
 ## Classification
 
@@ -39,8 +39,8 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
 | MobileNet V2 1.0 224        | Caffe\*<br>TensorFlow\*<br>PyTorch\*| [mobilenet-v2](./mobilenet-v2/README.md) <br>[mobilenet-v2-1.0-224](./mobilenet-v2-1.0-224/README.md)<br>[mobilenet-v2-pytorch](./mobilenet-v2-pytorch/README.md) | 71.218%/90.178%<br>71.85%/90.69%<br>71.81%/90.396% | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/README.md) | 74.09%/91.97% | 1.183  | 6.087 |
-| MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) | 67.36%/87.45% | 0.121 | 2.537 |
-| MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md) | 75.70%/92.76% | 0.4536 | 5.4721 |
+| MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) | 67.36%/87.44% | 0.1168 | 2.537 |
+| MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md) | 75.30%/92.62% | 0.4450 | 5.4721 |
 | NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/README.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | DenseNet 121, alpha=0.125   | MXNet\*                            | [octave-densenet-121-0.125](./octave-densenet-121-0.125/README.md) | 76.066%/93.044% | 4.883 | 7.977 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/README.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
@@ -66,9 +66,11 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | SE-ResNet 152               | Caffe\*                            | [se-resnet-152](./se-resnet-152/README.md) | 78.506%/94.45% | 22.709 | 66.746 |
 | SE-ResNeXt 50               | Caffe\*                            | [se-resnext-50](./se-resnext-50/README.md) | 78.968%/94.63% | 8.533 | 27.526|
 | SE-ResNeXt 101              | Caffe\*                            | [se-resnext-101](./se-resnext-101/README.md) | 80.168%/95.19% | 16.054 | 48.886 |
+| Shufflenet V2 x0.5          | Caffe\*                            | [shufflenet-v2-x0.5](./shufflenet-v2-x0.5/README.md) | 58.80%/81.13% | 0.08465 | 1.363 |
 | Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/README.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/README.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/README.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
+| Swin Transformer Tiny, window size=7| PyTorch\*                  | [swin-tiny-patch4-window7-224](./swin-tiny-patch4-window7-224/README.md) | 81.38%/95.51% | 9.0280 | 28.8173 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*<br>Caffe2\*                | [vgg19](./vgg19/README.md)<br>[vgg19-caffe2](./vgg19-caffe2/README.md) | 71.062%/89.832%<br>71.062%/89.832% | 39.3 | 143.667  |
 
@@ -85,7 +87,8 @@ detect areas with complex shape.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
-| DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 66.85% | 11.469 | 23.819 |
+| DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 68.41% | 11.469 | 23.819 |
+| DRN-D-38                  |  PyTorch\*     | [drn-d-38](./drn-d-38/README.md) | 71.31% | 1768.3276 | 25.9939 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |
@@ -123,6 +126,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/README.md) | 73.67% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/README.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/README.md)| 44.2756%| 62.211 | 17.911 |
+| DETR-ResNet50                        | PyTorch\*                | [detr-resnet50](./detr-resnet50/README.md)| 39.27% / 42.36% | 174.4708 | 41.3293 |
 | EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)| 31.95% | 2.54 | 3.9 |
 | EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/README.md)|83.565% | 1.8975 | 1.0059 |
@@ -132,6 +136,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101         | TensorFlow\*             | [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/README.md) | 35.72% | 112.052 | 48.128 |
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
+| Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	84.44%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
@@ -151,10 +156,12 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) | 54.79% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/README.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
-| YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/README.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
-| YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
+| YOLO v3                              | Keras\* <br>ONNX\*       | [yolo-v3-tf](./yolo-v3-tf/README.md) <br>[yolo-v3-onnx](./yolo-v3-onnx/README.md) | 62.2759%/67.7221% <br> 48.30%/47.07%| 65.9843~65.998 | 61.9221~61.930 |
+| YOLO v3 Tiny                         | Keras\* <br>ONNX\*       | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) <br>[yolo-v3-tiny-onnx](./yolo-v3-tiny-onnx/README.md) | 35.9%/39.7% <br> 17.07%/13.64%| 5.582  | 8.848~8.8509 |
 | YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.23%/77.40%/50.26% | 129.5567	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
+| YOLOF                                | PyTorch\*                | [yolof](./yolof/README.md)           | 60.69%/66.23%/43.63% | 175.37942 | 48.228 |
+| YOLOX Tiny                           | PyTorch\*                | [yolox-tiny](./yolox-tiny/README.md) | 47.85%/52.56%/31.82%| 6.4813 | 5.0472 |
 
 ## Face Recognition
 
@@ -198,6 +205,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/README.md) | 33.47Db | 691.1589 | 12.7773|
+| Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 34.27Db | 146.6037 | 11.3313 |
 
 ## Style Transfer
 
@@ -239,11 +247,12 @@ The task of sound classification is to predict what sounds are in an audio fragm
 
 The task of speech recognition is to recognize and translate spoken language into text.
 
-| Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
-| ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
+| Model Name        | Implementation | OMZ Model Name                                                   | Accuracy | GFlops | mParams |
+| ----------------- | -------------- | ---------------------------------------------------------------- | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/README.md) | 7.55%    | 0.0472 | 47.2    |
 | DeepSpeech V0.8.2 | TensorFlow\*   | [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/README.md) | 6.13%    | 0.0472 | 47.2    |
-| QuartzNet | Pytorch\* | [quartznet-15x5-en](./quartznet-15x5-en/README.md) | 3.86% | 2.4195 | 18.8857 |
+| QuartzNet         | PyTorch\*      | [quartznet-15x5-en](./quartznet-15x5-en/README.md)               | 3.86%    | 2.4195 | 18.8857 |
+| Wav2Vec 2.0 Base  | PyTorch\*      | [wav2vec2-base](./wav2vec2-base/README.md)                       | 3.39%    | 26.843 | 94.3965 |
 
 ## Image Translation
 
@@ -275,6 +284,14 @@ The task of image deblurring.
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/README.md) | 28.25Db  | 80.8919 | 2.1083   |
 
+## JPEG artifacts removal
+
+The task of restoration images from jpeg format.
+
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops     | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | ---------- | -------- |
+| FBCNN          | PyTorch\*      | [fbcnn](./fbcnn/README.md)                     | 34.34Db  | 1420.78235 | 71.922   |
+
 ## Salient object detection
 
  Salient object detection is a task-based on a visual attention mechanism,
@@ -284,16 +301,25 @@ The task of image deblurring.
 | -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
 | F3Net          | PyTorch\*      | [f3net](./f3net/README.md) | 84.21%   | 31.2883 | 25.2791  |
 
+## Text Prediction
+
+Text prediction is a task to predict the next word, given all of the previous words within some text.
+
+| Model Name     | Implementation | OMZ Model Name             | Accuracy | GFlops   | mParams  |
+| -------------- | -------------- | -------------------------- | -------- | -------- | -------- |
+| GPT-2          | PyTorch\*      | [gpt-2](./gpt-2/README.md) | 29.00%   | 293.0489 | 175.6203 |
+
 ## Text Recognition
 
 Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
 See details about datasets in [here](./text-recognition-resnet-fc/README.md)
-The reported metric is collected over the alphanumeric subset of icdar 13 (1015 images) in case-insensitive mode.
+The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 images) in case-insensitive mode.
 
-| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
-| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
+| Model Name                      | Implementation | OMZ Model Name                                                       | Accuracy | GFlops  | mParams  |
+| ------------------------------- | -------------- | -------------------------------------------------------------------- | -------- | ------- | -------- |
+| Resnet-FC                       | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94%   | 40.3704 | 177.9668 |
+| ViTSTR Small patch=16, size=224 | PyTorch\*      | [vitstr-small-patch16-224](./vitstr-small-patch16-224/README.md)     | 90.34%   | 9.1544  | 21.5061  |
 
 ## Text to Speech
 
@@ -319,7 +345,7 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../tools/model_tools/README.md)
 * [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../intel/index.md)
 
 ## Legal Information

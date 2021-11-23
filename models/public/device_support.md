@@ -28,7 +28,9 @@
 | densenet-169-tf | YES | YES | YES |
 | densenet-201 | YES | YES | YES |
 | densenet-201-tf | YES | YES | YES |
+| detr-resnet50 | YES |    |    |
 | dla-34 | YES | YES | YES |
+| drn-d-38 | YES | YES |    |
 | efficientdet-d0-tf | YES | YES | YES |
 | efficientdet-d1-tf | YES | YES | YES |
 | efficientnet-b0 | YES | YES | YES |
@@ -50,6 +52,7 @@
 | faster_rcnn_resnet50_coco | YES | YES | YES |
 | fastseg-large | YES | YES |    |
 | fastseg-small | YES | YES |    |
+| fbcnn | YES | YES | YES |
 | fcrn-dp-nyu-depth-v2-tf | YES | YES |    |
 | forward-tacotron-duration-prediction | YES |    |    |
 | forward-tacotron-regression | YES |    |    |
@@ -61,12 +64,14 @@
 | googlenet-v3 | YES | YES | YES |
 | googlenet-v3-pytorch | YES | YES | YES |
 | googlenet-v4-tf | YES | YES | YES |
+| gpt-2 | YES | YES | |
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-0.5 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |
 | higher-hrnet-w32-human-pose-estimation | YES | YES |    |
 | hrnet-v2-c1-segmentation | YES | YES |    |
 | human-pose-estimation-3d-0001 | YES | YES | YES |
+| hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
 | license-plate-recognition-barrier-0007 | YES |    |    |
@@ -89,6 +94,7 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-yolo-v4-syg | YES | YES |    |
 | mozilla-deepspeech-0.6.1 | YES |    |    |
 | mozilla-deepspeech-0.8.2 | YES |    |    |
 | mtcnn-o | YES | YES |    |
@@ -128,6 +134,7 @@
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-101 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
+| shufflenet-v2-x0.5 | YES | YES | YES |
 | shufflenet-v2-x1.0 | YES | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES | YES |
 | Sphereface | YES | YES | YES |
@@ -142,6 +149,7 @@
 | ssd_mobilenet_v2_coco | YES | YES | YES |
 | ssd_resnet50_v1_fpn_coco | YES | YES | YES |
 | ssdlite_mobilenet_v2 | YES | YES | YES |
+| swin-tiny-patch4-window7-224 | YES | YES | YES |
 | text-recognition-resnet-fc | YES | YES | YES |
 | ultra-lightweight-face-detection-rfb-320 | YES | YES | YES |
 | ultra-lightweight-face-detection-slim-320 | YES | YES | YES |
@@ -150,13 +158,19 @@
 | vgg16 | YES | YES | YES |
 | vgg19 | YES | YES | YES |
 | vgg19-caffe2 | YES | YES | YES |
+| vitstr-small-patch16-224 | YES | YES | |
+| wav2vec2-base | YES |    |    |
 | wavernn-rnn | YES | YES | YES |
 | wavernn-upsampler | YES | YES |    |
 | yolact-resnet50-fpn-pytorch | YES | YES | YES |
 | yolo-v1-tiny-tf | YES | YES | YES |
 | yolo-v2-tf | YES | YES | YES |
 | yolo-v2-tiny-tf | YES | YES | YES |
+| yolo-v3-onnx | YES | | YES |
 | yolo-v3-tf | YES | YES | YES |
+| yolo-v3-tiny-onnx | YES | | |
 | yolo-v3-tiny-tf | YES | YES | YES |
 | yolo-v4-tf | YES | YES | YES |
-| yolo-v4-tiny-tf | YES | YES |    |
+| yolo-v4-tiny-tf | YES | YES | YES |
+| yolof | YES | YES |    |
+| yolox-tiny | YES | YES | |

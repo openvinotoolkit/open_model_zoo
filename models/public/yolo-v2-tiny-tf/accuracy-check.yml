@@ -38,9 +38,11 @@ models:
             integral: 11point
             ignore_difficult: False
             presenter: print_scalar
+            reference: 0.2734
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.2911
 
   - name: yolo-v2-tiny-tf
 
@@ -76,6 +78,8 @@ models:
             integral: 11point
             ignore_difficult: False
             presenter: print_scalar
+            reference: 0.2734
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.2911

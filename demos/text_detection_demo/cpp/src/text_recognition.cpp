@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Intel Corporation
+// Copyright (C) 2019-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -50,12 +50,12 @@ namespace  {
     };
 }  // namespace
 
-std::string SimpleDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf) {
+std::string SimpleDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf, int start_index) {
     std::string result = "";
     const int num_classes = alphabet.length();
     *conf = 1;
 
-    for (std::vector<float>::const_iterator it = data.begin(); it != data.end(); it += num_classes) {
+    for (std::vector<float>::const_iterator it = data.begin() + start_index * num_classes; it != data.end(); it += num_classes) {
         int argmax;
         float prob;
 

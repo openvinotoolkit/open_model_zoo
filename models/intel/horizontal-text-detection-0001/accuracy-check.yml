@@ -29,3 +29,4 @@ models:
             ignore_difficult: True
             area_recall_constrain: 0.5
             area_precision_constrain: 0.5
+            reference: 0.8845

@@ -17,10 +17,10 @@ limitations under the License.
 import numpy as np
 import pytest
 
-from accuracy_checker.config import ConfigError
-from accuracy_checker.postprocessor import PostprocessingExecutor
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.postprocessor import PostprocessingExecutor
 
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.representation import (
     DetectionAnnotation,
     DetectionPrediction,
     ContainerAnnotation,
@@ -799,7 +799,7 @@ class TestPostprocessor:
         assert annotation == expected
 
     def test_nms(self, mocker):
-        mock = mocker.patch('accuracy_checker.postprocessor.nms.NMS.process_all', return_value=([], []))
+        mock = mocker.patch('openvino.tools.accuracy_checker.postprocessor.nms.NMS.process_all', return_value=([], []))
         config = [{'type': 'nms', 'overlap': 0.4}]
         postprocess_data(PostprocessingExecutor(config), [], [])
         mock.assert_called_once_with([], [])
@@ -995,13 +995,6 @@ class TestPostprocessor:
         postprocess_data(PostprocessingExecutor(config), annotation, prediction)
         assert np.array_equal(prediction[0].mask, expected_prediction_mask)
         assert np.array_equal(annotation[0].mask, expected_annotation_mask)
-
-    def test_extend_segmentation_mask_raise_config_error_if_prediction_less_annotation(self):
-        config = [{'type': 'extend_segmentation_mask'}]
-        annotation = make_segmentation_representation(np.zeros((5, 5)), ground_truth=True)
-        prediction = make_segmentation_representation(np.zeros((4, 4)), ground_truth=False)
-        with pytest.raises(ConfigError):
-            postprocess_data(PostprocessingExecutor(config), annotation, prediction)
 
     def test_extend_segmentation_mask_with_filling_label(self):
         config = [{'type': 'extend_segmentation_mask', 'filling_label': 1}]

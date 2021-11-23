@@ -65,10 +65,12 @@ se-resnet-152
 se-resnet-50
 se-resnext-101
 se-resnext-50
+shufflenet-v2-x0.5
 shufflenet-v2-x1.0
 squeezenet1.0
 squeezenet1.1
 squeezenet1.1-caffe2
+swin-tiny-patch4-window7-224
 vgg16
 vgg19
 vgg19-caffe2

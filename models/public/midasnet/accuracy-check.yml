@@ -13,3 +13,4 @@ models:
           - type: align_prediction_depth_map
         metrics:
           - type: rmse
+            reference: 0.07071

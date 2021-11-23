@@ -33,3 +33,4 @@ models:
           - name: 'top_5_acc'
             type: 'qa_embedding_accuracy'
             top_k: 5
+            reference: 0.876

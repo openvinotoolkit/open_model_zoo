@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: ctpn.pb
     size: 71638063
-    sha256: 09b3a0cc57eb826dd6b6fa95a03e078ad435b7b5fb0186dad2abdb98a4fdf64a
+    sha384: edc59e0375fb56fc51e0333f4cd2377494d50ef3b86cb64b81e801a6d1ed3256dce068fce80bb7b7fd665258fae76cb4
     source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
 model_optimizer_args:
   - --input_shape=[1,600,600,3]

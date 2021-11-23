@@ -14,3 +14,4 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8858
