@@ -13,8 +13,8 @@ The network is able to recognize English text consisting of characters in the [G
 
 | Metric                    | Value     |
 | ------------------------- | --------- |
-| GFlops                    |           |
-| MParams                   |           |
+| GFlops                    | 1.3182    |
+| MParams                   | 0.1413    |
 | Accuracy on GNHK test set | 81.5%     |
 | Source framework          | PyTorch\* |
 
