@@ -15,7 +15,7 @@ The network is able to recognize English text consisting of characters in the [G
 | ------------------------- | --------- |
 | GFlops                    |           |
 | MParams                   |           |
-| Accuracy on GNHK test set | 82.9%     |
+| Accuracy on GNHK test set | 81.5%     |
 | Source framework          | PyTorch\* |
 
 ## Accuracy Values
@@ -24,18 +24,18 @@ This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1
 
 ## Inputs
 
-Grayscale image, name - `actual_input`, shape - `1, 1, 128, 6400`, format is `B, C, H, W`, where:
+Grayscale image, name - `actual_input`, shape - `1, 1, 96, 2000`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
 - `H` - image height
 - `W` - image width
 
-> **NOTE:**  the source image should be resized to specific height (such as 128) while keeping aspect ratio, and the width after resizing should be no larger than 6400 and then the width should be right-bottom padded to 6400 with edge values.
+> **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and the width after resizing should be no larger than 2000 and then the width should be right-bottom padded to 2000 with edge values.
 
 ## Outputs
 
-Name - `output`, shape - `800, 1, 95`, format is `W, B, L`, where:
+Name - `output`, shape - `250, 1, 95`, format is `W, B, L`, where:
 
 - `W` - output sequence length
 - `B` - batch size
