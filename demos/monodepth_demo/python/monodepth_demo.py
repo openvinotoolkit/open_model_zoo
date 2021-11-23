@@ -48,7 +48,7 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+                      required=True, type=str)
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -105,9 +105,9 @@ def main():
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+        log.info('Connecting to remote model: {}'.format(args.model))
+        service_url, model_name, model_version = RemoteAdapter.parse_model_arg(args.model)
+        model_adapter = RemoteAdapter(service_url, model_name, model_version)
 
     model = MonoDepthModel(model_adapter)
     model.log_layers_info()

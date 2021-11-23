@@ -44,7 +44,7 @@ def build_argparser():
     args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=Path)
+                      required=True, type=str)
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
@@ -168,9 +168,9 @@ def main():
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+        log.info('Connecting to remote model: {}'.format(args.model))
+        service_url, model_name, model_version = RemoteAdapter.parse_model_arg(args.model)
+        model_adapter = RemoteAdapter(service_url, model_name, model_version)
 
     config = {
         'vocab': vocab,
