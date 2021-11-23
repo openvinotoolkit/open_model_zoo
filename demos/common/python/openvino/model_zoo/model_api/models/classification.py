@@ -73,6 +73,5 @@ class Classification(ImageModel):
         if self.apply_softmax:
             scores = softmax(scores)
         labels = [self.labels[i] if self.labels else "" for i in indices]
-        return list(zip(indices,
-                        labels,
-                        scores))
+        return list(zip(indices, labels, scores))
+
