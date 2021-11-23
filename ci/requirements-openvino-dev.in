@@ -10,7 +10,6 @@ nltk
 numpy
 opencv-python
 openvino
-openvino-dev
 pandas
 parasail
 pillow
