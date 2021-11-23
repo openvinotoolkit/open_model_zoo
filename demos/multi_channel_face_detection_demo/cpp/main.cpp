@@ -204,11 +204,17 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
-        IEGraph graph{FLAGS_m, FLAGS_d, core, roundUp(params.count, FLAGS_bs), FLAGS_show_stats, FLAGS_bs};
-        ov::Shape inputShape = graph.getInputShape();
+        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
+            reshape(core.read_model(FLAGS_m), FLAGS_bs),
+            FLAGS_m,
+            FLAGS_d,
+            roundUp(params.count, FLAGS_bs),
+            core);
+        ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
+        IEGraph graph{std::move(reqQueue), FLAGS_show_stats};
 
         VideoSources::InitParams vsParams;
         vsParams.inputs               = inputs;
@@ -223,8 +229,7 @@ int main(int argc, char* argv[]) {
         sources.start();
 
         size_t currentFrame = 0;
-
-        graph.start([&](VideoFrame& img) {
+        graph.start(FLAGS_bs, [&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);

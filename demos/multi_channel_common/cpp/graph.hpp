@@ -21,10 +21,49 @@
 #include "perf_timer.hpp"
 #include "input.hpp"
 
-static constexpr size_t roundUp(size_t enumerator, size_t denominator) noexcept {
+namespace {
+constexpr size_t roundUp(size_t enumerator, size_t denominator) {
     assert(enumerator > 0);
+    assert(denominator > 0);
     return 1 + (enumerator - 1) / denominator;
 }
+
+std::shared_ptr<ov::Function> reshape(std::shared_ptr<ov::Function>&& model, size_t batchSize) {
+    if (model->get_parameters().size() != 1) {
+        throw std::logic_error("Face Detection model must have only one input");
+    }
+    const ov::Layout inLyout{"NHWC"};
+    model = ov::preprocess::PrePostProcessor(model).input(ov::preprocess::InputInfo()
+        .tensor(ov::preprocess::InputTensorInfo()
+            .set_element_type(ov::element::u8)
+            .set_layout(inLyout))
+        .preprocess(ov::preprocess::PreProcessSteps()
+            .convert_element_type(ov::element::f32)
+            .convert_layout("NCHW"))
+        .network(ov::preprocess::InputNetworkInfo().set_layout("NCHW"))
+    ).build();
+    ov::Shape inShape = model->input().get_shape();
+    inShape[ov::layout::batch_idx(inLyout)] = batchSize;
+    model->reshape({{model->input().get_any_name(), inShape}});
+    return model;
+}
+
+std::queue<ov::runtime::InferRequest> setConfig(std::shared_ptr<ov::Function>&& model, const std::string& modelPath,
+        const std::string& device, size_t performanceHintNumRequests, ov::runtime::Core& core) {
+    core.set_config({{"CPU_BIND_THREAD", "NO"}}, "CPU");
+    ov::runtime::ExecutableNetwork net = core.compile_model(model, device, {
+        {"PERFORMANCE_HINT", "THROUGHPUT"},
+        {"PERFORMANCE_HINT_NUM_REQUESTS", std::to_string(performanceHintNumRequests)}});
+    unsigned maxRequests = net.get_metric("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
+    logExecNetworkInfo(net, modelPath, device);
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
+    std::queue<ov::runtime::InferRequest> reqQueue;
+    for (unsigned i = 0; i < maxRequests; ++i) {
+        reqQueue.push(net.create_infer_request());
+    }
+    return reqQueue;
+}
+}  // namespace
 
 class VideoFrame;
 
@@ -32,7 +71,6 @@ class IEGraph{
 private:
     PerfTimer perfTimerPreprocess;
     PerfTimer perfTimerInfer;
-    std::size_t batchSize;
     std::queue<ov::runtime::InferRequest> availableRequests;
 
     struct BatchRequestDesc {
@@ -42,7 +80,7 @@ private:
     };
     std::queue<BatchRequestDesc> busyBatchRequests;
 
-    std::size_t maxRequests = 0;
+    std::size_t maxRequests;
 
     std::atomic_bool terminate = {false};
     std::mutex mtxAvalableRequests;
@@ -54,18 +92,17 @@ private:
     GetterFunc getter;
     using PostprocessingFunc = std::function<std::vector<Detections>(ov::runtime::InferRequest, cv::Size)>;
     PostprocessingFunc postprocessing;
-    using PostReadFunc = std::function<void (std::shared_ptr<ov::Function>&)>;
-    PostReadFunc postRead;
     std::thread getterThread;
 public:
-    explicit IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
-        size_t performanceHintNumRequests, bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc = nullptr);
+    IEGraph::IEGraph(std::queue<ov::runtime::InferRequest>&& availableRequests, bool collectStats):
+        availableRequests(std::move(availableRequests)),
+        maxRequests(this->availableRequests.size()),
+        perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0) {}
 
-    void start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
+    void start(size_t batchSize, GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 
     bool isRunning();
-
-    ov::Shape getInputShape();
 
     std::vector<std::shared_ptr<VideoFrame>> getBatchData(cv::Size windowSize);
 

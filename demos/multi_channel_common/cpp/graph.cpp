@@ -30,13 +30,14 @@ void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::
 }
 }  // namespace
 
-void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
+void IEGraph::start(size_t batchSize, GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
+    assert(batchSize > 0);
     assert(nullptr != getterFunc);
     assert(nullptr != postprocessingFunc);
     assert(nullptr == getter);
     getter = std::move(getterFunc);
     postprocessing = std::move(postprocessingFunc);
-    getterThread = std::thread([&]() {
+    getterThread = std::thread([&, batchSize]() {
         std::vector<std::shared_ptr<VideoFrame>> vframes;
         while (!terminate) {
             vframes.clear();
@@ -87,55 +88,9 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
     });
 }
 
-IEGraph::IEGraph(const std::string& modelPath, const std::string& device, ov::runtime::Core& core,
-            size_t performanceHintNumRequests, bool collectStats, std::size_t batchSize, PostReadFunc&& postReadFunc):
-        perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
-        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0),
-        batchSize(batchSize),
-        postRead(std::move(postReadFunc)) {
-    std::shared_ptr<ov::Function> model = core.read_model(modelPath);
-    if (model->get_parameters().size() != 1) {
-        throw std::logic_error("Face Detection model must have only one input");
-    }
-    const ov::Layout inLyout{"NHWC"};
-    model = ov::preprocess::PrePostProcessor(model).input(ov::preprocess::InputInfo()
-        .tensor(ov::preprocess::InputTensorInfo()
-            .set_element_type(ov::element::u8)
-            .set_layout(inLyout))
-        .preprocess(ov::preprocess::PreProcessSteps()
-            .convert_element_type(ov::element::f32)
-            .convert_layout("NCHW"))
-        .network(ov::preprocess::InputNetworkInfo().set_layout("NCHW"))
-    ).build();
-    ov::Shape inShape = model->input().get_shape();
-    // Set batch size
-    inShape[ov::layout::batch_idx(inLyout)] = batchSize;
-    model->reshape({{model->input().get_any_name(), inShape}});
-
-    if (postRead != nullptr)
-        postRead(model);
-    core.set_config({{"CPU_BIND_THREAD", "NO"}}, "CPU");
-    ov::runtime::ExecutableNetwork net = core.compile_model(model, device, {
-        {"PERFORMANCE_HINT", "THROUGHPUT"},
-        {"PERFORMANCE_HINT_NUM_REQUESTS", std::to_string(performanceHintNumRequests)}});
-    maxRequests = net.get_metric("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
-    logExecNetworkInfo(net, modelPath, device);
-
-    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
-    slog::info << "\tBatch size is set to " << batchSize << slog::endl;
-
-    for (size_t i = 0; i < maxRequests; ++i) {
-        availableRequests.push(net.create_infer_request());
-    }
-}
-
 bool IEGraph::isRunning() {
     std::lock_guard<std::mutex> lock(mtxBusyRequests);
     return !terminate || !busyBatchRequests.empty();
-}
-
-ov::Shape IEGraph::getInputShape() {
-    return availableRequests.front().get_input_tensor().get_shape();
 }
 
 std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSize) {

@@ -203,33 +203,41 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
+        std::shared_ptr<ov::Function> model = reshape(core.read_model(FLAGS_m), FLAGS_bs);
+
         struct {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        IEGraph graph(FLAGS_m, FLAGS_d, core, roundUp(params.count, FLAGS_bs), FLAGS_show_stats, FLAGS_bs, [&postParams](std::shared_ptr<ov::Function>& model) {
-            postParams.pafsOut = model->outputs()[0];
-            postParams.heatMapsOut = model->outputs()[1];
-            const ov::Layout outLayout{"NCHW"};
-            model = ov::preprocess::PrePostProcessor(model)
-                .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                    .set_layout(outLayout)
-                    .set_element_type(ov::element::f32)))
-                .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                    .set_layout(outLayout)
-                    .set_element_type(ov::element::f32)))
-                .build();
-            postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
-            postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
-            postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
-            postParams.heatMapsWidth = postParams.heatMapsOut.get_shape()[ov::layout::width_idx(outLayout)];
-            postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
-            postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
-        });
-        ov::Shape inputShape = graph.getInputShape();
+        postParams.pafsOut = model->outputs()[0];
+        postParams.heatMapsOut = model->outputs()[1];
+        const ov::Layout outLayout{"NCHW"};
+        model = ov::preprocess::PrePostProcessor(model)
+            .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                .set_layout(outLayout)
+                .set_element_type(ov::element::f32)))
+            .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
+                .set_layout(outLayout)
+                .set_element_type(ov::element::f32)))
+            .build();
+        postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
+        postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
+        postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
+        postParams.heatMapsWidth = postParams.heatMapsOut.get_shape()[ov::layout::width_idx(outLayout)];
+        postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
+        postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
+
+        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
+            std::move(model),
+            FLAGS_m,
+            FLAGS_d,
+            roundUp(params.count, FLAGS_bs),
+            core);
+        ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
+        IEGraph graph{std::move(reqQueue), FLAGS_show_stats};
 
         VideoSources::InitParams vsParams;
         vsParams.inputs               = inputs;
@@ -244,8 +252,7 @@ int main(int argc, char* argv[]) {
         sources.start();
 
         size_t currentFrame = 0;
-
-        graph.start([&](VideoFrame& img) {
+        graph.start(FLAGS_bs, [&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);

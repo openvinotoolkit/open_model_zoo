@@ -317,20 +317,32 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
+        std::shared_ptr<ov::Function> model = reshape(core.read_model(FLAGS_m), FLAGS_bs);
+
         std::vector<std::pair<size_t, YoloParams>> yoloParams;
-        IEGraph graph(FLAGS_m, FLAGS_d, core, params.count, FLAGS_show_stats, 1, [&yoloParams](std::shared_ptr<ov::Function>& model) {
-            for (const ov::Output<ov::Node>& out : model->outputs()) {
-                const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
-                if (!regionYolo) {
-                    throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
-                }
-                yoloParams.emplace_back(out.get_index(), regionYolo);
+        for (const ov::Output<ov::Node>& out : model->outputs()) {
+            const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
+            if (!regionYolo) {
+                throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
             }
-        });
-        ov::Shape inputShape = graph.getInputShape();
+            yoloParams.emplace_back(out.get_index(), regionYolo);
+        }
+        std::vector<cv::Scalar> colors;
+        if (yoloParams.size() > 0)
+            for (int i = 0; i < static_cast<int>(yoloParams.front().second.classes); ++i)
+                colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
+
+        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
+            std::move(model),
+            FLAGS_m,
+            FLAGS_d,
+            roundUp(params.count, FLAGS_bs),
+            core);
+        ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
         }
+        IEGraph graph{std::move(reqQueue), FLAGS_show_stats};
 
         VideoSources::InitParams vsParams;
         vsParams.inputs               = inputs;
@@ -345,13 +357,7 @@ int main(int argc, char* argv[]) {
         sources.start();
 
         size_t currentFrame = 0;
-
-        std::vector<cv::Scalar> colors;
-        if (yoloParams.size() > 0)
-            for (int i = 0; i < static_cast<int>(yoloParams.front().second.classes); ++i)
-                colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
-
-        graph.start([&](VideoFrame& img) {
+        graph.start(FLAGS_bs, [&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
