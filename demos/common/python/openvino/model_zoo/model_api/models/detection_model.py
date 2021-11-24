@@ -18,9 +18,9 @@ from .utils import load_labels, clip_detections
 
 
 class DetectionModel(ImageModel):
-    '''A abstract detection model class
+    '''An abstract detection model class
 
-    This class supports the detection models. The Detection Model should have single image input.
+    This class supports detection models. The Detection Model must have single image input.
 
     Attributes:
         labels(List[str]): list of labels for classes (could be None)
