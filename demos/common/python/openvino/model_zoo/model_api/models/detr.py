@@ -16,7 +16,7 @@
 import numpy as np
 
 from .detection_model import DetectionModel
-from .utils import Detection
+from .utils import Detection, softmax
 
 
 class DETR(DetectionModel):
@@ -55,7 +55,7 @@ class DETR(DetectionModel):
 
         x_mins, y_mins, x_maxs, y_maxs = self.box_cxcywh_to_xyxy(boxes)
 
-        scores = self.softmax(scores)
+        scores = np.array([softmax(logit) for logit in scores])
         labels = np.argmax(scores[:, :-1], axis=-1)
         det_scores = np.max(scores[:, :-1], axis=-1)
 
@@ -71,8 +71,3 @@ class DETR(DetectionModel):
         b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
              (x_c + 0.5 * w), (y_c + 0.5 * h)]
         return b
-
-    @staticmethod
-    def softmax(logits):
-        res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
-        return np.array(res)
