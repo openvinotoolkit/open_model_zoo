@@ -1,6 +1,6 @@
 # Classification Python\* Demo
 
-![](./classification.jpg)
+![](./classification.gif)
 
 This demo showcases inference of Classification networks using Python\* Model API and Async Pipeline.
 
