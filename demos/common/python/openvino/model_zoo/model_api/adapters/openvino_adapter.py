@@ -40,7 +40,7 @@ def create_core():
 
 class OpenvinoAdapter(ModelAdapter):
     """
-    Works with OpenVINO model, its inputs and outputs
+    Works with OpenVINO model
     """
 
     def __init__(self, ie, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
@@ -51,8 +51,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.max_num_requests = max_num_requests
 
         if isinstance(model_path, (str, Path)):
-            if Path(model_path).suffix == ".onnx":
-                if weights_path:
+            if Path(model_path).suffix == ".onnx" and weights_path:
                     log.warning('For model in ONNX format should set only "model_path" parameter.'
                                 'The "weights_path" will be omitted')
 

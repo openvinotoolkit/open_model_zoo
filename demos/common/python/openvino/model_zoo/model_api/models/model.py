@@ -21,7 +21,7 @@ class Model:
     '''An abstract model wrapper
 
     An abstract model wrapper can only load model from the disk.
-    The ``preprocess`` and ``postprocess`` methods should be implemented in concrete class
+    The ``preprocess`` and ``postprocess`` methods should be implemented in a concrete class
 
     Attributes:
         model_adapter(ModelAdapter): allows working with the specified executor
