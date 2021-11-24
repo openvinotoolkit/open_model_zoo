@@ -29,7 +29,6 @@ class Classification(ImageModel):
             self.labels = labels
         else:
             self.labels = self._load_labels(labels) if labels else None
-        self.apply_softmax = "Softmax" not in [layer_info.type for _, layer_info in self.model_adapter._get_meta_from_ngraph().items()]
         self.out_layer_name = self._get_outputs()
 
     @staticmethod
@@ -70,7 +69,7 @@ class Classification(ImageModel):
         desc_order = scores.argsort()[::-1]
         scores = scores[desc_order]
         indices = indices[desc_order]
-        if self.apply_softmax:
+        if not np.isclose(np.sum(outputs), 1.0, atol=0.01):
             scores = softmax(scores)
         labels = [self.labels[i] if self.labels else "" for i in indices]
         return list(zip(indices, labels, scores))
