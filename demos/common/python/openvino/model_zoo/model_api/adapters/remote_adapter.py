@@ -98,10 +98,11 @@ class RemoteAdapter(ModelAdapter):
             inputs[input_name] = input_data
         return inputs
 
-    def __init__(self, service_url, model_name, model_version=0):
+    def __init__(self, target_model):
         if ovmsclient_absent:
             raise ImportError("The ovmsclient package is not installed")
 
+        service_url, model_name, model_version = RemoteAdapter.parse_model_arg(target_model)
         self.model_name = model_name
         self.model_version = model_version          
         self.client = ovmsclient.make_grpc_client(url=service_url)
