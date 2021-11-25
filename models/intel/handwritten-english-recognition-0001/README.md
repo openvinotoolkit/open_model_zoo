@@ -22,7 +22,7 @@ The network is able to recognize English text consisting of characters in the [G
 
 ## Accuracy Values
 
-This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
+This model adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
 
 ## Inputs
 
@@ -44,6 +44,8 @@ Name - `output`, shape - `250, 1, 95`, format is `W, B, L`, where:
 - `L` - confidence distribution across the supported symbols in [GNHK](https://goodnotes.com/gnhk/)
 
 The network output can be decoded by CTC Greedy Decoder.
+
+The network also outputs 10 LSTM hidden states of shape `2, 1, 256`, which can be simply ignored.
 
 ## Legal Information
 
