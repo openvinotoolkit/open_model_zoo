@@ -145,7 +145,6 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);
             for (size_t i = 0; i < blob_sizes.size(); ++i) {
                 blob_sizes[i] = ie_output_dims[i];
-                std::cout << blob_sizes[i] << std::endl;
             }
             // InferenceEngine::LockedMemory<const void> blobMapped =
             //     InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
