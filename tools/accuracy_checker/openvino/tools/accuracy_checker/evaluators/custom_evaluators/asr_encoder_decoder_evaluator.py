@@ -140,8 +140,8 @@ class EncoderDLSDKModel(BaseDLSDKModel):
 
 class DecoderDLSDKModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
-        super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):
@@ -150,6 +150,10 @@ class DecoderDLSDKModel(BaseDLSDKModel):
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        self.adapter.output_blob = self.output_blob
 
 
 class EncoderONNXModel(BaseONNXModel):
