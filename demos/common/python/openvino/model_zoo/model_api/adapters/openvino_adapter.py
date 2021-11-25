@@ -52,8 +52,8 @@ class OpenvinoAdapter(ModelAdapter):
 
         if isinstance(model_path, (str, Path)):
             if Path(model_path).suffix == ".onnx" and weights_path:
-                    log.warning('For model in ONNX format should set only "model_path" parameter.'
-                                'The "weights_path" will be omitted')
+                log.warning('For model in ONNX format should set only "model_path" parameter.'
+                            'The "weights_path" will be omitted')
 
         self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
         log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
