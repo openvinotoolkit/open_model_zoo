@@ -470,16 +470,27 @@ public:
 
     std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) override {
         std::vector<cv::Mat> face_rois;
-
+        std::cout << "before for loop in Recognize" << std::endl;
         for (const auto& face : faces) {
             face_rois.push_back(frame(face.rect));
         }
-
+        std::cout << face_rois.size() << std::endl;
         std::vector<cv::Mat> landmarks, embeddings;
-
+        std::cout << "before landmark_detector.Compute in Recognize" << std::endl;
+        std::cout << "face_rois: " << std::endl;
+        for (int i=0; i < face_rois.size();i++) {
+            std::cout << typeid(face_rois[i]).name() << std::endl;
+        }
+        std::cout << "landmarks: " << std::endl;
+        for (int j=0; j < landmarks.size(); j++) {
+            std::cout << landmarks[j] << std::endl;
+        }
         landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+        std::cout << "before AlignFaces in Recognize" << std::endl;
         AlignFaces(&face_rois, &landmarks);
+        std::cout << "before face-reid.Compute in Recognize" << std::endl;
         face_reid.Compute(face_rois, &embeddings);
+        std::cout << "after face-reid.Compute in Recognize" << std::endl;
         return face_gallery.GetIDsByEmbeddings(embeddings);
     }
 
@@ -551,16 +562,17 @@ int main(int argc, char* argv[]) {
 
         // slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         // InferenceEngine::Core ie;
+        slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
         std::set<std::string> loadedDevices;
-
+        std::cout << "before device loop" << std::endl;
         for (const auto &device : devices) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-
+            std::cout << "before 1st if statement" << std::endl;
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
@@ -575,7 +587,7 @@ int main(int argc, char* argv[]) {
                 // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
                 core.set_config({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
-
+            std::cout << "before 2nd if statement" << std::endl;
             if (device.find("CPU") != std::string::npos) {
                 // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                 core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
@@ -591,6 +603,7 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
+            std::cout << "action_detector" << std::endl;
             // Load action detector
             ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
@@ -608,6 +621,7 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
         if (!fd_model_path.empty()) {
+            std::cout << "face_detector" << std::endl;
             // Load face detector
             detection::DetectorConfig face_config(fd_model_path);
             face_config.deviceName = FLAGS_d_fd;
@@ -627,7 +641,7 @@ int main(int argc, char* argv[]) {
 
         if (!fd_model_path.empty() && !fr_model_path.empty() && !lm_model_path.empty()) {
             // Create face recognizer
-
+            std::cout << "face_recognizer" << std::endl;
             detection::DetectorConfig face_registration_det_config(fd_model_path);
             face_registration_det_config.deviceName = FLAGS_d_fd;
             // face_registration_det_config.ie = ie;
@@ -640,6 +654,7 @@ int main(int argc, char* argv[]) {
             CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
             // if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            std::cout << "before 1st checkDynamicBatchSupport" << std::endl;
             if (checkDynamicBatchSupport(core, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
             else
@@ -650,22 +665,25 @@ int main(int argc, char* argv[]) {
             CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
             // if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            std::cout << "before 2nd checkDynamicBatchSupport" << std::endl;
             if (checkDynamicBatchSupport(core, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
             else
                 landmarks_config.max_batch_size = 1;
             // landmarks_config.ie = ie;
             landmarks_config.ie = core;
-
+            std::cout << "before face_recognizer reset" << std::endl;
             face_recognizer.reset(new FaceRecognizerDefault(
                 landmarks_config, reid_config,
                 face_registration_det_config,
                 FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery, FLAGS_greedy_reid_matching));
+            std::cout << "after face_recognizer reset" << std::endl;
 
             if (actions_type == TEACHER && !face_recognizer->LabelExists(teacher_id)) {
                 slog::err << "Teacher id does not exist in the gallery!" << slog::endl;
                 return 1;
             }
+            std::cout << "after action_type if statement" << std::endl;
         } else {
             slog::warn << "Face Recognition models are disabled!" << slog::endl;
             if (actions_type == TEACHER) {
@@ -718,7 +736,7 @@ int main(int argc, char* argv[]) {
         std::map<int, int> top_k_obj_ids;
 
         int teacher_track_id = -1;
-
+        std::cout << "after tracker params" << std::endl;
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
         cv::Mat frame = cap->read();
         if (!frame.data) {
@@ -731,7 +749,7 @@ int main(int argc, char* argv[]) {
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, num_top_persons);
         DetectionsLogger logger(slog::debug, FLAGS_r, FLAGS_ad, FLAGS_al);
-
+        std::cout << "after visualizer creation" << std::endl;
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
             action_detector->submitRequest();
@@ -743,6 +761,7 @@ int main(int argc, char* argv[]) {
 
         bool is_last_frame = false;
         while (!is_last_frame) {
+            std::cout << "start while loop" << std::endl;
             auto startTime = std::chrono::steady_clock::now();
             cv::Mat prev_frame = std::move(frame);
             frame = cap->read();
@@ -752,7 +771,7 @@ int main(int argc, char* argv[]) {
             is_last_frame = !frame.data;
 
             logger.CreateNextFrameRecord(FLAGS_i, work_num_frames, prev_frame.cols, prev_frame.rows);
-
+            std::cout << "after CreateNextFrameRecord" << std::endl;
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
                 break;
@@ -762,8 +781,9 @@ int main(int argc, char* argv[]) {
             presenter.drawGraphs(prev_frame);
 
             sc_visualizer.SetFrame(prev_frame);
-
+            std::cout << "after SetFrame" << std::endl;
             if (actions_type == TOP_K) {
+                std::cout << "start top_k if statement" << std::endl;
                 if ( (is_monitoring_enabled && key == SPACE_KEY) ||
                      (!is_monitoring_enabled && key != SPACE_KEY) ) {
                     if (key == SPACE_KEY) {
@@ -833,36 +853,38 @@ int main(int argc, char* argv[]) {
                     ++work_num_frames;
                     metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 }
+                std::cout << "end top_k if statement" << std::endl;
             } else {
+                std::cout << "start top_k else statement" << std::endl;
                 face_detector->wait();
                 detection::DetectedObjects faces = face_detector->fetchResults();
-
+                std::cout << "after face detector fetchResults in else statement" << std::endl;
                 action_detector->wait();
                 DetectedActions actions = action_detector->fetchResults();
-
+                std::cout << "after action detector fetchResults in else statement" << std::endl;
                 if (!is_last_frame) {
                     face_detector->enqueue(frame);
                     face_detector->submitRequest();
                     action_detector->enqueue(frame);
                     action_detector->submitRequest();
                 }
-
+                std::cout << "after is_last_frame condition in else statement" << std::endl;
                 auto ids = face_recognizer->Recognize(prev_frame, faces);
-
+                std::cout << "after Recognize in else statement" << std::endl;
                 TrackedObjects tracked_face_objects;
 
                 for (size_t i = 0; i < faces.size(); i++) {
                     tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, ids[i]);
                 }
                 tracker_reid.Process(prev_frame, tracked_face_objects, work_num_frames);
-
+                std::cout << "after Process in else statement" << std::endl;
                 const auto tracked_faces = tracker_reid.TrackedDetectionsWithLabels();
 
                 TrackedObjects tracked_action_objects;
                 for (const auto& action : actions) {
                     tracked_action_objects.emplace_back(action.rect, action.detection_conf, action.label);
                 }
-
+                std::cout << "after for loop with actions in else statement" << std::endl;
                 tracker_action.Process(prev_frame, tracked_action_objects, work_num_frames);
                 const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
 
@@ -921,6 +943,7 @@ int main(int argc, char* argv[]) {
                 }
                 metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 ++work_num_frames;
+                std::cout << "end top_k else statement" << std::endl;
             }
 
             ++total_num_frames;
@@ -928,6 +951,7 @@ int main(int argc, char* argv[]) {
             sc_visualizer.Show();
 
             logger.FinalizeFrameRecord();
+            std::cout << "end while loop" << std::endl;
         }
         sc_visualizer.Finalize();
 
