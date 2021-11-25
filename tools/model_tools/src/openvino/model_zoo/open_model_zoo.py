@@ -1,4 +1,3 @@
-import re
 import cv2
 import os
 import argparse
@@ -22,6 +21,7 @@ class Model:
 
         self.net = None
         self.exec_net = None
+        self._ie = None
         self._accuracy_config = None
         self._model_config = None
 
@@ -157,7 +157,7 @@ class Model:
                 self.net = ie.read_network(self.model_path)
             except AttributeError:
                 raise TypeError('ie argumnet must be of IECore type.')
-        
+
         input_blob = next(iter(self.net.input_info))
 
         return input_blob
@@ -168,7 +168,7 @@ class Model:
                 self.net = ie.read_network(self.model_path)
             except AttributeError:
                 raise TypeError('ie argumnet must be of IECore type.')
-        
+
         output_blob = next(iter(self.net.outputs))
 
         return output_blob
