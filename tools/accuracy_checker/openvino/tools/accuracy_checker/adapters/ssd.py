@@ -380,3 +380,72 @@ class SSDONNXAdapter(Adapter):
         self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
 
         self.outputs_verified = True
+
+
+class SSDMultiLabelAdapter(Adapter):
+    __provider__ = 'ssd_multilabel'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'scores_out': StringField(description='scores output'),
+            'boxes_out': StringField(description='boxes output'),
+            'confidence_threshold': NumberField(optional=True, default=0.01, description="confidence threshold"),
+            'nms_threshold': NumberField(optional=True, default=0.45, description="NMS threshold"),
+            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="keep top K")
+        })
+        return params
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.confidence_threshold = self.get_value_from_config('confidence_threshold')
+        self.iou_threshold = self.get_value_from_config('nms_threshold')
+        self.keep_top_k = self.get_value_from_config('keep_top_k')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
+
+        for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            for class_index in range(1, logits.shape[-1]):
+                probs = logits[:, class_index]
+                mask = probs > self.confidence_threshold
+                probs = probs[mask]
+                if probs.size == 0:
+                    continue
+                subset_boxes = boxes[mask, :]
+
+                x_mins, y_mins, x_maxs, y_maxs = subset_boxes.T
+
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, probs, self.iou_threshold, include_boundaries=False,
+                               keep_top_k=self.keep_top_k)
+
+                filtered_probs = probs[keep]
+                x_mins = x_mins[keep]
+                y_mins = y_mins[keep]
+                x_maxs = x_maxs[keep]
+                y_maxs = y_maxs[keep]
+
+                labels = [class_index] * filtered_probs.size
+                detections['labels'].extend(labels)
+                detections['scores'].extend(filtered_probs)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            result.append(DetectionPrediction(identifier, detections['labels'], detections['scores'],
+                                              detections['x_mins'], detections['y_mins'], detections['x_maxs'],
+                                              detections['y_maxs']))
+        return result
