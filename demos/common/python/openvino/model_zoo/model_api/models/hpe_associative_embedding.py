@@ -27,8 +27,8 @@ from .utils import resize_image
 class HpeAssociativeEmbedding(ImageModel):
     __model__ = 'HPE-assosiative-embeddings'
 
-    def __init__(self, model_adapter, configuration=None):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload=False)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.outputs)
         try:
             self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.outputs)
@@ -51,6 +51,9 @@ class HpeAssociativeEmbedding(ImageModel):
         input_shape = {self.image_blob_name: [self.n, self.c, self.h, self.w]}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         super().reshape(input_shape)
+
+        if preload:
+            self.load()
 
         self.decoder = AssociativeEmbeddingDecoder(
             num_joints=self.outputs[self.heatmaps_blob_name].shape[1],

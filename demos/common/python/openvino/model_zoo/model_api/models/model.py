@@ -36,7 +36,7 @@ class Model:
 
     __model__ = None # Abstract wrappers has no name
 
-    def __init__(self, model_adapter, configuration=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''Abstract model constructor
 
         Args:
@@ -49,6 +49,9 @@ class Model:
         for name, parameter in self.parameters().items():
             self.__setattr__(name, parameter.default_value)
         self.load_config(configuration if configuration else {})
+        self.model_loaded = False
+        if preload:
+            self.load()
 
     @classmethod
     def get_model(cls, name):
@@ -62,9 +65,9 @@ class Model:
                          format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, name, model_adapter, configuration=None):
+    def create_model(cls, name, model_adapter, configuration=None, preload=False):
         Model = cls.get_model(name)
-        return Model(model_adapter, configuration)
+        return Model(model_adapter, configuration, preload)
 
     @classmethod
     def get_subclasses(cls):
@@ -164,10 +167,15 @@ class Model:
         raw_result = self.infer_sync(dict_data)
         return self.postprocess(raw_result, input_meta)
 
-    def load(self):
-        self.model_adapter.load_model()
+    def load(self, force=False):
+        if not self.model_loaded or force:
+            self.model_loaded = True
+            self.model_adapter.load_model()
 
     def reshape(self, new_shape):
+        if self.model_loaded:
+            log.warning(f'{self.__model__}: the model already loaded to device, should be reloaded after reshaping.')
+            self.model_loaded = False
         self.model_adapter.reshape_model(new_shape)
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()

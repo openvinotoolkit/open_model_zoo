@@ -23,6 +23,7 @@ from .detr import DETR
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
@@ -47,6 +48,7 @@ __all__ = [
     'FaceBoxes',
     'HpeAssociativeEmbedding',
     'InputTransform',
+    'Model',
     'MonoDepthModel',
     'OpenPose',
     'OutputTransform',

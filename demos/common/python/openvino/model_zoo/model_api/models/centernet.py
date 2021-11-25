@@ -25,8 +25,8 @@ from .utils import Detection, clip_detections
 class CenterNet(DetectionModel):
     __model__ = 'centernet'
 
-    def __init__(self, model_adapter, configuration=None):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 3)
         self._output_layer_names = sorted(self.outputs)
 

@@ -30,8 +30,8 @@ from .types import NumericalValue
 class OpenPose(ImageModel):
     __model__ = 'OpenPose'
 
-    def __init__(self, model_adapter, configuration=None):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload=False)
         self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
         self.heatmaps_blob_name = 'heatmaps'
         self.pafs_blob_name = 'pafs'
@@ -83,6 +83,9 @@ class OpenPose(ImageModel):
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         super().reshape(input_shape)
+
+        if preload:
+            self.load()
 
         num_joints = self.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
         self.decoder = OpenPoseDecoder(num_joints, score_threshold=self.prob_threshold)

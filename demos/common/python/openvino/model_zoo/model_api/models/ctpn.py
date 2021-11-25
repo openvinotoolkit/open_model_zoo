@@ -26,8 +26,8 @@ from .utils import Detection, nms, clip_detections
 class CTPN(DetectionModel):
     __model__ = 'CTPN'
 
-    def __init__(self, model_adapter, configuration=None):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, False)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
@@ -57,6 +57,8 @@ class CTPN(DetectionModel):
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.reshape(input_shape)
+        if preload:
+            self.load()
 
     def _get_outputs(self):
         (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.outputs.items()

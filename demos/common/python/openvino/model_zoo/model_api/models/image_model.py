@@ -33,7 +33,7 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, model_adapter, configuration=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''Image model constructor
 
         Calls the `Model` constructor first
@@ -42,7 +42,7 @@ class ImageModel(Model):
             model_adapter(ModelAdapter): allows working with the specified executor
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
         '''
-        super().__init__(model_adapter, configuration)
+        super().__init__(model_adapter, configuration, preload)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:

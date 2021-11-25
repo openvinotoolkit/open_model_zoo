@@ -20,8 +20,8 @@ from .types import DictValue, NumericalValue, StringValue
 class Bert(Model):
     __model__ = 'bert'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.token_cls = [self.vocab['[CLS]']]
         self.token_sep = [self.vocab['[SEP]']]
         self.token_pad = [self.vocab['[PAD]']]
@@ -85,8 +85,8 @@ class Bert(Model):
 class BertNamedEntityRecognition(Bert):
     __model__ = 'bert-named-entity-recognition'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
 
         self.output_names = list(self.outputs)
         self._check_io_number(-1, 1)
@@ -114,8 +114,8 @@ class BertNamedEntityRecognition(Bert):
 class BertEmbedding(Bert):
     __model__ = 'bert-embedding'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
 
         self.output_names = list(self.outputs)
         self._check_io_number(-1, 1)
@@ -135,8 +135,8 @@ class BertEmbedding(Bert):
 class BertQuestionAnswering(Bert):
     __model__ = 'bert-question-answering'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
 
         self.output_names = [o.strip() for o in self.output_names.split(',')]
         if self.outputs.keys() != set(self.output_names):

@@ -31,7 +31,7 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, model_adapter, configuration=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''The Detection Model constructor
 
         Calls the ``ImageModel`` construtor first.
@@ -44,7 +44,7 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(model_adapter, configuration)
+        super().__init__(model_adapter, configuration, preload)
 
         if not self.image_blob_name:
             raise WrapperError(self.__model__, "The Wrapper supports only one image input, but {} found"

@@ -24,8 +24,8 @@ from .utils import Detection, nms
 class UltraLightweightFaceDetection(DetectionModel):
     __model__ = 'Ultra_LightWeight_Face_Detection'
 
-    def __init__(self, model_adapter, configuration=None):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 2)
         self.labels = ['Face']
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
