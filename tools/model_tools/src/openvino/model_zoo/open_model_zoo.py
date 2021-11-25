@@ -21,7 +21,6 @@ class Model:
 
         self.net = None
         self.exec_net = None
-        self._ie = None
         self._accuracy_config = None
         self._model_config = None
 
