@@ -145,11 +145,12 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);
             for (size_t i = 0; i < blob_sizes.size(); ++i) {
                 blob_sizes[i] = ie_output_dims[i];
+                std::cout << blob_sizes[i] << std::endl;
             }
             // InferenceEngine::LockedMemory<const void> blobMapped =
             //     InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
             // cv::Mat out_blob(blob_sizes, CV_32F, blobMapped.as<float*>());
-            cv::Mat out_blob(blob_sizes, CV_32F, blob.data<float*>());
+            cv::Mat out_blob(blob_sizes, CV_32F, blob.data<float>());
             for (size_t b = 0; b < batch_size; b++) {
                 cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,
                                      reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));
