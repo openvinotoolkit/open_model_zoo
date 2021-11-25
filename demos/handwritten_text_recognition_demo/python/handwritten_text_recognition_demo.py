@@ -48,6 +48,7 @@ def build_argparser():
                       help="Path to the decoding char list file. Default is for Japanese")
     args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
     args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
+    args.add_argument("-ob", "--output_blob", type=str, default="output", help="Optional. Name of the output layer of the model. Default is \'output\'")
     return parser
 
 
@@ -85,7 +86,7 @@ def main():
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
 
     input_blob = next(iter(net.input_info))
-    out_blob = 'output' # name of output blob of model
+    out_blob = args.output_blob
 
     characters = get_characters(args)
     codec = CTCCodec(characters, args.designated_characters, args.top_k)
