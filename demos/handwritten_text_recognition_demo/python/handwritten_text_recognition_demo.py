@@ -78,6 +78,7 @@ def main():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+    ie.set_config(config={"GPU_ENABLE_LOOP_UNROLLING": "NO", "CACHE_DIR": "./"}, device_name="GPU")
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
