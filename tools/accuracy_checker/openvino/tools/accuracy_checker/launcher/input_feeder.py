@@ -351,7 +351,8 @@ class InputFeeder:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
                 layout = input_.get('layout', layouts_info.get(name, default_layout))
-                layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                    layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
 
         all_config_inputs = (
@@ -364,8 +365,9 @@ class InputFeeder:
         non_constant_inputs = not_config_inputs + config_non_constant_inputs
         if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)) or layouts_info:
             inputs_entry = self.provide_input_config_for_not_config(
-                inputs_entry, precision_info, not_config_inputs, precisions, layouts_info
+                inputs_entry, precision_info, not_config_inputs, precisions, layouts_info, layouts
             )
+
 
         return (
             constant_inputs,
@@ -513,11 +515,14 @@ class InputFeeder:
         precisions[input_name] = input_precision
         return input_precision
 
-    def provide_input_config_for_not_config(self, inputs_entry, precision_info, not_config_inputs, precisions, layouts):
+    def provide_input_config_for_not_config(
+        self, inputs_entry, precision_info, not_config_inputs, precisions, layouts, layouts_mapping):
         for input_name in not_config_inputs:
             input_config = {'name': input_name, 'type': 'INPUT'}
             precision = self.get_layer_precision(input_config, input_name, precision_info, precisions)
             layout = layouts.get(input_name)
+            if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                layouts_mapping[input_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
             input_config['layout'] = layout
             if precision is not None or layout is not None:
                 inputs_entry.append(input_config)
