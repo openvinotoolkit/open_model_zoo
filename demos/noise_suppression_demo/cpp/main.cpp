@@ -150,7 +150,6 @@ void write_wav(const std::string& file_name, const std::vector<int16_t>& wave, c
     out_wave.write((char*)&(wave.front()), wave.size()*2);
 }
 
-
 int main(int argc, char *argv[]) {
     try {
         // ------------------------------ Parsing and validating of input arguments --------------------------
