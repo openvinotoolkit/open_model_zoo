@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+from pathlib import Path
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
@@ -109,8 +109,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         images_set = read_txt(self.image_set_file)
         num_iterations = len(images_set)
         for image_id, image in enumerate(images_set):
-            image_file = '{}.jpg'.format(image)
-            mask_file = '{}.png'.format(image)
+            image_file, mask_file = self.find_images(image)
             annotation = SegmentationAnnotation(image_file, mask_file, mask_loader=GTMaskLoader.SCIPY)
             annotations.append(annotation)
             if check_content:
@@ -130,6 +129,27 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         }
 
         return ConverterReturn(annotations, meta, content_check_errors)
+
+    def find_images(self, image_id):
+        relative_image_subdir = ''
+        if '/' in image_id:
+            relative_image_subdir, image_id =image_id.rsplit('/', 1)
+            image_root = self.image_dir / relative_image_subdir
+            mask_root = self.mask_dir / relative_image_subdir
+        else:
+            image_root = self.image_dir
+            mask_root = self.mask_dir
+        images = list(Path(image_root).glob('{}.*'.format(image_id)))
+        if not images:
+            image_file = '{}.jpg'.format(relative_image_subdir + '/' + image_id if relative_image_subdir else image_id)
+        else:
+            image_file = images[0].name if not relative_image_subdir else relative_image_subdir + '/' + images[0].name
+        masks = list(Path(mask_root).glob('{}.*'.format(image_id)))
+        if not masks:
+            mask_file = '{}.png'.format(relative_image_subdir + '/' + image_id if relative_image_subdir else image_id)
+        else:
+            mask_file = masks[0].name if not relative_image_subdir else relative_image_subdir + '/' + masks[0].name
+        return image_file, mask_file
 
 
 class PascalVOCDetectionConverter(BaseFormatConverter):
