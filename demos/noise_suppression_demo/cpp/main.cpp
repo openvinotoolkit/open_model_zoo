@@ -257,7 +257,10 @@ int main(int argc, char *argv[]) {
 
         using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
         double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
-        std::cout << "Metrics report:" << std::endl;
+        using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
+        double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
         std::cout << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << std::endl;
 
         //convert fp32 to int16_t
