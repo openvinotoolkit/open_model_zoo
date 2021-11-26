@@ -181,8 +181,7 @@ int main(int argc, char *argv[]) {
             std::cout << inp_state_name << "<-" << out_state_name << " " << tensor_size << " params" << std::endl;
             state_size += tensor_size;
         }
-        std::cout << state_size*1e-6 << "M params in all states" << std::endl;
-
+        std::cout << "State_param_num = " << state_size << " (" << state_size*4e-6 << "Mb)" << std::endl;
         InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
         InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
 
