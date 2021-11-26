@@ -84,7 +84,7 @@ struct RiffWaveHeader {
 const unsigned int fourcc(const char c[4]){
     return (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | (c[0]);
 }
-void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWaveHeader& wave_header){
+void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWaveHeader& wave_header) {
     std::ifstream inp_wave(file_name, std::ios::in|std::ios::binary);
     if(!inp_wave.is_open())
         throw std::logic_error("fail to open " + file_name);
