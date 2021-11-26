@@ -22,7 +22,9 @@ public:
          *  second additional Mat is sacriface of memory for data about first element
         **/
         batch = std::vector<cv::Mat>(batch_size + 1 + 1); // 16(8) 15FPS-batch imgaes + one fast image +  batch description
-        batch[batch_size + 1].create(cv::Size{1, 1}, CV_8U);
+        batch[batch_size + 1].create(cv::Size{1, 2}, CV_8U); // 1x2 Mat for first element position and is_filled batch state
+        auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
+        ptr[1] = 0; // set is_filled to NO
     }
     std::vector<cv::Mat> getBatch() {
         return batch;
@@ -41,31 +43,37 @@ public:
         batch[step] = frame.clone();
         /** Putting of info about batch to additional element **/
         auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
-        ptr[0] = first_el;
+        ptr[0] = first_el; // position of start of batch in cyclic buffer
         batch_lock.unlock();
         const auto cur_step = std::chrono::steady_clock::now() - time;
         const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step).count();
-        int time_step = int(1000.f / batch_fps);
+        const int time_step = int(1000.f / batch_fps); // 1/15 sec
         if (gap < time_step) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap));
+            std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap)); // wait for constant step of batch update
         }
     }
 private:
-    float batch_fps = 0; // constant FPS for batc
+    float batch_fps = 0; // constant FPS for batch
     std::vector<cv::Mat> batch; // pack of images for graph
-    size_t first_el = 0; // place of first image of batch
-    size_t images_in_batch_count = 0; // amount of images in batch
+    size_t first_el = 0; // place of first image in batch
+    size_t images_in_batch_count = 0; // number of images in batch
+    bool is_filled = false; // is batch filled
 
     int updateStep(const size_t batch_size) {
         if (images_in_batch_count < batch_size) {
             /** case when batch isn't filled **/
             return images_in_batch_count++;
         } else {
-            /** Cyclic buffer if filled. Counting of step for next image **/
-            if (first_el > (batch_size - 1)) {
-                first_el = 0; // case when new image has batch_size - 1 place (last in batch memory)
+            if (!is_filled) {
+                batch_lock.lock();
+                auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
+                ptr[1] = 1;
+                batch_lock.unlock();
+                is_filled = true;
             }
-            return first_el++;
+            /** Cyclic buffer if filled. Counting of step for next image **/
+            first_el = (first_el + 1) % batch_size;
+            return first_el;
         }
     }
 };
@@ -141,7 +149,7 @@ protected:
         producer.fillFastFrame(fast_frame);
 
         /** Put pulled batch to GRunArg data **/
-        cv::detail::VectorRef ref(producer.getBatch());
+        cv::detail::VectorRef ref(std::move(producer.getBatch()));
         data = std::move(ref);
         return true;
     }

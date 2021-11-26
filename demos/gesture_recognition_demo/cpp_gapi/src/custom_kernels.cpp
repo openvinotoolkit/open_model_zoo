@@ -136,7 +136,7 @@ GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) 
         const auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
         auto p_pm = state.prepared_mat.ptr<float>();
 
-        if (!batch[batch.size() - 3].empty()) { // is filled and updated
+        if (ptr[1]) { // is filled and updated
             int step = ptr[0]; // first
             if (current_person_id < tracked_persons.size()) { // wrong number protection
                 state.last_id = current_person_id;
