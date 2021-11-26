@@ -200,7 +200,7 @@ class OpenVINOLauncher(Launcher):
             outputs = self.infer_request.infer(inputs=infer_inputs)
             results.append({
                 out_node.get_node().friendly_name: out_res
-                for out_node, out_res in zip(self.exec_network.outputs, outputs)
+                for out_node, out_res in outputs.items()
             })
         if self.reset_memory_state:
             for state in self.infer_request.query_state():
@@ -217,10 +217,10 @@ class OpenVINOLauncher(Launcher):
         results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
-            out_tensors = self.exec_network.infer_new_request(feed_dict)
+            out_tensors = self.infer_request.infer(feed_dict)
             output_result = {
                 out_node.get_node().friendly_name: out_tensor
-                for out_node, out_tensor in zip(self.exec_network.outputs, out_tensors)
+                for out_node, out_tensor in out_tensors.items()
             }
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)

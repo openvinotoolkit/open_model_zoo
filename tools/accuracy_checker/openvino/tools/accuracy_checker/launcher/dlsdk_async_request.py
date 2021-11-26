@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+from copy import deepcopy
 from collections import OrderedDict
 
 
@@ -45,7 +45,7 @@ class AsyncInferRequestWrapper:
             return self.context, self.meta, self.request.outputs
         if self._contains_tensors:
             return self.context, self.meta, {
-                out.get_node().friendly_name: res.data
+                out.get_node().friendly_name: deepcopy(res.data)
                 for out, res in zip(self.request.outputs, self.request.output_tensors)
             }
         outputs = OrderedDict()
