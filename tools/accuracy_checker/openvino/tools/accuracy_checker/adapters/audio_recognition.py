@@ -745,7 +745,8 @@ class DumbDecoder(Adapter):
         if 'vocabulary_file' in self.launcher_config:
             self.alphabet = read_txt(self.get_value_from_config('vocabulary_file'), ignore_space=True)
         else:
-            self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+            self.alphabet = (''.join(self.get_value_from_config('alphabet')) if self.get_value_from_config('alphabet')
+                             else ' ' + string.ascii_lowercase + '\'')
             self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
 
     def process(self, raw, identifiers=None, frame_meta=None):
