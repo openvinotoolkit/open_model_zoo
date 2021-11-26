@@ -9,4 +9,5 @@ add_demo(NAME gesture_recognition_demo_gapi
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    DEPENDENCIES monitors)
+    DEPENDENCIES monitors
+    OPENCV_VERSION_REQUIRED 4.5.3)
