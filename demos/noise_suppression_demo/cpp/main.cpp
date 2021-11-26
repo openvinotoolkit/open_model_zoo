@@ -20,7 +20,6 @@
 #include <inference_engine.hpp>
 
 typedef std::chrono::steady_clock Time;
-typedef std::chrono::nanoseconds ns;
 
 static const char help_message[] = "Print a usage message.";
 static const char inp_wav_message[] = "Required. Path to a input WAV file.";
