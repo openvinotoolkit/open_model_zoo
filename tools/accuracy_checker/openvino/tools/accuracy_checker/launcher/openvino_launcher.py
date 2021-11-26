@@ -602,7 +602,10 @@ class OpenVINOLauncher(Launcher):
         self.try_to_set_default_layout()
 
     def read_network(self, model, weights):
-        network = self.ie_core.read_model(model=str(model), weights=str(weights))
+        if weights is not None:
+            network = self.ie_core.read_model(model=str(model), weights=str(weights))
+        else:
+            network = self.ie_core.read_model(model=str(model))
         return network
 
     def inputs_info_for_meta(self):
