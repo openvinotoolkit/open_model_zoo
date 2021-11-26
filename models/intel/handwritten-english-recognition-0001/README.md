@@ -20,8 +20,6 @@ The network is able to recognize English text consisting of characters in the [G
 
 > **Note:** to achieve the accuracy, images from the GNHK test set should be preprocessed into single-line text images, using the coordinates from the accompanying JSON annotation files in the GNHK dataset, and then binarized using adaptive thresholding.
 
-## Accuracy Values
-
 This model adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
 
 ## Inputs

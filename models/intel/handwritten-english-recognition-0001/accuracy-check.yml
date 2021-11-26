@@ -24,10 +24,8 @@ models:
             dst_height: 96
             dst_width: 2000
             pad_type: right_bottom
-        #  - type: normalization
-        #    mean: 127.5
-        #    std: 127.5
 
         metrics:
           - type: label_level_recognition_accuracy
+            reference: 0.815
 
