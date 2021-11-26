@@ -93,50 +93,27 @@ void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWave
 
     inp_wave.read((char*)&wave_header, sizeof(RiffWaveHeader));
 
-    bool read_ok = true;
-    // make sure it is actually a RIFF file
+    std::string error_msg = "";
+    #define CHECK_IF(cond) if(cond){ error_msg = error_msg + #cond + ", "; }
 
-    if (fourcc("RIFF") != wave_header.riff_tag) {
-        std::cerr << "riff_tag != 'RIFF' for " << file_name << std::endl;
-        read_ok = false;
-    }
-    if (fourcc("WAVE") != wave_header.wave_tag) {
-        std::cerr << "wave_tag != 'WAVE' for " << file_name << std::endl;
-        read_ok = false;
-    }
-    if (fourcc("fmt ") != wave_header.fmt_tag) {
-        std::cerr << "fmt_tag != 'fmt' for " << file_name << std::endl;
-        read_ok = false;
-    }
-
+    // make sure it is actually a RIFF file with WAVE
+    CHECK_IF(wave_header.riff_tag != fourcc("RIFF"));
+    CHECK_IF(wave_header.wave_tag != fourcc("WAVE"));
+    CHECK_IF(wave_header.fmt_tag != fourcc("fmt "));
     // only PCM
-    if (wave_header.data_format != 1) {
-        std::cerr << "data_format != kPCMFormat(1) for " << file_name << std::endl;
-        read_ok = false;
-    }
+    CHECK_IF(wave_header.data_format != 1);
     // only mono
-    if (wave_header.num_of_channels != 1) {
-        std::cerr << "num_of_channels != 1 for " << file_name << std::endl;
-        read_ok = false;
-    }
+    CHECK_IF(wave_header.num_of_channels != 1);
     // only 16 bit
-    if (wave_header.bits_per_sample != 16) {
-        std::cerr << "bits_per_sample != 16 for " << file_name << std::endl;
-        read_ok = false;
-    }
+    CHECK_IF(wave_header.bits_per_sample != 16);
     // only 16KHz
-    if (wave_header.sampling_freq != 16000) {
-        std::cerr << "sampling_freq != 16000 for " << file_name << std::endl;
-        read_ok = false;
-    }
+    CHECK_IF(wave_header.sampling_freq != 16000);
     // make sure that data chunk follows file header
-    if (fourcc("data") != wave_header.data_tag) {
-        std::cerr << "data_tag != 'data' for " << file_name << std::endl;
-        read_ok = false;
-    }
+    CHECK_IF(wave_header.data_tag != fourcc("data"));
+    #undef CHECK_IF
 
-    if (!read_ok) {
-        throw std::logic_error("bad header for " + file_name);
+    if (!error_msg.empty()) {
+        throw std::logic_error(error_msg + "for '" + file_name + "' file.");
     }
 
     size_t wave_size = wave_header.data_length / 2;
@@ -257,7 +234,8 @@ int main(int argc, char *argv[]) {
         double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
         slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
-
+        slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / 16.0f << " ms" << slog::endl;
+        
         //convert fp32 to int16_t
         for(size_t i=0; i < out_wave_s16.size(); ++i) {
             out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
