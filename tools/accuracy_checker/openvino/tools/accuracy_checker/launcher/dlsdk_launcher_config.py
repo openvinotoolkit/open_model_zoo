@@ -382,6 +382,7 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         'paddle': 'pdmodel',
         'tf': 'pb'
     }
+
     def get_model_by_suffix(model_name, model_dir, suffix):
         model_list = list(Path(model_dir).glob('{}.{}'.format(model_name, suffix)))
         if not model_list:

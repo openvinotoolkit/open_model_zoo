@@ -164,11 +164,11 @@ class BaseDLSDKModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
+        accepted_suffixes = ['.blob', '.xml', '.onnx']
         if model.suffix not in accepted_suffixes:
             raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
         print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        if model.suffix == '.blob':
+        if model.suffix in ['.blob', '.onnx']:
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
         accepted_weights_suffixes = ['.bin']
@@ -200,11 +200,14 @@ class BaseDLSDKModel:
             model, weights = launcher.convert_model(network_info)
         else:
             model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, launcher)
-        else:
+        if weights is None and model.suffix != '.onnx':
             self.exec_network = launcher.ie_core.import_network(str(model))
+        else:
+            if weights:
+                self.network = launcher.read_network(str(model), str(weights))
+            else:
+                self.network = launcher.ie_core.read_network(str(model))
+            self.load_network(self.network, launcher)
         self.set_input_and_output()
         if log:
             self.print_input_output_info()

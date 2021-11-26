@@ -350,7 +350,7 @@ def add_openvino_specific_args(parser):
     )
     openvino_specific_args.add_argument(
         '--use_new_api', type=cast_to_bool, help='switch to processing using OpenVINO 2.0 API', required=False,
-        default=False
+        default=None
     )
 
 
