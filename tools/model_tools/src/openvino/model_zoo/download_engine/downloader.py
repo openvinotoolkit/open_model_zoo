@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import functools
-import hashlib
 import requests
 import ssl
 import time
@@ -62,7 +61,7 @@ class Downloader:
         finally:
             reporter.end_progress()
 
-    def _try_download(self, reporter, file, start_download, size):
+    def _try_download(self, reporter, file, start_download, size, hasher):
         progress = types.SimpleNamespace(size=0)
 
         for attempt in range(self.num_attempts):
@@ -87,7 +86,7 @@ class Downloader:
                     file.seek(0)
                     file.truncate()
                     progress.size = 0
-                    progress.hasher = hashlib.sha384()
+                    progress.hasher = hasher
 
                 self._process_download(reporter, chunk_iterable, size, progress, file)
 
@@ -109,11 +108,11 @@ class Downloader:
 
     def _try_retrieve_from_cache(self, reporter, model_file, destination):
         try:
-            if self.cache.has(model_file.sha384):
+            if self.cache.has(model_file.checksum.value, model_file.checksum.type.digest_size):
                 reporter.job_context.check_interrupted()
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
-                if not self.cache.get(model_file, destination, reporter):
+                if not self.cache.get(model_file, destination, reporter, model_file.checksum.type.digest_size):
                     reporter.print('Will retry from the original source.')
                     reporter.print()
                     return False
@@ -143,10 +142,10 @@ class Downloader:
         success = False
 
         with destination.open('w+b') as f:
-            actual_hash = self._try_download(reporter, f, start_download, model_file.size)
+            actual_hash = self._try_download(reporter, f, start_download, model_file.size, model_file.checksum.type)
 
-        if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.sha384, destination):
-            self._try_update_cache(reporter, self.cache, model_file.sha384, destination)
+        if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.checksum.value, destination):
+            self._try_update_cache(reporter, self.cache, model_file.checksum.value, destination)
             success = True
 
         reporter.print()

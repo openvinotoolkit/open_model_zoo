@@ -20,16 +20,15 @@ import sys
 import yaml
 
 from openvino.model_zoo import _common
-from openvino.model_zoo.download_engine import file_source, postprocessing, validation
+from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
-RE_SHA384SUM = re.compile(r'[0-9a-fA-F]{96}')
 
 class ModelFile:
-    def __init__(self, name, size, sha384, source):
+    def __init__(self, name, size, checksum, source):
         self.name = name
         self.size = size
-        self.sha384 = sha384
+        self.checksum = checksum
         self.source = source
 
     @classmethod
@@ -39,18 +38,13 @@ class ModelFile:
         with validation.deserialization_context('In file "{}"'.format(name)):
             size = validation.validate_nonnegative_int('"size"', file['size'])
 
-            sha384_str = validation.validate_string('"sha384"', file['sha384'])
-
-            if not RE_SHA384SUM.fullmatch(sha384_str):
-                raise validation.DeserializationError(
-                    '"sha384": got invalid hash {!r}'.format(sha384_str))
-
-            sha384 = bytes.fromhex(sha384_str)
+            with validation.deserialization_context('"checksum"'):
+                checksum = cache.Checksum.deserialize(file['checksum'])
 
             with validation.deserialization_context('"source"'):
                 source = file_source.FileSource.deserialize(file['source'])
 
-            return cls(name, size, sha384, source)
+            return cls(name, size, checksum, source)
 
 class Model:
     def __init__(

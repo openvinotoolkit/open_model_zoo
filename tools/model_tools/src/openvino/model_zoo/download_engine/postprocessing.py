@@ -15,9 +15,9 @@
 import re
 import shutil
 
-from openvino.model_zoo.download_engine import file_source, validation
+from openvino.model_zoo.download_engine import base, validation
 
-class Postproc(file_source.TaggedBase):
+class Postproc(base.TaggedBase):
     types = {}
 
 class PostprocRegexReplace(Postproc):
