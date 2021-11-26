@@ -18,11 +18,11 @@ task_type: classification
 files:
   - name: se-resnext-50.prototxt
     size: 49519
-    sha384: 5a87782d5f79f2b12df90bd6f61310a552aa4f2fa8df2573e7ab654f01dda44137620cebfc08717f57e76a17909a7844
+    checksum: 5a87782d5f79f2b12df90bd6f61310a552aa4f2fa8df2573e7ab654f01dda44137620cebfc08717f57e76a17909a7844
     source: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNeXt-50.prototxt
   - name: se-resnext-50.caffemodel
     size: 110550637
-    sha384: cbc0b1da5a2a21ba1398fa1e79b143f637c5dc0248262ab6cf936ef783a3a1cd23943bf5f19f03f19000d7e7d3baf700
+    checksum: cbc0b1da5a2a21ba1398fa1e79b143f637c5dc0248262ab6cf936ef783a3a1cd23943bf5f19f03f19000d7e7d3baf700
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-resnext-50/SE-ResNeXt-50.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]

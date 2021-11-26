@@ -26,7 +26,7 @@ description: >-
 task_type: classification
 files:
   - name: resnet18-5c106cde.pth
-    sha384: 5d513c0e73ad03072938d37c0f973ef96719db2ceee80d827b89b74a30a499b1b86f0e0e47d20f3965889577c1d854dd
+    checksum: 5d513c0e73ad03072938d37c0f973ef96719db2ceee80d827b89b74a30a499b1b86f0e0e47d20f3965889577c1d854dd
     size: 46827520
     source: https://download.pytorch.org/models/resnet18-5c106cde.pth
 framework: pytorch

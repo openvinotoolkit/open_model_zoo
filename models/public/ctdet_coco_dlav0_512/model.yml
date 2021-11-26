@@ -22,21 +22,21 @@ task_type: detection
 files:
   - name: ctdet_coco_dlav0_1x.pth
     size: 221889662
-    sha384: 74565ead2d6c42738f90c0c23abaca04048c9156fdd548130a6b9df94786a6d964b8d6f548a0a44208885243314eea64
+    checksum: 74565ead2d6c42738f90c0c23abaca04048c9156fdd548130a6b9df94786a6d964b8d6f548a0a44208885243314eea64
     source:
       $type: google_drive
       id: 18yBxWOlhTo32_swSug_HM4q3BeWgxp_N
   - name: CenterNet/src/lib/models/model.py
     size: 3415
-    sha384: 470f5591048628d23768d9422d9f960855190d092e31370c0dcdcb73d200adbfa9fa64ab5836ed83d171f1b6a6041147
+    checksum: 470f5591048628d23768d9422d9f960855190d092e31370c0dcdcb73d200adbfa9fa64ab5836ed83d171f1b6a6041147
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/models/model.py
   - name: CenterNet/src/lib/models/networks/dlav0.py
     size: 22682
-    sha384: 7b8ced5f89807a8a662917b105a26e5c8107ead638ba9f9ef8bc3e4b893ae10e3c69506960c4602ba5188ff70a7cb075
+    checksum: 7b8ced5f89807a8a662917b105a26e5c8107ead638ba9f9ef8bc3e4b893ae10e3c69506960c4602ba5188ff70a7cb075
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/models/networks/dlav0.py
   - name: CenterNet/src/lib/opts.py
     size: 18696
-    sha384: d002e405f083412de4e5f9b4df56aab695ca6efde9ba1e8d2230dcbee4e64b171d87ab344fe324530ff547cbcc5fbbd2
+    checksum: d002e405f083412de4e5f9b4df56aab695ca6efde9ba1e8d2230dcbee4e64b171d87ab344fe324530ff547cbcc5fbbd2
     source: https://github.com/xingyizhou/CenterNet/raw/8ef87b433529ac8f8bd4f95707f6bc05052c55e9/src/lib/opts.py
 postprocessing:
   # disable imports and usages of components we don't need

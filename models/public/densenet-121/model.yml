@@ -22,11 +22,11 @@ task_type: classification
 files:
   - name: densenet-121.prototxt
     size: 76474
-    sha384: e385fcce6416abba5b3c55f39df1392edc6d0c740f0905d923b4746ea2026812790fb2666e4b8729e15e5d3a6b505886
+    checksum: e385fcce6416abba5b3c55f39df1392edc6d0c740f0905d923b4746ea2026812790fb2666e4b8729e15e5d3a6b505886
     source: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_121.prototxt
   - name: densenet-121.caffemodel
     size: 32303870
-    sha384: 6ecb7d9f607c817152a39ccdfcb4caa798bcdbe6a38150dba90ef0822b02907026c89157fa9088aa28173e9c98690ec6
+    checksum: 6ecb7d9f607c817152a39ccdfcb4caa798bcdbe6a38150dba90ef0822b02907026c89157fa9088aa28173e9c98690ec6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/densenet-121/DenseNet_121.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]

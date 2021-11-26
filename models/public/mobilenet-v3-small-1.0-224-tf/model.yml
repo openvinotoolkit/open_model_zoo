@@ -21,7 +21,7 @@ task_type: classification
 files:
   - name: weights_mobilenet_v3_small_224_1.0_float.h5
     size: 10734624
-    sha384: d342c446ceecbcf76edf94f7a51bb94d26296fea8d91e0b28287143eff569118c98a950df3258f37a94c06f0adc4d31b
+    checksum: d342c446ceecbcf76edf94f7a51bb94d26296fea8d91e0b28287143eff569118c98a950df3258f37a94c06f0adc4d31b
     source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_small_224_1.0_float.h5
 model_optimizer_args:
   - --reverse_input_channels

@@ -20,7 +20,7 @@ task_type: instance_segmentation
 files:
   - name: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
     size: 177817887
-    sha384: 37702fbafdb4fcf37df60c9dde834dd2bb602cbe11e87b7bd83a0a1cabc23035703bddf086e42dc32866102d06b7f13d
+    checksum: 37702fbafdb4fcf37df60c9dde834dd2bb602cbe11e87b7bd83a0a1cabc23035703bddf086e42dc32866102d06b7f13d
     source: http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

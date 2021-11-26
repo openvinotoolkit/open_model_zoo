@@ -29,11 +29,11 @@ task_type: classification
 files:
   - name: squeezenet1.1.prototxt
     size: 9678
-    sha384: 04e07f1f70210300959388d675b613ebc002464a4508dbcee7784f3bb1b55542f9ee1d191b79838d82dcf14ddac27485
+    checksum: 04e07f1f70210300959388d675b613ebc002464a4508dbcee7784f3bb1b55542f9ee1d191b79838d82dcf14ddac27485
     source: https://raw.githubusercontent.com/forresti/SqueezeNet/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/deploy.prototxt
   - name: squeezenet1.1.caffemodel
     size: 4950080
-    sha384: 1ffe0f38d605c2c83b51cfea5fa34a4d60744ebeac5655d317146a0ce5ccf39fc40daa1a7798e3c6dc4f67c11ddb9245
+    checksum: 1ffe0f38d605c2c83b51cfea5fa34a4d60744ebeac5655d317146a0ce5ccf39fc40daa1a7798e3c6dc4f67c11ddb9245
     source: https://github.com/forresti/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/squeezenet_v1.1.caffemodel
 postprocessing:
   - $type: regex_replace

@@ -23,19 +23,19 @@ task_type: detection
 files:
   - name: yolov4.weights
     size: 257717640
-    sha384: bb55bc319c21cde4546f86cee1ad7a74e1056bbe38edcd1da74e754b9a9081d0bd8834e15f7e4f7b46a3e38ce336ada9
+    checksum: bb55bc319c21cde4546f86cee1ad7a74e1056bbe38edcd1da74e754b9a9081d0bd8834e15f7e4f7b46a3e38ce336ada9
     source: https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights
   - name: keras-YOLOv3-model-set/tools/model_converter/convert.py
     size: 16704
-    sha384: 176b20235fbe2d55faf78e6437693c194a3a989b8c11ad78afe2313926edbabadef1323bc5bbb2bf4c6fb81ff2ba6ccd
+    checksum: 176b20235fbe2d55faf78e6437693c194a3a989b8c11ad78afe2313926edbabadef1323bc5bbb2bf4c6fb81ff2ba6ccd
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/tools/model_converter/convert.py
   - name: keras-YOLOv3-model-set/yolo4/models/layers.py
     size: 15535
-    sha384: f8d67ea5f2d293c00a967b7aa85efb03100e2420d0dc702cb38cd49c31d1b6e367469bd455c1870828184268d94007b7
+    checksum: f8d67ea5f2d293c00a967b7aa85efb03100e2420d0dc702cb38cd49c31d1b6e367469bd455c1870828184268d94007b7
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/yolo4/models/layers.py
   - name: keras-YOLOv3-model-set/cfg/yolov4.cfg
     size: 12208
-    sha384: ccd87e37a99bf98582ceb39af3cd3b9ddb550c382f433f177c86f896fc1ad621ef0e5e51da6318415c853bf2311e5b9b
+    checksum: ccd87e37a99bf98582ceb39af3cd3b9ddb550c382f433f177c86f896fc1ad621ef0e5e51da6318415c853bf2311e5b9b
     source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/cfg/yolov4.cfg
 postprocessing:
   # disable imports that aren't needed for this model and code that uses them

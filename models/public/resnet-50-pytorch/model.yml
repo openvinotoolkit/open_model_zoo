@@ -26,7 +26,7 @@ description: >-
 task_type: classification
 files:
   - name: resnet50-19c8e357.pth
-    sha384: de63f5f0157c6781341f7b8e6cca587b462a0d80425b51b7a333d3f38a9be0ff198df25bf6ce107112c0136ce5b9ee50
+    checksum: de63f5f0157c6781341f7b8e6cca587b462a0d80425b51b7a333d3f38a9be0ff198df25bf6ce107112c0136ce5b9ee50
     size: 102502400
     source: https://download.pytorch.org/models/resnet50-19c8e357.pth
 framework: pytorch

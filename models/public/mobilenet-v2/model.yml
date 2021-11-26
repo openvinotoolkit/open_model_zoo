@@ -18,11 +18,11 @@ task_type: classification
 files:
   - name: mobilenet-v2.prototxt
     size: 51551
-    sha384: 62accf1c3389d496848ffac2fa0544f5c1311dcf5e16dba596ed517fb8e2175055f77100e64cb08314df2750e2461041
+    checksum: 62accf1c3389d496848ffac2fa0544f5c1311dcf5e16dba596ed517fb8e2175055f77100e64cb08314df2750e2461041
     source: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_v2_deploy.prototxt
   - name: mobilenet-v2.caffemodel
     size: 14186496
-    sha384: da548763d0f93c8c0ac2187ae23c217038afb5ede540e4bc1853e9c806c2b5be16b8b5fadca292976c104e3e21ea00ba
+    checksum: da548763d0f93c8c0ac2187ae23c217038afb5ede540e4bc1853e9c806c2b5be16b8b5fadca292976c104e3e21ea00ba
     source: https://github.com/shicai/MobileNet-Caffe/raw/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_v2.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
