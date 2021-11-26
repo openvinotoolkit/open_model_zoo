@@ -16,6 +16,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <utils/slog.hpp>
+
 
 #include <inference_engine.hpp>
 
@@ -178,7 +180,6 @@ int main(int argc, char *argv[]) {
             for(size_t s: size) {
                 tensor_size *= s;
             }
-            std::cout << inp_state_name << "<-" << out_state_name << " " << tensor_size << " params" << std::endl;
             state_size += tensor_size;
         }
         std::cout << "State_param_num = " << state_size << " (" << state_size*4e-6 << "Mb)" << std::endl;
@@ -192,7 +193,6 @@ int main(int argc, char *argv[]) {
         const InferenceEngine::TensorDesc& inp_desc = inputs[input_name]->getInputData()->getTensorDesc();
         const InferenceEngine::SizeVector& inp_shape = inp_desc.getDims();
         size_t patch_size = inp_shape[1];
-        std::cout << "patch_size " << patch_size << std::endl;
 
         //read input wav file
         std::vector<int16_t> inp_wave_s16, out_wave_s16;
@@ -203,11 +203,9 @@ int main(int argc, char *argv[]) {
 
         //fp32 input wave will be expanded to be divisible by patch_size
         size_t iter = 1 + (inp_wave_s16.size() / patch_size);
-        std::cout << "iter " << iter << std::endl;
         size_t inp_size = patch_size * iter;
         inp_wave_fp32.resize(inp_size, 0);
         out_wave_fp32.resize(inp_size, 0);
-        std::cout << "inp_size " << inp_size << " " << inp_size/16000.0f << "sec" << std::endl;
 
         //convert sint16_t  to float
         float scale = 1.0f/std::numeric_limits<int16_t>::max();
@@ -257,11 +255,8 @@ int main(int argc, char *argv[]) {
 
         using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
         double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
-        using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
-        double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
         slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
-        std::cout << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << std::endl;
 
         //convert fp32 to int16_t
         for(size_t i=0; i < out_wave_s16.size(); ++i) {
