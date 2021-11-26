@@ -108,11 +108,11 @@ class Downloader:
 
     def _try_retrieve_from_cache(self, reporter, model_file, destination):
         try:
-            if self.cache.has(model_file.checksum.value, model_file.checksum.type.digest_size):
+            if self.cache.has(model_file.checksum.value):
                 reporter.job_context.check_interrupted()
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
-                if not self.cache.get(model_file, destination, reporter, model_file.checksum.type.digest_size):
+                if not self.cache.get(model_file, destination, reporter):
                     reporter.print('Will retry from the original source.')
                     reporter.print()
                     return False

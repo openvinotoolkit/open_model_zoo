@@ -26,8 +26,8 @@ CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
 
 class NullCache:
-    def has(self, hash, hash_len): return False
-    def get(self, model_file, path, reporter, hash_len): return False
+    def has(self, hash): return False
+    def get(self, model_file, path, reporter): return False
     def put(self, hash, path): pass
 
 
@@ -41,16 +41,15 @@ class DirCache:
         self._staging_dir = self._cache_dir / 'staging'
         self._staging_dir.mkdir(exist_ok=True)
 
-    def _hash_path(self, hash, hash_len):
-        assert len(hash) == hash_len
+    def _hash_path(self, hash):
         hash_str = hash.hex().lower()
         return self._cache_dir / hash_str[:2] / hash_str[2:]
 
-    def has(self, hash, hash_len):
-        return self._hash_path(hash, hash_len).exists()
+    def has(self, hash):
+        return self._hash_path(hash).exists()
 
-    def get(self, model_file, path, reporter, hash_len):
-        cache_path = self._hash_path(model_file.checksum.value, hash_len)
+    def get(self, model_file, path, reporter):
+        cache_path = self._hash_path(model_file.checksum.value)
         cache_sha = model_file.checksum.type
         cache_size = 0
 
