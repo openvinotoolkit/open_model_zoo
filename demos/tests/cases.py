@@ -642,6 +642,13 @@ NATIVE_DEMOS = [
                 ]),
         ]
     )),
+    
+    CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-poconetlike-0001')}),
+
+    )),
+
 ]
 
 PYTHON_DEMOS = [
