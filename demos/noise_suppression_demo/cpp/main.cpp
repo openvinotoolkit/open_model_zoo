@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
                 if (i > 0) {
                     //set input state by coresponding output state from prev infer
                     auto blob_ptr = infer_request.GetBlob(out_state_name);
-                    infer_request.SetBlob(inp_state_name,blob_ptr);  // infer_request accepts input blob of any size
+                    infer_request.SetBlob(inp_state_name,blob_ptr);
                 } else {
                     // first iteration. set input state to zero tensor.
                     const InferenceEngine::TensorDesc &state_desc = inputs[inp_state_name]->getInputData()->getTensorDesc();
