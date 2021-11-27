@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
                     for (auto &val: *blob_ptr) {
                         val = 0;
                     }
-                    infer_request.SetBlob(inp_state_name,blob_ptr);  // infer_request accepts input blob of any size
+                    infer_request.SetBlob(inp_state_name,blob_ptr);
                 }
             }
 
