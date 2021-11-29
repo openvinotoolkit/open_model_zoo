@@ -66,14 +66,11 @@ class ImageModel(Model):
             ),
             'reverse_input_channels': BooleanValue(default_value=False, description='Reverse the channel order'),
             'resize_type': StringValue(
-                default_value=None, choices=tuple(RESIZE_TYPES.keys()),
+                default_value='standard', choices=tuple(RESIZE_TYPES.keys()),
                 description="Type of input image resizing"
             ),
         })
         return parameters
-
-    def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
-        self.input_transform = InputTransform(reverse_input_channels, mean_values, scale_values)
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []

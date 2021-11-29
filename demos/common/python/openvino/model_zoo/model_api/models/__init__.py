@@ -19,10 +19,12 @@ from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnsweri
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
+from .detection_model import DetectionModel
 from .detr import DETR
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .image_model import ImageModel
 from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
@@ -32,8 +34,6 @@ from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
 from .yolo import YOLO, YoloV3ONNX, YoloV4, YOLOF, YOLOX
-from .image_model import ImageModel
-from .detection_model import DetectionModel
 
 __all__ = [
     'BertEmbedding',
@@ -42,11 +42,13 @@ __all__ = [
     'CenterNet',
     'Classification',
     'CTPN',
-    'DetectionWithLandmarks',
     'Deblurring',
+    'DetectionModel',
+    'DetectionWithLandmarks',
     'DETR',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
+    'ImageModel',
     'InputTransform',
     'Model',
     'MonoDepthModel',
@@ -64,6 +66,4 @@ __all__ = [
     'YoloV4',
     'YOLOF',
     'YOLOX',
-    'DetectionModel',
-    'ImageModel'
 ]

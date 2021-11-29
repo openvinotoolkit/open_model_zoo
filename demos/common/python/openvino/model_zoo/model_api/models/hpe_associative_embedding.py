@@ -25,7 +25,7 @@ from .utils import resize_image
 
 
 class HpeAssociativeEmbedding(ImageModel):
-    __model__ = 'HPE-assosiative-embeddings'
+    __model__ = 'HPE-assosiative-embedding'
 
     def __init__(self, model_adapter, configuration=None, preload=False):
         super().__init__(model_adapter, configuration, preload=False)
@@ -78,7 +78,7 @@ class HpeAssociativeEmbedding(ImageModel):
             'prob_threshold': NumericalValue(),
             'delta': NumericalValue(default_value=0.0),
             'size_divisor': NumericalValue(default_value=32, value_type=int),
-            'padding_mode': StringValue(default_vaue='right_bottom', choices=('center', 'right_bottom')),
+            'padding_mode': StringValue(default_value='right_bottom', choices=('center', 'right_bottom')),
         })
         return parameters
 

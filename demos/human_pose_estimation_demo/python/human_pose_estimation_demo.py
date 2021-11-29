@@ -39,8 +39,8 @@ from helpers import resolution, log_latency_per_stage
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 ARCHITECTURES = {
-    'ae': 'HPE-assosiative-embeddings',
-    'higherhrnet': 'HPE-assosiative-embeddings',
+    'ae': 'HPE-assosiative-embedding',
+    'higherhrnet': 'HPE-assosiative-embedding',
     'openpose': 'openpose'
 }
 

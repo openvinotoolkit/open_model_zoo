@@ -34,7 +34,7 @@ class Model:
         logger(Logger): instance of the logger
     '''
 
-    __model__ = None # Abstract wrappers has no name
+    __model__ = None # Abstract wrapper has no name
 
     def __init__(self, model_adapter, configuration=None, preload=False):
         '''Abstract model constructor
