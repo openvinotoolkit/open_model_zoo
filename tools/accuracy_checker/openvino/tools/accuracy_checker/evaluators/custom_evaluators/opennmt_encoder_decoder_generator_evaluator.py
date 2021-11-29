@@ -488,8 +488,9 @@ class OpenNMTModel(BaseModel):
         for data in input_data:
             decode_strategy = BeamSearch(self.decoder.network_info)
 
-            h, c, memory, src_len = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
-                                                                       'src_len.1': np.array([len(data)])})
+            src_len = np.array([len(data)])
+            h, c, memory = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
+                                                              'src_len': src_len})
             if encoder_callback:
                 encoder_callback((h, c, memory, src_len))
             if self.store_encoder_predictions:
@@ -801,11 +802,9 @@ class CommonOpenNMTDecoder(StatefulModel):
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
-    input_layers = ['src', 'src_len.1']
-    # output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
-    # return_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
-    output_layers = ['state.0', 'state.1', 'memory', 'Convert_297', ]
-    return_layers = ['state.0', 'state.1', 'memory', 'Convert_297', ]
+    input_layers = ['src', 'src_len']
+    output_layers = ['state.0', 'state.1', 'memory']
+    return_layers = ['state.0', 'state.1', 'memory']
 
 
 class DecoderDLSDKModel(CommonOpenNMTDecoder, CommonDLSDKModel):
@@ -872,8 +871,10 @@ class CommonONNXModel(BaseModel):
 
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
-    input_layers = ['src', 'src_len']
-    output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
+    # input_layers = ['src', 'src_len']
+    # output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
+    input_layers = ['src']
+    output_layers = ['state.0', 'state.1', 'memory']
 
 
 class DecoderONNXModel(CommonOpenNMTDecoder, CommonONNXModel):
