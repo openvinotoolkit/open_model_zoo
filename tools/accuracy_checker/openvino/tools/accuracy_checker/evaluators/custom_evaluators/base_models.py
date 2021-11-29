@@ -320,7 +320,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         return {self.input_blob: np.array(input_data)}
 
     def infer(self, input_data):
-        if self.infer_request is None:
+        if not hasattr(self, 'infer_request') or self.infer_request is None:
             self.infer_request = self.exec_network.create_infer_request()
         outputs = self.infer_request.infer(input_data)
         return {

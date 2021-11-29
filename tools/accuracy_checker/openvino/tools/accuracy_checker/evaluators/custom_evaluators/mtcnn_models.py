@@ -109,6 +109,7 @@ class BaseStage:
 
 class ProposalBaseStage(BaseStage):
     default_model_name = 'mtcnn-p'
+    default_model_suffix = 'pnet'
 
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, delayed_model_loading=False):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
@@ -128,9 +129,6 @@ class ProposalBaseStage(BaseStage):
         if self.store:
             self._predictions.extend(result)
         return result
-
-    def _infer(self, input_blobs, batch_meta):
-        raise NotImplementedError
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         return self._infer(input_blobs, batch_meta)
@@ -190,9 +188,6 @@ class RefineBaseStage(BaseStage):
             self._predictions.extend(result)
         return result
 
-    def _infer(self, input_blobs, batch_meta):
-        raise NotImplementedError
-
     def predict(self, input_blobs, batch_meta, output_callback=None):
         return self._infer(input_blobs, batch_meta)
 
@@ -208,9 +203,6 @@ class OutputBaseStage(RefineBaseStage):
     input_size = 48
     include_boundaries = False
     default_model_name = 'mtcnn-o'
-
-    def _infer(self, input_blobs, batch_meta):
-        raise NotImplementedError
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
         batch_predictions = calibrate_predictions(
@@ -256,7 +248,7 @@ class CaffeModelMixin:
     def release(self):
         del self.net
 
-    def fit_to_input(self, data, layer_name, layout, precision):
+    def fit_to_input(self, data, layer_name, layout, precision, tmpl=None):
         data_shape = np.shape(data)
         layer_shape = self.inputs[layer_name]
         if len(data_shape) == 5 and len(layer_shape) == 4:
@@ -542,7 +534,7 @@ class OVModelMixin(BaseOpenVINOModel):
         del self.exec_network
         self.launcher.release()
 
-    def fit_to_input(self, data, layer_name, layout, precision, **kwargs):
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = (
             tuple(self.inputs[layer_name].shape)
             if layer_name not in self.dynamic_inputs else self.partial_shapes[layer_name])
@@ -638,23 +630,26 @@ class OVModelMixin(BaseOpenVINOModel):
         self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+        self.infer_request = None
 
     def reshape_net(self, shape):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
             del self.exec_network
-        self.network.reshape(shape)
+        self.launcher.reshape_network(self.network, shape)
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:
             return
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+        self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
+        self.infer_request = None
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.load_network(self.network, launcher, model_prefix)
         if log:
             self.print_input_output_info()
+        self.infer_request = None
 
     def update_input_output_info(self, model_prefix):
         def generate_name(prefix, with_prefix, layer_name):
@@ -704,7 +699,7 @@ class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
-class OpenVINOProposalStage(OVModelMixin, ProposalBaseStage):
+class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
@@ -806,10 +801,11 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         return raw_outputs
 
 
-class OpenVINORefineStage(OVModelMixin, RefineBaseStage):
+class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
+        self.default_model_suffix = 'rnet'
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.is_dynamic = False
         self.launcher = launcher
@@ -917,10 +913,11 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         return output_per_box
 
 
-class OpenVINOOutputStage(OVModelMixin, OutputBaseStage):
+class OpenVINOOutputStage(OutputBaseStage, OVModelMixin):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
+        self.default_model_suffix = 'onet'
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.is_dynamic = False
         self.launcher = launcher

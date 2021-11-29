@@ -86,12 +86,14 @@ class SequentialModel(BaseCascadeModel):
         self.processing_frames_buffer = []
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOpenVINO,
             'onnx_runtime': EncoderONNXModel,
             'opencv': EncoderOpenCVModel,
             'dummy': DummyEncoder
         }
         self._decoder_mapping = {
             'dlsdk': DecoderDLSDKModel,
+            'openvino': DecoderOpenVINOModel,
             'onnx_runtime': DecoderONNXModel,
             'opencv': DecoderOpenCVModel
         }

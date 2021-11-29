@@ -143,22 +143,16 @@ class SequentialModel(BaseCascadeModel):
         text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
-        decoder_exec_net = self.recognizer_decoder.exec_network
-        has_info = hasattr(decoder_exec_net, 'input_info')
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder.input: feature})
+            encoder_outputs = self.recognizer_encoder.predict(
+                identifiers, {self.recognizer_encoder.input: np.expand_dims(feature, 0)})
             if callback:
                 callback(encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder.output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
-            if has_info:
-                hidden_shape = decoder_exec_net.input_info[
-                    self.recognizer_decoder.model_inputs['prev_hidden']
-                ].input_data.shape
-            else:
-                hidden_shape = decoder_exec_net.inputs[self.recognizer_decoder.inputs['prev_hidden']].shape
+            hidden_shape = self.recognizer_decoder.get_hidden_shape(self.recognizer_decoder.model_inputs['prev_hidden'])
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
 
@@ -325,8 +319,8 @@ class DetectorOVModel(BaseOpenVINOModel):
             self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
                 'detector_') else 'text_features/sink_port_0'
         else:
-            self.text_feats_out = 'detector_text_features.0/sink_port_0' if self.im_data_name.startswith(
-                'detector_') else 'text_features.0/sink_port_0'
+            self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
+                'detector_') else 'text_features/sink_port_0'
 
 
 class RecognizerDLSDKModel(BaseDLSDKModel):
@@ -338,6 +332,14 @@ class RecognizerDLSDKModel(BaseDLSDKModel):
     def set_input_and_output(self):
         pass
 
+    def get_hidden_shape(self, name):
+        has_info = hasattr(self.exec_network, 'input_info')
+        if has_info:
+            hidden_shape = self.exec_network.input_info[name].input_data.shape
+        else:
+            hidden_shape = self.exec_network.inputs[name].shape
+        return hidden_shape
+
 
 class RecognizerOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
@@ -347,6 +349,9 @@ class RecognizerOVModel(BaseOpenVINOModel):
 
     def set_input_and_output(self):
         pass
+
+    def get_hidden_shape(self, name):
+        return parse_partial_shape(self.inputs[name].get_partial_shape())
 
 
 class RecognizerEncoderDLSDKModel(RecognizerDLSDKModel):
