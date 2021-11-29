@@ -5,10 +5,11 @@
 # pragma once
 
 #include <list>
+#include <map>
 
 #include <opencv2/opencv.hpp>
 
-// -------------------------Describe detected face on a frame-------------------------------------------------
+// -------------------------Describe detected face on a frame-------------------
 
 struct Face {
 public:
