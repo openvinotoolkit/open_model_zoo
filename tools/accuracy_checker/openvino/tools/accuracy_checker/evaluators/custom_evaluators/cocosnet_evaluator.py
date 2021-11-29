@@ -19,7 +19,7 @@ import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel
+from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
@@ -183,6 +183,42 @@ class CocosnetModel(BaseDLSDKModel):
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
 
+
+class CoCosNetModelOV(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
+
+    def set_input_and_output(self):
+        self.inputs_names = list(self.inputs.keys())
+        if self.output_blob is None:
+            self.output_blob = next(iter(self.exec_network.outputs)).get_node()..friendly_name
+
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = self.output_blob
+
+    def fit_to_input(self, input_data):
+        inputs = {}
+        for value, key in zip(input_data, self.inputs_names):
+            value = np.expand_dims(value, 0)
+            value = np.transpose(value, (0, 3, 1, 2))
+            inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].precision])
+        return inputs
+
+    def predict(self, identifiers, input_data):
+        results = []
+        prediction = None
+        if self.infer_request is None:
+            self.infer_request = self.exec_network.create_infer_reuqest()
+        for current_input in input_data:
+            data = self.fit_to_input(current_input)
+            if not self.is_dynamic and self.dynamic_inputs:
+                self._reshape_input({k: v.shape for k, v in data.items()})
+            outputs = self.infer(data)
+            prediction =
+            results.append(*self.adapter.process(prediction, identifiers, [{}]))
+        return results, prediction
 
 class GanCheckModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):

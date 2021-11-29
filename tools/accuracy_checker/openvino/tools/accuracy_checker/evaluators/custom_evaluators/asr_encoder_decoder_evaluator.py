@@ -21,7 +21,9 @@ from collections import OrderedDict
 
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, create_model, create_encoder
+from .base_models import (
+    BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel,
+    create_model, create_encoder)
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
@@ -79,10 +81,12 @@ class ASRModel(BaseCascadeModel):
             raise ConfigError('network_info should contain encoder and decoder fields')
         self._decoder_mapping = {
             'dlsdk': DecoderDLSDKModel,
+            'openvino': DecoderOVModel,
             'onnx_runtime': DecoderONNXModel
         }
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOVModel,
             'onnx_runtime': EncoderONNXModel,
             'dummy': DummyEncoder
         }
@@ -138,6 +142,13 @@ class EncoderDLSDKModel(BaseDLSDKModel):
         return results, results[self.output_blob]
 
 
+class EncoderOVModel(BaseOpenVINOModel):
+    def predict(self, identifiers, input_data):
+        input_data = self.fit_to_input(input_data)
+        results = self.infer(input_data)
+        return results, results[self.output_blob]
+
+
 class DecoderDLSDKModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
@@ -150,6 +161,24 @@ class DecoderDLSDKModel(BaseDLSDKModel):
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        self.adapter.output_blob = self.output_blob
+
+
+class DecoderOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
+
+    def predict(self, identifiers, input_data):
+        feed_dict = self.fit_to_input(input_data)
+        results = self.infer(feed_dict)
+        result = self.adapter.process([results], identifiers, [{}])
+
+        return results, result
 
     def set_input_and_output(self):
         super().set_input_and_output()
