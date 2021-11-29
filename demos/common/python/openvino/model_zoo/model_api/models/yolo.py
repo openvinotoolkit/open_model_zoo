@@ -75,8 +75,8 @@ class YOLO(DetectionModel):
 
                 self.use_input_size = True  # Weak way to determine but the only one.
 
-    def __init__(self, model_adapter, configuraition):
-        super().__init__(model_adapter, configuraition)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.is_tiny = len(self.outputs) == 2  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
         self._check_io_number(1, -1)
