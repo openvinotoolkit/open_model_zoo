@@ -99,6 +99,7 @@ ACCEPTABLE_MODEL = [
     'saved_model_dir',
     'params'
 ]
+ALLOW_FILE_OR_DIR = ['models']
 
 
 class ConfigReader:
@@ -788,10 +789,14 @@ def merge_entry_paths(keys, value, args, value_id=0):
                 continue
 
             selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
+            prefix_path = selected_argument
             if not selected_argument.is_dir():
-                raise ConfigError('argument: {} should be a directory'.format(argument))
+                if argument in ALLOW_FILE_OR_DIR:
+                    prefix_path = selected_argument.parent
+                else:
+                    raise ConfigError('argument: {} should be a directory'.format(argument))
 
-            if (selected_argument / config_path).exists():
+            if (prefix_path / config_path).exists():
                 break
         value[field] = selected_argument / config_path if selected_argument is not None else config_path
 
