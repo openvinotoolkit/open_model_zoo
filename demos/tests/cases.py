@@ -663,6 +663,16 @@ NATIVE_DEMOS = [
                 ]),
         ]
     )),
+
+    CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-poconetlike-0001')}),
+# TODO: add new model when it will be ready
+#        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+#                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
+
+    )),
+
 ]
 
 PYTHON_DEMOS = [
@@ -1004,6 +1014,9 @@ PYTHON_DEMOS = [
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('noise-suppression-poconetlike-0001')}),
+# TODO: add new model when it will be ready
+#        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+#                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
 
     )),
 

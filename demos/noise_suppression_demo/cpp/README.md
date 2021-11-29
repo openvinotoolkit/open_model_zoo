@@ -1,4 +1,4 @@
-# Noise Suppression Python\* Demo
+# Noise Suppression C++\* Demo
 
 This README describes the Noise Suppression demo application.
 
@@ -30,45 +30,44 @@ omz_converter --list models.lst
 * noise-suppression-poconetlike-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```
-python3 noise_suppression_demo.py -h
+```sh
+./noise_suppression_demo -h
 ```
 The command yields the following usage message:
 ```
-usage: noise_suppression_demo.py [-h] -m MODEL -i INPUT [-o OUTPUT] [-d DEVICE]
-
+noise_suppression_demo [OPTION]
 Options:
-  -h, --help            Show this help message and exit.
-  -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
-  -i INPUT, --input INPUT
-                        Required. Path to a 16kHz wav file with speech+noise
-  -o OUTPUT, --output OUTPUT
-                        Optional. Path to output wav file for cleaned speech
-  -d DEVICE, --device DEVICE
-                        Optional. Target device to perform inference on.
-                        Default value is CPU
+
+    -h           Print a usage message.
+    -i INPUT     Required. Path to a input WAV file.
+    -o OUTPUT    Optional. Path to a output WAV file.
+    -m MODEL     Required. Path to an .xml file with a trained model.
+    -d DEVICE    Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
 ```
 
-You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
-[Model Downloader](../../../tools/model_tools/README.md) executed with "--name noise-suppression*"):
-```
-    python3 noise_suppression_demo.py \
-        --model=<path_to_model>/noise-suppression-poconetlike-0001.xml \
-        --input=noisy.wav \
-        --output=cleaned.wav
+Running the application with an empty list of options yields an error message.
+
+For example, to do inference on a CPU, run the following command:
+
+```sh
+./noise_suppression_demo \
+  -m <path_to_model>/noise-suppression-poconetlike-0001.xml \
+  -d CPU \
+  -i noisy.wav \
+  -o cleaned.wav
 ```
 
 ## Demo Inputs
 
-The application reads audio wave from the input file with given name. The input file has to have 16kHZ discretization frequency
-The model is also required demo arguments.
+The application reads audio wave from the INPUT WAV file. The INPUT file has to have 16kHZ discretization frequency and be mono.
+The MODEL is also required arguments.
 
 ## Demo Outputs
-The application outputs cleaned wave to output file.
+The application outputs cleaned wave to OUTPUT WAV file.
 The demo reports
 
 * **Latency**: total processing time required to process input data (from reading the data to displaying the results).
