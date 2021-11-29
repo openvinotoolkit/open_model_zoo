@@ -247,6 +247,9 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
         self.infer_request = None
 
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
     def load_network(self, network, launcher):
         self.infer_request = None
         self.network = network

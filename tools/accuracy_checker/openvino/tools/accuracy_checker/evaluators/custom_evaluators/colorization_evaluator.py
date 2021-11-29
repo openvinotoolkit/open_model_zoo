@@ -18,10 +18,10 @@ import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel
+from .base_models import BaseDLSDKModel, BaseCascadeModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import extract_image_representations, contains_all
+from ...utils import extract_image_representations, contains_all, parse_partial_shape
 
 
 class ColorizationEvaluator(BaseCustomEvaluator):
@@ -78,11 +78,18 @@ class ColorizationCascadeModel(BaseCascadeModel):
             })
         if not contains_all(network_info, ['colorization_network', 'verification_network']):
             raise ConfigError('configuration for colorization_network/verification_network does not exist')
+        use_api2 = launcher.config['framework'] == 'openvino'
 
-        self.test_model = ColorizationTestModel(network_info.get('colorization_network', {}), launcher,
-                                                'colorization_network', delayed_model_loading)
-        self.check_model = ColorizationCheckModel(network_info.get('verification_network', {}), launcher,
-                                                  'verification_network', delayed_model_loading)
+        if not use_api2:
+            self.test_model = ColorizationTestModel(network_info.get('colorization_network', {}), launcher,
+                                                    'colorization_network', delayed_model_loading)
+            self.check_model = ColorizationCheckModel(network_info.get('verification_network', {}), launcher,
+                                                      'verification_network', delayed_model_loading)
+        else:
+            self.test_model = ColorizationTestOVModel(network_info.get('colorization_network', {}), launcher,
+                                                      'colorization_network', delayed_model_loading)
+            self.check_model = ColorizationCheckOVModel(network_info.get('verification_network', {}), launcher,
+                                                        'verification_network', delayed_model_loading)
         self._part_by_name = {
             'colorization_network': self.test_model,
             'verification_network': self.check_model
@@ -141,6 +148,49 @@ class ColorizationTestModel(BaseDLSDKModel):
             self.inputs[input_name] = np.zeros(input_info[input_name].input_data.shape)
 
 
+class ColorizationTestOVModel(BaseOpenVINOModel):
+    @staticmethod
+    def data_preparation(input_data):
+        input_ = input_data[0].astype(np.float32)
+        img_lab = cv2.cvtColor(input_, cv2.COLOR_RGB2Lab)
+        img_l = np.copy(img_lab[:, :, 0])
+        img_l_rs = np.copy(img_lab[:, :, 0])
+        return img_l, img_l_rs
+
+    @staticmethod
+    def central_crop(input_data, crop_size=(224, 224)):
+        h, w = input_data.shape[:2]
+        delta_h = (h - crop_size[0]) // 2
+        delta_w = (w - crop_size[1]) // 2
+        return input_data[delta_h:h - delta_h, delta_w: w - delta_w, :]
+
+    def postprocessing(self, res, img_l):
+        res = np.squeeze(res, axis=0)
+        res = res.transpose((1, 2, 0)).astype(np.float32)
+
+        out_lab = np.concatenate((img_l[:, :, np.newaxis], res), axis=2)
+        result_bgr = np.clip(cv2.cvtColor(out_lab, cv2.COLOR_Lab2BGR), 0, 1)
+
+        return [self.central_crop(result_bgr)]
+
+    def predict(self, identifiers, input_data):
+        img_l, img_l_rs = self.data_preparation(input_data)
+
+        self._inputs[self.input_blob] = img_l_rs
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in self._inputs.items()})
+        res = self.infer(self._inputs)
+
+        new_result = self.postprocessing(res[self.output_blob], img_l)
+        return res, np.array(new_result)
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        self._inputs = {}
+        for input_name, input_node in self.inputs.items():
+            self._inputs[input_name] = np.zeros(parse_partial_shape(input_node[input_name].get_partial_shape()))
+
+
 class ColorizationCheckModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.adapter = create_adapter(network_info['adapter'])
@@ -152,6 +202,27 @@ class ColorizationCheckModel(BaseDLSDKModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_dict.items()})
         raw_result = self.exec_network.infer(input_dict)
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result
+
+    def fit_to_input(self, input_data):
+        constant_normalization = 255.
+        input_data *= constant_normalization
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
+        return {self.input_blob: input_data}
+
+
+class ColorizationCheckOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info['adapter'])
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
+
+    def predict(self, identifiers, input_data):
+        input_dict = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in input_dict.items()})
+        raw_result = self.infer(input_dict)
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
 

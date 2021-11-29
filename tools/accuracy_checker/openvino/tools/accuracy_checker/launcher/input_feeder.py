@@ -63,7 +63,16 @@ PRECISION_TO_DTYPE = {
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
     'STR': str,  # string'
-    'BOOL': bool
+    'BOOL': bool,
+    'f32': np.float32,
+    'i32': np.int32,
+    'i64': np.int64,
+    'fp16': np.float16,
+    'i16': np.int16,
+    'u16': np.uint16,
+    'i8': np.int8,
+    'u8': np.uint8,
+    'boolean': np.uint8
 }
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT', 'SCALE_FACTOR']

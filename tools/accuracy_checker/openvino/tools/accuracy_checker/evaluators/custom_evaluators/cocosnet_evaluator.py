@@ -26,7 +26,7 @@ from ...data_readers import DataRepresentation
 from ...launcher.input_feeder import PRECISION_TO_DTYPE
 from ...preprocessor import PreprocessingExecutor
 from ...representation import RawTensorPrediction, RawTensorAnnotation
-from ...utils import extract_image_representations, contains_all
+from ...utils import extract_image_representations, contains_all, parse_partial_shape
 
 
 class CocosnetEvaluator(BaseCustomEvaluator):
@@ -117,12 +117,21 @@ class CocosnetCascadeModel(BaseCascadeModel):
             })
         if not contains_all(network_info, ['cocosnet_network']) and not delayed_model_loading:
             raise ConfigError('network_info should contain cocosnet_network field')
+        use_api2 = launcher.config['framework'] == 'openvino'
 
-        self.test_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
-                                        delayed_model_loading)
+        if not use_api2:
+            self.test_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
+                                            delayed_model_loading)
+        else:
+            self.test_model = CoCosNetModelOV(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
+                                              delayed_model_loading)
         if network_info.get('verification_network'):
-            self.check_model = GanCheckModel(network_info.get('verification_network', {}), launcher,
-                                             'verification_network', delayed_model_loading)
+            if not use_api2:
+                self.check_model = GanCheckModel(network_info.get('verification_network', {}), launcher,
+                                                 'verification_network', delayed_model_loading)
+            else:
+                self.check_model = GANCheckOVModel(network_info.get('verification_network', {}), launcher,
+                                                   'verification_network', delayed_model_loading)
         else:
             self.check_model = None
         self._part_by_name = {
@@ -193,7 +202,7 @@ class CoCosNetModelOV(BaseOpenVINOModel):
     def set_input_and_output(self):
         self.inputs_names = list(self.inputs.keys())
         if self.output_blob is None:
-            self.output_blob = next(iter(self.exec_network.outputs)).get_node()..friendly_name
+            self.output_blob = next(iter(self.exec_network.outputs)).get_node().friendly_name
 
         if self.adapter.output_blob is None:
             self.adapter.output_blob = self.output_blob
@@ -203,7 +212,7 @@ class CoCosNetModelOV(BaseOpenVINOModel):
         for value, key in zip(input_data, self.inputs_names):
             value = np.expand_dims(value, 0)
             value = np.transpose(value, (0, 3, 1, 2))
-            inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].precision])
+            inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].element_type.get_type_name()])
         return inputs
 
     def predict(self, identifiers, input_data):
@@ -215,10 +224,10 @@ class CoCosNetModelOV(BaseOpenVINOModel):
             data = self.fit_to_input(current_input)
             if not self.is_dynamic and self.dynamic_inputs:
                 self._reshape_input({k: v.shape for k, v in data.items()})
-            outputs = self.infer(data)
-            prediction =
+            prediction = self.infer(data)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
+
 
 class GanCheckModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
@@ -267,5 +276,47 @@ class GanCheckModel(BaseDLSDKModel):
             if not self.is_dynamic and self.dynamic_inputs:
                 self._reshape_input({k, v.shape} for k, v in input_dict.items())
             prediction = self.exec_network.infer(input_dict)
+            results.append(np.squeeze(prediction[self.output_blob[index_of_key]]))
+        return results
+
+
+class GANCheckOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.additional_layers = network_info.get('additional_layers')
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def load_model(self, network_info, launcher, log=False):
+        model, weights = self.automatic_model_search(network_info)
+        if model.suffix != '.blob':
+            self.network = launcher.read_network(model, weights)
+            self.network.add_outputs(self.additional_layers)
+            self.load_network(self.network, launcher)
+        else:
+            self.network = None
+            self.exec_network = launcher.ie_core.import_model(str(model))
+        self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
+
+    def set_input_and_output(self):
+        self.input_blob = next(iter(self.inputs))
+        self.input_shape = parse_partial_shape(self.inputs[self.input_blob].get_partial_shape())
+        self.output_blob = [out.get_node().friendly_name for out in self.exec_network.outputs]
+        self.number_of_metrics = len(self.output_blob)
+
+    def fit_to_input(self, input_data):
+        input_data = cv2.cvtColor(input_data, cv2.COLOR_RGB2BGR)
+        input_data = cv2.resize(input_data, dsize=self.input_shape[2:])
+        input_data = np.expand_dims(input_data, 0)
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
+        return {self.input_blob: input_data}
+
+    def predict(self, identifiers, input_data, index_of_key=None):
+        results = []
+        for data in input_data:
+            input_dict = self.fit_to_input(data.value)
+            if not self.is_dynamic and self.dynamic_inputs:
+                self._reshape_input({k, v.shape} for k, v in input_dict.items())
+            prediction = self.infer(input_dict)
             results.append(np.squeeze(prediction[self.output_blob[index_of_key]]))
         return results

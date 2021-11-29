@@ -18,11 +18,11 @@ import warnings
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel
+from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import create_reader
-from ...utils import extract_image_representations, contains_all
+from ...utils import extract_image_representations, contains_all, parse_partial_shape
 from ...preprocessor import Crop, Resize
 
 
@@ -117,12 +117,21 @@ class I3DCascadeModel(BaseCascadeModel):
         if not contains_all(network_info, ['flow', 'rgb']):
             raise ConfigError('configuration for flow/rgb does not exist')
 
-        self.flow_model = I3DFlowModel(
-            network_info.get('flow', {}), launcher, data_source, 'flow', delayed_model_loading
-        )
-        self.rgb_model = I3DRGBModel(
-            network_info.get('rgb', {}), launcher, data_source, 'rgb', delayed_model_loading
-        )
+        use_api2 = launcher.config['framework'] == 'openvino'
+        if not use_api2:
+            self.flow_model = I3DFlowModel(
+                network_info.get('flow', {}), launcher, data_source, 'flow', delayed_model_loading
+            )
+            self.rgb_model = I3DRGBModel(
+                network_info.get('rgb', {}), launcher, data_source, 'rgb', delayed_model_loading
+            )
+        else:
+            self.flow_model = I3DFlowOVModel(
+                network_info.get('flow', {}), launcher, data_source, 'flow', delayed_model_loading
+            )
+            self.rgb_model = I3DRGBOVModel(
+                network_info.get('rgb', {}), launcher, data_source, 'rgb', delayed_model_loading
+            )
         if self.rgb_model.output_blob != self.flow_model.output_blob:
             warnings.warn("Outputs for rgb and flow models have different names. "
                           "rgb model's output name: {}. flow model's output name: {}. Output name of rgb model "
@@ -168,6 +177,30 @@ class BaseI3DModel(BaseDLSDKModel):
         return {self.input_blob: input_data}
 
 
+class BaseI3DOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, data_source, suffix=None, delayed_model_loading=False):
+        reader_config = network_info.get('reader', {})
+        source_prefix = reader_config.get('source_prefix', '')
+        reader_config.update({
+            'data_source': data_source / source_prefix
+        })
+        self.reader = create_reader(reader_config)
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data):
+        input_dict = input_data[0]
+        if self.dynamic_inputs and not self.is_dynamic:
+            self._reshape_input({k: v.shape for k, v in input_dict.items()})
+        return self.infer(input_dict)
+
+    def fit_to_input(self, input_data):
+        input_data = np.array(input_data)
+        input_data = np.transpose(input_data, (3, 0, 1, 2))
+        if not self.dynamic_inputs:
+            input_data = np.reshape(input_data, parse_partial_shape(self.inputs[self.input_blob].get_partial_shape()))
+        return {self.input_blob: input_data}
+
+
 class I3DRGBModel(BaseI3DModel):
     def prepare_data(self, data):
         image_data = data.values[0]
@@ -186,9 +219,17 @@ class I3DRGBModel(BaseI3DModel):
         return image
 
 
+class I3DRGBOVModel(I3DRGBModel, BaseI3DOVModel):
+    pass
+
+
 class I3DFlowModel(BaseI3DModel):
     def prepare_data(self, data):
         numpy_data = data.values[1]
         prepared_data = self.reader(numpy_data)
         prepared_data.data = self.fit_to_input(prepared_data.data)
         return prepared_data
+
+
+class I3DFlowOVModel(I3DFlowModel, BaseI3DOVModel):
+    pass

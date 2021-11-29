@@ -15,11 +15,11 @@ limitations under the License.
 """
 
 import numpy as np
-from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
+from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSOVModel
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all
+from ...utils import contains_all, parse_partial_shape
 
 
 scale = 255.0/32768.0
@@ -67,11 +67,13 @@ class SequentialModel(BaseCascadeModel):
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
         self._encoder_mapping = {
-            'dlsdk': EncoderOpenVINOModel,
+            'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOpenVINOModel,
             'onnx_runtime': EncoderONNXModel,
         }
         self._decoder_mapping = {
-            'dlsdk': DecoderOpenVINOModel,
+            'dlsdk': DecoderDLSDKModel,
+            'openvino': DecoderOpenVINOModel,
             'onnx_runtime': DecoderONNXModel
         }
         self.encoder = create_model(network_info['encoder'], launcher, self._encoder_mapping, 'encoder',
@@ -138,7 +140,7 @@ class EncoderModel:
         self.output = generate_name(self.default_model_suffix+'_', with_prefix, self.output)
 
 
-class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
+class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         self.nb_features = network_info.get('nb_features')
         self.nb_used_features = network_info.get('nb_used_features')
@@ -153,6 +155,23 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
             input_shapes = {in_name: value.shape for in_name, value in feed_dict.items()}
             self._reshape_input(input_shapes)
         return self.exec_network.infer(feed_dict)
+
+
+class EncoderOpenVINOModel(EncoderModel, TTSOVModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.nb_features = network_info.get('nb_features')
+        self.nb_used_features = network_info.get('nb_used_features')
+        self.feature_input = network_info.get('feature_input')
+        self.periods_input = network_info.get('periods_input')
+        self.output = network_info.get('output')
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def infer(self, input_data):
+        feature_layer_shape = parse_partial_shape(self.inputs[self.feature_input].get_partial_shape())
+        if self.feature_input in self.dynamic_inputs or feature_layer_shape != input_data[self.feature_input].shape:
+            input_shapes = {in_name: value.shape for in_name, value in input_data.items()}
+            self._reshape_input(input_shapes)
+        return self.infer(input_data)
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
@@ -264,7 +283,7 @@ class DecoderONNXModel(BaseONNXModel, DecoderModel):
         return dict(zip(self.output_names, outs))
 
 
-class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
+class DecoderDLSDKModel(DecoderModel, TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         self.frame_size = network_info.get('frame_size')
         self.nb_frames = 1
@@ -282,6 +301,23 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
 
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
+
+
+class DecoderOpenVINOModel(DecoderModel, TTSOVModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.frame_size = network_info.get('frame_size')
+        self.nb_frames = 1
+        self.nb_features = network_info.get('nb_features')
+        self.rnn_units1 = network_info.get('rnn_units1')
+        self.rnn_units2 = network_info.get('rnn_units2')
+        self.input1 = network_info.get('input1')
+        self.input2 = network_info.get('input2')
+        self.rnn_input1 = network_info.get('rnn_input1')
+        self.rnn_input2 = network_info.get('rnn_input2')
+        self.rnn_output1 = network_info.get('rnn_output1')
+        self.rnn_output2 = network_info.get('rnn_output2')
+        self.output = network_info.get('output')
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class LPCNetEvaluator(TextToSpeechEvaluator):
