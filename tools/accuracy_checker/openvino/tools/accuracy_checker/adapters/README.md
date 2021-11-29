@@ -459,7 +459,7 @@ AccuracyChecker supports following set of adapters:
 * `noise_suppression` - converts output of audio denoising model to `NoiseSuppressionPrediction`.
   * `output_blob` - name of output layer with processed signal (Optional, if not provided, first found output from model will be used).
 * `kaldi_latgen_faster_mapped` - decodes output Kaldi\* automatic speech recognition model using lattice generation approach with transition model to `CharcterRecognitionPrediction`.
-  **Important note** This adapter requires [Kaldi\* installation](https://kaldi-asr.org/doc/install.html)(we recommend to use `67db30cc` commit)
+  **Important note** This adapter requires [Kaldi\* installation](https://kaldi-asr.org/doc/install.html) (we recommend to use `67db30cc` commit)
   and providing path to directory with compiled executable apps: `latgen-faster-mapped`, `lattice-scale`, `lattice-add-penalty`, `lattice-best-path`.
   Path directory can be provided using `--kaldi_bin_dir` commandline argument or `KALDI_BIN_DIR` environment variable.
   * `fst_file` - Weighted Finite-State Transducers (WFST) state graph file.
@@ -481,3 +481,9 @@ AccuracyChecker supports following set of adapters:
   * `output_name` - name of output node to convert.
 * `mask_to_binary_classification` - converts output of model represented as segmentation mask to `ArgMaxClassificationPrediction`. Class label calculated as comparision maximal probability in mask with given threshold.
   * `threshold` - probability threshold for label 1 (Optional, default 0.5).
+* `ssd_multilabel` - converting output of SSD-based model where multiple labels can correspond to one box to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
+  * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.01).
+  * `nms_threshold` - overlap threshold for NMS (optional, default 0.45).
+  * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).

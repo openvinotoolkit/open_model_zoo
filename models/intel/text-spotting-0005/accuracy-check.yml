@@ -7,31 +7,27 @@ evaluations:
 
         recognizer_encoder: {}
 
-        recognizer_decoder: {}
+        recognizer_decoder:
+          inputs:
+            prev_symbol: prev_symbol
+            prev_hidden: prev_hidden
+            encoder_outputs: encoder_outputs
+          outputs:
+            symbols_distribution: output
+            cur_hidden: hidden
 
-        recognizer_decoder_inputs:
-          prev_symbol: prev_symbol
-          prev_hidden: prev_hidden
-          encoder_outputs: encoder_outputs
-
-        recognizer_decoder_outputs:
-          symbols_distribution: output
-          cur_hidden: hidden
-
-        max_seq_len: '28'
-        recognizer_confidence_threshold: '0.45'
-
-        alphabet: __abcdefghijklmnopqrstuvwxyz0123456789
-        sos_index: '0'
-        eos_index: '1'
-
-        adapter:
-          type: mask_rcnn_with_text
-          classes_out: labels
-          boxes_out: boxes
-          raw_masks_out: masks
-          texts_out: texts
-          confidence_threshold: 0.65
+      max_seq_len: '28'
+      alphabet: __abcdefghijklmnopqrstuvwxyz0123456789
+      sos_index: '0'
+      eos_index: '1'
+      recognizer_confidence_threshold: '0.45'
+      adapter:
+        type: mask_rcnn_with_text
+        classes_out: labels
+        boxes_out: boxes
+        raw_masks_out: masks
+        texts_out: texts
+        confidence_threshold: 0.65
 
       launchers:
         - framework: dlsdk

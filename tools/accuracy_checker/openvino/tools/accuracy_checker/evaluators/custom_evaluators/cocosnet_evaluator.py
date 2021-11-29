@@ -15,36 +15,28 @@ limitations under the License.
 """
 
 from collections import OrderedDict
-from pathlib import Path
 import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
+from .base_models import BaseDLSDKModel, BaseCascadeModel
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
 from ...launcher.input_feeder import PRECISION_TO_DTYPE
-from ...logging import print_info
 from ...preprocessor import PreprocessingExecutor
 from ...representation import RawTensorPrediction, RawTensorAnnotation
-from ...utils import extract_image_representations, contains_all, get_path
+from ...utils import extract_image_representations, contains_all
 
 
 class CocosnetEvaluator(BaseCustomEvaluator):
-    def __init__(self, dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model,
-                 check_model, orig_config):
+    def __init__(self, dataset_config, launcher, preprocessor_mask, preprocessor_image, model, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
         self.preprocessor_mask = preprocessor_mask
         self.preprocessor_image = preprocessor_image
-        self.test_model = gan_model
-        self.check_model = check_model
-        self._part_by_name = {
-            'gan_network': self.test_model,
-        }
-        if self.check_model:
-            self._part_by_name.update({'verification_network': self.check_model})
-        if hasattr(self.test_model, 'adapter'):
-            self.adapter_type = self.test_model.adapter.__provider__
+        self.model = model
+        if hasattr(self.model, 'adapter'):
+            self.adapter_type = self.model.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
@@ -52,36 +44,12 @@ class CocosnetEvaluator(BaseCustomEvaluator):
 
         preprocessor_mask = PreprocessingExecutor(dataset_config[0].get('preprocessing_mask'))
         preprocessor_image = PreprocessingExecutor(dataset_config[0].get('preprocessing_image'))
-        network_info = config.get('network_info', {})
-        cocosnet_network = network_info.get('cocosnet_network', {})
-        verification_network = network_info.get('verification_network', {})
-
-        if not delayed_model_loading:
-            model_args = config.get('_models', [])
-            models_is_blob = config.get('_model_is_blob')
-
-            if 'model' not in cocosnet_network and model_args:
-                cocosnet_network['model'] = model_args[0]
-                cocosnet_network['_model_is_blob'] = models_is_blob
-            if verification_network and 'model' not in verification_network and model_args:
-                verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
-                verification_network['_model_is_blob'] = models_is_blob
-            network_info.update({
-                'cocosnet_network': cocosnet_network,
-                'verification_network': verification_network
-            })
-            if not contains_all(network_info, ['cocosnet_network']):
-                raise ConfigError('configuration for cocosnet_network does not exist')
-
-        gan_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, delayed_model_loading)
-        if verification_network:
-            check_model = GanCheckModel(network_info.get('verification_network', {}), launcher, delayed_model_loading)
-        else:
-            check_model = None
-
-        return cls(
-            dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model, orig_config
+        model = CocosnetCascadeModel(
+            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
+            delayed_model_loading
         )
+
+        return cls(dataset_config, launcher, preprocessor_mask, preprocessor_image, model, orig_config)
 
     def _preprocessing_for_batch_input(self, batch_annotation, batch_inputs):
         for i, _ in enumerate(batch_inputs):
@@ -98,7 +66,7 @@ class CocosnetEvaluator(BaseCustomEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self._preprocessing_for_batch_input(batch_annotation, batch_inputs)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
-            batch_predictions, raw_predictions = self.test_model.predict(batch_identifiers, extr_batch_inputs)
+            batch_predictions, raw_predictions = self.model.test_model.predict(batch_identifiers, extr_batch_inputs)
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
             if self.metric_executor:
@@ -107,13 +75,13 @@ class CocosnetEvaluator(BaseCustomEvaluator):
                 )
                 check_model_annotations = []
                 check_model_predictions = []
-                if self.check_model:
-                    for index_of_metric in range(self.check_model.number_of_metrics):
+                if self.model.check_model:
+                    for index_of_metric in range(self.model.check_model.number_of_metrics):
                         check_model_annotations.extend(
-                            self.check_model.predict(batch_identifiers, annotations, index_of_metric)
+                            self.model.check_model.predict(batch_identifiers, annotations, index_of_metric)
                         )
                         check_model_predictions.extend(
-                            self.check_model.predict(batch_identifiers, predictions, index_of_metric)
+                            self.model.check_model.predict(batch_identifiers, predictions, index_of_metric)
                         )
                     batch_identifiers.extend(batch_identifiers)
                     check_model_annotations = [
@@ -130,154 +98,58 @@ class CocosnetEvaluator(BaseCustomEvaluator):
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_predictions), csv_file)
 
-    def load_model(self, network_list):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_model(network_dict, self.launcher)
 
-    def load_network(self, network=None):
-        for network_dict in network:
-            self._part_by_name[network_dict['name']].load_network(network_dict['model'], self.launcher)
+class CocosnetCascadeModel(BaseCascadeModel):
+    def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
+        super().__init__(network_info, launcher)
+        if models_args and not delayed_model_loading:
+            cocosnet_network = network_info.get('cocosnet_network', {})
+            verification_network = network_info.get('verification_network', {})
+            if 'model' not in cocosnet_network and models_args:
+                cocosnet_network['model'] = models_args[0]
+                cocosnet_network['_model_is_blob'] = is_blob
+            if verification_network and 'model' not in verification_network and models_args:
+                verification_network['model'] = models_args[1 if len(models_args) > 1 else 0]
+                verification_network['_model_is_blob'] = is_blob
+            network_info.update({
+                'cocosnet_network': cocosnet_network,
+                'verification_network': verification_network
+            })
+        if not contains_all(network_info, ['cocosnet_network']) and not delayed_model_loading:
+            raise ConfigError('network_info should contain cocosnet_network field')
 
-    def get_network(self):
-        return [{'name': key, 'model': model.network} for key, model in self._part_by_name.items()]
+        self.test_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
+                                        delayed_model_loading)
+        if network_info.get('verification_network'):
+            self.check_model = GanCheckModel(network_info.get('verification_network', {}), launcher,
+                                             'verification_network', delayed_model_loading)
+        else:
+            self.check_model = None
+        self._part_by_name = {
+            'gan_network': self.test_model,
+        }
+        if self.check_model:
+            self._part_by_name.update({'verification_network': self.check_model})
 
-    def load_network_from_ir(self, models_list):
-        model_paths = next(iter(models_list))
-        next(iter(self._part_by_name.values())).load_model(model_paths, self.launcher)
+    @property
+    def adapter(self):
+        return self.test_model.adapter
 
-class BaseModel:
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.input_blob = None
-        self.output_blob = None
-        self.with_prefix = False
-        self.launcher = launcher
-        self.is_dynamic = False
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
+    def predict(self, identifiers, input_data, encoder_callback=None):
+        pass
 
-    @staticmethod
-    def auto_model_search(network_info, net_type=""):
-        model = Path(network_info['model'])
-        is_blob = network_info.get('_model_is_blob')
-        if model.is_dir():
-            if is_blob:
-                model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*.xml'))
-                if not model_list and is_blob is None:
-                    model_list = list(model.glob('*.blob'))
-            if not model_list:
-                raise ConfigError('Suitable model not found')
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models found')
-            model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(net_type, model))
-        if model.suffix == '.blob':
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(net_type, weights))
 
-        return model, weights
+class CocosnetModel(BaseDLSDKModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
 
     @property
     def inputs(self):
         if self.network:
             return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
         return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
-
-    def predict(self, identifiers, input_data):
-        raise NotImplementedError
-
-    def release(self):
-        del self.network
-        del self.exec_network
-
-    def load_model(self, network_info, launcher, log=False):
-        model, weights = self.auto_model_search(network_info, self.net_type)
-        if weights:
-            self.network = launcher.read_network(model, weights)
-            self.load_network(self.network, launcher)
-        else:
-            self.network = None
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        self.set_input_and_output()
-        if log:
-            self.print_input_output_info()
-
-    def load_network(self, network, launcher):
-        self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
-        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
-            try:
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-                self.is_dynamic = True
-            except RuntimeError as e:
-                if launcher.dynamic_shapes_policy == 'dynamic':
-                    raise e
-                self.is_dynamic = False
-                self.exec_network = None
-        if not self.dynamic_inputs:
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.set_input_and_output()
-
-    def reshape_net(self, shape):
-        if self.is_dynamic:
-            return
-        if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.exec_network
-        self.network.reshape(shape)
-        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-        if not self.is_dynamic and self.dynamic_inputs:
-            return
-        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
-
-    def set_input_and_output(self):
-        pass
-
-    def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.net_type))
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
-        if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
-        else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape: {}\n'.format(
-                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-            print_info('{} - Output info'.format(self.net_type))
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(
-                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-
-
-class CocosnetModel(BaseModel):
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.net_type = "cocosnet_network"
-        self.adapter = create_adapter(network_info.get('adapter'))
-        super().__init__(network_info, launcher, delayed_model_loading)
-        self.adapter.output_blob = self.output_blob
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -302,23 +174,29 @@ class CocosnetModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         results = []
+        prediction = None
         for current_input in input_data:
             data = self.fit_to_input(current_input)
             if not self.is_dynamic and self.dynamic_inputs:
-                self.reshape_net({k: v.shape for k, v in data.items()})
+                self._reshape_input({k: v.shape for k, v in data.items()})
             prediction = self.exec_network.infer(data)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
 
 
-class GanCheckModel(BaseModel):
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.net_type = "verification_network"
+class GanCheckModel(BaseDLSDKModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.additional_layers = network_info.get('additional_layers')
-        super().__init__(network_info, launcher, delayed_model_loading)
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    @property
+    def inputs(self):
+        if self.network:
+            return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
+        return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
 
     def load_model(self, network_info, launcher, log=False):
-        model, weights = self.auto_model_search(network_info, self.net_type)
+        model, weights = self.automatic_model_search(network_info)
         if weights:
             self.network = launcher.read_network(model, weights)
             for layer in self.additional_layers:
@@ -346,12 +224,12 @@ class GanCheckModel(BaseModel):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
 
-    def predict(self, identifiers, input_data, index_of_key):
+    def predict(self, identifiers, input_data, index_of_key=None):
         results = []
         for data in input_data:
             input_dict = self.fit_to_input(data.value)
             if not self.is_dynamic and self.dynamic_inputs:
-                self.reshape_net({k, v.shape} for k, v in input_dict.items())
+                self._reshape_input({k, v.shape} for k, v in input_dict.items())
             prediction = self.exec_network.infer(input_dict)
             results.append(np.squeeze(prediction[self.output_blob[index_of_key]]))
         return results

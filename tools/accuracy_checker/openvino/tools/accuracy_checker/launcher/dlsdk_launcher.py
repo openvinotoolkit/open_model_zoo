@@ -656,7 +656,10 @@ class DLSDKLauncher(Launcher):
 
     def read_network(self, model, weights):
         if 'read_network' in ie.IECore.__dict__:
-            network = self.ie_core.read_network(model=str(model), weights=str(weights))
+            if weights is None:
+                network = self.ie_core.read_network(model=str(model))
+            else:
+                network = self.ie_core.read_network(model=str(model), weights=str(weights))
         else:
             network = ie.IENetwork(model=str(model), weights=str(weights))
         return network

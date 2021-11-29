@@ -65,18 +65,18 @@ ANNOTATION_CONVERSION_PATHS = {
 }
 
 LIST_ENTRIES_PATHS = {
-        'model': 'models',
-        'weights': 'models',
-        'color_coeff': ['model_attributes', 'models'],
-        'caffe_model': 'models',
-        'caffe_weights': 'models',
-        'tf_model': 'models',
-        'tf_meta': 'models',
-        'mxnet_weights': 'models',
-        'onnx_model': 'models',
-        'kaldi_model': 'models',
-        'saved_model_dir': 'models',
-        'params': 'models'
+    'model': 'models',
+    'weights': 'models',
+    'color_coeff': ['model_attributes', 'models'],
+    'caffe_model': 'models',
+    'caffe_weights': 'models',
+    'tf_model': 'models',
+    'tf_meta': 'models',
+    'mxnet_weights': 'models',
+    'onnx_model': 'models',
+    'kaldi_model': 'models',
+    'saved_model_dir': 'models',
+    'params': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -99,6 +99,7 @@ ACCEPTABLE_MODEL = [
     'saved_model_dir',
     'params'
 ]
+ALLOW_FILE_OR_DIR = ['models']
 
 
 class ConfigReader:
@@ -190,7 +191,7 @@ class ConfigReader:
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
             raise ConfigError(
-                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'. format(
+                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'.format(
                     eval_mode))
         config_checker_func(config)
 
@@ -676,8 +677,8 @@ def filter_modules(config, target_devices, args):
 
 
 def process_config(
-        config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
+    config_item, entries_paths, args, dataset_identifier='datasets',
+    launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         for datasets_config in datasets_configs:
@@ -788,10 +789,14 @@ def merge_entry_paths(keys, value, args, value_id=0):
                 continue
 
             selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
+            prefix_path = selected_argument
             if not selected_argument.is_dir():
-                raise ConfigError('argument: {} should be a directory'.format(argument))
+                if argument in ALLOW_FILE_OR_DIR:
+                    prefix_path = selected_argument.parent
+                else:
+                    raise ConfigError('argument: {} should be a directory'.format(argument))
 
-            if (selected_argument / config_path).exists():
+            if (prefix_path / config_path).exists():
                 break
         value[field] = selected_argument / config_path if selected_argument is not None else config_path
 
@@ -849,7 +854,7 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
     if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
-    if 'use_new_api' in arguments:
+    if 'use_new_api' in arguments and arguments.use_new_api is not None:
         if launcher_entry['framework'].lower() == 'dlsdk' and arguments.use_new_api:
             launcher_entry['framework'] = 'openvino'
         elif launcher_entry['framework'].lower() == 'openvino' and not arguments.use_new_api:
@@ -912,8 +917,8 @@ def merge_device_configs(launcher_entry, device_config_file):
     if not embedded_device_config:
         embedded_device_config = external_device_config
     elif (
-            not isinstance(next(iter(external_device_config.values())), dict)
-            and not isinstance(next(iter(embedded_device_config.values())), dict)
+        not isinstance(next(iter(external_device_config.values())), dict)
+        and not isinstance(next(iter(embedded_device_config.values())), dict)
     ):
         embedded_device_config.update(external_device_config)
     else:

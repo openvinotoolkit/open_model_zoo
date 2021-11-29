@@ -62,7 +62,16 @@ struct ClassificationResult : public ResultBase {
     ClassificationResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
         ResultBase(frameId, metaData) {}
 
-    std::vector<std::pair<unsigned int, std::string>> topLabels;
+    struct Classification {
+        unsigned int id;
+        std::string label;
+        float score;
+
+        Classification(unsigned int id, const std::string& label, float score) :
+            id(id), label(label), score(score) {};
+    };
+
+    std::vector<Classification> topLabels;
 };
 
 struct DetectedObject : public cv::Rect2f {

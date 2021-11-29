@@ -123,7 +123,7 @@ def single_option_cases(key, *args):
 
 
 NATIVE_DEMOS = [
-    CppDemo(name='classification_demo',
+    CppDemo(name='classification_benchmark_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
@@ -140,6 +140,7 @@ NATIVE_DEMOS = [
             ModelArg('googlenet-v1-tf'),
             ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
+            ModelArg('efficientnet-b7-pytorch'),
             ModelArg('mixnet-l'),
             ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
@@ -766,6 +767,37 @@ PYTHON_DEMOS = [
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
         }),
+    )),
+
+    PythonDemo(name='classification_demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+        TestCase(options={
+            '--no_show': None,
+            '-i': DataDirectoryOrigFileNamesArg('classification'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
+        [
+            *single_option_cases('-m',
+                ModelArg('alexnet'),
+                ModelArg('densenet-121-tf'),
+                ModelArg('densenet-169'),
+                ModelArg('googlenet-v1'),
+                ModelArg('googlenet-v1-tf'),
+                ModelArg('googlenet-v3'),
+                ModelArg('googlenet-v3-pytorch'),
+                ModelArg('efficientnet-b7-pytorch'),
+                ModelArg('mixnet-l'),
+                ModelArg('mobilenet-v2-pytorch'),
+                ModelArg('repvgg-a0'),
+                ModelArg('repvgg-b1'),
+                ModelArg('repvgg-b3'),
+                ModelArg('resnet-50-caffe2')),
+
+            TestCase(options={'-m': ModelFileArg('efficientnet-b7-pytorch', 'efficientnet-b7.onnx'),
+                        '--reverse_input_channels': None,
+                        '--mean_values': ['123.675', '116.28', '103.53'],
+                        '--scale_values': ['58.395', '57.12', '57.375']}),
+        ]
     )),
 
     PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
