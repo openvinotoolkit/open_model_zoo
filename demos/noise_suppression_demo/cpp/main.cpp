@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
         slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / 16.0f << " ms" << slog::endl;
-        
+
         //convert fp32 to int16_t
         for(size_t i=0; i < out_wave_s16.size(); ++i) {
             out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
