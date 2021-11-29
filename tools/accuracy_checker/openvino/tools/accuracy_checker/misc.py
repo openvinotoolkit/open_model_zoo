@@ -25,7 +25,7 @@ EVALUATION_MODE = {
 }
 
 
-def get_metric_references(config_path, definitions_path=None, subset=None, additional_info=None, return_header=True):
+def get_metric_references(config_path, definitions_path=None, additional_info=None, return_header=True):
     args = {'config': Path(config_path), 'definitions': Path(definitions_path) if definitions_path else None}
     if additional_info:
         args.update(additional_info)
@@ -36,7 +36,7 @@ def get_metric_references(config_path, definitions_path=None, subset=None, addit
         raise ValueError('Unknown evaluation mode')
     report = []
     for conf in config[mode]:
-        header, template_report = evaluator_class.provide_metric_references(conf, subset)
+        header, template_report = evaluator_class.provide_metric_references(conf)
         report.extend(template_report if isinstance(template_report, list) else [template_report])
     if return_header:
         return header, report
