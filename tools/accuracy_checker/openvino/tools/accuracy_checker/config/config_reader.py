@@ -146,7 +146,9 @@ class ConfigReader:
         definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
-        global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
+        global_config = (
+            read_yaml(arguments.definitions) if 'definitions' in arguments and arguments.definitions else definitions
+        )
 
         return global_config, local_config
 
