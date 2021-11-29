@@ -742,6 +742,12 @@ class DLSDKLauncher(Launcher):
     def _data_to_blob_dyn(layer_rang, data, layout, template=None):
         data_shape = np.shape(data)
         if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
+            if len(data_shape) == len(layout):
+                data = np.transpose(data, layout)
+                if len(template) == layer_rang:
+                    tmp_template = [1, ] + template
+                    new_template = [tmp_template[l_dim] for l_dim in layout][1:]
+                    template = new_template
             data = data[0]
             data_shape = np.shape(data)
         if template is not None:
