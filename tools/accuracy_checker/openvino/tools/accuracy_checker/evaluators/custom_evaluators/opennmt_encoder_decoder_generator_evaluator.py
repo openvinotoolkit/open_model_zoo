@@ -78,7 +78,7 @@ class BaseModel:
     def fit_to_input(self, input_data):
         pass
 
-    def propagate_output(self, output_data):
+    def propagate_output(self, data):
         pass
 
 
@@ -252,7 +252,6 @@ class OpenNMTModel(BaseModel):
             raise ConfigError('network_info should contain encoder, decoder and generator fields')
         self.encoder = create_model('encoder', network_info['encoder'], launcher, delayed_model_loading)
         self.decoder = create_model('decoder', network_info['decoder'], launcher, delayed_model_loading)
-        self.decoder1 = create_model('decoder', network_info['decoder'], launcher, delayed_model_loading)
         self.generator = create_model('generator', network_info['generator'], launcher, delayed_model_loading)
         self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
         self.store_decoder_predictions = network_info['decoder'].get('store_predictions', False)
@@ -291,7 +290,6 @@ class OpenNMTModel(BaseModel):
                     decode_strategy.update_finished()
                     if decode_strategy.done:
                         break
-
                 select_indices = decode_strategy.select_indices.squeeze()
                 if any_finished:
                     self.decoder.reorder_state(select_indices, ('memory', 'mem_len'))
@@ -419,7 +417,7 @@ class CommonDLSDKModel(BaseDLSDKModel, BaseModel):
         return {input_blob: np.array(input_data)}
 
 
-class BeamSearch(object):
+class BeamSearch:
     def __init__(self, config):
         self.batch_size = config.get('batch', 1)
         self.pad = config.get('pad', 1)
@@ -618,7 +616,6 @@ class CommonONNXModel(BaseModel):
     def predict(self, identifiers, input_data, callback=None):
         fitted = self.fit_to_input(input_data)
         names = tuple([blob.name for blob in self.output_blobs])
-        # results = self.inference_session.run(names, fitted)
         results = dict(zip(names, self.inference_session.run(names, fitted)))
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
@@ -651,8 +648,6 @@ class CommonONNXModel(BaseModel):
 
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
-    # input_layers = ['src', 'src_len']
-    # output_layers = ['state.0', 'state.1', 'memory', 'src_len', ]
     input_layers = ['src']
     output_layers = ['state.0', 'state.1', 'memory']
 
