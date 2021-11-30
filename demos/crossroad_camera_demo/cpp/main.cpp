@@ -203,33 +203,28 @@ struct PersonDetection : BaseDetection {
 //        tensor_shape[2] = 1920;
         const ov::Layout tensor_layout{ "NHWC" };
 
+        auto proc = PrePostProcessor(network);
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor(network).
-                          input(InputInfo().
-                              tensor(InputTensorInfo().
-                                  set_element_type(ov::element::u8).
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
 //                                  set_spatial_static_shape(
 //                                      tensor_shape[ov::layout::height_idx(tensor_layout)],
 //                                      tensor_shape[ov::layout::width_idx(tensor_layout)]).
-                                  set_layout(tensor_layout)).
-                              preprocess(PreProcessSteps().
-                                  convert_element_type(ov::element::f32). // WA for CPU plugin
-                                  convert_layout("NCHW"). // WA for CPU plugin
-                                  resize(ResizeAlgorithm::RESIZE_LINEAR)).
-                              network(InputNetworkInfo().
-                                  set_layout("NCHW"))).
-                          output(OutputInfo().
-                              tensor(OutputTensorInfo().
-                                  set_element_type(ov::element::f32))).
-                      build();
+                set_spatial_dynamic_shape().
+                set_layout(tensor_layout);
+            proc.input().preprocess().
+                convert_element_type(ov::element::f32).
+                convert_layout("NCHW").
+                resize(ResizeAlgorithm::RESIZE_LINEAR);
+            proc.input().network().set_layout("NCHW");
+            proc.output().tensor().set_element_type(ov::element::f32);
         } else {
-            network = PrePostProcessor(network).
-                          input(InputInfo().
-                               tensor(InputTensorInfo().
-                                    set_element_type(ov::element::u8).
-                                    set_layout({"NCHW"}))).
-                      build();
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
+                set_layout({ "NCHW" });
         }
+
+        network = proc.build();
 
         return network;
     }
@@ -401,28 +396,24 @@ struct PersonAttribsDetection : BaseDetection {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
 
+        auto proc = PrePostProcessor(network);
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor(network).
-                input(InputInfo().
-                    tensor(InputTensorInfo().
-                        set_element_type(ov::element::u8).
-                        set_spatial_dynamic_shape().
-                        set_layout({ "NHWC "})).
-                preprocess(PreProcessSteps().
-                    convert_element_type(ov::element::f32). // WA for CPU plugin
-                    convert_layout("NCHW"). // WA for CPU plugin
-                    resize(ResizeAlgorithm::RESIZE_LINEAR)).
-                network(InputNetworkInfo().
-                    set_layout("NCHW"))).
-                build();
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
+                set_spatial_dynamic_shape().
+                set_layout({ "NHWC" });
+            proc.input().preprocess().
+                convert_element_type(ov::element::f32).
+                convert_layout("NCHW").
+                resize(ResizeAlgorithm::RESIZE_LINEAR);
+            proc.input().network().set_layout("NCHW");
         } else {
-            network = PrePostProcessor(network).
-                input(InputInfo().
-                    tensor(InputTensorInfo().
-                        set_element_type(ov::element::u8).
-                        set_layout({ "NCHW" }))).
-                build();
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
+                set_layout({ "NCHW" });
         }
+
+        network = proc.build();
 
         inputName = network->input().get_any_name();
         // -----------------------------------------------------------------------------------------------------
@@ -537,28 +528,24 @@ struct PersonReIdentification : BaseDetection {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
 
+        auto proc = PrePostProcessor(network);
         if (FLAGS_auto_resize) {
-            network = PrePostProcessor(network).
-                          input(InputInfo().
-                              tensor(InputTensorInfo().
-                                  set_element_type(ov::element::u8).
-                                  set_spatial_dynamic_shape().
-                                  set_layout({ "NHWC" })).
-                              preprocess(PreProcessSteps().
-                                  convert_element_type(ov::element::f32). // WA for CPU plugin
-                                  convert_layout("NCHW"). // WA for CPU plugin
-                                  resize(ResizeAlgorithm::RESIZE_LINEAR)).
-                              network(InputNetworkInfo().
-                                  set_layout("NCHW"))).
-                      build();
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
+                set_spatial_dynamic_shape().
+                set_layout({ "NHWC" });
+            proc.input().preprocess().
+                convert_element_type(ov::element::f32).
+                convert_layout("NCHW").
+                resize(ResizeAlgorithm::RESIZE_LINEAR);
+            proc.input().network().set_layout("NCHW");
         } else {
-            network = PrePostProcessor(network).
-                          input(InputInfo().
-                              tensor(InputTensorInfo().
-                                  set_element_type(ov::element::u8).
-                                  set_layout({ "NCHW" }))).
-                          build();
+            proc.input().tensor().
+                set_element_type(ov::element::u8).
+                set_layout({ "NCHW" });
         }
+
+        network = proc.build();
 
         inputName = network->input().get_any_name();
         // -----------------------------------------------------------------------------------------------------
