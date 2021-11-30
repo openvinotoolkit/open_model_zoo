@@ -193,7 +193,7 @@ class OpenVINOLauncher(Launcher):
         for infer_inputs in inputs:
             if self._do_reshape:
                 input_shapes = {
-                    self.input_to_tensor_name[layer_name]: data.shape for layer_name, data in infer_inputs.items()
+                    layer_name: data.shape for layer_name, data in infer_inputs.items()
                 }
                 self._reshape_input(input_shapes)
             if self.infer_request is None:
@@ -325,7 +325,7 @@ class OpenVINOLauncher(Launcher):
             del self.exec_network
         if self.infer_request is not None:
             self.infer_request = None
-        self.network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
+        self.network.reshape({self.input_to_tensor_name[k]: PartialShape(shape) for k, shape in shapes.items()})
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         if self.dyn_input_layers and make_dynamic:
             return
