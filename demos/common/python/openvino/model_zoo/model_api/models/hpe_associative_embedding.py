@@ -71,7 +71,6 @@ class HpeAssociativeEmbedding(ImageModel):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.pop('resize_type')
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
