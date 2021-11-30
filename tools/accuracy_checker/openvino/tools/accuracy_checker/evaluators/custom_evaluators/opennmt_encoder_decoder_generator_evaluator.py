@@ -209,10 +209,6 @@ class CommonDLSDKModel(BaseDLSDKModel):
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
         return tuple(results[name] for name in names)
 
-    def release(self):
-        del self.exec_network
-        del self.launcher
-
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
             fitted = {}
