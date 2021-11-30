@@ -73,11 +73,11 @@ int main(int argc, char **argv) {
             delay = -1;
         should_show = (delay >= 0);
 
-        std::string postprocessType = "simple";
+        std::string postprocessKey = "heatmap";
 
         std::unique_ptr<ModelBase> detectionModel;
         if (FLAGS_at == "landmarks") {
-            detectionModel.reset(new LandmarksModel(det_model, false, postprocessType));
+            detectionModel.reset(new LandmarksModel(det_model, false, postprocessKey));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
         for (unsigned frameIdx = 0; ; ++frameIdx) {
-
+            
             detectionModel->preprocess(ImageInputData(frame), req);
             req->Infer();
 
@@ -140,22 +140,21 @@ int main(int argc, char **argv) {
 
             auto result = (detectionModel->postprocess(res))->asRef<LandmarksResult>();
             std::vector<cv::Point2f> landmarks = result.coordinates;
-           
             cv::Size s = frame.size();
             int cols = s.width;
             int lmRadius = static_cast<int>(0.003* cols + 1);
             for (auto const& point : landmarks)
                 cv::circle(frame, point, lmRadius, cv::Scalar(0, 255, 255), -1);
             presenter.drawGraphs(frame);
-
+           
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
             }
             if (should_show) {
                 cv::imshow("dbg", frame);
-                char k = cv::waitKey(delay);
-                if (k == 27)
+                char k = cv::waitKey(0);
+                if (k == 50)
                     break;
                 presenter.handleKey(k);
             }
@@ -164,7 +163,7 @@ int main(int argc, char **argv) {
             if (!frame.data) break;
             if (frame.size() != firstFrameSize)
                 throw std::runtime_error("Can't track objects on images of different size");
-        }
+     }
 
 
         slog::info << presenter.reportMeans() << slog::endl;
