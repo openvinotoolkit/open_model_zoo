@@ -293,7 +293,6 @@ class LanguageModelingAdapter(Adapter):
             if len(token_output.shape) == 3:
                 token_output = np.squeeze(token_output, axis=0)
             result.append(LanguageModelingPrediction(identifier, token_output))
-
         return result
 
     def select_output_blob(self, outputs):
