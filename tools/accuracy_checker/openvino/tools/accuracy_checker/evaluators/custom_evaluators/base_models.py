@@ -233,13 +233,19 @@ class BaseDLSDKModel:
 
 
 class BaseOpenVINOModel(BaseDLSDKModel):
+    def input_tensors_mapping(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        return {inp_node.get_node().friendly_name: inp_node.get_tensor().get_any_name() for inp_node in inputs}
+
     def _reshape_input(self, input_shapes):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
             del self.infer_request
             del self.exec_network
-        self.launcher.reshape_network(self.network, input_shapes)
+        tensor_mapping = self.input_tensors_mapping()
+        input_shapes_for_tensors = {tensor_mapping[name]: shape for name, shape in input_shapes.items()}
+        self.launcher.reshape_network(self.network, input_shapes_for_tensors)
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:
             self.exec_network = None
@@ -322,7 +328,9 @@ class BaseOpenVINOModel(BaseDLSDKModel):
     def infer(self, input_data):
         if not hasattr(self, 'infer_request') or self.infer_request is None:
             self.infer_request = self.exec_network.create_infer_request()
-        outputs = self.infer_request.infer(input_data)
+        tensors_mapping = self.input_tensors_mapping()
+        feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
+        outputs = self.infer_request.infer(feed_dict)
         return {
             out_node.get_node().friendly_name: out_res
             for out_node, out_res in zip(self.exec_network.outputs, outputs)
