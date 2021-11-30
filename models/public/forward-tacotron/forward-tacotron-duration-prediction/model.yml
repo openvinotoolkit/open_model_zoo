@@ -28,6 +28,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,241]
   - --input=input_seq
+  - --layout=input_seq(NS)
   - --output=embeddings,duration
   - --input_model=$dl_dir/forward-tacotron-duration-prediction/forward_tacotron_duration_prediction.onnx
 framework: onnx

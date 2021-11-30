@@ -27,6 +27,7 @@ files:
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.onnx
 model_optimizer_args:
   - --input_shape=[1,4,128,128,128]
+  - --layout [NCDHW]
   - --input_model=$dl_dir/brain-tumor-segmentation-0002.onnx
 framework: onnx
 license: https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE

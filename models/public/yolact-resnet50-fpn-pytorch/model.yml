@@ -97,6 +97,7 @@ conversion_to_onnx_args:
   - --output-names=conf,mask,proto,boxes
 model_optimizer_args:
   - --input=input.1
+  - --layout=input.1(NCHW)
   - --mean_values=input.1[123.675,116.78,103.94]
   - --scale_values=input.1[58.395,57.12,57.375]
   - --reverse_input_channels

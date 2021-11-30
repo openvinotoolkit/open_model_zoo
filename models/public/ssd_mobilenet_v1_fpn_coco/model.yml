@@ -28,6 +28,7 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,640,640,3]
+  - --layout=image_tensor(NHWC)
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
   - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json

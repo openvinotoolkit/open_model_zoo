@@ -103,6 +103,7 @@ conversion_to_onnx_args:
   - --output-names=output
 model_optimizer_args:
   - --input_shape=[1,64,128]
+  - --layout=audio_signal(NCH)
   - --input=audio_signal
   - --output=output
   - --input_model=$conv_dir/quartznet.onnx
