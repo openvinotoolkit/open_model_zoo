@@ -334,7 +334,7 @@ class BertTextClassification(Adapter):
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outputs = self._extract_predictions(raw, frame_meta)
-        if self.classification_out is None:
+        if not self.outputs_checked:
             self.select_output_blob(outputs)
         outputs = outputs[self.classification_out]
         if not self.single_score and outputs.shape[1] != self.num_classes:
@@ -387,7 +387,7 @@ class BERTNamedEntityRecognition(Adapter):
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outputs = self._extract_predictions(raw, frame_meta)
-        if self.outputs_checked:
+        if not self.outputs_checked:
             self.select_output_blob(outputs)
         outputs = outputs[self.classification_out]
         results = []
