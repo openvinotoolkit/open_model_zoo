@@ -20,9 +20,8 @@ from pathlib import Path
 import re
 import warnings
 import numpy as np
-from openvino.ie_api import Core, AsyncInferQueue
-from openvino.pyopenvino import get_version
-from openvino.impl import Type, PartialShape
+from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape
+from openvino.runtime.impl import Type
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
