@@ -127,7 +127,7 @@ class OpenNMTModel(BaseCascadeModel):
             self.decoder.init_state(h, c, memory, src_len)
             self.decoder.tile_state(decode_strategy.beam_size)
 
-            for step in range(decode_strategy.max_length):
+            for _ in range(decode_strategy.max_length):
                 decoder_input = decode_strategy.current_predictions.view().reshape([1, decode_strategy.beam_size, 1])
 
                 decoder_output, _ = self.decoder.predict(identifiers, {'input': decoder_input})
@@ -207,7 +207,7 @@ class CommonDLSDKModel(BaseDLSDKModel):
         results = self.exec_network.infer(input_data)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple([results[name] for name in names])
+        return tuple(results[name] for name in names)
 
     def release(self):
         del self.exec_network
@@ -263,7 +263,7 @@ class BeamSearch:
         self.alive_attn = None
 
         n_paths = self.batch_size * self.beam_size
-        self.forbidden_tokens = [dict() for _ in range(n_paths)]
+        self.forbidden_tokens = [{} for _ in range(n_paths)]
 
         # beam parameters
         self.top_beam_finished = np.zeros([self.batch_size], dtype=np.uint8)
@@ -438,11 +438,11 @@ class CommonONNXModel(BaseONNXModel):
 
     def predict(self, identifiers, input_data, callback=None):
         fitted = self.fit_to_input(input_data)
-        names = tuple([blob.name for blob in self.output_blobs])
+        names = tuple(blob.name for blob in self.output_blobs)
         results = dict(zip(names, self.inference_session.run(names, fitted)))
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple([results[name] for name in names])
+        return tuple(results[name] for name in names)
 
     def fit_to_input(self, input_data):
         return {blob.name: input_data[blob.name] for blob in self.input_blobs}
@@ -470,4 +470,3 @@ class GeneratorONNXModel(CommonONNXModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
-
