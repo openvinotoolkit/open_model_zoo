@@ -17,7 +17,6 @@ import sys
 from pathlib import Path
 from pkginfo import Wheel
 
-
 # Package dependencies can vary depending on the Python version.
 # We thus have to run pip-compile with the lowest Python version that
 # the project supports.
@@ -48,7 +47,6 @@ def pip_compile(target, *sources, upgrade=False):
             *(['--upgrade'] if upgrade else []),
             '--no-header', '--quiet', '-o', target, '--', *map(str, sources)],
         check=True, cwd=str(repo_root))
-
 
 def update_openvino_dev_reqs():
     package_downloading_stdout = subprocess.run(
