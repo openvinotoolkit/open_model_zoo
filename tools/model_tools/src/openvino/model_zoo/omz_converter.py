@@ -164,7 +164,7 @@ def num_jobs_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
 
-def main(argv):
+def converter(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with downloaded model files')
@@ -291,5 +291,9 @@ def main(argv):
                 reporter.print(failed_model_name)
             sys.exit(1)
 
+def main():
+    converter(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

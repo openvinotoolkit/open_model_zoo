@@ -62,7 +62,7 @@ class Model:
                  '--cache_dir=' + str(cache_dir),
                  '--precisions=' + str(precision)]
 
-        omz_downloader.main(flags)
+        omz_downloader.download(flags)
 
         description = '{}\n\n    License: {}'.format(model.description, model.license_url)
         task_type = model.task_type
@@ -80,7 +80,7 @@ class Model:
         subdirectory = model.subdirectory
 
         if not os.path.exists(model_path) or not os.path.exists(bin_path):
-            omz_converter.main(['--name=' + model_name, '--precisions=' + precision,
+            omz_converter.converter(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
         return cls(name, model_path, description, task_type, subdirectory)
 

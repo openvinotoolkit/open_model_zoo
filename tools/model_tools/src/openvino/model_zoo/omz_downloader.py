@@ -39,7 +39,7 @@ def positive_int_arg(value_str):
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
 
-def main(argv):
+def download(argv):
     parser = DownloaderArgumentParser()
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='download only models whose names match at least one of the specified patterns')
@@ -105,5 +105,9 @@ def main(argv):
             sys.exit(1)
 
 
+def main():
+    download(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
