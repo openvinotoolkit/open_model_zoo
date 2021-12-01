@@ -183,7 +183,8 @@ class StatefulModel:
     def init_state(self, *args):
         self.state = dict(zip(self.state_names, args))
 
-    def preprocess_state(self, name, value):
+    @staticmethod
+    def preprocess_state(name, value):
         return value
 
     def fit_to_input(self, input_data):
@@ -400,7 +401,8 @@ class CommonOpenNMTDecoder(StatefulModel):
             if name in names:
                 self.state[name] = np.take(self.state[name], indices, axis=self.beam_dim[idx])
 
-    def preprocess_state(self, name, value):
+    @staticmethod
+    def preprocess_state(name, value):
         return value.squeeze(0) if name == "input_feed" else value
 
 
