@@ -158,7 +158,7 @@ protected:
         if (wait_gap) {
             const auto cur_step = std::chrono::steady_clock::now() - read_time;
             const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step).count();
-            const int time_step = int(1000.f / float(source_fps));
+            const int time_step = int(1000. / source_fps);
             if (gap < time_step) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap));
             }
