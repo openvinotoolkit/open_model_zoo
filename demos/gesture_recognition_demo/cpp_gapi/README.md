@@ -24,7 +24,7 @@ The demo workflow is the following:
 
 ## Creating a Gallery for gestures window
 
-To show gestures on a additional window, the demo needs a gallery of reference videos. Each video should contain an appropriate name of gesture. You can create the gallery from an arbitrary list of images:
+The gallery of sample videos can be created to show the sample gestures on an additional window:
 
 1. Put videos containing gestures to a separate empty folder. Each video must have only one gesture.
 2. Run the `python3 <omz_dir>/demos/gesture_recognition_demo/cpp_gapi/create_list.py --classes_map <path_to_a_file_with_gesture_classes> --gesture_storage <path_to_directory_with_gesture_videos>` command, which will create a `gesture_gallery.json` file with list of gestures and paths to appropriate videos.

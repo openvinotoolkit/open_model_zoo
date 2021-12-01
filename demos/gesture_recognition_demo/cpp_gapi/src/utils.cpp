@@ -7,9 +7,7 @@
 #include "utils.hpp"
 
 cv::Scalar getNetShape(const std::string& path) {
-    InferenceEngine::Core ie;
-    const auto network = ie.ReadNetwork(path);
-    const auto layerName = network.getInputsInfo().begin()->first;
+    const auto network = InferenceEngine::Core{}.ReadNetwork(path);
     const auto layerData = network.getInputsInfo().begin()->second;
     const auto layerDims = layerData->getTensorDesc().getDims();
 
@@ -20,7 +18,6 @@ cv::Scalar getNetShape(const std::string& path) {
                       double(layerDims[3 + step]));
 }
 
-// FIXME: cv::FileStorage can't open this .json files
 void erase(std::string& str, const char symbol) {
     str.erase(std::remove(str.begin(), str.end(), symbol), str.end());
 };

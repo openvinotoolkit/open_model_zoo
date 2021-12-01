@@ -20,7 +20,7 @@ import os
 import json
 import argparse
 
-parser = argparse.ArgumentParser(description='This is')
+parser = argparse.ArgumentParser(description='')
 
 parser.add_argument('--gesture_storage',
                     help='Path to the gesture directory')
