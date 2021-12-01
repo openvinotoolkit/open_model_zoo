@@ -5,6 +5,7 @@
 #pragma once
 
 #include <utils/images_capture.h>
+#include <utils/slog.hpp>
 #include <opencv2/gapi.hpp>
 #include <chrono>
 #include <thread>
@@ -93,7 +94,12 @@ public:
                              const cv::Size& frame_size,
                              const int batch_size,
                              const float batch_fps)
-        : cap(cap), producer(batch_size, batch_fps) {
+        : cap(cap), producer(batch_size, batch_fps), source_fps(cap->fps()) {
+        if (source_fps <= 0.) {
+            source_fps = 30.;
+            wait_gap = true;
+            slog::warn << "Got a non-positive value as FPS of the input. Interpret it as 30 FPS" << slog::endl;
+        }
         /** Create and get first image for batch **/
         GAPI_Assert(first_batch.empty());
         if (batch_size == 0 || batch_size == 1) {
@@ -119,6 +125,8 @@ public:
 protected:
     std::shared_ptr<ImagesCapture> cap; // wrapper for cv::VideoCapture
     BatchProducer producer; // class batch-construcor
+    double source_fps = 0.; // input source framerate
+    bool wait_gap = false; // waiting for fast frame reading (stop main thread when got a non-positive FPS value)
     bool first_pulled = false; // is first already pulled
     std::vector<cv::Mat> first_batch; // batch from constructor
     cv::Mat fast_frame; // frame from cv::VideoCapture
@@ -147,6 +155,14 @@ protected:
 
         /** Put fast frame to the batch **/
         producer.fillFastFrame(fast_frame);
+        if (wait_gap) {
+            const auto cur_step = std::chrono::steady_clock::now() - read_time;
+            const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step).count();
+            const int time_step = int(1000.f / float(source_fps));
+            if (gap < time_step) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap));
+            }
+        }
 
         /** Put pulled batch to GRunArg data **/
         cv::detail::VectorRef ref(std::move(producer.getBatch()));

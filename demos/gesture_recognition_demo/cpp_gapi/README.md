@@ -22,9 +22,9 @@ The demo workflow is the following:
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
-## Creating a Gallery for gestures window
+## Creating a Gallery for Gestures Window
 
-The gallery of sample videos can be created to show the sample gestures on an additional window:
+The gallery of sample videos and list of paths to gesture videos must be created to show the sample gestures on an additional window:
 
 1. Put videos containing gestures to a separate empty folder. Each video must have only one gesture.
 2. Run the `python3 <omz_dir>/demos/gesture_recognition_demo/cpp_gapi/create_list.py --classes_map <path_to_a_file_with_gesture_classes> --gesture_storage <path_to_directory_with_gesture_videos>` command, which will create a `gesture_gallery.json` file with list of gestures and paths to appropriate videos.
