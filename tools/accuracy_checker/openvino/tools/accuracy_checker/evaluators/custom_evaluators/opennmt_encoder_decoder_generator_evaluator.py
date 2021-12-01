@@ -117,12 +117,12 @@ class OpenNMTModel(BaseCascadeModel):
             decode_strategy = BeamSearch(self.decoder.network_info)
 
             src_len = np.array([len(data)])
-            h, c, memory = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
+            h, c, memory, raw_outputs = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
                                                               'src_len': src_len})
             if encoder_callback:
-                encoder_callback((h, c, memory, src_len))
+                encoder_callback(raw_outputs)
             if self.store_encoder_predictions:
-                self._encoder_predictions.append((h, c, memory, src_len))
+                self._encoder_predictions.append((h, c, memory))
 
             self.decoder.init_state(h, c, memory, src_len)
             self.decoder.tile_state(decode_strategy.beam_size)
@@ -130,8 +130,13 @@ class OpenNMTModel(BaseCascadeModel):
             for _ in range(decode_strategy.max_length):
                 decoder_input = decode_strategy.current_predictions.view().reshape([1, decode_strategy.beam_size, 1])
 
-                decoder_output, _ = self.decoder.predict(identifiers, {'input': decoder_input})
-                log_probs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})[0]
+                decoder_output, _, raw_outputs = self.decoder.predict(identifiers, {'input': decoder_input})
+                if encoder_callback:
+                    encoder_callback(raw_outputs)
+
+                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})
+                if encoder_callback:
+                    encoder_callback(raw_outputs)
 
                 decode_strategy.advance(log_probs)
                 any_finished = decode_strategy.is_finished.any()
@@ -207,7 +212,7 @@ class CommonDLSDKModel(BaseDLSDKModel):
         results = self.exec_network.infer(input_data)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(results[name] for name in names)
+        return tuple(results[name] for name in names) + (results,)
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
@@ -438,7 +443,7 @@ class CommonONNXModel(BaseONNXModel):
         results = dict(zip(names, self.inference_session.run(names, fitted)))
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(results[name] for name in names)
+        return tuple(results[name] for name in names) + (results,)
 
     def fit_to_input(self, input_data):
         return {blob.name: input_data[blob.name] for blob in self.input_blobs}
