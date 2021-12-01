@@ -30,7 +30,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api.models import OutputTransform, SegmentationModel
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, OvmsAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -117,7 +117,7 @@ def build_argparser():
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -187,9 +187,8 @@ def main():
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Connecting to remote model: {}'.format(args.model))
-        model_adapter = RemoteAdapter(args.model)
+    elif args.adapter == 'ovms':
+        model_adapter = OvmsAdapter(args.model)
 
     model = SegmentationModel.create_model(args.architecture_type, model_adapter, {'path_to_labels': args.labels})
     if args.architecture_type == 'segmentation':

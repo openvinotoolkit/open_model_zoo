@@ -28,7 +28,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api.models import Deblurring
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, OvmsAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -47,7 +47,7 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
@@ -93,9 +93,8 @@ def main():
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Connecting to remote model: {}'.format(args.model))
-        model_adapter = RemoteAdapter(args.model)
+    elif args.adapter == 'ovms':
+        model_adapter = OvmsAdapter(args.model)
 
     start_time = perf_counter()
     frame = cap.read()

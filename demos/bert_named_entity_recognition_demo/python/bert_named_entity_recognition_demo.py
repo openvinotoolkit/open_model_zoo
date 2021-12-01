@@ -31,7 +31,7 @@ from html_reader import get_paragraphs
 from model_api.models import BertNamedEntityRecognition
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, OvmsAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -51,7 +51,7 @@ def build_argparser():
                       action='append',
                       required=True, type=str)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
@@ -109,9 +109,8 @@ def main():
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Connecting to remote model: {}'.format(args.model))
-        model_adapter = RemoteAdapter(args.model)
+    elif args.adapter == 'ovms':
+        model_adapter = OvmsAdapter(args.model)
 
     model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names})
     if max_sentence_length > model.max_length:

@@ -273,6 +273,72 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server).
+
+Model Server is distributed as docker image, so you can pull it from Docker Hub with:
+
+```
+docker pull openvino/model_server
+```
+
+Use instruction from "Preparing to Run" section to download and convert the model and then place model files in the following directory structure:
+
+```
+<model_directory>
+└── <version_directory>
+    ├── model.bin
+    └── model.xml
+```
+
+For example, for face detection model, it could look like this:
+
+```
+face_detection
+└── 1
+    ├── face-detection-retail-0004.bin
+    └── face-detection-retail-0004.xml
+```
+
+Now you can run OpenVINO Model Server:
+```
+docker run -d -u $(id -u):$(id -g) -v <model_directory>:/model -p 9000:9000 openvino/model_server:latest \
+--model_path /model --model_name object_detection --port 9000
+```
+
+Above command will mount `<model_directory>` path on the host filesystem to the model server container, so the OVMS can load and serve the model. 
+
+**Note**: `<model_directory>` should indicate model catalog (**not** the one with specific version).
+
+Once the server has been launched it will provide inference service with the model called "object_detection" on port 9000. 
+
+To run the demo, you would have to provide `--adapter ovms` option and modify `-m` parameter to indicate model inference service instead of the model files. Model parameter for OVMS adapter follows this schema:
+
+```<service_address>/models/<model_name>[:<model_option>]```
+
+- `<service_address>` - OVMS gRPC service address in form `<address>:<port>`
+- `<model_name>` - name of the target model (the one specified by `model_name` parameter in the model server startup command)
+- `<model_version>` *(optional)* - version of the target model (default: latest)
+ 
+ Assuming that model server is running on the same machine as the demo, for above `docker run` command the correct value of `-m` parameter would be:
+
+`localhost:9000/models/object_detection`
+
+**Note**: While using `--adapter ovms`, inference options like: `-nireq`, `-nstreams` `-nthreads` as well as device specification with `-d` will be ignored.
+These values can be modified in OpenVINO Model Server configuration. See [model server configuration parameters](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md#configuration-parameters) for more details.
+
+Finally the command to run the demo can look like this:
+
+```sh
+python3 object_detection_demo.py \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m localhost:9000/models/object_detection \
+  -at ssd \
+  --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt \
+  --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).

@@ -22,12 +22,13 @@ except ImportError:
 
 import re
 import numpy as np
+import logging as log
 from .model_adapter import ModelAdapter, Metadata
 
 
-class RemoteAdapter(ModelAdapter):
+class OvmsAdapter(ModelAdapter):
     """
-    Class that allows working with Remote OpenVino Model Server model
+    Class that allows working with models served by the OpenVINO Model Server
     """
 
     tf2ov_precision = {
@@ -102,13 +103,16 @@ class RemoteAdapter(ModelAdapter):
         if ovmsclient_absent:
             raise ImportError("The ovmsclient package is not installed")
 
-        service_url, model_name, model_version = RemoteAdapter.parse_model_arg(target_model)
+        log.info('Connecting to remote model: {}'.format(target_model))
+        service_url, model_name, model_version = OvmsAdapter.parse_model_arg(target_model)
         self.model_name = model_name
         self.model_version = model_version          
         self.client = ovmsclient.make_grpc_client(url=service_url)
         # Ensure the model is available
         if not self._is_model_available():
-            raise RuntimeError("Model not found or is not in available state")
+            model_version_str = "latest" if self.model_version == 0 else str(self.model_version)
+            raise RuntimeError("Requested model: {}, version: {}, has not been found or is not " 
+                "in available state".format(self.model_name, model_version_str))
 
         self.metadata = self.client.get_model_metadata(model_name=self.model_name,
                                                        model_version=self.model_version)
