@@ -21,7 +21,7 @@ from ..config import PathField, ConfigError, StringField, NumberField, ListField
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters, convert_model
 from ..logging import warning, print_info
-from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config, string_to_tuple
+from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config
 
 try:
     from openvino.inference_engine import known_plugins  # pylint:disable=W9902
@@ -38,28 +38,6 @@ MULTI_DEVICE_KEYWORD = 'MULTI:'
 NIREQ_REGEX = r"(\(\d+\))"
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
-
-
-def parse_partial_shape(partial_shape):
-    ps = str(partial_shape)
-    preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
-    if '[' not in preprocessed:
-        return string_to_tuple(preprocessed, casting_type=int)
-    shape_list = []
-    s_pos = 0
-    e_pos = len(preprocessed)
-    while s_pos >= e_pos:
-        open_brace = preprocessed.find('[', s_pos, e_pos)
-        if open_brace == -1:
-            shape_list.extend(string_to_tuple(preprocessed[s_pos:], casting_type=int))
-            break
-        if open_brace != s_pos:
-            shape_list.extend(string_to_tuple(preprocessed[:open_brace], casting_type=int))
-        close_brace = preprocessed.find(']', open_brace, e_pos)
-        shape_range = preprocessed[open_brace + 1:close_brace]
-        shape_list.append(string_to_tuple(shape_range, casting_type=int))
-        s_pos = min(close_brace + 2, e_pos)
-    return shape_list
 
 
 class CPUExtensionPathField(PathField):

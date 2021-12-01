@@ -17,7 +17,7 @@ import heapq
 import math
 import numpy as np
 from .asr_encoder_prediction_joint_evaluator import ASREvaluator
-from .base_models import create_model, BaseCascadeModel, BaseDLSDKModel, BaseONNXModel
+from .base_models import create_model, BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...utils import generate_layer_name, contains_all, contains_any
 from ...config import ConfigError
@@ -261,10 +261,44 @@ class CommonDLSDKModel(BaseDLSDKModel):
         raise NotImplementedError
 
 
+class CommonOpenVINOModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.select_inputs_outputs(network_info)
+        self.reset()
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def set_input_and_output(self):
+        inputs = self.exec_network.inputs if self.exec_network is not None else self.network.inputs
+        input_blob = next(iter(inputs)).get_node().friendly_name
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if with_prefix != self.with_prefix:
+            self.input_names = [
+                generate_layer_name(
+                    inp_name, self.default_model_suffix + '_', with_prefix) for inp_name in self.input_names
+            ]
+            self.output_names = [
+                generate_layer_name(
+                    out_name, self.default_model_suffix + '_', with_prefix) for out_name in self.output_names
+            ]
+            self.with_prefix = with_prefix
+
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
+
+
 class DLSDKEncoder(Encoder, CommonDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['input_0', 'input_1', 'input_2']
         self.default_outputs = ['output_0', 'output_1', 'output_2']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class OVEncoder(Encoder, CommonOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_inputs = ['input_0', 'input_1', 'input_2']
+        self.default_outputs = ['output_0/sink_port_0', 'output_1/sink_port_0', 'output_2/sink_port_0']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -275,10 +309,24 @@ class DLSDKDecoder(Decoder, CommonDLSDKModel):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
+class OVDecoder(Decoder, CommonOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_inputs = ['input_0', 'input_1', 'input_2']
+        self.default_outputs = ['output_0/sink_port_0', 'output_1/sink_port_0', 'output_2/sink_port_0']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
 class DLSDKJoint(Joint, CommonDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['0', '1']
         self.default_outputs = ['8']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class OVJoint(Joint, CommonOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_inputs = ['0', '1']
+        self.default_outputs = ['8/sink_port']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -352,14 +400,17 @@ class ASRModel(BaseCascadeModel):
             raise ConfigError('network_info should contain encoder, prediction and joint fields')
         self._decoder_mapping = {
             'dlsdk': DLSDKDecoder,
+            'openvino': OVDecoder,
             'onnx_runtime': ONNXDecoder
         }
         self._encoder_mapping = {
             'dlsdk': DLSDKEncoder,
+            'openvino': OVEncoder,
             'onnx_runtime': ONNXEncoder
         }
         self._joint_mapping = {
             'dlsdk': DLSDKJoint,
+            'openvino': OVJoint,
             'onnx_runtime': ONNXJoint
         }
         self.encoder = create_model(network_info['encoder'], launcher, self._encoder_mapping, 'encoder',

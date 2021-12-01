@@ -18,7 +18,7 @@ from functools import partial
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel, create_model
+from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...config import ConfigError
 from ...utils import contains_all, extract_image_representations
 from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
@@ -109,7 +109,8 @@ class BaseSequentialModel(BaseCascadeModel):
             if not contains_all(network_info, ['recognizer_encoder', 'recognizer_decoder']):
                 raise ConfigError('network_info should contain encoder and decoder fields')
         self._recognizer_mapping = {
-            'dlsdk': RecognizerDLSDKModel
+            'dlsdk': RecognizerDLSDKModel,
+            'openvino': RecognizerOVModel,
         }
         self.recognizer_encoder = create_model(network_info['recognizer_encoder'], launcher, self._recognizer_mapping,
                                                'encoder', delayed_model_loading=delayed_model_loading)
@@ -306,6 +307,19 @@ class RecognizerDLSDKModel(BaseDLSDKModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
         return self.exec_network.infer(input_data)
+
+
+class RecognizerOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix,
+                 delayed_model_loading=False, inputs_mapping=None, outputs_mapping=None):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.inputs_mapping = inputs_mapping
+        self.outputs_mapping = outputs_mapping
+
+    def predict(self, identifiers, input_data):
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
+        return self.infer(input_data)
 
 
 MODEL_TYPES = {

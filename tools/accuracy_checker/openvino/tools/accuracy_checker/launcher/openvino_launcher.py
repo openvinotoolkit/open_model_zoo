@@ -27,7 +27,6 @@ from .dlsdk_launcher_config import (
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
-    parse_partial_shape,
     automatic_model_search
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
@@ -39,6 +38,7 @@ from ..utils import (
     contains_any,
     string_to_tuple,
     get_or_parse_value,
+    parse_partial_shape,
 )
 from .launcher import Launcher
 from ..logging import print_info
@@ -330,6 +330,11 @@ class OpenVINOLauncher(Launcher):
             return
         self.exec_network = self.ie_core.compile_model(self.network, self.device)
 
+    @staticmethod
+    def reshape_network(network, shapes):
+        network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
+        return network
+
     def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
@@ -535,7 +540,7 @@ class OpenVINOLauncher(Launcher):
             self._set_input_shape()
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
             if log:
-                self._print_input_output_info()
+                self.print_input_output_info(self.network if self.network is not None else self.exec_network)
             if preprocessing:
                 self._set_preprocess(preprocessing)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
@@ -549,7 +554,7 @@ class OpenVINOLauncher(Launcher):
         self._set_input_shape()
         self.try_to_set_default_layout()
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
-        self._print_input_output_info()
+        self.print_input_output_info(self.network if self.network is not None else self.exec_network)
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
         if self.network:
@@ -794,14 +799,14 @@ class OpenVINOLauncher(Launcher):
             feed_dict[lstm_var] = input_data
         return feed_dict
 
-    def _print_input_output_info(self):
-        print_info('Input info:')
-        if self.network:
-            network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
+    @staticmethod
+    def print_input_output_info(network, prefix=None):
+        if prefix:
+            print_info('{} - Input info:'.format(prefix))
         else:
-            network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
+            print_info('Input info:')
+        network_inputs = network.inputs
+        network_outputs = network.outputs
         for input_info in network_inputs:
             input_node = input_info.get_node()
             print_info('\tLayer name: {}'.format(input_node.friendly_name))
@@ -815,7 +820,6 @@ class OpenVINOLauncher(Launcher):
             print_info('\tprecision: {}'.format(precision))
             shape = parse_partial_shape(out_node.get_output_partial_shape(0))
             print_info('\tshape: {}\n'.format(shape))
-            self._output_precisions[out_node.friendly_name] = format_map[precision]
 
     def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
