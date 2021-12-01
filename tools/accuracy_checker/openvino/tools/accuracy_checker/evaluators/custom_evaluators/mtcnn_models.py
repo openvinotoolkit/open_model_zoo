@@ -22,7 +22,9 @@ import numpy as np
 
 from ...preprocessor import PreprocessingExecutor
 from ...config import ConfigError
-from ...utils import contains_any, extract_image_representations, read_pickle, get_path, parse_partial_shape
+from ...utils import (
+    contains_any, extract_image_representations, read_pickle, get_path, parse_partial_shape, generate_layer_name
+)
 from .mtcnn_evaluator_utils import cut_roi, calibrate_predictions, nms
 from ...logging import print_info
 from ...launcher import InputFeeder
@@ -486,9 +488,6 @@ class DLSDKModelMixin:
                 output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
 
     def update_input_output_info(self, model_prefix):
-        def generate_name(prefix, with_prefix, layer_name):
-            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
         if model_prefix is None:
             return
         config_inputs = self.model_info.get('inputs', [])
@@ -498,13 +497,13 @@ class DLSDKModelMixin:
             if config_with_prefix == network_with_prefix:
                 return
             for c_input in config_inputs:
-                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+                c_input['name'] = generate_layer_name(c_input['name'], model_prefix, network_with_prefix)
             self.model_info['inputs'] = config_inputs
         config_outputs = self.model_info['outputs']
         for key, value in config_outputs.items():
             config_with_prefix = value.startswith(model_prefix)
             if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+                config_outputs[key] = generate_layer_name(value, model_prefix, network_with_prefix)
         self.model_info['outputs'] = config_outputs
 
 
@@ -652,9 +651,6 @@ class OVModelMixin(BaseOpenVINOModel):
         self.infer_request = None
 
     def update_input_output_info(self, model_prefix):
-        def generate_name(prefix, with_prefix, layer_name):
-            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
         if model_prefix is None:
             return
         config_inputs = self.model_info.get('inputs', [])
@@ -664,13 +660,13 @@ class OVModelMixin(BaseOpenVINOModel):
             if config_with_prefix == network_with_prefix:
                 return
             for c_input in config_inputs:
-                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+                c_input['name'] = generate_layer_name(c_input['name'], model_prefix, network_with_prefix)
             self.model_info['inputs'] = config_inputs
         config_outputs = self.model_info['outputs']
         for key, value in config_outputs.items():
             config_with_prefix = value.startswith(model_prefix)
             if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+                config_outputs[key] = generate_layer_name(value, model_prefix, network_with_prefix)
         self.model_info['outputs'] = config_outputs
 
 

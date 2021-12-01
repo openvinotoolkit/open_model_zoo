@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, parse_partial_shape
+from ...utils import contains_all, parse_partial_shape, generate_layer_name
 
 
 scale = 255.0/32768.0
@@ -39,10 +39,6 @@ def lin2ulaw(x):
     u = (s*(128*np.log(1+scale*x)/np.log(256)))
     u = np.clip(128 + np.round(u), 0, 255)
     return u.astype('int16')
-
-
-def generate_name(prefix, with_prefix, layer_name):
-    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
 
 
 class SequentialModel(BaseCascadeModel):
@@ -135,9 +131,9 @@ class EncoderModel:
         return outs, features, feature_chunk_size
 
     def update_inputs_outputs_info(self, with_prefix):
-        self.feature_input = generate_name(self.default_model_suffix+'_', with_prefix, self.feature_input)
-        self.periods_input = generate_name(self.default_model_suffix+'_', with_prefix, self.periods_input)
-        self.output = generate_name(self.default_model_suffix+'_', with_prefix, self.output)
+        self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
+        self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
+        self.output = generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -245,13 +241,13 @@ class DecoderModel:
 
     def update_inputs_outputs_info(self, with_prefix):
         prefix = self.default_model_suffix + '_'
-        self.input1 = generate_name(prefix, with_prefix, self.input1)
-        self.input2 = generate_name(prefix, with_prefix, self.input2)
-        self.rnn_input1 = generate_name(prefix, with_prefix, self.rnn_input1)
-        self.rnn_input2 = generate_name(prefix, with_prefix, self.rnn_input2)
-        self.output = generate_name(prefix, with_prefix, self.output)
-        self.rnn_output1 = generate_name(prefix, with_prefix, self.rnn_output1)
-        self.rnn_output2 = generate_name(prefix, with_prefix, self.rnn_output2)
+        self.input1 = generate_layer_name(self.input1, prefix, with_prefix)
+        self.input2 = generate_layer_name(self.input2, prefix, with_prefix)
+        self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
+        self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
+        self.output = generate_layer_name(self.output, prefix, with_prefix)
+        self.rnn_output1 = generate_layer_name(self.rnn_output1, prefix, with_prefix)
+        self.rnn_output2 = generate_layer_name(self.rnn_output2, prefix, with_prefix)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

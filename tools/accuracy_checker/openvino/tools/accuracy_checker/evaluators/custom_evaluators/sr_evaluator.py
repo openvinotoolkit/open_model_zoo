@@ -24,10 +24,6 @@ from ...config import ConfigError
 from ...utils import contains_all, contains_any, extract_image_representations, parse_partial_shape
 
 
-def generate_name(prefix, with_prefix, layer_name):
-    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
-
 class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, model, orig_config):
         super().__init__(dataset_config, launcher, orig_config)

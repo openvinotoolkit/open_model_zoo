@@ -20,7 +20,7 @@ import numpy as np
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations
+from ...utils import contains_all, extract_image_representations, generate_layer_name
 from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
 
 
@@ -134,19 +134,20 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
-        def generate_name(prefix, with_prefix, layer_name):
-            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
         with_prefix = next(iter(self.recognizer_encoder.network.input_info)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
-                self.recognizer_encoder.inputs_mapping[input_k] = generate_name('encoder_', with_prefix, input_name)
+                self.recognizer_encoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'encoder_',
+                                                                                      with_prefix)
             for out_k, out_name in self.recognizer_encoder.outputs_mapping.items():
-                self.recognizer_encoder.outputs_mapping[out_k] = generate_name('encoder_', with_prefix, out_name)
+                self.recognizer_encoder.outputs_mapping[out_k] = generate_layer_name(out_name, 'encoder_',
+                                                                                     with_prefix)
             for input_k, input_name in self.recognizer_decoder.inputs_mapping.items():
-                self.recognizer_decoder.inputs_mapping[input_k] = generate_name('decoder_', with_prefix, input_name)
+                self.recognizer_decoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'decoder_',
+                                                                                      with_prefix)
             for out_k, out_name in self.recognizer_decoder.outputs_mapping.items():
-                self.recognizer_decoder.outputs_mapping[out_k] = generate_name('decoder_', with_prefix, out_name)
+                self.recognizer_decoder.outputs_mapping[out_k] = generate_layer_name(out_name, 'decoder_',
+                                                                                     with_prefix)
         self.with_prefix = with_prefix
 
     def predict(self, identifiers, input_data):
