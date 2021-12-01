@@ -4,16 +4,19 @@
 This script updates all of the requirements-*.txt files in this directory
 with the most recent package versions.
 
-It uses pip-compile (https://github.com/jazzband/pip-tools), so install that
-before running it.
+It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo, 
+so install these dependencies before running it.
 """
 
 import argparse
 import os
+import re
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
 
 from pathlib import Path
+from pkginfo import Wheel
+
 
 # Package dependencies can vary depending on the Python version.
 # We thus have to run pip-compile with the lowest Python version that
@@ -46,6 +49,19 @@ def pip_compile(target, *sources, upgrade=False):
             '--no-header', '--quiet', '-o', target, '--', *map(str, sources)],
         check=True, cwd=str(repo_root))
 
+
+def update_openvino_dev_reqs():
+    package_downloading_stdout = subprocess.run(
+        [sys.executable, '-m', 'pip', 'download', 'openvino-dev', '--no-deps'],
+        check=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
+
+    wheel_name = re.search(r'openvino\S*\.whl', package_downloading_stdout).group(0)
+    wheel = Wheel(wheel_name)
+    reqs_list = sorted(wheel.requires_dist)
+
+    with open("requirements-openvino-dev.in", "w", encoding="UTF-8") as f:
+        f.write("\n".join(reqs_list) + "\n")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--upgrade', action='store_true', help='Bump package versions')
@@ -58,6 +74,8 @@ def main():
         sys.exit("run OpenVINO toolkit's setupvars.sh before this")
 
     openvino_dir = Path(os.environ['INTEL_OPENVINO_DIR'])
+
+    update_openvino_dev_reqs()
 
     def pc(target, *sources):
         pip_compile(target, *sources, upgrade=args.upgrade)

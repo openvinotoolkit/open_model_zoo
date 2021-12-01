@@ -4,7 +4,7 @@ addict==2.4.0
     # via -r ci/requirements-openvino-dev.in
 certifi==2021.10.8
     # via requests
-charset-normalizer==2.0.7
+charset-normalizer==2.0.8
     # via requests
 click==8.0.3
     # via nltk
@@ -28,7 +28,7 @@ hyperopt==0.1.2
     # via -r ci/requirements-openvino-dev.in
 idna==3.3
     # via requests
-imageio==2.11.1
+imageio==2.13.1
     # via scikit-image
 importlib-metadata==4.8.2
     # via click
@@ -90,7 +90,7 @@ py-cpuinfo==8.0.0
     # via -r ci/requirements-openvino-dev.in
 pydicom==2.2.2
     # via -r ci/requirements-openvino-dev.in
-pymongo==3.12.1
+pymongo==4.0
     # via hyperopt
 pyparsing==3.0.6
     # via
@@ -145,7 +145,7 @@ tqdm==4.62.3
     #   -r ci/requirements-openvino-dev.in
     #   hyperopt
     #   nltk
-typing-extensions==4.0.0
+typing-extensions==4.0.1
     # via importlib-metadata
 urllib3==1.26.7
     # via requests
