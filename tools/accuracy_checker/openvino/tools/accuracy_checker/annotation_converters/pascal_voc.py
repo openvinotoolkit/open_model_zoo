@@ -69,6 +69,7 @@ def prepare_detection_labels(dataset_meta, has_background=True):
 
     return reversed_label_map
 
+
 def syg_prepare_detection_labels(dataset_meta, has_background=True):
     labels_shift = 1 if has_background else 0
     if dataset_meta:
@@ -152,13 +153,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
-        meta = {
-            'label_map': self.dataset_meta.get('label_map', dict(enumerate(_VOC_CLASSES_SEGMENTATION))),
-            'background_label': 0,
-            'segmentation_colors': self.dataset_meta.get('segmentation_colors', _SEGMENTATION_COLORS)
-        }
-
-        return ConverterReturn(annotations, meta, content_check_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_check_errors)
 
     def find_images(self, image_id):
         relative_image_subdir = ''
@@ -181,6 +176,17 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
             mask_file = masks[0].name if not relative_image_subdir else relative_image_subdir + '/' + masks[0].name
         return image_file, mask_file
 
+    def get_meta(self):
+        label_map = self.dataset_meta.get('label_map')
+        if not label_map and 'labels' in self.dataset_meta:
+            label_map = dict(enumerate(self.dataset_meta['labels']))
+        label_map = verify_label_map(label_map or dict(enumerate(_VOC_CLASSES_SEGMENTATION)))
+        meta = {
+            'label_map': label_map,
+            'background_label': 0,
+            'segmentation_colors': self.dataset_meta.get('segmentation_colors', _SEGMENTATION_COLORS)
+        }
+        return meta
 
     @staticmethod
     def read_labelmap(input_file):
@@ -231,9 +237,9 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        class_to_ind = prepare_detection_labels(self.dataset_meta, self.has_background)
         content_check_errors = [] if check_content else None
-
+        meta = self.get_meta()
+        class_to_ind = reverse_label_map(meta['label_map'])
         detections = []
         image_set = read_txt(self.image_set_file, sep=None)
         num_iterations = len(image_set)
@@ -271,89 +277,23 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
+        return ConverterReturn(detections, meta, content_check_errors)
+
+    def get_meta(self):
+        class_to_ind = prepare_detection_labels(self.dataset_meta, self.has_background)
         meta = {'label_map': reverse_label_map(class_to_ind)}
         if self.has_background:
             meta['background_label'] = 0
-
-        return ConverterReturn(detections, meta, content_check_errors)
-
+        return meta
 
 
-class SYGDetectionConverter(BaseFormatConverter):
+class SYGDetectionConverter(PascalVOCDetectionConverter):
     __provider__ = 'syg_detection'
     annotation_types = (DetectionAnnotation, )
 
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'imageset_file': PathField(description="Path to file with validation image list."),
-            'annotations_dir': PathField(is_directory=True, description="Path to directory with annotation files."),
-            'images_dir': PathField(
-                optional=True, is_directory=True,
-                description="Path to directory with images related to devkit root (default JPEGImages)."
-            ),
-            'has_background': BoolField(
-                optional=True, default=True, description="Allows convert dataset with/without adding background_label."
-            ),
-            'dataset_meta_file': PathField(
-                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
-            )
-        })
-        return parameters
-
-    def configure(self):
-        self.image_set_file = self.get_value_from_config('imageset_file')
-        self.image_dir = self.get_value_from_config('images_dir')
-        if not self.image_dir:
-            self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages')
-        self.annotations_dir = self.get_value_from_config('annotations_dir')
-        self.has_background = self.get_value_from_config('has_background')
-        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
-
-    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+    def get_meta(self):
         class_to_ind = syg_prepare_detection_labels(self.dataset_meta, self.has_background)
-        content_check_errors = [] if check_content else None
-
-        detections = []
-        image_set = read_txt(self.image_set_file, sep=None)
-        num_iterations = len(image_set)
-        for (image_id, image) in enumerate(image_set):
-            root = read_xml(self.annotations_dir / '{}.xml'.format(image))
-
-            identifier = root.find('.//filename').text
-            get_path(self.image_dir / identifier)
-            if check_content:
-                if not check_file_existence(self.image_dir / identifier):
-                    content_check_errors.append('{}: does not exist'.format(self.image_dir / identifier))
-
-            labels, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], []
-            difficult_indices = []
-            for entry in root:
-                if not entry.tag.startswith('object'):
-                    continue
-
-                bbox = entry.find('bndbox')
-                difficult = int(entry.find('difficult').text)
-
-                if difficult == 1:
-                    difficult_indices.append(len(labels))
-
-                labels.append(class_to_ind[entry.find('name').text])
-                x_mins.append(float(bbox.find('xmin').text) - 1)
-                y_mins.append(float(bbox.find('ymin').text) - 1)
-                x_maxs.append(float(bbox.find('xmax').text) - 1)
-                y_maxs.append(float(bbox.find('ymax').text) - 1)
-
-            image_annotation = DetectionAnnotation(identifier, labels, x_mins, y_mins, x_maxs, y_maxs)
-            image_annotation.metadata['difficult_boxes'] = difficult_indices
-
-            detections.append(image_annotation)
-            if progress_callback is not None and image_id % progress_interval == 0:
-                progress_callback(image_id / num_iterations * 100)
-
         meta = {'label_map': reverse_label_map(class_to_ind)}
         if self.has_background:
             meta['background_label'] = 0
-
-        return ConverterReturn(detections, meta, content_check_errors)
+        return meta

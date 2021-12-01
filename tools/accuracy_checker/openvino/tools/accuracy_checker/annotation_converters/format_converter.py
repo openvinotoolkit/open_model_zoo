@@ -108,7 +108,8 @@ class BaseFormatConverter(ClassProvider):
             return full_scheme
         return cls.parameters()
 
-    def get_meta(self):
+    @staticmethod
+    def get_meta():
         return None
 
 

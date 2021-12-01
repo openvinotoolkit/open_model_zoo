@@ -320,6 +320,12 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
 
         return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
 
+    def get_meta(self):
+        full_annotation = read_json(self.annotation_file)
+        label_map, _ = get_label_map(self.dataset_meta, full_annotation, True)
+
+        return {'label_map': label_map}
+
 
 def make_segmentation_mask(height, width, path_to_mask, labels, segmentations):
     polygons = []
@@ -559,4 +565,7 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
                 if progress_callback is not None and image_id & progress_interval == 0:
                     progress_callback(image_id / num_iterations * 100)
 
-        return ConverterReturn(keypoints_annotations, {'label_map': {1: 'person'}}, content_errors)
+        return ConverterReturn(keypoints_annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
+        return {'label_map': {1: 'person'}}

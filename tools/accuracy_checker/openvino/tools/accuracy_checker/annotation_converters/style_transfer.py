@@ -49,5 +49,4 @@ class StyleTransferConverter(BaseFormatConverter):
             annotation = StyleTransferAnnotation(identifiers, image.name)
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, None,
-                               content_check_errors)
+        return ConverterReturn(annotations, None, content_check_errors)
