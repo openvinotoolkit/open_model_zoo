@@ -336,7 +336,11 @@ class BertTextClassification(Adapter):
         if not self.outputs_checked:
             self.select_output_blob(outputs)
         outputs = outputs[self.classification_out]
-        if not self.single_score and outputs.shape[1] != self.num_classes:
+        if outputs.ndim >= 3:
+            outputs = np.squeeze(outputs)
+        if outputs.ndim == 1 and len(identifiers) == 1:
+            outputs = np.expand_dims(outputs, 0)
+        if not self.single_score and outputs.shape[-1] != self.num_classes:
             _, hidden_size = outputs.shape
             output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
             output_bias = np.zeros(self.num_classes)
