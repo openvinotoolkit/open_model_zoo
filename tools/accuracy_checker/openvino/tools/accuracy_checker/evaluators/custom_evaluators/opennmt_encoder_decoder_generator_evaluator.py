@@ -19,10 +19,10 @@ from collections import OrderedDict
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseONNXModel
+from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations
+from ...utils import contains_all, contains_any, extract_image_representations, parse_partial_shape
 
 
 class OpenNMTEvaluator(BaseCustomEvaluator):
@@ -78,15 +78,18 @@ class OpenNMTModel(BaseCascadeModel):
         self._encoder_mapping = {
                 'dlsdk': EncoderDLSDKModel,
                 'onnx_runtime': EncoderONNXModel,
+                'openvino': EncoderOVModel
             }
         self._decoder_mapping = {
                 'dlsdk': DecoderDLSDKModel,
                 'onnx_runtime': DecoderONNXModel,
+                'openvino': DecoderOVModel
             }
 
         self._generator_mapping = {
                 'dlsdk': GeneratorDLSDKModel,
-                'onnx_runtime': GeneratorONNXModel
+                'onnx_runtime': GeneratorONNXModel,
+                'openvino': GeneratorOVModel
             }
 
         self.encoder = create_model(network_info['encoder'], launcher, self._encoder_mapping, 'encoder',
@@ -207,6 +210,38 @@ class CommonDLSDKModel(BaseDLSDKModel):
         else:
             input_info = self.exec_network.inputs[input_blob]
         if tuple(input_info.shape) != np.shape(input_data):
+            self._reshape_input({input_blob: np.shape(input_data)})
+
+        return {input_blob: np.array(input_data)}
+
+    def propagate_output(self, data):
+        pass
+
+
+class CommonOVModel(BaseOpenVINOModel):
+    default_model_suffix = 'encoder'
+    input_layers = []
+    output_layers = []
+    return_layers = []
+
+    def predict(self, identifiers, input_data, callback=None):
+        input_data = self.fit_to_input(input_data)
+        results = self.infer(input_data)
+        self.propagate_output(results)
+        names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
+        return tuple(results[name] for name in names) + (results,)
+
+    def fit_to_input(self, input_data):
+        if isinstance(input_data, dict):
+            fitted = {}
+            for input_blob in self.inputs:
+                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+        else:
+            fitted = self.fit_one_input(self.input_blob, input_data)
+        return fitted
+
+    def fit_one_input(self, input_blob, input_data):
+        if input_blob in self.dynamic_inputs or parse_partial_shape(self.inputs[input_blob]) != np.shape(input_data):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
@@ -397,6 +432,28 @@ class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
     output_layers = ['output']
+
+
+class EncoderOVModel(CommonOVModel):
+    default_model_suffix = 'encoder'
+    input_layers = ['src', 'src_len']
+    output_layers = ['state.0/sink_port_0', 'state.1/sink_port_0', 'memory/sink_port_0']
+    return_layers = ['state.0/sink_port_0', 'state.1/sink_port_0', 'memory/sink_port_0']
+
+
+class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
+    default_model_suffix = 'decoder'
+    input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
+    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
+    return_layers = ['output', 'attn']
+    state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
+    state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
+
+
+class GeneratorOVModel(CommonOVModel):
+    default_model_suffix = 'generator'
+    input_layers = ['input']
+    output_layers = ['output/sink_port_0']
 
 
 class CommonONNXModel(BaseONNXModel):
