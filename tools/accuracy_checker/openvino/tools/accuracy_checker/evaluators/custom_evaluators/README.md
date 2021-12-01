@@ -56,3 +56,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **Tacotron2 Evaluator** demonstrates how to evaluate custom Tacotron2 model for text to speech task.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/tacotron2_evaluator.py`
+
+* **Open-NMT Evaluator** demonstrates how to evaluate Open-NMT model for text translation task.
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/opennmt_encoder_decoder_generator_evaluator.py`

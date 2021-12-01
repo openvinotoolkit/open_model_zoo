@@ -95,7 +95,7 @@ class DecodeByVocabulary(Preprocessor):
             decoded_sentence.append(self.decoding_dict.get(word, self.unk_index))
         image.data = decoded_sentence
         image.metadata['decoded'] = True
-
+        image.metadata['length'] = len(decoded_sentence)
         return image
 
 
