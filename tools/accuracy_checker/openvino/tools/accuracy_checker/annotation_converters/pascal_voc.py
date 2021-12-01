@@ -164,8 +164,8 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         relative_image_subdir = ''
         if '/' in image_id:
             relative_image_subdir, image_id =image_id.rsplit('/', 1)
-            image_root = self.image_dir / relative_image_subdir
-            mask_root = self.mask_dir / relative_image_subdir
+            image_root = Path(self.image_dir) / relative_image_subdir
+            mask_root = Path(self.mask_dir) / relative_image_subdir
         else:
             image_root = self.image_dir
             mask_root = self.mask_dir
