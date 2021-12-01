@@ -4,7 +4,7 @@
 This script updates all of the requirements-*.txt files in this directory
 with the most recent package versions.
 
-It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo, 
+It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo,
 so install these dependencies before running it.
 """
 
