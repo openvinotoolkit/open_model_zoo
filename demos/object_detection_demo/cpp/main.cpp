@@ -266,8 +266,6 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
         const auto& color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
-        cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, color);
         cv::rectangle(outputImg, obj, color, 2);
     }
