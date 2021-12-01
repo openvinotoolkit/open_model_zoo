@@ -47,10 +47,10 @@ public:
         ptr[0] = first_el; // position of start of batch in cyclic buffer
         batch_lock.unlock();
         const auto cur_step = std::chrono::steady_clock::now() - time;
-        const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step).count();
-        const int time_step = int(1000.f / batch_fps); // 1/15 sec
+        const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step);
+        const auto time_step = std::chrono::milliseconds(int(1000.f / batch_fps)); // 1/15 sec
         if (gap < time_step) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap)); // wait for constant step of batch update
+            std::this_thread::sleep_for(time_step - gap); // wait for constant step of batch update
         }
     }
 private:
@@ -157,10 +157,10 @@ protected:
         producer.fillFastFrame(fast_frame);
         if (wait_gap) {
             const auto cur_step = std::chrono::steady_clock::now() - read_time;
-            const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step).count();
-            const int time_step = int(1000. / source_fps);
+            const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step);
+            const auto time_step = std::chrono::milliseconds(int(1000.f / source_fps));
             if (gap < time_step) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(time_step - gap));
+                std::this_thread::sleep_for(time_step - gap);
             }
         }
 
