@@ -101,8 +101,6 @@ class OpenNMTModel(BaseCascadeModel):
 
         self.adapter = create_adapter(launcher.config.get('adapter', 'nmt'))
 
-        self.processing_frames_buffer = None
-
     def predict(self, identifiers, input_data, encoder_callback=None):
         predictions, raw_outputs = [], []
 
@@ -145,11 +143,6 @@ class OpenNMTModel(BaseCascadeModel):
             predictions.append(prediction)
 
         return raw_outputs, predictions
-
-    def reset(self):
-        self.processing_frames_buffer = []
-        if self._encoder_predictions is not None:
-            self._encoder_predictions = []
 
 
 class StatefulModel:
