@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
-import pickle
 from functools import partial
 from collections import OrderedDict
 import numpy as np
@@ -98,11 +96,6 @@ class OpenNMTModel(BaseCascadeModel):
         self.generator = create_model(network_info['generator'], launcher, self._generator_mapping, 'generator',
                                       delayed_model_loading)
 
-        self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
-        self.store_decoder_predictions = network_info['decoder'].get('store_predictions', False)
-        self._encoder_predictions = [] if self.store_encoder_predictions else None
-        self._decoder_predictions = [] if self.store_decoder_predictions else None
-
         self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder, 'generator': self.generator}
         self._raw_outs = OrderedDict()
 
@@ -117,12 +110,9 @@ class OpenNMTModel(BaseCascadeModel):
             decode_strategy = BeamSearch(self.decoder.network_info)
 
             src_len = np.array([len(data)])
-            h, c, memory, raw_outputs = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data]),
-                                                              'src_len': src_len})
+            h, c, memory, raw_outputs = self.encoder.predict(identifiers, {'src': np.array([[[t]] for t in data])})
             if encoder_callback:
                 encoder_callback(raw_outputs)
-            if self.store_encoder_predictions:
-                self._encoder_predictions.append((h, c, memory))
 
             self.decoder.init_state(h, c, memory, src_len)
             self.decoder.tile_state(decode_strategy.beam_size)
@@ -160,18 +150,6 @@ class OpenNMTModel(BaseCascadeModel):
         self.processing_frames_buffer = []
         if self._encoder_predictions is not None:
             self._encoder_predictions = []
-
-    def save_encoder_predictions(self):
-        if self._encoder_predictions is not None:
-            prediction_file = Path(self.network_info['encoder'].get('predictions', 'encoder_predictions.pickle'))
-            with prediction_file.open('wb') as file:
-                pickle.dump(self._encoder_predictions, file)
-
-    def save_decoder_predictions(self):
-        if self._decoder_predictions is not None:
-            prediction_file = Path(self.network_info['decoder'].get('predictions', 'decoder_predictions.pickle'))
-            with prediction_file.open('wb') as file:
-                pickle.dump(self._encoder_predictions, file)
 
 
 class StatefulModel:
