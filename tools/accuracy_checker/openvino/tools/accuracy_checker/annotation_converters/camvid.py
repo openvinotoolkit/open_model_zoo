@@ -76,6 +76,9 @@ class CamVidConverter(FileBasedAnnotationConverter):
             annotations.append(SegmentationAnnotation(identifier, gt_file))
             if progress_callback is not None and line_id % progress_interval == 0:
                 progress_callback(line_id * 100 / num_iterations)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         meta = self.meta
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
@@ -83,8 +86,7 @@ class CamVidConverter(FileBasedAnnotationConverter):
                 meta['label_map'] = verify_label_map(meta['label_map'])
             if 'labels' in meta and 'label_map' not in meta:
                 meta['label_map'] = dict(enumerate(meta['labels']))
-
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta
 
 
 class CamVid32DatasetConverter(BaseFormatConverter):
@@ -169,6 +171,9 @@ class CamVid32DatasetConverter(BaseFormatConverter):
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / val_subset_size)
 
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         meta = self.meta
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
@@ -176,5 +181,4 @@ class CamVid32DatasetConverter(BaseFormatConverter):
                 meta['label_map'] = verify_label_map(meta['label_map'])
             if 'labels' in meta and 'label_map' not in meta:
                 meta['label_map'] = dict(enumerate(meta['labels']))
-
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta

@@ -42,8 +42,8 @@ class LPRConverter(BaseFormatConverter):
 
     def configure(self, *args, **kwargs):
         self.annotation_file = self.get_value_from_config('annotation_file')
-        self.meta = prepare_meta(self.get_value_from_config('decoding_dictionary_file'))
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.meta_dict = self.get_value_from_config(self.get_value_from_config('decoding_dictionary_file'))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -64,13 +64,12 @@ class LPRConverter(BaseFormatConverter):
                 continue
             annotations.append(CharacterRecognitionAnnotation(identifier, label))
 
-        return ConverterReturn(annotations, self.meta, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
+    def get_meta(self):
+        label_map = {}
+        for line in read_txt(self.meta_dict):
+            key_val = line.split(' ')
+            label_map[int(key_val[0])] = key_val[1]
 
-def prepare_meta(meta_dict):
-    label_map = {}
-    for line in read_txt(meta_dict):
-        key_val = line.split(' ')
-        label_map[int(key_val[0])] = key_val[1]
-
-    return {'label_map': label_map}
+        return {'label_map': label_map}

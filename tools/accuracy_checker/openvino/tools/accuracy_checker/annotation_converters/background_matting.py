@@ -83,8 +83,11 @@ class BackgroundMattingConverter(BaseFormatConverter):
                 progress_callback(idx / num_iterations * 100)
 
         return ConverterReturn(
-            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+            annotations, self.get_meta(), content_errors
         )
+
+    def get_meta(self):
+        return {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}
 
 
 class VideoBackgroundMatting(BackgroundMattingConverter):
@@ -125,5 +128,5 @@ class VideoBackgroundMatting(BackgroundMattingConverter):
                 progress_callback(idx / num_iterations * 100)
 
         return ConverterReturn(
-            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+            annotations, self.get_meta(), content_errors
         )

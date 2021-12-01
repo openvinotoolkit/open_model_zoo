@@ -162,6 +162,7 @@ class DataIterator:
 
         return source, target
 
+
 class AmazonProductData(BaseFormatConverter):
 
     __provider__ = 'amazon_product_data'

@@ -108,6 +108,9 @@ class BaseFormatConverter(ClassProvider):
             return full_scheme
         return cls.parameters()
 
+    def get_meta(self):
+        return None
+
 
 class FileBasedAnnotationConverter(BaseFormatConverter):
     @classmethod

@@ -53,9 +53,8 @@ class LabelMeDetectionConverter(BaseFormatConverter):
         detections = []
         annotation_files = list(self.annotations_dir.glob('*.xml'))
         num_iterations = len(annotation_files)
-
-        label_map = get_label_map(self.dataset_meta.get('label_map'), self.has_background)
-        reversed_label_map = reverse_label_map(label_map)
+        meta = self.get_meta()
+        reversed_label_map = reverse_label_map(meta['label_map'])
 
         for (idx, annotation_file) in enumerate(annotation_files):
             annotation = read_xml(annotation_file)
@@ -102,14 +101,16 @@ class LabelMeDetectionConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
+        return ConverterReturn(detections, meta, content_check_errors)
+
+    def get_meta(self):
+        label_map = get_label_map(self.dataset_meta.get('label_map'), self.has_background)
         meta = {'label_map': label_map}
 
         if self.has_background:
-            meta.update({
-                'background_label': 0
-            })
+            meta['background_label'] = 0
 
-        return ConverterReturn(detections, meta, content_check_errors)
+        return meta
 
 
 class LabelMeSegmentationConverter(BaseFormatConverter):
@@ -145,11 +146,6 @@ class LabelMeSegmentationConverter(BaseFormatConverter):
         annotation_files = list(self.annotations_dir.glob('*.xml'))
         num_iterations = len(annotation_files)
 
-        label_map = get_label_map(self.dataset_meta.get('label_map'))
-        segmentation_colors = self.dataset_meta.get('segmentation_colors')
-        if segmentation_colors is None:
-            raise ValueError('segmentation_colors must be provided in dataset_meta_file')
-
         for (idx, annotation_file) in enumerate(annotation_files):
             annotation = read_xml(annotation_file)
 
@@ -181,12 +177,16 @@ class LabelMeSegmentationConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
+        return ConverterReturn(annotations, self.get_meta(), content_check_errors)
+
+    def get_meta(self):
+        label_map = get_label_map(self.dataset_meta.get('label_map'))
+        segmentation_colors = self.dataset_meta.get('segmentation_colors')
         meta = {
             'label_map': label_map,
             'segmentation_colors': segmentation_colors
         }
-
-        return ConverterReturn(annotations, meta, content_check_errors)
+        return meta
 
 
 def get_label_map(labels, has_background=False):

@@ -87,3 +87,10 @@ class CVATMultilabelAttributesRecognitionConverter(FileBasedAnnotationConverter)
         if not label:
             raise ConfigError('{} does not present in annotation'.format(self.label))
         return label[0]
+
+    def get_meta(self):
+        annotation = read_xml(self.annotation_file)
+        meta = annotation.find('meta')
+        label = self.select_label(meta)
+        label_to_id = {attribute.find('name').text: idx for idx, attribute in enumerate(label.iter('attribute'))}
+        return self.generate_meta(label_to_id)

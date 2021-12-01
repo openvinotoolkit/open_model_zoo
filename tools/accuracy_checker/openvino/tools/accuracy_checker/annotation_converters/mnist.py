@@ -75,7 +75,7 @@ class MNISTFormatConverter(BaseFormatConverter):
         """
         annotations = []
         check_images = check_content and not self.convert_images
-        meta = self.generate_meta()
+        meta = self.get_meta()
         content_errors = None
         if check_content:
             self.converted_images_dir = self.converted_images_dir or self.test_anno_file.parent / 'converted_images'
@@ -111,7 +111,7 @@ class MNISTFormatConverter(BaseFormatConverter):
 
         return ConverterReturn(annotations, meta, content_errors)
 
-    def generate_meta(self):
+    def get_meta(self):
         if not self.dataset_meta:
             return {'label_map': {str(i): i for i in range(10)}}
         dataset_meta = read_json(self.dataset_meta)
@@ -179,7 +179,7 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
         """
         annotations = []
         check_images = check_content and not self.convert_images
-        meta = self.generate_meta()
+        meta = self.get_meta()
         labels_to_id = meta['label_map']
         content_errors = None
         if check_content:
@@ -219,7 +219,7 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
 
         return image
 
-    def generate_meta(self):
+    def get_meta(self):
         if not self.dataset_meta:
             return {'label_map': {str(i): i for i in range(10)}}
         dataset_meta = read_json(self.dataset_meta)
