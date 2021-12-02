@@ -22,7 +22,7 @@ description: >-
 task_type: detection
 files:
   - name: yolov3-10.onnx
-    sha384: 832bb4c2be2f9a0eb3e69c426ceaadf472ef260802995fc694b5e8e36a63f0bdfe005058d16e18f091bfdefde3489746
+    checksum: 832bb4c2be2f9a0eb3e69c426ceaadf472ef260802995fc694b5e8e36a63f0bdfe005058d16e18f091bfdefde3489746
     size: 247908721
     source: https://media.githubusercontent.com/media/onnx/models/41ccf18ba5a815dab714899ac234e9b1e4293c20/vision/object_detection_segmentation/yolov3/model/yolov3-10.onnx
 model_optimizer_args:

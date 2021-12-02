@@ -19,27 +19,27 @@ task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-1040.xml
     size: 980908
-    sha384: 8ded927b8542d6645e095a7570dbd92e004d21e917b900092f6ab5014c3b0a37ba3cf06f486974b0dd3f6b8f7873f5ca
+    checksum: 8ded927b8542d6645e095a7570dbd92e004d21e917b900092f6ab5014c3b0a37ba3cf06f486974b0dd3f6b8f7873f5ca
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.xml
   - name: FP32/instance-segmentation-security-1040.bin
     size: 52969864
-    sha384: 7dd555c9daef256a216299cfd47c5cc45b521d3349c1c4d86c63b7210256a5f5f24afc48dc7b1858098cd86377080819
+    checksum: 7dd555c9daef256a216299cfd47c5cc45b521d3349c1c4d86c63b7210256a5f5f24afc48dc7b1858098cd86377080819
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.bin
   - name: FP16/instance-segmentation-security-1040.xml
     size: 980828
-    sha384: d7f89dd9b100462247dcceaa2137ee355fabea8aed9777dbd13fc318049cd16de475e2bef2b97659c512810ad6879668
+    checksum: d7f89dd9b100462247dcceaa2137ee355fabea8aed9777dbd13fc318049cd16de475e2bef2b97659c512810ad6879668
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.xml
   - name: FP16/instance-segmentation-security-1040.bin
     size: 26485214
-    sha384: 1538332959f447535620f64c29a40d085784d7941c7a205961627e27b5be02e4ddc44041299cb78377e80ca632450270
+    checksum: 1538332959f447535620f64c29a40d085784d7941c7a205961627e27b5be02e4ddc44041299cb78377e80ca632450270
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.bin
   - name: FP16-INT8/instance-segmentation-security-1040.xml
     size: 1688757
-    sha384: 292773a3f3f094dce7cc71e92554912eb9dd8f7de6624e42dd23fe2523fe604968364b1a45623b18600943f3fef74ed0
+    checksum: 292773a3f3f094dce7cc71e92554912eb9dd8f7de6624e42dd23fe2523fe604968364b1a45623b18600943f3fef74ed0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.xml
   - name: FP16-INT8/instance-segmentation-security-1040.bin
     size: 21614048
-    sha384: 02b3a87dabd2e767cac215b27b4387c6f37f28c3e5cafba1cbbd590e47cd6d09aea00f45b48ee7bdac3f2d8aa3d38c36
+    checksum: 02b3a87dabd2e767cac215b27b4387c6f37f28c3e5cafba1cbbd590e47cd6d09aea00f45b48ee7bdac3f2d8aa3d38c36
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

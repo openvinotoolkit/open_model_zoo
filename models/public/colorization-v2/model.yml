@@ -24,19 +24,19 @@ task_type: colorization
 files:
   - name: ckpt/colorization-v2-eccv16.pth
     size: 128976165
-    sha384: 65bc890b145efde14f6847e707ba49fe8a026a02d5dc91bdfa9708893a954547256935b997904280a7ae991da1aac53e
+    checksum: 65bc890b145efde14f6847e707ba49fe8a026a02d5dc91bdfa9708893a954547256935b997904280a7ae991da1aac53e
     source: https://colorizers.s3.us-east-2.amazonaws.com/colorization_release_v2-9b330a0b.pth
   - name: model/__init__.py
     size: 96
-    sha384: 04b2675bb9d47bd3f05cb786ec74abd67b4118b6d3b424c0bc85d5136939605c39da443740d9b98b1e7f3f0ada05c885
+    checksum: 04b2675bb9d47bd3f05cb786ec74abd67b4118b6d3b424c0bc85d5136939605c39da443740d9b98b1e7f3f0ada05c885
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
   - name: model/base_color.py
     size: 454
-    sha384: 73f4fdae2d975c533530da98efc3c8a7089202492293b28fef447408d054cd59bdff0befc7f38b8336b1a001ce6f9e8d
+    checksum: 73f4fdae2d975c533530da98efc3c8a7089202492293b28fef447408d054cd59bdff0befc7f38b8336b1a001ce6f9e8d
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
   - name: model/eccv16.py
     size: 4613
-    sha384: 121ed60312afef4c2d460298c78390714b3417914a82218185520ea6ae5a23da3bda99d5fffba3b586d54988a4919684
+    checksum: 121ed60312afef4c2d460298c78390714b3417914a82218185520ea6ae5a23da3bda99d5fffba3b586d54988a4919684
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/eccv16.py
 postprocessing:
   - $type: regex_replace

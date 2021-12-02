@@ -21,11 +21,11 @@ task_type: detection
 files:
   - name: face-detection-retail-0044.prototxt
     size: 27995
-    sha384: 308dd708e34a0993fdd2d41781c360972e12e5560f2e58fe67172a187df74fa072986142d7faeec7058d024d28f5c43a
+    checksum: 308dd708e34a0993fdd2d41781c360972e12e5560f2e58fe67172a187df74fa072986142d7faeec7058d024d28f5c43a
     source: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/deploy.prototxt
   - name: face-detection-retail-0044.caffemodel
     size: 2410177
-    sha384: a86e975a6cad2ca8d0a28d8e9492cffbf45e3a9210baa456761e0c4708f09c024ac6c5f174c190e86b31a8bef77932fc
+    checksum: a86e975a6cad2ca8d0a28d8e9492cffbf45e3a9210baa456761e0c4708f09c024ac6c5f174c190e86b31a8bef77932fc
     source: https://github.com/opencv/training_toolbox_caffe/raw/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/face-detection-retail-0044.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,300,300]

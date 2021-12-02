@@ -21,65 +21,65 @@ task_type: image_translation
 files:
   - name: model_files/util/__init__.py
     size: 72
-    sha384: dfc6f539e037c1d6a8a1747c8a64f20431a0847874461c845a60aa686936d51163d7db6a56fc5086558512f544051fac
+    checksum: dfc6f539e037c1d6a8a1747c8a64f20431a0847874461c845a60aa686936d51163d7db6a56fc5086558512f544051fac
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/util/__init__.py
   - name: model_files/util/util.py
     size: 17551
-    sha384: ada7dfbea39ed1a0bc97f03dab894fe1eac065bc0e0c7361def8e7a9e5bac75627eaa38d3c176ac6aa391945e0e221b3
+    checksum: ada7dfbea39ed1a0bc97f03dab894fe1eac065bc0e0c7361def8e7a9e5bac75627eaa38d3c176ac6aa391945e0e221b3
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/util/util.py
   - name: model_files/models/networks/__init__.py
     size: 2676
-    sha384: 9f1dae79e5600f33da16268485852627fe12bb62695f2c320abb12852f3232d6e76cfc9745fa5bc04994766d9e488114
+    checksum: 9f1dae79e5600f33da16268485852627fe12bb62695f2c320abb12852f3232d6e76cfc9745fa5bc04994766d9e488114
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/__init__.py
   - name: model_files/models/networks/architecture.py
     size: 7985
-    sha384: 4be0416ec80decdcdc177b31197794c6c683a05e74690b780ec8db85b8f47c3a03dfa8dbfde58e72aa4c6e4a49ed1204
+    checksum: 4be0416ec80decdcdc177b31197794c6c683a05e74690b780ec8db85b8f47c3a03dfa8dbfde58e72aa4c6e4a49ed1204
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/architecture.py
   - name: model_files/models/networks/base_network.py
     size: 2466
-    sha384: 2bd2cc5d29b71387dc4a756c7e3b8931c019d6a1e765bf71fa28443e34686716dacf77f1b5f58460517886148518332d
+    checksum: 2bd2cc5d29b71387dc4a756c7e3b8931c019d6a1e765bf71fa28443e34686716dacf77f1b5f58460517886148518332d
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/base_network.py
   - name: model_files/models/networks/correspondence.py
     size: 18453
-    sha384: 6a4aef47693a292715f8986ccc994e2e932db5d9d54dea790a3df9be34471ed7645f0fff6d1cbde87a26831a7b339c39
+    checksum: 6a4aef47693a292715f8986ccc994e2e932db5d9d54dea790a3df9be34471ed7645f0fff6d1cbde87a26831a7b339c39
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/correspondence.py
   - name: model_files/models/networks/generator.py
     size: 10874
-    sha384: 24a4fe9c52345aba6c161930bda8d27692ad511f00711b62c2aef97157d36a648c2439c27d2e15d52271ae87f5d1f339
+    checksum: 24a4fe9c52345aba6c161930bda8d27692ad511f00711b62c2aef97157d36a648c2439c27d2e15d52271ae87f5d1f339
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/generator.py
   - name: model_files/models/networks/normalization.py
     size: 11279
-    sha384: 6b95b80690a0ff4f79f72669132763876c855631b662a0f9a089ffde1597341a1e3f823ea90ba6b7be963272378b295c
+    checksum: 6b95b80690a0ff4f79f72669132763876c855631b662a0f9a089ffde1597341a1e3f823ea90ba6b7be963272378b295c
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/normalization.py
   - name: model_files/models/__init__.py
     size: 1417
-    sha384: 307d0718d8268d5f27dc5b394a756d7910f9f2f36792d78e718295966208bdaed0055e3ca224db506baab7c847857a9a
+    checksum: 307d0718d8268d5f27dc5b394a756d7910f9f2f36792d78e718295966208bdaed0055e3ca224db506baab7c847857a9a
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/__init__.py
   - name: model_files/models/networks/sync_batchnorm/__init__.py
     size: 507
-    sha384: e5e64b8365cbfbb1c1dc5379cd6230ae468c38cde59c294e67e0103e4add0744ed658ac7f246efcc7abfc601463bc29b
+    checksum: e5e64b8365cbfbb1c1dc5379cd6230ae468c38cde59c294e67e0103e4add0744ed658ac7f246efcc7abfc601463bc29b
     source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/5768ead395820b8a625cbe0da0bb9f949748a5dd/sync_batchnorm/__init__.py
   - name: model_files/models/networks/sync_batchnorm/batchnorm.py
     size: 15944
-    sha384: 8a282cac42d4a9e970c26deb8251c7e7ea30bc55ffbcba13f1a0e02cb78763a6b993c6c91e1ed6a90074ca6899242136
+    checksum: 8a282cac42d4a9e970c26deb8251c7e7ea30bc55ffbcba13f1a0e02cb78763a6b993c6c91e1ed6a90074ca6899242136
     source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/5768ead395820b8a625cbe0da0bb9f949748a5dd/sync_batchnorm/batchnorm.py
   - name: model_files/models/networks/sync_batchnorm/replicate.py
     size: 3226
-    sha384: 9f662572ba39a396b98116ee8a4fe1b08fb5905fb2ba88cef3965a0827f6917409e7f25a5d1dcbf06acc986acea87d56
+    checksum: 9f662572ba39a396b98116ee8a4fe1b08fb5905fb2ba88cef3965a0827f6917409e7f25a5d1dcbf06acc986acea87d56
     source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/5768ead395820b8a625cbe0da0bb9f949748a5dd/sync_batchnorm/replicate.py
   - name: model_files/models/networks/sync_batchnorm/comm.py
     size: 4449
-    sha384: 985fb49fbc665ecef6de44ba10c8e547b27733a2301d10ce47da78c7152dd14c78645baae5cd6c042a987bad59ec86dc
+    checksum: 985fb49fbc665ecef6de44ba10c8e547b27733a2301d10ce47da78c7152dd14c78645baae5cd6c042a987bad59ec86dc
     source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/5768ead395820b8a625cbe0da0bb9f949748a5dd/sync_batchnorm/comm.py
   - name: model_files/ckpt/latest_net_Corr.pth
     size: 237624725
-    sha384: f756f61b5b4d7ca0e23b7a3208ec8c8d5307fd834cef0dbeea7b7d8bc051eda9ecee2b71a378a2ecc5086a769242fc9a
+    checksum: f756f61b5b4d7ca0e23b7a3208ec8c8d5307fd834cef0dbeea7b7d8bc051eda9ecee2b71a378a2ecc5086a769242fc9a
     source:
       $type: google_drive
       id: 1yNCapBY7YqMoKeyVWwTwceqrEKHpUzYN
   - name: model_files/ckpt/latest_net_G.pth
     size: 387069636
-    sha384: 25b790181bbb30c5bd09627756bd70c8bd528431c57c8508ea48f3f352fda987203f19cc129b5706927bd68878d46e0d
+    checksum: 25b790181bbb30c5bd09627756bd70c8bd528431c57c8508ea48f3f352fda987203f19cc129b5706927bd68878d46e0d
     source:
       $type: google_drive
       id: 1zVG4SnR1uI8bC8fagZrgxNYCI5GRmJuR

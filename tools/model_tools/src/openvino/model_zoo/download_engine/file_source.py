@@ -15,18 +15,10 @@
 import re
 import requests
 
-from openvino.model_zoo.download_engine import validation
+from openvino.model_zoo.download_engine import base, validation
 
 
-class TaggedBase:
-    @classmethod
-    def deserialize(cls, value):
-        try:
-            return cls.types[value['$type']].deserialize(value)
-        except KeyError:
-            raise validation.DeserializationError('Unknown "$type": "{}"'.format(value['$type']))
-
-class FileSource(TaggedBase):
+class FileSource(base.TaggedBase):
     RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
 
     types = {}

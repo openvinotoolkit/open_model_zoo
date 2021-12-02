@@ -19,7 +19,7 @@ task_type: detection
 files:
   - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
     size: 381355771
-    sha384: 905eb0e51f1894a02bb8391ed436601450df67e092a9aaee72fc3868d556bbf7410af97a18a06223b389bb818e489999
+    checksum: 905eb0e51f1894a02bb8391ed436601450df67e092a9aaee72fc3868d556bbf7410af97a18a06223b389bb818e489999
     source: http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet50_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive

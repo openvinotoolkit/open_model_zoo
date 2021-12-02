@@ -19,19 +19,19 @@ task_type: question_answering
 files:
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
     size: 1316805
-    sha384: 0a8fbe4593dbf64e777e97af7cee52ad101aa2e26b1b2cf663e1c69e24ca2d8beed22cc5931a863ef0eda1753ed35c0d
+    checksum: 0a8fbe4593dbf64e777e97af7cee52ad101aa2e26b1b2cf663e1c69e24ca2d8beed22cc5931a863ef0eda1753ed35c0d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 1336377584
-    sha384: 0a762c4f17991d6f564fcc24ba588ab70e19c84243e6b529fc3156b91b4f55526fda0df20ac7ecc34c24c1b7d5d131a4
+    checksum: 0a762c4f17991d6f564fcc24ba588ab70e19c84243e6b529fc3156b91b4f55526fda0df20ac7ecc34c24c1b7d5d131a4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
     size: 1315563
-    sha384: 5495f01494ee5a61096beb9fd76ad55970d4e49d707a2f8943eb17709f1c84130136796967f41815c5fa99fd3b258830
+    checksum: 5495f01494ee5a61096beb9fd76ad55970d4e49d707a2f8943eb17709f1c84130136796967f41815c5fa99fd3b258830
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 668188872
-    sha384: 7ec8b5ec15dac76214075add12ab88a5248ba1358f3104cf7ad8e5c0ef6bdfadb420b6864322111496706337a72d00ac
+    checksum: 7ec8b5ec15dac76214075add12ab88a5248ba1358f3104cf7ad8e5c0ef6bdfadb420b6864322111496706337a72d00ac
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

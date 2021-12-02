@@ -18,7 +18,7 @@ task_type: text_to_speech
 files:
   - name: wavernn-rnn.zip
     size: 14297518
-    sha384: 77186c83348d404c547d5706af7541d9a5cb430ed4236595d4f5b5f5e034d01ee5a74e3d39307324d5cdac5007cd013a
+    checksum: 77186c83348d404c547d5706af7541d9a5cb430ed4236595d4f5b5f5e034d01ee5a74e3d39307324d5cdac5007cd013a
     source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
 postprocessing:
   - $type: unpack_archive

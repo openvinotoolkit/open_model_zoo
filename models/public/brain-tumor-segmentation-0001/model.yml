@@ -26,13 +26,13 @@ task_type: semantic_segmentation
 files:
   - name: brain-tumor-segmentation-0001-symbol.json
     size: 100106
-    sha384: 2a36d9609896409eb47268316b5b0ec23bd6f4db1c98cbb69e9dfd34cbf5e9fdfad9d286b1a675fe58c8aec547aaa14c
+    checksum: 2a36d9609896409eb47268316b5b0ec23bd6f4db1c98cbb69e9dfd34cbf5e9fdfad9d286b1a675fe58c8aec547aaa14c
     source:
       $type: google_drive
       id: 1HaExnmHtF2nl2PkcLfKJDzA_7IMmLyKJ
   - name: brain-tumor-segmentation-0001-0000.params
     size: 152788159
-    sha384: f418f3565b8d9c755ad6f407c979a12f2b2a7327170c881477bb75cac70d77f69d5613aaa06bed6a7913e14df5119c36
+    checksum: f418f3565b8d9c755ad6f407c979a12f2b2a7327170c881477bb75cac70d77f69d5613aaa06bed6a7913e14df5119c36
     source:
       $type: google_drive
       id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
