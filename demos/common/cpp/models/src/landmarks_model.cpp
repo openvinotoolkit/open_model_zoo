@@ -137,7 +137,6 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
     std::vector<cv::Point2f> preds = getMaxPreds(heatMaps);
 
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
-        slog::info << preds[landmarkId].x << "  " << preds[landmarkId].y << slog::endl;
         const cv::Mat& heatMap = heatMaps[landmarkId];
         int px = int(preds[landmarkId].x);
         int py = int(preds[landmarkId].y);
