@@ -28,4 +28,3 @@ models:
         metrics:
           - type: label_level_recognition_accuracy
             reference: 0.815
-

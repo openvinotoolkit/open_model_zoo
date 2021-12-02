@@ -56,7 +56,7 @@ def main():
             line_indices = set(map(lambda obj: obj["line_idx"], data))
             img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
             img = binarize(img)
-            for idx in sorted(list(line_indices)):
+            for idx in sorted(line_indices):
                 objects = list(filter(lambda obj: obj["line_idx"] == idx, data))
                 # discard math symbols, scribbles, illegible text, and printed text
                 objects = list(filter(lambda obj: obj["text"] != "%math%" and obj["text"] != "%SC%" and obj["text"] != "%NA%" and obj["type"] != "P", objects))
@@ -69,26 +69,26 @@ def main():
                 # create mask for the words
                 mask = np.zeros(img.shape[0:2], dtype=np.uint8)
                 for obj in objects:
-                        region = [
-                            [obj["polygon"]["x0"], obj["polygon"]["y0"]],
-                            [obj["polygon"]["x1"], obj["polygon"]["y1"]],
-                            [obj["polygon"]["x2"], obj["polygon"]["y2"]],
-                            [obj["polygon"]["x3"], obj["polygon"]["y3"]]
-                        ]
-                        points = np.array([region])
-                        cv2.drawContours(mask, [points], -1, (255, 255, 255), -1, cv2.LINE_AA)
+                    region = [
+                        [obj["polygon"]["x0"], obj["polygon"]["y0"]],
+                        [obj["polygon"]["x1"], obj["polygon"]["y1"]],
+                        [obj["polygon"]["x2"], obj["polygon"]["y2"]],
+                        [obj["polygon"]["x3"], obj["polygon"]["y3"]]
+                    ]
+                    points = np.array([region])
+                    cv2.drawContours(mask, [points], -1, (255, 255, 255), -1, cv2.LINE_AA)
                 masked = cv2.bitwise_and(img, img, mask = mask)
                 bg = np.ones_like(img, np.uint8) * 255
                 cv2.bitwise_not(bg, bg, mask = mask)
                 overlay = bg + masked
                 # crop bounding rectangle of the text region
-                l = list(map(lambda obj: [
-                    [obj["polygon"]["x0"], obj["polygon"]["y0"]],
-                    [obj["polygon"]["x1"], obj["polygon"]["y1"]],
-                    [obj["polygon"]["x2"], obj["polygon"]["y2"]],
-                    [obj["polygon"]["x3"], obj["polygon"]["y3"]]
+                L = list(map(lambda obj: [
+                        [obj["polygon"]["x0"], obj["polygon"]["y0"]],
+                        [obj["polygon"]["x1"], obj["polygon"]["y1"]],
+                        [obj["polygon"]["x2"], obj["polygon"]["y2"]],
+                        [obj["polygon"]["x3"], obj["polygon"]["y3"]]
                     ], objects))
-                flat = [item for sublist in l for item in sublist]
+                flat = [item for sublist in L for item in sublist]
                 pts = np.array(flat)
                 rect = cv2.boundingRect(pts)
                 x, y, w, h = rect
@@ -107,4 +107,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
