@@ -18,7 +18,7 @@ The network is able to recognize English text consisting of characters in the [G
 | Accuracy on GNHK test subset (excluding images wider than 2000px after resized to height 96px with aspect ratio) | 81.5%     |
 | Source framework          | PyTorch\* |
 
-> **Note:** to achieve the accuracy, images from the GNHK test set should be binarized using adaptive thresholding, and preprocessed into single-line text images, using the coordinates from the accompanying JSON annotation files in the GNHK dataset. See [preprocess_gnhk.py](../../../demos/handwritten_text_recognition_demo/python/utils/preprocess_gnhk.py).
+> **Note:** to achieve the accuracy, images from the GNHK test set should be binarized using adaptive thresholding, and preprocessed into single-line text images, using the coordinates from the accompanying JSON annotation files in the GNHK dataset. See [preprocess_gnhk.py](./preprocess_gnhk.py).
 
 This model adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
 
