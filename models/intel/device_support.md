@@ -34,6 +34,7 @@
 | formula-recognition-polynomials-handwritten-0001-decoder | YES | YES |    |
 | formula-recognition-polynomials-handwritten-0001-encoder | YES | YES |    |
 | gaze-estimation-adas-0002 | YES | YES | YES |
+| handwritten-english-recognition-0001 | YES | YES | YES |
 | handwritten-japanese-recognition-0001 | YES | YES | YES |
 | handwritten-score-recognition-0003 | YES | YES | YES |
 | handwritten-simplified-chinese-recognition-0001 | YES | YES | YES |
