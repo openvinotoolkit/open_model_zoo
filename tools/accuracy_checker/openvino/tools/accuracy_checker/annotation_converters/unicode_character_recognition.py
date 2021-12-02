@@ -57,7 +57,7 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
         num_iterations = len(original_annotations)
 
         for line_id, line in enumerate(original_annotations):
-            identifier, text = line.strip().split(',')
+            identifier, text = line.strip().split(',', 1)
             annotations.append(CharacterRecognitionAnnotation(identifier.strip(), text.strip()))
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
@@ -78,7 +78,7 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
             lines = content.readlines()
             total_symbol = []
             for line in lines:
-                total_symbol.append(line.strip())
+                total_symbol.append(line.strip('\n'))
             supported_symbols = ''.join(total_symbol)
             return supported_symbols
 

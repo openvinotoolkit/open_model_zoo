@@ -48,6 +48,7 @@ def build_argparser():
                       help="Path to the decoding char list file. Default is for Japanese")
     args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
     args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
+    args.add_argument("-ob", "--output_blob", type=str, default=None, help="Optional. Name of the output layer of the model. Default is None, in which case the demo will read the output name from the model, assuming there is only 1 output layer")
     return parser
 
 
@@ -77,16 +78,20 @@ def main():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+    ie.set_config(config={"GPU_ENABLE_LOOP_UNROLLING": "NO", "CACHE_DIR": "./"}, device_name="GPU")
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
-    assert len(net.outputs) == 1, "Demo supports only single output topologies"
-
     input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
+
+    if args.output_blob is not None:
+        out_blob = args.output_blob
+    else:
+        assert len(net.outputs) == 1, "Demo supports only single output topologies"
+        out_blob = next(iter(net.output_info))
 
     characters = get_characters(args)
     codec = CTCCodec(characters, args.designated_characters, args.top_k)
