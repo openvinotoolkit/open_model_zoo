@@ -1,0 +1,25 @@
+models:
+  - name: instance-segmentation-person-0007
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: mask_rcnn
+          classes_out: labels
+          boxes_out: boxes
+          raw_masks_out: masks
+
+    datasets:
+      - name: ms_coco_mask_rcnn_person
+
+        preprocessing:
+          - type: resize
+            dst_width: 544
+            dst_height: 320
+
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+
+          - name: AP@boxes
+            type: coco_orig_precision
