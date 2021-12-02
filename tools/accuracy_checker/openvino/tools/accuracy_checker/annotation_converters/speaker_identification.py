@@ -59,4 +59,7 @@ class SpeakerReIdentificationDatasetConverter(FileBasedAnnotationConverter):
                     audio_negative = audio_negative[:self.max_pairs]
             annotations.append(ReIdentificationClassificationAnnotation(
                 audio, audio_positive, audio_negative))
-        return ConverterReturn(annotations, {'no_recursion': True}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
+        return {'no_recursion': True}

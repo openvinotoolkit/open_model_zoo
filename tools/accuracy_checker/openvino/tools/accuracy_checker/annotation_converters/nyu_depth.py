@@ -63,7 +63,6 @@ class NYUDepthV2Converter(BaseFormatConverter):
             self.images_dir = get_path(self.images_dir, is_directory=True)
             self.depths_dir = get_path(self.depths_dir, is_directory=True)
 
-
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         if self.allow_convert_data:
             images_list = self.convert_data()

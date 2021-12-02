@@ -22,8 +22,8 @@ from ..config import NumberField, StringField, PathField, BoolField, ConfigError
 from .format_converter import BaseFormatConverter
 from .format_converter import ConverterReturn
 
-class CriteoKaggleDACConverter(BaseFormatConverter):
 
+class CriteoKaggleDACConverter(BaseFormatConverter):
     __provider__ = 'criteo'
     annotation_types = (ClassificationAnnotation, )
 

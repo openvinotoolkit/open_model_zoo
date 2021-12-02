@@ -64,10 +64,13 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
                     content_errors.append('{}: does not exist'.format(identifier))
             if progress_callback is not None and line_id % progress_interval:
                 progress_callback(line_id / num_iterations * 100)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         # index 0 is reserved for blank
-        label_map = {ind+1: key for ind, key in enumerate(self.supported_symbols)}
+        label_map = {ind + 1: key for ind, key in enumerate(self.supported_symbols)}
         meta = {'label_map': label_map, 'blank_label': 0}
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta
 
     @staticmethod
     def read_decoding_char_file(file: Union[str, Path], **kwargs):

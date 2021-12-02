@@ -53,7 +53,10 @@ class DNASequenceDatasetConverter(BaseFormatConverter):
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
 
-        return ConverterReturn(annotations, {'label_map': dict(enumerate(self.alphabet))}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
 
     def decode_ref(self, ref):
         return ''.join(self.alphabet[e] for e in ref if e)
+
+    def get_meta(self):
+        return {'label_map': dict(enumerate(self.alphabet))}

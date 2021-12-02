@@ -58,7 +58,7 @@ class WiderFormatConverter(BaseFormatConverter):
         image_annotations = read_txt(self.annotation_file)
         content_errors = None if not check_content else []
         image_ids = [image_id for image_id, line in enumerate(image_annotations) if '.jpg' in line]
-        meta = self.generate_meta()
+        meta = self.get_meta()
 
         annotations = []
         num_iterations = len(image_ids)
@@ -88,7 +88,7 @@ class WiderFormatConverter(BaseFormatConverter):
 
         return ConverterReturn(annotations, meta, content_errors)
 
-    def generate_meta(self):
+    def get_meta(self):
         if not self.dataset_meta:
             if self.label_start != 0:
                 return {'label_map': {0: '__background__', self.label_start: 'face'}, 'background_label': 0}
