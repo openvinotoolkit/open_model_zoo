@@ -3,16 +3,3 @@
 dependencies:
   - '**/*requirements*.*'
   - '**/setup.py'
-demo:
-  - any: ['demos/**/*', '!demos/**/*.md']
-documentation:
-  - '*.md'
-  - '**/*.md'
-model:
-  - 'models/**/*'
-accuracy checker:
-  - 'tools/accuracy_checker/**/*'
-  - 'models/**/accuracy_check.yml'
-downloader:
-  - 'tools/downloader/**/*'
-  - 'tools/model_tools/**/*'
