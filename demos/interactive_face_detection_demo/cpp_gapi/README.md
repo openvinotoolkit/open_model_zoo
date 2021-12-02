@@ -1,19 +1,23 @@
 # G-API Interactive Face Detection Demo
 
+![example](../interactive_face_detection.gif)
+
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
 The pipeline is based on [G-API framework](https://docs.opencv.org/master/d0/d1e/gapi.html). This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them infer networks and another one is a postprocessing kernel.
-This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks. You can use a set of the following pre-trained models with the demo:
+This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Detection and Antispoofing Classifier networks. You can use a set of the following pre-trained models with the demo:
 
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
 * `head-pose-estimation-adas-0001`, which is executed on top of the results of the first model and reports estimated head pose in Tait-Bryan angles
 * `emotions-recognition-retail-0003`, which is executed on top of the results of the first model and reports an emotion for each detected face
 * `facial-landmarks-35-adas-0002`, which is executed on top of the results of the first model and reports normed coordinates of estimated facial landmarks
+* `anti-spoof-mn3`, which is executed on top of the results of the first model and reports estimated probability whether spoof or real face is shown
 
 Other demo objectives are:
 
+* Video as input support via OpenCV\*
 * Visualization of the resulting face bounding boxes from Face Detection network
-* Visualization of age/gender, head pose, emotion information, and facial landmarks positions for each detected face
+* Visualization of age/gender, spoof/real, head pose, emotion information, and facial landmarks positions for each detected face
 
 OpenCV is used to draw resulting bounding boxes, labels, and other information. You can copy and paste this code without pulling Inference Engine demo helpers into your application.
 
@@ -24,7 +28,7 @@ Engine.
 2. G-API pipeline gets a video/image/camera like a source, using the OpenCV VideoCapture.
 3. G-API pipeline performs inference on the Face Detection network.
 4. G-API pipeline runs post processing kernel.
-5. G-API pipeline performs four inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
+5. G-API pipeline performs four inferences, using the Age/Gender, Head Pose, Emotions, Facial Landmarks detection and Anti-spoof detection networks if they are specified in the command line.
 6. The application displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
@@ -50,6 +54,7 @@ omz_converter --list models.lst
 ### Supported Models
 
 * age-gender-recognition-retail-0013
+* anti-spoof-mn3
 * emotions-recognition-retail-0003
 * face-detection-adas-0001
 * face-detection-retail-0004
@@ -77,11 +82,13 @@ Options:
     -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
     -m_em "<path>"             Optional. Path to an .xml file with a trained Emotions Recognition model.
     -m_lm "<path>"             Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.
+    -m_am "<path>"             Optional. Path to an .xml file with a trained Antispoofing Classification model.
     -d "<device>"              Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
     -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
     -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
     -d_em "<device>"           Optional. Target device for Emotions Recognition network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
     -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
+    -d_am "<device>"           Optional. Target device for Antispoofing Classification network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -no_show                   Optional. Don't show output.
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
@@ -106,7 +113,8 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
   -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml \
   -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
   -m_em <path_to_model>/emotions-recognition-retail-0003.xml \
-  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
+  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml \
+  -m_am <path_to_model>/anti-spoof-mn3.xml
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -133,3 +141,4 @@ You can use this metric to measure application-level performance.
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
+

@@ -38,6 +38,7 @@ G_API_NET(AgeGender,      <AGInfo(cv::GMat)>,   "age-gender-recognition");
 G_API_NET(HeadPose,       <HPInfo(cv::GMat)>,   "head-pose-recognition");
 G_API_NET(FacialLandmark, <cv::GMat(cv::GMat)>, "facial-landmark-recognition");
 G_API_NET(Emotions,       <cv::GMat(cv::GMat)>, "emotions-recognition");
+G_API_NET(ASpoof,         <cv::GMat(cv::GMat)>, "anti-spoofing");
 
 G_API_OP(PostProc, <cv::GArray<cv::Rect>(cv::GArray<cv::Rect>, cv::GOpaque<cv::Size>, double, double, double)>, "custom.fd_postproc") {
     static cv::GArrayDesc outMeta(const cv::GArrayDesc&, const cv::GOpaqueDesc&, double, double, double) {
@@ -54,7 +55,7 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
                     std::vector<cv::Rect> &out_faces) {
         out_faces.clear();
         const cv::Rect surface({0,0}, frame_size);
-        for(const auto& rc : rois) {
+        for (const auto& rc : rois) {
             // Make square and enlarge face bounding box for more robust operation of face analytics networks
             const int bb_width = rc.width;
             const int bb_height = rc.height;
@@ -79,8 +80,8 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
     }
 };
 
-void rawOutputDetections(const cv::Mat  &ssd_result,
-                         const cv::Size &upscale,
+void rawOutputDetections(const cv::Mat&  ssd_result,
+                         const cv::Size& upscale,
                          const double detectionThreshold) {
     const auto &in_ssd_dims = ssd_result.size;
     CV_Assert(in_ssd_dims.dims() == 4u);
@@ -115,7 +116,7 @@ void rawOutputDetections(const cv::Mat  &ssd_result,
     }
 }
 
-void rawOutputAgeGender(const int idx, const cv::Mat &out_ages, const cv::Mat &out_genders) {
+void rawOutputAgeGender(const int idx, const cv::Mat& out_ages, const cv::Mat& out_genders) {
     const float *age_data = out_ages.ptr<float>();
     const float *gender_data = out_genders.ptr<float>();
 
@@ -126,9 +127,9 @@ void rawOutputAgeGender(const int idx, const cv::Mat &out_ages, const cv::Mat &o
 }
 
 void rawOutputHeadpose(const int idx,
-                       const cv::Mat &out_y_fc,
-                       const cv::Mat &out_p_fc,
-                       const cv::Mat &out_r_fc) {
+                       const cv::Mat& out_y_fc,
+                       const cv::Mat& out_p_fc,
+                       const cv::Mat& out_r_fc) {
     const float *y_data = out_y_fc.ptr<float>();
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
@@ -152,7 +153,7 @@ void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
     }
 }
 
-void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
+void rawOutputEmotions(const int idx, const cv::Mat& out_emotion) {
     const size_t emotionsVecSize = EMOTION_VECTOR.size();
 
     const float *em_data = out_emotion.ptr<float>();
@@ -168,6 +169,11 @@ void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
     }
 }
 
+void rawOutputSpoof(const int idx, const cv::Mat& out_landmark) {
+    const float as_r = out_landmark.ptr<float>()[0] * 100;
+    slog::debug << "[" << idx << "] element, real face probability = " << as_r << slog::endl;
+}
+
 float calcMean(const cv::Mat& src) {
     cv::Mat tmp;
     cv::cvtColor(src, tmp, cv::COLOR_BGR2GRAY);
@@ -176,12 +182,12 @@ float calcMean(const cv::Mat& src) {
     return static_cast<float>(mean[0]);
 }
 
-void faceDataUpdate(const cv::Mat &frame,
-                    Face::Ptr &face,
-                    const cv::Rect &face_rect,
-                    std::list<Face::Ptr>  &prev_faces,
-                    const std::vector<cv::Rect> &face_hub,
-                    size_t &id,
+void faceDataUpdate(const cv::Mat& frame,
+                    Face::Ptr& face,
+                    const cv::Rect& face_rect,
+                    std::list<Face::Ptr>& prev_faces,
+                    const std::vector<cv::Rect>& face_hub,
+                    size_t& id,
                     bool no_smooth) {
     // Face update
     cv::Rect rect = face_rect & cv::Rect({0, 0}, frame.size());
@@ -205,9 +211,9 @@ void faceDataUpdate(const cv::Mat &frame,
     }
 }
 
-void ageGenderDataUpdate(const Face::Ptr &face,
-                         const cv::Mat &out_age,
-                         const cv::Mat &out_gender) {
+void ageGenderDataUpdate(const Face::Ptr& face,
+                         const cv::Mat& out_age,
+                         const cv::Mat& out_gender) {
     const float *age_data =    out_age.ptr<float>();
     const float *gender_data = out_gender.ptr<float>();
 
@@ -218,10 +224,10 @@ void ageGenderDataUpdate(const Face::Ptr &face,
     face->updateAge(age);
 }
 
-void headPoseDataUpdate(const Face::Ptr &face,
-                        const cv::Mat &out_y_fc,
-                        const cv::Mat &out_p_fc,
-                        const cv::Mat &out_r_fc) {
+void headPoseDataUpdate(const Face::Ptr& face,
+                        const cv::Mat& out_y_fc,
+                        const cv::Mat& out_p_fc,
+                        const cv::Mat& out_r_fc) {
     const float *y_data = out_y_fc.ptr<float>();
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
@@ -229,7 +235,7 @@ void headPoseDataUpdate(const Face::Ptr &face,
     face->updateHeadPose(y_data[0], p_data[0], r_data[0]);
 }
 
-void emotionsDataUpdate(const Face::Ptr &face, const cv::Mat &out_emotion) {
+void emotionsDataUpdate(const Face::Ptr& face, const cv::Mat& out_emotion) {
     const float *em_data = out_emotion.ptr<float>();
 
     std::map<std::string, float> em_val_map;
@@ -240,14 +246,17 @@ void emotionsDataUpdate(const Face::Ptr &face, const cv::Mat &out_emotion) {
     face->updateEmotions(em_val_map);
 }
 
-void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
+void landmarksDataUpdate(const Face::Ptr& face, const cv::Mat& out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
-
     const size_t n_lm = 70;
-
     std::vector<float> normedLandmarks(&lm_data[0], &lm_data[n_lm]);
-
     face->updateLandmarks(normedLandmarks);
+}
+
+void ASpoofDataUpdate(const Face::Ptr& face, const cv::Mat& out_a_spoof) {
+    const float* as_data = out_a_spoof.ptr<float>();
+    const auto real_face_conf = as_data[0] * 100;
+    face->updateRealFaceConfidence(real_face_conf);
 }
 
 int main(int argc, char *argv[]) {
@@ -306,6 +315,11 @@ int main(int argc, char *argv[]) {
             outs += GOut(landmarks);
         }
 
+        cv::GArray<cv::GMat> a_spoof;
+        if (!FLAGS_m_am.empty()) {
+            a_spoof = cv::gapi::infer<ASpoof>(faces, in);
+            outs += GOut(a_spoof);
+        }
         auto pipeline = cv::GComputation(cv::GIn(in), std::move(outs));
         /** ---------------- End of graph ---------------- **/
         /** Configure networks **/
@@ -314,7 +328,7 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
-        slog::info << "The Face Detection model  " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
+        slog::info << "The Face Detection model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
         auto age_net = cv::gapi::ie::Params<AgeGender> {
             FLAGS_m_ag,                         // path to model
@@ -323,8 +337,7 @@ int main(int argc, char *argv[]) {
         }.cfgOutputLayers({ "age_conv3", "prob" });
         if (!FLAGS_m_ag.empty()) {
             slog::info << "The Age/Gender Recognition model " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
         }
 
@@ -335,21 +348,30 @@ int main(int argc, char *argv[]) {
         }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
         if (!FLAGS_m_hp.empty()) {
             slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Head Pose Estimation DISABLED." << slog::endl;
         }
 
         auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
-            FLAGS_m_lm,                        // path to model
-            fileNameNoExt(FLAGS_m_lm) + ".bin",// path to weights
-            FLAGS_d_lm                         // device to use
+            FLAGS_m_lm,                         // path to model
+            fileNameNoExt(FLAGS_m_lm) + ".bin", // path to weights
+            FLAGS_d_lm                          // device to use
         }.cfgOutputLayers({ "align_fc3" });
         if (!FLAGS_m_lm.empty()) {
             slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
+        }
+
+        auto am_net = cv::gapi::ie::Params<ASpoof> {
+            FLAGS_m_am,                         // path to model
+            fileNameNoExt(FLAGS_m_am) + ".bin", // path to weights
+            FLAGS_d_am                          // device to use
+        };
+        if (!FLAGS_m_am.empty()) {
+            slog::info << "The Anti Spoof model " << FLAGS_m_am << " is loaded to " << FLAGS_d_am << " device." << slog::endl;
+        } else {
+            slog::info << "Anti Spoof DISABLED." << slog::endl;
         }
 
         auto emo_net = cv::gapi::ie::Params<Emotions> {
@@ -359,14 +381,13 @@ int main(int argc, char *argv[]) {
         };
         if (!FLAGS_m_em.empty()) {
             slog::info << "The Emotions Recognition model " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Emotions Recognition DISABLED." << slog::endl;
         }
 
         /** Custom kernels **/
         auto kernels = cv::gapi::kernels<OCVPostProc>();
-        auto networks = cv::gapi::networks(det_net, age_net, hp_net, lm_net, emo_net);
+        auto networks = cv::gapi::networks(det_net, age_net, hp_net, lm_net, emo_net, am_net);
         auto stream = pipeline.compileStreaming(cv::compile_args(kernels, networks));
 
         /** Output containers for results **/
@@ -386,7 +407,14 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Mat> out_landmarks;
         if (!FLAGS_m_lm.empty()) out_vector += cv::gout(out_landmarks);
 
-        Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
+        std::vector<cv::Mat> out_a_spoof;
+        if (!FLAGS_m_am.empty()) out_vector += cv::gout(out_a_spoof);
+
+        Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(),
+                                                                  !FLAGS_m_em.empty(),
+                                                                  !FLAGS_m_hp.empty(),
+                                                                  !FLAGS_m_lm.empty(),
+                                                                  !FLAGS_m_am.empty());
 
         std::list<Face::Ptr> out_faces;
         std::ostringstream out;
@@ -404,8 +432,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Couldn't grab first frame");
         }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
-            FLAGS_limit);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);
 
@@ -476,12 +503,18 @@ int main(int argc, char *argv[]) {
                     if (FLAGS_r)
                         rawOutputLandmarks(i, out_landmarks[i]);
                 }
-                /** End of face postprocessing **/
 
+                if (!FLAGS_m_am.empty()) {
+                    ASpoofDataUpdate(face, out_a_spoof[i]);
+                    if (FLAGS_r)
+                        rawOutputSpoof(i, out_a_spoof[i]);
+                }
+
+                /** End of face postprocessing **/
                 out_faces.push_back(face);
             }
 
-            /** drawing faces **/
+            /** Drawing faces **/
             visualizer->draw(frame, out_faces);
 
             presenter->drawGraphs(frame);
