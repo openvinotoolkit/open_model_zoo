@@ -4,7 +4,7 @@
 
 This model is an instance segmentation network for one class - person.
 It is a PointRend based architecture with EfficientNet-B1 backbone, light-weight FPN, RPN,
-detection and segmentation heads. 
+detection and segmentation heads.
 
 ## Example
 
