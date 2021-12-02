@@ -34,7 +34,7 @@ void CnnDLSDKBase::Load() {
         cnnNetwork->reshape({{cnnNetwork->input().get_any_name(), input_shape}});
 
     // InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
-    ov::OutputVector in = cnnNetwork->inputs(); 
+    ov::OutputVector in = cnnNetwork->inputs();
     if (in.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
