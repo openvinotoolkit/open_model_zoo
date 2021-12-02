@@ -42,7 +42,7 @@ Sequence patch, name: `input`, shape: `1, 128`, format: `B, T`, where:
  - `B` - batch size
  - `T` - number of samples in patch
 
-input states, names: `inp_state_*`, should be filled by corresponding `out_state_*` from previous step
+input states, names: `inp_state_*`, should be filled by corresponding `out_state_*` from previous step. Total number of input states is 39
 
 ## Output
 
@@ -52,7 +52,7 @@ Sequence patch, name: `output`, shape: `1, 128`, format: `B, T`, where:
  - `T` - number of samples in patch
 Note: The output patch is "shifted" by 384 (24ms) samples in time. So output[0,i] sample is synced with input[0,i-384] sample
 
-output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step
+output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step. Total number of output states is 39
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
