@@ -699,7 +699,7 @@ class OpenVINOLauncher(Launcher):
         if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
             if len(data_shape) == len(layout):
                 data = np.transpose(data, layout)
-                if len(template) == layer_rang:
+                if template is not None and len(template) == layer_rang:
                     tmp_template = [1, ] + template
                     new_template = [tmp_template[l_dim] for l_dim in layout][1:]
                     template = new_template
