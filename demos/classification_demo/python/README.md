@@ -131,9 +131,9 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i
-                              INPUT [-d DEVICE] [--labels LABELS]lues showing.
+                              INPUT [-d DEVICE] [--labels LABELS]
                               [-topk {1,2,3,4,5,6,7,8,9,10}]
-                              [-nireq NUM_INFER_REQUESTS]ass
+                              [-nireq NUM_INFER_REQUESTS]
                               [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
                               [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
                               [--no_show]
@@ -201,11 +201,11 @@ Input transform options:
                         RGB.
   --mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES
                         Optional. Normalize input by subtracting the mean
-                        values per channel. Example: 255 255 255
+                        values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES
                         Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
-                        Example: 255 255 255
+                        Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message
