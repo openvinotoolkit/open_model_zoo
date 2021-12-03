@@ -13,6 +13,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+from .types import ListValue, NumericalValue, StringValue
+from .model import WrapperError
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
 
@@ -29,8 +31,7 @@ class DetectionModel(ImageModel):
         iou_threshold(float): threshold for NMS detection filtering
     '''
 
-    def __init__(self, model_adapter, resize_type=None,
-                 labels=None, threshold=None, iou_threshold=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''The Detection Model constructor
 
         Calls the ``ImageModel`` construtor first.
@@ -43,19 +44,27 @@ class DetectionModel(ImageModel):
         Raises:
             RuntimeError: If loaded model has more than one image inputs
         '''
-        super().__init__(model_adapter, resize_type=resize_type)
+        super().__init__(model_adapter, configuration, preload)
 
         if not self.image_blob_name:
-            raise RuntimeError("The DetectionModel wrappers supports only one image input, but {} found"
+            raise WrapperError(self.__model__, "The Wrapper supports only one image input, but {} found"
                                .format(len(self.image_blob_names)))
 
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
 
-        self.threshold = threshold
-        self.iou_threshold = iou_threshold
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumericalValue(default_value=0.5, description="Threshold value for detection box confidence"),
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(
+                description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter"
+            )
+        })
+
+        return parameters
 
     def _resize_detections(self, detections, meta):
         '''Resizes detection bounding boxes according to initial image size
@@ -83,7 +92,7 @@ class DetectionModel(ImageModel):
         elif self.resize_type == 'standard':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
-            raise RuntimeError('Unknown resize type {}'.format(self.resize_type))
+            raise WrapperError(self.__model__, 'Unknown resize type {}'.format(self.resize_type))
         return clip_detections(detections, original_shape)
 
 

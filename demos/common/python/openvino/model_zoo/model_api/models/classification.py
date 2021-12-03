@@ -15,20 +15,19 @@
 """
 
 import numpy as np
+
+from .types import NumericalValue, ListValue, StringValue
 from .utils import softmax
 
 from .image_model import ImageModel
 
 
 class Classification(ImageModel):
-    def __init__(self, model_adapter, topk = 1, labels = None, resize_type='crop'):
-        super().__init__(model_adapter, resize_type=resize_type)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 1)
-        self.topk = topk
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = self._load_labels(labels) if labels else None
+        if self.path_to_labels:
+            self.labels = self._load_labels(self.path_to_labels)
         self.out_layer_name = self._get_outputs()
 
     @staticmethod
@@ -60,6 +59,19 @@ class Classification(ImageModel):
                 raise RuntimeError("Model's number of classes and parsed "
                                 'labels must match ({} != {})'.format(layer_shape[1], len(self.labels)))
         return layer_name
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('crop')
+        parameters.update({
+            'topk': NumericalValue(value_type=int, default_value=1, min=1),
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(
+                description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter"
+            ),
+        })
+        return parameters
 
     def postprocess(self, outputs, meta):
         outputs = outputs[self.out_layer_name].squeeze()

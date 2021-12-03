@@ -172,8 +172,14 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model = BertQuestionAnswering(model_adapter, vocab, args.input_names, args.output_names,
-                                  args.max_answer_token_num, args.model_squad_ver)
+    config = {
+        'vocab': vocab,
+        'input_names': args.input_names,
+        'output_names': args.output_names,
+        'max_answer_token_num': args.max_answer_token_num,
+        'squad_ver': args.model_squad_ver
+    }
+    model = BertQuestionAnswering(model_adapter, config)
     if args.reshape:
         # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
         new_length = min(model.max_length, int(np.ceil((len(c_tokens[0]) + args.max_question_token_num) / 64) * 64))

@@ -17,20 +17,17 @@ import itertools
 import math
 import numpy as np
 
+from .types import NumericalValue
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection, nms
 
 
 class FaceBoxes(DetectionModel):
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.3):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        self._check_io_number(1, 2)
-        if not self.labels:
-            self.labels = ['Face']
+    __model__ = 'FaceBoxes'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
         self.min_sizes = [[32, 64, 128], [256], [512]]
         self.steps = [32, 64, 128]
@@ -41,16 +38,20 @@ class FaceBoxes(DetectionModel):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+            raise WrapperError(self.__model__, "Expected the same second dimension for boxes and scores, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
             return bboxes_blob_name, scores_blob_name
-        elif scores_layer.shape[2] == 4:
-            return scores_blob_name, bboxes_blob_name
-        else:
-            raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
-                               .format(bboxes_layer.shape, scores_layer.shape))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.3, description="Threshold for NMS filtering")
+        })
+        parameters['labels'].update_default_value(['Face'])
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)

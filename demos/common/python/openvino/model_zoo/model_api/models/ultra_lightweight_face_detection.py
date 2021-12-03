@@ -15,17 +15,17 @@
 """
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
+from .types import NumericalValue
 from .utils import Detection, nms
 
 
 class UltraLightweightFaceDetection(DetectionModel):
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'Ultra_LightWeight_Face_Detection'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 2)
         self.labels = ['Face']
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
@@ -34,7 +34,8 @@ class UltraLightweightFaceDetection(DetectionModel):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+            raise WrapperError(self.__model__,
+                               "Expected the same second dimension for boxes and scores, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
@@ -42,8 +43,20 @@ class UltraLightweightFaceDetection(DetectionModel):
         elif scores_layer.shape[2] == 4:
             return scores_blob_name, bboxes_blob_name
         else:
-            raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
+            raise WrapperError(self.__model__,
+                               "Expected shape [:,:,4] for bboxes output, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
+        })
+        parameters['resize_type'].update_default_value('standard')
+        parameters['threshold'].update_default_value(0.5)
+        parameters['labels'].update_default_value(['Face'])
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)

@@ -103,7 +103,8 @@ def main():
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    model = Deblurring(model_adapter, frame.shape)
+    model = Deblurring(model_adapter, preload=False)
+    model.reshape(frame.shape)
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)

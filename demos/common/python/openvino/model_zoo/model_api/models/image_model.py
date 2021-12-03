@@ -15,6 +15,7 @@
 """
 
 from .model import Model
+from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform
 
 
@@ -32,7 +33,7 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, model_adapter, resize_type=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''Image model constructor
 
         Calls the `Model` constructor first
@@ -41,22 +42,35 @@ class ImageModel(Model):
             model_adapter(ModelAdapter): allows working with the specified executor
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
         '''
-        super().__init__(model_adapter)
+        super().__init__(model_adapter, configuration, preload)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
             self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
 
         self.image_layout = 'NCHW'
-        if not resize_type:
-            self.logger.warning('The resizer isn\'t set. The "standard" will be used')
-            resize_type = 'standard'
-        self.resize_type = resize_type
         self.resize = RESIZE_TYPES[self.resize_type]
-        self.input_transform = InputTransform()
+        self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
 
-    def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
-        self.input_transform = InputTransform(reverse_input_channels, mean_values, scale_values)
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'mean_values': ListValue(
+                default_value=None,
+                description='Normalization values, which will be subtracted from image channels for image-input layer during preprocessing'
+            ),
+            'scale_values': ListValue(
+                default_value=None,
+                description='Normalization values, which will divide the image channels for image-input layer'
+            ),
+            'reverse_input_channels': BooleanValue(default_value=False, description='Reverse the channel order'),
+            'resize_type': StringValue(
+                default_value='standard', choices=tuple(RESIZE_TYPES.keys()),
+                description="Type of input image resizing"
+            ),
+        })
+        return parameters
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []

@@ -19,10 +19,13 @@ from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnsweri
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
+from .detection_model import DetectionModel
 from .detr import DETR
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .image_model import ImageModel
+from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
@@ -39,12 +42,15 @@ __all__ = [
     'CenterNet',
     'Classification',
     'CTPN',
-    'DetectionWithLandmarks',
     'Deblurring',
+    'DetectionModel',
+    'DetectionWithLandmarks',
     'DETR',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
+    'ImageModel',
     'InputTransform',
+    'Model',
     'MonoDepthModel',
     'OpenPose',
     'OutputTransform',

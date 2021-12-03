@@ -14,7 +14,9 @@
 from collections import namedtuple
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
+from .types import ListValue, NumericalValue
 from .utils import Detection, clip_detections, nms, resize_image, INTERPOLATION_TYPES
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
@@ -48,6 +50,8 @@ def sigmoid(x):
 
 
 class YOLO(DetectionModel):
+    __model__ = 'YOLO'
+
     class Params:
         # Magic numbers are copied from yolo samples
         def __init__(self, param, sides):
@@ -71,12 +75,8 @@ class YOLO(DetectionModel):
 
                 self.use_input_size = True  # Weak way to determine but the only one.
 
-    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'fit_to_window_letterbox'
-        super().__init__(model_adapter, resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.is_tiny = len(self.outputs) == 2  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
         self._check_io_number(1, -1)
@@ -102,11 +102,21 @@ class YOLO(DetectionModel):
                 bboxes = shape[1] // (cx*cy)
                 print(cx, cy, bboxes, self.w)
                 if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
-                    raise RuntimeError('The Yolo wrapper cannot reshape 2D output')
+                    raise WrapperError(self.__model__, 'The cannot reshape 2D output tensor into 4D')
                 shape = (shape[0], bboxes, cy, cx)
             params = self.Params(info.meta, shape[2:4])
             output_info[name] = (shape, params)
         return output_info
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
+        })
+        parameters['resize_type'].update_default_value('fit_to_window_letterbox')
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)
@@ -219,6 +229,8 @@ class YOLO(DetectionModel):
 
 
 class YoloV4(YOLO):
+    __model__ = 'YOLOV4'
+
     class Params:
         def __init__(self, classes, num, sides, anchors, mask):
             self.num = num
@@ -232,13 +244,8 @@ class YoloV4(YOLO):
             self.anchors = masked_anchors
             self.use_input_size = True
 
-    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox',
-                 labels=None, threshold=0.5, iou_threshold=0.5,
-                 anchors=None, masks=None):
-        self.anchors = anchors
-        self.masks = masks
-        super().__init__(model_adapter, resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
 
     def _get_output_info(self):
         if not self.anchors:
@@ -254,11 +261,19 @@ class YoloV4(YOLO):
             shape = layer.shape
             classes = shape[1] // num - 5
             if shape[1] % num != 0:
-                raise RuntimeError("The output blob {} has wrong 2nd dimension".format(name))
+                raise WrapperError(self.__model__, "The output blob {} has wrong 2nd dimension".format(name))
             yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
         return output_info
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'anchors': ListValue(description="List of custom anchor values"),
+            'masks': ListValue(description="List of mask, applied to anchors for each output layer"),
+        })
+        return parameters
 
     @staticmethod
     def _get_probabilities(prediction, classes):
@@ -276,6 +291,8 @@ class YoloV4(YOLO):
 
 
 class YOLOF(YOLO):
+    __model__ = 'YOLOF'
+
     class Params:
         def __init__(self, classes, num, sides, anchors):
             self.num = num
@@ -286,10 +303,8 @@ class YOLOF(YOLO):
             self.anchors = anchors
             self.use_input_size = True
 
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(model_adapter, resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
 
     def _get_output_info(self):
         anchors = ANCHORS['YOLOF']
@@ -302,6 +317,12 @@ class YOLOF(YOLO):
             yolo_params = self.Params(classes, num, shape[2:4], anchors)
             output_info[name] = (shape, yolo_params)
         return output_info
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        return parameters
 
     @staticmethod
     def _get_probabilities(prediction, classes):
@@ -320,15 +341,25 @@ class YOLOF(YOLO):
 
 
 class YOLOX(DetectionModel):
-    def __init__(self, model_adapter, labels=None, threshold=0.5, iou_threshold=0.65):
-        super().__init__(model_adapter, labels=labels,
-                         threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'YOLOX'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 1)
         self.output_blob_name = next(iter(self.outputs))
 
         self.expanded_strides = []
         self.grids = []
         self.set_strides_grids()
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.65, description="Threshold for NMS filtering"),
+        })
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def preprocess(self, inputs):
         image = inputs
@@ -398,10 +429,10 @@ class YOLOX(DetectionModel):
 
 
 class YoloV3ONNX(DetectionModel):
-    def __init__(self, model_adapter, resize_type='fit_to_window_letterbox', labels=None, threshold=0.5):
-        if not resize_type:
-            resize_type = 'fit_to_window_letterbox'
-        super().__init__(model_adapter, resize_type, labels=labels, threshold=threshold)
+    __model__ = 'YOLOv3-ONNX'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self._check_io_number(2, 3)
         self.classes = 80
@@ -419,12 +450,21 @@ class YoloV3ONNX(DetectionModel):
             elif layer.shape[1] == self.classes:
                 scores_blob_name = name
             else:
-                raise RuntimeError("Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
+                raise WrapperError(self.__model__,
+                                   "Expected shapes [:,:,4], [:,{},:] and [:,3] for outputs, but got {}, {} and {}"
                                    .format(self.classes, *[output.shape for output in self.outputs.values()]))
         if self.outputs[bboxes_blob_name].shape[1] != self.outputs[scores_blob_name].shape[2]:
-            raise RuntimeError("Expected the same dimension for boxes and scores, but got {} and {}".format(
-                self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
+            raise WrapperError(self.__model__,
+                               "Expected the same dimension for boxes and scores, but got {} and {}"
+                               .format(self.outputs[bboxes_blob_name].shape[1], self.outputs[scores_blob_name].shape[2]))
         return bboxes_blob_name, scores_blob_name, indices_blob_name
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('fit_to_window_letterbox')
+        parameters['threshold'].update_default_value(0.5)
+        return parameters
 
     def preprocess(self, inputs):
         image = inputs
