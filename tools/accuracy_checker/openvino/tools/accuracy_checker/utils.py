@@ -954,7 +954,7 @@ def parse_partial_shape(partial_shape):
     shape_list = []
     s_pos = 0
     e_pos = len(preprocessed)
-    while s_pos >= e_pos:
+    while s_pos <= e_pos:
         open_brace = preprocessed.find('[', s_pos, e_pos)
         if open_brace == -1:
             shape_list.extend(string_to_tuple(preprocessed[s_pos:], casting_type=int))
