@@ -49,7 +49,7 @@ def main():
         cwd=OMZ_ROOT,
     ).stdout.strip()
 
-    print('running miscellaneous checks...', flush=True)
+    print('running miscellaneousasdf checks...', flush=True)
 
     if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--', ':(exclude)data/dataset_classes/gnhk.txt'],
             cwd=OMZ_ROOT).returncode != 0:
