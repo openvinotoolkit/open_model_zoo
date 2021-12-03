@@ -130,8 +130,8 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}]
-                               -i INPUT [-d DEVICE] [--labels LABELS]
+usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INPUT
+                              [-d DEVICE] [--labels LABELS]
                               [-topk {1,2,3,4,5,6,7,8,9,10}]
                               [-nireq NUM_INFER_REQUESTS]
                               [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
