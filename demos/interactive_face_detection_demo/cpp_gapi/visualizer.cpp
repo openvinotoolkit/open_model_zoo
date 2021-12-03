@@ -198,11 +198,11 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     std::ostringstream out;
     if (_isAgeGenderEnabled) {
         out << (f->isMale() ? "Male" : "Female");
-        out << "," << f->getAge() << ",";
+        out << "," << f->getAge();
     }
 
     if (_isAntispoofingEnabled) {
-        out << (f->isReal() ? "real," : "spoof,");
+        out << (f->isReal() ? ",real" : ",spoof");
     }
 
     if (_isEmotionsEnabled) {
