@@ -415,3 +415,52 @@ class BaseTFModel:
     def automatic_model_search(network_info):
         model = Path(network_info['model'])
         return model
+
+
+class BaseCaffeModel:
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.network_info = network_info
+        self.launcher = launcher
+        self.default_model_suffix = suffix
+
+    def fit_to_input(self, data, layer_name, layout, precision, tmpl=None):
+        return self.launcher.fit_to_input(data, layer_name, layout, precision, template=tmpl)
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
+    def release(self):
+        del self.net
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.caffemodel'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = Path(weights)
+        accepted_suffixes = ['.prototxt']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.caffemodel']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights
