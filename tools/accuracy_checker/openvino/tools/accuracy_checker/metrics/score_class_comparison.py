@@ -19,6 +19,7 @@ from .metric import FullDatasetEvaluationMetric
 from ..config import NumberField
 from ..representation import QualityAssessmentAnnotation, QualityAssessmentPrediction
 
+
 class ScoreClassComparisonMetric(FullDatasetEvaluationMetric):
     __provider__ = 'score_class_comparison'
     annotation_types = (QualityAssessmentAnnotation, )

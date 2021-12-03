@@ -30,7 +30,6 @@ class ScorePerplexity(PerImageEvaluationMetric):
         super().__init__(*args, **kwargs)
         self.loss = 0
         self.total = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         def cross_entropy(logits, target):
@@ -59,3 +58,8 @@ class ScorePerplexity(PerImageEvaluationMetric):
     def reset(self):
         self.loss = 0
         self.total = 0
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'

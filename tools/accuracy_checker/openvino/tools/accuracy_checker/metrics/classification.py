@@ -371,7 +371,6 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.video_avg_prob = AverageProbMeter()
         self.previous_video_id = None
         self.previous_video_label = None
-        self.meta['names'] = ['clip_accuracy', 'video_accuracy']
 
     def update(self, annotation, prediction):
         if isinstance(annotation.identifier, list):
@@ -406,6 +405,10 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.video_avg_prob.reset()
         if self.profiler:
             self.profiler.reset()
+
+    @classmethod
+    def get_common_meta(cls):
+        return {'target': 'higher-better', 'names': ['clip_accuracy', 'video_accuracy']}
 
 
 class ClassificationF1Score(PerImageEvaluationMetric):
@@ -553,9 +556,6 @@ class AcerScore(PerImageEvaluationMetric):
     def configure(self):
         if isinstance(confusion_matrix, UnsupportedPackage):
             confusion_matrix.raise_error(self.__provider__)
-        self.meta.update({
-            'target': 'higher-worse'
-        })
         self.reset()
 
     def update(self, annotation, prediction):
@@ -579,3 +579,7 @@ class AcerScore(PerImageEvaluationMetric):
     def reset(self):
         self.targets = []
         self.results = []
+
+    @classmethod
+    def get_common_meta(cls):
+        return {'target': 'higher-worse'}

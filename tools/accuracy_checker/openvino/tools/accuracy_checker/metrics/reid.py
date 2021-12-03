@@ -816,8 +816,6 @@ class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
 
     def configure(self):
         self.similarity_score_func = similarity_score[self.get_value_from_config('similarity_distance')]
-        self.meta['scale'] = 1
-        self.meta['postfix'] = ''
 
     @staticmethod
     def get_pair_embeddings(annotations, predictions):
@@ -837,6 +835,13 @@ class BaseSentenceSimilarityMetric(FullDatasetEvaluationMetric):
         embeddings1, embeddings2, gt_score = self.get_pair_embeddings(annotations, predictions)
         sim_score = self.similarity_score_func(embeddings1, embeddings2)
         return sim_score, gt_score
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['scale'] = 1
+        meta['postfix'] = ''
+        return meta
 
 
 class SpearmanCorrelation(BaseSentenceSimilarityMetric):
