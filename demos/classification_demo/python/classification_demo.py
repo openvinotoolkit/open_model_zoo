@@ -92,11 +92,11 @@ def build_argparser():
                                            'BGR to RGB.')
     input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
                                       help='Optional. Normalize input by subtracting the mean '
-                                           'values per channel. Example: 255 255 255')
+                                           'values per channel. Example: 255.0 255.0 255.0')
     input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
                                       help='Optional. Divide input by scale values per channel. '
                                            'Division is applied after mean values subtraction. '
-                                           'Example: 255 255 255')
+                                           'Example: 255.0 255.0 255.0')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
