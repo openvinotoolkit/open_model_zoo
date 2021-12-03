@@ -91,7 +91,7 @@ def main():
         out_blob = args.output_blob
     else:
         assert len(net.outputs) == 1, "Demo supports only single output topologies"
-        out_blob = next(iter(net.output_info))
+        out_blob = next(iter(net.outputs))
 
     characters = get_characters(args)
     codec = CTCCodec(characters, args.designated_characters, args.top_k)

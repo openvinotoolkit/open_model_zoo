@@ -51,7 +51,7 @@ def main():
 
     print('running miscellaneous checks...', flush=True)
 
-    if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--'],
+    if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--', ':(exclude)data/dataset_classes/gnhk.txt'],
             cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
