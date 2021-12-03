@@ -52,6 +52,7 @@
 | instance-segmentation-security-0228 | YES |    |    |
 | instance-segmentation-security-1039 | YES |    |    |
 | instance-segmentation-security-1040 | YES |    |    |
+| instance-segmentation-person-0007 | YES |    |    |
 | landmarks-regression-retail-0009 | YES | YES | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
 | machine-translation-nar-de-en-0002 | YES | YES |    |
