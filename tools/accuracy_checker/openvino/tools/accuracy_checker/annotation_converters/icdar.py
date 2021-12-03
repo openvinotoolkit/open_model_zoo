@@ -190,7 +190,9 @@ class ICDAR13RecognitionDatasetConverter(FileBasedAnnotationConverter):
             if progress_callback is not None and line_id % progress_interval:
                 progress_callback(line_id / num_iterations * 100)
 
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
         meta = {'label_map': label_map, 'blank_label': len(label_map)}
-
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta

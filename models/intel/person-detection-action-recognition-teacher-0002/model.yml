@@ -19,27 +19,27 @@ task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
     size: 707408
-    sha384: 3b91813d9e2f9f485b9d9763a5adea5e7d0e064ada191fa8086972e8bdbb71bd035b3327442266d09139a214579d21d0
+    checksum: 3b91813d9e2f9f485b9d9763a5adea5e7d0e064ada191fa8086972e8bdbb71bd035b3327442266d09139a214579d21d0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800360
-    sha384: 71ebd437ed9e4d2b91dd49bcada2cc58b8772f7f4f911c69746d0f209e36d7e14fad450e4d6a944c3577312cf648e4ba
+    checksum: 71ebd437ed9e4d2b91dd49bcada2cc58b8772f7f4f911c69746d0f209e36d7e14fad450e4d6a944c3577312cf648e4ba
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
     size: 707164
-    sha384: 1fee57b9c17389400fb1a03f64cf07143799a2560717b855917f46a03680a149a47d7e992dc5bdf52e44ae27d8a4df2e
+    checksum: 1fee57b9c17389400fb1a03f64cf07143799a2560717b855917f46a03680a149a47d7e992dc5bdf52e44ae27d8a4df2e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900234
-    sha384: 54af2b0962fe3152160c07af8590a6fd5fac80e40ef1576a7668433988a14ffcca2cbf06993632fc777da7354dec6820
+    checksum: 54af2b0962fe3152160c07af8590a6fd5fac80e40ef1576a7668433988a14ffcca2cbf06993632fc777da7354dec6820
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.xml
     size: 1949822
-    sha384: 93896c4dd2a7759a7e5eb37d1778aff4d712acb230cf1d5a904787659007fe6adeac878c9f263ca2394ad3044380119f
+    checksum: 93896c4dd2a7759a7e5eb37d1778aff4d712acb230cf1d5a904787659007fe6adeac878c9f263ca2394ad3044380119f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.bin
     size: 2055068
-    sha384: 2f822911f38d56f7001a6ebb8377eba035c73e51163b3c7b381e8cee48b6a6d038624ff1eb463cd6eec9a18f286593cb
+    checksum: 2f822911f38d56f7001a6ebb8377eba035c73e51163b3c7b381e8cee48b6a6d038624ff1eb463cd6eec9a18f286593cb
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

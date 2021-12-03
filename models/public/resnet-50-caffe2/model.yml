@@ -20,11 +20,11 @@ task_type: classification
 files:
   - name: predict_net.pb
     size: 31649
-    sha384: 5d21f314c72263f17734e0ebab5fdb0d6f0d6107a2b7ea40842193e8f1fc430db4935b3f4cfc1e26794260edb420168d
+    checksum: 5d21f314c72263f17734e0ebab5fdb0d6f0d6107a2b7ea40842193e8f1fc430db4935b3f4cfc1e26794260edb420168d
     source: https://s3.amazonaws.com/download.caffe2.ai/models/resnet50/predict_net.pb
   - name: init_net.pb
     size: 128070759
-    sha384: 3f0dff89a72b22a460fb55b3e42699f2a40e89b525a21443282532422fa7f4c7e5ae7e82761117382e01b4d8b0afce81
+    checksum: 3f0dff89a72b22a460fb55b3e42699f2a40e89b525a21443282532422fa7f4c7e5ae7e82761117382e01b4d8b0afce81
     source: https://s3.amazonaws.com/download.caffe2.ai/models/resnet50/init_net.pb
 framework: caffe2
 quantizable: yes

@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/text-spotting-0005-detector.xml
     size: 787322
-    sha384: 2bf03b8bd98b1feb1daab5af6a678cdaf765e346e4a4d714db32be4f424fd2d466826bcf8da10ff6c77974314960fdf1
+    checksum: 2bf03b8bd98b1feb1daab5af6a678cdaf765e346e4a4d714db32be4f424fd2d466826bcf8da10ff6c77974314960fdf1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP32/text-spotting-0005-detector.xml
   - name: FP32/text-spotting-0005-detector.bin
     size: 103797576
-    sha384: 159e28ee53a290ee166d126c0ea988f3883d0672e5e0a9921877f706831c07bc7d46dcb718faf77d772cc19984469f93
+    checksum: 159e28ee53a290ee166d126c0ea988f3883d0672e5e0a9921877f706831c07bc7d46dcb718faf77d772cc19984469f93
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP32/text-spotting-0005-detector.bin
   - name: FP16/text-spotting-0005-detector.xml
     size: 787207
-    sha384: d31dfb7bf3990c067590ec5759dc968735f644f73b921a56a846420d3cf23c3572326fdbc8ab1d672a580dfca58199ef
+    checksum: d31dfb7bf3990c067590ec5759dc968735f644f73b921a56a846420d3cf23c3572326fdbc8ab1d672a580dfca58199ef
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP16/text-spotting-0005-detector.xml
   - name: FP16/text-spotting-0005-detector.bin
     size: 51899008
-    sha384: 923c409f4f8fc26c15026a1e2cfb6d5b4b5cd225a437a73d6d448858e1f42fdf910a1e6c27f1b0a6788562404f48f35f
+    checksum: 923c409f4f8fc26c15026a1e2cfb6d5b4b5cd225a437a73d6d448858e1f42fdf910a1e6c27f1b0a6788562404f48f35f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP16/text-spotting-0005-detector.bin
   - name: FP16-INT8/text-spotting-0005-detector.xml
     size: 1141663
-    sha384: 880ae56c5a3a7c9099a3a76ba7aa89d0ca399068dbf789daf4ec85e0ae7bf02ad800a72d837e55f046576c612055861f
+    checksum: 880ae56c5a3a7c9099a3a76ba7aa89d0ca399068dbf789daf4ec85e0ae7bf02ad800a72d837e55f046576c612055861f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP16-INT8/text-spotting-0005-detector.xml
   - name: FP16-INT8/text-spotting-0005-detector.bin
     size: 15611019
-    sha384: 0f5fc06a2377bff04b4fe110e255bfa429a55ff13e9af3d6a0c65591d6f8163a69a2e0525abedaa47af3ad942251134c
+    checksum: 0f5fc06a2377bff04b4fe110e255bfa429a55ff13e9af3d6a0c65591d6f8163a69a2e0525abedaa47af3ad942251134c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-detector/FP16-INT8/text-spotting-0005-detector.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

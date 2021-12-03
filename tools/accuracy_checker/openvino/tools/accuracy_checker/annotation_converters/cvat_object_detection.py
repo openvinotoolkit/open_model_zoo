@@ -112,3 +112,9 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
         meta['label_map'] = {value: key for key, value in label_to_id.items()}
 
         return label_to_id, meta
+
+    def get_meta(self):
+        annotation = read_xml(self.annotation_file)
+        annotation_meta = annotation.find('meta')
+        _, meta = self.generate_labels_mapping(annotation_meta)
+        return meta

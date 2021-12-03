@@ -101,9 +101,6 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         pass
 
     def _create_meta(self):
-        self.meta['scale'] = 1
-        self.meta['postfix'] = ''
-        self.meta['calculate_mean'] = False
         self.meta['names'] = list(self.labels.values())
         if self.calculate_average:
             self.meta['names'].append('average')
@@ -115,6 +112,14 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self._create_meta()
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['scale'] = 1
+        meta['postfix'] = ''
+        meta['calculate_mean'] = False
+        return meta
 
 
 class MultiLabelAccuracy(MultiLabelMetric):
@@ -249,6 +254,11 @@ class F1Score(PerImageEvaluationMetric):
         self.meta['names'] = list(self.labels.values())
         if self.calculate_average:
             self.meta['names'].append('average')
-        self.meta['scale'] = 1
-        self.meta['postfix'] = ''
-        self.meta['calculate_mean'] = False
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['scale'] = 1
+        meta['postfix'] = ''
+        meta['calculate_mean'] = False
+        return meta

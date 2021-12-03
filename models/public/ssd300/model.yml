@@ -37,7 +37,7 @@ task_type: detection
 files:
   - name: ssd300.tar.gz
     size: 97789219
-    sha384: 2c96cb2aeb08044b1475b5e80523f956317e764ceea8d603d12adebe00951ec25d38f5c060c1bf6d215792a355559c3c
+    checksum: 2c96cb2aeb08044b1475b5e80523f956317e764ceea8d603d12adebe00951ec25d38f5c060c1bf6d215792a355559c3c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/ssd300/models_VGGNet_VOC0712Plus_SSD_300x300_ft.tar.gz
 postprocessing:
   - $type: unpack_archive

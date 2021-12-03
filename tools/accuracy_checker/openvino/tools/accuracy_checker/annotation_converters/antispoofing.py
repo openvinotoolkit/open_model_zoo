@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .format_converter import ConverterReturn, FileBasedAnnotationConverter
+from .format_converter import ConverterReturn, FileBasedAnnotationConverter, verify_label_map
 from ..representation import ClassificationAnnotation
 from ..utils import read_json, check_file_existence
 from ..config import PathField, NumberField
+
 
 class AntispoofingDatasetConverter(FileBasedAnnotationConverter):
     __provider__ = 'antispoofing'
@@ -68,7 +69,7 @@ class AntispoofingDatasetConverter(FileBasedAnnotationConverter):
         annotation_tuple = self.generate_annotations()
         annotations = []
         content_errors = None if not check_content else []
-        meta = self.generate_meta()
+        meta = self.get_meta()
         num_iterations = len(annotations)
 
         for i, (img_name, label, bbox) in enumerate(annotation_tuple):
@@ -85,11 +86,15 @@ class AntispoofingDatasetConverter(FileBasedAnnotationConverter):
 
         return ConverterReturn(annotations, meta, content_errors)
 
-    def generate_meta(self):
+    def get_meta(self):
         if not self.meta:
             return {'label_map': {'real': 0, 'spoof': 1}}
         dataset_meta = read_json(self.meta)
         label_map = dataset_meta.get('label_map')
+        if label_map:
+            label_map = verify_label_map(label_map)
+        if not label_map and 'labels' in dataset_meta:
+            label_map = dict(enumerate(dataset_meta['labels']))
         dataset_meta['label_map'] = label_map or {'real': 0, 'spoof': 1}
         return dataset_meta
 

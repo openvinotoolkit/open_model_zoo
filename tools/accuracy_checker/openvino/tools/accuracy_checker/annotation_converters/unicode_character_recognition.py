@@ -57,17 +57,20 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
         num_iterations = len(original_annotations)
 
         for line_id, line in enumerate(original_annotations):
-            identifier, text = line.strip().split(',')
+            identifier, text = line.strip().split(',', 1)
             annotations.append(CharacterRecognitionAnnotation(identifier.strip(), text.strip()))
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(identifier))
             if progress_callback is not None and line_id % progress_interval:
                 progress_callback(line_id / num_iterations * 100)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         # index 0 is reserved for blank
-        label_map = {ind+1: key for ind, key in enumerate(self.supported_symbols)}
+        label_map = {ind + 1: key for ind, key in enumerate(self.supported_symbols)}
         meta = {'label_map': label_map, 'blank_label': 0}
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta
 
     @staticmethod
     def read_decoding_char_file(file: Union[str, Path], **kwargs):
@@ -75,7 +78,7 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
             lines = content.readlines()
             total_symbol = []
             for line in lines:
-                total_symbol.append(line.strip())
+                total_symbol.append(line.strip('\n'))
             supported_symbols = ''.join(total_symbol)
             return supported_symbols
 

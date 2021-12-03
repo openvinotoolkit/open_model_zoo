@@ -56,9 +56,9 @@ class ADE20kConverter(BaseFormatConverter):
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
             annotations.append(SegmentationAnnotation(identifier, annotation_path.name))
-        return ConverterReturn(annotations, self.read_meta(), content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
-    def read_meta(self):
+    def get_meta(self):
         categories_dist = DictReader(self.object_categories_file.open(), delimiter='\t')
         if self.num_classes:
             label_map = {int(category['Idx']): category['Name'] for category in categories_dist

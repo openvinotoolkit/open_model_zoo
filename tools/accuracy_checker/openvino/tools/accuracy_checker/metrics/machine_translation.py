@@ -82,6 +82,7 @@ SMOOTH_DEFAULTS = {
         'none': None,   # No value is required
 }
 
+
 class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
     __provider__ = 'bleu'
     annotation_types = (MachineTranslationAnnotation, )

@@ -18,19 +18,19 @@ task_type: feature_extraction
 files:
   - name: FP32/text-recognition-0015-encoder.xml
     size: 326445
-    sha384: 27441bbe12dee3d4c9dff93d25516883915ff89f1095cbc6674b0897d8d22da4ff986a809eaa5f79dccc2550a67f8dba
+    checksum: 27441bbe12dee3d4c9dff93d25516883915ff89f1095cbc6674b0897d8d22da4ff986a809eaa5f79dccc2550a67f8dba
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
   - name: FP32/text-recognition-0015-encoder.bin
     size: 1592248036
-    sha384: 8e54bd82adf517bb3e08a45d673a4b1626698819ce4b90c8a0cf702ffad1e89853327cc16e9e44b8a8d8dce58ee5dbdc
+    checksum: 8e54bd82adf517bb3e08a45d673a4b1626698819ce4b90c8a0cf702ffad1e89853327cc16e9e44b8a8d8dce58ee5dbdc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
   - name: FP16/text-recognition-0015-encoder.xml
     size: 326304
-    sha384: 3871c35a68ebe3f4f93e3c763cfe0c8a06b2e6d23c583e976eee57e79f0316587df9524448fdceafbf9f1bd579cad2d2
+    checksum: 3871c35a68ebe3f4f93e3c763cfe0c8a06b2e6d23c583e976eee57e79f0316587df9524448fdceafbf9f1bd579cad2d2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
   - name: FP16/text-recognition-0015-encoder.bin
     size: 796124044
-    sha384: b34ab56d2ff2fb80a6fac649aede61d382bb81543531ea4f0a24001c0cce698de2b31eebd381dc3861c96657df1b9bd9
+    checksum: b34ab56d2ff2fb80a6fac649aede61d382bb81543531ea4f0a24001c0cce698de2b31eebd381dc3861c96657df1b9bd9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

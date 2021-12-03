@@ -211,11 +211,7 @@ def main():
             mo_executable = shutil.which('mo')
 
             if mo_executable:
-                mo_cmd_prefix = [str(args.python), '--', mo_executable]
-                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
-                if mo_package_path is None:
-                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
-                mo_dir = mo_package_path.parent
+                mo_path = Path(mo_executable)
             else:
                 try:
                     mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
@@ -224,9 +220,15 @@ def main():
                         + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
         if mo_path is not None:
-            # run MO as a script
+            mo_path = mo_path.resolve()
             mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
-            mo_dir = mo_path.parent
+            if str(mo_path).lower().endswith('.py'):
+                mo_dir = mo_path.parent
+            else:
+                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                if mo_package_path is None:
+                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
+                mo_dir = mo_package_path.parent
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
 

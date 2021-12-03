@@ -30,6 +30,7 @@ try:
 except ImportError as import_error:
     nib = UnsupportedPackage("nibabel", import_error.msg)
 
+
 class BratsConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'brats'
     annotation_types = (BrainTumorSegmentationAnnotation, )
@@ -125,9 +126,9 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
 
                 annotations.append(annotation)
 
-        return ConverterReturn(annotations, self._get_meta(), content_check_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_check_errors)
 
-    def _get_meta(self):
+    def get_meta(self):
         if not self.labels_file:
             return None
         return {'label_map': dict(enumerate(read_txt(self.labels_file)))}
@@ -222,9 +223,9 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
             if progress_callback is not None and i % progress_interval == 0:
                 progress_callback(i / num_iterations * 100)
 
-        return ConverterReturn(annotations, self._get_meta(), check_content_errors)
+        return ConverterReturn(annotations, self.get_meta(), check_content_errors)
 
-    def _get_meta(self):
+    def get_meta(self):
         if not self.labels_file:
             return None
         return {'label_map': dict(enumerate(read_txt(self.labels_file)))}

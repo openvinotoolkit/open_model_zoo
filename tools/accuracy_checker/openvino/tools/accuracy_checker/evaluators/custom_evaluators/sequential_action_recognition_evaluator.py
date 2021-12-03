@@ -20,10 +20,13 @@ from functools import partial
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel, BaseONNXModel, BaseOpenCVModel, create_model, create_encoder
+from .base_models import (
+    BaseDLSDKModel, BaseCascadeModel, BaseONNXModel, BaseOpenCVModel, BaseOpenVINOModel,
+    create_model, create_encoder
+)
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
+from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, parse_partial_shape
 
 
 class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
@@ -83,12 +86,14 @@ class SequentialModel(BaseCascadeModel):
         self.processing_frames_buffer = []
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOpenVINO,
             'onnx_runtime': EncoderONNXModel,
             'opencv': EncoderOpenCVModel,
             'dummy': DummyEncoder
         }
         self._decoder_mapping = {
             'dlsdk': DecoderDLSDKModel,
+            'openvino': DecoderOpenVINOModel,
             'onnx_runtime': DecoderONNXModel,
             'opencv': DecoderOpenCVModel
         }
@@ -151,8 +156,24 @@ class EncoderDLSDKModel(BaseDLSDKModel):
             input_info = self.exec_network.input_info[self.input_blob].input_data
         else:
             input_info = self.exec_network.inputs[self.input_blob]
-        if not input_info.is_dynamic:
+        if (hasattr(input_info, 'is_dynamic') and not input_info.is_dynamic) or input_info.shape:
             input_data = input_data.reshape(input_info.shape)
+
+        return {self.input_blob: np.array(input_data)}
+
+
+class EncoderOpenVINO(BaseOpenVINOModel):
+    def predict(self, identifiers, input_data):
+        input_dict = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({key: data.shape for key, data in input_dict.items()})
+        return self.infer(input_dict)
+
+    def fit_to_input(self, input_data):
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
+        input_info = self.inputs[self.input_blob]
+        if not input_info.get_partial_shape().is_dynamic:
+            input_data = input_data.reshape(parse_partial_shape(input_info.shape))
 
         return {self.input_blob: np.array(input_data)}
 
@@ -180,6 +201,29 @@ class DecoderDLSDKModel(BaseDLSDKModel):
             if has_info else self.exec_network.inputs[self.input_blob]
         )
         if not input_info.is_dynamic:
+            input_data = np.reshape(input_data, input_info.shape)
+        return {self.input_blob: np.array(input_data)}
+
+
+class DecoderOpenVINOModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'classification'))
+        self.num_processing_frames = network_info.get('num_processing_frames', 16)
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
+
+    def predict(self, identifiers, input_data):
+        input_dict = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({key: data.shape for key, data in input_dict.items()})
+        raw_result = self.infer(input_dict)
+        result = self.adapter.process([raw_result], identifiers, [{}])
+
+        return raw_result, result
+
+    def fit_to_input(self, input_data):
+        input_info = self.inputs[self.input_blob]
+        if not input_info.get_partial_shape().is_dynamic:
             input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: np.array(input_data)}
 

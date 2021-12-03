@@ -28,11 +28,6 @@ class MpjpeMultiperson(PerImageEvaluationMetric):
     def __init__(self, config, dataset, name=None, state=None):
         super().__init__(config, dataset, name, state)
         self.per_image_mpjpe = []
-        self.meta.update({
-            'scale': 10,
-            'postfix': 'mm',
-            'target': 'higher-worse',
-        })
 
     def update(self, annotation, prediction):
         # since pelvis does not detected, remove it before evaluation
@@ -91,6 +86,16 @@ class MpjpeMultiperson(PerImageEvaluationMetric):
 
     def reset(self):
         self.per_image_mpjpe = []
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 10,
+            'postfix': 'mm',
+            'target': 'higher-worse',
+        })
+        return meta
 
 
 def _get_iou(box_a, box_b):

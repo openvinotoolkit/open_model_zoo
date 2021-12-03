@@ -22,14 +22,16 @@ class DatasetFolderConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'cls_dataset_folder'
 
     def convert(self, check_content=False, **kwargs):
-        classes = [directory.name for directory in self.data_dir.glob('*') if directory.is_dir()]
-        classes.sort()
+        meta = self.get_meta()
         annotations = []
-        label_map = {}
-        for idx, cls_dir in enumerate(classes):
-            label_map[idx] = cls_dir
+        for idx, cls_dir in meta['label_map'].items():
             for img in (self.data_dir / cls_dir).glob('*'):
                 identifier = '{}/{}'.format(cls_dir, img.name)
                 annotations.append(ClassificationAnnotation(identifier, idx))
 
-        return ConverterReturn(annotations, {'label_map': label_map}, None)
+        return ConverterReturn(annotations, meta, None)
+
+    def get_meta(self):
+        classes = [directory.name for directory in self.data_dir.glob('*') if directory.is_dir()]
+        classes.sort()
+        return {'label_map': dict(enumerate(classes))}

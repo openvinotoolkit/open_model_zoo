@@ -22,19 +22,19 @@ task_type: question_answering
 files:
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1180008
-    sha384: 88969417b0b7aec629eb2789c861281a2e275a9247127ca327993c6dfdc0ee483ee20d27b314759c5df6e43ae0b7b205
+    checksum: 88969417b0b7aec629eb2789c861281a2e275a9247127ca327993c6dfdc0ee483ee20d27b314759c5df6e43ae0b7b205
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41893204
-    sha384: c8f3d484b7464c50d4fc6e9b7089cc5fc3a0376f4a56176a975d5c0b708e76be65b00e2bd9968e6f86cf09767189225a
+    checksum: c8f3d484b7464c50d4fc6e9b7089cc5fc3a0376f4a56176a975d5c0b708e76be65b00e2bd9968e6f86cf09767189225a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1180008
-    sha384: bc1cc846e1485ff2e6d716e6fd0ac688c5e56debea59727bcf73e96d712314ad705c199feea40fe8e017bdf42c722500
+    checksum: bc1cc846e1485ff2e6d716e6fd0ac688c5e56debea59727bcf73e96d712314ad705c199feea40fe8e017bdf42c722500
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41736942
-    sha384: 96dd099688cea4b23f955c55a83026e81cf69095daaa83cab549bd108d67420bfd7690307087909d9eb73e88fe04e712
+    checksum: 96dd099688cea4b23f955c55a83026e81cf69095daaa83cab549bd108d67420bfd7690307087909d9eb73e88fe04e712
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

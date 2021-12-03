@@ -22,7 +22,7 @@ description: >-
 task_type: detection
 files:
   - name: tiny-yolov3-11.onnx
-    sha384: 997714d4731fd00d6bc8c5deb3b9f6ce5b43a21b3eade03bc636f9347c6daa6df9a6e27cc3ff22cbc5d0572eab57314e
+    checksum: 997714d4731fd00d6bc8c5deb3b9f6ce5b43a21b3eade03bc636f9347c6daa6df9a6e27cc3ff22cbc5d0572eab57314e
     size: 35511756
     source: https://media.githubusercontent.com/media/onnx/models/41ccf18ba5a815dab714899ac234e9b1e4293c20/vision/object_detection_segmentation/tiny-yolov3/model/tiny-yolov3-11.onnx
 model_optimizer_args:

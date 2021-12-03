@@ -139,8 +139,10 @@ def get_index_filtering(data, id_col, target_col, lookback):
                       data[id_col],
                       df_total_count], axis=1).reset_index(drop=True)
 
+
 def get_time_steps():
     return get_fixed_params()['total_time_steps']
+
 
 def get_num_encoder_steps():
     return get_fixed_params()['num_encoder_steps']

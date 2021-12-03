@@ -30,7 +30,7 @@ task_type: classification
 files:
   - name: a01_densenet-121_alpha-0.125.tar
     size: 32983040
-    sha384: 3893ca9f4dc2d352734e1d077beaed086743a83583080668870eb4436f221a3e25175a7d7e1231e0c96814e46faa79e2
+    checksum: 3893ca9f4dc2d352734e1d077beaed086743a83583080668870eb4436f221a3e25175a7d7e1231e0c96814e46faa79e2
     source: https://dl.fbaipublicfiles.com/octconv/ablation/a01_densenet-121_alpha-0.125.tar
 postprocessing:
   - $type: unpack_archive

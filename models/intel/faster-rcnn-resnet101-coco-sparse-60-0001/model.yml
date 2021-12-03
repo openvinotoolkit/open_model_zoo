@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
     size: 351050
-    sha384: fa224f29e51134564aab1cb4124db054540efcfba0bcfb4aee5b9aab0534233a893c629a81d1c3bb83d1c4edd0e3ee32
+    checksum: fa224f29e51134564aab1cb4124db054540efcfba0bcfb4aee5b9aab0534233a893c629a81d1c3bb83d1c4edd0e3ee32
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
     size: 211169988
-    sha384: 521b2177e450f204994bb655d454bb9b4dd619080fe6bb3b9207d81443c78a9f2bee613d4ff2811eb18c8eb3be6a5f58
+    checksum: 521b2177e450f204994bb655d454bb9b4dd619080fe6bb3b9207d81443c78a9f2bee613d4ff2811eb18c8eb3be6a5f58
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
   - name: FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
     size: 350890
-    sha384: 6e3fe4ae275ffaeb06b05f27c0906b352dcc5adf3cf7704187d7f1206581245b26dce3a18154f2f0ff85f9aa7864c138
+    checksum: 6e3fe4ae275ffaeb06b05f27c0906b352dcc5adf3cf7704187d7f1206581245b26dce3a18154f2f0ff85f9aa7864c138
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
     size: 105585134
-    sha384: ffe322db6d6b094a0d35d1a2b5e1bb702cbf9c7e10bd5db972181031637508283b8e2517883810599d18efd5f648a73e
+    checksum: ffe322db6d6b094a0d35d1a2b5e1bb702cbf9c7e10bd5db972181031637508283b8e2517883810599d18efd5f648a73e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
   - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
     size: 871790
-    sha384: 475c8b9827e0372c552f3097e623cd5bcc566d32a44749e276d5f5685986989d93f0f600220d2d53caa8dc7a14564049
+    checksum: 475c8b9827e0372c552f3097e623cd5bcc566d32a44749e276d5f5685986989d93f0f600220d2d53caa8dc7a14564049
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
     size: 54722851
-    sha384: b03d8f11bc52c87ed33ee41dc1adf20c9629ee9ee5fc4fe6a53176842092d9496f6fdab85dfb3087d6998a68a3b17113
+    checksum: b03d8f11bc52c87ed33ee41dc1adf20c9629ee9ee5fc4fe6a53176842092d9496f6fdab85dfb3087d6998a68a3b17113
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

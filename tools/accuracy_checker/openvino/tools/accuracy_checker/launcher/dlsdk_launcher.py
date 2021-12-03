@@ -27,7 +27,6 @@ from .dlsdk_launcher_config import (
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
-    parse_partial_shape,
     automatic_model_search
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
@@ -38,7 +37,8 @@ from ..utils import (
     contains_any,
     string_to_tuple,
     get_or_parse_value,
-    UnsupportedPackage
+    UnsupportedPackage,
+    parse_partial_shape
 )
 from .launcher import Launcher
 from ..logging import print_info

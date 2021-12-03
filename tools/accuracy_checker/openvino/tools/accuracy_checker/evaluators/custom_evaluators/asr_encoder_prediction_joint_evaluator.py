@@ -21,9 +21,11 @@ import numpy as np
 
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, read_pickle
+from ...utils import contains_all, contains_any, read_pickle, parse_partial_shape
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, create_model, create_encoder
+from .base_models import (
+    BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, BaseONNXModel, create_model, create_encoder
+)
 
 
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
@@ -59,15 +61,18 @@ class ASRModel(BaseCascadeModel):
             raise ConfigError('network_info should contain encoder, prediction and joint fields')
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOVMOdel,
             'onnx_runtime': EncoderONNXModel,
             'dummy': DummyEncoder
         }
         self._prediction_mapping = {
             'dlsdk': PredictionDLSDKModel,
+            'openvino': PredictionOVModel,
             'onnx_runtime': PredictionONNXModel
         }
         self._joint_mapping = {
             'dlsdk': JointDLSDKModel,
+            'openvino': JointOVModel,
             'onnx_runtime': JointONNXModel
         }
         self.encoder = create_encoder(network_info['encoder'], launcher, self._encoder_mapping, delayed_model_loading)
@@ -249,10 +254,74 @@ class CommonDLSDKModel(BaseDLSDKModel):
                 )
 
 
+class CommonOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.input_layers = network_info.get('inputs', self.default_input_layers)
+        self.output_layers = network_info.get('outputs', self.default_output_layers)
+        if len(self.input_layers) == 1:
+            self.input_blob = self.input_layers[0]
+        if len(self.output_layers) == 1:
+            self.output_blob = self.output_layers[0]
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data, callback=None):
+        input_data = self.fit_to_input(input_data)
+        results = self.infer(input_data)
+        return results, results[self.output_blob]
+
+    def fit_to_input(self, input_data):
+        if isinstance(input_data, dict):
+            fitted = {}
+            for input_blob in self.inputs.keys():
+                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+        else:
+            fitted = self.fit_one_input(self.input_blob, input_data)
+        return fitted
+
+    def fit_one_input(self, input_blob, input_data):
+        if (input_blob in self.dynamic_inputs or parse_partial_shape(
+            self.inputs[input_blob].get_partial_shape()) != np.shape(input_data)):
+            self._reshape_input({input_blob: np.shape(input_data)})
+
+        return {input_blob: np.array(input_data)}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(self.exec_network.outputs)).get_node().friendly_name
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            for idx, inp in enumerate(self.input_layers):
+                self.input_layers[idx] = (
+                    '_'.join([self.default_model_suffix, inp])
+                    if with_prefix else inp.split(self.default_model_suffix)[-1]
+                )
+            for idx, out in enumerate(self.output_layers):
+                self.output_layers[idx] = (
+                    '_'.join([self.default_model_suffix, out])
+                    if with_prefix else out.split(self.default_model_suffix)[-1]
+                )
+
+
 class EncoderDLSDKModel(CommonDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_input_layers = []
         self.default_output_layers = ['472']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class EncoderOVMOdel(CommonOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = []
+        self.default_output_layers = ['472/sink_port_0']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -263,7 +332,21 @@ class PredictionDLSDKModel(CommonDLSDKModel):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
+class PredictionOVModel(CommonOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['input.1', '1', '2']
+        self.default_output_layers = ['151/sink_port_0', '152/sink_port_0', '153/sink_port_0']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
 class JointDLSDKModel(CommonDLSDKModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['0', '1']
+        self.default_output_layers = []
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class JointOVModel(CommonOVModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_input_layers = ['0', '1']
         self.default_output_layers = []

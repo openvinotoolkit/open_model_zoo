@@ -26,11 +26,11 @@ task_type: classification
 files:
   - name: vgg19.prototxt
     size: 5499
-    sha384: f3c8a34cbaba8c92fbd7744f4a26d244555e1b9a541fef3294622483b316465dad2363bdbab548dfd6733da66213a2d3
+    checksum: f3c8a34cbaba8c92fbd7744f4a26d244555e1b9a541fef3294622483b316465dad2363bdbab548dfd6733da66213a2d3
     source: https://gist.githubusercontent.com/ksimonyan/3785162f95cd2d5fee77/raw/f02f8769e64494bcd3d7e97d5d747ac275825721/VGG_ILSVRC_19_layers_deploy.prototxt
   - name: vgg19.caffemodel
     size: 574671192
-    sha384: 86b83739d448a81ddc927922d4d7581e06113478106b59480097b02cc63ff51c9da7c3cd8a865b08946d07d0281d5b2e
+    checksum: 86b83739d448a81ddc927922d4d7581e06113478106b59480097b02cc63ff51c9da7c3cd8a865b08946d07d0281d5b2e
     source: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_19_layers.caffemodel
 postprocessing:
   - $type: regex_replace

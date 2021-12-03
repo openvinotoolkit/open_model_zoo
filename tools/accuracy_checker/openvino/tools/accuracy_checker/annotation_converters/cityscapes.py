@@ -123,9 +123,9 @@ class CityscapesConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
-        return ConverterReturn(annotations, self.generate_meta(), content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
-    def generate_meta(self):
+    def get_meta(self):
         if self.dataset_meta_file is not None:
             meta = read_json(self.dataset_meta_file)
             if 'label_map' in meta:

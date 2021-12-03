@@ -22,7 +22,7 @@ task_type: detection
 files:
   - name: resnet34-ssd1200.onnx
     size: 80363696
-    sha384: 754dd59fdb244e6a93f6173efe26c45bce804305f71b1d0a8a3eb555b3a120894658a0b97475840b93f3c2a30c5efd99
+    checksum: 754dd59fdb244e6a93f6173efe26c45bce804305f71b1d0a8a3eb555b3a120894658a0b97475840b93f3c2a30c5efd99
     source: https://zenodo.org/record/3228411/files/resnet34-ssd1200.onnx
 model_optimizer_args:
   - --reverse_input_channels

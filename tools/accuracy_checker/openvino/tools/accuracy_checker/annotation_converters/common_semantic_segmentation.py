@@ -87,6 +87,9 @@ class CommonSegmentationConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         dataset_meta = None
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
@@ -97,5 +100,4 @@ class CommonSegmentationConverter(BaseFormatConverter):
                     warning("Information about dataset labels is provided. Please provide it for metric calculation.")
             else:
                 dataset_meta['label_map'] = verify_label_map(dataset_meta['label_map'])
-
-        return ConverterReturn(annotations, dataset_meta, content_errors)
+        return dataset_meta

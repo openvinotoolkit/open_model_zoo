@@ -79,8 +79,9 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
                     max(int(row["X"]), 0), max(int(row["Y"]), 0), max(int(row["W"]), 0), max(int(row["H"]), 0)
                 )
 
-        meta = {
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
+        return {
             'label_map': {0: 'Left Eye', 1: 'Right Eye', 2: 'Nose', 3: 'Left Mouth Corner', 4: 'Right Mouth Corner'}
         }
-
-        return ConverterReturn(annotations, meta, content_errors)

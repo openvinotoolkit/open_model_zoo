@@ -793,7 +793,7 @@ def merge_entry_paths(keys, value, args, value_id=0):
             selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
             prefix_path = selected_argument
             if not selected_argument.is_dir():
-                if argument in ALLOW_FILE_OR_DIR:
+                if arg_candidate in ALLOW_FILE_OR_DIR:
                     prefix_path = selected_argument.parent
                 else:
                     raise ConfigError('argument: {} should be a directory'.format(argument))

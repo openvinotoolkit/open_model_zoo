@@ -20,15 +20,13 @@ from pathlib import Path
 import re
 import warnings
 import numpy as np
-from openvino.ie_api import Core, AsyncInferQueue
-from openvino.pyopenvino import get_version
-from openvino.impl import Type, PartialShape
+from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape
+from openvino.runtime.impl import Type
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
-    parse_partial_shape,
     automatic_model_search
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
@@ -40,10 +38,10 @@ from ..utils import (
     contains_any,
     string_to_tuple,
     get_or_parse_value,
+    parse_partial_shape,
 )
 from .launcher import Launcher
 from ..logging import print_info
-from .input_feeder import PRECISION_TO_DTYPE
 
 
 format_map = {
@@ -193,11 +191,14 @@ class OpenVINOLauncher(Launcher):
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
-                input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
+                input_shapes = {
+                    layer_name: data.shape for layer_name, data in infer_inputs.items()
+                }
                 self._reshape_input(input_shapes)
             if self.infer_request is None:
                 self.infer_request = self.exec_network.create_infer_request()
-            outputs = self.infer_request.infer(inputs=infer_inputs)
+            feed_dict = {self.input_to_tensor_name[layer_name]: data for layer_name, data in infer_inputs.items()}
+            outputs = self.infer_request.infer(inputs=feed_dict)
             results.append({
                 out_node.get_node().friendly_name: out_res
                 for out_node, out_res in zip(self.exec_network.outputs, outputs)
@@ -214,10 +215,13 @@ class OpenVINOLauncher(Launcher):
 
     def _predict_sequential(self, inputs, metadata=None, **kwargs):
         lstm_inputs_feed = self._fill_lstm_inputs()
+        if not self.infer_request:
+            self.infer_request = self.exec_network.create_infer_request()
         results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
-            out_tensors = self.exec_network.infer_new_request(feed_dict)
+            infer_inputs = {self.input_to_tensor_name[layer_name]: data for layer_name, data in feed_dict.items()}
+            out_tensors = self.infer_request.infer(infer_inputs)
             output_result = {
                 out_node.get_node().friendly_name: out_tensor
                 for out_node, out_tensor in zip(self.exec_network.outputs, out_tensors)
@@ -236,9 +240,10 @@ class OpenVINOLauncher(Launcher):
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
+        feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}
         if metadata is not None:
             self._fill_meta(metadata)
-        ir.infer(infer_inputs, metadata, context)
+        ir.infer(feed_dict, metadata, context)
 
     def _fill_meta(self, metadata):
         for meta_ in metadata:
@@ -319,11 +324,16 @@ class OpenVINOLauncher(Launcher):
             del self.exec_network
         if self.infer_request is not None:
             self.infer_request = None
-        self.network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
+        self.network.reshape({self.input_to_tensor_name[k]: PartialShape(shape) for k, shape in shapes.items()})
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         if self.dyn_input_layers and make_dynamic:
             return
         self.exec_network = self.ie_core.compile_model(self.network, self.device)
+
+    @staticmethod
+    def reshape_network(network, shapes):
+        network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
+        return network
 
     def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
@@ -523,13 +533,14 @@ class OpenVINOLauncher(Launcher):
             self.network = network
         if self.network is not None:
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
+        self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
 
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
             if log:
-                self._print_input_output_info()
+                self.print_input_output_info(self.network if self.network is not None else self.exec_network)
             if preprocessing:
                 self._set_preprocess(preprocessing)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
@@ -543,7 +554,7 @@ class OpenVINOLauncher(Launcher):
         self._set_input_shape()
         self.try_to_set_default_layout()
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
-        self._print_input_output_info()
+        self.print_input_output_info(self.network if self.network is not None else self.exec_network)
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
         if self.network:
@@ -571,6 +582,13 @@ class OpenVINOLauncher(Launcher):
                 partial_shapes[input_node.friendly_name] = input_shape
 
         return inputs_with_undefined_shapes, partial_shapes
+
+    @staticmethod
+    def get_input_tensor_name_mapping(network):
+        inputs_mapping = {}
+        for input_node in network.inputs:
+            inputs_mapping[input_node.get_node().friendly_name] = input_node.get_tensor().get_any_name()
+        return inputs_mapping
 
     @property
     def dyn_batch_only(self):
@@ -772,21 +790,23 @@ class OpenVINOLauncher(Launcher):
     def _fill_lstm_inputs(self, infer_outputs=None):
         feed_dict = {}
         for lstm_var, output_layer in self._lstm_inputs.items():
-            layer_shape = self.inputs[lstm_var].shape
+            layer_shape = parse_partial_shape(self.inputs[lstm_var].partial_shape)
+            if infer_outputs and output_layer not in infer_outputs:
+                raise 'Output node with name {} not found'.format(output_layer)
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
-                layer_shape, dtype=PRECISION_TO_DTYPE[self.inputs[lstm_var].precision]
+                layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()]
             )
             feed_dict[lstm_var] = input_data
         return feed_dict
 
-    def _print_input_output_info(self):
-        print_info('Input info:')
-        if self.network:
-            network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
+    @staticmethod
+    def print_input_output_info(network, prefix=None):
+        if prefix:
+            print_info('{} - Input info:'.format(prefix))
         else:
-            network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
+            print_info('Input info:')
+        network_inputs = network.inputs
+        network_outputs = network.outputs
         for input_info in network_inputs:
             input_node = input_info.get_node()
             print_info('\tLayer name: {}'.format(input_node.friendly_name))
@@ -800,7 +820,6 @@ class OpenVINOLauncher(Launcher):
             print_info('\tprecision: {}'.format(precision))
             shape = parse_partial_shape(out_node.get_output_partial_shape(0))
             print_info('\tshape: {}\n'.format(shape))
-            self._output_precisions[out_node.friendly_name] = format_map[precision]
 
     def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
@@ -856,10 +875,11 @@ class OpenVINOLauncher(Launcher):
                                  inputs, batch_meta, batch_id, batch_input_ids,
                                  batch_annotation, batch_identifiers):
         infer_inputs = inputs[0]
+        feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}
         if batch_meta is not None:
             self._fill_meta(batch_meta)
         context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
-        return infer_inputs, context
+        return feed_dict, context
 
     def get_result_from_request(self, request):
         return [{

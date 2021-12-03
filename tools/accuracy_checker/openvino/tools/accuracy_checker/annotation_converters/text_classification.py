@@ -190,7 +190,10 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             if progress_callback and example_id % progress_interval == 0:
                 progress_callback(example_id * 100 / num_iter)
 
-        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
+        return {'label_map': self.label_map}
 
 
 class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
@@ -318,7 +321,10 @@ class BertXNLITFRecordConverter(BertTextClassificationTFRecordConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations, _, errors = super().convert(check_content, progress_callback, progress_interval, **kwargs)
 
-        return ConverterReturn(annotations, {'label_map': dict(enumerate(labels['xnli']))}, errors)
+        return ConverterReturn(annotations, self.get_meta(), errors)
+
+    def get_meta(self):
+        return {'label_map': dict(enumerate(labels['xnli']))}
 
 
 class MRPCConverter(BaseGLUETextClassificationConverter):
@@ -454,7 +460,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
             if progress_callback and example_id % progress_interval == 0:
                 progress_callback(example_id * 100 / num_iter)
 
-        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
 
 
 class ColumnDataset(BaseGLUETextClassificationConverter):

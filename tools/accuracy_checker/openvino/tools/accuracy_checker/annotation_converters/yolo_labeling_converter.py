@@ -41,6 +41,7 @@ class YOLOLabelingConverter(BaseFormatConverter):
         self.labels_file = self.get_value_from_config('labels_file')
         self.images_suffix = self.get_value_from_config('images_suffix')
         self.max_label = 0
+        self._max_label_finalized = False
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = None if not check_content else []
@@ -63,8 +64,9 @@ class YOLOLabelingConverter(BaseFormatConverter):
                 progress_callback(idx * 100 / num_iterations)
 
             self.max_label = max(self.max_label, max_label_itr)
+        self._max_label_finalized = True
 
-        meta = self.generate_meta()
+        meta = self.get_meta()
 
         return ConverterReturn(annotations, meta, content_errors)
 
@@ -82,9 +84,11 @@ class YOLOLabelingConverter(BaseFormatConverter):
             y_maxs.append(y_max)
         return np.array(labels), np.array(x_mins), np.array(y_mins), np.array(x_maxs), np.array(y_maxs)
 
-    def generate_meta(self):
-        labels = read_txt(self.labels_file) if self.labels_file else range(self.max_label + 1)
-        label_map = {}
-        for idx, label_name in enumerate(labels):
-            label_map[idx] = label_name
+    def get_meta(self):
+        labels = read_txt(self.labels_file) if self.labels_file else None
+        if labels is None:
+            if not self._max_label_finalized:
+                return None
+            labels = range(self.max_label + 1)
+        label_map = dict(enumerate(labels))
         return {'label_map': label_map}

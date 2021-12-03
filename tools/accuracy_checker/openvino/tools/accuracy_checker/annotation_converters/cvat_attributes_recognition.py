@@ -100,3 +100,15 @@ class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
         if not label:
             raise ConfigError('{} does not present in annotation'.format(self.label))
         return label[0]
+
+    def get_meta(self):
+        annotation = read_xml(self.annotation_file)
+        meta = annotation.find('meta')
+        attribute_values_mapping = {}
+        label = self.select_label(meta)
+        for attribute in label.iter('attribute'):
+            label_to_id = {
+                label: idx for idx, label in enumerate(attribute.find('values').text.split('\n'))
+            }
+            attribute_values_mapping[attribute.find('name').text] = label_to_id
+        return self.generate_meta(attribute_values_mapping)

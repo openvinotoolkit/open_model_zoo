@@ -69,9 +69,11 @@ class CVATTextRecognitionConverter(FileBasedAnnotationConverter):
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / size)
 
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
-        meta = {'label_map': label_map, 'blank_label': len(label_map)}
-        return ConverterReturn(annotations, meta, content_errors)
+        return {'label_map': label_map, 'blank_label': len(label_map)}
 
     @staticmethod
     def select_label(meta):

@@ -174,3 +174,8 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         meta['label_map'] = label_map
 
         return class_to_ind, meta
+
+    def get_meta(self):
+        root = read_xml(self.annotation_file)
+        _, meta = self.generate_meta(root)
+        return meta

@@ -89,9 +89,8 @@ class CVATPoseEstimationConverter(FileBasedAnnotationConverter):
 
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / size)
-        meta = {'label_map': {1: 'person'}}
 
-        return ConverterReturn(annotations, meta, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
     @staticmethod
     def get_pose(image_annotation, num_landmarks):
@@ -103,3 +102,7 @@ class CVATPoseEstimationConverter(FileBasedAnnotationConverter):
             landmarks_y[idx] = float(y)
 
         return landmarks_x, landmarks_y
+
+    def get_meta(self):
+        meta = {'label_map': {1: 'person'}}
+        return meta

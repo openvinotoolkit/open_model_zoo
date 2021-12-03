@@ -18,7 +18,7 @@ from functools import partial
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model
+from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import contains_all, extract_image_representations
@@ -94,13 +94,16 @@ class SequentialModel(BaseCascadeModel):
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
         self._duration_mapping = {
-            'dlsdk': TTSDLSDKModel
+            'dlsdk': TTSDLSDKModel,
+            'openvino': TTSOVModel
         }
         self._regression_mapping = {
-            'dlsdk': RegressionDLSDKModel
+            'dlsdk': RegressionDLSDKModel,
+            'openvino': RegressionOVModel
         }
         self._melgan_mapping = {
-            'dlsdk': MelganDLSDKModel
+            'dlsdk': MelganDLSDKModel,
+            'openvino': MelganOVModel
         }
         self.forward_tacotron_duration = create_model(
             network_info.get('forward_tacotron_duration', {}), launcher, self._duration_mapping,
@@ -282,6 +285,16 @@ class TTSDLSDKModel(BaseDLSDKModel):
         pass
 
 
+class TTSOVModel(BaseOpenVINOModel):
+    def predict(self, identifiers, input_data):
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
+        return self.infer(input_data)
+
+    def set_input_and_output(self):
+        pass
+
+
 class RegressionDLSDKModel(TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         self.max_len = int(network_info['max_regression_len'])
@@ -290,6 +303,19 @@ class RegressionDLSDKModel(TTSDLSDKModel):
 
 
 class MelganDLSDKModel(TTSDLSDKModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.max_len = int(network_info['max_mel_len'])
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class RegressionOVModel(TTSOVModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.max_len = int(network_info['max_regression_len'])
+        self.regression_input = network_info['inputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class MelganOVModel(TTSOVModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         self.max_len = int(network_info['max_mel_len'])
         super().__init__(network_info, launcher, suffix, delayed_model_loading)

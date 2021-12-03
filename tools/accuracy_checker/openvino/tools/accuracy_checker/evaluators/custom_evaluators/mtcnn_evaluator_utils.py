@@ -1,3 +1,19 @@
+"""
+Copyright (c) 2018-2021 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import cv2
 import numpy as np
 
@@ -5,7 +21,10 @@ from ...adapters import MTCNNPAdapter
 
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
-    score = out[0][outputs_mapping['probability_out']][:, 1]
+    prob_out = outputs_mapping['probability_out']
+    if prob_out not in out[0]:
+        prob_out = prob_out + '/sink_port_0' if '/sink_port_0' not in prob_out else prob_out.replace('/sink_port_0', '')
+    score = out[0][prob_out][:, 1]
     pass_t = np.where(score > 0.7)[0]
     removed_boxes = [i for i in range(previous_stage_predictions[0].size) if i not in pass_t]
     previous_stage_predictions[0].remove(removed_boxes)
@@ -15,7 +34,12 @@ def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_ma
         previous_stage_predictions[0].x_maxs, previous_stage_predictions[0].y_maxs,
         previous_stage_predictions[0].scores
     ]
-    mv = out[0][outputs_mapping['region_out']][pass_t]
+    region_out = outputs_mapping['region_out']
+    if region_out not in out[0]:
+        region_out = (
+            region_out + '/sink_port_0' if '/sink_port_0' not in region_out else region_out.replace('/sink_port_0', '')
+        )
+    mv = out[0][region_out][pass_t]
     if iou_type:
         previous_stage_predictions[0], peek = nms(previous_stage_predictions[0], threshold, iou_type)
         bboxes = np.c_[

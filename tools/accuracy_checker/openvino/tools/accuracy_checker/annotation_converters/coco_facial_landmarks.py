@@ -39,8 +39,8 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    @classmethod
-    def _collectImageIds(cls, data):
+    @staticmethod
+    def _collect_image_ids(data):
         result = {}
         for itm in data:
             img_name = itm["file_name"]
@@ -49,12 +49,11 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
 
         return result
 
-
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         with open(self.annotation_file, encoding='UTF-8') as f:
             data = json.load(f)
         coco_ann = data["annotations"]
-        id2name = self._collectImageIds(data["images"])
+        id2name = self._collect_image_ids(data["images"])
         num_landmarks = 98
         annotations = []
         for ann_id, ann in enumerate(coco_ann[1:]):
