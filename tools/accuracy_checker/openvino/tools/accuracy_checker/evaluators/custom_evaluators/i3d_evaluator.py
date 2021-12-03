@@ -26,6 +26,14 @@ from ...utils import extract_image_representations, contains_all, parse_partial_
 from ...preprocessor import Crop, Resize
 
 
+def create_model(model_config, launcher, data_source, launcher_model_mapping, suffix=None, delayed_model_loading=False):
+    framework = launcher.config['framework']
+    model_class = launcher_model_mapping.get(framework)
+    if not model_class:
+        raise ValueError('model for framework {} is not supported'.format(framework))
+    return model_class(model_config, launcher, data_source, suffix, delayed_model_loading)
+
+
 class I3DEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, adapter, model, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
@@ -101,37 +109,22 @@ class I3DEvaluator(BaseCustomEvaluator):
 class I3DCascadeModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, data_source=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            flow_network = network_info.get('flow', {})
-            rgb_network = network_info.get('rgb', {})
-            if 'model' not in flow_network and models_args:
-                flow_network['model'] = models_args[0]
-                flow_network['_model_is_blob'] = is_blob
-            if 'model' not in rgb_network and models_args:
-                rgb_network['model'] = models_args[1 if len(models_args) > 1 else 0]
-                rgb_network['_model_is_blob'] = is_blob
-            network_info.update({
-                'flow': flow_network,
-                'rgb': rgb_network
-            })
-        if not contains_all(network_info, ['flow', 'rgb']):
+        parts = ['flow', 'rgb']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('configuration for flow/rgb does not exist')
-
-        use_api2 = launcher.config['framework'] == 'openvino'
-        if not use_api2:
-            self.flow_model = I3DFlowModel(
-                network_info.get('flow', {}), launcher, data_source, 'flow', delayed_model_loading
-            )
-            self.rgb_model = I3DRGBModel(
-                network_info.get('rgb', {}), launcher, data_source, 'rgb', delayed_model_loading
-            )
-        else:
-            self.flow_model = I3DFlowOVModel(
-                network_info.get('flow', {}), launcher, data_source, 'flow', delayed_model_loading
-            )
-            self.rgb_model = I3DRGBOVModel(
-                network_info.get('rgb', {}), launcher, data_source, 'rgb', delayed_model_loading
-            )
+        self._flow_mapping = {
+            'dlsdk': I3DFlowModel,
+            'openvino': I3DFlowOVModel
+        }
+        self._rgb_mapping = {
+            'dlsdk': I3DRGBModel,
+            'openvino': I3DRGBOVModel
+        }
+        self.flow_model = create_model(network_info.get('flow', {}), launcher, data_source, self._flow_mapping, 'flow',
+                                       delayed_model_loading)
+        self.rgb_model = create_model(network_info.get('rgb', {}), launcher, data_source, self._rgb_mapping, 'rgb',
+                                      delayed_model_loading)
         if self.rgb_model.output_blob != self.flow_model.output_blob:
             warnings.warn("Outputs for rgb and flow models have different names. "
                           "rgb model's output name: {}. flow model's output name: {}. Output name of rgb model "
@@ -139,10 +132,7 @@ class I3DCascadeModel(BaseCascadeModel):
                                                                    self.flow_model.output_blob))
         self.output_blob = self.rgb_model.output_blob
 
-        self._part_by_name = {
-            'flow_network': self.flow_model,
-            'rgb_network': self.rgb_model
-        }
+        self._part_by_name = {'flow_network': self.flow_model, 'rgb_network': self.rgb_model}
 
     def predict(self, identifiers, input_data, encoder_callback=None):
         pass

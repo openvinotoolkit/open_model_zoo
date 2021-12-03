@@ -44,24 +44,10 @@ def lin2ulaw(x):
 class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            if 'model' not in encoder:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if 'model' not in decoder:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            network_info.update({
-                'encoder': encoder,
-                'decoder': decoder,
-            })
-            required_fields = ['encoder', 'decoder']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['encoder', 'decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain encoder and decoder fields')
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
             'openvino': EncoderOpenVINOModel,
@@ -80,10 +66,7 @@ class SequentialModel(BaseCascadeModel):
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
-        self._part_by_name = {
-            'encoder': self.encoder,
-            'decoder': self.decoder,
-        }
+        self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder}
 
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1

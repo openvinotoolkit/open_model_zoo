@@ -22,7 +22,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, parse_partial_shape
+from ...utils import contains_all, extract_image_representations, parse_partial_shape
 
 
 class OpenNMTEvaluator(BaseCustomEvaluator):
@@ -63,16 +63,9 @@ class OpenNMTEvaluator(BaseCustomEvaluator):
 class OpenNMTModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        stages = ['encoder', 'decoder', 'generator']
-        if models_args and not delayed_model_loading:
-            for idx, stage in enumerate(stages):
-                stage_info = network_info.get(stage, {})
-                if not contains_any(stage_info, ['model', 'onnx_model']) and models_args:
-                    stage_info['model'] = models_args[idx if len(models_args) > idx else 0]
-                    stage_info['_model_is_blob'] = is_blob
-                network_info.update({stage: stage_info})
-
-        if not contains_all(network_info, stages) and not delayed_model_loading:
+        parts = ['encoder', 'decoder', 'generator']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder, decoder and generator fields')
 
         self._encoder_mapping = {

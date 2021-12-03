@@ -70,29 +70,11 @@ class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, pos_mask_window, is_blob=None,
                  delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            forward_tacotron_duration = network_info.get('forward_tacotron_duration', {})
-            forward_tacotron_regression = network_info.get('forward_tacotron_regression', {})
-            melgan = network_info.get('melgan', {})
-            if 'model' not in forward_tacotron_duration:
-                forward_tacotron_duration['model'] = models_args[0]
-                forward_tacotron_duration['_model_is_blob'] = is_blob
-            if 'model' not in forward_tacotron_regression:
-                forward_tacotron_regression['model'] = models_args[1 if len(models_args) > 1 else 0]
-                forward_tacotron_regression['_model_is_blob'] = is_blob
-            if 'model' not in melgan:
-                melgan['model'] = models_args[2 if len(models_args) > 2 else 0]
-                melgan['_model_is_blob'] = is_blob
-            network_info.update({
-                'forward_tacotron_duration': forward_tacotron_duration,
-                'forward_tacotron_regression': forward_tacotron_regression,
-                'melgan': melgan
-            })
-            required_fields = ['forward_tacotron_duration', 'forward_tacotron_regression', 'melgan']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['forward_tacotron_duration', 'forward_tacotron_regression', 'melgan']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain forward_tacotron_duration,'
+                              'forward_tacotron_regression and melgan fields')
         self._duration_mapping = {
             'dlsdk': TTSDLSDKModel,
             'openvino': TTSOVModel

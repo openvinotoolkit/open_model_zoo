@@ -21,7 +21,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseTFModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, parse_partial_shape
+from ...utils import contains_all, extract_image_representations, parse_partial_shape
 
 
 class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
@@ -61,13 +61,9 @@ class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
 class SRFModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            model = network_info.get('srmodel', {})
-            if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['model'] = models_args[0]
-                model['_model_is_blob'] = is_blob
-            network_info.update({'srmodel': model})
-        if not contains_all(network_info, ['srmodel']) and not delayed_model_loading:
+        parts = ['srmodel']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain srmodel field')
         self._model_mapping = {
             'dlsdk': ModelDLSDKModel,

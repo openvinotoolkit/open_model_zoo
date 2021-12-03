@@ -26,7 +26,7 @@ from .base_models import (
 )
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, parse_partial_shape
+from ...utils import contains_all, extract_image_representations, read_pickle, parse_partial_shape
 
 
 class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
@@ -70,17 +70,9 @@ class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
 class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if not contains_any(decoder, ['model', 'onnx_model']) and models_args:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            network_info.update({'encoder': encoder, 'decoder': decoder})
-        if not contains_all(network_info, ['encoder', 'decoder']) and not delayed_model_loading:
+        parts = ['encoder', 'decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder and decoder fields')
         self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
         self.processing_frames_buffer = []

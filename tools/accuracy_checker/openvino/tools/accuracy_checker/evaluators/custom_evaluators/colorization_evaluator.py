@@ -18,7 +18,7 @@ import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseCascadeModel, BaseOpenVINOModel
+from .base_models import BaseDLSDKModel, BaseCascadeModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import extract_image_representations, contains_all, parse_partial_shape
@@ -63,37 +63,24 @@ class ColorizationEvaluator(BaseCustomEvaluator):
 class ColorizationCascadeModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            colorization_network = network_info.get('colorization_network', {})
-            verification_network = network_info.get('verification_network', {})
-            if 'model' not in colorization_network and models_args:
-                colorization_network['model'] = models_args[0]
-                colorization_network['_model_is_blob'] = is_blob
-            if 'model' not in verification_network and models_args:
-                verification_network['model'] = models_args[1 if len(models_args) > 1 else 0]
-                verification_network['_model_is_blob'] = is_blob
-            network_info.update({
-                'colorization_network': colorization_network,
-                'verification_network': verification_network
-            })
-        if not contains_all(network_info, ['colorization_network', 'verification_network']):
+        parts = ['colorization_network', 'verification_network']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('configuration for colorization_network/verification_network does not exist')
-        use_api2 = launcher.config['framework'] == 'openvino'
 
-        if not use_api2:
-            self.test_model = ColorizationTestModel(network_info.get('colorization_network', {}), launcher,
-                                                    'colorization_network', delayed_model_loading)
-            self.check_model = ColorizationCheckModel(network_info.get('verification_network', {}), launcher,
-                                                      'verification_network', delayed_model_loading)
-        else:
-            self.test_model = ColorizationTestOVModel(network_info.get('colorization_network', {}), launcher,
-                                                      'colorization_network', delayed_model_loading)
-            self.check_model = ColorizationCheckOVModel(network_info.get('verification_network', {}), launcher,
-                                                        'verification_network', delayed_model_loading)
-        self._part_by_name = {
-            'colorization_network': self.test_model,
-            'verification_network': self.check_model
+        self._test_mapping = {
+            'dlsdk': ColorizationTestModel,
+            'openvino': ColorizationTestOVModel
         }
+        self._check_mapping = {
+            'dlsdk': ColorizationCheckModel,
+            'openvino': ColorizationCheckOVModel
+        }
+        self.test_model = create_model(network_info.get('colorization_network', {}), launcher, self._test_mapping,
+                                       'colorization_network', delayed_model_loading)
+        self.check_model = create_model(network_info.get('verification_network', {}), launcher, self._check_mapping,
+                                        'verification_network', delayed_model_loading)
+        self._part_by_name = {'colorization_network': self.test_model, 'verification_network': self.check_model}
 
     @property
     def adapter(self):

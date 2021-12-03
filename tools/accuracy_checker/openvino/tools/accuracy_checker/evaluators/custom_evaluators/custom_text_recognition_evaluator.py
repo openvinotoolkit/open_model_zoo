@@ -93,21 +93,10 @@ class TextRecognitionWithAttentionEvaluator(BaseCustomEvaluator):
 class BaseSequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        recognizer_encoder = network_info.get('recognizer_encoder', {})
-        recognizer_decoder = network_info.get('recognizer_decoder', {})
-        if not delayed_model_loading:
-            if 'model' not in recognizer_encoder:
-                recognizer_encoder['model'] = models_args[0]
-                recognizer_encoder['_model_is_blob'] = is_blob
-            if 'model' not in recognizer_decoder:
-                recognizer_decoder['model'] = models_args[len(models_args) == 2]
-                recognizer_decoder['_model_is_blob'] = is_blob
-            network_info.update({
-                'recognizer_encoder': recognizer_encoder,
-                'recognizer_decoder': recognizer_decoder
-            })
-            if not contains_all(network_info, ['recognizer_encoder', 'recognizer_decoder']):
-                raise ConfigError('network_info should contain encoder and decoder fields')
+        parts = ['recognizer_encoder', 'recognizer_decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain encoder and decoder fields')
         self._recognizer_mapping = {
             'dlsdk': RecognizerDLSDKModel,
             'openvino': RecognizerOVModel,
@@ -119,10 +108,7 @@ class BaseSequentialModel(BaseCascadeModel):
         self.sos_index = 0
         self.eos_index = 2
         self.max_seq_len = int(meta.get('max_seq_len', 0))
-        self._part_by_name = {
-            'encoder': self.recognizer_encoder,
-            'decoder': self.recognizer_decoder
-        }
+        self._part_by_name = {'encoder': self.recognizer_encoder, 'decoder': self.recognizer_decoder}
         self.with_prefix = False
 
     def load_model(self, network_list, launcher):

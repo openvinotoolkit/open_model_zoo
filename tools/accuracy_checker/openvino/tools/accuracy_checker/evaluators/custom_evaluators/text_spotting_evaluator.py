@@ -80,26 +80,10 @@ class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, meta, is_blob=None,
                  delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            detector = network_info.get('detector', {})
-            recognizer_encoder = network_info.get('recognizer_encoder', {})
-            recognizer_decoder = network_info.get('recognizer_decoder', {})
-            if 'model' not in detector:
-                detector['model'] = models_args[0]
-                detector['_model_is_blob'] = is_blob
-            if 'model' not in recognizer_encoder:
-                recognizer_encoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                recognizer_encoder['_model_is_blob'] = is_blob
-            if 'model' not in recognizer_decoder:
-                recognizer_decoder['model'] = models_args[2 if len(models_args) > 2 else 0]
-                recognizer_decoder['_model_is_blob'] = is_blob
-            network_info.update({
-                'detector': detector,
-                'recognizer_encoder': recognizer_encoder,
-                'recognizer_decoder': recognizer_decoder
-            })
-            if not contains_all(network_info, ['detector', 'recognizer_encoder', 'recognizer_decoder']):
-                raise ConfigError('network_info should contains detector, encoder and decoder fields')
+        parts = ['detector', 'recognizer_encoder', 'recognizer_decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contains detector, encoder and decoder fields')
         self._detector_mapping = {
             'dlsdk': DetectorDLSDKModel,
             'openvino': DetectorOVModel
