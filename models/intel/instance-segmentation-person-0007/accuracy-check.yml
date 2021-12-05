@@ -10,7 +10,7 @@ models:
           raw_masks_out: masks
 
     datasets:
-      - name: ms_coco_mask_rcnn_person
+      - name: COCO2017_mask_rcnn_person
 
         preprocessing:
           - type: resize
@@ -20,6 +20,8 @@ models:
         metrics:
           - name: AP@masks
             type: coco_orig_segm_precision
+            reference: 0.309
 
           - name: AP@boxes
             type: coco_orig_precision
+            reference: 0.357
