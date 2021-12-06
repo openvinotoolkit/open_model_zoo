@@ -47,7 +47,7 @@ class DETR(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters['resize_type'].update_default_value('standard')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def postprocess(self, outputs, meta):
@@ -65,7 +65,7 @@ class DETR(DetectionModel):
         labels = np.argmax(scores[:, :-1], axis=-1)
         det_scores = np.max(scores[:, :-1], axis=-1)
 
-        keep = det_scores > self.threshold
+        keep = det_scores > self.confidence_threshold
 
         detections = [Detection(*det) for det in zip(x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep],
                                                      det_scores[keep], labels[keep])]

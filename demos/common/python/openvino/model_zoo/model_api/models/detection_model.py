@@ -57,7 +57,7 @@ class DetectionModel(ImageModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'threshold': NumericalValue(default_value=0.5, description="Threshold value for detection box confidence"),
+            'confidence_threshold': NumericalValue(default_value=0.5, description="Threshold value for detection box confidence"),
             'labels': ListValue(description="List of class labels"),
             'path_to_labels': StringValue(
                 description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter"

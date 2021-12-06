@@ -217,7 +217,7 @@ def main():
         'scale_values': args.scale_values,
         'reverse_input_channels': args.reverse_input_channels,
         'path_to_labels': args.labels,
-        'threshold': args.prob_threshold,
+        'confidence_threshold': args.prob_threshold,
         'input_size': args.input_size, # The CTPN specific
     }
     model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)

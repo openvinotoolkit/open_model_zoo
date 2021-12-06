@@ -79,7 +79,7 @@ class CTPN(DetectionModel):
             'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
             'input_size': ListValue()
         })
-        parameters['threshold'].update_default_value(0.9)
+        parameters['confidence_threshold'].update_default_value(0.9)
         parameters['labels'].update_default_value(['Text'])
         return parameters
 
@@ -207,7 +207,7 @@ class CTPN(DetectionModel):
         heights = (abs(text_recs[:, 5] - text_recs[:, 1]) + abs(text_recs[:, 7] - text_recs[:, 3])) / 2.0 + 1
         widths = (abs(text_recs[:, 2] - text_recs[:, 0]) + abs(text_recs[:, 6] - text_recs[:, 4])) / 2.0 + 1
         scores = text_recs[:, 8]
-        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.threshold) &
+        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.confidence_threshold) &
                              (widths > self.min_width))[0]
 
         return text_recs[keep_inds]

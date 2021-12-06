@@ -43,14 +43,14 @@ class RetinaFace(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters['resize_type'].update_default_value('standard')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold, self.mask_threshold)
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.confidence_threshold, self.mask_threshold)
         return clip_detections(outputs, meta['original_shape'])
 
 
@@ -69,7 +69,7 @@ class RetinaFacePyTorch(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters['resize_type'].update_default_value('standard')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         parameters['labels'].update_default_value(['Face'])
         return parameters
 
@@ -77,7 +77,7 @@ class RetinaFacePyTorch(DetectionModel):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.confidence_threshold,
                                                     meta['resized_shape'][:2])
         return clip_detections(outputs, meta['original_shape'])
 

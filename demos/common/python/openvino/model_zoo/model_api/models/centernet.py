@@ -61,7 +61,7 @@ class CenterNet(DetectionModel):
                                  xs + wh[..., 0:1] / 2,
                                  ys + wh[..., 1:2] / 2), axis=1)
         detections = np.concatenate((bboxes, scores, clses), axis=1)
-        mask = detections[..., 4] >= self.threshold
+        mask = detections[..., 4] >= self.confidence_threshold
         filtered_detections = detections[mask]
         scale = max(meta['original_shape'])
         center = np.array(meta['original_shape'][:2])/2.0
