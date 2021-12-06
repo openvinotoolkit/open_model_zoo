@@ -50,7 +50,8 @@ from .segmentation_representation import (
     SalientRegionAnnotation,
     SalientRegionPrediction,
     BackgroundMattingAnnotation,
-    BackgroundMattingPrediction
+    BackgroundMattingPrediction,
+    AnomalySegmentationAnnotation
 )
 from .character_recognition_representation import (
     CharacterRecognition,

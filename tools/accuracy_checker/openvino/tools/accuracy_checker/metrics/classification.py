@@ -525,14 +525,58 @@ class RocAucScore(PerImageEvaluationMetric):
     prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     def configure(self):
-        if isinstance(roc_auc_score, UnsupportedPackage):
-            roc_auc_score.raise_error(self.__provider__)
         self.reset()
 
     def update(self, annotation, prediction):
         self.targets.append(annotation.label)
         self.results.append(prediction.label)
-        return 0
+        return annotation.label != prediction.label
+
+    def binarize_labels(self):
+        max_v = max(np.max(self.targets) + 1, np.max(self.results) + 1)
+        gt_bin, pred_bin = [], []
+        for gt in self.targets:
+            label_bin = np.zeros(max_v)
+            label_bin[int(gt)] = 1
+            gt_bin.append(label_bin)
+
+        for pred in self.results:
+            label_bin = np.zeros(max_v)
+            label_bin[pred.astype(int)] = 1
+            pred_bin.append(label_bin)
+
+        return np.array(gt_bin), np.array(pred_bin)
+
+    def roc(self, y_true, y_score):
+        per_class_area = []
+        for i in range(y_true.shape[-1]):
+            per_class_area.append(self.roc_curve_area(y_true[:, i], y_score[:, i]))
+        average_area = self.roc_curve_area(y_true.ravel(), y_score.ravel())
+        return average_area, per_class_area
+
+    def roc_curve_area(self, gt, pred):
+        desc_score_indices = np.argsort(pred, kind="mergesort")[::-1]
+        y_score = pred[desc_score_indices]
+        y_true = gt[desc_score_indices]
+        distinct_value_indices = np.where(np.diff(y_score))[0]
+        threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
+        tps = np.cumsum(y_true)[threshold_idxs]
+        fps = 1 + threshold_idxs - tps
+        if max(fps) > 0:
+            fps /= fps[-1]
+        if max(tps) > 0:
+            tps /= tps[-1]
+        area = self.roc_auc_score(fps, tps)
+        return area
+
+    @staticmethod
+    def roc_auc_score(fpr, tpr):
+        direction = 1
+        dx = np.diff(fpr)
+        if np.any(dx < 0):
+            if np.all(dx <= 0):
+                direction = -1
+        return direction * np.trapz(tpr, fpr)
 
     def evaluate(self, annotations, predictions):
         all_results = np.concatenate(self.results)

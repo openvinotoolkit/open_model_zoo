@@ -19,6 +19,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import BoolField, StringField, NumberField
 from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
+from ..utils import softmax
 
 
 class ClassificationAdapter(Adapter):
@@ -47,7 +48,12 @@ class ClassificationAdapter(Adapter):
             'label_as_array': BoolField(
                 optional=True, default=False, description="produce ClassificationPrediction's label as array"
             ),
-            'classification_output': StringField(optional=True, description='target output layer name')
+            'classification_output': StringField(optional=True, description='target output layer name'),
+            'multi_label_threshold': NumberField(
+                optional=True, value_type=float,
+                description='threshold for treating classification as multi label problem'),
+            'do_softmax': BoolField(
+                optional=True, description='apply softmax on probabilities in logits format', default=False)
         })
 
         return parameters
@@ -59,6 +65,8 @@ class ClassificationAdapter(Adapter):
         self.fixed_output = self.get_value_from_config('fixed_output')
         self.fixed_output_index = int(self.get_value_from_config('fixed_output_index'))
         self.label_as_array = self.get_value_from_config('label_as_array')
+        self.do_softmax = self.get_value_from_config('do_softmax')
+        self.multilabel_thresh = self.get_value_from_config('multi_label_threshold')
         self.output_verified = False
 
     def select_output_blob(self, outputs):
@@ -83,7 +91,6 @@ class ClassificationAdapter(Adapter):
             self.select_output_blob(raw)
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
         raw_prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_prediction)
         prediction = raw_prediction[self.output_blob]
         if multi_infer:
             prediction = np.mean(prediction, axis=0)
@@ -99,7 +106,11 @@ class ClassificationAdapter(Adapter):
                 single_prediction = ArgMaxClassificationPrediction(identifiers[0],
                                                                    prediction[:, self.fixed_output_index])
             else:
-                single_prediction = ClassificationPrediction(identifiers[0], prediction, self.label_as_array)
+                if self.do_softmax:
+                    prediction = softmax(prediction)
+                single_prediction = ClassificationPrediction(
+                    identifiers[0], prediction, self.label_as_array,
+                    multilabel_threshold=self.multilabel_thresh)
 
             result.append(single_prediction)
         else:
@@ -110,7 +121,10 @@ class ClassificationAdapter(Adapter):
                     single_prediction = ArgMaxClassificationPrediction(identifiers[0],
                                                                        output[self.fixed_output_index])
                 else:
-                    single_prediction = ClassificationPrediction(identifier, output)
+                    if self.do_softmax:
+                        output = softmax(output)
+                    single_prediction = ClassificationPrediction(
+                        identifier, output, multilabel_threshold=self.multilabel_thresh)
                 result.append(single_prediction)
 
         return result
