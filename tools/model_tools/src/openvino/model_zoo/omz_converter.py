@@ -240,12 +240,21 @@ def main():
         )
         shared_convert_args = (output_dir, args, mo_props, requested_precisions)
 
+        def convert_model(model, reporter):
+            if model.model_stages:
+                results = []
+                for model_stage in model.model_stages:
+                    results.append(convert(reporter, model_stage, *shared_convert_args))
+                return sum(results) == len(model.model_stages)
+            else:
+                return convert(reporter, model, *shared_convert_args)
+
         if args.jobs == 1 or args.dry_run:
-            results = [convert(reporter, model, *shared_convert_args) for model in models]
+            results = [convert_model(model, reporter) for model in models]
         else:
             results = _concurrency.run_in_parallel(args.jobs,
                 lambda context, model:
-                    convert(_reporting.Reporter(context), model, *shared_convert_args),
+                    convert_model(model, _reporting.Reporter(context)),
                 models)
 
         failed_models = [model.name for model, successful in zip(models, results) if not successful]

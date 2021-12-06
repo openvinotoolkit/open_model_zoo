@@ -50,7 +50,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, composite_model_name,
+        task_type, conversion_to_onnx_args, composite_model_name
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -66,6 +66,7 @@ class Model:
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = _common.KNOWN_FRAMEWORKS[framework]
         self.composite_model_name = composite_model_name
+        self.model_stages = {}
 
     @classmethod
     def deserialize(cls, model, name, subdirectory, composite_model_name):
@@ -159,6 +160,46 @@ class Model:
                 description, license_url, precisions, quantization_output_precisions,
                 task_type, conversion_to_onnx_args, composite_model_name)
 
+class CompositeModel:
+    def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
+        license_url, precisions, quantization_output_precisions, composite_model_name
+    ):
+        self.name = name
+        self.subdirectory = subdirectory
+        self.task_type = task_type
+        self.model_stages = model_stages
+        self.description = description
+        self.framework = framework
+        self.license_url = license_url
+        self.precisions = precisions
+        self.quantization_output_precisions = quantization_output_precisions
+        self.composite_model_name = composite_model_name
+
+    @classmethod
+    def deserialize(cls, model, name, subdirectory, stages):
+        with validation.deserialization_context('In model "{}"'.format(name)):
+            if not RE_MODEL_NAME.fullmatch(name):
+                raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
+
+            task_type = validation.validate_string_enum('"task_type"', model['task_type'], _common.KNOWN_TASK_TYPES)
+
+            description = validation.validate_string('"description"', model['description'])
+
+            license_url = validation.validate_string('"license"', model['license'])
+
+            framework = validation.validate_string_enum('"framework"', model['framework'],
+                _common.KNOWN_FRAMEWORKS.keys())
+
+            model_stages = []
+            for model_subdirectory, model_part in stages.items():
+                model_stages.append(Model.deserialize(model_part, model_subdirectory.name, model_subdirectory, name))
+
+            quantization_output_precisions = model_stages[0].quantization_output_precisions
+            precisions = model_stages[0].precisions
+
+            return cls(name, subdirectory, task_type, model_stages, description, framework,
+                license_url, precisions, quantization_output_precisions, name)
+
 def check_composite_model_dir(model_dir):
     with validation.deserialization_context('In directory "{}"'.format(model_dir)):
         if list(model_dir.glob('*/*/**/model.yml')):
@@ -181,6 +222,7 @@ def load_models(models_root, args):
     model_names = set()
 
     composite_models = []
+    composite_model_names = set()
 
     schema = _common.get_schema()
 
@@ -192,15 +234,38 @@ def load_models(models_root, args):
 
             check_composite_model_dir(composite_model_config.parent)
 
-            if composite_model_name in composite_models:
-                raise validation.DeserializationError(
-                    'Duplicate composite model name "{}"'.format(composite_model_name))
-            composite_models.append(composite_model_name)
+            with composite_model_config.open('rb') as config_file, \
+                validation.deserialization_context('In config "{}"'.format(composite_model_config)):
+
+                composite_model = yaml.safe_load(config_file)
+                model_stages = {}
+                for stage in sorted(composite_model_config.parent.glob('*/model.yml')):
+                    with stage.open('rb') as stage_config_file, \
+                        validation.deserialization_context('In config "{}"'.format(stage_config_file)):
+                        model = yaml.safe_load(stage_config_file)
+                        if not schema.check(model):
+                            raise validation.DeserializationError('Configuration file check was\'t successful.')
+
+                        model_stages[stage.parent] = model
+
+                if len(model_stages) == 0:
+                    continue
+                composite_models.append(CompositeModel.deserialize(
+                    composite_model, composite_model_name, composite_model_config.parent, model_stages
+                ))
+
+                if composite_model_name in composite_model_names:
+                    raise validation.DeserializationError(
+                        'Duplicate composite model name "{}"'.format(composite_model_name))
+                composite_model_names.add(composite_model_name)
 
     for config_path in sorted(models_root.glob('**/model.yml')):
         subdirectory = config_path.parent
 
         is_composite = (subdirectory.parent / 'composite-model.yml').exists()
+        if is_composite:
+            continue
+
         composite_model_name = subdirectory.parent.name if is_composite else None
 
         subdirectory = subdirectory.relative_to(models_root)
@@ -216,14 +281,14 @@ def load_models(models_root, args):
                 if bad_key in model:
                     raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-            models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+            models.append(Model.deserialize(model, subdirectory.name, subdirectory, None))
 
             if models[-1].name in model_names:
                 raise validation.DeserializationError(
                     'Duplicate model name "{}"'.format(models[-1].name))
             model_names.add(models[-1].name)
 
-    return models
+    return sorted(models + composite_models, key=lambda model : model.name)
 
 def load_models_or_die(models_root, args):
     try:
@@ -276,8 +341,10 @@ def load_models_from_args(parser, args, models_root):
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
                     matching_models.append(model)
-                elif model.composite_model_name and fnmatch.fnmatchcase(model.composite_model_name, pattern):
-                    matching_models.append(model)
+                elif isinstance(model, CompositeModel):
+                    for model_stage in model.model_stages:
+                        if fnmatch.fnmatchcase(model_stage.name, pattern):
+                            matching_models.append(model_stage)
 
             if not matching_models:
                 sys.exit('No matching models: "{}"'.format(pattern))
