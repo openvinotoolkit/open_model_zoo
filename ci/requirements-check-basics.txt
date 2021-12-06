@@ -19,7 +19,7 @@ importlib-metadata==4.8.1
     #   stevedore
 mccabe==0.6.1
     # via flake8
-mistune==2.0.0a6
+mistune==2.0.0
     # via -r ci/requirements-documentation.in
 pathspec==0.9.0
     # via yamllint
