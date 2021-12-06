@@ -9,4 +9,4 @@ add_demo(NAME gaze_estimation_demo
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    DEPENDENCIES monitors)
+    DEPENDENCIES monitors models pipelines)

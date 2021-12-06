@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+﻿// Copyright (C) 2018 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -48,6 +48,9 @@
 
 #include "results_marker.hpp"
 
+#include <models/landmarks_model.h>
+#include <pipelines/metadata.h>
+
 #include "utils.hpp"
 
 using namespace gaze_estimation;
@@ -94,12 +97,19 @@ int main(int argc, char *argv[]) {
         // Set up face detector and estimators
         FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
         HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
-        LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
+       // LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
         EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
-
+        ///--------------
+        std::string postprocessKey = "heatmap";// вынеси в ключи 
+        std::unique_ptr<ModelBase> landmarksModel;
+        landmarksModel.reset(new LandmarksModel(FLAGS_m_lm, false, postprocessKey));
+        auto execNet = landmarksModel->loadExecutableNetwork(
+            ConfigFactory::getUserConfig(FLAGS_d_lm, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
+        auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());
+        //---------------------------
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
-        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &eyeStateEstimator, &gazeEstimator};
+        BaseEstimator* estimators[] = {&headPoseEstimator};
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
@@ -125,6 +135,7 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+        std::vector<std::vector<cv::Point2f>> landmarksResults;
 
         do {
             if (flipImage) {
@@ -134,14 +145,57 @@ int main(int argc, char *argv[]) {
             // Infer results
             auto inferenceResults = faceDetector.detect(frame);
             for (auto& inferenceResult : inferenceResults) {
+                //crop frame by box set it in preprocess
+                auto faceBoundingBox = inferenceResult.faceBoundingBox;
+                auto faceCrop(cv::Mat(frame, faceBoundingBox));
+
+                landmarksModel->preprocess(ImageInputData(faceCrop), req);
+                req->Infer();
+
+                InferenceResult res;
+
+                res.internalModelData = std::make_shared<InternalImageModelData>(faceCrop.cols, faceCrop.rows);
+
+                res.metaData = std::make_shared<ImageMetaData>(faceCrop, std::chrono::steady_clock::now());
+
+                for (const auto& outName : landmarksModel->getOutputsNames()) {
+
+                    auto blobPtr = req->GetBlob(outName);
+
+                    if (InferenceEngine::Precision::I32 == blobPtr->getTensorDesc().getPrecision()) {
+                        res.outputsData.emplace(outName,
+                            std::make_shared<InferenceEngine::TBlob<int>>(*InferenceEngine::as<InferenceEngine::TBlob<int>>(blobPtr)));
+                    }
+                    else {
+                        res.outputsData.emplace(outName,
+                            std::make_shared<InferenceEngine::TBlob<float>>(*InferenceEngine::as<InferenceEngine::TBlob<float>>(blobPtr)));
+                    }
+                }
+                auto result = (landmarksModel->postprocess(res))->asRef<LandmarksResult>();
+                //landmarksResults.push_back(result.coordinates);
+                //-----
+                // сделать преобразования поинтов
+                std::vector<cv::Point2f> coordinates;
+                for (auto point : result.coordinates) {
+                    coordinates.push_back(cv::Point2f(point.x + faceBoundingBox.tl().x,point.y + faceBoundingBox.tl().y));
+                }
+                landmarksResults.push_back(coordinates);
+                //-----------------------
                 for (auto estimator : estimators) {
                     estimator->estimate(frame, inferenceResult);
+
                 }
             }
-
+            size_t it = 0;
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
+
+                int lmRadius = static_cast<int>(0.003 * frame.cols + 1);//0.01 * faceBoundingBoxWidth
+
+                for (auto const& point : landmarksResults[it])
+                    cv::circle(frame, point, lmRadius, cv::Scalar(0, 255, 255), -1);
+                it++;
             }
 
             presenter.drawGraphs(frame);
@@ -161,7 +215,7 @@ int main(int argc, char *argv[]) {
                 cv::imshow(windowName, frame);
 
                 // Controls the information being displayed while demo runs
-                int key = cv::waitKey(delay);
+                int key = cv::waitKey(0);
                 resultsMarker.toggle(key);
 
                 // Press 'Esc' to quit, 'f' to flip the video horizontally

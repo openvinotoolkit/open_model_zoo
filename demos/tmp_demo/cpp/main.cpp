@@ -143,8 +143,11 @@ int main(int argc, char **argv) {
             cv::Size s = frame.size();
             int cols = s.width;
             int lmRadius = static_cast<int>(0.003* cols + 1);
-            for (auto const& point : landmarks)
-                cv::circle(frame, point, lmRadius, cv::Scalar(0, 255, 255), -1);
+            for (size_t i = 0; i < landmarks.size(); ++i) {
+                cv::circle(frame, landmarks[i], lmRadius, cv::Scalar(0, 255, 255), -1);
+            }
+            //for (auto const& point : landmarks)
+                cv::circle(frame, landmarks[60], lmRadius, cv::Scalar(24, 80, 209), -1);
             presenter.drawGraphs(frame);
            
             framesProcessed++;

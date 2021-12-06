@@ -43,6 +43,16 @@ static const char fd_reshape_message[] = "Optional. Reshape Face Detector networ
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
+static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
+"Absolute path to the .xml file with the kernels description.";
+static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
+"Absolute path to a shared library with the kernels implementation.";
+static const char nireq_message[] = "Optional. Number of infer requests for detector model. If this option is omitted, number of infer requests is determined automatically.";
+static const char num_threads_message[] = "Optional. Number of threads for detector model.";
+static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
+"throughput mode for detector model (for HETERO and MULTI device cases use format "
+"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
 DEFINE_string(m, "", gaze_estimation_model_message);
@@ -60,6 +70,12 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+
+DEFINE_string(c, "", custom_cldnn_message);
+DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_uint32(nireq, 0, nireq_message);
+DEFINE_uint32(nthreads, 0, num_threads_message);
+DEFINE_string(nstreams, "", num_streams_message);
 
 /**
 * \brief This function shows a help message
@@ -91,4 +107,11 @@ static void showUsage() {
     std::cout << "    -r                       " << raw_output_message << std::endl;
     std::cout << "    -t                       " << thresh_output_message << std::endl;
     std::cout << "    -u                       " << utilization_monitors_message << std::endl;
+
+    std::cout << "    -l \"<absolute_path>\"         " << custom_cpu_library_message << std::endl;
+    std::cout << "          Or" << std::endl;
+    std::cout << "    -c \"<absolute_path>\"         " << custom_cldnn_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
+    std::cout << "    -nstreams                   " << num_streams_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
 }
