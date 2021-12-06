@@ -32,7 +32,7 @@ class SSD(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters['resize_type'].update_default_value('standard')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def preprocess(self, inputs):
@@ -72,7 +72,7 @@ class SSD(DetectionModel):
     def _parse_outputs(self, outputs, meta):
         detections = self.output_parser(outputs)
 
-        detections = [d for d in detections if d.score > self.threshold]
+        detections = [d for d in detections if d.score > self.confidence_threshold]
 
         return detections
 

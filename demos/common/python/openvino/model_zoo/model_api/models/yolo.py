@@ -115,7 +115,7 @@ class YOLO(DetectionModel):
             'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
         })
         parameters['resize_type'].update_default_value('fit_to_window_letterbox')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def postprocess(self, outputs, meta):
@@ -124,7 +124,7 @@ class YOLO(DetectionModel):
         return detections
 
     @staticmethod
-    def _parse_yolo_region(cls, predictions, input_size, params, threshold):
+    def _parse_yolo_region(cls, predictions, input_size, params, confidence_threshold):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
         size_normalizer = input_size if params.use_input_size else params.sides
@@ -135,7 +135,7 @@ class YOLO(DetectionModel):
             class_probabilities = cls._get_probabilities(prediction, params.classes)
 
             # filter out the proposals with low confidence score
-            keep_idxs = np.nonzero(class_probabilities > threshold)[0]
+            keep_idxs = np.nonzero(class_probabilities > confidence_threshold)[0]
             class_probabilities = class_probabilities[keep_idxs]
             obj_indx = keep_idxs // params.classes
             class_idx = keep_idxs % params.classes
@@ -222,7 +222,7 @@ class YOLO(DetectionModel):
             out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
             out_blob.shape = layer_params[0]
-            detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.threshold)
+            detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.confidence_threshold)
 
         detections = self._filter(detections, self.iou_threshold)
         return detections
@@ -358,7 +358,7 @@ class YOLOX(DetectionModel):
         parameters.update({
             'iou_threshold': NumericalValue(default_value=0.65, description="Threshold for NMS filtering"),
         })
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def preprocess(self, inputs):
@@ -385,11 +385,11 @@ class YOLOX(DetectionModel):
             output[..., :2] = (output[..., :2] + self.grids) * self.expanded_strides
             output[..., 2:4] = np.exp(output[..., 2:4]) * self.expanded_strides
 
-        valid_predictions = output[output[..., 4] > self.threshold]
+        valid_predictions = output[output[..., 4] > self.confidence_threshold]
         valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
 
         boxes = self.xywh2xyxy(valid_predictions[:, :4]) / meta['scale']
-        i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
+        i, j = (valid_predictions[:, 5:] > self.confidence_threshold).nonzero()
         x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
         scores = valid_predictions[i, j + 5]
 
@@ -463,7 +463,7 @@ class YoloV3ONNX(DetectionModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters['resize_type'].update_default_value('fit_to_window_letterbox')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         return parameters
 
     def preprocess(self, inputs):
@@ -497,7 +497,7 @@ class YoloV3ONNX(DetectionModel):
             out_scores.append(scores[tuple(idx_[1:])])
             out_boxes.append(boxes[idx_[2]])
         transposed_boxes = np.array(out_boxes).T if out_boxes else ([], [], [], [])
-        mask = np.array(out_scores) > self.threshold
+        mask = np.array(out_scores) > self.confidence_threshold
 
         if mask.size == 0:
             return []

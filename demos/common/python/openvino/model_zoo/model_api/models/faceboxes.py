@@ -75,7 +75,7 @@ class FaceBoxes(DetectionModel):
 
         score = np.transpose(scores)[1]
 
-        mask = score > self.threshold
+        mask = score > self.confidence_threshold
         filtered_boxes, filtered_score = boxes[mask, :], score[mask]
         if filtered_score.size != 0:
             x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])

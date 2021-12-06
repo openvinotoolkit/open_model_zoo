@@ -54,7 +54,7 @@ class UltraLightweightFaceDetection(DetectionModel):
             'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
         })
         parameters['resize_type'].update_default_value('standard')
-        parameters['threshold'].update_default_value(0.5)
+        parameters['confidence_threshold'].update_default_value(0.5)
         parameters['labels'].update_default_value(['Face'])
         return parameters
 
@@ -69,7 +69,7 @@ class UltraLightweightFaceDetection(DetectionModel):
 
         score = np.transpose(scores)[1]
 
-        mask = score > self.threshold
+        mask = score > self.confidence_threshold
         filtered_boxes, filtered_score = boxes[mask, :], score[mask]
 
         x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
