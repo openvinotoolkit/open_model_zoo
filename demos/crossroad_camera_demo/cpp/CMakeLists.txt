@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
+
 add_demo(NAME crossroad_camera_demo
-    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-    HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/crossroad_camera_demo.hpp"
+    SOURCES "${SOURCES}"
+    HEADERS "${HEADERS}"
     DEPENDENCIES monitors)
