@@ -201,7 +201,7 @@ class OpenVINOLauncher(Launcher):
             outputs = self.infer_request.infer(inputs=feed_dict)
             results.append({
                 out_node.get_node().friendly_name: out_res
-                for out_node, out_res in zip(self.exec_network.outputs, outputs)
+                for out_node, out_res in outputs.items()
             })
         if self.reset_memory_state:
             for state in self.infer_request.query_state():
@@ -224,7 +224,7 @@ class OpenVINOLauncher(Launcher):
             out_tensors = self.infer_request.infer(infer_inputs)
             output_result = {
                 out_node.get_node().friendly_name: out_tensor
-                for out_node, out_tensor in zip(self.exec_network.outputs, out_tensors)
+                for out_node, out_tensor in out_tensors.items()
             }
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
@@ -315,6 +315,7 @@ class OpenVINOLauncher(Launcher):
         self._async_mode = flag
 
     def get_async_requests(self):
+        self._set_nireq()
         return [
             AsyncInferRequestWrapper(ireq_id, self.exec_network.create_infer_request())
             for ireq_id in range(self.num_requests)]
@@ -356,7 +357,6 @@ class OpenVINOLauncher(Launcher):
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
-            self._set_nireq()
             if log:
                 self._log_versions()
         self._device_specific_configuration()
@@ -408,8 +408,11 @@ class OpenVINOLauncher(Launcher):
             print_info('Infer requests number:{}'.format(self.num_requests))
 
     def auto_num_requests(self, return_list=False):
-        concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4}
         platform_list = self._devices_list()
+        concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4}
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            num_requests = self.exec_network.get_metric('OPTIMAL_NUMBER_OF_INFER_REQUESTS')
+            return num_requests
         if 'CPU' in platform_list and len(platform_list) == 1:
             min_requests = [4, 5, 3]
             cpu_count = multiprocessing.cpu_count()
@@ -448,12 +451,10 @@ class OpenVINOLauncher(Launcher):
         if num_devices != len(num_per_device_requests):
             raise ConfigError('num requests for all {} should be specified'.format(num_devices))
         self._num_requests = sum(num_per_device_requests) * 2
+        self._async_mode = True
         if log:
             self._log_versions()
             print_info('Async mode activated')
-            print_info('Request number for each device:')
-            for device, nreq in zip(device_list, num_per_device_requests):
-                print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
         if not isinstance(device_config, dict):
@@ -881,10 +882,11 @@ class OpenVINOLauncher(Launcher):
         context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
         return feed_dict, context
 
-    def get_result_from_request(self, request):
+    @staticmethod
+    def get_result_from_request(request):
         return [{
             out.get_node().friendly_name: tensor.data for out, tensor
-            in zip(self.exec_network.outputs, request.output_tensors)}
+            in request.results.items()}
         ]
 
     def input_shape(self, input_name):
