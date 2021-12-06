@@ -28,7 +28,7 @@
 using namespace ov::preprocess;
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
+    // Parsing and validation of input args
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        // ------------------------------ Parsing and validation of input args ---------------------------------
+        // Parsing and validation of input args
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -61,23 +61,19 @@ int main(int argc, char* argv[]) {
         parseInputFilesArguments(imagePaths);
         if (imagePaths.empty())
             throw std::logic_error("No suitable images were found");
-        // -----------------------------------------------------------------------------------------------------
 
-        // ---------------------Load inference engine------------------------------------------------
+        // Load inference engine
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
 
-        // -----------------------------------------------------------------------------------------------------
-
-        // --------------------Load network (Generated xml/bin files)-------------------------------------------
+        // Load network (Generated xml/bin files)
 
         // Read network model
         std::shared_ptr<ov::Function> network = core.read_model(FLAGS_m);
         slog::info << "model file: " << FLAGS_m << slog::endl;
-        slog::info << "model name: " << network->get_friendly_name() << slog::endl;
-        // -----------------------------------------------------------------------------------------------------
+        log_model_info(network);
 
-        // -----------------------------Prepare input blobs-----------------------------------------------------
+        // Prepare input blobs
 
         // Taking information about all topology inputs
         ov::OutputVector inputs = network->inputs();
@@ -86,30 +82,6 @@ int main(int argc, char* argv[]) {
         if(inputs.size() != 2 || outputs.size() != 2)
             throw std::logic_error("Expected network with 2 inputs and 2 outputs");
 
-        for (const ov::Output<ov::Node> input : inputs)
-        {
-            slog::info << slog::endl;
-            const std::string name = input.get_any_name();
-            const ov::element::Type type = input.get_element_type();
-            const ov::Shape shape = input.get_shape();
-
-            slog::info << "input name: " << name << slog::endl;
-            slog::info << "input type: " << type << slog::endl;
-            slog::info << "input shape: " << shape << slog::endl;
-        }
-
-        for (const ov::Output<ov::Node> output : outputs)
-        {
-            slog::info << slog::endl;
-            const std::string name = output.get_any_name();
-            const ov::element::Type type = output.get_element_type();
-            const ov::Shape shape = output.get_shape();
-
-            slog::info << "output name: " << name << slog::endl;
-            slog::info << "output type: " << type << slog::endl;
-            slog::info << "output shape: " << shape << slog::endl;
-        }
-
         size_t netBatchSize = 0;
         size_t netInputHeight = 0;
         size_t netInputWidth = 0;
@@ -117,11 +89,13 @@ int main(int argc, char* argv[]) {
         const ov::Layout layout_nchw{ "NCHW" };
 
         // network dimensions for image input
-        auto it = std::find_if(inputs.begin(), inputs.end(), [](const ov::Output<ov::Node>& obj) {return obj.get_shape().size() == 4;});
+        auto it = std::find_if(inputs.begin(), inputs.end(), [](const ov::Output<ov::Node>& input) {return input.get_shape().size() == 4;});
         if (it != inputs.end()) {
             netBatchSize = it->get_shape()[ov::layout::batch_idx(layout_nchw)];
             netInputHeight = it->get_shape()[ov::layout::height_idx(layout_nchw)];
             netInputWidth = it->get_shape()[ov::layout::width_idx(layout_nchw)];
+        } else {
+            throw std::logic_error("Couldn't find model image input");
         }
 
         // Collect images
@@ -152,18 +126,16 @@ int main(int argc, char* argv[]) {
         }
         if (images.empty())
             throw std::logic_error("Valid input images were not found!");
-        // -----------------------------------------------------------------------------------------------------
 
-        // -------------------------Load model to the device----------------------------------------------------
+        // Load model to the device
         ov::runtime::ExecutableNetwork executableNetwork = core.compile_model(network, FLAGS_d);
         logExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
         slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
-        // -------------------------Create Infer Request--------------------------------------------------------
+        // Create Infer Request
         ov::runtime::InferRequest infer_request = executableNetwork.create_infer_request();
-        // -----------------------------------------------------------------------------------------------------
 
-        // -------------------------------Set input data--------------------------------------------------------
+        // Set input data
         // Iterate over all the input blobs
         for (size_t idx = 0; idx < inputs.size(); idx++) {
             ov::runtime::Tensor tensor = infer_request.get_input_tensor(idx);
@@ -181,13 +153,11 @@ int main(int argc, char* argv[]) {
                 data[2] = 1;
             }
         }
-        // -----------------------------------------------------------------------------------------------------
 
-        // ----------------------------Do inference-------------------------------------------------------------
+        // Do inference
         infer_request.infer();
-        // -----------------------------------------------------------------------------------------------------
 
-        // ---------------------------Postprocess output blobs--------------------------------------------------
+        // Postprocess output blobs
         float* do_data = nullptr;
         float* masks_data = nullptr;
 
@@ -249,7 +219,7 @@ int main(int argc, char* argv[]) {
             int box_width = static_cast<int>(x2 - x1);
             int box_height = static_cast<int>(y2 - y1);
 
-            auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
+            auto class_id = static_cast<size_t>(box_info[1] + 1e-6);
 
             if (prob > PROBABILITY_THRESHOLD && box_width > 0 && box_height > 0) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
@@ -270,7 +240,7 @@ int main(int argc, char* argv[]) {
                     cv::Scalar(color.blue(), color.green(), color.red()));
                 roi_input_img.copyTo(uchar_resized_mask, resized_mask_mat <= MASK_THRESHOLD);
 
-                cv::addWeighted(uchar_resized_mask, alpha, roi_input_img, 1.0f - alpha, 0.0f, roi_input_img);
+                cv::addWeighted(uchar_resized_mask, alpha, roi_input_img, 1.0 - alpha, 0.0f, roi_input_img);
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
