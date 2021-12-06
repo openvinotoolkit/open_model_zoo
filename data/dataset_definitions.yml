@@ -155,7 +155,7 @@ datasets:
       - name: AP
         type: coco_orig_keypoints_precision
 
-  - name: ms_coco_mask_rcnn_person
+  - name: COCO2017_mask_rcnn_person
     annotation_conversion:
       converter: mscoco_mask_rcnn
       annotation_file: instances_val2017_persons.json
