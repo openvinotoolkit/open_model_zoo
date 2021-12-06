@@ -76,6 +76,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m_lm is not set");
     if (FLAGS_m_es.empty())
         throw std::logic_error("Parameter -m_es is not set");
+    if (FLAGS_postprocess_key.empty())
+        throw std::logic_error("Parameter -postprocess_key is not set");
 
     return true;
 }
@@ -100,16 +102,13 @@ int main(int argc, char *argv[]) {
        // LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
         EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
-        ///--------------
-        std::string postprocessKey = "heatmap";// вынеси в ключи 
         std::unique_ptr<ModelBase> landmarksModel;
-        landmarksModel.reset(new LandmarksModel(FLAGS_m_lm, false, postprocessKey));
+        landmarksModel.reset(new LandmarksModel(FLAGS_m_lm, false, FLAGS_postprocess_key));
         auto execNet = landmarksModel->loadExecutableNetwork(
             ConfigFactory::getUserConfig(FLAGS_d_lm, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
         auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());
-        //---------------------------
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
-        BaseEstimator* estimators[] = {&headPoseEstimator};
+        BaseEstimator* estimators[] = { &headPoseEstimator, &eyeStateEstimator, &gazeEstimator };
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
@@ -135,7 +134,6 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
-        std::vector<std::vector<cv::Point2f>> landmarksResults;
 
         do {
             if (flipImage) {
@@ -145,7 +143,7 @@ int main(int argc, char *argv[]) {
             // Infer results
             auto inferenceResults = faceDetector.detect(frame);
             for (auto& inferenceResult : inferenceResults) {
-                //crop frame by box set it in preprocess
+                //crop frame by box and set it in preprocess
                 auto faceBoundingBox = inferenceResult.faceBoundingBox;
                 auto faceCrop(cv::Mat(frame, faceBoundingBox));
 
@@ -172,30 +170,20 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 auto result = (landmarksModel->postprocess(res))->asRef<LandmarksResult>();
-                //landmarksResults.push_back(result.coordinates);
-                //-----
-                // сделать преобразования поинтов
                 std::vector<cv::Point2f> coordinates;
                 for (auto point : result.coordinates) {
                     coordinates.push_back(cv::Point2f(point.x + faceBoundingBox.tl().x,point.y + faceBoundingBox.tl().y));
                 }
-                landmarksResults.push_back(coordinates);
-                //-----------------------
+                inferenceResult.faceLandmarks = coordinates;
                 for (auto estimator : estimators) {
                     estimator->estimate(frame, inferenceResult);
 
                 }
             }
-            size_t it = 0;
+            
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
-
-                int lmRadius = static_cast<int>(0.003 * frame.cols + 1);//0.01 * faceBoundingBoxWidth
-
-                for (auto const& point : landmarksResults[it])
-                    cv::circle(frame, point, lmRadius, cv::Scalar(0, 255, 255), -1);
-                it++;
             }
 
             presenter.drawGraphs(frame);
@@ -215,7 +203,7 @@ int main(int argc, char *argv[]) {
                 cv::imshow(windowName, frame);
 
                 // Controls the information being displayed while demo runs
-                int key = cv::waitKey(0);
+                int key = cv::waitKey(delay);
                 resultsMarker.toggle(key);
 
                 // Press 'Esc' to quit, 'f' to flip the video horizontally

@@ -13,7 +13,7 @@ struct FaceInferenceResults {
     float faceDetectionConfidence{};
     cv::Rect faceBoundingBox;
 
-    std::vector<cv::Point2i> faceLandmarks;
+    std::vector<cv::Point2f> faceLandmarks;
 
     cv::Point3f headPoseAngles;
     cv::Rect leftEyeBoundingBox;
@@ -24,6 +24,8 @@ struct FaceInferenceResults {
     bool rightEyeState{};
 
     cv::Point3f gazeVector;
+
+    std::vector<cv::Point2f> getEyeLandmarks();
 
     friend slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults);
 };

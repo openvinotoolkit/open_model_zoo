@@ -18,8 +18,8 @@ EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
     outputBlobName = ieWrapper.expectSingleOutput();
 }
 
-cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
-                                                 const cv::Point2i& p2,
+cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2f& p1,
+                                                 const cv::Point2f& p2,
                                                  float scale) const {
     cv::Rect result;
     float size = static_cast<float>(cv::norm(p1 - p2));
@@ -51,9 +51,10 @@ void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
 
 void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto roll = outputResults.headPoseAngles.z;
+    std::vector<cv::Point2f> eyeLandmarks = outputResults.getEyeLandmarks();
 
-    outputResults.leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
-    auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0], outputResults.faceLandmarks[1]);
+    outputResults.leftEyeMidpoint = (eyeLandmarks[0] + eyeLandmarks[1]) / 2;
+    auto leftEyeBoundingBox = createEyeBoundingBox(eyeLandmarks[0], eyeLandmarks[1]);
     outputResults.leftEyeBoundingBox = leftEyeBoundingBox;
     if (leftEyeBoundingBox.area()) {
         auto leftEyeImage(cv::Mat(image, leftEyeBoundingBox));
@@ -70,8 +71,8 @@ void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& out
         outputResults.leftEyeState = false;
     }
 
-    outputResults.rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
-    auto rightEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[2], outputResults.faceLandmarks[3]);
+    outputResults.rightEyeMidpoint = (eyeLandmarks[2] + eyeLandmarks[3]) / 2;
+    auto rightEyeBoundingBox = createEyeBoundingBox(eyeLandmarks[2], eyeLandmarks[3]);
     outputResults.rightEyeBoundingBox = rightEyeBoundingBox;
     if (rightEyeBoundingBox.area()) {
         auto rightEyeImage(cv::Mat(image, rightEyeBoundingBox));
