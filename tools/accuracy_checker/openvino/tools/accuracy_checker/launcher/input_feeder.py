@@ -68,7 +68,7 @@ PRECISION_TO_DTYPE = {
     'i32': np.int32,
     'i64': np.int64,
     'fp16': np.float16,
-    'f16': np.float16
+    'f16': np.float16,
     'i16': np.int16,
     'u16': np.uint16,
     'i8': np.int8,
