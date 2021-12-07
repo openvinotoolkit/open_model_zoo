@@ -149,7 +149,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 def parse_supported_device_list(paths):
     if not paths:
         return None
-    supported_devices = {}
+    suppressed_devices = {}
     for path in paths:
         with Path(path).open() as f:
             data = f.read()
@@ -166,8 +166,8 @@ def parse_supported_device_list(paths):
                     for device, value in zip(devices, values):
                         if not value:
                             result[model_name] = result.get(model_name, []) + [device]
-            supported_devices.update(result)
-    return supported_devices
+            suppressed_devices.update(result)
+    return suppressed_devices
 
 
 def get_models(case, keys):
@@ -183,6 +183,7 @@ def main():
     args = parse_args()
 
     suppressed_devices = parse_supported_device_list(args.supported_devices)
+
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
     auto_tools_dir = omz_dir / 'tools/model_tools'
