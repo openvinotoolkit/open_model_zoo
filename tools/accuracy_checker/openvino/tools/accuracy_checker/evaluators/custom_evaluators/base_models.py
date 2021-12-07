@@ -333,7 +333,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         outputs = self.infer_request.infer(feed_dict)
         return {
             out_node.get_node().friendly_name: out_res
-            for out_node, out_res in zip(self.exec_network.outputs, outputs)
+            for out_node, out_res in outputs.items()
         }
 
 
