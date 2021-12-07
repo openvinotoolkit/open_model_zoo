@@ -83,8 +83,8 @@ public:
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
-        inputNetworkInfo.set_layout({ "NCHW" });
+        InputModelInfo& inputModelInfo = inputInfo.model();
+        inputModelInfo.set_layout({ "NCHW" });
 
         network = ppp.build();
 
@@ -193,8 +193,8 @@ public:
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
-        inputNetworkInfo.set_layout({ "NCHW" });
+        InputModelInfo& inputModelInfo = inputInfo.model();
+        inputModelInfo.set_layout({ "NCHW" });
 
         network = ppp.build();
 
@@ -321,8 +321,8 @@ public:
             preProcessSteps.resize(ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        InputNetworkInfo& inputNetworkInfo = inputInfo.network();
-        inputNetworkInfo.set_layout({ "NCHW" });
+        InputModelInfo& inputModelInfo = inputInfo.model();
+        inputModelInfo.set_layout({ "NCHW" });
 
         network = ppp.build();
 

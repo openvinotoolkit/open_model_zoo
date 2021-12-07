@@ -100,7 +100,7 @@ struct PersonDetection : BaseDetection {
                 convert_element_type(ov::element::f32).
                 convert_layout("NCHW").
                 resize(ResizeAlgorithm::RESIZE_LINEAR);
-            ppp.input().network().set_layout("NCHW");
+            ppp.input().model().set_layout("NCHW");
             ppp.output().tensor().set_element_type(ov::element::f32);
         } else {
             ppp.input().tensor().

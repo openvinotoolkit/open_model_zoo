@@ -152,7 +152,7 @@ struct PersonAttribsDetection : BaseDetection {
                 convert_element_type(ov::element::f32).
                 convert_layout("NCHW").
                 resize(ResizeAlgorithm::RESIZE_LINEAR);
-            ppp.input().network().set_layout("NCHW");
+            ppp.input().model().set_layout("NCHW");
         } else {
             ppp.input().tensor().
                 set_element_type(ov::element::u8).
