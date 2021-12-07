@@ -69,7 +69,7 @@ def parse_args():
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
     parser.add_argument('--suppressed-devices', type=parser_paths_list, required=False,
-        help='paths to file with suppressed devices for each model')
+        help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
         help='IR precisions for all models. By default, models are tested in FP16 precision')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
