@@ -145,6 +145,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
     return dl_dir
 
+
 def parse_suppressed_device_list(paths):
     if not paths:
         return None
