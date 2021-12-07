@@ -99,7 +99,7 @@ std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& i
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
     LandmarksResult* result = new LandmarksResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-    for (auto i = 0; i < numberLandmarks / 2; ++i) {
+    for (size_t i = 0; i < numberLandmarks / 2; ++i) {
         float normed_x = static_cast<float>(normed_coordinates[2 * i] * internalData.inputImgHeight);
         float normed_y = static_cast<float>(normed_coordinates[2 * i + 1] * internalData.inputImgWidth);
 
