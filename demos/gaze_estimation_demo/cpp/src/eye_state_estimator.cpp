@@ -18,13 +18,13 @@ EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
     outputBlobName = ieWrapper.expectSingleOutput();
 }
 
-cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2f& p1,
+cv::Rect2f EyeStateEstimator::createEyeBoundingBox(const cv::Point2f& p1,
                                                  const cv::Point2f& p2,
                                                  float scale) const {
-    cv::Rect result;
+    cv::Rect2f result;
     float size = static_cast<float>(cv::norm(p1 - p2));
 
-    result.width = static_cast<int>(scale * size);
+    result.width = static_cast<float>(scale * size);
     result.height = result.width;
 
     auto midpoint = (p1 + p2) / 2;

@@ -52,8 +52,6 @@ static const char num_threads_message[] = "Optional. Number of threads for detec
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode for detector model (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char postprocess_key_for_landmarks[] = "Required. The key for defining the post-processing type for landmark models"
-"(simple - for models with output shape = 2, heatmap - for models with output shape = 4).";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
@@ -78,7 +76,6 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_string(postprocess_key, "", postprocess_key_for_landmarks);
 
 /**
 * \brief This function shows a help message
@@ -117,5 +114,4 @@ static void showUsage() {
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nstreams                   " << num_streams_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
-    std::cout << "    -postprocess_key            " << postprocess_key_for_landmarks << std::endl;
 }

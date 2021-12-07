@@ -76,8 +76,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m_lm is not set");
     if (FLAGS_m_es.empty())
         throw std::logic_error("Parameter -m_es is not set");
-    if (FLAGS_postprocess_key.empty())
-        throw std::logic_error("Parameter -postprocess_key is not set");
 
     return true;
 }
@@ -103,7 +101,7 @@ int main(int argc, char *argv[]) {
         EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
         std::unique_ptr<ModelBase> landmarksModel;
-        landmarksModel.reset(new LandmarksModel(FLAGS_m_lm, false, FLAGS_postprocess_key));
+        landmarksModel.reset(new LandmarksModel(FLAGS_m_lm, false));
         auto execNet = landmarksModel->loadExecutableNetwork(
             ConfigFactory::getUserConfig(FLAGS_d_lm, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
         auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());

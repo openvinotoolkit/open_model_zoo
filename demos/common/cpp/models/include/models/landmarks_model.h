@@ -22,7 +22,7 @@ public:
     /// @param modelFileName name of model to load
     /// @param useAutoResize - if true, image will be resized by IE.
     /// @param postprocessType key for model model with heatmap output and simple output.
-    LandmarksModel(const std::string& modelFileName, bool useAutoResize,std::string postprocessKey);
+    LandmarksModel(const std::string& modelFileName, bool useAutoResize);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
@@ -40,5 +40,4 @@ protected:
     cv::Point2f rotatePoint(cv::Point2f, float);
     cv::Point2f get3rdPoint(cv::Point2f a, cv::Point2f b);
     size_t numberLandmarks;
-    std::string postprocessType;// simple or heatmap
 };

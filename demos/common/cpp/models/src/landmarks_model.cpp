@@ -20,9 +20,8 @@
 #include <vector>
 #include <utility>
 
-LandmarksModel::LandmarksModel(const std::string& modelFileName, bool useAutoResize, std::string postprocessKey) :
+LandmarksModel::LandmarksModel(const std::string& modelFileName, bool useAutoResize) :
     ImageModel(modelFileName, useAutoResize) {
-    postprocessType = postprocessKey;
 }
 
 
@@ -79,14 +78,16 @@ std::shared_ptr<InternalModelData> LandmarksModel::preprocess(const InputData& i
 }
 
 std::unique_ptr<ResultBase> LandmarksModel::postprocess(InferenceResult& infResult) {
-    if (postprocessType == "simple") {
+    InferenceEngine::MemoryBlob::Ptr  outputMapped = infResult.getFirstOutputBlob();
+    const InferenceEngine::SizeVector& heatMapsDims = outputMapped->getTensorDesc().getDims();
+    if (heatMapsDims.size() == 2) {
         return simplePostprocess(infResult);
     }
-    else if(postprocessType == "heatmap"){
+    else if(heatMapsDims.size() == 4){
         return heatmapPostprocess(infResult);
     }
     else {
-        throw std::logic_error("postprocessType parameter is incorrect");
+        throw std::logic_error("Landmarks Estimation network output layer should have 2 or 4 dimensions");
     }
 }
 
@@ -99,8 +100,8 @@ std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& i
     LandmarksResult* result = new LandmarksResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
     for (auto i = 0; i < numberLandmarks / 2; ++i) {
-        int normed_x = static_cast<int>(normed_coordinates[2 * i] * internalData.inputImgHeight);
-        int normed_y = static_cast<int>(normed_coordinates[2 * i + 1] * internalData.inputImgWidth);
+        float normed_x = static_cast<float>(normed_coordinates[2 * i] * internalData.inputImgHeight);
+        float normed_y = static_cast<float>(normed_coordinates[2 * i + 1] * internalData.inputImgWidth);
 
         result->coordinates.push_back(cv::Point2f(normed_x, normed_y));
     }
@@ -120,8 +121,8 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
             heatMaps[i].col(j - 1).copyTo(tmpCol);
         }
     }
-    cv::Point2f center(internalData.inputImgWidth *0.5, internalData.inputImgHeight *0.5);
-    cv::Point2f scale(internalData.inputImgWidth, internalData.inputImgHeight);
+    cv::Point2f center(internalData.inputImgWidth *0.5f, internalData.inputImgHeight *0.5f);
+    cv::Point2f scale(static_cast<float>(internalData.inputImgWidth), static_cast<float>(internalData.inputImgHeight));
     std::vector<cv::Point2f> preds = getMaxPreds(heatMaps);
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
         const cv::Mat& heatMap = heatMaps[landmarkId];
@@ -130,8 +131,8 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
         if (1 < px && px < heatMap.cols - 1 && 1 < py && py < heatMap.rows - 1) {
             float diffFirst = heatMap.at<float>(py, px + 1) - heatMap.at<float>(py, px - 1);
             float diffSecond = heatMap.at<float>(py + 1, px ) - heatMap.at<float>(py - 1, px);
-            preds[landmarkId].x += sign(diffFirst) * 0.25;
-            preds[landmarkId].y += sign(diffSecond) * 0.25;
+            preds[landmarkId].x += sign(diffFirst) * 0.25f;
+            preds[landmarkId].y += sign(diffSecond) * 0.25f;
         }
     }
     //transform preds
@@ -174,7 +175,7 @@ std::vector<cv::Point2f> LandmarksModel::getMaxPreds(std::vector<cv::Mat> heatMa
         size_t idx = indices[0];
         float maxVal = heatMapData[idx];
         if (maxVal > 0) {
-            preds.push_back(cv::Point2f(idx % heatMaps[0].cols, idx / heatMaps[0].cols));
+            preds.push_back(cv::Point2f(static_cast<float>(idx % heatMaps[0].cols), static_cast<float>(idx / heatMaps[0].cols)));
         }
         else {
             preds.push_back(cv::Point2f(-1, -1));
@@ -196,16 +197,16 @@ int LandmarksModel::sign(float number) {
 cv::Mat LandmarksModel::affineTransform(cv::Point2f center, cv::Point2f scale,
     float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv) {
     cv::Point2f scale_tmp = scale;
-    const float pi = acos(-1.0);
+    const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
-    cv::Point2f src_dir = rotatePoint(cv::Point2f(0., scale_tmp.y * -0.5), rot_rad);
+    cv::Point2f src_dir = rotatePoint(cv::Point2f(0.f, scale_tmp.y * -0.5f), rot_rad);
     cv::Point2f* src = new cv::Point2f[3];
     src[0] = cv::Point2f(center.x + scale_tmp.x * shift.x, center.y + scale_tmp.y * shift.y);
     src[1] = cv::Point2f(center.x + src_dir.x+ scale_tmp.x * shift.x, center.y + src_dir.y + scale_tmp.y * shift.y);
     src[2] = get3rdPoint(src[0], src[1]);
-    cv::Point2f dst_dir = cv::Point2f(0., dst_w * -0.5);
+    cv::Point2f dst_dir = cv::Point2f(0.f, dst_w * -0.5f);
     cv::Point2f* dst = new cv::Point2f[3];
-    dst[0] = cv::Point2f(dst_w * 0.5, dst_h * 0.5);
+    dst[0] = cv::Point2f(dst_w * 0.5f, dst_h * 0.5f);
     dst[1] = dst[0]+ dst_dir;
     dst[2] = get3rdPoint(dst[0], dst[1]);
     cv::Mat trans;
