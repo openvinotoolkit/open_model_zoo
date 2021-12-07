@@ -75,7 +75,11 @@ from .yolo import (
 )
 from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
-    SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
+    SegmentationAdapter,
+    BrainTumorSegmentationAdapter,
+    DUCSegmentationAdapter,
+    BackgroundMattingAdapter,
+    AnomalySegmentationAdapter
 )
 from .facial_landmarks_98_detection import FacialLandmarksAdapter
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
@@ -177,6 +181,7 @@ __all__ = [
     'DUCSegmentationAdapter',
     'SalientObjectDetection',
     'BackgroundMattingAdapter',
+    'AnomalySegmentationAdapter',
 
     'ReidAdapter',
 

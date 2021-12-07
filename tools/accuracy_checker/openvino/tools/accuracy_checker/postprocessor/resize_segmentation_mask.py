@@ -21,14 +21,29 @@ from PIL import Image
 from ..config import NumberField, BoolField
 from ..utils import get_size_from_config
 from .postprocessor import PostprocessorWithSpecificTargets
-from ..representation import SegmentationPrediction, SegmentationAnnotation
+from ..representation import (
+    SegmentationPrediction, SegmentationAnnotation,
+    AnomalySegmentationAnnotation, AnomalySegmentationPrediction,
+    BackgroundMattingAnnotation, BackgroundMattingPrediction,
+    SalientRegionAnnotation, SalientRegionPrediction
+)
 
 
 class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'resize_segmentation_mask'
 
-    annotation_types = (SegmentationAnnotation, )
-    prediction_types = (SegmentationPrediction, )
+    annotation_types = (
+        SegmentationAnnotation,
+        AnomalySegmentationAnnotation,
+        BackgroundMattingAnnotation,
+        SalientRegionAnnotation
+    )
+    prediction_types = (
+        SegmentationPrediction,
+        AnomalySegmentationPrediction,
+        BackgroundMattingPrediction,
+        SalientRegionPrediction
+    )
 
     @classmethod
     def parameters(cls):
@@ -64,6 +79,9 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             return entry
 
         @resize_segmentation_mask.register(SegmentationPrediction)
+        @resize_segmentation_mask.register(AnomalySegmentationPrediction)
+        @resize_segmentation_mask.register(BackgroundMattingPrediction)
+        @resize_segmentation_mask.register(SalientRegionPrediction)
         def _(entry, height, width):
             if len(entry.mask.shape) == 2:
                 entry.mask = self.segm_resize(entry.mask, width, height)
@@ -78,6 +96,9 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             return entry
 
         @resize_segmentation_mask.register(SegmentationAnnotation)
+        @resize_segmentation_mask.register(AnomalySegmentationAnnotation)
+        @resize_segmentation_mask.register(BackgroundMattingAnnotation)
+        @resize_segmentation_mask.register(SalientRegionAnnotation)
         def _(entry, height, width):
             entry.mask = self.segm_resize(entry.mask, width, height)
             return entry

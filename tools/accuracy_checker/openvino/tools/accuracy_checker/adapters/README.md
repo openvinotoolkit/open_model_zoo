@@ -33,7 +33,9 @@ AccuracyChecker supports following set of adapters:
   * `label_as_array` - produce ClassificationPrediction's label as array
 * `segmentation` - converting output of semantic segmentation model to `SeegmentationPrediction` representation.
   * `make_argmax` - allows applying argmax operation to output values.
-* `segmentation_one_class` - converting output of semantic segmentation to `SeegmentationPrediction` representation. It is suitable for situation when model's output is probability of belong each pixel to foreground class.
+* `segmentation_one_class` - converting output of semantic segmentation model to `SeegmentationPrediction` representation. It is suitable for cases when model's output is probability of belong each pixel to foreground class.
+  * `threshold` - minimum probability threshold for valid class belonging.
+* `anomaly_segmentation` - converting output of anomaly segmentation model to `AnomalySeegmentationPrediction` representation.
   * `threshold` - minimum probability threshold for valid class belonging.
 * `tiny_yolo_v1` - converting output of Tiny YOLO v1 model to `DetectionPrediction` representation.
 * `reid` - converting output of reidentification model to `ReIdentificationPrediction` representation.

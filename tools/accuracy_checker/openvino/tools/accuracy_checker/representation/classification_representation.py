@@ -32,16 +32,29 @@ class ClassificationAnnotation(Classification):
 
 
 class ClassificationPrediction(Classification):
-    def __init__(self, identifier='', scores=None, label_as_array=False):
+    def __init__(self, identifier='', scores=None, label_as_array=False, multilabel_threshold=None):
         super().__init__(identifier)
 
         self.scores = np.array(scores) if scores is not None else np.array([])
         self.label_as_array = label_as_array
+        self.multilabel_threshold = multilabel_threshold
 
     @property
     def label(self):
         val = np.argmax(self.scores)
         return val if not self.label_as_array or not np.isscalar(val) else [val, ]
+
+    @property
+    def multi_label(self):
+        if self.multilabel_threshold is None:
+            return self.label
+        return np.argwhere(self.scores >= self.multilabel_threshold)
+
+    @property
+    def one_hot_label(self):
+        label = np.zeros_like(self.scores)
+        label[self.multi_label] = 1
+        return label
 
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
@@ -82,3 +95,12 @@ class SequenceClassificationPrediction(ClassificationPrediction):
 
     def top_k(self, k):
         return np.argpartition(self.scores, -k, axis=1)[:, -k:]
+
+
+class MultiLabelClassificationAnnotation(ClassificationAnnotation):
+    def __init__(self, identfier, one_hot_label):
+        super().__init__(identfier, one_hot_label)
+
+    @property
+    def label_ids(self):
+        return np.argwhere(self.label)

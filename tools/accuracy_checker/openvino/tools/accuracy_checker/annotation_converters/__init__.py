@@ -125,6 +125,7 @@ from .sentence_similarity import SentenceSimilarityConverter
 from .common_text_recognition import CommonTextRecognition
 from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .speaker_identification import SpeakerReIdentificationDatasetConverter
+from .mvtec import MVTecDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -250,4 +251,5 @@ __all__ = [
     'CommonTextRecognition',
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
+    'MVTecDatasetConverter',
 ]
