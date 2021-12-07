@@ -180,7 +180,6 @@ int main(int argc, char *argv[]) {
 
                 }
             }
-            
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);

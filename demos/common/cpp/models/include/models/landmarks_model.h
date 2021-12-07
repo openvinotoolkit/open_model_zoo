@@ -33,12 +33,12 @@ protected:
     std::unique_ptr<ResultBase> simplePostprocess(InferenceResult& infResult);
     std::unique_ptr<ResultBase> heatmapPostprocess(InferenceResult& infResult);
     std::vector<cv::Mat> split(float* data, const InferenceEngine::SizeVector& shape);
-    std::vector<cv::Point2f> LandmarksModel::getMaxPreds(std::vector<cv::Mat> heatMaps);
+    std::vector<cv::Point2f> getMaxPreds(std::vector<cv::Mat> heatMaps);
     int sign(float number);
     cv::Mat affineTransform(cv::Point2f center, cv::Point2f scale,
         float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv);
     cv::Point2f rotatePoint(cv::Point2f, float);
     cv::Point2f get3rdPoint(cv::Point2f a, cv::Point2f b);
-    int numberLandmarks;
+    size_t numberLandmarks;
     std::string postprocessType;// simple or heatmap
 };

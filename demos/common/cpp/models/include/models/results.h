@@ -110,7 +110,7 @@ struct HumanPoseResult : public ResultBase {
     }
     std::vector<HumanPose> poses;
 };
- 
+
 struct LandmarksResult : public ResultBase {
     LandmarksResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
         ResultBase(frameId, metaData) {}

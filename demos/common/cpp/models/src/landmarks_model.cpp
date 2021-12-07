@@ -64,23 +64,18 @@ void LandmarksModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     if (outSizeVector.size() != 2 && outSizeVector.size() != 4) {
         throw std::logic_error("Landmarks Estimation network output layer should have 2 or 4 dimensions");
     }
-    
 }
 
 
 std::shared_ptr<InternalModelData> LandmarksModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-    
-        const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
-        const auto& img = inputTransform(origImg);
-
-        cv::Mat resizedImage;
-        auto scaledSize = cv::Size(static_cast<int>(netInputWidth), static_cast<int>(netInputHeight));
-        cv::resize(img, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC); 
-
-        auto inputBlob = request->GetBlob(inputsNames[0]);
-        matToBlob(resizedImage, inputBlob);
-        return std::make_shared<InternalImageModelData>(img.cols, img.rows);
-
+    const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
+    const auto& img = inputTransform(origImg);
+    cv::Mat resizedImage;
+    auto scaledSize = cv::Size(static_cast<int>(netInputWidth), static_cast<int>(netInputHeight));
+    cv::resize(img, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC);
+    auto inputBlob = request->GetBlob(inputsNames[0]);
+    matToBlob(resizedImage, inputBlob);
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::unique_ptr<ResultBase> LandmarksModel::postprocess(InferenceResult& infResult) {
@@ -93,7 +88,6 @@ std::unique_ptr<ResultBase> LandmarksModel::postprocess(InferenceResult& infResu
     else {
         throw std::logic_error("postprocessType parameter is incorrect");
     }
-    
 }
 
 std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& infResult) {
@@ -102,7 +96,6 @@ std::unique_ptr<ResultBase> LandmarksModel::simplePostprocess(InferenceResult& i
     numberLandmarks = output->getTensorDesc().getDims()[1];
     auto normed_coordinates = output->rmap().as<float*>();
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
-
     LandmarksResult* result = new LandmarksResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
     for (auto i = 0; i < numberLandmarks / 2; ++i) {
@@ -127,15 +120,9 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
             heatMaps[i].col(j - 1).copyTo(tmpCol);
         }
     }
-    
-
-    // we think that we have frame with right size for face _xywh2cs
-    double padding = 1.0;
     cv::Point2f center(internalData.inputImgWidth *0.5, internalData.inputImgHeight *0.5);
     cv::Point2f scale(internalData.inputImgWidth, internalData.inputImgHeight);
-    //scale *= padding;
     std::vector<cv::Point2f> preds = getMaxPreds(heatMaps);
-
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
         const cv::Mat& heatMap = heatMaps[landmarkId];
         int px = int(preds[landmarkId].x);
@@ -164,9 +151,8 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
     auto retVal = std::unique_ptr<ResultBase>(result);
     result->coordinates = landmarks;
     return retVal;
-
-
 }
+
 std::vector<cv::Mat> LandmarksModel::split(float* data, const InferenceEngine::SizeVector& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
     for (size_t i = 0; i < flattenData.size(); i++) {
@@ -179,7 +165,6 @@ std::vector<cv::Point2f> LandmarksModel::getMaxPreds(std::vector<cv::Mat> heatMa
     std::vector<cv::Point2f> preds;
     size_t reshapedSize = heatMaps[0].cols * heatMaps[0].rows;
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
-        
         const cv::Mat& heatMap = heatMaps[landmarkId];
         const float* heatMapData = heatMap.ptr<float>();
         std::vector<int> indices(reshapedSize);
@@ -194,11 +179,10 @@ std::vector<cv::Point2f> LandmarksModel::getMaxPreds(std::vector<cv::Mat> heatMa
         else {
             preds.push_back(cv::Point2f(-1, -1));
         }
-       
     }
     return preds;
-       
 }
+
 int LandmarksModel::sign(float number) {
     if (number > 0) {
         return 1;
@@ -215,12 +199,10 @@ cv::Mat LandmarksModel::affineTransform(cv::Point2f center, cv::Point2f scale,
     const float pi = acos(-1.0);
     float rot_rad = pi * rot / 180;
     cv::Point2f src_dir = rotatePoint(cv::Point2f(0., scale_tmp.y * -0.5), rot_rad);
-
     cv::Point2f* src = new cv::Point2f[3];
     src[0] = cv::Point2f(center.x + scale_tmp.x * shift.x, center.y + scale_tmp.y * shift.y);
     src[1] = cv::Point2f(center.x + src_dir.x+ scale_tmp.x * shift.x, center.y + src_dir.y + scale_tmp.y * shift.y);
     src[2] = get3rdPoint(src[0], src[1]);
-
     cv::Point2f dst_dir = cv::Point2f(0., dst_w * -0.5);
     cv::Point2f* dst = new cv::Point2f[3];
     dst[0] = cv::Point2f(dst_w * 0.5, dst_h * 0.5);
@@ -244,4 +226,3 @@ cv::Point2f LandmarksModel::get3rdPoint(cv::Point2f a, cv::Point2f b) {
     cv::Point2f direction = a - b;
     return  cv::Point2f(b.x - direction.y, b.y + direction.x);
 }
-
