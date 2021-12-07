@@ -138,7 +138,7 @@ std::unique_ptr<ResultBase> LandmarksModel::heatmapPostprocess(InferenceResult& 
     cv::Mat trans = affineTransform(center, scale, 0, heatMapsDims[2], heatMapsDims[3], cv::Point2f(0., 0.), true);
     std::vector<cv::Point2f> landmarks;
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
-        cv::Mat coord(3, 1, CV_32F); 
+        cv::Mat coord(3, 1, CV_32F);
         coord.at<float>(0, 0) = preds[landmarkId].x;
         coord.at<float>(1, 0) = preds[landmarkId].y;
         coord.at<float>(2, 0) = 1;
@@ -190,7 +190,7 @@ int LandmarksModel::sign(float number) {
     else if (number < 0) {
         return -1;
     }
-    return 0; 
+    return 0;
 }
 
 cv::Mat LandmarksModel::affineTransform(cv::Point2f center, cv::Point2f scale,
