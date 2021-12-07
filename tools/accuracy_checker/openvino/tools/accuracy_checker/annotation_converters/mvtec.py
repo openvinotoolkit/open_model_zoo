@@ -43,8 +43,8 @@ class MVTecDatasetConverter(BaseFormatConverter):
             self.reference_mask_dir = self.data_dir / 'ground_truth'
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        test_images = self.test_images_dir.glob("**/*.png")
-        num_iterations = len(list(test_images))
+        test_images = list(self.test_images_dir.rglob("**/*.png"))
+        num_iterations = len(test_images)
         annotations = []
         errors = [] if check_content else None
         for idx, image in enumerate(test_images):
@@ -52,7 +52,8 @@ class MVTecDatasetConverter(BaseFormatConverter):
             label_id = 0 if label == 'good' else 1
             identifier = str(image.relative_to(self.test_images_dir))
             if self.classification_only:
-                annotations = ClassificationAnnotation(identifier, label_id)
+                annotation = ClassificationAnnotation(identifier, label_id)
+                annotations.append(annotation)
             else:
                 mask = None
                 mask_path = None
@@ -61,14 +62,15 @@ class MVTecDatasetConverter(BaseFormatConverter):
                     h, w = img.shape[:2]
                     mask = np.zeros((h, w), dtype=np.uint8)
                 else:
-                    mask_path = str(image.with_stem(image.stem + '_mask').relative_to(self.test_images_dir))
-                annotation = AnomalySegmentationAnnotation(identifier, mask_path, label)
+                    mask_path = str(
+                        image.with_name(image.stem + '_mask' + image.suffix).relative_to(self.test_images_dir))
+                annotation = AnomalySegmentationAnnotation(identifier, mask_path, label_id)
                 if mask_path is None:
                     annotation.mask = mask
                 if check_content and mask_path:
                     if not check_file_existence(self.reference_mask_dir / mask_path):
                         errors.append('{}: does not exist'.format(self.reference_mask_dir / mask_path))
-            annotations.append(annotation)
+                annotations.append(annotation)
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
         return ConverterReturn(annotations, self.get_meta(), errors)

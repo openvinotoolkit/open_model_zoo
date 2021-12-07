@@ -51,7 +51,8 @@ from .segmentation_representation import (
     SalientRegionPrediction,
     BackgroundMattingAnnotation,
     BackgroundMattingPrediction,
-    AnomalySegmentationAnnotation
+    AnomalySegmentationAnnotation,
+    AnomalySegmentationPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -144,6 +145,9 @@ __all__ = [
 
     'BackgroundMattingAnnotation',
     'BackgroundMattingPrediction',
+
+    'AnomalySegmentationAnnotation',
+    'AnomalySegmentationPrediction',
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',

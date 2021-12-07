@@ -100,34 +100,26 @@ class ClassificationAdapter(Adapter):
 
         result = []
         if self.block:
-            if self.argmax_output:
-                single_prediction = ArgMaxClassificationPrediction(identifiers[0], prediction)
-            elif self.fixed_output:
-                single_prediction = ArgMaxClassificationPrediction(identifiers[0],
-                                                                   prediction[:, self.fixed_output_index])
-            else:
-                if self.do_softmax:
-                    prediction = softmax(prediction)
-                single_prediction = ClassificationPrediction(
-                    identifiers[0], prediction, self.label_as_array,
-                    multilabel_threshold=self.multilabel_thresh)
-
-            result.append(single_prediction)
+            result.append(self.prepare_representation(identifiers[0], prediction))
         else:
             for identifier, output in zip(identifiers, prediction):
-                if self.argmax_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifier, [output[0], ])
-                elif self.fixed_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifiers[0],
-                                                                       output[self.fixed_output_index])
-                else:
-                    if self.do_softmax:
-                        output = softmax(output)
-                    single_prediction = ClassificationPrediction(
-                        identifier, output, multilabel_threshold=self.multilabel_thresh)
-                result.append(single_prediction)
+                result.append(self.prepare_representation(identifier, output))
 
         return result
+
+    def prepare_representation(self, identifier, prediction):
+        if self.argmax_output:
+            single_prediction = ArgMaxClassificationPrediction(identifier, prediction)
+        elif self.fixed_output:
+            single_prediction = ArgMaxClassificationPrediction(identifier,
+                                                               prediction[:, self.fixed_output_index])
+        else:
+            if self.do_softmax:
+                prediction = softmax(prediction)
+            single_prediction = ClassificationPrediction(
+                identifier, prediction, self.label_as_array,
+                multilabel_threshold=self.multilabel_thresh)
+        return single_prediction
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):

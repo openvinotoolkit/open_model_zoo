@@ -408,7 +408,7 @@ class AnomalySegmentationAnnotation(SegmentationAnnotation):
     def _load_mask(self):
         mask = super()._load_mask()
         if self.binarize_mask:
-            mask /= 255
+            mask = mask.astype(float) / 255
         return mask.astype(np.uint8)
 
     @property

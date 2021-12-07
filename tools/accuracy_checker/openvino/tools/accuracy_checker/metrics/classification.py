@@ -20,7 +20,9 @@ from ..representation import (
     ClassificationAnnotation,
     ClassificationPrediction,
     TextClassificationAnnotation,
-    ArgMaxClassificationPrediction
+    ArgMaxClassificationPrediction,
+    AnomalySegmentationAnnotation,
+    AnomalySegmentationPrediction
 )
 
 from ..config import NumberField, StringField, ConfigError, BoolField
@@ -29,11 +31,10 @@ from .average_meter import AverageMeter
 from ..utils import UnsupportedPackage
 
 try:
-    from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+    from sklearn.metrics import accuracy_score, confusion_matrix
 except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
     confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
-    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
 
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
@@ -204,18 +205,11 @@ class ClassificationProfilingSummaryHelper:
 
     def binarize_labels(self):
         max_v = max(np.max(self.gt) + 1, np.max(self.pred) + 1)
-        gt_bin, pred_bin = [], []
-        for gt in self.gt:
-            label_bin = np.zeros(max_v)
-            label_bin[int(gt)] = 1
-            gt_bin.append(label_bin)
-
-        for pred, scores in zip(self.pred, self.scores):
-            label_bin = np.zeros(max_v)
-            label_bin[pred.astype(int)] = scores[pred.astype(int)]
-            pred_bin.append(label_bin)
-
-        return np.array(gt_bin), np.array(pred_bin)
+        gt_bin = np.zeros((len(self.gt), max_v))
+        pred_bin = np.zeros((len(self.pred), max_v))
+        np.put_along_axis(gt_bin, np.expand_dims(np.array(self.gt).astype(int), 1), 1, axis=1)
+        np.put_along_axis(pred_bin, np.expand_dims(np.array(self.pred).astype(int), 1), 1, axis=1)
+        return gt_bin, pred_bin
 
     def roc(self, y_true, y_score):
         per_class_chart = {}
@@ -411,8 +405,8 @@ class ClipAccuracy(PerImageEvaluationMetric):
 class ClassificationF1Score(PerImageEvaluationMetric):
     __provider__ = 'classification_f1-score'
 
-    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
-    prediction_types = (ClassificationPrediction, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation, AnomalySegmentationAnnotation)
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction, AnomalySegmentationPrediction)
 
     @classmethod
     def parameters(cls):
@@ -422,13 +416,15 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             'pos_label': NumberField(
                 optional=True, value_type=int, min_value=0,
                 description="Return metric value for specified class during metric calculation."
-            )
+            ),
+            'pixel_level': BoolField(optional=True, default=False, description='calculate metric on pixel level')
         })
         return parameters
 
     def configure(self):
         label_map = self.get_value_from_config('label_map')
         self.pos_label = self.get_value_from_config('pos_label')
+        self.pixel_level = self.get_value_from_config('pixel_level')
         if self.dataset.metadata:
             self.labels = self.dataset.metadata.get(label_map)
             if not self.labels:
@@ -444,30 +440,32 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             self.meta['names'] = list(self.labels.values())
 
     def update(self, annotation, prediction):
+        if (
+            self.pixel_level and isinstance(annotation, AnomalySegmentationAnnotation)
+            and isinstance(prediction, AnomalySegmentationPrediction)
+        ):
+            return self.update_pixels(annotation, prediction)
         self.cm[annotation.label][prediction.label] += 1
         result = annotation.label == prediction.label
         if self.profiler:
             self.profiler.update(annotation.identifier, annotation.label, prediction.label, self.name, result)
         return result
 
+    def update_pixels(self, annotation, prediction):
+        label_true = annotation.mask.flatten()
+        label_pred = prediction.mask.flatten()
+        n_classes = len(self.labels)
+        mask = (label_true >= 0) & (label_true < n_classes) & (label_pred < n_classes) & (label_pred >= 0)
+        hist = np.bincount(n_classes * label_true[mask].astype(int) + label_pred[mask], minlength=n_classes ** 2)
+        hist = hist.reshape(n_classes, n_classes)
+        hist = hist.reshape(n_classes, n_classes)
+        self.cm += hist
+        return self.f1_score(hist)
+
     def evaluate(self, annotations, predictions):
-        cm_diagonal = self.cm.diagonal()
-        cm_horizontal_sum = self.cm.sum(axis=1)
-        cm_vertical_sum = self.cm.sum(axis=0)
-        precision = np.divide(
-            cm_diagonal, cm_horizontal_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_horizontal_sum != 0
-        )
-        recall = np.divide(
-            cm_diagonal, cm_vertical_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_vertical_sum != 0
-        )
-        sum_precision_recall = precision + recall
-        f1_score = 2 * np.divide(
-            precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
-            where=sum_precision_recall != 0
-        )
+        f1_score = self.f1_score(self.cm)
         if self.profiler:
             self.profiler.finish()
-
         if self.pos_label is not None:
             return f1_score[self.pos_label]
         return f1_score if len(f1_score) == 2 else f1_score[0]
@@ -480,6 +478,24 @@ class ClassificationF1Score(PerImageEvaluationMetric):
     def set_profiler(self, profiler):
         self.profiler = profiler
         self.summary_helper = ClassificationProfilingSummaryHelper()
+
+    @staticmethod
+    def f1_score(cm):
+        cm_diagonal = cm.diagonal()
+        cm_horizontal_sum = cm.sum(axis=1)
+        cm_vertical_sum = cm.sum(axis=0)
+        precision = np.divide(
+            cm_diagonal, cm_horizontal_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_horizontal_sum != 0
+        )
+        recall = np.divide(
+            cm_diagonal, cm_vertical_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_vertical_sum != 0
+        )
+        sum_precision_recall = precision + recall
+        f1_score = 2 * np.divide(
+            precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
+            where=sum_precision_recall != 0
+        )
+        return f1_score
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):
@@ -521,31 +537,50 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
 
 class RocAucScore(PerImageEvaluationMetric):
     __provider__ = 'roc_auc_score'
-    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
-    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation, AnomalySegmentationAnnotation)
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction, AnomalySegmentationPrediction)
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'pixel_level': BoolField(
+                optional=True, default=False,
+                description='calculate metic on pixel level, for anomaly segmentation only')
+        })
+        return params
 
     def configure(self):
         self.reset()
+        self.pixel_level = self.get_value_from_config('pixel_level')
 
     def update(self, annotation, prediction):
-        self.targets.append(annotation.label)
-        self.results.append(prediction.label)
-        return annotation.label != prediction.label
+        if (
+            self.pixel_level and
+            isinstance(prediction, AnomalySegmentationPrediction)
+            and isinstance(annotation, AnomalySegmentationAnnotation)
+        ):
+            self.targets.append(annotation.mask.flatten())
+            self.results.append(prediction.mask.flatten())
+        else:
+            self.targets.append(annotation.label)
+            self.results.append(prediction.label)
+        if np.isscalar(self.results[-1]) or np.ndim(self.results[-1]) == 0:
+            res = annotation.label == prediction.label
+            if isinstance(res, np.ndarray):
+                res = res.item()
+            return res
+        return self.auc_score(self.targets[-1], self.results[-1])
 
-    def binarize_labels(self):
-        max_v = max(np.max(self.targets) + 1, np.max(self.results) + 1)
-        gt_bin, pred_bin = [], []
-        for gt in self.targets:
-            label_bin = np.zeros(max_v)
-            label_bin[int(gt)] = 1
-            gt_bin.append(label_bin)
+    @staticmethod
+    def one_hot_labels(targets, results):
+        max_v = max(np.max(targets) + 1, np.max(results) + 1)
+        gt_bin = np.zeros((len(targets), max_v))
+        pred_bin = np.zeros((len(targets), max_v))
+        np.put_along_axis(gt_bin, np.expand_dims(np.array(targets).astype(int), 1), 1, axis=1)
+        np.put_along_axis(pred_bin, np.expand_dims(np.array(results).astype(int), 1), 1, axis=1)
 
-        for pred in self.results:
-            label_bin = np.zeros(max_v)
-            label_bin[pred.astype(int)] = 1
-            pred_bin.append(label_bin)
-
-        return np.array(gt_bin), np.array(pred_bin)
+        return gt_bin, pred_bin
 
     def roc(self, y_true, y_score):
         per_class_area = []
@@ -558,7 +593,7 @@ class RocAucScore(PerImageEvaluationMetric):
         desc_score_indices = np.argsort(pred, kind="mergesort")[::-1]
         y_score = pred[desc_score_indices]
         y_true = gt[desc_score_indices]
-        distinct_value_indices = np.where(np.diff(y_score))[0]
+        distinct_value_indices = np.where(y_score[1:] - y_score[:-1])[0]
         threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
         tps = np.cumsum(y_true)[threshold_idxs]
         fps = 1 + threshold_idxs - tps
@@ -579,14 +614,19 @@ class RocAucScore(PerImageEvaluationMetric):
         return direction * np.trapz(tpr, fpr)
 
     def evaluate(self, annotations, predictions):
-        all_results = np.concatenate(self.results)
-        all_targets = np.concatenate(self.targets)
-        roc_auc = roc_auc_score(all_targets, all_results)
+        all_results = self.results if np.isscalar(self.results[-1]) else np.concatenate(self.results)
+        all_targets = self.targets if np.isscalar(self.results[-1]) else np.concatenate(self.results)
+        roc_auc = self.auc_score(all_targets, all_results)
         return roc_auc
 
     def reset(self):
         self.targets = []
         self.results = []
+
+    def auc_score(self, targets, results):
+        gt, dt = self.one_hot_labels(targets, results)
+        avg_area, _ = self.roc(gt, dt)
+        return avg_area
 
 
 class AcerScore(PerImageEvaluationMetric):
