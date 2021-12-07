@@ -19,7 +19,7 @@ import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel
+from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
@@ -117,21 +117,19 @@ class CocosnetCascadeModel(BaseCascadeModel):
             })
         if not contains_all(network_info, ['cocosnet_network']) and not delayed_model_loading:
             raise ConfigError('network_info should contain cocosnet_network field')
-        use_api2 = launcher.config['framework'] == 'openvino'
-
-        if not use_api2:
-            self.test_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
-                                            delayed_model_loading)
-        else:
-            self.test_model = CoCosNetModelOV(network_info.get('cocosnet_network', {}), launcher, 'cocosnet_network',
-                                              delayed_model_loading)
+        self._test_mapping = {
+            'dlsdk': CocosnetModel,
+            'openvino': CoCosNetModelOV
+        }
+        self._check_mapping = {
+            'dlsdk': GanCheckModel,
+            'openvino': GANCheckOVModel
+        }
+        self.test_model = create_model(network_info.get('cocosnet_network', {}), launcher, self._test_mapping,
+                                       'cocosnet_network', delayed_model_loading)
         if network_info.get('verification_network'):
-            if not use_api2:
-                self.check_model = GanCheckModel(network_info.get('verification_network', {}), launcher,
-                                                 'verification_network', delayed_model_loading)
-            else:
-                self.check_model = GANCheckOVModel(network_info.get('verification_network', {}), launcher,
-                                                   'verification_network', delayed_model_loading)
+            self.check_model = create_model(network_info.get('verification_network', {}), launcher, self._check_mapping,
+                                            'verification_network', delayed_model_loading)
         else:
             self.check_model = None
         self._part_by_name = {

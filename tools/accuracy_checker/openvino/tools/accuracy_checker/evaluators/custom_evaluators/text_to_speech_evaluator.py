@@ -21,7 +21,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations
+from ...utils import contains_all, extract_image_representations, generate_layer_name
 
 
 class TextToSpeechEvaluator(BaseCustomEvaluator):
@@ -70,29 +70,11 @@ class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, pos_mask_window, is_blob=None,
                  delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            forward_tacotron_duration = network_info.get('forward_tacotron_duration', {})
-            forward_tacotron_regression = network_info.get('forward_tacotron_regression', {})
-            melgan = network_info.get('melgan', {})
-            if 'model' not in forward_tacotron_duration:
-                forward_tacotron_duration['model'] = models_args[0]
-                forward_tacotron_duration['_model_is_blob'] = is_blob
-            if 'model' not in forward_tacotron_regression:
-                forward_tacotron_regression['model'] = models_args[1 if len(models_args) > 1 else 0]
-                forward_tacotron_regression['_model_is_blob'] = is_blob
-            if 'model' not in melgan:
-                melgan['model'] = models_args[2 if len(models_args) > 2 else 0]
-                melgan['_model_is_blob'] = is_blob
-            network_info.update({
-                'forward_tacotron_duration': forward_tacotron_duration,
-                'forward_tacotron_regression': forward_tacotron_regression,
-                'melgan': melgan
-            })
-            required_fields = ['forward_tacotron_duration', 'forward_tacotron_regression', 'melgan']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['forward_tacotron_duration', 'forward_tacotron_regression', 'melgan']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain forward_tacotron_duration,'
+                              'forward_tacotron_regression and melgan fields')
         self._duration_mapping = {
             'dlsdk': TTSDLSDKModel,
             'openvino': TTSOVModel
@@ -244,26 +226,24 @@ class SequentialModel(BaseCascadeModel):
         return a[tuple(expanded_index)]
 
     def update_inputs_outputs_info(self):
-        def generate_name(prefix, with_prefix, layer_name):
-            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
         current_name = next(iter(self.forward_tacotron_duration.inputs))
         with_prefix = current_name.startswith('forward_tacotron_duration_')
         if with_prefix != self.with_prefix:
-            self.duration_output = generate_name('forward_tacotron_duration_', with_prefix, self.duration_output)
-            self.embeddings_output = generate_name('forward_tacotron_duration_', with_prefix, self.embeddings_output)
-            self.mel_output = generate_name('forward_tacotron_regression_', with_prefix, self.mel_output)
-            self.audio_output = generate_name('melgan_', with_prefix, self.audio_output)
+            self.duration_output = generate_layer_name(self.duration_output, 'forward_tacotron_duration_', with_prefix)
+            self.embeddings_output = generate_layer_name(self.embeddings_output, 'forward_tacotron_duration_',
+                                                         with_prefix)
+            self.mel_output = generate_layer_name(self.mel_output, 'forward_tacotron_regression_', with_prefix)
+            self.audio_output = generate_layer_name(self.audio_output, 'melgan_', with_prefix)
             self.adapter.output_blob = self.audio_output
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
             if self.duration_speaker_embeddings:
-                self.duration_speaker_embeddings = generate_name(
-                    'forward_tacotron_duration_', with_prefix, self.duration_speaker_embeddings
+                self.duration_speaker_embeddings = generate_layer_name(
+                    self.duration_speaker_embeddings, 'forward_tacotron_duration_', with_prefix
                 )
             for key, value in self.forward_tacotron_regression_input.items():
-                self.forward_tacotron_regression_input[key] = generate_name(
-                    'forward_tacotron_regression_', with_prefix, value
+                self.forward_tacotron_regression_input[key] = generate_layer_name(
+                    value, 'forward_tacotron_regression_', with_prefix
                 )
 
         self.with_prefix = with_prefix
@@ -280,9 +260,6 @@ class TTSDLSDKModel(BaseDLSDKModel):
         if self.network:
             return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
         return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
-
-    def set_input_and_output(self):
-        pass
 
 
 class TTSOVModel(BaseOpenVINOModel):

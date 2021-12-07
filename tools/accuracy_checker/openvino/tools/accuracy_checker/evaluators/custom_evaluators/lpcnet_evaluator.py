@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, parse_partial_shape
+from ...utils import contains_all, parse_partial_shape, generate_layer_name
 
 
 scale = 255.0/32768.0
@@ -41,31 +41,13 @@ def lin2ulaw(x):
     return u.astype('int16')
 
 
-def generate_name(prefix, with_prefix, layer_name):
-    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
-
 class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            if 'model' not in encoder:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if 'model' not in decoder:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            network_info.update({
-                'encoder': encoder,
-                'decoder': decoder,
-            })
-            required_fields = ['encoder', 'decoder']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['encoder', 'decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain encoder and decoder fields')
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
             'openvino': EncoderOpenVINOModel,
@@ -84,10 +66,7 @@ class SequentialModel(BaseCascadeModel):
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
-        self._part_by_name = {
-            'encoder': self.encoder,
-            'decoder': self.decoder,
-        }
+        self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder}
 
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
@@ -135,9 +114,9 @@ class EncoderModel:
         return outs, features, feature_chunk_size
 
     def update_inputs_outputs_info(self, with_prefix):
-        self.feature_input = generate_name(self.default_model_suffix+'_', with_prefix, self.feature_input)
-        self.periods_input = generate_name(self.default_model_suffix+'_', with_prefix, self.periods_input)
-        self.output = generate_name(self.default_model_suffix+'_', with_prefix, self.output)
+        self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
+        self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
+        self.output = generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -245,13 +224,13 @@ class DecoderModel:
 
     def update_inputs_outputs_info(self, with_prefix):
         prefix = self.default_model_suffix + '_'
-        self.input1 = generate_name(prefix, with_prefix, self.input1)
-        self.input2 = generate_name(prefix, with_prefix, self.input2)
-        self.rnn_input1 = generate_name(prefix, with_prefix, self.rnn_input1)
-        self.rnn_input2 = generate_name(prefix, with_prefix, self.rnn_input2)
-        self.output = generate_name(prefix, with_prefix, self.output)
-        self.rnn_output1 = generate_name(prefix, with_prefix, self.rnn_output1)
-        self.rnn_output2 = generate_name(prefix, with_prefix, self.rnn_output2)
+        self.input1 = generate_layer_name(self.input1, prefix, with_prefix)
+        self.input2 = generate_layer_name(self.input2, prefix, with_prefix)
+        self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
+        self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
+        self.output = generate_layer_name(self.output, prefix, with_prefix)
+        self.rnn_output1 = generate_layer_name(self.rnn_output1, prefix, with_prefix)
+        self.rnn_output2 = generate_layer_name(self.rnn_output2, prefix, with_prefix)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

@@ -18,7 +18,7 @@ import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
 from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
-from ...utils import contains_any, contains_all, generate_layer_name, extract_image_representations
+from ...utils import contains_all, generate_layer_name, extract_image_representations
 from ...config import ConfigError
 
 
@@ -181,13 +181,9 @@ class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
 class SegnetModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            model = network_info.get('segnet_model', {})
-            if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['model'] = models_args[0]
-                model['_model_is_blob'] = is_blob
-            network_info.update({'segnet_model': model})
-        if not contains_all(network_info, ['segnet_model']) and not delayed_model_loading:
+        parts = ['segnet_model']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain segnet_model field')
         self._model_mapping = {
             'dlsdk': DLSDKFeedbackModel,

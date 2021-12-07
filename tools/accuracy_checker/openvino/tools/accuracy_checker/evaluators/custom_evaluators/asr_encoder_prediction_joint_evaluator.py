@@ -21,7 +21,7 @@ import numpy as np
 
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, read_pickle, parse_partial_shape
+from ...utils import contains_all, read_pickle, parse_partial_shape
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 from .base_models import (
     BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, BaseONNXModel, create_model, create_encoder
@@ -43,21 +43,9 @@ class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
 class ASRModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, adapter_info, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            prediction = network_info.get('prediction', {})
-            joint = network_info.get('joint', {})
-            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if not contains_any(prediction, ['model', 'onnx_model']) and models_args:
-                prediction['model'] = models_args[1 if len(models_args) > 1 else 0]
-                prediction['_model_is_blob'] = is_blob
-            if not contains_any(joint, ['model', 'onnx_model']) and models_args:
-                joint['model'] = models_args[2 if len(models_args) > 2 else 0]
-                joint['_model_is_blob'] = is_blob
-            network_info.update({'encoder': encoder, 'prediction': prediction, 'joint': joint})
-        if not contains_all(network_info, ['encoder', 'prediction', 'joint']) and not delayed_model_loading:
+        parts = ['encoder', 'prediction', 'joint']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder, prediction and joint fields')
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,

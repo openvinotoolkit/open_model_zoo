@@ -25,30 +25,10 @@ from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_s
 class Synthesizer(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            postnet = network_info.get('postnet', {})
-            if 'model' not in encoder:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if 'model' not in decoder:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            if 'model' not in postnet:
-                postnet['model'] = models_args[2 if len(models_args) > 2 else 0]
-                postnet['_model_is_blob'] = is_blob
-
-            network_info.update({
-                'encoder': encoder,
-                'decoder': decoder,
-                'postnet': postnet
-            })
-            required_fields = ['encoder', 'decoder', 'postnet']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['encoder', 'decoder', 'postnet']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain encoder, decoder and postnet fields')
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
             'openvino': EncoderOpenVINOModel,
@@ -73,11 +53,7 @@ class Synthesizer(BaseCascadeModel):
         self.adapter = create_adapter(adapter_info)
 
         self.with_prefix = False
-        self._part_by_name = {
-            'encoder': self.encoder,
-            'decoder': self.decoder,
-            'postnet': self.postnet
-        }
+        self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder, 'postnet': self.postnet}
         self.max_decoder_steps = int(network_info.get('max_decoder_steps', 500))
         self.gate_threshold = float(network_info.get('gate_treshold', 0.6))
 
