@@ -18,12 +18,8 @@ from ..representation import CharacterRecognitionAnnotation, CharacterRecognitio
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 from .average_editdistance_meter import AverageEditdistanceMeter
-from ..utils import UnsupportedPackage
+from .distance import editdistance_eval
 from ..config import BoolField
-try:
-    import editdistance
-except ImportError as import_error:
-    editdistance = UnsupportedPackage("editdistance", import_error.msg)
 
 
 class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
@@ -66,9 +62,7 @@ class LabelLevelRecognitionAccuracy(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction, )
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
-        self.accuracy = AverageEditdistanceMeter(editdistance.eval)
+        self.accuracy = AverageEditdistanceMeter(editdistance_eval)
 
     def update(self, annotation, prediction):
         return self.accuracy.update(annotation.label, prediction.label)

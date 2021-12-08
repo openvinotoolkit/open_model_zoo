@@ -33,9 +33,6 @@ tokenizers>=0.10.1
 transformers>=4.5
 nltk>=3.5
 
-# editdistance calculation
-editdistance>=0.5.3
-
 # DNA sequence matching
 parasail>=1.2.4
 fast-ctc-decode>=0.2.5
