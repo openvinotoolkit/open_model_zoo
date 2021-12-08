@@ -173,16 +173,19 @@ struct PersonAttribsDetection : BaseDetection {
             hasTopBottomColor = false;
         } else if (outputs.size() == 3) {
             // check person-attributes-recognition-crossroad-0230 outputs exist
-            if (!CheckOutputNameExist(outputs, "453")) {
-                throw std::logic_error("Couldn't find output with name '453'");
+            outputNameForAttributes = "453";
+            outputNameForTopColorPoint = "456";
+            outputNameForBottomColorPoint = "459";
+            if (!CheckOutputNameExist(outputs, outputNameForAttributes)) {
+                throw std::logic_error(std::string("Couldn't find output with name ") + outputNameForAttributes);
             }
 
-            if (CheckOutputNameExist(outputs, "456")) {
-                throw std::logic_error("Couldn't find output with name '456'");
+            if (!CheckOutputNameExist(outputs, outputNameForTopColorPoint)) {
+                throw std::logic_error(std::string("Couldn't find output with name ") + outputNameForTopColorPoint);
             }
 
-            if (CheckOutputNameExist(outputs, "459")) {
-                throw std::logic_error("Couldn't find output with name '459'");
+            if (!CheckOutputNameExist(outputs, outputNameForBottomColorPoint)) {
+                throw std::logic_error(std::string("Couldn't find output with name ") + outputNameForBottomColorPoint);
             }
             hasTopBottomColor = true;
         } else {
