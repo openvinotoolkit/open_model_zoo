@@ -225,9 +225,11 @@ def main():
             if str(mo_path).lower().endswith('.py'):
                 mo_dir = mo_path.parent
             else:
-                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                mo_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.mo')
                 if mo_package_path is None:
-                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
+                    mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                    if mo_package_path is None:
+                        sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
                 mo_dir = mo_package_path.parent
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
