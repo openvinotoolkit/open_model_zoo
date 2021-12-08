@@ -73,7 +73,7 @@ class OvmsAdapter(ModelAdapter):
         else:
             raise TypeError("invalid --model option format")
 
-    
+
     def _is_model_available(self):
         try:
             model_status = self.client.get_model_status(self.model_name, self.model_version)
@@ -106,12 +106,12 @@ class OvmsAdapter(ModelAdapter):
         log.info('Connecting to remote model: {}'.format(target_model))
         service_url, model_name, model_version = OvmsAdapter.parse_model_arg(target_model)
         self.model_name = model_name
-        self.model_version = model_version          
+        self.model_version = model_version
         self.client = ovmsclient.make_grpc_client(url=service_url)
         # Ensure the model is available
         if not self._is_model_available():
             model_version_str = "latest" if self.model_version == 0 else str(self.model_version)
-            raise RuntimeError("Requested model: {}, version: {}, has not been found or is not " 
+            raise RuntimeError("Requested model: {}, version: {}, has not been found or is not "
                 "in available state".format(self.model_name, model_version_str))
 
         self.metadata = self.client.get_model_metadata(model_name=self.model_name,
@@ -138,7 +138,7 @@ class OvmsAdapter(ModelAdapter):
     def infer_sync(self, dict_data):
         inputs = self._prepare_inputs(dict_data)
         raw_result = self.client.predict(inputs, model_name=self.model_name, model_version=self.model_version)
-        # For models with single output ovmsclient returns ndarray with results, 
+        # For models with single output ovmsclient returns ndarray with results,
         # so the dict must be created to correctly implement interface.
         if isinstance(raw_result, np.ndarray):
             output_name = list(self.metadata["outputs"].keys())[0]
@@ -148,7 +148,7 @@ class OvmsAdapter(ModelAdapter):
     def infer_async(self, dict_data, callback_fn, callback_data):
         inputs = self._prepare_inputs(dict_data)
         raw_result = self.client.predict(inputs, model_name=self.model_name, model_version=self.model_version)
-        # For models with single output ovmsclient returns ndarray with results, 
+        # For models with single output ovmsclient returns ndarray with results,
         # so the dict must be created to correctly implement interface.
         if isinstance(raw_result, np.ndarray):
             output_name = list(self.metadata["outputs"].keys())[0]
