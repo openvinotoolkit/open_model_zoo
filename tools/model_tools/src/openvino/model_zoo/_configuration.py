@@ -266,8 +266,6 @@ def load_models(models_root, args):
         if is_composite:
             continue
 
-        composite_model_name = subdirectory.parent.name if is_composite else None
-
         subdirectory = subdirectory.relative_to(models_root)
 
         with config_path.open('rb') as config_file, \

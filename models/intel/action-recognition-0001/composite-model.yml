@@ -1,6 +1,6 @@
 description: >-
   General-purpose action recognition model for Kinetics-400 dataset based on Video
-  Transformer Network approach. Encoder par
+  Transformer Network approach.
 task_type: action_recognition
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
