@@ -21,7 +21,7 @@ from pathlib import Path
 from openvino.model_zoo import _configuration, _common
 
 def to_info(model):
-    return {
+    result = {
         'name': model.name,
         'composite_model_name': model.composite_model_name,
 
@@ -32,7 +32,12 @@ def to_info(model):
         'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
         'task_type': str(model.task_type),
+        'model_stages': [],
     }
+
+    for model_stage in model.model_stages:
+        result['model_stages'].append(to_info(model_stage))
+    return result
 
 def main():
     parser = argparse.ArgumentParser()
