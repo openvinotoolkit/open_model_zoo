@@ -46,6 +46,11 @@ from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
 
 
+def parser_paths_list(supported_devices):
+    paths = supported_devices.split(',')
+    return [Path(p) for p in paths if Path(p).is_file()]
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
@@ -63,8 +68,8 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
-    parser.add_argument('--suppressed-devices', type=Path, required=False,
-        help='path to file with suppressed devices for each model')
+    parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
+        help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
         help='IR precisions for all models. By default, models are tested in FP16 precision')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
@@ -141,16 +146,27 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     return dl_dir
 
 
-def parse_suppressed_device_list(path):
-    if not path:
+def parse_supported_device_list(paths):
+    if not paths:
         return None
     suppressed_devices = {}
-    with open(path, "r") as f:
-        for line in f:
-            if line.startswith('#'):
-                continue
-            parsed = line.rstrip('\n').split(sep=',')
-            suppressed_devices[parsed[0]] = parsed[1:]
+    for path in paths:
+        with Path(path).open() as f:
+            data = f.read()
+            rest = '|' + data.split('|', 1)[1]
+            table = rest.rsplit('|', 1)[0] + '|'
+            result = {}
+
+            for n, line in enumerate(table.split('\n')):
+                if n == 0:
+                    devices = [t.strip() for t in line.split('|')[2:-1]]
+                else:
+                    values = [t.strip() for t in line.split('|')[1:-1]]
+                    model_name, values = values[0], values[1:]
+                    for device, value in zip(devices, values):
+                        if not value:
+                            result[model_name] = result.get(model_name, []) + [device]
+            suppressed_devices.update(result)
     return suppressed_devices
 
 
@@ -166,7 +182,7 @@ def get_models(case, keys):
 def main():
     args = parse_args()
 
-    suppressed_devices = parse_suppressed_device_list(args.suppressed_devices)
+    suppressed_devices = parse_supported_device_list(args.supported_devices)
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
