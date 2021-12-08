@@ -18,7 +18,10 @@ import math
 import cv2
 import numpy as np
 from ..adapters import Adapter
-from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction, BackgroundMattingPrediction
+from ..representation import (
+    SegmentationPrediction, BrainTumorSegmentationPrediction, BackgroundMattingPrediction,
+    AnomalySegmentationPrediction
+)
 from ..config import ConfigError, ConfigValidator, BoolField, ListField, NumberField, StringField
 from ..utils import contains_any
 
@@ -55,21 +58,25 @@ class SegmentationAdapter(Adapter):
         if segm_out.shape[0] != len(identifiers) and len(identifiers) == 1:
             segm_out = np.expand_dims(segm_out, 0)
         for identifier, output, meta in zip(identifiers, segm_out, frame_meta):
-            input_shape = next(iter(meta['input_shape'].values()))
-            is_chw = input_shape[1] <= 4
-            if len(output.shape) == 2 and len(input_shape) == 4:
-                (in_h, in_w) = input_shape[2:] if is_chw else input_shape[1:3]
-                if output.shape[0] == in_h * in_w:
-                    output = np.resize(output, (in_h, in_w, output.shape[-1]))
-                    is_chw = False
-            if self.make_argmax:
-                argmax_axis = 0 if is_chw else -1
-                output = np.argmax(output, axis=argmax_axis)
-            if not is_chw and not self.make_argmax and len(output.shape) == 3:
-                output = np.transpose(output, (2, 0, 1))
+            output = self.prepare_seg_map(meta, output)
             result.append(SegmentationPrediction(identifier, output))
 
         return result
+
+    def prepare_seg_map(self, meta, output):
+        input_shape = next(iter(meta['input_shape'].values()))
+        is_chw = input_shape[1] <= 4
+        if len(output.shape) == 2 and len(input_shape) == 4:
+            (in_h, in_w) = input_shape[2:] if is_chw else input_shape[1:3]
+            if output.shape[0] == in_h * in_w:
+                output = np.resize(output, (in_h, in_w, output.shape[-1]))
+                is_chw = False
+        if self.make_argmax:
+            argmax_axis = 0 if is_chw else -1
+            output = np.argmax(output, axis=argmax_axis)
+        if not is_chw and not self.make_argmax and len(output.shape) == 3:
+            output = np.transpose(output, (2, 0, 1))
+        return output
 
     def _extract_predictions(self, outputs_list, meta):
         if 'tiles_shape' not in (meta[-1] or {}):
@@ -116,8 +123,24 @@ class SegmentationOneClassAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_outputs)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
-            output = output > self.threshold
+            output = output >= self.threshold
             result.append(SegmentationPrediction(identifier, output.astype(np.uint8)))
+
+        return result
+
+
+class AnomalySegmentationAdapter(SegmentationOneClassAdapter):
+    __provider__ = 'anomaly_segmentation'
+    prediction_types = (AnomalySegmentationPrediction, )
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        frame_meta = frame_meta or [] * len(identifiers)
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+            output = output > self.threshold
+            result.append(AnomalySegmentationPrediction(identifier, output.astype(np.uint8)))
 
         return result
 

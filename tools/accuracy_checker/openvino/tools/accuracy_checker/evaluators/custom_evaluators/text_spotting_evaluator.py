@@ -19,15 +19,10 @@ from collections import OrderedDict
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model
+from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations
-
-
-def softmax(x):
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum()
+from ...utils import contains_all, extract_image_representations, parse_partial_shape, generate_layer_name, softmax
 
 
 class TextSpottingEvaluator(BaseCustomEvaluator):
@@ -85,34 +80,21 @@ class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, meta, is_blob=None,
                  delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            detector = network_info.get('detector', {})
-            recognizer_encoder = network_info.get('recognizer_encoder', {})
-            recognizer_decoder = network_info.get('recognizer_decoder', {})
-            if 'model' not in detector:
-                detector['model'] = models_args[0]
-                detector['_model_is_blob'] = is_blob
-            if 'model' not in recognizer_encoder:
-                recognizer_encoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                recognizer_encoder['_model_is_blob'] = is_blob
-            if 'model' not in recognizer_decoder:
-                recognizer_decoder['model'] = models_args[2 if len(models_args) > 2 else 0]
-                recognizer_decoder['_model_is_blob'] = is_blob
-            network_info.update({
-                'detector': detector,
-                'recognizer_encoder': recognizer_encoder,
-                'recognizer_decoder': recognizer_decoder
-            })
-            if not contains_all(network_info, ['detector', 'recognizer_encoder', 'recognizer_decoder']):
-                raise ConfigError('network_info should contains detector, encoder and decoder fields')
+        parts = ['detector', 'recognizer_encoder', 'recognizer_decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contains detector, encoder and decoder fields')
         self._detector_mapping = {
-            'dlsdk': DetectorDLSDKModel
+            'dlsdk': DetectorDLSDKModel,
+            'openvino': DetectorOVModel
         }
         self._encoder_mapping = {
-            'dlsdk': RecognizerEncoderDLSDKModel
+            'dlsdk': RecognizerEncoderDLSDKModel,
+            'openvino': RecognizerEncoderOVModel
         }
         self._decoder_mapping = {
-            'dlsdk': RecognizerDecoderDLSDKModel
+            'dlsdk': RecognizerDecoderDLSDKModel,
+            'openvino': RecognizerDecoderOVModel
         }
         self.detector = create_model(network_info.get('detector', {}), launcher, self._detector_mapping,
                                      'detector', delayed_model_loading)
@@ -140,22 +122,16 @@ class SequentialModel(BaseCascadeModel):
         text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
-        decoder_exec_net = self.recognizer_decoder.exec_network
-        has_info = hasattr(decoder_exec_net, 'input_info')
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder.input: feature})
+            encoder_outputs = self.recognizer_encoder.predict(
+                identifiers, {self.recognizer_encoder.input: np.expand_dims(feature, 0)})
             if callback:
                 callback(encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder.output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
-            if has_info:
-                hidden_shape = decoder_exec_net.input_info[
-                    self.recognizer_decoder.inputs['prev_hidden']
-                ].input_data.shape
-            else:
-                hidden_shape = decoder_exec_net.inputs[self.recognizer_decoder.inputs['prev_hidden']].shape
+            hidden_shape = self.recognizer_decoder.get_hidden_shape(self.recognizer_decoder.model_inputs['prev_hidden'])
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
 
@@ -164,9 +140,9 @@ class SequentialModel(BaseCascadeModel):
             confidence = 1.0
             for _ in range(self.max_seq_len):
                 input_to_decoder = {
-                    self.recognizer_decoder.inputs['prev_symbol']: prev_symbol_index,
-                    self.recognizer_decoder.inputs['prev_hidden']: hidden,
-                    self.recognizer_decoder.inputs['encoder_outputs']: feature}
+                    self.recognizer_decoder.model_inputs['prev_symbol']: prev_symbol_index,
+                    self.recognizer_decoder.model_inputs['prev_hidden']: hidden,
+                    self.recognizer_decoder.model_inputs['encoder_outputs']: feature}
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
                 if callback:
                     callback(decoder_outputs)
@@ -194,33 +170,30 @@ class SequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
-        def generate_name(prefix, with_prefix, layer_name):
-            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
-
         with_prefix = (
             isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
         )
         if with_prefix != self.with_prefix:
-            self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
+            self.adapter.classes_out = generate_layer_name(self.adapter.classes_out, 'detector_', with_prefix)
             if self.adapter.scores_out is not None:
-                self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
-            self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
-            self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
-            self.recognizer_encoder.input = generate_name(
-                'recognizer_encoder_', with_prefix, self.recognizer_encoder.input
+                self.adapter.scores_out = generate_layer_name(self.adapter.scores_out, 'detector_', with_prefix)
+            self.adapter.boxes_out = generate_layer_name(self.adapter.boxes_out, 'detector_', with_prefix)
+            self.adapter.raw_masks_out = generate_layer_name(self.adapter.raw_masks_out, 'detector_', with_prefix)
+            self.recognizer_encoder.input = generate_layer_name(
+                self.recognizer_encoder.input, 'recognizer_encoder_', with_prefix
             )
-            self.recognizer_encoder.output = generate_name(
-                'recognizer_encoder_', with_prefix, self.recognizer_encoder.output
+            self.recognizer_encoder.output = generate_layer_name(
+                self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix
             )
             recognizer_decoder_inputs = {
-                key: generate_name('recognizer_decoder_', with_prefix, value)
-                for key, value in self.recognizer_decoder.inputs.items()
+                key: generate_layer_name(value, 'recognizer_decoder_', with_prefix)
+                for key, value in self.recognizer_decoder.model_inputs.items()
             }
             recognizer_decoder_outputs = {
-                key: generate_name('recognizer_decoder_', with_prefix, value)
+                key: generate_layer_name(value, 'recognizer_decoder_', with_prefix)
                 for key, value in self.recognizer_decoder.outputs.items()
             }
-            self.recognizer_decoder.inputs = recognizer_decoder_inputs
+            self.recognizer_decoder.model_inputs = recognizer_decoder_inputs
             self.recognizer_decoder.outputs = recognizer_decoder_outputs
         self.with_prefix = with_prefix
 
@@ -283,14 +256,72 @@ class DetectorDLSDKModel(BaseDLSDKModel):
                 'detector_') else 'text_features.0'
 
 
+class DetectorOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.im_info_name = None
+        self.im_data_name = None
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data):
+        input_data = np.array(input_data)
+        assert len(input_data.shape) == 4
+        assert input_data.shape[0] == 1
+
+        if self.im_info_name:
+            input_data = {self.im_data_name: self.fit_to_input(input_data),
+                          self.im_info_name: np.array([[input_data.shape[1], input_data.shape[2], 1.0]])}
+        else:
+            input_data = {self.im_data_name: self.fit_to_input(input_data)}
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
+
+        output = self.infer(input_data)
+
+        return output
+
+    def fit_to_input(self, input_data):
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
+
+        return input_data
+
+    def set_input_and_output(self):
+        self.im_data_name = [
+            x for x in self.inputs if len(parse_partial_shape(self.inputs[x].get_partial_shape())) == 4][0]
+        self.im_info_name = [
+            x for x in self.inputs if len(parse_partial_shape(self.inputs[x].get_partial_shape())) == 2
+        ]
+        if self.im_info_name:
+            self.im_info_name = self.im_info_name[0]
+            self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
+                'detector_') else 'text_features/sink_port_0'
+        else:
+            self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
+                'detector_') else 'text_features/sink_port_0'
+
+
 class RecognizerDLSDKModel(BaseDLSDKModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
         return self.exec_network.infer(input_data)
 
-    def set_input_and_output(self):
-        pass
+    def get_hidden_shape(self, name):
+        has_info = hasattr(self.exec_network, 'input_info')
+        if has_info:
+            hidden_shape = self.exec_network.input_info[name].input_data.shape
+        else:
+            hidden_shape = self.exec_network.inputs[name].shape
+        return hidden_shape
+
+
+class RecognizerOVModel(BaseOpenVINOModel):
+    def predict(self, identifiers, input_data):
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({k: v.shape for k, v in input_data.items()})
+        return self.infer(input_data)
+
+    def get_hidden_shape(self, name):
+        return parse_partial_shape(self.inputs[name].get_partial_shape())
 
 
 class RecognizerEncoderDLSDKModel(RecognizerDLSDKModel):
@@ -300,8 +331,22 @@ class RecognizerEncoderDLSDKModel(RecognizerDLSDKModel):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
+class RecognizerEncoderOVModel(RecognizerOVModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.input = 'input'
+        self.output = 'output/sink_port_0'
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
 class RecognizerDecoderDLSDKModel(RecognizerDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
-        self.inputs = network_info['inputs']
+        self.model_inputs = network_info['inputs']
+        self.outputs = network_info['outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class RecognizerDecoderOVModel(RecognizerOVModel):
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        self.model_inputs = network_info['inputs']
         self.outputs = network_info['outputs']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)

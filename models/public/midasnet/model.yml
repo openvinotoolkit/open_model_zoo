@@ -26,19 +26,19 @@ task_type: monocular_depth_estimation
 files:
   - name: models/midas_net.py
     size: 2662
-    sha384: ad8d94e07cfb60e463f383057763a0faa29e7547fe3b4482c787a5948050f37f0878c6f307d455f6759928237e43b78c
+    checksum: ad8d94e07cfb60e463f383057763a0faa29e7547fe3b4482c787a5948050f37f0878c6f307d455f6759928237e43b78c
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/midas_net.py
   - name: models/base_model.py
     size: 355
-    sha384: cf959343ae280093bb38eb225f4d3b1de791ef7e245c35f02315bd984065379e7a29b5830010aad34d3ac38ca77bfa04
+    checksum: cf959343ae280093bb38eb225f4d3b1de791ef7e245c35f02315bd984065379e7a29b5830010aad34d3ac38ca77bfa04
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/base_model.py
   - name: models/blocks.py
     size: 3596
-    sha384: 3bca3aadb2e7fc5990e4d909740e2c8c6cbedd326fc49ea858e06ebe97269d6410d2f28e0cec3ca2b5b466928c84fa2e
+    checksum: 3bca3aadb2e7fc5990e4d909740e2c8c6cbedd326fc49ea858e06ebe97269d6410d2f28e0cec3ca2b5b466928c84fa2e
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/blocks.py
   - name: model.pt
     size: 422509849
-    sha384: 22219f664a4b235e797585d56a398c25e7cbb3cdb46f61bdc0e0596dc713495ece860ac57df8b22f7b530ea00c21b049
+    checksum: 22219f664a4b235e797585d56a398c25e7cbb3cdb46f61bdc0e0596dc713495ece860ac57df8b22f7b530ea00c21b049
     source: https://github.com/intel-isl/MiDaS/releases/download/v2_1/model-openvino.pt
 framework: pytorch
 postprocessing:

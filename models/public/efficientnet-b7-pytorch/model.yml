@@ -30,27 +30,27 @@ task_type: classification
 files:
   - name: model/gen_efficientnet.py
     size: 40997
-    sha384: b2868eed99002c95a8f54b0f20a975486d47dd0a4d8fda2fbeed68e0f83330b4617d6a09d60a08eaaf660f490a5906a9
+    checksum: b2868eed99002c95a8f54b0f20a975486d47dd0a4d8fda2fbeed68e0f83330b4617d6a09d60a08eaaf660f490a5906a9
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/gen_efficientnet.py
   - name: model/efficientnet_builder.py
     size: 18446
-    sha384: 5dbc9484139e3f23504508b63416a10251590c0f84e056e78830351d104a67f215fd6e180d7f22d20ad1eadd803c8bd6
+    checksum: 5dbc9484139e3f23504508b63416a10251590c0f84e056e78830351d104a67f215fd6e180d7f22d20ad1eadd803c8bd6
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/efficientnet_builder.py
   - name: model/helpers.py
     size: 1097
-    sha384: b1adc8c85422236df810c36de5333bd80f516f948be894633448ea9f12c098aba61be8bb6663cdedb0bd545b6ae986a6
+    checksum: b1adc8c85422236df810c36de5333bd80f516f948be894633448ea9f12c098aba61be8bb6663cdedb0bd545b6ae986a6
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/helpers.py
   - name: model/conv2d_helpers.py
     size: 6175
-    sha384: cac2642f90d160a9f338bc83c423fd9cfa044a27f74c97726dc70b86adca7b6db32041676c64954ecac7acd5240975de
+    checksum: cac2642f90d160a9f338bc83c423fd9cfa044a27f74c97726dc70b86adca7b6db32041676c64954ecac7acd5240975de
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/conv2d_helpers.py
   - name: model/__init__.py
     size: 32
-    sha384: 56056cd865f696313e48aa09cc4d6dd334dd5aa71ba9495bdc443ac209c42485d864c31c216ee3befd8dd03e723c2113
+    checksum: 56056cd865f696313e48aa09cc4d6dd334dd5aa71ba9495bdc443ac209c42485d864c31c216ee3befd8dd03e723c2113
     source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
   - name: tf-efficientnet-b7.pth
     size: 266843942
-    sha384: 56fd1ed71e016e7dabac6b92882a4e12a16640da790442d5f16923dd39eee124fdeca396d4e422cb8c3a0cecc8aba814
+    checksum: 56fd1ed71e016e7dabac6b92882a4e12a16640da790442d5f16923dd39eee124fdeca396d4e422cb8c3a0cecc8aba814
     source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_efficientnet_b7_aa-076e3472.pth
 postprocessing:
   - $type: regex_replace

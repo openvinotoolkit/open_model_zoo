@@ -102,7 +102,10 @@ class Mapillary20Converter(MapillaryBaseConverter):
             annotation = SegmentationAnnotation(file_in_dir.name, file_in_dir.name, mask_loader=GTMaskLoader.PILLOW)
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+        return ConverterReturn(annotations, None)
+
+    def get_meta(self):
+        return {'label_map': self.label_map}
 
 
 class MapillaryVistasConverter(MapillaryBaseConverter):
@@ -162,3 +165,6 @@ class MapillaryVistasConverter(MapillaryBaseConverter):
             annotations.append(annotation)
 
         return ConverterReturn(annotations, self.meta, None)
+
+    def get_meta(self):
+        return self.meta

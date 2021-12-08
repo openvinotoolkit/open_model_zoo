@@ -114,7 +114,7 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model = BertNamedEntityRecognition(model_adapter, vocab, args.input_names)
+    model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names})
     if max_sentence_length > model.max_length:
         model.reshape(max_sentence_length)
     model.log_layers_info()

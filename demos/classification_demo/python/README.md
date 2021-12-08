@@ -130,60 +130,82 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: classification_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] --labels LABELS [-ntop {1,2,3,4,5,6,7,8,9,10}]
-                              [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop]
-                              [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show] [--output_resolution OUTPUT_RESOLUTION]
-                              [-u UTILIZATION_MONITORS] [--reverse_input_channels]
+usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INPUT
+                              [-d DEVICE] [--labels LABELS]
+                              [-topk {1,2,3,4,5,6,7,8,9,10}]
+                              [-nireq NUM_INFER_REQUESTS]
+                              [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
+                              [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                              [--no_show]
+                              [--output_resolution OUTPUT_RESOLUTION]
+                              [-u UTILIZATION_MONITORS]
+                              [--reverse_input_channels]
                               [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
-                              [--scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES] [-r]
+                              [--scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES]
+                              [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
+  --adapter {openvino,remote}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a single image, a folder of images, video
-                        file or camera id.
+                        Required. An input to process. The input must be a
+                        single image, a folder of images, video file or camera
+                        id.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The
-                        demo will look for a suitable plugin for device specified. Default value is CPU.
+                        Optional. Specify the target device to infer on; CPU,
+                        GPU, HDDL or MYRIAD is acceptable. The demo will look
+                        for a suitable plugin for device specified. Default
+                        value is CPU.
 
 Common model options:
-  --labels LABELS       Required. Labels mapping file.
-  -ntop {1,2,3,4,5,6,7,8,9,10}
-                        Optional. Number of top results. Default value is 5. Must be from 1 to 10.
+  --labels LABELS       Optional. Labels mapping file.
+  -topk {1,2,3,4,5,6,7,8,9,10}
+                        Optional. Number of top results. Default value is 5.
+                        Must be from 1 to 10.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
-                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for
-                        HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
                         <nstreams>).
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
-                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases).
 
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is
+                        set, all frames are stored.
   --no_show             Optional. Don't show output.
   --output_resolution OUTPUT_RESOLUTION
-                        Optional. Specify the maximum output window resolution in (width x height) format. Example:
-                        1280x720. Input frame size used by default.
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720. Input
+                        frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
 Input transform options:
   --reverse_input_channels
-                        Optional. Switch the input channels order from BGR to RGB.
+                        Optional. Switch the input channels order from BGR to
+                        RGB.
   --mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES
-                        Optional. Normalize input by subtracting the mean values per channel. Example: 255 255 255
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES
-                        Optional. Divide input by scale values per channel. Division is applied after mean values
-                        subtraction. Example: 255 255 255
+                        Optional. Divide input by scale values per channel.
+                        Division is applied after mean values subtraction.
+                        Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message

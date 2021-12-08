@@ -15,50 +15,33 @@ limitations under the License.
 """
 
 import numpy as np
-from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
+from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSOVModel
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, sigmoid, generate_layer_name
+from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_shape
 
 
 class Synthesizer(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            postnet = network_info.get('postnet', {})
-            if 'model' not in encoder:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if 'model' not in decoder:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            if 'model' not in postnet:
-                postnet['model'] = models_args[2 if len(models_args) > 2 else 0]
-                postnet['_model_is_blob'] = is_blob
-
-            network_info.update({
-                'encoder': encoder,
-                'decoder': decoder,
-                'postnet': postnet
-            })
-            required_fields = ['encoder', 'decoder', 'postnet']
-            if not contains_all(network_info, required_fields):
-                raise ConfigError(
-                    'network_info should contains: {} fields'.format(' ,'.join(required_fields))
-                )
+        parts = ['encoder', 'decoder', 'postnet']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain encoder, decoder and postnet fields')
         self._encoder_mapping = {
-            'dlsdk': EncoderOpenVINOModel,
+            'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOpenVINOModel,
             'onnx_runtime': EncoderONNXModel,
         }
         self._decoder_mapping = {
-            'dlsdk': DecoderOpenVINOModel,
+            'dlsdk': DecodeDLSDKModel,
+            'openvino': DecodeOpenVINOModel,
             'onnx_runtime': DecoderONNXModel
         }
         self._postnet_mapping = {
-            'dlsdk': PostNetOpenVINOModel,
+            'dlsdk': PostNetDLSDKModel,
+            'openvino': PostNetOpenVINOModel,
             'onnx_runtime': PostNetONNXModel
         }
         self.encoder = create_model(network_info['encoder'], launcher, self._encoder_mapping, 'encoder',
@@ -70,11 +53,7 @@ class Synthesizer(BaseCascadeModel):
         self.adapter = create_adapter(adapter_info)
 
         self.with_prefix = False
-        self._part_by_name = {
-            'encoder': self.encoder,
-            'decoder': self.decoder,
-            'postnet': self.postnet
-        }
+        self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder, 'postnet': self.postnet}
         self.max_decoder_steps = int(network_info.get('max_decoder_steps', 500))
         self.gate_threshold = float(network_info.get('gate_treshold', 0.6))
 
@@ -231,7 +210,7 @@ class PostNetModel:
             self.output_mapping[out_id] = generate_layer_name(out_name, 'postnet_', with_prefix)
 
 
-class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
+class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.input_mapping = {
@@ -261,6 +240,36 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
 
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
+
+
+class EncoderOpenVINOModel(EncoderModel, TTSOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.input_mapping = {
+            'text_encoder_outputs': 'text_encoder_outputs',
+            'domain': 'domain',
+            'f0s': 'f0s',
+            'bert_embedding': 'bert_embedding'
+        }
+        self.output_mapping = {'encoder_outputs': 'encoder_outputs/sink_port_0'}
+        self.text_enc_dim = 384
+        self.bert_dim = 768
+
+    def prepare_inputs(self, feed):
+        feed_dict = super().prepare_inputs(feed)
+        if (
+                self.input_mapping['text_encoder_outputs'] in self.dynamic_inputs or
+                feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
+                parse_partial_shape(self.inputs[self.input_mapping['text_encoder_outputs']].shape)
+        ):
+            if not self.is_dynamic:
+                new_shapes = {}
+                for input_name in self.inputs:
+                    new_shapes[input_name] = (
+                        feed_dict[input_name].shape if input_name in feed_dict else parse_partial_shape(
+                            self.inputs[input_name].shape))
+                self._reshape_input(new_shapes)
+        return feed_dict
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
@@ -342,7 +351,7 @@ class DecoderONNXModel(BaseONNXModel, DecoderModel):
         return feed_dict
 
 
-class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
+class DecodeDLSDKModel(DecoderModel, TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.input_mapping = {
@@ -413,6 +422,74 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
         return feed_dict
 
 
+class DecodeOpenVINOModel(DecoderModel, TTSOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.input_mapping = {
+            'decoder_input': 'decoder_input',
+            'attention_hidden': 'attention_hidden',
+            'attention_cell': 'attention_cell',
+            'decoder_hidden': 'decoder_hidden',
+            'decoder_cell': 'decoder_cell',
+            'attention_weights': 'attention_weights',
+            'attention_weights_cum': 'attention_weights_cum',
+            'attention_context': 'attention_context',
+            'encoder_outputs': 'encoder_outputs'
+        }
+        self.output_mapping = {
+            'finished': '109/sink_port_0',
+            'decoder_input': '108/sink_port_0',
+            'attention_hidden': '68/sink_port_0',
+            'attention_cell': '66/sink_port_0',
+            'decoder_hidden': '106/sink_port_0',
+            'decoder_cell': '104/sink_port_0',
+            'attention_weights': '85/sink_port_0',
+            'attention_weights_cum': '89/sink_port_0',
+            'attention_context': '88/sink_port_0'
+        }
+        self.n_mel_channels = 22
+        self.attention_rnn_dim = 800
+        self.encoder_embedding_dim = 512
+        self.decoder_rnn_dim = 800
+        self.additional_inputs_filling = network_info.get('additional_input_filling', 'zeros')
+        if self.additional_inputs_filling not in ['zeros', 'random']:
+            raise ConfigError(
+                'invalid setting for additional_inputs_filling: {}'.format(self.additional_inputs_filling)
+            )
+        self.seed = int(network_info.get('seed', 666))
+        if self.additional_inputs_filling == 'random':
+            np.random.seed(self.seed)
+
+    def prepare_inputs(self, feed_dict):
+        if next(iter(self.input_mapping.values())) not in feed_dict:
+            feed_dict_ = {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
+            feed_dict = feed_dict_
+
+        if (
+                self.input_mapping['encoder_outputs'] in self.dynamic_inputs or
+                feed_dict[self.input_mapping['encoder_outputs']].shape !=
+                parse_partial_shape(self.inputs[self.input_mapping['encoder_outputs']].get_partial_shape())
+        ):
+            if not self.is_dynamic:
+                new_shapes = {}
+                for input_name in self.inputs:
+                    new_shapes[input_name] = (
+                        feed_dict[input_name].shape if input_name in feed_dict else
+                        parse_partial_shape(self.inputs[input_name].get_partial_shape()))
+                self._reshape_input(new_shapes)
+
+        if len(feed_dict) != len(self.inputs):
+            extra_inputs = set(self.inputs).difference(set(feed_dict))
+            for input_layer in extra_inputs:
+                shape = self.inputs[input_layer].input_data.shape
+                if self.additional_inputs_filling == 'zeros':
+                    feed_dict[input_layer] = np.zeros(shape, dtype=np.float32)
+                else:
+                    feed_dict[input_layer] = np.random.uniform(size=shape)
+
+        return feed_dict
+
+
 class PostNetONNXModel(BaseONNXModel, PostNetModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
@@ -435,7 +512,7 @@ class PostNetONNXModel(BaseONNXModel, PostNetModel):
         return dict(zip(self.output_names, outs))
 
 
-class PostNetOpenVINOModel(PostNetModel, TTSDLSDKModel):
+class PostNetDLSDKModel(PostNetModel, TTSDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.input_mapping = {'mel_outputs': 'mel_outputs'}
@@ -447,6 +524,21 @@ class PostNetOpenVINOModel(PostNetModel, TTSDLSDKModel):
     def prepare_inputs(self, feed_dict):
         input_shape = next(iter(feed_dict.values())).shape
         if input_shape != tuple(self.inputs[self.input_mapping['mel_outputs']].input_data.shape):
+            self._reshape_input({self.input_mapping['mel_outputs']: input_shape})
+        if next(iter(self.input_mapping.values())) not in feed_dict:
+            return {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
+        return feed_dict
+
+
+class PostNetOpenVINOModel(PostNetModel, TTSOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.input_mapping = {'mel_outputs': 'mel_outputs'}
+        self.output_mapping = {'postnet_outputs': 'postnet_outputs/sink_port_0'}
+
+    def prepare_inputs(self, feed_dict):
+        input_shape = next(iter(feed_dict.values())).shape
+        if input_shape != parse_partial_shape(self.inputs[self.input_mapping['mel_outputs']].get_partial_shape()):
             self._reshape_input({self.input_mapping['mel_outputs']: input_shape})
         if next(iter(self.input_mapping.values())) not in feed_dict:
             return {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}

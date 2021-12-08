@@ -85,4 +85,7 @@ class MPIIDatasetConverter(FileBasedAnnotationConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
 
-        return ConverterReturn(annotations, {'joints': joints}, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
+        return {'joints': joints}

@@ -38,8 +38,7 @@ class SISDRMetric(PerImageEvaluationMetric):
     def configure(self):
         self.delay = self.get_value_from_config('delay')
         self.buffer = []
-        self.meta.update({'scale': 1, 'postfix': 'Db', 'calculate_mean': False, 'names': ['mean', 'std']})
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
+        self.meta = self.get_common_meta()
 
     def reset(self):
         del self.buffer
@@ -67,3 +66,12 @@ class SISDRMetric(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         return [np.mean(self.buffer), np.std(self.buffer)]
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': 'Db', 'calculate_mean': False, 'names': ['mean', 'std'],
+            'target_per_value': {'mean': 'higher-better', 'std': 'higher-worse'}
+        })
+        return meta

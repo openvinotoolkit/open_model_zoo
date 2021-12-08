@@ -21,10 +21,12 @@ from collections import OrderedDict
 
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, create_model, create_encoder
+from .base_models import (
+    BaseCascadeModel, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel,
+    create_model, create_encoder)
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
+from ...utils import contains_all, extract_image_representations, read_pickle
 
 
 class AutomaticSpeechRecognitionEvaluator(BaseCustomEvaluator):
@@ -65,24 +67,18 @@ class AutomaticSpeechRecognitionEvaluator(BaseCustomEvaluator):
 class ASRModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            decoder = network_info.get('decoder', {})
-            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if not contains_any(decoder, ['model', 'onnx_model']) and models_args:
-                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
-                decoder['_model_is_blob'] = is_blob
-            network_info.update({'encoder': encoder, 'decoder': decoder})
-        if not contains_all(network_info, ['encoder', 'decoder']) and not delayed_model_loading:
+        parts = ['encoder', 'decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder and decoder fields')
         self._decoder_mapping = {
             'dlsdk': DecoderDLSDKModel,
+            'openvino': DecoderOVModel,
             'onnx_runtime': DecoderONNXModel
         }
         self._encoder_mapping = {
             'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOVModel,
             'onnx_runtime': EncoderONNXModel,
             'dummy': DummyEncoder
         }
@@ -138,6 +134,13 @@ class EncoderDLSDKModel(BaseDLSDKModel):
         return results, results[self.output_blob]
 
 
+class EncoderOVModel(BaseOpenVINOModel):
+    def predict(self, identifiers, input_data):
+        input_data = self.fit_to_input(input_data)
+        results = self.infer(input_data)
+        return results, results[self.output_blob]
+
+
 class DecoderDLSDKModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
@@ -150,6 +153,24 @@ class DecoderDLSDKModel(BaseDLSDKModel):
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        self.adapter.output_blob = self.output_blob
+
+
+class DecoderOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.adapter.output_blob = self.output_blob
+
+    def predict(self, identifiers, input_data):
+        feed_dict = self.fit_to_input(input_data)
+        results = self.infer(feed_dict)
+        result = self.adapter.process([results], identifiers, [{}])
+
+        return results, result
 
     def set_input_and_output(self):
         super().set_input_and_output()

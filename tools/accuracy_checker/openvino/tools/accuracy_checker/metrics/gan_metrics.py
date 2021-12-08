@@ -52,9 +52,6 @@ class BaseGanMetric(FullDatasetEvaluationMetric):
         return parameters
 
     def configure(self):
-        self.meta.update({
-            'scale': 1, 'postfix': ' ', 'target': 'higher-worse'
-        })
         self.eps = self.get_value_from_config('eps')
         self.length = self.get_value_from_config('length')
 
@@ -70,6 +67,14 @@ class BaseGanMetric(FullDatasetEvaluationMetric):
         generated = [item for item in predictions if item.size == self.length]
         generated = np.stack(generated)
         return self.score_calc(real, generated)
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': ' ', 'target': 'higher-worse'
+        })
+        return meta
 
 
 class InceptionScore(BaseGanMetric):

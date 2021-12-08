@@ -20,7 +20,7 @@ task_type: semantic_segmentation
 files:
   - name: brain-tumor-segmentation-0002.onnx
     size: 21735156
-    sha384: 3c7b1b9c2444b93bfc25e0e32b9ef588a1fed8ed0e367655300008e86959b1413717bff02794a58af96760df7fc293c0
+    checksum: 3c7b1b9c2444b93bfc25e0e32b9ef588a1fed8ed0e367655300008e86959b1413717bff02794a58af96760df7fc293c0
     source:
       $type: google_drive
       id: 1NhH51NgKJKhu0Bax_IKQ_Byvoe2bItPX

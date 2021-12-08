@@ -29,17 +29,17 @@ task_type: semantic_segmentation
 files:
   - name: drn_d_38_cityscapes.pth
     size: 104117210
-    sha384: 090859278d373c8ce160a21b256f6dcfa2a5d07b6d2aebbd18e598a1d3f2c48a97e188d13f1bc16751859a8ed8f8ec1a
+    checksum: 090859278d373c8ce160a21b256f6dcfa2a5d07b6d2aebbd18e598a1d3f2c48a97e188d13f1bc16751859a8ed8f8ec1a
     source:
       $type: google_drive
       id: 1Ck5cE5o6wsS5ITjeyBkvUYHnw4bIR6eg
   - name: models/drn.py
     size: 14175
-    sha384: 065d2584b6fc9528138f94fe60244e24669ca2b9870143e252f5e78684d037bff7971c3afacf22b8d481672fe4ab6f55
+    checksum: 065d2584b6fc9528138f94fe60244e24669ca2b9870143e252f5e78684d037bff7971c3afacf22b8d481672fe4ab6f55
     source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/drn.py
   - name: models/segment.py
     size: 26909
-    sha384: d30346421bf9aee14fd72806fda6cc3acb857398b72b7e12715626e91eef4f39798fdde3bfea8c3f52a8cabd8bb32ffa
+    checksum: d30346421bf9aee14fd72806fda6cc3acb857398b72b7e12715626e91eef4f39798fdde3bfea8c3f52a8cabd8bb32ffa
     source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/segment.py
 postprocessing:
   - $type: regex_replace

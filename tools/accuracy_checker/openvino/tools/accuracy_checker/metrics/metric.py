@@ -45,7 +45,7 @@ class Metric(ClassProvider):
         self.state = state
         self._update_iter = 0
         self.set_profiler(profiler)
-        self.meta = {'target': 'higher-better'}
+        self.meta = self.get_common_meta()
         self._initial_state = copy.deepcopy(state)
 
         self.validate_config(config)
@@ -236,6 +236,10 @@ class Metric(ClassProvider):
         if 'names' in self.meta:
             return [0] * len(self.meta['names'])
         return 0
+
+    @classmethod
+    def get_common_meta(cls):
+        return {'target': 'higher-better'}
 
 
 class PerImageEvaluationMetric(Metric):

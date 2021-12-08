@@ -18,27 +18,27 @@ task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
     size: 40242
-    sha384: 09292370295354e17507f4e718b235a626680c39ee6be525656e3874d58a5e22f1a7acee55929515e5b98fcf3f8c2e08
+    checksum: 09292370295354e17507f4e718b235a626680c39ee6be525656e3874d58a5e22f1a7acee55929515e5b98fcf3f8c2e08
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
-    sha384: 56a7e92575a3f9fede0f18f9ebc6f1fe479a7b7f826b50917eb0bbfd484b3e65693be27f61e36e3459ffeff6a6a81d16
+    checksum: 56a7e92575a3f9fede0f18f9ebc6f1fe479a7b7f826b50917eb0bbfd484b3e65693be27f61e36e3459ffeff6a6a81d16
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
     size: 40225
-    sha384: af03286b3cd2faf978f7e69f65a9a4fe4004d517156c493334d3cf5e68be82d2a252c734b8f07d42f1a2c8a4c5358389
+    checksum: af03286b3cd2faf978f7e69f65a9a4fe4004d517156c493334d3cf5e68be82d2a252c734b8f07d42f1a2c8a4c5358389
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
-    sha384: 1fda2fff394cc6be6901465c793c93133faff98b1cbccd3f86869202961c9988ecb92a2fb7cef5a1ef6dd275808b65fa
+    checksum: 1fda2fff394cc6be6901465c793c93133faff98b1cbccd3f86869202961c9988ecb92a2fb7cef5a1ef6dd275808b65fa
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
   - name: FP16-INT8/emotions-recognition-retail-0003.xml
     size: 113682
-    sha384: a66c2bd579ba8fa1d7c0608eff6f1cd565baab794e847f15e23a4f5b72d2bc7cc36e9ff8c3559ee17469859be4be86a8
+    checksum: a66c2bd579ba8fa1d7c0608eff6f1cd565baab794e847f15e23a4f5b72d2bc7cc36e9ff8c3559ee17469859be4be86a8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
   - name: FP16-INT8/emotions-recognition-retail-0003.bin
     size: 2494126
-    sha384: 2cb63a32656e6af79b829e59142090fd47e4a9e6000fc2f6af2f3efdea372ffe2dbdbe54a044ec4adb66b52a806279c6
+    checksum: 2cb63a32656e6af79b829e59142090fd47e4a9e6000fc2f6af2f3efdea372ffe2dbdbe54a044ec4adb66b52a806279c6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

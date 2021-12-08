@@ -26,7 +26,7 @@ description: >-
 task_type: classification
 files:
   - name: resnet34-333f7ec4.pth
-    sha384: 857b461359759d30b1eed4a5bd6e0db499b8c6e6eaff38b456ee980c834b62035c4ac53b6005ecef7150b15b23828c71
+    checksum: 857b461359759d30b1eed4a5bd6e0db499b8c6e6eaff38b456ee980c834b62035c4ac53b6005ecef7150b15b23828c71
     size: 87306240
     source: https://download.pytorch.org/models/resnet34-333f7ec4.pth
 framework: pytorch

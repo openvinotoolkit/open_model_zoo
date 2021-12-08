@@ -798,6 +798,10 @@ The main difference between this converter and `super_resolution` in data organi
 * `speaker_reidentification` - converts annotation for speaker/sound reidentification dataset to `ReidentificationClassificationAnnotation`.
   * `annotation_file` - text file containing reidentification pairs in following format: `[is_positive] [audio_1] [audio_2]`, where `is_positive` - indicator that pair is positive (1 if speaker is the same, 0 if speakers are different), `audio_1` and `audio_2` are path to the first and the second audio files respectively.
   * `max_pairs` - limit for selection pairs for each image (Optional, by default use all founded pairs in annotation).
+* `mvtec` - converts MVTec dataset to `AnomalySegmentationAnnotation` or `ClassificationAnnotation`.
+  * `data_dir` - directory with subset images.
+  * `classification_only` - converts dataset to `ClassificationAnnotation` withot saving pixel level information (Optional, default `False`).
+
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

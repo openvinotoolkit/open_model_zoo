@@ -24,11 +24,11 @@ task_type: speech_recognition
 files:
   - name: deepspeech-0.8.2-models.pbmm
     size: 188915984
-    sha384: 5ab0759fcace311c36c5322321463ad171458102230df4db83435c1c337f3c7deeba1344057cc9d158e23dd42268b298
+    checksum: 5ab0759fcace311c36c5322321463ad171458102230df4db83435c1c337f3c7deeba1344057cc9d158e23dd42268b298
     source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.pbmm
   - name: deepspeech-0.8.2-models.scorer
     size: 953363776
-    sha384: 2694ef52d092ab7ddf9f913a8cf2f6b958a0ae38790080a37eb3be3453961ecc96d225095d3ae505e22dd6ba41fd27d5
+    checksum: 2694ef52d092ab7ddf9f913a8cf2f6b958a0ae38790080a37eb3be3453961ecc96d225095d3ae505e22dd6ba41fd27d5
     source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
 model_optimizer_args:
   - --input_model=$conv_dir/deepspeech-0.8.2-models.pb

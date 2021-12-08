@@ -33,7 +33,9 @@ AccuracyChecker supports following set of adapters:
   * `label_as_array` - produce ClassificationPrediction's label as array
 * `segmentation` - converting output of semantic segmentation model to `SeegmentationPrediction` representation.
   * `make_argmax` - allows applying argmax operation to output values.
-* `segmentation_one_class` - converting output of semantic segmentation to `SeegmentationPrediction` representation. It is suitable for situation when model's output is probability of belong each pixel to foreground class.
+* `segmentation_one_class` - converting output of semantic segmentation model to `SeegmentationPrediction` representation. It is suitable for cases when model's output is probability of belong each pixel to foreground class.
+  * `threshold` - minimum probability threshold for valid class belonging.
+* `anomaly_segmentation` - converting output of anomaly segmentation model to `AnomalySeegmentationPrediction` representation.
   * `threshold` - minimum probability threshold for valid class belonging.
 * `tiny_yolo_v1` - converting output of Tiny YOLO v1 model to `DetectionPrediction` representation.
 * `reid` - converting output of reidentification model to `ReIdentificationPrediction` representation.
@@ -273,6 +275,7 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+  * `logits_output` - Name of the output layer of the network (Optional).
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm (Optional, if provided in dataset_meta or vocabulary_file).
   * `vocabulary_file` - file with model vocab, represented as txt file, where each label is located on own line (Optional).
   * `shift_labels` - shift label map ids on 1 if it represented without blank label on zero position (Optional, default False).

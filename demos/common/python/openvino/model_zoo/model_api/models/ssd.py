@@ -15,19 +15,25 @@
 """
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection
 
 
 class SSD(DetectionModel):
-    def __init__(self, model_adapter, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(model_adapter, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'SSD'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
         self.output_parser = self._get_output_parser(self.image_blob_name)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['confidence_threshold'].update_default_value(0.5)
+        return parameters
 
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)
@@ -61,12 +67,12 @@ class SSD(DetectionModel):
             return parser
         except ValueError:
             pass
-        raise RuntimeError('Unsupported model outputs')
+        raise WrapperError(self.__model__, 'Unsupported model outputs')
 
     def _parse_outputs(self, outputs, meta):
         detections = self.output_parser(outputs)
 
-        detections = [d for d in detections if d.score > self.threshold]
+        detections = [d for d in detections if d.score > self.confidence_threshold]
 
         return detections
 

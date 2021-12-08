@@ -18,7 +18,7 @@ from collections import OrderedDict
 import numpy as np
 
 from ...config import ConfigError
-from ...utils import get_path
+from ...utils import get_path, parse_partial_shape, contains_any
 from ...logging import print_info
 
 
@@ -69,6 +69,17 @@ class BaseCascadeModel:
 
     def reset(self):
         pass
+
+    @staticmethod
+    def fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading):
+        if models_args and not delayed_model_loading:
+            for idx, part in enumerate(parts):
+                part_info = network_info.get(part, {})
+                if not contains_any(part_info, ['model', 'onnx_model']) and models_args:
+                    part_info['model'] = models_args[idx if len(models_args) > idx else 0]
+                    part_info['_model_is_blob'] = is_blob
+                network_info.update({part: part_info})
+        return network_info
 
 
 class BaseDLSDKModel:
@@ -232,6 +243,111 @@ class BaseDLSDKModel:
         raise NotImplementedError
 
 
+class BaseOpenVINOModel(BaseDLSDKModel):
+    def input_tensors_mapping(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        return {inp_node.get_node().friendly_name: inp_node.get_tensor().get_any_name() for inp_node in inputs}
+
+    def _reshape_input(self, input_shapes):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.infer_request
+            del self.exec_network
+        tensor_mapping = self.input_tensors_mapping()
+        input_shapes_for_tensors = {tensor_mapping[name]: shape for name, shape in input_shapes.items()}
+        self.launcher.reshape_network(self.network, input_shapes_for_tensors)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self.exec_network = None
+            return
+        self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
+        self.infer_request = None
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
+    def load_network(self, network, launcher):
+        self.infer_request = None
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+
+    def load_model(self, network_info, launcher, log=False):
+        if 'onnx_model' in network_info:
+            network_info.update(launcher.config)
+            model, weights = launcher.convert_model(network_info)
+        else:
+            model, weights = self.automatic_model_search(network_info)
+        if weights is None and model.suffix != '.onnx':
+            self.exec_network = launcher.ie_core.import_network(str(model))
+        else:
+            if weights:
+                self.network = launcher.read_network(str(model), str(weights))
+            else:
+                self.network = launcher.ie_core.read_network(str(model))
+            self.load_network(self.network, launcher)
+        self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
+
+    def print_input_output_info(self):
+        self.launcher.print_input_output_info(
+            self.network if self.network is not None else self.exec_network, self.default_model_suffix)
+
+    def set_input_and_output(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        outputs = self.network.outputs if self.network is not None else self.exec_network.outputs
+        input_blob = next(iter(inputs)).get_node().friendly_name
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(outputs)).get_node().friendly_name
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+
+    @property
+    def inputs(self):
+        if self.network:
+            return {node.get_node().friendly_name: node.get_node() for node in self.network.inputs}
+        return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.inputs}
+
+    def fit_to_input(self, input_data):
+        input_info = self.inputs[self.input_blob]
+        if (self.input_blob in self.dynamic_inputs or
+            parse_partial_shape(input_info.get_partial_shape()) != np.shape(input_data)):
+            self._reshape_input({self.input_blob: np.shape(input_data)})
+
+        return {self.input_blob: np.array(input_data)}
+
+    def infer(self, input_data):
+        if not hasattr(self, 'infer_request') or self.infer_request is None:
+            self.infer_request = self.exec_network.create_infer_request()
+        tensors_mapping = self.input_tensors_mapping()
+        feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
+        outputs = self.infer_request.infer(feed_dict)
+        return {
+            out_node.get_node().friendly_name: out_res
+            for out_node, out_res in outputs.items()
+        }
+
+
 class BaseONNXModel:
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.network_info = network_info
@@ -310,3 +426,52 @@ class BaseTFModel:
     def automatic_model_search(network_info):
         model = Path(network_info['model'])
         return model
+
+
+class BaseCaffeModel:
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.network_info = network_info
+        self.launcher = launcher
+        self.default_model_suffix = suffix
+
+    def fit_to_input(self, data, layer_name, layout, precision, tmpl=None):
+        return self.launcher.fit_to_input(data, layer_name, layout, precision, template=tmpl)
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError
+
+    def release(self):
+        del self.net
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.caffemodel'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = Path(weights)
+        accepted_suffixes = ['.prototxt']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.caffemodel']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights

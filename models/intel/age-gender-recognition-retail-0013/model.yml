@@ -18,27 +18,27 @@ task_type: object_attributes
 files:
   - name: FP32/age-gender-recognition-retail-0013.xml
     size: 31536
-    sha384: f7d042e1b5fec35ea29766f9544fac24a4fb17cd22973914310f96744afda9e582c12761766cfd218f467ac834a75e49
+    checksum: f7d042e1b5fec35ea29766f9544fac24a4fb17cd22973914310f96744afda9e582c12761766cfd218f467ac834a75e49
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
   - name: FP32/age-gender-recognition-retail-0013.bin
     size: 8552076
-    sha384: f00e708403ab7cf2a473351ec57d7fe65e15488b4baa8f8cf8fa9b5bdf90da3594bcbc689794993c1b08a51889488a13
+    checksum: f00e708403ab7cf2a473351ec57d7fe65e15488b4baa8f8cf8fa9b5bdf90da3594bcbc689794993c1b08a51889488a13
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
   - name: FP16/age-gender-recognition-retail-0013.xml
     size: 31526
-    sha384: 164d57fab84782a44297bf589f9b738d75ef619da7c564d8df9c126748e0a74378d2b107f90cbb607f70d91903940a26
+    checksum: 164d57fab84782a44297bf589f9b738d75ef619da7c564d8df9c126748e0a74378d2b107f90cbb607f70d91903940a26
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
   - name: FP16/age-gender-recognition-retail-0013.bin
     size: 4276038
-    sha384: 0afe49d995b2b28087f8705d25d8e3e363d1833d1036de47005174637734b6c3edb789ce840098bc3fcc5e7def77723a
+    checksum: 0afe49d995b2b28087f8705d25d8e3e363d1833d1036de47005174637734b6c3edb789ce840098bc3fcc5e7def77723a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
   - name: FP16-INT8/age-gender-recognition-retail-0013.xml
     size: 72552
-    sha384: fc2a4e56723ea0eac8c6d41e70e2ab858d4e9517a3daad2d37b1f27399f0d3a60ee37b40ca2f119e67e8b24d902e2921
+    checksum: fc2a4e56723ea0eac8c6d41e70e2ab858d4e9517a3daad2d37b1f27399f0d3a60ee37b40ca2f119e67e8b24d902e2921
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.xml
   - name: FP16-INT8/age-gender-recognition-retail-0013.bin
     size: 2150120
-    sha384: bbec50f46cd0ccd798e6602da48b061ff4d41c10e666aefe566eaadf404af6569f2bba9a17a8f18702c7aa436b79334d
+    checksum: bbec50f46cd0ccd798e6602da48b061ff4d41c10e666aefe566eaadf404af6569f2bba9a17a8f18702c7aa436b79334d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

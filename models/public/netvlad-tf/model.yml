@@ -25,15 +25,15 @@ task_type: place_recognition
 files:
   - name: netvlad.zip
     size: 1108966217
-    sha384: 2aacb2110402ee5c2c1dd5ccfdade0ca3da8df94d1f5eb5441d929beb031877909a399cb7268fef95fd1a8f251ccbd85
+    checksum: 2aacb2110402ee5c2c1dd5ccfdade0ca3da8df94d1f5eb5441d929beb031877909a399cb7268fef95fd1a8f251ccbd85
     source: http://rpg.ifi.uzh.ch/datasets/netvlad/vd16_pitts30k_conv5_3_vlad_preL2_intra_white.zip
   - name: netvlad_tf/layers.py
     size: 1492
-    sha384: 0cc24ff1de4a28c5d0c93da0958043145583d2ff9dc2e0209cf405d8d033dc95ad2caa071a2b1e0e1461946480ef31ab
+    checksum: 0cc24ff1de4a28c5d0c93da0958043145583d2ff9dc2e0209cf405d8d033dc95ad2caa071a2b1e0e1461946480ef31ab
     source: https://github.com/uzh-rpg/netvlad_tf_open/raw/abe37fe9d656bf781cff32caf738efca525b7889/python/netvlad_tf/layers.py
   - name: netvlad_tf/nets.py
     size: 2613
-    sha384: 01d2aade49c07a389e3f906c7157a5bbe7c1c7685873e81dbdc7ef5d1a44c796dfc7d53808ae05445ae9d0529f70e9ef
+    checksum: 01d2aade49c07a389e3f906c7157a5bbe7c1c7685873e81dbdc7ef5d1a44c796dfc7d53808ae05445ae9d0529f70e9ef
     source: https://github.com/uzh-rpg/netvlad_tf_open/raw/abe37fe9d656bf781cff32caf738efca525b7889/python/netvlad_tf/nets.py
 postprocessing:
   - $type: unpack_archive

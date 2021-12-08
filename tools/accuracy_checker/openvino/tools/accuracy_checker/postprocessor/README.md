@@ -50,7 +50,7 @@ Accuracy Checker supports following set of postprocessors:
 * `encode_segmentation_mask` - encoding segmentation label image as segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
   **Note:** this postprocessing requires a specific dataset meta: `segmentation_colors` for annotations and `prediction_to_gt_labels` for predictions.
-* `resize_segmentation_mask` - resizing segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
+* `resize_segmentation_mask` - resizing segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`, `AnomalySegmentationAnnotation`, `AnomalySegmentationPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     For resizing to final input size without padding, you can use `to_dst_image_size` flag with value `True`. If any of these parameters are not specified, original image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
@@ -95,7 +95,7 @@ Accuracy Checker supports following set of postprocessors:
     * `bottom-left`
     * `bottom-right`
   Default choice is `top-left`
-* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`, `AnomalySegmentationAnnotation`, `AnomalySegmentationPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).

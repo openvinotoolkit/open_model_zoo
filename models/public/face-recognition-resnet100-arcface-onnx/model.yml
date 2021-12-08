@@ -23,7 +23,7 @@ task_type: face_recognition
 files:
   - name: arcfaceresnet100-8.onnx
     size: 261036388
-    sha384: 4bceb34ee96c7c0b544012be53870d757f332d9d2972962065618de6942cf60f63b94f702f85fcc31844b21de326ec72
+    checksum: 4bceb34ee96c7c0b544012be53870d757f332d9d2972962065618de6942cf60f63b94f702f85fcc31844b21de326ec72
     source: https://media.githubusercontent.com/media/onnx/models/bb0d4cf3d4e2a5f7376c13a08d337e86296edbe8/vision/body_analysis/arcface/model/arcfaceresnet100-8.onnx
 model_optimizer_args:
   - --reverse_input_channels

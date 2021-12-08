@@ -119,13 +119,6 @@ class LogLoss(PerImageEvaluationMetric):
 
     def configure(self):
         self.losses = []
-        self.meta.update({
-            'scale': 1,
-            'postfix': ' ',
-            'calculate_mean': False,
-            'target': 'higher-worse',
-            'names': ['mean', 'std'],
-        })
 
     def update(self, annotation, prediction):
         score = np.clip(prediction.scores, 1e-15, 1 - 1e-15)
@@ -138,3 +131,13 @@ class LogLoss(PerImageEvaluationMetric):
 
     def reset(self):
         self.losses = []
+
+    @classmethod
+    def get_common_meta(cls):
+        return {
+            'scale': 1,
+            'postfix': ' ',
+            'calculate_mean': False,
+            'target': 'higher-worse',
+            'names': ['mean', 'std'],
+        }

@@ -29,11 +29,11 @@ task_type: classification
 files:
   - name: shufflenet-v2-x0.5.prototxt
     size: 68502
-    sha384: a22e8fec3f60b313b4853d4beff651dfc856786974f3b888db967ddd1e943e42d7576a50b7bee7e14288498ff8f7155b
+    checksum: a22e8fec3f60b313b4853d4beff651dfc856786974f3b888db967ddd1e943e42d7576a50b7bee7e14288498ff8f7155b
     source: https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe/releases/download/v0.1.1/shufflenet_v2_x0.5.prototxt
   - name: shufflenet-v2-x0.5.caffemodel
     size: 5529092
-    sha384: b19fbc18030a80580c9fc1e67626486368b0090c283456e00f4e98cd5cdd66ebf942fec591a465b248b50e18e24d81a9
+    checksum: b19fbc18030a80580c9fc1e67626486368b0090c283456e00f4e98cd5cdd66ebf942fec591a465b248b50e18e24d81a9
     source: https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe/releases/download/v0.1.1/shufflenet_v2_x0.5.caffemodel
 model_optimizer_args:
   - --reverse_input_channels

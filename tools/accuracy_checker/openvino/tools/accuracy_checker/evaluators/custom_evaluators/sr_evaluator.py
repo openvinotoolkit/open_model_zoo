@@ -18,14 +18,10 @@ from collections import OrderedDict
 import numpy as np
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseTFModel, create_model
+from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseTFModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, extract_image_representations
-
-
-def generate_name(prefix, with_prefix, layer_name):
-    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+from ...utils import contains_all, extract_image_representations, parse_partial_shape
 
 
 class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
@@ -65,16 +61,13 @@ class SuperResolutionFeedbackEvaluator(BaseCustomEvaluator):
 class SRFModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            model = network_info.get('srmodel', {})
-            if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['model'] = models_args[0]
-                model['_model_is_blob'] = is_blob
-            network_info.update({'srmodel': model})
-        if not contains_all(network_info, ['srmodel']) and not delayed_model_loading:
+        parts = ['srmodel']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain srmodel field')
         self._model_mapping = {
             'dlsdk': ModelDLSDKModel,
+            'openvino': ModelOVModel,
             'tf': ModelTFModel,
         }
         self.srmodel = create_model(network_info['srmodel'], launcher, self._model_mapping, 'srmodel',
@@ -157,6 +150,55 @@ class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
             data = np.transpose(data, [0, 3, 1, 2])
             if not info.input_data.is_dynamic:
                 assert tuple(info.input_data.shape) == np.shape(data)
+            fitted[name] = data
+
+        return fitted
+
+    def set_input_and_output(self):
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if (with_prefix != self.with_prefix) and with_prefix:
+            self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
+                                                            self.network_info['feedback_input']])
+            for inp in self.network_info['inputs']:
+                inp['name'] = '_'.join([self.default_model_suffix, inp['name']])
+                if 'blob' in inp.keys():
+                    inp['blob'] = '_'.join([self.default_model_suffix, inp['blob']])
+            self.network_info['adapter']['target_out'] = '_'.join([self.default_model_suffix,
+                                                                   self.network_info['adapter']['target_out']])
+
+        self.with_prefix = with_prefix
+
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.set_input_and_output()
+
+
+class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        self.partial_shapes = {}
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
+        self.configure_feedback()
+
+    def predict(self, identifiers, input_data):
+        input_data = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({key: data.shape for key, data in input_data.items()})
+        raw_result = self.infer(input_data)
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result
+
+    def fit_to_input(self, input_data):
+        fitted = {}
+        for name, info in self.inputs.items():
+            data = input_data[self._name_to_idx[name]]
+            data = np.expand_dims(data, axis=0)
+            data = np.transpose(data, [0, 3, 1, 2])
+            if not info.get_partial_shape.is_dynamic:
+                assert parse_partial_shape(info.input_data.shape) == np.shape(data)
             fitted[name] = data
 
         return fitted

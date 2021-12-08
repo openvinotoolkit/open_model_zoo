@@ -138,6 +138,7 @@ def main():
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size/16.0))
     sample_out = np.concatenate(samples_out, 0)
     wav_write(args.output, sample_out)
 

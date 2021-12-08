@@ -25,7 +25,8 @@ from ..representation import (
     ImageProcessingPrediction, ImageProcessingAnnotation,
     ImageInpaintingAnnotation, ImageInpaintingPrediction,
     SalientRegionAnnotation, SalientRegionPrediction,
-    BackgroundMattingAnnotation, BackgroundMattingPrediction
+    BackgroundMattingAnnotation, BackgroundMattingPrediction,
+    AnomalySegmentationAnnotation, AnomalySegmentationPrediction
 )
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets, ApplyToOption
 from ..postprocessor import ResizeSegmentationMask
@@ -41,13 +42,13 @@ class Resize(PostprocessorWithSpecificTargets):
         StyleTransferPrediction, ImageProcessingPrediction,
         SegmentationPrediction, SuperResolutionPrediction,
         ImageInpaintingPrediction, SalientRegionPrediction,
-        BackgroundMattingPrediction
+        BackgroundMattingPrediction, AnomalySegmentationPrediction
     )
     annotation_types = (
         StyleTransferAnnotation, ImageProcessingAnnotation,
         SegmentationAnnotation, SuperResolutionAnnotation,
         ImageInpaintingPrediction, SalientRegionAnnotation,
-        BackgroundMattingAnnotation
+        BackgroundMattingAnnotation, AnomalySegmentationAnnotation
     )
 
     @classmethod
@@ -122,6 +123,7 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SegmentationPrediction)
         @resize.register(SalientRegionPrediction)
         @resize.register(BackgroundMattingPrediction)
+        @resize.register(AnomalySegmentationPrediction)
         def _(entry, height, width):
             if len(entry.mask.shape) == 2:
                 entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
@@ -138,6 +140,7 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SegmentationAnnotation)
         @resize.register(SalientRegionAnnotation)
         @resize.register(BackgroundMattingAnnotation)
+        @resize.register(AnomalySegmentationAnnotation)
         def _(entry, height, width):
             entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
 
@@ -171,6 +174,7 @@ class Resize(PostprocessorWithSpecificTargets):
         @set_sizes.register(SegmentationPrediction)
         @set_sizes.register(SalientRegionPrediction)
         @set_sizes.register(BackgroundMattingPrediction)
+        @set_sizes.register(AnomalySegmentationPrediction)
         def _(entry):
             if self._deprocess_predictions:
                 return self.image_size[:2]

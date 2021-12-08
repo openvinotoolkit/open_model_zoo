@@ -16,7 +16,9 @@ limitations under the License.
 
 import numpy as np
 from .base_representation import BaseRepresentation
-from .classification_representation import ClassificationAnnotation, SequenceClassificationAnnotation
+from .classification_representation import (
+    ClassificationAnnotation, SequenceClassificationAnnotation, MultiLabelClassificationAnnotation
+)
 
 
 class MachineTranslationRepresentation(BaseRepresentation):
@@ -85,6 +87,7 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.paragraph_len = paragraph_len
         self.token_is_max_context = token_is_max_context
         self.token_to_orig_map = token_to_orig_map
+
 
 class QuestionAnsweringPrediction(QuestionAnswering):
     def __init__(self, identifier, start_logits=None, end_logits=None, start_index=None, end_index=None, tokens=None):
@@ -160,3 +163,12 @@ class SentenceSimilarityAnnotation(BaseRepresentation):
         self.similarity_score = similarity_score
         self.input_mask = input_mask if input_mask is not None else []
         self.segment_ids = segment_ids if segment_ids is not None else []
+
+
+class MultiLabelTextClassification(MultiLabelClassificationAnnotation):
+    def __init__(self, identifier, label, input_ids, input_mask=None, segment_ids=None, tokens=None):
+        super().__init__(identifier, label)
+        self.input_ids = input_ids
+        self.input_mask = input_mask if input_mask is not None else []
+        self.segment_ids = segment_ids if segment_ids is not None else []
+        self.tokens = tokens if tokens is not None else []

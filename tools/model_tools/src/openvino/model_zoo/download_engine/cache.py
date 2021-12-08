@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import hashlib
+import re
 import shutil
 import sys
 import tempfile
 
 from pathlib import Path
+
+from openvino.model_zoo.download_engine import base, validation
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
@@ -30,7 +33,6 @@ class NullCache:
 
 class DirCache:
     _FORMAT = 1 # increment if backwards-incompatible changes to the format are made
-    _HASH_LEN = hashlib.sha384().digest_size
 
     def __init__(self, cache_dir):
         self._cache_dir = cache_dir / str(self._FORMAT)
@@ -40,7 +42,6 @@ class DirCache:
         self._staging_dir.mkdir(exist_ok=True)
 
     def _hash_path(self, hash):
-        assert len(hash) == self._HASH_LEN
         hash_str = hash.hex().lower()
         return self._cache_dir / hash_str[:2] / hash_str[2:]
 
@@ -48,8 +49,8 @@ class DirCache:
         return self._hash_path(hash).exists()
 
     def get(self, model_file, path, reporter):
-        cache_path = self._hash_path(model_file.sha384)
-        cache_sha384 = hashlib.sha384()
+        cache_path = self._hash_path(model_file.checksum.value)
+        cache_sha = model_file.checksum.type
         cache_size = 0
 
         with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
@@ -61,12 +62,12 @@ class DirCache:
                 if cache_size > model_file.size:
                     reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
                     return False
-                cache_sha384.update(data)
+                cache_sha.update(data)
                 destination_file.write(data)
         if cache_size < model_file.size:
             reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
             return False
-        return verify_hash(reporter, cache_sha384.digest(), model_file.sha384, path)
+        return verify_hash(reporter, cache_sha.digest(), model_file.checksum.value, path)
 
     def put(self, hash, path):
         staging_path = None
@@ -89,6 +90,37 @@ class DirCache:
             # get rid of it.
             if staging_path:
                 staging_path.unlink()
+
+
+class Checksum(base.TaggedBase):
+    types = {}
+
+    @classmethod
+    def deserialize(cls, checksum):
+        if isinstance(checksum, str):
+            checksum = {'$type': 'sha384', 'value': checksum}
+        return super().deserialize(checksum)
+
+
+class ChecksumSHA384(Checksum):
+    RE_SHA384SUM = re.compile(r'[0-9a-fA-F]{96}')
+
+    def __init__(self, value):
+        self.type = hashlib.sha384()
+        self.value = value
+
+    @classmethod
+    def deserialize(cls, checksum):
+        sha384_str = validation.validate_string('"sha384"', checksum['value'])
+        if not cls.RE_SHA384SUM.fullmatch(sha384_str):
+            raise validation.DeserializationError(
+                '"sha384": got invalid hash {!r}'.format(sha384_str))
+
+        sha384 = bytes.fromhex(sha384_str)
+        return cls(sha384)
+
+
+Checksum.types['sha384'] = ChecksumSHA384
 
 
 def verify_hash(reporter, actual_hash, expected_hash, path):

@@ -18,17 +18,18 @@ import cv2
 import numpy as np
 
 from .image_model import ImageModel
+from .types import ListValue, StringValue
 from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, model_adapter, resize_type='standard', labels=None):
-        super().__init__(model_adapter, resize_type=resize_type)
+    __model__ = 'Segmentation'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 1)
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
 
         self.output_blob_name = self._get_outputs()
 
@@ -45,6 +46,16 @@ class SegmentationModel(ImageModel):
 
         return layer_name
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter")
+        })
+
+        return parameters
+
     def postprocess(self, outputs, meta):
         predictions = outputs[self.output_blob_name].squeeze()
         input_image_height = meta['original_shape'][0]
@@ -60,6 +71,7 @@ class SegmentationModel(ImageModel):
 
 
 class SalientObjectDetectionModel(SegmentationModel):
+    __model__ = 'Salient_Object_Detection'
 
     def postprocess(self, outputs, meta):
         input_image_height = meta['original_shape'][0]

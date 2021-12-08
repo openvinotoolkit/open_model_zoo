@@ -161,9 +161,10 @@ class CVATPersonDetectionActionRecognitionConverter(FileBasedAnnotationConverter
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / size)
 
-        meta = {
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
+        return {
             'action_label_map': self.action_names_back_map,
             'person_label_map': {1: 'person'}
         }
-
-        return ConverterReturn(annotations, meta, content_errors)

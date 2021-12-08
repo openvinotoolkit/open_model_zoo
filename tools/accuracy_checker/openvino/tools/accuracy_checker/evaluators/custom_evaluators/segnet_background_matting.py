@@ -16,9 +16,9 @@ limitations under the License.
 
 import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
-from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel
+from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
-from ...utils import contains_any, contains_all, generate_layer_name, extract_image_representations
+from ...utils import contains_all, generate_layer_name, extract_image_representations
 from ...config import ConfigError
 
 
@@ -64,7 +64,7 @@ class ONNXFeedbackModel(FeedbackModel, BaseONNXModel):
         }
 
 
-class OpenVINOFeedbackModel(FeedbackModel, BaseDLSDKModel):
+class DLSDKFeedbackModel(FeedbackModel, BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.feedback = None
         self._feedback_shape = None
@@ -91,6 +91,47 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseDLSDKModel):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if self.input_blob is None:
+            self.input_blob = input_blob
+            self.output_blob = next(iter(self.exec_network.outputs))
+        if with_prefix != self.with_prefix:
+            self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
+            self.output_blob = generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix)
+            self.adapter.output_blob = self.output_blob
+
+        self.with_prefix = with_prefix
+
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.set_input_and_output()
+
+
+class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.feedback = None
+        self._feedback_shape = None
+        self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data):
+        data = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({key: in_data.shape for key, in_data in data.items()})
+        raw_result = self.infer(data)
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result[0]
+
+    def fit_to_input(self, input_data):
+        if self.feedback is None:
+            h, w = input_data.shape[:2]
+            self.feedback = np.zeros((h, w, 1), dtype=np.float32)
+        return {self.input_blob: np.expand_dims(
+            np.transpose(np.concatenate([input_data, self.feedback], -1), (2, 0, 1)), 0
+        )}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.inputs))
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if self.input_blob is None:
             self.input_blob = input_blob
@@ -140,16 +181,13 @@ class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
 class SegnetModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            model = network_info.get('segnet_model', {})
-            if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['model'] = models_args[0]
-                model['_model_is_blob'] = is_blob
-            network_info.update({'segnet_model': model})
-        if not contains_all(network_info, ['segnet_model']) and not delayed_model_loading:
+        parts = ['segnet_model']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain segnet_model field')
         self._model_mapping = {
-            'dlsdk': OpenVINOFeedbackModel,
+            'dlsdk': DLSDKFeedbackModel,
+            'openvino': OpenVINOFeedbackModel,
             'onnx_runtime': ONNXFeedbackModel,
         }
         self.model = create_model(network_info['segnet_model'], launcher, self._model_mapping, 'segnet_model',

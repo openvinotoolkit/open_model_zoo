@@ -1,7 +1,6 @@
 # Handwritten Text Recognition Demo
 
-This example demonstrates an approach to recognize handwritten Japanese and simplified Chinese text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
-
+This example demonstrates an approach to recognize handwritten Japanese, simplified Chinese, and English text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release). For English, it supports the characters in [GNHK](https://goodnotes.com/gnhk/).
 ## How It Works
 
 The demo workflow is the following:
@@ -29,6 +28,7 @@ omz_converter --list models.lst
 
 * handwritten-japanese-recognition-0001
 * handwritten-simplified-chinese-recognition-0001
+* handwritten-english-recognition-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -76,9 +76,11 @@ Options:
   -tk TOP_K, --top_k TOP_K
                         Optional. Top k steps in looking up the decoded
                         character, until a designated one is found
+  -ob OUTPUT_BLOB, --output_blob OUTPUT_BLOB
+                        Optional. Name of the output layer of the model. Default is 'output'
 ```
 
-The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt`file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
+The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt` file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file, and for English it is the `<omz_dir>/data/dataset_classes/gnhk.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
 
 ```sh
 python handwritten_text_recognition_demo.py \

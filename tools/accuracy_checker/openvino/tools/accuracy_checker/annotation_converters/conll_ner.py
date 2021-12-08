@@ -54,8 +54,11 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
     def convert(self, check_content=False, **kwargs):
         sents, labels = self.read_annotation()
         annotations = self.convert_examples_to_features(sents, labels)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
         label_map = dict(enumerate(self.label_list, int(self.include_spec)))
-        return ConverterReturn(annotations, {'label_map': label_map}, None)
+        return {'label_map': label_map}
 
     def read_annotation(self):
         with self.annotation_file.open(mode='r') as lines:

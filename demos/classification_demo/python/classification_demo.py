@@ -26,7 +26,7 @@ import cv2
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api import models
+from model_api.models import Classification, OutputTransform
 from model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
@@ -55,7 +55,7 @@ def build_argparser():
                            'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=Path)
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-topk', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
 
@@ -92,11 +92,11 @@ def build_argparser():
                                            'BGR to RGB.')
     input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
                                       help='Optional. Normalize input by subtracting the mean '
-                                           'values per channel. Example: 255 255 255')
+                                           'values per channel. Example: 255.0 255.0 255.0')
     input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
                                       help='Optional. Divide input by scale values per channel. '
                                            'Division is applied after mean values subtraction. '
-                                           'Example: 255 255 255')
+                                           'Example: 255.0 255.0 255.0')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
@@ -166,8 +166,14 @@ def main():
         serving_config = {"address": "localhost", "port": 9000}
         model_adapter = RemoteAdapter(args.model, serving_config)
 
-    model = models.Classification(model_adapter, topk=args.topk, labels=args.labels)
-    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
+    config = {
+        'mean_values':  args.mean_values,
+        'scale_values': args.scale_values,
+        'reverse_input_channels': args.reverse_input_channels,
+        'topk': args.topk,
+        'path_to_labels': args.labels
+    }
+    model = Classification(model_adapter, config)
     model.log_layers_info()
 
     async_pipeline = AsyncPipeline(model)
@@ -223,7 +229,7 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
                 if args.output_resolution:
                     output_resolution = output_transform.new_resolution
                 else:
