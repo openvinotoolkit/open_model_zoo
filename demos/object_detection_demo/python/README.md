@@ -275,7 +275,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Running with OpenVINO Model Server
 
-You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OvmsAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OvmsAdapter`](/demos/common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
 
 Exemplary command:
 
