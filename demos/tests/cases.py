@@ -177,16 +177,17 @@ NATIVE_DEMOS = [
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+            '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             '-m_es': ModelArg('open-closed-eye-0001'),
         }),
         single_option_cases(
             '-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004')),
-        single_option_cases(
-            '-m_lm',
-            ModelArg('facial-landmarks-35-adas-0002'),
-            ModelArg('facial-landmarks-98-detection-0001')),
+        #single_option_cases(
+        #    '-m_lm',
+        #    ModelArg('facial-landmarks-35-adas-0002'),
+        #    ModelArg('facial-landmarks-98-detection-0001')),
     )),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
