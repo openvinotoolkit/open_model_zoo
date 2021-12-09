@@ -246,7 +246,12 @@ class BaseDLSDKModel:
 class BaseOpenVINOModel(BaseDLSDKModel):
     def input_tensors_mapping(self):
         inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
-        return {inp_node.get_node().friendly_name: inp_node.get_tensor().get_any_name() for inp_node in inputs}
+        node_to_tensor = {}
+        for idx, input_desc in enumerate(inputs):
+            tensor_names = input_desc.get_tensor().get_names()
+            node_to_tensor[input_desc.get_node().friendly_name] = idx if not tensor_names else next(iter(tensor_names))
+
+        return node_to_tensor
 
     def _reshape_input(self, input_shapes):
         if self.is_dynamic:
