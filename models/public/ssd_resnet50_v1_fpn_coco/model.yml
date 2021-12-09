@@ -31,7 +31,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,640,640,3]
   - --input=image_tensor
-  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/pipeline.config
   - --output=detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/frozen_inference_graph.pb

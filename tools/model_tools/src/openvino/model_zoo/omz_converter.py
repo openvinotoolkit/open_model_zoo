@@ -90,12 +90,16 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         return False
 
     model_format = model.framework
+    mo_extension_dir = mo_props.base_dir / 'extensions'
+    if not mo_extension_dir.exists():
+        mo_extension_dir = mo_props.base_dir / 'mo'
 
     template_variables = {
         'config_dir': _common.MODEL_ROOT / model.subdirectory,
         'conv_dir': output_dir / model.subdirectory,
         'dl_dir': args.download_dir / model.subdirectory,
         'mo_dir': mo_props.base_dir,
+        'mo_ext_dir':  mo_extension_dir,
     }
 
     if model.conversion_to_onnx_args:

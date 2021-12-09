@@ -30,7 +30,7 @@ model_optimizer_args:
   - --input_shape=[1,600,1024,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
-  - --transformations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
+  - --transformations_config=$mo_ext_dir/front/tf/faster_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_v2_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
