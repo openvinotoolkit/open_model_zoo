@@ -246,12 +246,14 @@ def load_models(models_root, args):
                         if not schema.check(model):
                             raise validation.DeserializationError('Configuration file check was\'t successful.')
 
-                        model_stages[stage.parent] = model
+                        stage_subdirectory = stage.parent.relative_to(models_root)
+                        model_stages[stage_subdirectory] = model
 
                 if len(model_stages) == 0:
                     continue
+                subdirectory = composite_model_config.parent.relative_to(models_root)
                 composite_models.append(CompositeModel.deserialize(
-                    composite_model, composite_model_name, composite_model_config.parent, model_stages
+                    composite_model, composite_model_name, subdirectory, model_stages
                 ))
 
                 if composite_model_name in composite_model_names:
