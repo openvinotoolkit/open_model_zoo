@@ -24,6 +24,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | EfficientNet B5             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b5](./efficientnet-b5/README.md)<br>[efficientnet-b5-pytorch](./efficientnet-b5-pytorch/README.md) | 83.33%/96.67%<br>83.69%/96.71% | 21.252 | 30.303 |
 | EfficientNet B7             | PyTorch\*                          | [efficientnet-b7-pytorch](./efficientnet-b7-pytorch/README.md) | 84.42%/96.91% | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment | TensorFlow\*                       | [efficientnet-b7_auto_aug](./efficientnet-b7_auto_aug/README.md) | 84.68%/97.09% | 77.618  | 66.193 |
+| EfficientNet V2 B0          | PyTorch\*                          | [efficientnet-v2-b0](./efficientnet-v2-b0/README.md) | 78.36%/94.02% | 1.4641 | 7.1094 |
 | HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/README.md)  | 73.1%/91.0% | 0.6208 | 4.5443 |
 | HBONet 0.5                  | PyTorch\*                          | [hbonet-0.5](./hbonet-0.5/README.md)  | 67.0%/86.9% | 0.1977 | 2.5287 |
 | HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/README.md) | 57.3%/79.8% | 0.0758 | 1.9299 |

@@ -40,6 +40,7 @@
 | efficientnet-b5-pytorch | YES | YES |    |
 | efficientnet-b7-pytorch | YES | YES |    |
 | efficientnet-b7_auto_aug | YES | YES |    |
+| efficientnet-v2-b0 | YES | YES |    |
 | f3net | YES | YES | YES |
 | face-detection-retail-0044 | YES | YES |    |
 | face-recognition-resnet100-arcface-onnx | YES | YES |    |
