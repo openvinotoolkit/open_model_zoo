@@ -27,7 +27,7 @@ model_optimizer_args:
   - --input=input_1
   - --mean_values=[103.939,116.779,123.68]
   - --output=filtered_detections/map/TensorArrayStack/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3
-  - --transformations_config=$mo_dir/extensions/front/tf/retinanet.json
+  - --transformations_config=$mo_ext_dir/front/tf/retinanet.json
   - --input_model=$dl_dir/retinanet_resnet50_coco_best_v2.1.0.pb
 framework: tf
 quantizable: yes

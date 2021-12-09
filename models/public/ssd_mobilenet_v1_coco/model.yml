@@ -32,7 +32,7 @@ model_optimizer_args:
   - --input_shape=[1,300,300,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
-  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
