@@ -45,7 +45,9 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
+    args.add_argument('-m', '--model', 
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using ovms adapter.',
                       required=True)
     available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
