@@ -4,7 +4,13 @@
 The `OvmsAdapter` implements `ModelAdapter` interface which makes it possible to use Model API with models hosted in OpenVINO Model Server.
 
 
-## Install OpenVINO Model Server
+## Prerequisites
+
+`OvmsAdapter` enables inference via gRPC calls to OpenVINO Model Server, so in order to use it you need two things:
+- OpenVINO Model Server that serves your model
+- [`ovmsclient`](https://pypi.org/project/ovmsclient/) package installed to enable communication with the model server
+
+### Deploy OpenVINO Model Server
 
 Model Server is distributed as a docker image, so you can pull it from Docker Hub with:
 
@@ -13,6 +19,15 @@ docker pull openvino/model_server
 ```
 
 See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
+
+
+### Install ovmsclient
+
+`ovmsclient` package is distributed on PyPi, so the easiest way to install it is via:
+
+```
+pip install ovmsclient
+```
 
 ## Model configuration
 
