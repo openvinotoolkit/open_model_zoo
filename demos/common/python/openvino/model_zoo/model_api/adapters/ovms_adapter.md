@@ -16,7 +16,7 @@ See [model server documentation](https://github.com/openvinotoolkit/model_server
 
 ## Model configuration
 
-When using OpenVINO Model Server model cannot be directly accessed from the client application (like OMZ demos). Therefore any configuration must be done on model server side. 
+When using OpenVINO Model Server model cannot be directly accessed from the client application (like OMZ demos). Therefore any configuration must be done on model server side.
 
 ### Input reshaping
 
@@ -48,7 +48,7 @@ To run the demo with model served in OpenVINO Model Server, you would have to pr
 - `<service_address>` - OVMS gRPC service address in form `<address>:<port>`
 - `<model_name>` - name of the target model (the one specified by `model_name` parameter in the model server startup command)
 - `<model_version>` *(optional)* - version of the target model (default: latest)
- 
+
  Assuming that model server is running on the same machine as the demo, expose gRPC service on port 9000 and serves model called `my_model`, the value of `-m` parameter would be:
 
 `localhost:9000/models/my_model`
