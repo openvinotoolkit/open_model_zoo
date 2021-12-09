@@ -26,7 +26,7 @@ For some use cases you may want your model to reshape to match input of certain 
 
 It's possible to configure inference related options for the model in OpenVINO Model Server with options:
 - `--target_device` - name of the device to load the model to
-- `--nireq - number` of InferRequests
+- `--nireq` - number of InferRequests
 - `--plugin_config` - configuration of the device plugin
 
 See [model server configuration parameters](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md#configuration-parameters) for more details.
