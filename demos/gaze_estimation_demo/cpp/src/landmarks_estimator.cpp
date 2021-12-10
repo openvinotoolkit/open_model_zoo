@@ -41,7 +41,6 @@ void LandmarksEstimator::estimate(const cv::Mat& image,
     else {
         outputResults.faceLandmarks = heatMapPostprocess(faceBoundingBox, faceCrop);
     }
-    
 }
 
 std::vector<cv::Point2i> LandmarksEstimator::simplePostprocess(cv::Rect faceBoundingBox, cv::Mat faceCrop) {
