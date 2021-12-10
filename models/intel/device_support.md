@@ -60,6 +60,7 @@
 | machine-translation-nar-en-de-0002 | YES | YES |    |
 | machine-translation-nar-en-ru-0001 | YES | YES |    |
 | machine-translation-nar-ru-en-0001 | YES | YES |    |
+| noise-suppression-denseunet-ll-0001 | YES |    |    |
 | noise-suppression-poconetlike-0001 | YES |    |    |
 | pedestrian-and-vehicle-detector-adas-0001 | YES | YES | YES |
 | pedestrian-detection-adas-0002 | YES | YES | YES |
