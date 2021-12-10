@@ -155,6 +155,16 @@ datasets:
       - name: AP
         type: coco_orig_keypoints_precision
 
+  - name: COCO2017_mask_rcnn_person
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_persons.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_person.pickle
+    dataset_meta: mscoco_mask_rcnn_person.json
+    data_source: val2017
+
   - name: imagenet_1000_classes
     annotation_conversion:
       converter: imagenet
