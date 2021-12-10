@@ -191,8 +191,8 @@ def main():
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
-    
-    model_info = dict()
+
+    model_info = {}
     for model_data in model_info_list:
         models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
         for model in models_list:
@@ -223,11 +223,11 @@ def main():
             print('Testing {}...'.format(demo.subdirectory))
             print()
             demo.set_precisions(args.precisions, model_info)
-            
+
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
-                    '--list', str(demo.models_lst_path(demos_dir))],
+                        '--list', str(demo.models_lst_path(demos_dir))],
                     universal_newlines=True)):
                 models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
                 for model in models_list:
