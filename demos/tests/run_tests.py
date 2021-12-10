@@ -223,7 +223,8 @@ def main():
             print('Testing {}...'.format(demo.subdirectory))
             print()
             demo.set_precisions(args.precisions, model_info)
-
+            
+            declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
                     '--list', str(demo.models_lst_path(demos_dir))],
