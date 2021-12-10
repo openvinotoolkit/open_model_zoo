@@ -33,7 +33,6 @@ postprocessing:
 model_optimizer_args:
   - --input=Placeholder
   - --reverse_input_channels
-  - --input_shape=[1,228,304,3]
   - --output=ConvPred/ConvPred
   - --input_meta=$dl_dir/NYU_FCRN.ckpt.meta
 quantizable: yes

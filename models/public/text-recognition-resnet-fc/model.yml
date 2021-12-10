@@ -288,8 +288,8 @@ conversion_to_onnx_args:
   - --input-names=input
   - --output-names=output
   - --output-file=$conv_dir/resnet_fc.onnx
+  - '--conversion-param=dynamic_axes={"input": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
-  - --input_shape=[1,1,32,100]
   - --input=input
   - --mean_values=input[127.5]
   - --scale_values=input[127.5]

@@ -25,7 +25,6 @@ files:
     checksum: 0d8510160bffd5a656022173a962cdd5e73d857015d0911f4ec1b73e1a7a2f9a1e979170e55baf8830b16379c6b75340
     source: https://raw.githubusercontent.com/BVLC/caffe/2cc3844cb2a4a72de10d321781dc8f994bef95c7/models/bvlc_reference_caffenet/deploy.prototxt
 model_optimizer_args:
-  - --input_shape=[1,3,227,227]
   - --input=data
   - --mean_values=data[104.0,117.0,123.0]
   - --output=prob

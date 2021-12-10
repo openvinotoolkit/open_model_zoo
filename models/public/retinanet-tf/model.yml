@@ -23,7 +23,7 @@ files:
     checksum: 0f51df51f4a58c5e0fe65e9ed69f7bb07819e73ebf975c86783e7a176634357b15c212a839c80a31f99a751c88d21683
     source: https://download.01.org/opencv/public_models/052020/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
 model_optimizer_args:
-  - --input_shape=[1,1333,1333,3]
+  - --input_shape=[-1,-1,-1,3]
   - --input=input_1
   - --mean_values=[103.939,116.779,123.68]
   - --output=filtered_detections/map/TensorArrayStack/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3

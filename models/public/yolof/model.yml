@@ -176,8 +176,8 @@ conversion_to_onnx_args:
   - --input-names=image
   - --output-names=boxes
   - --output-file=$conv_dir/yolof.onnx
+  - '--conversion-param=dynamic_axes={"image": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
-  - --input_shape=[1,3,608,608]
   - --mean_values=image[103.53,116.28,123.675]
   - --input=image
   - --output=boxes

@@ -70,7 +70,6 @@ postprocessing:
     pattern: 'tensorflow\.keras'
     replacement: 'tensorflow.compat.v1.keras'
 model_optimizer_args:
-  - --input_shape=[1,416,416,3]
   - --input=image_input
   - --scale_values=image_input[255]
   - --reverse_input_channels

@@ -78,7 +78,6 @@ postprocessing:
     replacement: 'layer'
     file: models/research/slim/tf_slim/layers/layers.py
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]

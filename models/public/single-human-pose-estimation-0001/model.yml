@@ -34,6 +34,7 @@ conversion_to_onnx_args:
   - --input-names=data
   - --output-names=heatmaps0,heatmaps1,heatmaps2,heatmaps3,heatmaps4,heatmaps
   - --output-file=$conv_dir/single-human-pose-estimation-0001.onnx
+  - '--conversion-param=dynamic_axes={"data": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
   - --input=data
   - --mean_values=data[123.675,116.28,103.53]
@@ -41,5 +42,4 @@ model_optimizer_args:
   - --output=heatmaps
   - --input_model=$conv_dir/single-human-pose-estimation-0001.onnx
   - --reverse_input_channels
-  - --input_shape=[1,3,384,288]
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

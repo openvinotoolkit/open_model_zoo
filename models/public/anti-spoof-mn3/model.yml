@@ -27,7 +27,6 @@ files:
       $type: google_drive
       id: 1KmM2vwGBuKxy7RE9hz1m5D0yyh2N9Amo
 model_optimizer_args:
-  - --input_shape=[1,3,128,128]
   - --input=actual_input_1
   - --mean_values=actual_input_1[151.2405,119.5950,107.8395]
   - --scale_values=actual_input_1[63.0105,56.4570,55.0035]

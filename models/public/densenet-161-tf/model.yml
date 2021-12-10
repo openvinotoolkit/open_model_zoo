@@ -29,7 +29,6 @@ postprocessing:
     file: tf-densenet161.tar.gz
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
   - --input=Placeholder
   - --mean_values=Placeholder[123.68,116.78,103.94]
   - --scale_values=Placeholder[58.8235294117647]

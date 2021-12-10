@@ -25,7 +25,6 @@ files:
     source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_large_224_1.0_float.h5
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
   - --input=input_1
   - --output=StatefulPartitionedCall/MobilenetV3large/Predictions/Softmax
   - --saved_model_dir=$dl_dir/mobilenet_v3_large_224_1.0_float.savedmodel

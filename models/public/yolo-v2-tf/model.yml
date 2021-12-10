@@ -24,7 +24,6 @@ files:
     checksum: d97d0e4736a210879c1e3db84e19a7b9cf8dd138350d66ef65715514a1ce361ec822133789020b6adca9bd25f0d73817
     source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
 model_optimizer_args:
-  - --input_shape=[1,608,608,3]
   - --input=image_input
   - --scale_values=image_input[255]
   - --reverse_input_channels

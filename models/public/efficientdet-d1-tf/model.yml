@@ -115,7 +115,6 @@ postprocessing:
     format: gztar
     file: efficientdet-d1.tar.gz
 model_optimizer_args:
-  - --input_shape=[1,640,640,3]
   - --input=image_arrays
   - --reverse_input_channels
   - --input_model=$conv_dir/efficientdet-d1_saved_model/efficientdet-d1_frozen.pb

@@ -40,7 +40,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --mean_values=data[124,117,104]
   - --scale_values=data[59.880239521]
-  - --input_shape=[1,3,224,224]
+  - --input_shape=[-1,3,-1,-1]
   - --input=data
   - --output=softmax
   - --input_model=$dl_dir/a08_resnet-200_alpha-0.125/checkpoint-0-0000.params

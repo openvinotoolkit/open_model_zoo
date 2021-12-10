@@ -27,7 +27,6 @@ files:
     source: https://media.githubusercontent.com/media/onnx/models/bb0d4cf3d4e2a5f7376c13a08d337e86296edbe8/vision/body_analysis/arcface/model/arcfaceresnet100-8.onnx
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,3,112,112]
   - --input_model=$dl_dir/arcfaceresnet100-8.onnx
   - --input=data
   - --output=fc1

@@ -67,12 +67,12 @@ conversion_to_onnx_args:
   - --model-param=model_name="fpn_mobilenet"
   - --input-names=blur_image
   - --output-names=deblur_image
+  - '--conversion-param=dynamic_axes={"blur_image": {0: "batch_size", 2: "height", 3: "width"}, "deblur_image": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
   - --model_name=deblurgan-v2
   - --reverse_input_channels
   - --mean_values=blur_image[127.5]
   - --scale_values=blur_image[127.5]
-  - --input_shape=[1,3,736,1312]
   - --input=blur_image
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx

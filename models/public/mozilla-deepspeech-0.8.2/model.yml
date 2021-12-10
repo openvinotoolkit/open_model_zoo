@@ -34,7 +34,6 @@ model_optimizer_args:
   - --input_model=$conv_dir/deepspeech-0.8.2-models.pb
   - --freeze_placeholder_with_value=input_lengths->[16]
   - --input=input_node,previous_state_h,previous_state_c
-  - --input_shape=[1,16,19,26],[1,2048],[1,2048]
   - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
   - --disable_nhwc_to_nchw
 framework: tf

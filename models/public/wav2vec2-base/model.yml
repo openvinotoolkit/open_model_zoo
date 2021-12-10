@@ -104,7 +104,6 @@ conversion_to_onnx_args:
   - '--conversion-param=dynamic_axes={"inputs": {0: "batch_size", 1: "sequence_len"},
     "logits": {0: "batch_size", 1: "sequence_len"}}'
 model_optimizer_args:
-  - --input_shape=[1,30480]
   - --input=inputs
   - --input_model=$conv_dir/wav2vec2-base.onnx
   - --output=logits
