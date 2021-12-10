@@ -4,8 +4,8 @@
 
 This is a model for noise suppression to make speech cleaner.
 The model architecture is similar to [PoCoNet](https://arxiv.org/abs/2008.04470), [Channel-Attention Dense U-Net](https://arxiv.org/abs/2001.11542) but without multi head attensions (MHA) to decrease model complexity and increse processing speed.
-Also to reduce processed patch size and achive small delay the pyrmid structure along time axis is reduced and convolutions with dilation along time axis are used. 
-The model was trained on [DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README.md) [paper](https://arxiv.org/abs/2101.01902), .
+Also to reduce processed patch size and achieve small delay the pyramid structure along time axis is reduced and convolutions with dilation along time axis are used.
+The model was trained on [DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README.md) [paper](https://arxiv.org/abs/2101.01902).
 The network works with mono audio sampled on 16kHz.
 The audio is processed iteratively by patches with 128 size.
 On each iteration it takes 128 (8ms) samples as input and returns 128 (8ms) samples as output with 384 (24ms) samples delay.
@@ -25,7 +25,7 @@ to process 128 samples that is 8ms for 16kHz
 | Source framework  | PyTorch\*             |
 ## Accuracy
 
-The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/tree/icassp2021-final/datasets/ICASSP_dev_test_set/track_1/synthetic).
+The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/tree/icassp2021-final).
 
 
 | Metric                          | Value         |
