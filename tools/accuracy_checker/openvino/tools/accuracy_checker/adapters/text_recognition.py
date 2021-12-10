@@ -200,6 +200,7 @@ class CTCGreedySearchDecoder(Adapter):
         self.blank_label = self.get_value_from_config('blank_label')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        self.output_verified = False
         vocabulary_file = self.get_value_from_config('vocabulary_file')
         if vocabulary_file:
             self.custom_label_map = dict(enumerate(read_txt(vocabulary_file)))

@@ -121,6 +121,7 @@ from .gan_metrics import InceptionScore, FrechetInceptionDistance
 from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
 
 from .time_series import NormalisedQuantileLoss
+from .distance import editdistance_eval
 
 __all__ = [
     'Metric',
@@ -248,5 +249,6 @@ __all__ = [
     'StructuralSimilarity',
     'PeakSignalToNoiseRatioWithBlockingEffectFactor',
 
-    'NormalisedQuantileLoss'
+    'NormalisedQuantileLoss',
+    'editdistance_eval'
 ]
