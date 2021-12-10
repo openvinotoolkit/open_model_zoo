@@ -312,6 +312,7 @@ Deep Learning models for noise suppression.
 | Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------|--------------------- |----------- |
 | [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+| [noise-suppression-denseunet-ll-0001](./noise-suppression-denseunet-ll-0001/README.md)| 0.2                  | 4.2       |
 
 ## Time Series Forecasting
 
