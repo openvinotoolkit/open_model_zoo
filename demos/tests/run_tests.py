@@ -191,7 +191,12 @@ def main():
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
-    model_info = {model['name']: model for model in model_info_list}
+    
+    model_info = dict()
+    for model_data in model_info_list:
+            models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
+            for model in models_list:
+                model_info[model['name']] = model
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
