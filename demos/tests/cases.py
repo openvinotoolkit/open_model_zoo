@@ -184,6 +184,10 @@ NATIVE_DEMOS = [
             '-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004')),
+		#single_option_cases(
+        #    '-m_lm',
+        #    ModelArg('facial-landmarks-35-adas-0002'),
+        #    ModelArg('facial-landmarks-98-detection-0001')),
     )),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',

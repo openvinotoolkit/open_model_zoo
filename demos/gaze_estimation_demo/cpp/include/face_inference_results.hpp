@@ -25,6 +25,8 @@ struct FaceInferenceResults {
 
     cv::Point3f gazeVector;
 
+    std::vector<cv::Point2f> getEyeLandmarks();
+
     friend slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults);
 };
 

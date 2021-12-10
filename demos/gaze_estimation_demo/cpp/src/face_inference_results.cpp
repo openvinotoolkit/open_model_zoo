@@ -27,4 +27,24 @@ slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& fac
 
     return os;
 }
+
+std::vector<cv::Point2f> FaceInferenceResults::getEyeLandmarks() {
+    std::vector<cv::Point2f> result(4);
+    if (faceLandmarks.size() == 35) {
+        result[0] = faceLandmarks[0];
+        result[1] = faceLandmarks[1];
+        result[2] = faceLandmarks[2];
+        result[3] = faceLandmarks[3];
+    }
+    else if (faceLandmarks.size() == 98) {
+        result[0] = faceLandmarks[60];
+        result[1] = faceLandmarks[64];
+        result[2] = faceLandmarks[68];
+        result[3] = faceLandmarks[72];
+    }
+    else {
+        throw std::runtime_error("the network must output 35 or 98 points");
+    }
+    return result;
+}
 }  // namespace gaze_estimation
