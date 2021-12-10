@@ -37,6 +37,7 @@ void LandmarksEstimator::estimate(const cv::Mat& image, FaceInferenceResults& ou
     const auto& outputBlobDims = outputInfo.at(outputBlobName);
     if (outputBlobDims.size() == 2) {
         outputResults.faceLandmarks=simplePostprocess(faceBoundingBox, faceCrop);
+
     } else {
         outputResults.faceLandmarks = heatMapPostprocess(faceBoundingBox, faceCrop);
     }
