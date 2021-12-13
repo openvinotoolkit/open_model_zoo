@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from time import perf_counter
 import wave
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -138,22 +138,21 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    ie = Core()
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
 
     log.info('Reading model {}'.format(args.model))
-    net = ie.read_network(args.model, args.model[:-4] + ".bin")
+    model = ie.read_model(args.model, args.model[:-4] + ".bin")
 
-    if len(net.input_info) != 1:
+    if len(model.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")
         sys.exit(1)
-    input_blob = next(iter(net.input_info))
-    input_shape = net.input_info[input_blob].input_data.shape
-    if len(net.outputs) != 1:
+    input_shape = model.inputs[0].shape
+    input_tensor_name = model.inputs[0].get_any_name()
+    if len(model.outputs) != 1:
         log.error("Demo supports only models with 1 output layer")
         sys.exit(1)
-    output_blob = next(iter(net.outputs))
 
     batch_size, channels, one, length = input_shape
     if one != 1:
@@ -164,7 +163,8 @@ def main():
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    exec_net = ie.load_network(network=net, device_name=args.device)
+    compiled_model = ie.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     labels = []
@@ -179,9 +179,8 @@ def main():
     clips = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk.shape = input_shape
-        output = exec_net.infer(inputs={input_blob: chunk})
+        output = next(iter(infer_request.infer({input_tensor_name: chunk}).values()))
         clips += batch_size
-        output = output[output_blob]
         for batch, data in enumerate(output):
             start_time = (idx*batch_size + batch)*hop / audio.samplerate
             end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
