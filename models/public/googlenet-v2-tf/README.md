@@ -38,12 +38,12 @@ Mean values - [127.5, 127.5, 127.5], scale value - 127.5
 
 ### Converted model
 
-Image,  name - `data`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
+Image,  shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`
 
