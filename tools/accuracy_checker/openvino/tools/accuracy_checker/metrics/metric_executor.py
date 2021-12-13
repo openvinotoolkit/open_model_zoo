@@ -144,10 +144,10 @@ class MetricsExecutor:
                     'reference value should be represented as number or dictionary with numbers for each submetric'
                 )
             profiling_file = None
-            values = 0
+            values = None
             if reference_v is not None and isinstance(reference_v, dict):
                 num_results = len(reference_v) - 1 if metric_meta.get('calculate_mean', True) else len(reference_v)
-                values = [0] * num_results
+                values = [None] * num_results
             yield metric_presenter, EvaluationResult(
                 name=metric_identifier,
                 metric_type=metric_type,
