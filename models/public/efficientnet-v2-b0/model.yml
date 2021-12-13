@@ -20,7 +20,7 @@ description: >-
   and scaling were used in the development to jointly optimize training speed and
   parameter efficiency.
 
-  More details provided in the paper <https://arxiv.org/pdf/2104.00298.pdf> and repository
+  More details provided in the paper <https://arxiv.org/abs/2104.00298> and repository
   <https://github.com/rwightman/pytorch-image-models>.
 task_type: classification
 files:

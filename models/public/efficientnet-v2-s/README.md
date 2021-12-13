@@ -4,7 +4,7 @@
 
 The `efficientnet-v2-s` model is a small variant of the EfficientNetV2 pre-trained on ImageNet-21k dataset and fine-tuned on ImageNet-1k for image classification task. EfficientNetV2 is a new family of convolutional networks that have faster training speed and better parameter efficiency than previous models. A combination of training-aware neural architecture search and scaling were used in the development to jointly optimize training speed and parameter efficiency.
 
-More details provided in the [paper](https://arxiv.org/pdf/2104.00298.pdf) and [repository](https://github.com/rwightman/pytorch-image-models).
+More details provided in the [paper](https://arxiv.org/abs/2104.00298) and [repository](https://github.com/rwightman/pytorch-image-models).
 
 ## Specification
 
