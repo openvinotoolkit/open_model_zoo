@@ -63,3 +63,4 @@ class ScorePerplexity(PerImageEvaluationMetric):
     def get_common_meta(cls):
         meta = super().get_common_meta()
         meta['target'] = 'higher-worse'
+        return meta
