@@ -117,7 +117,7 @@ def main():
     model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names})
     model.check_dynamic_loading()
     if max_sentence_length > model.max_length:
-        model.reshape(max_sentence_length if not model.is_dynamic else (1, max_sentence_length))
+        model.reshape(max_sentence_length)
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)

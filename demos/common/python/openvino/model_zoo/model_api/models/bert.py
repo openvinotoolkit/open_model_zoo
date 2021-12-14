@@ -78,6 +78,8 @@ class Bert(Model):
 
     def reshape(self, new_length):
         new_shapes = {}
+        if self.is_dynamic and new_length != -1:
+            new_length = (1, new_length)
         for input_name, input_info in self.inputs.items():
             new_shapes[input_name] = [1, new_length]
         default_input_shape = input_info.shape

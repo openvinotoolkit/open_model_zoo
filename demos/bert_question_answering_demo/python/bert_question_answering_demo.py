@@ -180,6 +180,7 @@ def main():
         'squad_ver': args.model_squad_ver
     }
     model = BertQuestionAnswering(model_adapter, config)
+    model.check_dynamic_loading()
     if args.reshape:
         # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
         new_length = min(model.max_length, int(np.ceil((len(c_tokens[0]) + args.max_question_token_num) / 64) * 64))
