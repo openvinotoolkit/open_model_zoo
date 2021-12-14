@@ -275,8 +275,11 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
             subdirectory = config_path.parent
 
             is_composite = (subdirectory.parent / 'composite-model.yml').exists()
-            if is_composite and mode != ModelLoadingMode.ignore_composite:
-                continue
+            composite_model_name = None
+            if is_composite:
+                if mode != ModelLoadingMode.ignore_composite:
+                    continue
+                composite_model_name = subdirectory.parent.name
 
             subdirectory = subdirectory.relative_to(models_root)
 
@@ -291,7 +294,7 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                models.append(Model.deserialize(model, subdirectory.name, subdirectory, None))
+                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
