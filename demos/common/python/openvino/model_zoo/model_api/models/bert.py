@@ -193,8 +193,7 @@ class BertQuestionAnswering(Bert):
         # index of first context token in tensor
         c_s_idx = len(q_tokens_id) + 2
         # index of last+1 context token in tensor
-        c_e_idx = self.max_length - (pad_len + 1)
-
+        c_e_idx = self.max_length - (pad_len + 1) if not self.is_dynamic else score_e.shape[0]
         # find product of all start-end combinations to find the best one
         max_score, max_s, max_e = self.find_best_answer_window(score_s, score_e, c_s_idx, c_e_idx)
 

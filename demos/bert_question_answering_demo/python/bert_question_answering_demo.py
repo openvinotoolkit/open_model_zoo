@@ -131,6 +131,7 @@ class Visualizer:
 class ContextSource:
     def __init__(self, q_tokens_id, c_tokens, model_max_length):
         self.q_tokens_id = q_tokens_id
+        model_max_length = model_max_length if model_max_length != -1 else 384
 
         # calculate number of tokens for context in each inference request.
         # reserve 3 positions for special tokens: [CLS] q_tokens [SEP] c_tokens [SEP]
