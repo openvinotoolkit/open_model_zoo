@@ -29,7 +29,9 @@ class Bert(Model):
         if self.inputs.keys() != set(self.input_names):
             raise WrapperError(self.__model__, 'The Wrapper expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.inputs.keys())))
+
         self.max_length = self.inputs[self.input_names[0]].shape[1]
+        self.is_dynamic = None
 
     @classmethod
     def parameters(cls):
@@ -42,8 +44,10 @@ class Bert(Model):
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
-
-        pad_len = self.pad_input(input_ids, attention_mask, token_type_ids)
+        if not self.is_dynamic:
+            pad_len = self.pad_input(input_ids, attention_mask, token_type_ids)
+        else:
+            pad_len = 0
         meta = {'pad_len': pad_len, 'inputs': inputs}
 
         return self.create_input_dict(input_ids, attention_mask, token_type_ids), meta
@@ -79,7 +83,19 @@ class Bert(Model):
         default_input_shape = input_info.shape
         super().reshape(new_shapes)
         self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
-        self.max_length = new_length
+        self.max_length = new_length if not isinstance(new_length, tuple) else new_length[-1]
+
+    def check_dynamic_loading(self):
+        if self.is_dynamic is not None:
+            return self.is_dynamic
+        if not self.dynamic_inputs:
+            self.reshape(-1)
+        try:
+            self.load()
+        except RuntimeError:
+            self.is_dynamic = False
+            self.reshape(self.max_length)
+        self.is_dynamic = True
 
 
 class BertNamedEntityRecognition(Bert):
@@ -103,10 +119,11 @@ class BertNamedEntityRecognition(Bert):
         output = np.exp(output[0])
         score = output / output.sum(axis=-1, keepdims=True)
         labels_id = score.argmax(-1)
+        max_len = self.max_length - meta['pad_len'] if not self.is_dynamic else labels_id.shape[0] - 1
 
         filtered_labels_id = [
             (i, label_i) for i, label_i in enumerate(labels_id)
-            if label_i != 0 and 0 < i < self.max_length - meta['pad_len']
+            if label_i != 0 and 0 < i < max_len
         ]
         return score, filtered_labels_id
 

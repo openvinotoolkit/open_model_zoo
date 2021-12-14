@@ -38,6 +38,38 @@ def create_core():
     return IECore()
 
 
+def get_partial_shape(input_data):
+    def string_to_tuple(string, casting_type=float):
+        processed = string.replace(' ', '')
+        processed = processed.replace('(', '')
+        processed = processed.replace(')', '')
+        processed = processed.split(',')
+        processed = filter(lambda x: x, processed)
+
+        return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
+
+    partial_shape = ngraph.partial_shape_from_data(input_data)
+    ps = str(partial_shape)
+    preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
+    if '[' not in preprocessed:
+        return string_to_tuple(preprocessed, casting_type=int)
+    shape_list = []
+    s_pos = 0
+    e_pos = len(preprocessed)
+    while s_pos <= e_pos:
+        open_brace = preprocessed.find('[', s_pos, e_pos)
+        if open_brace == -1:
+            shape_list.extend(string_to_tuple(preprocessed[s_pos:], casting_type=int))
+            break
+        if open_brace != s_pos:
+            shape_list.extend(string_to_tuple(preprocessed[:open_brace], casting_type=int))
+        close_brace = preprocessed.find(']', open_brace, e_pos)
+        shape_range = preprocessed[open_brace + 1:close_brace]
+        shape_list.append(string_to_tuple(shape_range, casting_type=int))
+        s_pos = min(close_brace + 2, e_pos)
+    return shape_list
+
+
 class OpenvinoAdapter(ModelAdapter):
     """
     Works with OpenVINO model
@@ -90,14 +122,28 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for name, layer in self.net.input_info.items():
-            inputs[name] = Metadata(layer.input_data.shape, layer.input_data.precision)
+            is_dynamic = False
+            if not layer.input_data.is_dynamic:
+                shape = layer.input_data.shape
+            else:
+                shape = get_partial_shape(layer.input_data)
+                is_dynamic = True
+            inputs[name] = Metadata(shape, layer.input_data.precision)
+            inputs[name].is_dynamic = is_dynamic
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for name, layer in self.net.outputs.items():
-            outputs[name] = Metadata(layer.shape, layer.precision)
+            is_dynamic = False
+            if not layer.is_dynamic:
+                shape = layer.shape
+            else:
+                shape = get_partial_shape(layer)
+                is_dynamic = True
+            outputs[name] = Metadata(shape, layer.precision)
+            outputs[name].is_dynamic = is_dynamic
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
@@ -135,6 +181,6 @@ class OpenvinoAdapter(ModelAdapter):
             layer_name = node.get_friendly_name()
             if layer_name not in layers_info.keys():
                 continue
-            layers_info[layer_name].meta = node._get_attributes()
+            layers_info[layer_name].meta = node._get_attributes() if hasattr(node, '_get_attributes') else {}
             layers_info[layer_name].type = node.get_type_name()
         return layers_info

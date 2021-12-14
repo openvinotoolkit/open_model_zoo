@@ -25,6 +25,7 @@ class Metadata:
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)
+    is_dynamic: bool = False
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):

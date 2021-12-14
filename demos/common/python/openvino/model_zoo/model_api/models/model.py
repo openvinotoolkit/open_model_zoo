@@ -200,3 +200,7 @@ class Model:
             log.info('\tInput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))
         for name, metadata in self.outputs.items():
             log.info('\tOutput layer: {}, shape: {}, precision: {}'.format(name, metadata.shape, metadata.precision))
+
+    @property
+    def dynamic_inputs(self):
+        return any([input_layer.is_dynamic for input_layer in self.model_adapter.get_input_layers().values()])
