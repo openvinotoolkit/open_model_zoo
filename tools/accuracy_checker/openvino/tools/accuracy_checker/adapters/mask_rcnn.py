@@ -112,7 +112,8 @@ class MaskRCNNAdapter(Adapter):
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
-        self.raw_masks_out = self.check_output_name(self.raw_masks_out, outputs)
+        if self.raw_masks_out:
+            self.raw_masks_out = self.check_output_name(self.raw_masks_out, outputs)
         if hasattr(self, 'detection_out'):
             self.detection_out = self.check_output_name(self.raw_masks_out, outputs)
         if self.classes_out:
