@@ -19,6 +19,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | MParams           | 107.4319              |
 | Source framework  | PyTorch\*             |
 
+GOps is calculated for for `1, 128` input size that is suitable for long context
 
 ## Accuracy
 
@@ -32,20 +33,20 @@ The quality metric was calculated on CONLL-2003 Named Entity Recognition dataset
 
 ### Original model
 
-1. Token IDs, name: `input_ids`, shape: `1, 128`.
-Token IDs is sequence of integer values that is representing the tokenized input sentence.
+1. Token IDs, name: `input_ids`, shape: `[batch_size], [sequence_length]`.
+Token IDs is sequence of integer values that is representing the tokenized input sentence. Model has dynamic input shape, where the first dimension correspond batch size and the second - input data sequence lenght respectively.
 The sequence structure is as follows (`[CLS]` and `[SEP]`should be replaced by corresponding token IDs
 as specified by the dictionary):
 `[CLS]` + *tokenized text* + `[SEP]` + `0` (for padding to sequence length 128]
 
-2. Input mask, name: `attention_mask`, shape: `1, 128`.
-Input mask is a sequence of integer values representing the mask of valid values in the input.
+2. Input mask, name: `attention_mask`, shape: `[batch_size], [sequence_length]`.
+Input mask is a sequence of integer values representing the mask of valid values in the input. Model has dynamic input shape, where the first dimension correspond batch size and the second - input data sequence lenght respectively.
 The values of this input are equal to:
     * `1` at positions corresponding to the `[CLS]` + *tokenized text* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the padding), and
     * `0` at all other positions
 
-3. Token types,  name: `token_type_ids`, shape: `1, 128`.
-Token types is sequence of integer values representing the segmentation of the `input_ids`.
+3. Token types,  name: `token_type_ids`, shape: `[batch_size], [sequence_length]`.
+Token types is sequence of integer values representing the segmentation of the `input_ids`. Model has dynamic input shape, where the first dimension correspond batch size and the second - input data sequence lenght respectively.
 The values are equal to `0` at all other positions (all text belongs to single segment)
 
 * `[CLS]` is a special symbol added in front of the text.
@@ -59,7 +60,7 @@ The values are equal to `0` at all other positions (all text belongs to single s
 
 ### Original model
 
-Token classifier, name: `output`, shape: `1, 128, 9`
+Token classifier, name: `output`, shape: `[batch_size], [sequence_length], 9`
 floating point-valued logit scores vectors that represents probability of belonging each token to 9 classes:
 
 | Abbreviation| Description                                                                  |
@@ -73,6 +74,8 @@ floating point-valued logit scores vectors that represents probability of belong
 | I-ORG       | Organisation                                                                 |
 | B-LOC       | Beginning of a location right after another location                         |
 | I-LOC       | Location                                                                     |
+
+Model has dynamic output shape, where the first dimension correspond batch size and the second - input data sequence lenght respectively.
 
 ### Converted model
 
