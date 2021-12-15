@@ -72,6 +72,21 @@ class TestTopologies(unittest.TestCase):
         output = model(inputs, ie)
         self.assertEqual(output[output_name].shape, (1, 2, 256, 256))
 
+    def test_load_public_composite(self):
+        model = omz.Model.download_model('mtcnn', precision='FP32')
+        xml_path = model.model_path
+
+        self.assertTrue(os.path.exists(xml_path))
+
+        ie = IECore()
+        net = ie.read_network(xml_path)
+
+        input_name = next(iter(net.input_info))
+        output_name = next(iter(net.outputs))
+
+        self.assertEqual(net.input_info[input_name].input_data.shape, [1, 1, 256, 256])
+        self.assertEqual(net.outputs[output_name].shape, [1, 2, 256, 256])
+
 
 if __name__ == '__main__':
     unittest.main()
