@@ -1,0 +1,16 @@
+0 background
+1 noise_action
+2 remove_support_sleeve
+3 remove_pointer_sleeve
+4 adjust_rider
+5 adjust_nut
+6 adjust_balancing
+7 open_box
+8 close_box
+9 choose_weight
+10 put_left
+11 put_right
+12 take_left
+13 take_right
+14 install_support_sleeve
+15 install_pointer_sleeve

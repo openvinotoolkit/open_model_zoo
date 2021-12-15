@@ -1,0 +1,2 @@
+model_checkpoint_path: "/cns/li-d/home/brianzhang/ckpoints/rgb_imagenet/model.ckpt"
+all_model_checkpoint_paths: "/cns/li-d/home/brianzhang/ckpoints/rgb_imagenet/model.ckpt"

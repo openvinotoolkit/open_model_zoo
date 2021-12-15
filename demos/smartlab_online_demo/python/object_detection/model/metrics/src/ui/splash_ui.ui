@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>682</width>
+    <height>206</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>682</width>
+    <height>203</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>682</width>
+    <height>206</height>
+   </size>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Information</string>
+  </property>
+  <widget class="QLabel" name="lbl_groundtruth_dir_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>681</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you use this code for your research, please consider citing:&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;A Comparative Analysis of Object Detection Metrics with a Companion Open-Source Toolkit&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;Authors: Rafael Padilla, Wesley L. Passos, Thadeu L. B. Dias, Sergio L. Netto, Eduardo A. B. da Silva&lt;br/&gt;Journal: Electronics V. 10&lt;br/&gt;Year: 2021&lt;br/&gt;ISSN: 2079-9292&lt;br/&gt;DOI: 10.3390/electronics10030279&lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;https://github.com/rafaelpadilla/review_object_detection_metrics&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/rafaelpadilla/review_object_detection_metrics&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_Close">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>170</y>
+     <width>141</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>The configurations will be applied in a random ground truth image.</string>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btn_Close</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>btn_close_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>582</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>455</x>
+     <y>233</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>btn_close_clicked()</slot>
+ </slots>
+</ui>
