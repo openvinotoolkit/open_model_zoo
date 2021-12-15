@@ -247,8 +247,6 @@ def main():
                 key = cv2.waitKey(1)
                 if key == 27 or key == 'q' or key == 'Q':
                     break
-                if key == 9:
-                    only_masks = not only_masks
                 presenter.handleKey(key)
 
     pipeline.await_all()
