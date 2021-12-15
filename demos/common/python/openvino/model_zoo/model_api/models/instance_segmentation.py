@@ -148,8 +148,9 @@ class MaskRCNNModel(ImageModel):
 
 class YolactModel(ImageModel):
     def __init__(self, model_adapter, prob_threshold=0.5, labels=None, keep_aspect_ratio=False):
-        resize_type = 'fit_to_window' if keep_aspect_ratio else 'standard'
-        super().__init__(model_adapter, resize_type=resize_type)
+        super().__init__(model_adapter)
+        self.resize_type = 'fit_to_window' if keep_aspect_ratio else 'standard'
+        self.resize = RESIZE_TYPES[self.resize_type]
         self.prob_threshold = prob_threshold
         self._check_io_number(1, 4)
         if isinstance(labels, (list, tuple)):
