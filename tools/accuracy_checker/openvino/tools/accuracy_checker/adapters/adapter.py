@@ -102,7 +102,7 @@ class Adapter(ClassProvider):
 
     def select_output_blob(self, outputs):
         if self.output_blob is None:
-            self.output_blob = next(iter(outputs))
+            self.output_blob = next(iter(outputs)) if isinstance(outputs, dict) else next(iter(outputs[0]))
 
     @classmethod
     def validation_scheme(cls, provider=None):

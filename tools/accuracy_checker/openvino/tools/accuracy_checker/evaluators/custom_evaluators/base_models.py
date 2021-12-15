@@ -55,10 +55,16 @@ class BaseCascadeModel:
                 model.release()
 
     def load_network(self, network_list, launcher):
+        if len(self._part_by_name) == 1 and 'name' not in network_list[0]:
+            next(iter(self._part_by_name.values())).load_model(network_list[0]['model'], launcher)
+            return
         for network_dict in network_list:
             self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
 
     def load_model(self, network_list, launcher):
+        if len(self._part_by_name) == 1 and 'name' not in network_list[0]:
+            next(iter(self._part_by_name.values())).load_model(network_list[0], launcher)
+            return
         for network_dict in network_list:
             self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
 
@@ -204,6 +210,8 @@ class BaseDLSDKModel:
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+            if hasattr(self, 'adapter') and self.adapter is not None:
+                self.adapter.output_blob = output_blob
 
     def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
@@ -326,6 +334,8 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+            if hasattr(self, 'adapter') and self.adapter is not None:
+                self.adapter.output_blob = output_blob
 
     @property
     def inputs(self):
