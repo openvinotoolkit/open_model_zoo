@@ -87,7 +87,7 @@ class BeamSearchDecoder(Adapter):
             self.select_output_blob(raw)
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
-        output = raw_output[self.output_blob]
+        output = raw_output[self.logits_output]
         # TBC -> BTC
         if output.shape[1] == len(identifiers):
             output = np.swapaxes(output, 0, 1)
@@ -229,7 +229,7 @@ class CTCGreedySearchDecoder(Adapter):
             self.select_output_blob(raw)
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
-        output = raw_output[self.output_blob]
+        output = raw_output[self.logits_output]
         preds_index = np.argmax(output, 2)
         preds_index = preds_index.transpose(1, 0)
 
