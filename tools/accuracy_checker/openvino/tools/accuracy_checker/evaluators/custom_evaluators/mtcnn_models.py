@@ -22,151 +22,132 @@ import numpy as np
 
 from ...preprocessor import PreprocessingExecutor
 from ...config import ConfigError
-from ...utils import (
-    contains_any, extract_image_representations, read_pickle, parse_partial_shape, generate_layer_name, contains_all
-)
+from ...utils import contains_any, extract_image_representations, read_pickle, get_path, parse_partial_shape
 from .mtcnn_evaluator_utils import cut_roi, calibrate_predictions, nms, transform_for_callback
+from ...logging import print_info
 from ...launcher import InputFeeder
-from .base_models import BaseOpenVINOModel, BaseDLSDKModel, BaseCaffeModel, BaseCascadeModel
+from .base_models import BaseOpenVINOModel
 from ...adapters import create_adapter
 
 
-def create_pnet(model_config, launcher, launcher_model_mapping, common_preprocessor, delayed_model_loading=False):
+def build_stages(models_info, preprocessors_config, launcher, model_args, delayed_model_loading=False):
+    required_stages = ['pnet']
+    stages_mapping = OrderedDict([
+        ('pnet', {
+            'caffe': CaffeProposalStage, 'dlsdk': DLSDKProposalStage,
+            'dummy': DummyProposalStage, 'openvino': OpenVINOProposalStage}),
+        ('rnet', {'caffe': CaffeRefineStage, 'dlsdk': DLSDKRefineStage,
+                  'openvino': OpenVINORefineStage}),
+        ('onet', {'caffe': CaffeOutputStage, 'dlsdk': DLSDKOutputStage, 'openvino': OpenVINOOutputStage})
+    ])
     framework = launcher.config['framework']
-    if 'predictions' in model_config and not model_config.get('store_predictions', False):
-        framework = 'dummy'
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    stage_preprocess = model_config.get('preprocessing', [])
-    model_specific_preprocessor = PreprocessingExecutor(stage_preprocess)
-    return model_class(model_config, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading)
+    common_preprocessor = PreprocessingExecutor(preprocessors_config)
+    stages = OrderedDict()
+    for stage_name, stage_classes in stages_mapping.items():
+        if stage_name not in models_info:
+            if stage_name not in required_stages:
+                continue
+            raise ConfigError('{} required for evaluation'.format(stage_name))
+        model_config = models_info[stage_name]
+        if 'predictions' in model_config and not model_config.get('store_predictions', False):
+            stage_framework = 'dummy'
+        else:
+            stage_framework = framework
+        if not delayed_model_loading:
+            if not contains_any(model_config, ['model', 'caffe_model']) and stage_framework != 'dummy':
+                if model_args:
+                    model_config['model'] = model_args[len(stages) if len(model_args) > 1 else 0]
+        stage = stage_classes.get(stage_framework)
+        if not stage_classes:
+            raise ConfigError('{} stage does not support {} framework'.format(stage_name, stage_framework))
+        stage_preprocess = models_info[stage_name].get('preprocessing', [])
+        model_specific_preprocessor = PreprocessingExecutor(stage_preprocess)
+        stages[stage_name] = stage(
+            models_info[stage_name], model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading
+        )
 
+    if not stages:
+        raise ConfigError('please provide information about MTCNN pipeline stages')
 
-def create_net(model_config, launcher, launcher_model_mapping, common_preprocessor, delayed_model_loading=False):
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    stage_preprocess = model_config.get('preprocessing', [])
-    model_specific_preprocessor = PreprocessingExecutor(stage_preprocess)
-    return model_class(model_config, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading)
-
-
-class MTCNNCascadeModel(BaseCascadeModel):
-    def __init__(self, network_info, launcher, models_args, delayed_model_loading=False):
-        super().__init__(network_info, launcher)
-        required_stages = ['pnet']
-        stages = ['pnet', 'rnet', 'onet']
-        network_info = self.fill_part_with_model(network_info, stages, models_args, delayed_model_loading)
-        if not contains_all(network_info, required_stages) and not delayed_model_loading:
-            raise ConfigError('network_info should contain pnet field')
-        self._pnet_mapping = {
-            'caffe': CaffeProposalStage,
-            'dlsdk': DLSDKProposalStage,
-            'dummy': DummyProposalStage,
-            'openvino': OpenVINOProposalStage
-        }
-        self._rnet_mapping = {
-            'caffe': CaffeRefineStage,
-            'dlsdk': DLSDKRefineStage,
-            'openvino': OpenVINORefineStage
-        }
-        self._onet_mapping = {
-            'caffe': CaffeOutputStage,
-            'dlsdk': DLSDKOutputStage,
-            'openvino': OpenVINOOutputStage
-        }
-        common_preprocessor = PreprocessingExecutor([])
-        self.pnet = create_pnet(network_info['pnet'], launcher, self._pnet_mapping, common_preprocessor,
-                                delayed_model_loading)
-        self.rnet = create_net(network_info['rnet'], launcher, self._rnet_mapping, common_preprocessor,
-                                delayed_model_loading)
-        self.onet = create_net(network_info['onet'], launcher, self._onet_mapping, common_preprocessor,
-                               delayed_model_loading)
-        self._part_by_name = {'pnet': self.pnet, 'rnet': self.rnet, 'onet': self.onet}
-
-    def predict(self, identifiers, input_data, encoder_callback=None):
-        pass
-
-    @property
-    def adapter(self):
-        return self.pnet.adapter
-
-    @property
-    def stages(self):
-        return self._part_by_name
-
-    def reset(self):
-        for stage in self._part_by_name.values():
-            stage.reset()
-
-    @staticmethod
-    def fill_part_with_model(network_info, parts, models_args, delayed_model_loading):
-        if models_args and not delayed_model_loading:
-            for idx, part in enumerate(parts):
-                part_info = network_info.get(part, {})
-                if not contains_any(part_info, ['model', 'caffe_model']) and models_args:
-                    part_info['model'] = models_args[idx if len(models_args) > idx else 0]
-                network_info.update({part: part_info})
-        return network_info
+    return stages
 
 
 class BaseStage:
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, delayed_model_loading=False):
+        self.model_info = model_info
+        self.model_specific_preprocessor = model_specific_preprocessor
+        self.common_preprocessor = common_preprocessor
+        self.input_feeder = None
+        self.store = model_info.get('store_predictions', False)
+        self.predictions = []
+
     def predict(self, input_blobs, batch_meta, output_callback=None):
-        return self._infer(input_blobs, batch_meta)
+        raise NotImplementedError
 
     def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *args, **kwargs):
-        batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
-        batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
-        _, batch_meta = extract_image_representations(batch_input)
-        batch_input = self.update_batch_input(batch_input, previous_stage_prediction)
-        filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
-        return filled_inputs, batch_meta
+        raise NotImplementedError
 
-    def update_batch_input(self, batch_input, previous_stage_prediction): # pylint:disable=R0201
-        return batch_input
+    def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
+        raise NotImplementedError
 
-    def dump_predictions(self, pickle_name=None):
-        if not hasattr(self, 'prediction_file'):
-            prediction_file = Path(self.network_info.get('predictions', '{}.pickle'.format(pickle_name)))
-            self.prediction_file = prediction_file
-        with self.prediction_file.open('wb') as out_file:
-            pickle.dump(self._predictions, out_file)
+    def release(self):
+        pass
 
     def reset(self):
         self._predictions = []
+
+    def dump_predictions(self):
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
     def update_preprocessing(self, preprocessor):
         self.common_preprocessor = preprocessor
 
 
 class ProposalBaseStage(BaseStage):
+    default_model_name = 'mtcnn-p'
+    default_model_suffix = 'pnet'
+
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, delayed_model_loading=False):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.adapter = None
+        self.input_feeder = None
+        self._predictions = []
+
+    def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
+        batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
+        _, batch_meta = extract_image_representations(batch_input)
+        filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
+        return filled_inputs, batch_meta
+
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
         result = self.adapter.process(this_stage_result, identifiers, batch_meta) if self.adapter else this_stage_result
         if self.store:
             self._predictions.extend(result)
         return result
 
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        return self._infer(input_blobs, batch_meta)
+
     def dump_predictions(self):
-        super().dump_predictions('pnet_predictions')
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'pnet_predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
 class DummyProposalStage(ProposalBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, *args, **kwargs):
-        self.default_model_name = 'mtcnn-p'
-        self.default_model_suffix = 'pnet'
-        self.network_info = model_info
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.store = model_info.get('store_predictions', False)
-        self.adapter = None
-        self.input_feeder = None
-        self._predictions = []
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self._index = 0
-        if 'predictions' not in self.network_info:
+        if 'predictions' not in self.model_info:
             raise ConfigError('predictions_file is not found')
-        self._predictions = read_pickle(self.network_info['predictions'])
+        self._predictions = read_pickle(self.model_info['predictions'])
         self.iterator = 0
 
     def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
@@ -182,39 +163,50 @@ class DummyProposalStage(ProposalBaseStage):
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
         return this_stage_result
 
-    def release(self):
-        pass
-
 
 class RefineBaseStage(BaseStage):
-    def update_batch_input(self, batch_input, previous_stage_prediction):
-        return [
+    input_size = 24
+    include_boundaries = True
+    default_model_name = 'mtcnn-r'
+
+    def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *args, **kwargs):
+        batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
+        _, batch_meta = extract_image_representations(batch_input)
+        batch_input = [
             cut_roi(input_image, prediction, self.input_size, include_bound=self.include_boundaries)
             for input_image, prediction in zip(batch_input, previous_stage_prediction)
         ]
+        filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
+        return filled_inputs, batch_meta
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
         result = calibrate_predictions(
-            previous_stage_result, this_stage_result, 0.7, self.network_info['outputs'], 'Union'
+            previous_stage_result, this_stage_result, 0.7, self.model_info['outputs'], 'Union'
         )
         if self.store:
             self._predictions.extend(result)
         return result
 
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        return self._infer(input_blobs, batch_meta)
+
     def dump_predictions(self):
-        super().dump_predictions('rnet_predictions')
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'rnet_predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
-class OutputBaseStage(BaseStage):
-    def update_batch_input(self, batch_input, previous_stage_prediction):
-        return [
-            cut_roi(input_image, prediction, self.input_size, include_bound=self.include_boundaries)
-            for input_image, prediction in zip(batch_input, previous_stage_prediction)
-        ]
+class OutputBaseStage(RefineBaseStage):
+    input_size = 48
+    include_boundaries = False
+    default_model_name = 'mtcnn-o'
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
         batch_predictions = calibrate_predictions(
-            previous_stage_result, this_stage_result, 0.7, self.network_info['outputs']
+            previous_stage_result, this_stage_result, 0.7, self.model_info['outputs']
         )
         batch_predictions[0], _ = nms(batch_predictions[0], 0.7, 'Min')
         if self.store:
@@ -222,10 +214,14 @@ class OutputBaseStage(BaseStage):
         return batch_predictions
 
     def dump_predictions(self):
-        super().dump_predictions('onet_predictions')
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'onet_predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
-class CaffeModelMixin(BaseCaffeModel):
+class CaffeModelMixin:
     def _infer(self, input_blobs, batch_meta, *args, **kwargs):
         for meta in batch_meta:
             meta['input_shape'] = []
@@ -249,67 +245,55 @@ class CaffeModelMixin(BaseCaffeModel):
     def input_shape(self, input_name):
         return self.inputs[input_name]
 
-    def predict(self, identifiers, input_data):
-        raise NotImplementedError
+    def release(self):
+        del self.net
+
+    def fit_to_input(self, data, layer_name, layout, precision, tmpl=None):
+        data_shape = np.shape(data)
+        layer_shape = self.inputs[layer_name]
+        if len(data_shape) == 5 and len(layer_shape) == 4:
+            data = data[0]
+            data_shape = np.shape(data)
+        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        if precision:
+            data = data.astype(precision)
+        return data
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.caffemodel'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = Path(weights)
+        accepted_suffixes = ['.prototxt']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.caffemodel']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights
 
 
-class CaffeProposalStage(ProposalBaseStage, CaffeModelMixin):
-    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
-        super().__init__(model_info, launcher, 'pnet')
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.store = model_info.get('store_predictions', False)
-        self.adapter = None
-        self._predictions = []
-        self.default_model_name = 'mtcnn-p'
-        self.net = launcher.create_network(self.network_info['model'], self.network_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
-        pnet_outs = model_info['outputs']
-        pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
-        pnet_adapter_config.update({'regions_format': 'hw'})
-        self.adapter = create_adapter(pnet_adapter_config)
-
-
-class CaffeRefineStage(RefineBaseStage, CaffeModelMixin):
-    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
-        super().__init__(model_info, launcher, 'rnet')
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.store = model_info.get('store_predictions', False)
-        self._predictions = []
-        self.input_size = 24
-        self.include_boundaries = True
-        self.default_model_name = 'mtcnn-r'
-        self.net = launcher.create_network(self.network_info['model'], self.network_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
-
-
-class CaffeOutputStage(OutputBaseStage, CaffeModelMixin):
-    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher):
-        super().__init__(model_info, launcher, 'onet')
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.store = model_info.get('store_predictions', False)
-        self._predictions = []
-        self.input_size = 48
-        self.include_boundaries = False
-        self.default_model_name = 'mtcnn-o'
-        self.net = launcher.create_network(self.network_info['model'], self.network_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
-
-
-class DLSDKModelMixin(BaseDLSDKModel):
-    def __init__(
-        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, suffix=None,
-        delayed_model_loading=False
-    ):
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.input_feeder = None
-        self.store = model_info.get('store_predictions', False)
-        self._predictions = []
-        super().__init__(model_info, launcher, suffix, delayed_model_loading)
-
+class DLSDKModelMixin:
     def _infer(self, input_blobs, batch_meta):
         for meta in batch_meta:
             meta['input_shape'] = []
@@ -317,7 +301,7 @@ class DLSDKModelMixin(BaseDLSDKModel):
         for feed_dict in input_blobs:
             input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
             if not self.is_dynamic:
-                self._reshape_input(input_shapes)
+                self.reshape_net(input_shapes)
             results.append(self.exec_network.infer(feed_dict))
             for meta in batch_meta:
                 meta['input_shape'].append(input_shapes)
@@ -352,7 +336,9 @@ class DLSDKModelMixin(BaseDLSDKModel):
 
     def release(self):
         self.input_feeder.release()
-        super().release()
+        del self.network
+        del self.exec_network
+        self.launcher.release()
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = (
@@ -367,7 +353,7 @@ class DLSDKModelMixin(BaseDLSDKModel):
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher, network_info):
+    def prepare_model(self, launcher):
         launcher_specific_entries = [
             'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
         ]
@@ -393,114 +379,136 @@ class DLSDKModelMixin(BaseDLSDKModel):
             model_config['mo_flags'] = model_mo_flags
             model_config['mo_params'] = model_mo_params
 
-        update_mo_params(launcher.config, network_info)
-        if 'caffe_model' in network_info:
-            model, weights = launcher.convert_model(network_info)
+        update_mo_params(launcher.config, self.model_info)
+        if 'caffe_model' in self.model_info:
+            model, weights = launcher.convert_model(self.model_info)
         else:
-            model, weights = self.automatic_model_search(network_info)
+            model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        self.update_input_output_info()
-        self.input_feeder = InputFeeder(
-            self.network_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+    def auto_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.xml'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.xml'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.bin'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = get_path(weights)
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights
 
-    def load_model(self, network_info, launcher, log=False):
-        model_xml, model_bin = self.prepare_model(launcher, network_info)
-        self.network = launcher.read_network(str(model_xml), str(model_bin))
-        self.load_network(self.network, launcher)
+    def load_network(self, network, launcher, model_prefix):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.network.reshape(shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
+        self.load_network(self.network, launcher, model_prefix)
         if log:
             self.print_input_output_info()
 
-    def update_input_output_info(self):
-        if self.default_model_suffix is None:
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_name))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(
+                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+        print_info('{} - Output info'.format(self.default_model_name))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(
+                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+
+    def update_input_output_info(self, model_prefix):
+        def generate_name(prefix, with_prefix, layer_name):
+            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+        if model_prefix is None:
             return
-        config_inputs = self.network_info.get('inputs', [])
-        network_with_prefix = next(iter(self.inputs)).startswith(self.default_model_suffix+'_')
+        config_inputs = self.model_info.get('inputs', [])
+        network_with_prefix = next(iter(self.inputs)).startswith(model_prefix)
         if config_inputs:
-            config_with_prefix = config_inputs[0]['name'].startswith(self.default_model_suffix+'_')
+            config_with_prefix = config_inputs[0]['name'].startswith(model_prefix)
             if config_with_prefix == network_with_prefix:
                 return
             for c_input in config_inputs:
-                c_input['name'] = generate_layer_name(c_input['name'], self.default_model_suffix+'_',
-                                                      network_with_prefix)
-            self.network_info['inputs'] = config_inputs
-        config_outputs = self.network_info['outputs']
+                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+            self.model_info['inputs'] = config_inputs
+        config_outputs = self.model_info['outputs']
         for key, value in config_outputs.items():
-            config_with_prefix = value.startswith(self.default_model_suffix+'_')
+            config_with_prefix = value.startswith(model_prefix)
             if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_layer_name(value, self.default_model_suffix+'_', network_with_prefix)
-        self.network_info['outputs'] = config_outputs
-
-    def predict(self, identifiers, input_data):
-        raise NotImplementedError
-
-
-class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
-    def __init__(
-        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
-    ):
-        self.adapter = None
-        self.default_model_name = 'mtcnn-p'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'pnet',
-                         delayed_model_loading)
-
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        pnet_outs = self.network_info['outputs']
-        pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
-        self.adapter = create_adapter(pnet_adapter_config)
-
-    def predict(self, input_blobs, batch_meta, output_callback=None):
-        raw_outputs = self._infer(input_blobs, batch_meta)
-        if output_callback:
-            for out in raw_outputs:
-                output_callback(out)
-        return raw_outputs
-
-
-class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
-    def __init__(
-        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
-    ):
-        self.input_size = 24
-        self.include_boundaries = True
-        self.default_model_name = 'mtcnn-r'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'rnet',
-                         delayed_model_loading)
-
-    def predict(self, input_blobs, batch_meta, output_callback=None):
-        raw_outputs = self._infer(input_blobs, batch_meta)
-        if output_callback:
-            batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
-            output_callback(transform_for_callback(batch_size, raw_outputs))
-        return raw_outputs
-
-
-class DLSDKOutputStage(OutputBaseStage, DLSDKModelMixin):
-    def __init__(
-        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
-    ):
-        self.input_size = 48
-        self.include_boundaries = False
-        self.default_model_name = 'mtcnn-o'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'onet',
-                         delayed_model_loading)
+                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+        self.model_info['outputs'] = config_outputs
 
 
 class OVModelMixin(BaseOpenVINOModel):
-    def __init__(
-        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, suffix=None,
-        delayed_model_loading=False
-    ):
-        self.model_specific_preprocessor = model_specific_preprocessor
-        self.common_preprocessor = common_preprocessor
-        self.input_feeder = None
-        self.store = model_info.get('store_predictions', False)
-        self._predictions = []
-        super().__init__(model_info, launcher, suffix, delayed_model_loading)
-
     def _infer(self, input_blobs, batch_meta):
         for meta in batch_meta:
             meta['input_shape'] = []
@@ -508,7 +516,7 @@ class OVModelMixin(BaseOpenVINOModel):
         for feed_dict in input_blobs:
             input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
             if not self.is_dynamic:
-                self._reshape_input(input_shapes)
+                self.reshape_net(input_shapes)
             results.append(self.infer(feed_dict))
             for meta in batch_meta:
                 meta['input_shape'].append(input_shapes)
@@ -522,7 +530,9 @@ class OVModelMixin(BaseOpenVINOModel):
 
     def release(self):
         self.input_feeder.release()
-        super().release()
+        del self.network
+        del self.exec_network
+        self.launcher.release()
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
         layer_shape = (
@@ -537,7 +547,7 @@ class OVModelMixin(BaseOpenVINOModel):
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher, network_info):
+    def prepare_model(self, launcher):
         launcher_specific_entries = [
             'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
         ]
@@ -563,63 +573,174 @@ class OVModelMixin(BaseOpenVINOModel):
             model_config['mo_flags'] = model_mo_flags
             model_config['mo_params'] = model_mo_params
 
-        update_mo_params(launcher.config, network_info)
-        if 'caffe_model' in network_info:
-            model, weights = launcher.convert_model(network_info)
+        update_mo_params(launcher.config, self.model_info)
+        if 'caffe_model' in self.model_info:
+            model, weights = launcher.convert_model(self.model_info)
         else:
-            model, weights = self.automatic_model_search(network_info)
+            model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        self.update_input_output_info()
+    def auto_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.xml'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.xml'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.bin'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = get_path(weights)
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights
+
+    def load_network(self, network, launcher, model_prefix):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
-            self.network_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         self.infer_request = None
 
-    def load_model(self, network_info, launcher, log=False):
-        model_xml, model_bin = self.prepare_model(launcher, network_info)
-        self.network = launcher.read_network(str(model_xml), str(model_bin))
-        self.load_network(self.network, launcher)
+    def reshape_net(self, shape):
+        if self.is_dynamic:
+            return
+        if hasattr(self, 'exec_network') and self.exec_network is not None:
+            del self.exec_network
+        self.launcher.reshape_network(self.network, shape)
+        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
+        if not self.is_dynamic and self.dynamic_inputs:
+            return
+        self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
+        self.infer_request = None
+
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
+        self.load_network(self.network, launcher, model_prefix)
         if log:
             self.print_input_output_info()
         self.infer_request = None
 
-    def update_input_output_info(self):
-        if self.default_model_suffix is None:
+    def update_input_output_info(self, model_prefix):
+        def generate_name(prefix, with_prefix, layer_name):
+            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+        if model_prefix is None:
             return
-        config_inputs = self.network_info.get('inputs', [])
-        network_with_prefix = next(iter(self.inputs)).startswith(self.default_model_suffix+'_')
+        config_inputs = self.model_info.get('inputs', [])
+        network_with_prefix = next(iter(self.inputs)).startswith(model_prefix)
         if config_inputs:
-            config_with_prefix = config_inputs[0]['name'].startswith(self.default_model_suffix+'_')
+            config_with_prefix = config_inputs[0]['name'].startswith(model_prefix)
             if config_with_prefix == network_with_prefix:
                 return
             for c_input in config_inputs:
-                c_input['name'] = generate_layer_name(c_input['name'], self.default_model_suffix+'_',
-                                                      network_with_prefix)
-            self.network_info['inputs'] = config_inputs
-        config_outputs = self.network_info['outputs']
+                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+            self.model_info['inputs'] = config_inputs
+        config_outputs = self.model_info['outputs']
         for key, value in config_outputs.items():
-            config_with_prefix = value.startswith(self.default_model_suffix+'_')
+            config_with_prefix = value.startswith(model_prefix)
             if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_layer_name(value, self.default_model_suffix+'_', network_with_prefix)
-        self.network_info['outputs'] = config_outputs
+                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+        self.model_info['outputs'] = config_outputs
 
 
-class OpenVINOProposalStage(OVModelMixin, ProposalBaseStage):
+class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+        pnet_outs = model_info['outputs']
+        pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+        pnet_adapter_config.update({'regions_format': 'hw'})
+        self.adapter = create_adapter(pnet_adapter_config)
+
+
+class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+
+
+class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+
+
+class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.adapter = None
-        self.default_model_name = 'mtcnn-p'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'pnet',
-                         delayed_model_loading)
+        self.is_dynamic = False
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
+            pnet_outs = model_info['outputs']
+            pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+            # pnet_adapter_config.update({'regions_format': 'hw'})
+            self.adapter = create_adapter(pnet_adapter_config)
 
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        pnet_outs = self.network_info['outputs']
+    def load_network(self, network, launcher, model_prefix):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.compile_modelk(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+        pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
+
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
+        self.load_network(self.network, launcher, model_prefix)
+        self.launcher = launcher
+        if log:
+            self.print_input_output_info()
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
@@ -629,15 +750,68 @@ class OpenVINOProposalStage(OVModelMixin, ProposalBaseStage):
         return raw_outputs
 
 
-class OpenVINORefineStage(OVModelMixin, RefineBaseStage):
+class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
-        self.input_size = 24
-        self.include_boundaries = True
-        self.default_model_name = 'mtcnn-r'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'rnet',
-                         delayed_model_loading)
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.adapter = None
+        self.is_dynamic = False
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
+            pnet_outs = model_info['outputs']
+            pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+            # pnet_adapter_config.update({'regions_format': 'hw'})
+            self.adapter = create_adapter(pnet_adapter_config)
+
+    def load_network(self, network, launcher, model_prefix):
+        self.network = network
+        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
+        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
+            try:
+                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+                self.is_dynamic = True
+            except RuntimeError as e:
+                if launcher.dynamic_shapes_policy == 'dynamic':
+                    raise e
+                self.is_dynamic = False
+                self.exec_network = None
+        if not self.dynamic_inputs:
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+        pnet_outs = self.model_info['outputs']
+        pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+        self.adapter = create_adapter(pnet_adapter_config)
+
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
+        self.load_network(self.network, launcher, model_prefix)
+        self.launcher = launcher
+        if log:
+            self.print_input_output_info()
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        if output_callback:
+            for out in raw_outputs:
+                output_callback(out)
+        return raw_outputs
+
+
+class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        self.default_model_suffix = 'rnet'
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
@@ -647,12 +821,53 @@ class OpenVINORefineStage(OVModelMixin, RefineBaseStage):
         return raw_outputs
 
 
+class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        if output_callback:
+            batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+            output_callback(transform_for_callback(batch_size, raw_outputs))
+        return raw_outputs
+
+
+class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        return raw_outputs
+
+
 class OpenVINOOutputStage(OutputBaseStage, OVModelMixin):
     def __init__(
         self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
     ):
-        self.input_size = 48
-        self.include_boundaries = False
-        self.default_model_name = 'mtcnn-o'
-        super().__init__(model_info, model_specific_preprocessor, common_preprocessor, launcher, 'onet',
-                         delayed_model_loading)
+        self.default_model_suffix = 'onet'
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.is_dynamic = False
+        self.launcher = launcher
+        if not delayed_model_loading:
+            model_xml, model_bin = self.prepare_model(launcher)
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        return raw_outputs
