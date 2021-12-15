@@ -32,18 +32,20 @@ public:
     Detector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string>& pluginConfig) :
         detectionTresholds{detectionTresholds}, m_core{core} {
-        auto network = core.read_model(xmlPath);
+        std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
+        slog::info << "model file: " << FLAGS_m << slog::endl;
+        log_model_info(model);
 
         // Check model inputs and outputs
 
-        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1) {
             throw std::logic_error("Detector should have only one input");
         }
 
-        detectorInputBlobName = network->input().get_any_name();
+        detectorInputBlobName = model->input().get_any_name();
 
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
             throw std::logic_error("Vehicle Detection network should have only one output");
         }
@@ -64,7 +66,7 @@ public:
             throw std::logic_error("Output should have 7 as a last dimension");
         }
 
-        PrePostProcessor ppp(network);
+        PrePostProcessor ppp(model);
 
         InputInfo& inputInfo = ppp.input();
 
@@ -86,14 +88,14 @@ public:
         InputModelInfo& inputModelInfo = inputInfo.model();
         inputModelInfo.set_layout({ "NCHW" });
 
-        network = ppp.build();
+        model = ppp.build();
 
-        m_net = m_core.compile_model(network, deviceName, pluginConfig);
-        logExecNetworkInfo(m_net, xmlPath, deviceName, "Vehicle And License Plate Detection");
+        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        log_compiled_model_info(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
     }
 
     ov::runtime::InferRequest createInferRequest() {
-        return m_net.create_infer_request();
+        return m_compiled_model.create_infer_request();
     }
 
     void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img) {
@@ -149,7 +151,7 @@ private:
     std::string detectorInputBlobName;
     std::string detectorOutputBlobName;
     ov::runtime::Core m_core;  // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::ExecutableNetwork m_net;
+    ov::runtime::CompiledModel m_compiled_model;
 };
 
 class VehicleAttributesClassifier {
@@ -157,16 +159,18 @@ public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(ov::runtime::Core& core, const std::string& deviceName,
         const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string>& pluginConfig) : m_core(core) {
-        auto network = m_core.read_model(FLAGS_m_va);
+        std::shared_ptr<ov::Model> model = m_core.read_model(FLAGS_m_va);
+        slog::info << "model file: " << FLAGS_m_va << slog::endl;
+        log_model_info(model);
 
-        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1) {
             throw std::logic_error("Vehicle Attribs topology should have only one input");
         }
 
-        attributesInputName = network->input().get_any_name();
+        attributesInputName = model->input().get_any_name();
 
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 2) {
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
         }
@@ -176,7 +180,7 @@ public:
         // type is the second output.
         outputNameForType = outputs[1].get_any_name();
 
-        PrePostProcessor ppp(network);
+        PrePostProcessor ppp(model);
 
         InputInfo& inputInfo = ppp.input();
         InputTensorInfo& inputTensorInfo = inputInfo.tensor();
@@ -196,14 +200,14 @@ public:
         InputModelInfo& inputModelInfo = inputInfo.model();
         inputModelInfo.set_layout({ "NCHW" });
 
-        network = ppp.build();
+        model = ppp.build();
 
-        m_net = m_core.compile_model(network, deviceName, pluginConfig);
-        logExecNetworkInfo(m_net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
+        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        log_compiled_model_info(m_compiled_model, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
     }
 
     ov::runtime::InferRequest createInferRequest() {
-        return m_net.create_infer_request();
+        return m_compiled_model.create_infer_request();
     }
 
     void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect vehicleRect) {
@@ -254,7 +258,7 @@ private:
     std::string outputNameForColor;
     std::string outputNameForType;
     ov::runtime::Core m_core;  // The only reason to store a device is to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::ExecutableNetwork m_net;
+    ov::runtime::CompiledModel m_compiled_model;
 };
 
 class Lpr {
@@ -263,12 +267,14 @@ public:
     Lpr(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
         const std::map<std::string, std::string>& pluginConfig) :
         m_core{core} {
-        auto network = m_core.read_model(FLAGS_m_lpr);
+        std::shared_ptr<ov::Model> model = m_core.read_model(FLAGS_m_lpr);
+        slog::info << "model file: " << FLAGS_m_lpr << slog::endl;
+        log_model_info(model);
 
         // LPR network should have 2 inputs (and second is just a stub) and one output
 
         // Check inputs
-        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1 && inputs.size() != 2) {
             throw std::logic_error("LPR should have 1 or 2 inputs");
         }
@@ -285,7 +291,7 @@ public:
 
         maxSequenceSizePerPlate = 1;
 
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
             throw std::logic_error("LPR should have 1 output");
         }
@@ -303,7 +309,7 @@ public:
             }
         }
 
-        PrePostProcessor ppp(network);
+        PrePostProcessor ppp(model);
 
         InputInfo& inputInfo = ppp.input(LprInputName);
 
@@ -324,14 +330,14 @@ public:
         InputModelInfo& inputModelInfo = inputInfo.model();
         inputModelInfo.set_layout({ "NCHW" });
 
-        network = ppp.build();
+        model = ppp.build();
 
-        m_net = m_core.compile_model(network, deviceName, pluginConfig);
-        logExecNetworkInfo(m_net, FLAGS_m_lpr, deviceName, "License Plate Recognition");
+        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        log_compiled_model_info(m_compiled_model, FLAGS_m_lpr, deviceName, "License Plate Recognition");
     }
 
     ov::runtime::InferRequest createInferRequest() {
-        return m_net.create_infer_request();
+        return m_compiled_model.create_infer_request();
     }
 
     void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect plateRect) {
@@ -423,5 +429,5 @@ private:
     std::string LprInputSeqName;
     std::string LprOutputName;
     ov::runtime::Core m_core;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::ExecutableNetwork m_net;
+    ov::runtime::CompiledModel m_compiled_model;
 };

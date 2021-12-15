@@ -126,22 +126,23 @@ struct PersonAttribsDetection : BaseDetection {
         return true;
     }
 
-    std::shared_ptr<ov::Function> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
         // Read network model
-        std::shared_ptr<ov::Function> network = core.read_model(FLAGS_m_pa);
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_pa);
+        slog::info << "model file: " << FLAGS_m_pa << slog::endl;
+        log_model_info(model);
+
         // set batch size 1
-        const ov::Layout layout_nhwc{ "NHWC" };
-        ov::Shape input_shape = network->input().get_shape();
-        input_shape[ov::layout::batch_idx(layout_nhwc)] = 1;
-        network->reshape({ {network->input().get_any_name(), input_shape} });
+        model->get_parameters()[0]->set_layout("NCHW");
+        ov::set_batch(model, 1);
 
         // Person Attribs network should have one input and one or three outputs
         // Check inputs
-        if (network->inputs().size() != 1) {
+        if (model->inputs().size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(network);
+        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -159,12 +160,12 @@ struct PersonAttribsDetection : BaseDetection {
                 set_layout({ "NCHW" });
         }
 
-        network = ppp.build();
+        model = ppp.build();
 
-        inputName = network->input().get_any_name();
+        inputName = model->input().get_any_name();
 
         // Check outputs
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
 
         if (outputs.size() == 1) {
             // attribute probabilities for
@@ -195,6 +196,6 @@ struct PersonAttribsDetection : BaseDetection {
 
         _enabled = true;
 
-        return network;
+        return model;
     }
 };

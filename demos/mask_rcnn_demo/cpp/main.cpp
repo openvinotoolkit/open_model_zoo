@@ -69,15 +69,15 @@ int main(int argc, char* argv[]) {
         // Load network (Generated xml/bin files)
 
         // Read network model
-        std::shared_ptr<ov::Function> network = core.read_model(FLAGS_m);
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
         slog::info << "model file: " << FLAGS_m << slog::endl;
-        log_model_info(network);
+        log_model_info(model);
 
         // Prepare input blobs
 
         // Taking information about all topology inputs
-        ov::OutputVector inputs = network->inputs();
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector inputs = model->inputs();
+        ov::OutputVector outputs = model->outputs();
 
         if(inputs.size() != 2 || outputs.size() != 2)
             throw std::logic_error("Expected network with 2 inputs and 2 outputs");
@@ -128,12 +128,16 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Valid input images were not found!");
 
         // Load model to the device
-        ov::runtime::ExecutableNetwork executableNetwork = core.compile_model(network, FLAGS_d);
-        logExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
+        ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
+        log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
+
+        // set batch size
+        model->get_parameters()[0]->set_layout("NCHW");
+        ov::set_batch(model, netBatchSize);
         slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
         // Create Infer Request
-        ov::runtime::InferRequest infer_request = executableNetwork.create_infer_request();
+        ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Set input data
         // Iterate over all the input blobs

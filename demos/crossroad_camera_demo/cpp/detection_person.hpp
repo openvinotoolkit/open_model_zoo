@@ -51,34 +51,35 @@ struct PersonDetection : BaseDetection {
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
 
-    std::shared_ptr<ov::Function> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
         // Read network model
-        auto network = core.read_model(FLAGS_m);
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        slog::info << "model file: " << FLAGS_m << slog::endl;
+        log_model_info(model);
+
         // Set batch size to 1
-        const ov::Layout layout_nhwc{"NHWC"};
-        ov::Shape input_shape = network->input().get_shape();
-        input_shape[ov::layout::batch_idx(layout_nhwc)] = 1;
-        network->reshape({{network->input().get_any_name(), input_shape}});
+        model->get_parameters()[0]->set_layout("NCHW");
+        ov::set_batch(model, 1);
 
         // SSD-based network should have one input and one output
         // Check inputs
-        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
 
-        inputName = network->input().get_any_name();
+        inputName = model->input().get_any_name();
 
         // Check outputs
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
         }
 
-        outputName = network->output().get_any_name();
+        outputName = model->output().get_any_name();
 
-        maxProposalCount = network->output().get_shape()[2];
-        objectSize = network->output().get_shape()[3];
+        maxProposalCount = model->output().get_shape()[2];
+        objectSize = model->output().get_shape()[3];
 
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
@@ -89,7 +90,7 @@ struct PersonDetection : BaseDetection {
 
         const ov::Layout tensor_layout{ "NHWC" };
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(network);
+        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -108,9 +109,9 @@ struct PersonDetection : BaseDetection {
                 set_layout({ "NCHW" });
         }
 
-        network = ppp.build();
+        model = ppp.build();
 
-        return network;
+        return model;
     }
 
     void fetchResults() {

@@ -9,7 +9,7 @@
 #pragma once
 
 struct BaseDetection {
-    ov::runtime::ExecutableNetwork net;
+    ov::runtime::CompiledModel compiled_model;
     ov::runtime::InferRequest request;
     std::string& commandLineFlag;
     std::string topoName;
@@ -20,17 +20,17 @@ struct BaseDetection {
     BaseDetection(std::string& commandLineFlag, const std::string& topoName) :
         commandLineFlag(commandLineFlag), topoName(topoName) {}
 
-    ov::runtime::ExecutableNetwork* operator->() {
-        return &net;
+    ov::runtime::CompiledModel* operator->() {
+        return &compiled_model;
     }
 
-    virtual std::shared_ptr<ov::Function> read(const ov::runtime::Core& core) = 0;
+    virtual std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) = 0;
 
     virtual void setRoiBlob(const ov::runtime::Tensor& roi_tensor) {
         if (!enabled())
             return;
         if (!request)
-            request = net.create_infer_request();
+            request = compiled_model.create_infer_request();
 
         request.set_input_tensor(roi_tensor);
     }
@@ -39,7 +39,7 @@ struct BaseDetection {
         if (!enabled())
             return;
         if (!request)
-            request = net.create_infer_request();
+            request = compiled_model.create_infer_request();
 
         input_tensor = request.get_input_tensor();
         matToTensor(person, input_tensor);
@@ -80,8 +80,8 @@ struct Load {
 
     void into(ov::runtime::Core& core, const std::string& deviceName) const {
         if (detector.enabled()) {
-            detector.net = core.compile_model(detector.read(core), deviceName);
-            logExecNetworkInfo(detector.net, detector.commandLineFlag, deviceName, detector.topoName);
+            detector.compiled_model = core.compile_model(detector.read(core), deviceName);
+            log_compiled_model_info(detector.compiled_model, detector.commandLineFlag, deviceName, detector.topoName);
         }
     }
 };

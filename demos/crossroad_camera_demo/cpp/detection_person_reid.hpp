@@ -69,22 +69,24 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    std::shared_ptr<ov::Function> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
         // Read network model
-        auto network = core.read_model(FLAGS_m_reid);
-        const ov::Layout layout_nhwc{ "NHWC" };
-        ov::Shape input_shape = network->input().get_shape();
-        input_shape[ov::layout::batch_idx(layout_nhwc)] = 1;
-        network->reshape({ {network->input().get_any_name(), input_shape} });
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_reid);
+        slog::info << "model file: " << FLAGS_m_reid << slog::endl;
+        log_model_info(model);
+
+        // set batch size 1
+        model->get_parameters()[0]->set_layout("NCHW");
+        ov::set_batch(model, 1);
 
         // Person Reidentification network should have 1 input and one output
         // Check inputs
-        ov::OutputVector inputs = network->inputs();
+        ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(network);
+        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -102,19 +104,19 @@ struct PersonReIdentification : BaseDetection {
                 set_layout({ "NCHW" });
         }
 
-        network = ppp.build();
+        model = ppp.build();
 
-        inputName = network->input().get_any_name();
+        inputName = model->input().get_any_name();
 
         // Check outputs
-        ov::OutputVector outputs = network->outputs();
+        ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
             throw std::logic_error("Person Re-Identification Model should have 1 output");
         }
 
-        outputName = network->output().get_any_name();
+        outputName = model->output().get_any_name();
 
         _enabled = true;
-        return network;
+        return model;
     }
 };
