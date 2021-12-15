@@ -705,6 +705,15 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+            '--delay': '1'}),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-person-0007')),
+    )),
+
     PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
                           '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
