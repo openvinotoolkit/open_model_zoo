@@ -1,6 +1,7 @@
 # Detection models
 person-detection-0106,GPU
 # Segmentation models
+instance-segmentation-person-0007,GPU
 instance-segmentation-security-0002,GPU
 instance-segmentation-security-0091,GPU
 instance-segmentation-security-0228,GPU
