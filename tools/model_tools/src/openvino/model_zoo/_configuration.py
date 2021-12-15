@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import collections
+import enum
 import fnmatch
 import re
 import shlex
@@ -200,6 +201,12 @@ class CompositeModel:
             return cls(name, subdirectory, task_type, model_stages, description, framework,
                 license_url, precisions, quantization_output_precisions, name)
 
+class ModelLoadingMode(enum.Enum):
+    all = 0 # return all models
+    composite_only = 1 # return only composite models
+    non_composite_only = 2 # return only non composite models
+    ignore_composite = 3 # ignore composite structure, return flatten models list
+
 def check_composite_model_dir(model_dir):
     with validation.deserialization_context('In directory "{}"'.format(model_dir)):
         if list(model_dir.glob('*/*/**/model.yml')):
@@ -217,7 +224,7 @@ def check_composite_model_dir(model_dir):
                 raise validation.DeserializationError(
                     'Names of composite model parts should start with composite model name')
 
-def load_models(models_root, args):
+def load_models(models_root, args, mode=ModelLoadingMode.all):
     models = []
     model_names = set()
 
@@ -226,67 +233,73 @@ def load_models(models_root, args):
 
     schema = _common.get_schema()
 
-    for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
-        composite_model_name = composite_model_config.parent.name
-        with validation.deserialization_context('In model "{}"'.format(composite_model_name)):
-            if not RE_MODEL_NAME.fullmatch(composite_model_name):
-                raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
+    if mode in (ModelLoadingMode.all, ModelLoadingMode.composite_only):
 
-            check_composite_model_dir(composite_model_config.parent)
+        for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
+            composite_model_name = composite_model_config.parent.name
+            with validation.deserialization_context('In model "{}"'.format(composite_model_name)):
+                if not RE_MODEL_NAME.fullmatch(composite_model_name):
+                    raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
 
-            with composite_model_config.open('rb') as config_file, \
-                validation.deserialization_context('In config "{}"'.format(composite_model_config)):
+                check_composite_model_dir(composite_model_config.parent)
 
-                composite_model = yaml.safe_load(config_file)
-                model_stages = {}
-                for stage in sorted(composite_model_config.parent.glob('*/model.yml')):
-                    with stage.open('rb') as stage_config_file, \
-                        validation.deserialization_context('In config "{}"'.format(stage_config_file)):
-                        model = yaml.safe_load(stage_config_file)
-                        if not schema.check(model):
-                            raise validation.DeserializationError('Configuration file check was\'t successful.')
+                with composite_model_config.open('rb') as config_file, \
+                    validation.deserialization_context('In config "{}"'.format(composite_model_config)):
 
-                        stage_subdirectory = stage.parent.relative_to(models_root)
-                        model_stages[stage_subdirectory] = model
+                    composite_model = yaml.safe_load(config_file)
+                    model_stages = {}
+                    for stage in sorted(composite_model_config.parent.glob('*/model.yml')):
+                        with stage.open('rb') as stage_config_file, \
+                            validation.deserialization_context('In config "{}"'.format(stage_config_file)):
+                            model = yaml.safe_load(stage_config_file)
+                            if not schema.check(model):
+                                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
-                if len(model_stages) == 0:
+                            stage_subdirectory = stage.parent.relative_to(models_root)
+                            model_stages[stage_subdirectory] = model
+
+                    if len(model_stages) == 0:
+                        continue
+                    subdirectory = composite_model_config.parent.relative_to(models_root)
+                    composite_models.append(CompositeModel.deserialize(
+                        composite_model, composite_model_name, subdirectory, model_stages
+                    ))
+
+                    if composite_model_name in composite_model_names:
+                        raise validation.DeserializationError(
+                            'Duplicate composite model name "{}"'.format(composite_model_name))
+                    composite_model_names.add(composite_model_name)
+
+    if mode != ModelLoadingMode.composite_only:
+        for config_path in sorted(models_root.glob('**/model.yml')):
+            subdirectory = config_path.parent
+
+            is_composite = (subdirectory.parent / 'composite-model.yml').exists()
+            composite_model_name = None
+            if is_composite:
+                if mode != ModelLoadingMode.ignore_composite:
                     continue
-                subdirectory = composite_model_config.parent.relative_to(models_root)
-                composite_models.append(CompositeModel.deserialize(
-                    composite_model, composite_model_name, subdirectory, model_stages
-                ))
+                composite_model_name = subdirectory.parent.name
 
-                if composite_model_name in composite_model_names:
+            subdirectory = subdirectory.relative_to(models_root)
+
+            with config_path.open('rb') as config_file, \
+                    validation.deserialization_context('In config "{}"'.format(config_path)):
+
+                model = yaml.safe_load(config_file)
+                if not schema.check(model):
+                    raise validation.DeserializationError('Configuration file check was\'t successful.')
+
+                for bad_key in ['name', 'subdirectory']:
+                    if bad_key in model:
+                        raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
+
+                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+
+                if models[-1].name in model_names:
                     raise validation.DeserializationError(
-                        'Duplicate composite model name "{}"'.format(composite_model_name))
-                composite_model_names.add(composite_model_name)
-
-    for config_path in sorted(models_root.glob('**/model.yml')):
-        subdirectory = config_path.parent
-
-        is_composite = (subdirectory.parent / 'composite-model.yml').exists()
-        if is_composite:
-            continue
-
-        subdirectory = subdirectory.relative_to(models_root)
-
-        with config_path.open('rb') as config_file, \
-                validation.deserialization_context('In config "{}"'.format(config_path)):
-
-            model = yaml.safe_load(config_file)
-            if not schema.check(model):
-                raise validation.DeserializationError('Configuration file check was\'t successful.')
-
-            for bad_key in ['name', 'subdirectory']:
-                if bad_key in model:
-                    raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
-
-            models.append(Model.deserialize(model, subdirectory.name, subdirectory, None))
-
-            if models[-1].name in model_names:
-                raise validation.DeserializationError(
-                    'Duplicate model name "{}"'.format(models[-1].name))
-            model_names.add(models[-1].name)
+                        'Duplicate model name "{}"'.format(models[-1].name))
+                model_names.add(models[-1].name)
 
     return sorted(models + composite_models, key=lambda model : model.name)
 
