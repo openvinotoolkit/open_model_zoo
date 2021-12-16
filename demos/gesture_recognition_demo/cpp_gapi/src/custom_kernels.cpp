@@ -105,7 +105,13 @@ namespace BatchState {
 struct Params {
     cv::Mat current_frame;
     cv::Mat prepared_mat;
-    size_t last_id;
+    std::atomic<size_t> last_id;
+    Params() {}
+    Params(const Params& params) {
+        current_frame = params.current_frame;
+        prepared_mat = params.prepared_mat;
+        last_id.fetch_add(params.last_id);
+    }
 };
 } // namespace BatchState
 
@@ -114,20 +120,22 @@ GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) 
                       const cv::GArrayDesc&,
                       const cv::Scalar& net_size,
                       const cv::Size& image_size,
+                      const cv::GOpaqueDesc&,
                             std::shared_ptr<BatchState::Params>& state) {
         BatchState::Params params;
         params.last_id = 0;
         params.prepared_mat.create(std::vector<int>{1,
-                                                   int(net_size[0]),
-                                                   int(net_size[1]),
-                                                   int(net_size[2]),
-                                                   int(net_size[3])}, CV_32F);
+                                                    int(net_size[0]),
+                                                    int(net_size[1]),
+                                                    int(net_size[2]),
+                                                    int(net_size[3])}, CV_32F);
         state = std::make_shared<BatchState::Params>(params);
     }
     static void run(const std::vector<cv::Mat>& batch,
                     const TrackedObjects& tracked_persons,
                     const cv::Scalar& net_size,
                     const cv::Size& image_size,
+                    const std::shared_ptr<size_t>& current_person_id,
                           std::vector<cv::Mat>& wrapped_mat,
                     BatchState::Params& state) {
         const int duration = int(net_size[1]);
@@ -136,10 +144,11 @@ GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) 
         const auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
         auto p_pm = state.prepared_mat.ptr<float>();
 
-        if (ptr[1]) { // is filled and updated
+        if (ptr[1] > 0) { // is filled and updated
             int step = ptr[0]; // first
-            if (current_person_id < tracked_persons.size()) { // wrong number protection
-                state.last_id = current_person_id;
+            size_t& person_id = *current_person_id;
+            if (person_id < tracked_persons.size()) { // wrong number protection
+                state.last_id = person_id;
             }
             for (int i = 0; i < duration; ++i) {
                 cv::Mat current_frame = batch[step];

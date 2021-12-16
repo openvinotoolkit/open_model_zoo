@@ -14,7 +14,6 @@ class Visualizer {
 private:
     cv::Mat storageFrame;
     bool no_show_;
-    std::string main_window_name_;
     std::string storage_window_name_;
     std::vector<std::string> labels_;
     std::string storage_path_;
@@ -43,17 +42,14 @@ public:
                const std::string& storage_window_name,
                const std::vector<std::string>& labels,
                const std::string& storage_path) :
-        no_show_(no_show), main_window_name_(main_window_name),
-        storage_window_name_(storage_window_name), labels_(labels),
-        storage_path_(storage_path) {
+        no_show_(no_show), storage_window_name_(storage_window_name),
+        labels_(labels), storage_path_(storage_path) {
         if (storage_path_.size() > 0) {
             getStorageElements();
         }
         if (no_show) {
             return;
         }
-
-        cv::namedWindow(main_window_name_);
 
         if (storage_path_.size() > 0) {
             cv::namedWindow(storage_window_name_);
@@ -66,6 +62,4 @@ public:
               const int out_label_number,
               const size_t current_id,
               const int key);
-
-    void finalize();
 };

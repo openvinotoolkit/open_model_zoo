@@ -65,9 +65,13 @@ int main(int argc, char *argv[]) {
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
+        /** Share runtime id with graph **/
+        auto current_person_id_m = std::make_shared<size_t>(0);
+
         /** ---------------- Main graph of demo ---------------- **/
         /** Graph inputs **/
         cv::GArray<cv::GMat> batch;
+        cv::GOpaque<std::shared_ptr<size_t>> current_person_id;
 
         cv::GMat fast_frame = custom::GetFastFrame::on(batch, frame_size);
 
@@ -81,7 +85,7 @@ int main(int argc, char *argv[]) {
         cv::GArray<TrackedObject> tracked = custom::TrackPerson::on(fast_frame, objects);
 
         /** Create clip for AR net **/
-        cv::GArray<cv::GMat> clip = custom::ConstructClip::on(batch, tracked, ar_net_shape, frame_size);
+        cv::GArray<cv::GMat> clip = custom::ConstructClip::on(batch, tracked, ar_net_shape, frame_size, current_person_id);
 
         /** Action recognition **/
         cv::GArray<cv::GMat> actions = cv::gapi::infer2<nets::ActionRecognition>(fast_frame, clip);
@@ -90,7 +94,7 @@ int main(int argc, char *argv[]) {
         cv::GOpaque<int> label = custom::GestureRecognitionPostprocessing::on(actions, float(FLAGS_t));
 
         /** Inputs and outputs of graph **/
-        auto graph = cv::GComputation(cv::GIn(batch), cv::GOut(fast_frame, tracked, label));
+        auto graph = cv::GComputation(cv::GIn(batch, current_person_id), cv::GOut(fast_frame, tracked, label));
         /** ---------------- End of graph ---------------- **/
         /** Configure networks **/
         auto person_detection = cv::gapi::ie::Params<nets::PersonDetection> {
@@ -118,17 +122,16 @@ int main(int argc, char *argv[]) {
         TrackedObjects out_detections;
         int out_label_number;
 
-        auto out_vector = cv::gout(out_frame, out_detections, out_label_number);
-
         /** ---------------- The execution part ---------------- **/
         const float batch_constant_FPS = 15;
-
+        auto drop_batch = std::make_shared<bool>(false);
         pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CustomCapSource>(cap,
                                                                                     frame_size,
                                                                                     int(ar_net_shape[1]),
-                                                                                    batch_constant_FPS)));
+                                                                                    batch_constant_FPS,
+                                                                                    drop_batch),
+                                   current_person_id_m));
 
-        std::string mainWindowName = "Gesture Recognition demo G-API";
         std::string gestureWindowName = "Gesture";
 
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
@@ -144,16 +147,16 @@ int main(int argc, char *argv[]) {
         /** Fill labels container from file with classes **/
         const auto labels = fill_labels(FLAGS_c);
         size_t current_id = 0;
-        size_t id = 0;
+        size_t last_id = current_id;
         int gesture = 0;
 
         /** Configure drawing utilities **/
-        Visualizer visualizer(FLAGS_no_show, mainWindowName, gestureWindowName, labels, FLAGS_s);
+        Visualizer visualizer(FLAGS_no_show, gestureWindowName, labels, FLAGS_s);
 
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
-        while (pipeline.pull(std::move(out_vector))) {
+        while (pipeline.pull(std::move(cv::gout(out_frame, out_detections, out_label_number)))) {
             /** Put FPS to frame**/
             if (isStart) {
                 metrics.update(startTime, out_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
@@ -177,7 +180,7 @@ int main(int argc, char *argv[]) {
             /** Controls **/
             int key = cv::waitKey(1);
             if      (key == 0x1B) break;  // (esc button) exit
-            else if (key >= 48 && key <= 57) id = key - 48; // buttons for person id
+            else if (key >= 48 && key <= 57) current_id = key - 48; // buttons for person id
             else if (key == 0x0D) out_label_number = -1; // (Enter) reset last gesture
             else if (key == 'f') gesture = 1; // next gesture
             else if (key == 'b') gesture = -1; // prev gesture
@@ -185,13 +188,12 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
 
             /** Share id with graph **/
-            if (id < out_detections.size()) {
-                current_person_id = id;
-                current_id = id;
+            if (current_id < out_detections.size()) {
+                *drop_batch = !(last_id != current_id);
+                *current_person_id_m = current_id;
+                last_id = current_id;
             }
         }
-        /** Destroy windows if exist **/
-        visualizer.finalize();
         slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;

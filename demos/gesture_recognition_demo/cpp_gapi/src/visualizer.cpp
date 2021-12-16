@@ -71,7 +71,7 @@ void Visualizer::show(const cv::Mat& frame,
                       const int key) {
     applyDrawing(frame, out_detections, out_label_number, current_id);
     if (!no_show_) {
-        cv::imshow(main_window_name_, frame);
+        cv::imshow("Gesture Recognition demo G-API", frame);
         if (!storage_path_.empty()) {
             const auto place = getPlaceByKey(key);
             const auto new_path = storage_elements_.at(place).second;
@@ -87,16 +87,6 @@ void Visualizer::show(const cv::Mat& frame,
                         cv::FONT_HERSHEY_SIMPLEX,
                         2, RED);
             cv::imshow(storage_window_name_, gesture_mat);
-        }
-    }
-}
-
-void Visualizer::finalize() {
-    if (!no_show_) {
-        cv::destroyWindow(main_window_name_);
-
-        if (storage_path_.size() > 0) {
-            cv::destroyWindow(storage_window_name_);
         }
     }
 }

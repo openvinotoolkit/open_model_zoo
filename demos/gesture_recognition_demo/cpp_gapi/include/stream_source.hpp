@@ -11,41 +11,43 @@
 #include <thread>
 #include <mutex>
 
-std::mutex batch_lock; // batch frames filling will be locked
-
 namespace custom {
 class BatchProducer {
 public:
-    BatchProducer(const int batch_size, const float batch_fps)
-        : batch_fps(batch_fps) {
+    BatchProducer(const int batch_size, const float batch_fps, const std::shared_ptr<bool>& drop_batch)
+        : batch_fps(batch_fps), drop_batch(drop_batch) {
         /** Create batch memory space for batch_size + 2 size
          *  first additional element is fast image
          *  second additional Mat is sacriface of memory for data about first element
         **/
         batch = std::vector<cv::Mat>(batch_size + 1 + 1); // 16(8) 15FPS-batch imgaes + one fast image +  batch description
-        batch[batch_size + 1].create(cv::Size{1, 2}, CV_8U); // 1x2 Mat for first element position and is_filled batch state
+        batch[batch_size + 1].create(cv::Size{ 1, 2 }, CV_8U); // 1x2 Mat for first element position and is_filled batch state
         auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
         ptr[1] = 0; // set is_filled to NO
     }
     std::vector<cv::Mat> getBatch() {
-        return batch;
+        batch_lock.lock();
+        std::vector<cv::Mat> temp_batch = batch;
+        batch_lock.unlock();
+        return temp_batch;
     }
 
     void fillFastFrame(const cv::Mat& frame) {
-        /** Copy fast frame from VideoCapture to batch memory as 17th (9) image **/
-        batch[batch.size() - 2] = frame.clone(); // 16th (from 0)
+            /** Copy fast frame from VideoCapture to batch memory as 17th (9) image **/
+            frame.copyTo(batch[batch.size() - 2]); // 16th (from 0)
     }
 
     void fillBatch(const cv::Mat& frame, std::chrono::steady_clock::time_point time) {
+        if (*drop_batch > 0) {
+            DropBatchInfo();
+        }
         /** Place of new frame in batch **/
         const int step = updateStep(batch.size() - 2);
-        batch_lock.lock();
         /** Adding of new image to batch. **/
-        batch[step] = frame.clone();
+        frame.copyTo(batch[step]);
         /** Putting of info about batch to additional element **/
         auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
         ptr[0] = first_el; // position of start of batch in cyclic buffer
-        batch_lock.unlock();
         const auto cur_step = std::chrono::steady_clock::now() - time;
         const auto gap = std::chrono::duration_cast<std::chrono::milliseconds>(cur_step);
         const auto time_step = std::chrono::milliseconds(int(1000.f / batch_fps)); // 1/15 sec
@@ -55,21 +57,22 @@ public:
     }
 private:
     float batch_fps = 0; // constant FPS for batch
+    const std::shared_ptr<bool>& drop_batch;
     std::vector<cv::Mat> batch; // pack of images for graph
     size_t first_el = 0; // place of first image in batch
     size_t images_in_batch_count = 0; // number of images in batch
     bool is_filled = false; // is batch filled
+    std::mutex batch_lock; // batch frames filling will be locked
 
     int updateStep(const size_t batch_size) {
         if (images_in_batch_count < batch_size) {
             /** case when batch isn't filled **/
             return images_in_batch_count++;
-        } else {
+        }
+        else {
             if (!is_filled) {
-                batch_lock.lock();
                 auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
                 ptr[1] = 1;
-                batch_lock.unlock();
                 is_filled = true;
             }
             /** Cyclic buffer if filled. Counting of step for next image **/
@@ -77,24 +80,36 @@ private:
             return first_el;
         }
     }
+
+    void DropBatchInfo() {
+        /** Drop batch information.
+          * Processing will continue when the batch will be filled
+          * Data of the batch will be overwritten */
+        auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
+        ptr[0] = 0; // first position
+        ptr[1] = 0; // batch if filled
+        first_el = 0;
+        images_in_batch_count = 0;
+        is_filled = false;
+    }
 };
 
 void runBatchFill(const cv::Mat& frame,
-                        BatchProducer& producer,
-                        std::chrono::steady_clock::time_point& time) {
-    while(!frame.empty()) {
+                  BatchProducer& producer,
+    std::chrono::steady_clock::time_point& time) {
+    while (!frame.empty()) {
         producer.fillBatch(frame, time);
     }
 }
 
-class CustomCapSource : public cv::gapi::wip::IStreamSource
-{
+class CustomCapSource : public cv::gapi::wip::IStreamSource {
 public:
     explicit CustomCapSource(const std::shared_ptr<ImagesCapture>& cap,
                              const cv::Size& frame_size,
                              const int batch_size,
-                             const float batch_fps)
-        : cap(cap), producer(batch_size, batch_fps), source_fps(cap->fps()) {
+                             const float batch_fps,
+                             const std::shared_ptr<bool>& drop_batch)
+        : cap(cap), producer(batch_size, batch_fps, drop_batch), source_fps(cap->fps()) {
         if (source_fps <= 0.) {
             source_fps = 30.;
             wait_gap = true;
@@ -106,19 +121,21 @@ public:
             GAPI_Assert(false && "Batch must contain more than one image");
         }
 
-        fast_frame.create(frame_size, CV_8UC3);
-
         /** Reading of frame with ImagesCapture class **/
         read_time = std::chrono::steady_clock::now();
-        fast_frame = cap->read();
+        cv::Mat fast_frame = cap->read();
         if (!fast_frame.data) {
             GAPI_Assert(false && "Couldn't grab the frame");
         }
 
-        /** Batch filling with constant time step **/
-        fill_bath_thr.detach();
-
         producer.fillFastFrame(fast_frame);
+        fast_frame.copyTo(thread_frame);
+        /** Batch filling with constant time step **/
+        std::thread fill_bath_thr(runBatchFill,
+                                  std::cref(thread_frame),
+                                  std::ref(producer),
+                                  std::ref(read_time));
+        fill_bath_thr.detach();
         first_batch = producer.getBatch();
     }
 
@@ -129,14 +146,11 @@ protected:
     bool wait_gap = false; // waiting for fast frame reading (stop main thread when got a non-positive FPS value)
     bool first_pulled = false; // is first already pulled
     std::vector<cv::Mat> first_batch; // batch from constructor
-    cv::Mat fast_frame; // frame from cv::VideoCapture
+    cv::Mat thread_frame; // frame for batch constant filling
+    std::mutex thread_frame_lock;
     std::chrono::steady_clock::time_point read_time; // timepoint from cv::read()
-    std::thread fill_bath_thr = std::thread(runBatchFill,
-                                            std::ref(fast_frame),
-                                            std::ref(producer),
-                                            std::ref(read_time));
 
-    virtual bool pull(cv::gapi::wip::Data &data) override {
+    virtual bool pull(cv::gapi::wip::Data& data) override {
         /** Is first already pulled **/
         if (!first_pulled) {
             GAPI_Assert(!first_batch.empty());
@@ -148,10 +162,15 @@ protected:
 
         /** Frame reading with ImagesCapture class **/
         read_time = std::chrono::steady_clock::now();
-        fast_frame = cap->read();
+        cv::Mat fast_frame = cap->read();
+
         if (!fast_frame.data) {
             return false;
         }
+
+        thread_frame_lock.lock();
+        fast_frame.copyTo(thread_frame);
+        thread_frame_lock.unlock();
 
         /** Put fast frame to the batch **/
         producer.fillFastFrame(fast_frame);
@@ -175,5 +194,4 @@ protected:
         return cv::GMetaArg{ cv::empty_array_desc() };
     }
 };
-
 } // namespace custom

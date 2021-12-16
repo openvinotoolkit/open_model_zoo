@@ -52,10 +52,10 @@ static void showUsage() {
     std::cout << "    -o \"<path>\"              " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"           " << limit_message << std::endl;
     std::cout << "    -res \"<WxH>\"             " << camera_resolution_message << std::endl;
-    std::cout << "    -m_d \"<path>\"           " << person_detection_model_message << std::endl;
-    std::cout << "    -m_a \"<path>\"           " << action_recognition_model_message << std::endl;
-    std::cout << "    -d_d \"<device>\"         " << target_device_message_d << std::endl;
-    std::cout << "    -d_a \"<device>\"         " << target_device_message_a << std::endl;
+    std::cout << "    -m_d \"<path>\"            " << person_detection_model_message << std::endl;
+    std::cout << "    -m_a \"<path>\"            " << action_recognition_model_message << std::endl;
+    std::cout << "    -d_d \"<device>\"          " << target_device_message_d << std::endl;
+    std::cout << "    -d_a \"<device>\"          " << target_device_message_a << std::endl;
     std::cout << "    -no_show                 " << no_show_message << std::endl;
     std::cout << "    -c                       " << class_map_message << std::endl;
     std::cout << "    -s                       " << samples_dir_message << std::endl;

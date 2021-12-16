@@ -11,8 +11,6 @@
 
 #include "tracker.hpp"
 
-static std::atomic<size_t> current_person_id{ 0 };
-
 namespace custom {
 G_API_OP(GetFastFrame,
          <cv::GMat(cv::GArray<cv::GMat>, cv::Size)>, "custom.get_fast_frame") {
@@ -48,12 +46,14 @@ G_API_OP(ConstructClip,
          <cv::GArray<cv::GMat>(const cv::GArray<cv::GMat>,
                                const cv::GArray<TrackedObject>,
                                const cv::Scalar,
-                               const cv::Size)>,
+                               const cv::Size,
+                               const cv::GOpaque<std::shared_ptr<size_t>>)>,
          "custom.construct_clip") {
     static cv::GArrayDesc outMeta(const cv::GArrayDesc&,
                                   const cv::GArrayDesc&,
                                   const cv::Scalar&,
-                                  const cv::Size&) {
+                                  const cv::Size&,
+                                  const cv::GOpaqueDesc&) {
         return cv::empty_array_desc();
     }
 };
