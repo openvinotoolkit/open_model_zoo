@@ -575,16 +575,7 @@ class OVModelMixin(BaseOpenVINOModel):
         self.infer_request = None
 
     def reshape_net(self, shape):
-        if self.is_dynamic:
-            return
-        if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.exec_network
-        self.launcher.reshape_network(self.network, shape)
-        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-        if not self.is_dynamic and self.dynamic_inputs:
-            return
-        self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
-        self.infer_request = None
+        self._reshape_input(shape)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
