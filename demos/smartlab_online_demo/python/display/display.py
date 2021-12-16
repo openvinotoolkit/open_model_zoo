@@ -10,8 +10,6 @@ class Display(object):
         self.eval_cbs = None
         self.front_scores_df = None
         self.top_scores_df = None
-        # self.record_video_path = '/home/xiaonan/datasets/smartlab/2021-10-18_09-31-52/video1.avi'
-        # self.out = cv2.VideoWriter(self.record_video_path, -1, 25.0, (1920,540))
 
     def initialize(self):
         # blank page to display score

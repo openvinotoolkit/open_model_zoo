@@ -89,7 +89,7 @@ class Application(object):
                                             scoring=self.scoring,
                                             state=self.state,
                                             frame_counter=self.frame_counter)
-                key = cv2.waitKey(1)& 0xFF
+                key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):     #press 'q' to exit
                     break
             else:
@@ -104,5 +104,5 @@ class Application(object):
 
 if __name__ == "__main__":
     application = Application()
-    application.video_parser(top_video_path="/home/xiaonan/datasets/smartlab/2021-10-18_09-31-52/top/top.mp4",
-                             front_video_path="/home/xiaonan/datasets/smartlab/2021-10-18_09-31-52/front/front.mp4")
+    application.video_parser(top_video_path="./top.mp4",
+                             front_video_path="./front.mp4")
