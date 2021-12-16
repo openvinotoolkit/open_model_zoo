@@ -79,9 +79,15 @@ _LOGGING_CONFIGURATION = {
     }
 }
 
-logging.config.dictConfig(_LOGGING_CONFIGURATION)
-
 _default_logger = logging.getLogger(_DEFAULT_LOGGER_NAME)
+_logging_initialized = False
+
+
+def init_logging():
+    global _logging_initialized # pylint: disable=W0603
+    if not _logging_initialized:
+        logging.config.dictConfig(_LOGGING_CONFIGURATION)
+        _logging_initialized = True
 
 
 def _warning_handler(message, category, filename, line_number, *args, **kwargs):
@@ -134,4 +140,5 @@ def add_file_handler(file_name):
     }
     _LOGGING_CONFIGURATION['handlers']['file_info'] = file_info_handler_config
     _LOGGING_CONFIGURATION['loggers'][_DEFAULT_LOGGER_NAME]['handlers'].append('file_info')
-    logging.config.dictConfig(_LOGGING_CONFIGURATION)
+    if _logging_initialized:
+        logging.config.dictConfig(_LOGGING_CONFIGURATION)
