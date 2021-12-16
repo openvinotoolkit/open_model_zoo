@@ -577,7 +577,7 @@ class RocAucScore(PerImageEvaluationMetric):
 
     @staticmethod
     def one_hot_labels(targets, results):
-        max_v = max(np.max(targets) + 1, np.max(results) + 1)
+        max_v = int(max(np.max(targets) + 1, np.max(results) + 1))
         gt_bin = np.zeros((len(targets), max_v))
         pred_bin = np.zeros((len(targets), max_v))
         np.put_along_axis(gt_bin, np.expand_dims(np.array(targets).astype(int), 1), 1, axis=1)
