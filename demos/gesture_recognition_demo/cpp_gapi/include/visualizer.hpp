@@ -38,7 +38,6 @@ private:
                       const size_t current_id);
 public:
     Visualizer(const bool no_show,
-               const std::string& main_window_name,
                const std::string& storage_window_name,
                const std::vector<std::string>& labels,
                const std::string& storage_path) :

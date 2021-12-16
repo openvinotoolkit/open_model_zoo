@@ -38,7 +38,7 @@ public:
     }
 
     void fillBatch(const cv::Mat& frame, std::chrono::steady_clock::time_point time) {
-        if (*drop_batch > 0) {
+        if (*drop_batch) {
             DropBatchInfo();
         }
         /** Place of new frame in batch **/
