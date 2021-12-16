@@ -129,7 +129,7 @@ class ModelEvaluator:
         )
         dataset_iterator = iter(enumerate(self.dataset))
         self.process_dataset_async_infer_queue(
-                dataset_iterator, progress_reporter,
+                dataset_iterator, progress_reporter, calculate_metrics, output_callback, dump_prediction_to_annotation,
                 **kwargs
             )
 
@@ -180,7 +180,7 @@ class ModelEvaluator:
 
             if output_callback:
                 output_callback(
-                    batch_raw_predictions,
+                    batch_raw_predictions[0],
                     metrics_result=metrics_result,
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
@@ -193,7 +193,7 @@ class ModelEvaluator:
         infer_queue.set_callback(completion_callback)
         for batch_id, dataset_item in dataset_iterator:
             batch_input_ids, batch_annotation, batch_input, batch_identifiers = dataset_item
-            filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_input, batch_annotation)
             infer_queue.start_async(*self.launcher.prepare_data_for_request(
                 filled_inputs, batch_meta, batch_id, batch_input_ids, batch_annotation, batch_identifiers))
         infer_queue.wait_all()

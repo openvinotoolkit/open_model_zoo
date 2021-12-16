@@ -266,7 +266,8 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.infer_request
+            if hasattr(self, 'infer_request'):
+                del self.infer_request
             del self.exec_network
         index_mapping = self.input_index_mapping()
         input_shapes_for_tensors = {index_mapping[name]: shape for name, shape in input_shapes.items()}

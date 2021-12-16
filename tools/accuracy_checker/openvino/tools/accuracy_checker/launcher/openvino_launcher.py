@@ -118,6 +118,7 @@ class OpenVINOLauncher(Launcher):
         self.is_dynamic = False
         self.preprocessor = preprocessor
         self.infer_request = None
+        self._num_requests = None
 
         if not delayed_model_loading:
             self._model, self._weights = automatic_model_search(
@@ -908,7 +909,7 @@ class OpenVINOLauncher(Launcher):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':
             num_requests = 0
         else:
-            num_requests = self.num_requests
+            num_requests = self.num_requests or 0
         queue = AsyncInferQueue(self.exec_network, num_requests)
         if log:
             print_info('Prepared async infer queue with {} requests'.format(len(queue)))
