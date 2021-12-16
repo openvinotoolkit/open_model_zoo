@@ -15,7 +15,7 @@ The network is able to recognize English text consisting of characters in the [G
 | ------------------------- | --------- |
 | GFlops                    | 1.3182    |
 | MParams                   | 0.1413    |
-| Accuracy on GNHK test subset (excluding images wider than 2000px after resized to height 96px with aspect ratio) | 81.5%     |
+| Accuracy on GNHK test subset (excluding images wider than 2000px after resized to height 96px with aspect ratio) | 82.0%     |
 | Source framework          | PyTorch\* |
 
 > **Note:** to achieve the accuracy, images from the GNHK test set should be binarized using adaptive thresholding, and preprocessed into single-line text images, using the coordinates from the accompanying JSON annotation files in the GNHK dataset. See `<omz_dir>/models/intel/handwritten-english-recognition-0001/preprocess_gnhk.py`.
