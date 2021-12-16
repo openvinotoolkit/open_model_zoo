@@ -37,8 +37,9 @@ def create_model_evaluator(config):
     if not cascade:
         return ModelEvaluator.from_configs(config)
 
-    if config['evaluations'][0]['module_config']['launcher']['framework'] != 'openvino':
-        config['evaluations'][0]['module_config']['launcher']['framework'] = 'openvino'
+    if config['evaluations'][0]['module_config']['launchers'][0]['framework'] != 'openvino':
+        config['evaluations'][0]['module_config']['launchers'][0]['framework'] = 'openvino'
+
     return ModuleEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
 
 
