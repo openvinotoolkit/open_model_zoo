@@ -950,6 +950,15 @@ def parse_partial_shape(partial_shape):
     ps = str(partial_shape)
     preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
     if '[' not in preprocessed:
+        preprocessed = preprocessed.replace('(', '').replace(')', '')
+        if '..' in preprocessed:
+            shape_list = []
+            for dim in preprocessed.split(','):
+                if '..' in dim:
+                    shape_list.append(string_to_tuple(dim.replace('..', ','), casting_type=int))
+                else:
+                    shape_list.append(int(dim))
+            return shape_list
         return string_to_tuple(preprocessed, casting_type=int)
     shape_list = []
     s_pos = 0
