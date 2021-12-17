@@ -50,7 +50,7 @@ void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNe
     InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
     inputInfo.setPrecision(Precision::FP32);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------    
+    // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
     if (outputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 output");
