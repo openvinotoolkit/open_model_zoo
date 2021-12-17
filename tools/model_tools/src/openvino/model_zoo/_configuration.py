@@ -327,9 +327,9 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
 
     return sorted(models + composite_models, key=lambda model : model.name)
 
-def load_models_or_die(models_root, args):
+def load_models_or_die(models_root, args, **kwargs):
     try:
-        return load_models(models_root, args)
+        return load_models(models_root, args, **kwargs)
     except validation.DeserializationError as e:
         indent = '    '
 
@@ -339,9 +339,9 @@ def load_models_or_die(models_root, args):
         sys.exit(1)
 
 # requires the --print_all, --all, --name and --list arguments to be in `args`
-def load_models_from_args(parser, args, models_root):
+def load_models_from_args(parser, args, models_root, **kwargs):
     if args.print_all:
-        for model in load_models_or_die(models_root, args):
+        for model in load_models_or_die(models_root, args, **kwargs):
             print(model.name)
         sys.exit()
 

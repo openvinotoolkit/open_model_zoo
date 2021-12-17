@@ -53,7 +53,8 @@ class Model:
 
         parser = argparse.ArgumentParser()
         args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
-        model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)[0]
+        model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT,
+                    mode=_configuration.ModelLoadingMode.ignore_composite)[0]
 
         model_dir = download_dir / model.subdirectory
 
@@ -134,9 +135,10 @@ class Model:
     def accuracy_checker_config(self):
         if self._accuracy_config is None:
             config_path = _common.MODEL_ROOT / self.subdirectory / 'accuracy-check.yml'
-            with config_path.open('rb') as config_file, \
-                    validation.deserialization_context('Loading config "{}"'.format(config_path)):
-                self._accuracy_config = yaml.safe_load(config_file)
+            if config_path.exists():
+                with config_path.open('rb') as config_file, \
+                        validation.deserialization_context('Loading config "{}"'.format(config_path)):
+                    self._accuracy_config = yaml.safe_load(config_file)
 
         return self._accuracy_config
 
@@ -144,9 +146,10 @@ class Model:
     def model_config(self):
         if self._model_config is None:
             config_path = _common.MODEL_ROOT / self.subdirectory / 'model.yml'
-            with config_path.open('rb') as config_file, \
-                    validation.deserialization_context('Loading config "{}"'.format(config_path)):
-                self._model_config = yaml.safe_load(config_file)
+            if config_path.exists():
+                with config_path.open('rb') as config_file, \
+                        validation.deserialization_context('Loading config "{}"'.format(config_path)):
+                    self._model_config = yaml.safe_load(config_file)
 
         return self._model_config
 
@@ -157,7 +160,7 @@ class Model:
             except AttributeError:
                 raise TypeError('ie argumnet must be of IECore type.')
 
-        input_blob = next(iter(self.net.input_info))
+        input_blob = self.net.input_info
 
         return input_blob
 
@@ -168,6 +171,6 @@ class Model:
             except AttributeError:
                 raise TypeError('ie argumnet must be of IECore type.')
 
-        output_blob = next(iter(self.net.outputs))
+        output_blob = self.net.outputs
 
         return output_blob
