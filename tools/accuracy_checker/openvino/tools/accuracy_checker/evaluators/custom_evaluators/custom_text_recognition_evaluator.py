@@ -167,8 +167,13 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         enc_res = self.recognizer_encoder.predict(identifiers,
                                                   {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        if isinstance(enc_res, tuple):
+            enc_res, enc_raw_res = enc_res
+        else:
+            enc_raw_res = enc_res
+
         if callback:
-            callback(enc_res)
+            callback(enc_raw_res)
         features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
         dec_state = enc_res[self.recognizer_encoder.outputs_mapping['decoder_hidden']]
 
@@ -183,6 +188,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
                     self.recognizer_decoder.inputs_mapping['hidden']: dec_state,
                     self.recognizer_decoder.inputs_mapping['decoder_input']: tgt
                  })
+            if isinstance(dec_res, tuple):
+                dec_res, dec_raw_res = dec_res
+            else:
+                dec_raw_res = dec_res
 
             dec_state = dec_res[self.recognizer_decoder.outputs_mapping['decoder_hidden']]
             logit = dec_res[self.recognizer_decoder.outputs_mapping['decoder_output']]
@@ -191,13 +200,13 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
                 break
             logits.append(logit)
             if callback:
-                callback(dec_res)
+                callback(dec_raw_res)
 
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
         result_phrase = self.get_phrase(targets)
-        return result_phrase, dec_res
+        return result_phrase, dec_raw_res
 
 
 class SequentialFormulaRecognitionModel(BaseSequentialModel):
@@ -243,8 +252,12 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         enc_res = self.recognizer_encoder.predict(identifiers,
                                                   {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        if isinstance(enc_res, tuple):
+            enc_res, enc_raw_res = enc_res
+        else:
+            dec_raw_res = enc_res
         if callback:
-            callback(enc_res)
+            callback(enc_raw_res)
         row_enc_out = enc_res[self.recognizer_encoder.outputs_mapping['row_enc_out']]
         dec_states_h = enc_res[self.recognizer_encoder.outputs_mapping['hidden']]
         dec_states_c = enc_res[self.recognizer_encoder.outputs_mapping['context']]
@@ -263,8 +276,12 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
                     self.recognizer_decoder.inputs_mapping['output_prev']: O_t,
                     self.recognizer_decoder.inputs_mapping['tgt']: tgt
                 })
+            if isinstance(dec_res, tuple):
+                dec_res, dec_raw_res = dec_res
+            else:
+                dec_raw_res = dec_res
             if callback:
-                callback(dec_res)
+                callback(dec_raw_res)
 
             dec_states_h = dec_res[self.recognizer_decoder.outputs_mapping['dec_st_h_t']]
             dec_states_c = dec_res[self.recognizer_decoder.outputs_mapping['dec_st_c_t']]
@@ -280,7 +297,7 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
         result_phrase = self.get_phrase(targets)
-        return result_phrase, dec_res
+        return result_phrase, dec_raw_res
 
 
 class RecognizerDLSDKModel(BaseDLSDKModel):

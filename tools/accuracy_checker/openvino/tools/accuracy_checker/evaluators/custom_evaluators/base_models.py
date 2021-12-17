@@ -349,16 +349,19 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return {self.input_blob: np.array(input_data)}
 
-    def infer(self, input_data):
+    def infer(self, input_data, raw_resuls=False):
         if not hasattr(self, 'infer_request') or self.infer_request is None:
             self.infer_request = self.exec_network.create_infer_request()
         tensors_mapping = self.input_tensors_mapping()
         feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
         outputs = self.infer_request.infer(feed_dict)
-        return {
+        res_outputs = {
             out_node.get_node().friendly_name: out_res
             for out_node, out_res in outputs.items()
         }
+        if raw_resuls:
+            return res_outputs, outputs
+        return res_outputs
 
 
 class BaseONNXModel:
