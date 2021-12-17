@@ -260,8 +260,8 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -274,6 +274,7 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
                     TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
                     TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
                 ],
             ),
             TestCase(options={
@@ -281,6 +282,7 @@ NATIVE_DEMOS = [
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
             })
         ],
         single_option_cases(
@@ -291,8 +293,8 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -305,6 +307,7 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
                     TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
                     TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
                 ],
             ),
             TestCase(options={
@@ -312,6 +315,7 @@ NATIVE_DEMOS = [
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
             })
         ],
         single_option_cases(
