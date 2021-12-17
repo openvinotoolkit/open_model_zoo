@@ -1,1 +1,5 @@
+description: >-
+  Latex formula recognition model.
 task_type: token_recognition
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

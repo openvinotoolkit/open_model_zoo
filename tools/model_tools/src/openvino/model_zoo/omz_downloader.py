@@ -126,16 +126,24 @@ def main():
 
         downloader = Downloader(args.output_dir, args.cache_dir, args.num_attempts)
 
+        def download_model(model, reporter, session):
+            if model.model_stages:
+                results = []
+                for model_stage in model.model_stages:
+                    results.append(downloader.download_model(
+                        reporter, session, requested_precisions, model_stage, _common.KNOWN_PRECISIONS))
+                return sum(results) == len(model.model_stages)
+            else:
+                return downloader.download_model(
+                    reporter, session, requested_precisions, model, _common.KNOWN_PRECISIONS)
+
         with contextlib.ExitStack() as exit_stack:
             session_factory = ThreadSessionFactory(exit_stack)
             if args.jobs == 1:
-                results = [downloader.download_model(
-                        reporter, session_factory, requested_precisions, model, _common.KNOWN_PRECISIONS)
-                    for model in models]
+                results = [download_model(model, reporter, session_factory) for model in models]
             else:
                 results = _concurrency.run_in_parallel(args.jobs,
-                    lambda context, model: downloader.download_model(
-                        make_reporter(context), session_factory, requested_precisions, model, _common.KNOWN_PRECISIONS),
+                    lambda context, model: download_model(model, make_reporter(context), session_factory),
                     models)
 
         failed_models = {model.name for model, successful in zip(models, results) if not successful}

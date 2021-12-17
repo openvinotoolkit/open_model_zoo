@@ -191,7 +191,12 @@ def main():
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
-    model_info = {model['name']: model for model in model_info_list}
+
+    model_info = {}
+    for model_data in model_info_list:
+        models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
+        for model in models_list:
+            model_info[model['name']] = model
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
@@ -219,11 +224,14 @@ def main():
             print()
             demo.set_precisions(args.precisions, model_info)
 
-            declared_model_names = {model['name']
-                for model in json.loads(subprocess.check_output(
+            declared_model_names = set()
+            for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
                         '--list', str(demo.models_lst_path(demos_dir))],
-                    universal_newlines=True))}
+                    universal_newlines=True)):
+                models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
+                for model in models_list:
+                    declared_model_names.add(model['name'])
 
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(

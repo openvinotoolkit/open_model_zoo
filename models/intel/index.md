@@ -150,6 +150,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | [instance-segmentation-security-0228](./instance-segmentation-security-0228/README.md) | 147.2352 | 49.8328 |
 | [instance-segmentation-security-1039](./instance-segmentation-security-1039/README.md) | 13.9672  | 10.5674 |
 | [instance-segmentation-security-1040](./instance-segmentation-security-1040/README.md) | 29.334   | 13.5673 |
+| [instance-segmentation-person-0007](./instance-segmentation-person-0007/README.md)     | 4.8492   | 7.2996  |
 
 ## Human Pose Estimation Models
 
@@ -311,6 +312,7 @@ Deep Learning models for noise suppression.
 | Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------|--------------------- |----------- |
 | [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+| [noise-suppression-denseunet-ll-0001](./noise-suppression-denseunet-ll-0001/README.md)| 0.2                  | 4.2       |
 
 ## Time Series Forecasting
 

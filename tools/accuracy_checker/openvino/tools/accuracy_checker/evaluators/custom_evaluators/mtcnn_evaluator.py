@@ -18,25 +18,26 @@ import copy
 from functools import partial
 import numpy as np
 
-from .mtcnn_models import MTCNNCascadeModel
+from .mtcnn_models import build_stages
 from .mtcnn_evaluator_utils import transform_for_callback
 from .base_custom_evaluator import BaseCustomEvaluator
+from ..quantization_model_evaluator import create_dataset_attributes
 
 
 class MTCNNEvaluator(BaseCustomEvaluator):
-    def __init__(self, dataset_config, launcher, model, orig_config):
+    def __init__(self, dataset_config, launcher, stages, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
-        self.model = model
-        if hasattr(self.model, 'adapter') and self.model.adapter is not None:
-            self.adapter_type = self.model.adapter.__provider__
+        self.stages = stages
+        stage = next(iter(self.stages.values()))
+        if hasattr(stage, 'adapter') and stage.adapter is not None:
+            self.adapter_type = stage.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
-        model = MTCNNCascadeModel(
-            config.get('network_info', {}), launcher, config.get('_models', []), delayed_model_loading
-        )
-        return cls(dataset_config, launcher, model, orig_config)
+        models_info = config['network_info']
+        stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
+        return cls(dataset_config, launcher, stages, orig_config)
 
     def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         def no_detections(batch_pred):
@@ -50,7 +51,7 @@ class MTCNNEvaluator(BaseCustomEvaluator):
                 intermediate_callback = partial(output_callback, metrics_result=None,
                                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             batch_size = 1
-            for stage in self.model.stages.values():
+            for stage in self.stages.values():
                 previous_stage_predictions = batch_prediction
                 filled_inputs, batch_meta = stage.preprocess_data(
                     copy.deepcopy(batch_inputs), batch_annotation, previous_stage_predictions
@@ -71,10 +72,37 @@ class MTCNNEvaluator(BaseCustomEvaluator):
                                 dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
+    def _release_model(self):
+        for _, stage in self.stages.items():
+            stage.release()
+
     def reset(self):
-        self.model.reset()
+        super().reset()
+        for _, stage in self.stages.items():
+            stage.reset()
+
+    def load_network(self, network=None):
+        if network is None:
+            for stage_name, stage in self.stages.items():
+                stage.load_network(network, self.launcher, stage_name + '_')
+        else:
+            for net_dict in network:
+                stage_name = net_dict['name']
+                network_ = net_dict['model']
+                self.stages[stage_name].load_network(network_, self.launcher, stage_name + '_')
+
+    def load_network_from_ir(self, models_list):
+        for models_dict in models_list:
+            stage_name = models_dict['name']
+            self.stages[stage_name].load_model(models_dict, self.launcher, stage_name + '_')
+
+    def get_network(self):
+        return [{'name': stage_name, 'model': stage.network} for stage_name, stage in self.stages.items()]
 
     def select_dataset(self, dataset_tag):
-        super().select_dataset(dataset_tag)
-        for _, stage in self.model.stages.items():
-            stage.update_preprocessing(self.preprocessor)
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+        self.dataset, self.metric_executor, preprocessor, self.postprocessor = dataset_attributes
+        for _, stage in self.stages.items():
+            stage.update_preprocessing(preprocessor)

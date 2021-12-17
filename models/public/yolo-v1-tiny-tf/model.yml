@@ -26,7 +26,7 @@ model_optimizer_args:
   - --input=input_1
   - --scale_values=input_1[255]
   - --reverse_input_channels
-  - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2_tiny_voc.json
+  - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny_voc.json
   - --input_model=$dl_dir/yolo-v1-tiny.pb
 quantizable: yes
 framework: tf

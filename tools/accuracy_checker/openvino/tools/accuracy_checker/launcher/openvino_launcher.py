@@ -20,8 +20,7 @@ from pathlib import Path
 import re
 import warnings
 import numpy as np
-from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape
-from openvino.runtime.impl import Type
+from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension, mo_convert_model,
@@ -326,7 +325,14 @@ class OpenVINOLauncher(Launcher):
             del self.exec_network
         if self.infer_request is not None:
             self.infer_request = None
-        self.network.reshape({self.input_to_tensor_name[k]: PartialShape(shape) for k, shape in shapes.items()})
+        partial_shapes = {}
+        for name, shape in shapes.items():
+            p_shape = PartialShape(
+                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
+            )
+            partial_shapes[self.input_to_tensor_name[name]] = p_shape
+
+        self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         if self.dyn_input_layers and make_dynamic:
             return
@@ -334,7 +340,13 @@ class OpenVINOLauncher(Launcher):
 
     @staticmethod
     def reshape_network(network, shapes):
-        network.reshape({k: PartialShape(shape) for k, shape in shapes.items()})
+        partial_shapes = {}
+        for name, shape in shapes.items():
+            p_shape = PartialShape(
+                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
+            )
+            partial_shapes[name] = p_shape
+        network.reshape(partial_shapes)
         return network
 
     def _align_data_shape(self, data, input_blob, data_layout):
@@ -588,8 +600,12 @@ class OpenVINOLauncher(Launcher):
     @staticmethod
     def get_input_tensor_name_mapping(network):
         inputs_mapping = {}
-        for input_node in network.inputs:
-            inputs_mapping[input_node.get_node().friendly_name] = input_node.get_tensor().get_any_name()
+        for idx, input_node in enumerate(network.inputs):
+            tensor_names = list(input_node.get_names())
+            if not tensor_names:
+                inputs_mapping[input_node.get_node().friendly_name] = idx
+            else:
+                inputs_mapping[input_node.get_node().friendly_name] = tensor_names[0]
         return inputs_mapping
 
     @property
@@ -648,7 +664,9 @@ class OpenVINOLauncher(Launcher):
                 if not hasattr(self, 'exec_network') or self.exec_network is None:
                     self.is_dynamic = True
                     self.load_network(self.network)
-                self.exec_network.infer_new_request(input_data[0])
+                self.exec_network.infer_new_request({
+                    self.input_to_tensor_name[k]: data for k, data in input_data[0].items()}
+                )
                 return
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
@@ -777,7 +795,9 @@ class OpenVINOLauncher(Launcher):
                     make_dynamic = True
         if not input_shapes:
             return
-        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
+        orig_input_shapes = {
+            input_name: parse_partial_shape(input_info.partial_shape)
+            for input_name, input_info in self.inputs.items()}
         orig_input_shapes.update(input_shapes)
         self._reshape_input(orig_input_shapes, make_dynamic)
 

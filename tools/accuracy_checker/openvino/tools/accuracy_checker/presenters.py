@@ -47,7 +47,7 @@ class ScalarPrintPresenter(BasePresenter):
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
                      ignore_metric_reference=False):
         value, reference, name, _, abs_threshold, rel_threshold, meta, _ = evaluation_result
-        value = np.mean(value)
+        value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
         if reference and not ignore_metric_reference:
@@ -63,7 +63,7 @@ class ScalarPrintPresenter(BasePresenter):
             ref = ref.get(name)
         result_dict = {
             'name': name,
-            'value': np.mean(value),
+            'value': '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value)),
             'type': metric_type,
             'ref': ref or '',
             'abs_threshold': abs_threshold or 0,
@@ -121,7 +121,7 @@ class VectorPrintPresenter(BasePresenter):
             )
 
         if len(value) > 1 and meta.get('calculate_mean', True):
-            mean_value = np.mean(value)
+            mean_value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
             value_scale = scale[0] if not np.isscalar(scale) else scale
             difference = None
             if reference and not ignore_metric_reference:
@@ -168,7 +168,7 @@ class VectorPrintPresenter(BasePresenter):
         if meta.get('calculate_mean', True):
             value_names_orig.append('mean')
             value_names.append('{}@mean'.format(name))
-            mean_value = np.mean(value)
+            mean_value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
             value = np.append(value, mean_value)
         per_value_meta = []
         target_per_value = meta.pop('target_per_value', {})

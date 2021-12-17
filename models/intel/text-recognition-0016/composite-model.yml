@@ -1,1 +1,5 @@
+description: >-
+  This is a text-recognition composite model that recognizes scene text.
 task_type: optical_character_recognition
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

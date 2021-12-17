@@ -19,12 +19,7 @@ from ..representation import (
     CharacterRecognitionPrediction,
 )
 from .metric import PerImageEvaluationMetric
-from ..utils import UnsupportedPackage
-
-try:
-    import editdistance
-except ImportError as import_error:
-    editdistance = UnsupportedPackage("editdistance", import_error.msg)
+from .distance import editdistance_eval
 
 
 class SpeechRecognitionWER(PerImageEvaluationMetric):
@@ -33,13 +28,11 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
         self.words = 0
         self.score = 0
 
     def update(self, annotation, prediction):
-        cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
+        cur_score = editdistance_eval(annotation.label.split(), prediction.label.split())
         cur_words = len(annotation.label.split())
         self.score += cur_score
         self.words += cur_words
@@ -64,13 +57,11 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
 
     def update(self, annotation, prediction):
-        cur_score = editdistance.eval(annotation.label, prediction.label)
+        cur_score = editdistance_eval(annotation.label, prediction.label)
         cur_length = len(annotation.label)
         self.score += cur_score
         self.length += cur_length

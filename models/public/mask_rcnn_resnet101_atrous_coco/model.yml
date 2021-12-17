@@ -29,7 +29,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,800,1365,3]
   - --input=image_tensor
-  - --transformations_config=$mo_dir/extensions/front/tf/mask_rcnn_support.json
+  - --transformations_config=$mo_ext_dir/front/tf/mask_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/mask_rcnn_resnet101_atrous_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/mask_rcnn_resnet101_atrous_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
