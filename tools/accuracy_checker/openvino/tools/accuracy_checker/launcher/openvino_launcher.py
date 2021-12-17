@@ -185,11 +185,12 @@ class OpenVINOLauncher(Launcher):
             return next(iter(self.original_outputs)).get_node().friendly_name
         return None
 
-    def predict(self, inputs, metadata=None, **kwargs):
+    def predict(self, inputs, metadata=None, return_raw=False, **kwargs):
         if self._lstm_inputs:
-            return self._predict_sequential(inputs, metadata)
+            return self._predict_sequential(inputs, metadata, return_raw)
 
         results = []
+        raw_results = []
         for infer_inputs in inputs:
             if self._do_reshape:
                 input_shapes = {
@@ -200,6 +201,7 @@ class OpenVINOLauncher(Launcher):
                 self.infer_request = self.exec_network.create_infer_request()
             feed_dict = {self.input_to_tensor_name[layer_name]: data for layer_name, data in infer_inputs.items()}
             outputs = self.infer_request.infer(inputs=feed_dict)
+            raw_results.append(outputs)
             results.append({
                 out_node.get_node().friendly_name: out_res
                 for out_node, out_res in outputs.items()
@@ -212,13 +214,16 @@ class OpenVINOLauncher(Launcher):
             self._fill_meta(metadata)
         self._do_reshape = False
 
+        if return_raw:
+            return results, raw_results
         return results
 
-    def _predict_sequential(self, inputs, metadata=None, **kwargs):
+    def _predict_sequential(self, inputs, metadata=None, return_raw=False, **kwargs):
         lstm_inputs_feed = self._fill_lstm_inputs()
         if not self.infer_request:
             self.infer_request = self.exec_network.create_infer_request()
         results = []
+        raw_results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
             infer_inputs = {self.input_to_tensor_name[layer_name]: data for layer_name, data in feed_dict.items()}
@@ -229,6 +234,8 @@ class OpenVINOLauncher(Launcher):
             }
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
+            if return_raw:
+                raw_results.append(out_tensors)
 
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
@@ -237,6 +244,8 @@ class OpenVINOLauncher(Launcher):
         if metadata is not None:
             self._fill_meta(metadata)
         self._do_reshape = False
+        if return_raw:
+            return results, raw_results
         return results
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
@@ -926,11 +935,14 @@ class OpenVINOLauncher(Launcher):
         return feed_dict, context
 
     @staticmethod
-    def get_result_from_request(request):
-        return [{
+    def get_result_from_request(request, return_raw=False):
+        preprocessed_results = [{
             out.get_node().friendly_name: data for out, data
             in request.results.items()}
         ]
+        if return_raw:
+            return preprocessed_results, [request.results]
+        return preprocessed_results
 
     def input_shape(self, input_name):
         return parse_partial_shape(self.inputs[input_name].get_partial_shape())

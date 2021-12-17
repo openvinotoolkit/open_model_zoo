@@ -153,9 +153,12 @@ class ModelEvaluator:
 
         def completion_callback(request, user_data):
             batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta = user_data
-            batch_raw_predictions = self.launcher.get_result_from_request(request)
+            batch_processed_predictions, batch_raw_predictions = self.launcher.get_result_from_request(
+                request, return_raw=True
+            )
             batch_predictions = _process_ready_predictions(
-                batch_raw_predictions, batch_identifiers, batch_meta, calculate_metrics or dump_prediction_to_annotation
+                batch_processed_predictions, batch_identifiers, batch_meta,
+                calculate_metrics or dump_prediction_to_annotation
             )
             metrics_result = None
             if calculate_metrics:
@@ -178,9 +181,12 @@ class ModelEvaluator:
                         self._annotations.extend(annotations)
                         self._predictions.extend(predictions)
 
+            if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
+                batch_raw_predictions = batch_raw_predictions[0]
+
             if output_callback:
                 output_callback(
-                    batch_raw_predictions[0],
+                    batch_raw_predictions,
                     metrics_result=metrics_result,
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
@@ -262,12 +268,13 @@ class ModelEvaluator:
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta, _ = self._get_batch_input(batch_inputs, batch_annotation)
-            batch_raw_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
+            batch_processed_predictions, batch_raw_predictions = self.launcher.predict(
+                filled_inputs, batch_meta, return_raw=True, **kwargs)
             if self.adapter and (calculate_metrics or dump_prediction_to_annotation):
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
-                batch_predictions = self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
+                batch_predictions = self.adapter.process(batch_processed_predictions, batch_identifiers, batch_meta)
             else:
-                batch_predictions = batch_raw_predictions
+                batch_predictions = batch_processed_predictions
 
             metrics_result = None
             if calculate_metrics:
