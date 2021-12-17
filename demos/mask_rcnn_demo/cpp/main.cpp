@@ -91,6 +91,8 @@ int main(int argc, char* argv[]) {
         // network dimensions for image input
         auto it = std::find_if(inputs.begin(), inputs.end(), [](const ov::Output<ov::Node>& input) {return input.get_shape().size() == 4;});
         if (it != inputs.end()) {
+            // ov::set_batch() should know input layout
+            model->get_parameters()[it->get_index()]->set_layout("NCHW");
             netBatchSize = it->get_shape()[ov::layout::batch_idx(layout_nchw)];
             netInputHeight = it->get_shape()[ov::layout::height_idx(layout_nchw)];
             netInputWidth = it->get_shape()[ov::layout::width_idx(layout_nchw)];
@@ -105,9 +107,14 @@ int main(int argc, char* argv[]) {
             slog::warn << "Network batch size is greater than number of images (" << imagePaths.size() <<
                        "), some input files will be duplicated" << slog::endl;
         } else if (netBatchSize < imagePaths.size()) {
+            netBatchSize = imagePaths.size();
             slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
-                       "), some input files will be ignored" << slog::endl;
+                       "), model will be reshaped" << slog::endl;
         }
+
+        // set batch size
+        ov::set_batch(model, netBatchSize);
+        slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
         auto startTime = std::chrono::steady_clock::now();
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
@@ -131,11 +138,6 @@ int main(int argc, char* argv[]) {
         ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
         log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
 
-        // set batch size
-        model->get_parameters()[0]->set_layout("NCHW");
-        ov::set_batch(model, netBatchSize);
-        slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
-
         // Create Infer Request
         ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
@@ -152,8 +154,8 @@ int main(int argc, char* argv[]) {
 
             if (shape.size() == 2) {
                 float* data = tensor.data<float>();
-                data[0] = static_cast<float>(netInputHeight);  // height
-                data[1] = static_cast<float>(netInputWidth);  // width
+                data[0] = static_cast<float>(netInputHeight); // height
+                data[1] = static_cast<float>(netInputWidth); // width
                 data[2] = 1;
             }
         }
