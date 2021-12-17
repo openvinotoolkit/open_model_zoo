@@ -599,12 +599,12 @@ class OVModelMixin(BaseOpenVINOModel):
             for c_input in config_inputs:
                 c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
             self.model_info['inputs'] = config_inputs
-        config_outputs = self.model_info['outputs']
-        for key, value in config_outputs.items():
-            config_with_prefix = value.startswith(model_prefix)
-            if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
-        self.model_info['outputs'] = config_outputs
+        # config_outputs = self.model_info['outputs']
+        # for key, value in config_outputs.items():
+        #     config_with_prefix = value.startswith(model_prefix)
+        #     if config_with_prefix != network_with_prefix:
+        #         config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+        # self.model_info['outputs'] = config_outputs
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
