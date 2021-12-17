@@ -39,6 +39,7 @@
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
 #include <models/jpeg_restoration_model.h>
+#include <models/style_transfer_model.h>
 #include <pipelines/metadata.h>
 #include "visualizer.hpp"
 
@@ -145,6 +146,9 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     }
     if (type == "jr") {
         return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
+    }
+	if (type == "style") {
+        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m, frameSize));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
