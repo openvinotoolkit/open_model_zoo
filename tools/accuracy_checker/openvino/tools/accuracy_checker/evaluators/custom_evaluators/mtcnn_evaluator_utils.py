@@ -171,6 +171,8 @@ def transform_for_callback(batch_size, raw_outputs):
             if layer_name.endswith('fq_weights_1'):
                 fq_weights.append(layer_name)
                 box_outs[layer_name] = data
+            elif data.ndim == 0:
+                box_outs[layer_name] = np.array([data])
             elif data.shape[0] <= i:
                 box_outs[layer_name] = data
             else:
