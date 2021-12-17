@@ -71,6 +71,8 @@ from .regression_representation import (
     GazeVectorPrediction,
     FeaturesRegressionAnnotation,
     NiftiRegressionAnnotation,
+    HandLandmarksAnnotation,
+    HandLandmarksPrediction,
 )
 from .facial_landmarks_heatmap_representation import FacialLandmarksHeatMapAnnotation, FacialLandmarksHeatMapPrediction
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
@@ -234,5 +236,8 @@ __all__ = [
     'NoiseSuppressionPrediction',
 
     'TimeSeriesForecastingAnnotation',
-    'TimeSeriesForecastingQuantilesPrediction'
+    'TimeSeriesForecastingQuantilesPrediction',
+
+    'HandLandmarksAnnotation',
+    'HandLandmarksPrediction'
 ]

@@ -158,3 +158,29 @@ class NiftiRegressionAnnotation(BaseRepresentation):
     @value.setter
     def value(self, value):
         self._value = value
+
+class HandLandmarksRepresentation(BaseRepresentation):
+    def __init__(self, identifier='', x_values=None, y_values=None):
+        super().__init__(identifier)
+        self.x_values = x_values if x_values is not None else []
+        self.y_values = y_values if y_values is not None else []
+
+
+class HandLandmarksAnnotation(FacialLandmarksRepresentation):
+    pass
+    # @property
+    # def interocular_distance(self):
+    #     left_eye = [
+    #         np.mean(self.x_values[self.metadata['left_eye']]),
+    #         np.mean(self.y_values[self.metadata['left_eye']])
+    #     ]
+    #     right_eye = [
+    #         np.mean(self.x_values[self.metadata['right_eye']]),
+    #         np.mean(self.y_values[self.metadata['right_eye']])
+    #     ]
+    #
+    #     return np.linalg.norm((np.subtract(left_eye, right_eye)))
+
+
+class HandLandmarksPrediction(FacialLandmarksRepresentation):
+    pass
