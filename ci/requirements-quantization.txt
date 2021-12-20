@@ -20,8 +20,6 @@ defusedxml==0.7.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
     #   -r tools/accuracy_checker/requirements-core.in
-editdistance==0.5.3
-    # via -r tools/accuracy_checker/requirements.in
 fast-ctc-decode==0.3.0
     # via -r tools/accuracy_checker/requirements.in
 filelock==3.0.12
@@ -89,7 +87,7 @@ packaging==21.0
 pandas==1.1.5
     # via
     #   -r tools/accuracy_checker/requirements.in
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}/tools/pot/setup.py)
 parasail==1.2.4
     # via -r tools/accuracy_checker/requirements.in
 pillow==8.3.2
@@ -167,7 +165,7 @@ tqdm==4.62.2
     #   -r tools/accuracy_checker/requirements.in
     #   huggingface-hub
     #   nltk
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   pot (${INTEL_OPENVINO_DIR}/tools/pot/setup.py)
     #   sacremoses
     #   transformers
 transformers==4.10.0

@@ -26,8 +26,6 @@ defusedxml==0.7.1
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
 flatbuffers==1.12
     # via tensorflow
-future==0.18.2
-    # via -r tools/model_tools/requirements-caffe2.in
 gast==0.3.3
     # via tensorflow
 google-auth==1.35.0
@@ -54,7 +52,6 @@ keras-preprocessing==1.1.2
     # via tensorflow
 markdown==3.3.4
     # via tensorboard
-mxnet==1.2.0 ; sys_platform == 'win32'
 mxnet==1.7.0.post2 ; sys_platform != "win32"
     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
 networkx==2.5.1
@@ -84,7 +81,6 @@ oauthlib==3.1.1
 onnx==1.10.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r tools/model_tools/requirements-caffe2.in
     #   -r tools/model_tools/requirements-pytorch.in
 opt-einsum==3.3.0
     # via tensorflow
@@ -126,7 +122,6 @@ six==1.15.0
     #   google-auth
     #   google-pasta
     #   grpcio
-    #   h5py
     #   keras-preprocessing
     #   onnx
     #   protobuf
@@ -147,7 +142,6 @@ termcolor==1.1.0
     # via tensorflow
 torch==1.8.1
     # via
-    #   -r tools/model_tools/requirements-caffe2.in
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
 torchvision==0.9.1
