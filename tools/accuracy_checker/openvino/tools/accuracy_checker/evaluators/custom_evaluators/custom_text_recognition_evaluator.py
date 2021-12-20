@@ -120,7 +120,7 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
-        with_prefix = next(iter(self.recognizer_encoder.network.input_info)).startswith('encoder')
+        with_prefix = next(iter(self.recognizer_encoder.inputs)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
                 self.recognizer_encoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'encoder_',
