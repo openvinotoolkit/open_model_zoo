@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+
+"""
+ Copyright (C) 2021-2022 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 import os
 import cv2
 import pandas as pd
@@ -31,12 +48,19 @@ class Application(object):
         self.eval_process_counter = 0  # Number of frames processed by the score evaluation module
 
         ''' Object Detection Variables'''
-        self.detector = Detector()
+        self.detector = Detector(["./intel/smartlab-object-detection-0001/FP32-INT1/mw-topview-all-yolox-n.bin",
+                "./intel/smartlab-object-detection-0002/FP32-INT1/mw-topview-move-yolox-n.bin"],
+                ["./intel/smartlab-object-detection-0003/FP32-INT1/mw-frontview-all-yolox-n.bin",
+                "./intel/smartlab-object-detection-0004/FP32-INT1/mw-frontview-move-yolox-n.bin"],
+                False)
         self.detector.initialize()  # Initialize the session and load the model parameters
 
         '''Video Segmentation Variables'''
-        self.segmentor = Segmentor()
+        self.segmentor = Segmentor(
+                "./intel/smartlab-action-recognition-encoder-0001/FP32-INT1/1280vec-mobilenet-v2.pt",
+                "./intel/smartlab-action-recognition-decoder-0001/FP32-INT1/concat-classifier.pth")
         self.segmentor.initialize()  # Initialize the session and load the model parameters
+
 
         '''Score Evaluation Variables'''
         self.evaluator = Evaluator()
@@ -104,5 +128,5 @@ class Application(object):
 
 if __name__ == "__main__":
     application = Application()
-    application.video_parser(top_video_path="./top.mp4",
-                             front_video_path="./front.mp4")
+    application.video_parser(top_video_path="./2.mp4",
+                             front_video_path="./3.mp4")

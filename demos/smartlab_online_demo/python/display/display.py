@@ -1,3 +1,19 @@
+"""
+ Copyright (C) 2021-2022 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 import numpy as np
 import pandas as pd
 import cv2
@@ -32,22 +48,22 @@ class Display(object):
         cv2.putText(frame_front, state, (1500, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
 
         #display obj detection result for both view
-        for idx, row in top_det_results.iterrows():
-            x_min = int(row['x_min'])
-            y_min = int(row['y_min'])
-            x_max = int(row['x_max'])
-            y_max = int(row['y_max'])
-            obj = row['obj']
+        for row, obj_cls in zip(top_det_results[0], top_det_results[1]):
+            x_min = int(row[0])
+            y_min = int(row[1])
+            x_max = int(row[2])
+            y_max = int(row[3])
+            obj = obj_cls
 
             cv2.putText(frame_top, obj, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=0.9, thickness=2)
             frame_top = cv2.rectangle(frame_top, (x_min,y_min),(x_max,y_max), color=(255,0,0), thickness=2)
 
-        for idx, row in front_det_results.iterrows():
-            x_min = int(row['x_min'])
-            y_min = int(row['y_min'])
-            x_max = int(row['x_max'])
-            y_max = int(row['y_max'])
-            obj = row['obj']
+        for row, obj_cls in zip(front_det_results[0], front_det_results[1]):
+            x_min = int(row[0])
+            y_min = int(row[1])
+            x_max = int(row[2])
+            y_max = int(row[3])
+            obj = obj_cls
 
             cv2.putText(frame_front, obj, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=0.9, thickness=2)
             frame_front = cv2.rectangle(frame_front, (x_min,y_min),(x_max,y_max), color=(255,0,0), thickness=2)

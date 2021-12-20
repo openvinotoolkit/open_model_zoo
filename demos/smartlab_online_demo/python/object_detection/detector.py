@@ -1,8 +1,27 @@
 # -*- coding: utf-8 -*-
+"""
+ Copyright (C) 2021-2022 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 import os
 import cv2
 import torch
 from torch import nn
+
+import sys
+sys.path.append('object_detection')
 from data.data_augment import ValTransform
 from settings import MwGlobalExp
 from tools.geometry import postprocess, bboxes_iou
@@ -308,6 +327,17 @@ class Detector(object):
     """
     top_bboxes, top_cls_ids, top_scores = self._detect_one(img_top, view='top')
     front_bboxes, front_cls_ids, front_scores = self._detect_one(img_front, view='front')
+
+    top_bboxes = top_bboxes.detach().numpy()
+    top_cls_ids = top_cls_ids.detach().numpy()
+    top_scores = top_scores.detach().numpy()
+    front_bboxes = front_bboxes.detach().numpy()
+    front_cls_ids = front_cls_ids.detach().numpy()
+    front_scores = front_scores.detach().numpy()
+    # get class string
+    top_cls_ids = [ self.classes[int(x)] for x in top_cls_ids ]
+    front_cls_ids = [ self.classes[int(x)] for x in front_cls_ids ]
+
     if self.is_show:
       vis_top = vis(
         img_top, 
@@ -323,52 +353,6 @@ class Detector(object):
         front_cls_ids, 
         self.front1_exp.confthre, 
         self.classes)
-      #cv2.imshow('top', vis_res)
       return vis_top, vis_front
     else:
-      return top_bboxes, top_cls_ids, top_scores, front_bboxes, front_cls_ids, front_scores
-
-
-if __name__ == '__main__':
-  fp_top_models = [
-    r'C:\Users\wyang2\local\weights\mw-a513\mw-A513v1-glb1cls10_yolox-n.pth',
-    r'C:\Users\wyang2\local\weights\mw-a513\mw-A513v1-glb2bcls3_yolox-n.pth'
-  ]
-  fp_front_models = [
-    r'C:\Users\wyang2\local\weights\mw-a513\mw-A513v2-glb1cls10_yolox-n.pth',
-    r'C:\Users\wyang2\local\weights\mw-a513\mw-A513v2-glb2bcls3_yolox-n.pth'
-  ]
-  det = Detector(
-    fp_top_models=fp_top_models,
-    fp_front_models=fp_front_models,
-    is_show=True
-  )
-  det.initialize()
-  # helper func of loading images
-  start_file = -3001
-  max_files = 100
-  def load_test_imgs(root_imgs, start, n):
-    if os.path.isdir(root_imgs):
-      files = get_images(root_imgs)
-    if len(files) > n:
-      files = files[start:start+n]
-    files.sort()
-    return [cv2.imread(f) for f in files]
-  # load test images
-  root_top_samples = r'C:\Users\wyang2\datasets\mythware\v1\images'
-  root_front_samples = r'C:\Users\wyang2\datasets\mythware\v2\images'
-  top_imgs = load_test_imgs(root_top_samples, start_file, max_files)
-  front_imgs = load_test_imgs(root_front_samples, start_file, max_files)
-  # test inference loop
-  from tqdm import tqdm
-  cv2.namedWindow('top', cv2.WINDOW_NORMAL)
-  cv2.namedWindow('front', cv2.WINDOW_NORMAL)
-  for img_top, img_front in tqdm(zip(top_imgs, front_imgs), total=len(front_imgs)):
-      top_label, front_label = det.inference(img_top, img_front)
-      cv2.imshow('top', top_label)
-      cv2.imshow('front', front_label)
-      k = cv2.waitKey(1)
-      if k == 27:
-          break
-  cv2.destroyWindow('top')
-  cv2.destroyWindow('front')
+      return [top_bboxes, top_cls_ids, top_scores], [front_bboxes, front_cls_ids, front_scores]
