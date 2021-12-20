@@ -25,10 +25,8 @@
 
 using namespace InferenceEngine;
 
-StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
+StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
     ImageModel(modelFileName, false) {
-        netInputHeight = inputImgSize.height;
-        netInputWidth = inputImgSize.width;
 }
 
 template<typename T>
@@ -64,23 +62,12 @@ void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNe
 
 }
 
-void StyleTransferModel::changeInputSize(CNNNetwork& cnnNetwork) {
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& inputDims = inputShapes.begin()->second;
-
-    inputDims[0] = 1;
-    inputDims[2] = netInputHeight;
-    inputDims[3] = netInputWidth;
-
-    cnnNetwork.reshape(inputShapes);
-}
-
 std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
     Blob::Ptr minput = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<float_t>(img, minput);
+    matToBlob(img, minput);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
@@ -99,11 +86,6 @@ std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& inf
     size_t outWidth = (int)(outSizeVector[3]);
     size_t numOfPixels = outWidth * outHeight;
 
-    //for (size_t i = 0; i < numOfPixels; i++) {
-    //    outputData[i] -= 155;
-    //    outputData[numOfPixels + i] -= 155;
-    //    outputData[2*numOfPixels + i] -= 155;
-    //}
     std::vector<cv::Mat> imgPlanes;
     imgPlanes = std::vector<cv::Mat>{
               cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2])),
@@ -113,7 +95,7 @@ std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& inf
     cv::merge(imgPlanes, resultImg);
     cv::resize(resultImg, result->resultImage, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
 
-    result->resultImage.convertTo(result->resultImage, CV_8UC3, 255);
+    result->resultImage.convertTo(result->resultImage, CV_8UC3);
 
     return std::unique_ptr<ResultBase>(result);
 }

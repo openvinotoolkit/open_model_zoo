@@ -22,7 +22,7 @@ class StyleTransferModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    StyleTransferModel(const std::string& modelFileName, const cv::Size& inputImgSize);
+    StyleTransferModel(const std::string& modelFileName);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
@@ -30,5 +30,4 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
 };
