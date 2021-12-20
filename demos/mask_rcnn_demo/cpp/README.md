@@ -31,8 +31,6 @@ omz_converter --list models.lst
 ### Supported Models
 
 * mask_rcnn_inception_resnet_v2_atrous_coco
-* mask_rcnn_inception_v2_coco
-* mask_rcnn_resnet101_atrous_coco
 * mask_rcnn_resnet50_atrous_coco
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.

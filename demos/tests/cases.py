@@ -147,8 +147,7 @@ NATIVE_DEMOS = [
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
-            ModelArg('resnet-50-caffe2')),
-    )),
+    ))),
 
     CppDemo(name='crossroad_camera_demo',
             model_keys=['-m', '-m_pa', '-m_reid'],
@@ -345,8 +344,6 @@ NATIVE_DEMOS = [
         TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
-            ModelArg('mask_rcnn_inception_v2_coco'),
-            ModelArg('mask_rcnn_resnet101_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
@@ -392,7 +389,6 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -401,7 +397,6 @@ NATIVE_DEMOS = [
                             '-scale_values': "73.695 69.87 70.89",
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -458,8 +453,6 @@ NATIVE_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
                         ModelArg('vehicle-detection-0201'),
@@ -820,8 +813,7 @@ PYTHON_DEMOS = [
                 ModelArg('mobilenet-v2-pytorch'),
                 ModelArg('repvgg-a0'),
                 ModelArg('repvgg-b1'),
-                ModelArg('repvgg-b3'),
-                ModelArg('resnet-50-caffe2')),
+                ModelArg('repvgg-b3')),
 
             TestCase(options={'-m': ModelFileArg('efficientnet-b7-pytorch', 'efficientnet-b7.onnx'),
                         '--reverse_input_channels': None,
@@ -1047,7 +1039,6 @@ PYTHON_DEMOS = [
                 TestCase(options={'--architecture_type': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -1056,7 +1047,6 @@ PYTHON_DEMOS = [
                             '--scale_values': ['73.695', '69.87', '70.89']
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -1116,8 +1106,6 @@ PYTHON_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssd-resnet34-1200-onnx'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
