@@ -96,7 +96,6 @@ class CustomBuild(distutils.command.build_py.build_py):
 setup(
     install_requires=read_text('requirements.in'),
     extras_require={
-        'caffe2': read_text('requirements-caffe2.in'),
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),
     },
