@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 #include "utils/slog.hpp"
 #include "utils/args_helper.hpp"
 
@@ -248,4 +249,70 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
             catch (const InferenceEngine::Exception&) {}
         }
     }
+}
+
+inline
+void log_compiled_model_info(
+    const ov::runtime::CompiledModel& compiledModel,
+    const std::string& modelName,
+    const std::string& deviceName,
+    const std::string& modelType = "")
+{
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+        for (const auto& device : devices) {
+            try {
+                slog::info << "\tDevice: " << device << slog::endl;
+                std::string nstreams = compiledModel.get_config(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
+                if (device == "CPU") {
+                    std::string nthreads = compiledModel.get_config("CPU_THREADS_NUM").as<std::string>();
+                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
+                }
+            }
+            catch (const ov::Exception&) {}
+        }
+    }
+}
+
+inline
+void log_model_info(const std::shared_ptr<ov::Model>& model) {
+    slog::info << "model name: " << model->get_friendly_name() << slog::endl;
+
+    // Prepare input blobs
+
+    // Taking information about all topology inputs
+    ov::OutputVector inputs = model->inputs();
+    ov::OutputVector outputs = model->outputs();
+
+    for (const ov::Output<ov::Node> input : inputs)
+    {
+        slog::info << slog::endl;
+        const std::string name = input.get_any_name();
+        const ov::element::Type type = input.get_element_type();
+        const ov::Shape shape = input.get_shape();
+
+        slog::info << "input name: " << name << slog::endl;
+        slog::info << "input type: " << type << slog::endl;
+        slog::info << "input shape: " << shape << slog::endl;
+    }
+
+    for (const ov::Output<ov::Node> output : outputs)
+    {
+        slog::info << slog::endl;
+        const std::string name = output.get_any_name();
+        const ov::element::Type type = output.get_element_type();
+        const ov::Shape shape = output.get_shape();
+
+        slog::info << "output name: " << name << slog::endl;
+        slog::info << "output type: " << type << slog::endl;
+        slog::info << "output shape: " << shape << slog::endl;
+    }
+
+    return;
 }

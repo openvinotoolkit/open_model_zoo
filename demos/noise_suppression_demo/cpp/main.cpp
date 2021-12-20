@@ -7,7 +7,6 @@
 * \file noise_suppression_demo/main.cpp
 * \example noise_suppression_demo/main.cpp
 */
-#include <gflags/gflags.h>
 #include <climits>
 #include <vector>
 #include <string>
@@ -16,10 +15,11 @@
 #include <iostream>
 #include <fstream>
 
-#include <utils/slog.hpp>
+#include "openvino/openvino.hpp"
 
-
-#include <inference_engine.hpp>
+#include "gflags/gflags.h"
+#include "utils/common.hpp"
+#include "utils/slog.hpp"
 
 typedef std::chrono::steady_clock Time;
 
@@ -139,39 +139,61 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
 
-        // Loading Inference Engine
-        InferenceEngine::Core ie;
+        slog::info << ov::get_openvino_version() << slog::endl;
 
-        InferenceEngine::CNNNetwork network = ie.ReadNetwork(FLAGS_m);
-        InferenceEngine::InputsDataMap inputs = network.getInputsInfo();
+        // Loading Inference Engine
+        ov::runtime::Core core;
+
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        slog::info << "model file: " << FLAGS_m << slog::endl;
+        log_model_info(model);
+
+        ov::OutputVector inputs = model->inputs();
+        ov::OutputVector outputs = model->outputs();
 
         // get state names pairs (inp,out)
+        std::vector<std::string> inp_names;
+        std::vector<std::string> out_names;
+        for (size_t i = 0; i < inputs.size(); i++) {
+            inp_names.push_back(inputs[i].get_any_name());
+            out_names.push_back(outputs[i].get_any_name());
+        }
+        std::sort(inp_names.begin(), inp_names.end(), [](const std::string& a, const std::string& b) { return a < b; });
+        std::sort(out_names.begin(), out_names.end(), [](const std::string& a, const std::string& b) { return a < b; });
+
         std::vector<std::pair<std::string, std::string>> state_names;
+
         size_t state_size = 0;
-        for(auto& inp: inputs) {
-            std::string inp_state_name = inp.first;
-            if (inp_state_name.find("inp_state") == std::string::npos)
+        for (size_t i = 0; i < inputs.size(); i++) {
+//            std::string inp_state_name = inputs[i].get_any_name();
+//            std::string out_state_name = outputs[i].get_any_name();
+//
+//            if (inp_state_name.find("inp_state") == std::string::npos)
+//                continue;
+            if (inp_names[i].find("inp_state") == std::string::npos)
                 continue;
-            std::string out_state_name(inp_state_name);
-            out_state_name.replace(0, 3, "out");
-            state_names.emplace_back(inp_state_name, out_state_name);
-            const InferenceEngine::SizeVector& size = inputs[inp_state_name]->getInputData()->getTensorDesc().getDims();
+
+//            state_names.emplace_back(inp_state_name, out_state_name);
+            state_names.emplace_back(inp_names[i], out_names[i]);
+
+            ov::Shape shape = inputs[i].get_shape();
             size_t tensor_size = 1;
-            for(size_t s: size) {
+            for (size_t s : shape)
                 tensor_size *= s;
-            }
+
             state_size += tensor_size;
         }
         std::cout << "State_param_num = " << state_size << " (" << state_size * 4e-6f << "Mb)" << std::endl;
-        InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
-        InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
+
+        ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
+        log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
+
+        ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Prepare input
         // get size of network input (pacth_size)
         std::string input_name("input");
-        InferenceEngine::InputInfo::Ptr input = inputs[input_name];
-        const InferenceEngine::TensorDesc& inp_desc = inputs[input_name]->getInputData()->getTensorDesc();
-        const InferenceEngine::SizeVector& inp_shape = inp_desc.getDims();
+        ov::Shape inp_shape = model->input(input_name).get_shape();
         size_t patch_size = inp_shape[1];
 
         // read input wav file
@@ -198,8 +220,8 @@ int main(int argc, char* argv[]) {
 
         auto start_time = Time::now();
         for(size_t i = 0; i < iter; ++i) {
-            auto inputBlob = InferenceEngine::make_shared_blob<float>(inp_desc, &inp_wave_fp32[i * patch_size]);
-            infer_request.SetBlob(input_name, inputBlob);
+            ov::runtime::Tensor inputBlob(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
+            infer_request.set_tensor(input_name, inputBlob);
 
             for (auto& state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
@@ -207,30 +229,23 @@ int main(int argc, char* argv[]) {
 
                 if (i > 0) {
                     // set input state by coresponding output state from prev infer
-                    auto blob_ptr = infer_request.GetBlob(out_state_name);
-                    infer_request.SetBlob(inp_state_name,blob_ptr);
+                    ov::runtime::Tensor blob_ptr = infer_request.get_tensor(out_state_name);
+                    infer_request.set_tensor(inp_state_name, blob_ptr);
                 } else {
                     // first iteration. set input state to zero tensor.
-                    const InferenceEngine::TensorDesc& state_desc = inputs[inp_state_name]->getInputData()->getTensorDesc();
-                    auto blob_ptr = InferenceEngine::make_shared_blob<float>(state_desc);
-                    blob_ptr->allocate();
-                    for (auto &val: *blob_ptr) {
-                        val = 0;
-                    }
-                    infer_request.SetBlob(inp_state_name,blob_ptr);
+                    ov::Shape state_shape = model->input(inp_state_name).get_shape();
+                    ov::runtime::Tensor blob_ptr(ov::element::f32, state_shape);
+                    memset(blob_ptr.data<float>(), 0, blob_ptr.get_byte_size());
+                    infer_request.set_tensor(inp_state_name, blob_ptr);
                 }
             }
 
             // make infer
-            infer_request.Infer();
+            infer_request.infer();
 
             {
                 // process output
-                InferenceEngine::Blob::Ptr output = infer_request.GetBlob("output");
-                InferenceEngine::MemoryBlob::CPtr moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(output);
-                // locked memory holder should be alive all time while access to its buffer happens
-                auto moutputHolder = moutput->rmap();
-                float* src = moutputHolder.as<float*>();
+                float* src = infer_request.get_tensor("output").data<float>();
                 float* dst = &out_wave_fp32[i * patch_size];
                 memcpy(dst, src, patch_size * sizeof(float));
             }
