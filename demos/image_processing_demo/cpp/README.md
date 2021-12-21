@@ -5,6 +5,7 @@ This demo processes the image according to the selected type of processing. The 
 * `super_resolution`
 * `deblurring`
 * `jpeg_restoration`
+* `style_transfer`
 
 ## Examples
 
@@ -36,6 +37,10 @@ Super resolution:
 
 ![](./assets/parrots_restoration.png)
 
+4. Example for style_transfer:
+
+![](./assets/cat_style_transfer.jpg)
+
 For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
 
 ## How It Works
@@ -53,6 +58,8 @@ For `jpeg_restoration` user can use [fbcnn](../../../models/public/fbcnn/README.
 
 The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
 
+For `style_transfer` user can use [fast-neural-style-mosaic-onnx](../../../models/public/fast-neural-style-mosaic-onnx/README.md) - one of the style transfer models designed to mix the content of an image with the style of another image.
+
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
@@ -68,6 +75,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 * text-image-super-resolution-0001
 * deblurgan-v2
 * fbcnn
+* fast-neural-style-mosaic-onnx
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -82,7 +90,7 @@ image_processing_demo_async [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration.
+    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer.
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
