@@ -27,6 +27,7 @@ from settings import MwGlobalExp
 from tools.geometry import postprocess, bboxes_iou
 from data.vis import vis
 
+from openvino.inference_engine import IECore
 
 class SubDetector(object):
   # modified from source: https://github.com/Megvii-BaseDetection/YOLOX
@@ -240,19 +241,42 @@ class Detector(object):
     """
     # helper func
     def create_subdetector(exp:MwGlobalExp) -> SubDetector:
-      det = exp.get_model()
-      assert isinstance(det, nn.Module)
-      det.eval()
-      assert exp.fp_model.endswith('.pth')
-      params_dict = torch.load(exp.fp_model, map_location='cpu')
-      det.load_state_dict(params_dict['model'])
-      return SubDetector(det, exp, exp.mw_classes, False)
-    ### load models for top view
-    self.top1_subdetector = create_subdetector(self.top1_exp)
-    self.top2_subdetector = create_subdetector(self.top2_exp)
-    ### load models for front view
-    self.front1_subdetector = create_subdetector(self.front1_exp)
-    self.front2_subdetector = create_subdetector(self.front2_exp)
+    #   det = exp.get_model()
+    #   assert isinstance(det, nn.Module)
+    #   det.eval()
+    #   assert exp.fp_model.endswith('.pth')
+    #   params_dict = torch.load(exp.fp_model, map_location='cpu')
+    #   det.load_state_dict(params_dict['model'])
+    #   return SubDetector(det, exp, exp.mw_classes, False)
+    # ### load models for top view
+    # self.top1_subdetector = create_subdetector(self.top1_exp)
+    # self.top2_subdetector = create_subdetector(self.top2_exp)
+    # ### load models for front view
+    # self.front1_subdetector = create_subdetector(self.front1_exp)
+    # self.front2_subdetector = create_subdetector(self.front2_exp)
+
+        ie = IECore()
+        net = ie.read_network(
+            model=self.top1_exp.fp_model[:-4]+".xml",
+            weights=self.top1_exp.fp_model[:-4]+".bin"
+        )
+        self.top1_subdetector = ie.load_network(network=net, device_name="CPU")
+        net = ie.read_network(
+            model=self.top2_exp.fp_model[:-4]+".xml",
+            weights=self.top2_exp.fp_model[:-4]+".bin"
+        )
+        self.top2_subdetector = ie.load_network(network=net, device_name="CPU")
+        net = ie.read_network(
+            model=self.front1_exp.fp_model[:-4]+".xml",
+            weights=self.front1_exp.fp_model[:-4]+".bin"
+        )
+        self.front1_subdetector = ie.load_network(network=net, device_name="CPU")
+        net = ie.read_network(
+            model=self.front2_exp.fp_model[:-4]+".xml",
+            weights=self.front2_exp.fp_model[:-4]+".bin"
+        )
+        self.front2_subdetector = ie.load_network(network=net, device_name="CPU")
+
 
   def _apply_detection_constraints(self, predictions:torch.Tensor, nmsthre=0.3):
     assert predictions.dim() == 2 and predictions.shape[1] == 7

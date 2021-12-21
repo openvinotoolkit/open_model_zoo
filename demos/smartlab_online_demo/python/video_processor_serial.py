@@ -86,8 +86,9 @@ class Application(object):
                 self.buffer_front.append(cv2.cvtColor(frame_front, cv2.COLOR_BGR2RGB))
                 self.frame_counter += 1
 
+                print(self.frame_counter)
                 ''' The object detection module need to generate detection results(for the current frame) '''
-                top_det_results, front_det_results = self.detector.inference(img_top=frame_top, img_front=frame_front,frame_counter=self.frame_counter)
+                top_det_results, front_det_results = self.detector.inference(img_top=frame_top, img_front=frame_front)
 
                 # ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
                 # top_seg_results, front_seg_results = self.segmentor.inference(buffer_top=self.buffer_top,
@@ -128,5 +129,5 @@ class Application(object):
 
 if __name__ == "__main__":
     application = Application()
-    application.video_parser(top_video_path="./2.mp4",
-                             front_video_path="./3.mp4")
+    application.video_parser(top_video_path="./stream_1_top.mp4",
+                             front_video_path="./stream_1_high.mp4")
