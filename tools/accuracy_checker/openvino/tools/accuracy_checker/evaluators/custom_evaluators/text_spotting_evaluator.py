@@ -119,14 +119,24 @@ class SequentialModel(BaseCascadeModel):
         assert len(identifiers) == 1
 
         detector_outputs = self.detector.predict(identifiers, input_data)
+        if isinstance(detector_outputs, tuple):
+            detector_outputs, raw_detector_outputs = detector_outputs
+        else:
+            raw_detector_outputs = detector_outputs
         text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
         for feature in text_features:
             encoder_outputs = self.recognizer_encoder.predict(
                 identifiers, {self.recognizer_encoder.input: np.expand_dims(feature, 0)})
+
+            if isinstance(encoder_outputs, tuple):
+                encoder_outputs, raw_encoder_outputs = encoder_outputs
+            else:
+                raw_encoder_outputs = encoder_outputs
+
             if callback:
-                callback(encoder_outputs)
+                callback(raw_encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder.output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
@@ -144,8 +154,13 @@ class SequentialModel(BaseCascadeModel):
                     self.recognizer_decoder.model_inputs['prev_hidden']: hidden,
                     self.recognizer_decoder.model_inputs['encoder_outputs']: feature}
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
+                if isinstance(decoder_outputs, tuple):
+                    decoder_outputs, raw_decoder_outputs = decoder_outputs
+                else:
+                    raw_decoder_outputs = decoder_outputs
+
                 if callback:
-                    callback(decoder_outputs)
+                    callback(raw_decoder_outputs)
                 decoder_output = decoder_outputs[self.recognizer_decoder.outputs['symbols_distribution']]
                 softmaxed = softmax(decoder_output[0])
                 prev_symbol_index = np.argmax(decoder_output, axis=1)
@@ -159,15 +174,7 @@ class SequentialModel(BaseCascadeModel):
         texts = np.array(texts)
         detector_outputs['texts'] = texts
         output = self.adapter.process(detector_outputs, identifiers, frame_meta)
-        return detector_outputs, output
-
-    def load_model(self, network_list, launcher):
-        super().load_model(network_list, launcher)
-        self.update_inputs_outputs_info()
-
-    def load_network(self, network_list, launcher):
-        super().load_network(network_list, launcher)
-        self.update_inputs_outputs_info()
+        return raw_detector_outputs, output
 
     def update_inputs_outputs_info(self):
         with_prefix = (
@@ -275,7 +282,7 @@ class DetectorOVModel(BaseOpenVINOModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
 
-        output = self.infer(input_data)
+        output = self.infer(input_data, raw_resuls=True)
 
         return output
 
@@ -318,7 +325,7 @@ class RecognizerOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
-        return self.infer(input_data)
+        return self.infer(input_data, raw_resuls=True)
 
     def get_hidden_shape(self, name):
         return parse_partial_shape(self.inputs[name].get_partial_shape())

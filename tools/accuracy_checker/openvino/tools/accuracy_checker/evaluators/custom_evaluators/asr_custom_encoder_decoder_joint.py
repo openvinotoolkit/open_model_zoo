@@ -60,10 +60,14 @@ class Encoder:
         # Evaluate the encoder network one feature frame at a time
         data = self.fit_to_input(input_data)
         outputs = self.infer(data)
+        if isinstance(outputs, tuple):
+            outputs, raw_outputs = outputs
+        else:
+            raw_outputs = outputs
         encoder_output = np.array(outputs[self.encoder_out]).squeeze()
         self.h0 = outputs[self.h0_out]
         self.c0 = outputs[self.c0_out]
-        return encoder_output, outputs
+        return encoder_output, raw_outputs
 
     def fit_to_input(self, input_data):
         return {self.input: input_data, self.h0_input: self.h0, self.c0_input: self.c0}
@@ -117,9 +121,13 @@ class Decoder:
     def predict(self, identifiers, input_data, hidden=None):
         data = self.fit_to_input(input_data, hidden)
         outputs = self.infer(data)
+        if isinstance(outputs, tuple):
+            outputs, raw_outputs = outputs
+        else:
+            raw_outputs = outputs
         self.h0 = outputs[self.h0_out]
         self.c0 = outputs[self.c0_out]
-        return np.array(outputs[self.decoder_out]).squeeze(), (self.h0, self.c0), outputs
+        return np.array(outputs[self.decoder_out]).squeeze(), (self.h0, self.c0), raw_outputs
 
     def fit_to_input(self, token_id, hidden):
         if hidden is None:
@@ -176,8 +184,12 @@ class Joint:
         encoder_out, predictor_out = input_data
         data = self.fit_to_input(encoder_out, predictor_out)
         outputs = self.infer(data)
+        if isinstance(outputs, tuple):
+            outputs, raw_outputs = outputs
+        else:
+            raw_outputs = outputs
         joint_out = outputs[self.output]
-        return log_softmax(np.array(joint_out).squeeze()), outputs
+        return log_softmax(np.array(joint_out).squeeze()), raw_outputs
 
     def fit_to_input(self, encoder_out, predictor_out):
         return {self.input1: encoder_out, self.input2: predictor_out}
@@ -282,10 +294,11 @@ class CommonOpenVINOModel(BaseOpenVINOModel):
             ]
             self.with_prefix = with_prefix
 
-
     def predict(self, identifiers, input_data):
         raise NotImplementedError
 
+    def infer(self, input_data, raw_resuls=False):
+        return super().infer(input_data, True)
 
 
 class DLSDKEncoder(Encoder, CommonDLSDKModel):

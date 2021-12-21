@@ -158,8 +158,13 @@ class SequentialModel(BaseCascadeModel):
 
         duration_input = dict(zip(input_names, input_data[0]))
         duration_output = self.forward_tacotron_duration.predict(identifiers, duration_input)
+        if isinstance(duration_output, tuple):
+            duration_output, raw_duration_output = duration_output
+        else:
+            raw_duration_output = duration_output
+
         if callback:
-            callback(duration_output)
+            callback(raw_duration_output)
 
         duration = duration_output[self.duration_output]
         duration = (duration + 0.5).astype('int').flatten()
@@ -183,23 +188,23 @@ class SequentialModel(BaseCascadeModel):
         else:
             mels = self.forward_tacotron_regression.predict(identifiers,
                                                             {self.forward_tacotron_regression_input: processed_emb})
+        if isinstance(mels, tuple):
+            mels, raw_mels = mels
+        else:
+            raw_mels = mels
         if callback:
-            callback(mels)
+            callback(raw_mels)
         melgan_input = mels[self.mel_output]
         if np.ndim(melgan_input) != 3:
             melgan_input = np.expand_dims(melgan_input, 0)
         melgan_input = melgan_input[:, :, :self.max_mel_len]
         audio = self.melgan.predict(identifiers, {self.melgan_input: melgan_input})
+        if isinstance(audio, tuple):
+            audio, raw_audio = audio
+        else:
+            raw_audio = audio
 
-        return audio, self.adapter.process(audio, identifiers, input_meta)
-
-    def load_model(self, network_list, launcher):
-        super().load_model(network_list, launcher)
-        self.update_inputs_outputs_info()
-
-    def load_network(self, network_list, launcher):
-        super().load_network(network_list, launcher)
-        self.update_inputs_outputs_info()
+        return raw_audio, self.adapter.process(audio, identifiers, input_meta)
 
     @staticmethod
     def build_index(duration, x):
@@ -267,6 +272,9 @@ class TTSOVModel(BaseOpenVINOModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
         return self.infer(input_data)
+
+    def infer(self, input_data, raw_resuls=True):
+        return super().infer(input_data, raw_resuls)
 
     def set_input_and_output(self):
         pass

@@ -60,8 +60,7 @@ class Synthesizer(BaseCascadeModel):
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_outputs = self.encoder.predict(identifiers, input_data[0])
-        if callback:
-            callback(encoder_outputs)
+        encoder_outputs = send_callback(encoder_outputs, callback)
         postnet_outputs = []
         mel_outputs = []
         n = 0
@@ -74,8 +73,7 @@ class Synthesizer(BaseCascadeModel):
         feed_dict = self.decoder.init_feed_dict(encoder_output)
         for _ in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(identifiers, feed_dict)
-            if callback:
-                callback(decoder_outs)
+            decoder_outs = send_callback(decoder_outs, callback)
             decoder_input = decoder_outs[self.decoder.output_mapping['decoder_input']]
             finished = decoder_outs[self.decoder.output_mapping['finished']]
             # padding for the first chunk for postnet
@@ -89,8 +87,7 @@ class Synthesizer(BaseCascadeModel):
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
                 postnet_outs = self.postnet.predict(identifiers,
                                                     {self.postnet.input_mapping['mel_outputs']: postnet_input})
-                if callback:
-                    callback(postnet_outs)
+                postnet_outs = send_callback(postnet_outs, callback)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
@@ -107,8 +104,7 @@ class Synthesizer(BaseCascadeModel):
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
                 postnet_outs = self.postnet.predict(identifiers,
                                                     {self.postnet.input_mapping['mel_outputs']: postnet_input})
-                if callback:
-                    callback(postnet_outs)
+                postnet_outs = send_callback(postnet_outs, callback)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
@@ -118,23 +114,15 @@ class Synthesizer(BaseCascadeModel):
         out_blob = {'postnet_outputs': np.array(postnet_outputs)[:, 0].reshape(1, -1, 22)}
         return {}, self.adapter.process(out_blob, identifiers, input_meta)
 
-    def load_model(self, network_list, launcher):
-        super().load_model(network_list, launcher)
-        self.update_inputs_outputs_info()
 
-    def load_network(self, network_list, launcher):
-        super().load_network(network_list, launcher)
-        self.update_inputs_outputs_info()
-
-    def update_inputs_outputs_info(self):
-        current_name = next(iter(self.encoder.inputs))
-        with_prefix = current_name.startswith('encoder_')
-        if with_prefix != self.with_prefix:
-            self.encoder.update_inputs_outputs_info(with_prefix)
-            self.decoder.update_inputs_outputs_info(with_prefix)
-            self.postnet.update_inputs_outputs_info(with_prefix)
-
-        self.with_prefix = with_prefix
+def send_callback(outs, callback):
+    if isinstance(outs, tuple):
+        outs, raw_outs = outs
+    else:
+        raw_outs = outs
+    if callback:
+        callback(raw_outs)
+    return outs
 
 
 class EncoderModel:
@@ -160,6 +148,8 @@ class DecoderModel:
     def predict(self, identifiers, input_data):
         feed_dict = self.prepare_inputs(input_data)
         outputs = self.infer(feed_dict)
+        if isinstance(outputs, tuple):
+            return outputs, self.prepare_next_state_inputs(feed_dict, outputs)
         return outputs, self.prepare_next_state_inputs(feed_dict, outputs)
 
     def prepare_next_state_inputs(self, feed_dict, outputs):

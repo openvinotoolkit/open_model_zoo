@@ -187,9 +187,9 @@ class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
         input_data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_data.items()})
-        raw_result = self.infer(input_data)
+        raw_result, raw_t_results = self.infer(input_data, raw_resuls=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
-        return raw_result, result
+        return raw_t_results, result
 
     def fit_to_input(self, input_data):
         fitted = {}

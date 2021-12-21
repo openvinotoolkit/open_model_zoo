@@ -80,8 +80,12 @@ class ASRModel(BaseCascadeModel):
         predictions, raw_outputs = [], []
         for data in input_data:
             encoder_prediction, decoder_inputs = self.encoder.predict(identifiers, data)
+            if isinstance(encoder_prediction, tuple):
+                encoder_prediction, raw_encoder_prediction = encoder_prediction
+            else:
+                raw_encoder_prediction = encoder_prediction
             if encoder_callback:
-                encoder_callback(encoder_prediction)
+                encoder_callback(raw_encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
             raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
@@ -129,8 +133,12 @@ class ASRModel(BaseCascadeModel):
                     self._get_last_symb(label),
                     hidden
                 )
+                if isinstance(g, tuple):
+                    g, raw_g = g
+                else:
+                    raw_g = g
                 if callback:
-                    callback(g)
+                    callback(raw_g)
                 hidden_prime = (g[self.prediction.output_layers[0]], g[self.prediction.output_layers[1]])
                 g = g[self.prediction.output_layers[2]]
                 logp = self._joint_step(f, g, log_normalize=False, callback=callback)[0, :]
@@ -161,8 +169,12 @@ class ASRModel(BaseCascadeModel):
     def _joint_step(self, enc, pred, log_normalize=False, callback=None):
         inputs = {self.joint.input_layers[0]: enc, self.joint.input_layers[1]: pred}
         logits, logits_blob = self.joint.predict(None, inputs)
+        if isinstance(logits, tuple):
+            logits, raw_logits = logits
+        else:
+            raw_logits = logits
         if callback:
-            callback(logits)
+            callback(raw_logits)
         logits = logits_blob[:, 0, 0, :]
         if not log_normalize:
             return logits
@@ -254,8 +266,8 @@ class CommonOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data)
-        return results, results[self.output_blob]
+        results = self.infer(input_data, raw_resuls=True)
+        return results, results[self.output_blob] if not isinstance(results, tuple) else results[0][self.output_blob]
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):

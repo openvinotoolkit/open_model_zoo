@@ -102,10 +102,6 @@ class DLSDKFeedbackModel(FeedbackModel, BaseDLSDKModel):
 
         self.with_prefix = with_prefix
 
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        self.set_input_and_output()
-
 
 class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
@@ -118,7 +114,9 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
         data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: in_data.shape for key, in_data in data.items()})
-        raw_result = self.infer(data)
+        raw_result = self.infer(data, raw_resuls=True)
+        if isinstance(raw_result, tuple):
+            return raw_result[1], self.adapter.process([raw_result[0]], identifiers, [{}])[0]
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result[0]
 

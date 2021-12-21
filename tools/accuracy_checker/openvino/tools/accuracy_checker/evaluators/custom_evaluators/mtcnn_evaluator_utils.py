@@ -165,17 +165,17 @@ def transform_for_callback(batch_size, raw_outputs):
     fq_weights = []
     for i in range(batch_size):
         box_outs = OrderedDict()
-        for layer_name, data in raw_outputs[0].items():
-            if layer_name in fq_weights:
+        for layer_node, data in raw_outputs[0].items():
+            if layer_node in fq_weights:
                 continue
-            if layer_name.endswith('fq_weights_1'):
-                fq_weights.append(layer_name)
-                box_outs[layer_name] = data
+            if layer_node.get_node().friendly_name.endswith('fq_weights_1'):
+                fq_weights.append(layer_node)
+                box_outs[layer_node] = data
             elif data.ndim == 0:
-                box_outs[layer_name] = np.array([data])
+                box_outs[layer_node] = np.array([data])
             elif data.shape[0] <= i:
-                box_outs[layer_name] = data
+                box_outs[layer_node] = data
             else:
-                box_outs[layer_name] = np.expand_dims(data[i], axis=0)
+                box_outs[layer_node] = np.expand_dims(data[i], axis=0)
         output_per_box.append(box_outs)
     return output_per_box

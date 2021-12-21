@@ -71,22 +71,18 @@ class SequentialModel(BaseCascadeModel):
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_output, feats, chunk_size = self.encoder.predict(identifiers, input_data[0])
+        if isinstance(encoder_output, tuple):
+            encoder_output, raw_encoder_output = encoder_output
+        else:
+            raw_encoder_output = encoder_output
         if callback:
-            callback(encoder_output)
+            callback(raw_encoder_output)
 
         cfeats = encoder_output[self.encoder.output]
         decoder_data = (cfeats, feats, chunk_size)
         out_blob = self.decoder.predict(identifiers, decoder_data, callback=callback)
 
         return {}, self.adapter.process(out_blob, identifiers, input_meta)
-
-    def load_model(self, network_list, launcher):
-        super().load_model(network_list, launcher)
-        self.update_inputs_outputs_info()
-
-    def load_network(self, network_list, launcher):
-        super().load_network(network_list, launcher)
-        self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
         current_name = next(iter(self.encoder.inputs))
@@ -145,12 +141,12 @@ class EncoderOpenVINOModel(EncoderModel, TTSOVModel):
         self.output = network_info.get('output')
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
-    def infer(self, input_data):
+    def infer(self, input_data, raw_results=True):
         feature_layer_shape = parse_partial_shape(self.inputs[self.feature_input].get_partial_shape())
         if self.feature_input in self.dynamic_inputs or feature_layer_shape != input_data[self.feature_input].shape:
             input_shapes = {in_name: value.shape for in_name, value in input_data.items()}
             self._reshape_input(input_shapes)
-        return super().infer(input_data)
+        return super().infer(input_data, raw_results)
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
@@ -200,9 +196,13 @@ class DecoderModel:
                     self.rnn_input1: state1,
                     self.rnn_input2: state2
                 })
+                if isinstance(outputs, tuple):
+                    outputs, raw_outputs = outputs
+                else:
+                    raw_outputs = outputs
 
                 if callback is not None:
-                    callback(outputs)
+                    callback(raw_outputs)
                 p = outputs[self.output]
                 state1 = outputs[self.rnn_output1]
                 state2 = outputs[self.rnn_output2]
