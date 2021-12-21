@@ -20,7 +20,7 @@ import numpy as np
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations
+from ...utils import contains_all, extract_image_representations, generate_layer_name
 from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
 
 
@@ -110,6 +110,25 @@ class BaseSequentialModel(BaseCascadeModel):
         self.max_seq_len = int(meta.get('max_seq_len', 0))
         self._part_by_name = {'encoder': self.recognizer_encoder, 'decoder': self.recognizer_decoder}
         self.with_prefix = False
+
+    def load_model(self, network_list, launcher):
+        super().load_model(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def load_network(self, network_list, launcher):
+        super().load_network(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def update_inputs_outputs_info(self):
+        with_prefix = next(iter(self.recognizer_encoder.network.input_info)).startswith('encoder')
+        if with_prefix != self.with_prefix:
+            for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
+                self.recognizer_encoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'encoder_',
+                                                                                      with_prefix)
+            for input_k, input_name in self.recognizer_decoder.inputs_mapping.items():
+                self.recognizer_decoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'decoder_',
+                                                                                      with_prefix)
+        self.with_prefix = with_prefix
 
     def predict(self, identifiers, input_data):
         pass

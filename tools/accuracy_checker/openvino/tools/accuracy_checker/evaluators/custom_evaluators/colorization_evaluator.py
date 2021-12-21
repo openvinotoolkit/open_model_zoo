@@ -166,7 +166,7 @@ class ColorizationTestOVModel(BaseOpenVINOModel):
         self._inputs[self.input_blob] = img_l_rs
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in self._inputs.items()})
-        res, raw_res = self.infer(self._inputs, raw_resuls=True)
+        res, raw_res = self.infer(self._inputs, raw_results=True)
 
         new_result = self.postprocessing(res[self.output_blob], img_l)
         return raw_res, np.array(new_result)
@@ -209,7 +209,7 @@ class ColorizationCheckOVModel(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_dict.items()})
-        raw_result, raw_outputs = self.infer(input_dict, raw_resuls=True)
+        raw_result, raw_outputs = self.infer(input_dict, raw_results=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_outputs, result
 

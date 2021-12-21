@@ -141,7 +141,7 @@ class EncoderDLSDKModel(BaseDLSDKModel):
 class EncoderOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data, raw_resuls=True)
+        results = self.infer(input_data, raw_results=True)
         return results, results[self.output_blob] if not isinstance(results, tuple) else results[0][self.output_blob]
 
 
@@ -171,7 +171,7 @@ class DecoderOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data):
         feed_dict = self.fit_to_input(input_data)
-        results, raw_results = self.infer(feed_dict, raw_resuls=True)
+        results, raw_results = self.infer(feed_dict, raw_results=True)
         result = self.adapter.process([results], identifiers, [{}])
 
         return raw_results, result

@@ -775,7 +775,7 @@ class OpenVINOLauncher(Launcher):
                 data = np.expand_dims(data, -1)
             data_shape = np.shape(data)
             if len(data_shape) < 4:
-                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                if np.size(np.squeeze(np.zeros(layer_shape))) == np.size(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
             return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:

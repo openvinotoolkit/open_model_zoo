@@ -163,7 +163,7 @@ class EncoderOpenVINO(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_dict.items()})
-        return self.infer(input_dict, raw_resuls=True)
+        return self.infer(input_dict, raw_results=True)
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
@@ -212,7 +212,7 @@ class DecoderOpenVINOModel(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_dict.items()})
-        raw_result, raw_node_result = self.infer(input_dict, raw_resuls=True)
+        raw_result, raw_node_result = self.infer(input_dict, raw_results=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_node_result, result

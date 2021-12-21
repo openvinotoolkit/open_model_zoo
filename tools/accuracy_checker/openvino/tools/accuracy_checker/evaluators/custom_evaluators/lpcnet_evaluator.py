@@ -84,6 +84,14 @@ class SequentialModel(BaseCascadeModel):
 
         return {}, self.adapter.process(out_blob, identifiers, input_meta)
 
+    def load_model(self, network_list, launcher):
+        super().load_model(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def load_network(self, network_list, launcher):
+        super().load_network(network_list, launcher)
+        self.update_inputs_outputs_info()
+
     def update_inputs_outputs_info(self):
         current_name = next(iter(self.encoder.inputs))
         with_prefix = current_name.startswith('encoder_')
@@ -112,7 +120,6 @@ class EncoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
         self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
-        self.output = generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -228,9 +235,6 @@ class DecoderModel:
         self.input2 = generate_layer_name(self.input2, prefix, with_prefix)
         self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
-        self.output = generate_layer_name(self.output, prefix, with_prefix)
-        self.rnn_output1 = generate_layer_name(self.rnn_output1, prefix, with_prefix)
-        self.rnn_output2 = generate_layer_name(self.rnn_output2, prefix, with_prefix)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

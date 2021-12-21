@@ -114,6 +114,24 @@ class Synthesizer(BaseCascadeModel):
         out_blob = {'postnet_outputs': np.array(postnet_outputs)[:, 0].reshape(1, -1, 22)}
         return {}, self.adapter.process(out_blob, identifiers, input_meta)
 
+    def load_model(self, network_list, launcher):
+        super().load_model(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def load_network(self, network_list, launcher):
+        super().load_network(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def update_inputs_outputs_info(self):
+        current_name = next(iter(self.encoder.inputs))
+        with_prefix = current_name.startswith('encoder_')
+        if with_prefix != self.with_prefix:
+            self.encoder.update_inputs_outputs_info(with_prefix)
+            self.decoder.update_inputs_outputs_info(with_prefix)
+            self.postnet.update_inputs_outputs_info(with_prefix)
+
+        self.with_prefix = with_prefix
+
 
 def send_callback(outs, callback):
     if isinstance(outs, tuple):
@@ -140,9 +158,6 @@ class EncoderModel:
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'encoder_', with_prefix)
 
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'encoder_', with_prefix)
-
 
 class DecoderModel:
     def predict(self, identifiers, input_data):
@@ -154,16 +169,17 @@ class DecoderModel:
 
     def prepare_next_state_inputs(self, feed_dict, outputs):
         common_layers = set(self.input_mapping).intersection(set(self.output_mapping))
+        if isinstance(outputs, tuple):
+            outs = outputs[0]
+        else:
+            outs = outputs
         for common_layer in common_layers:
-            feed_dict[self.input_mapping[common_layer]] = outputs[self.output_mapping[common_layer]]
+            feed_dict[self.input_mapping[common_layer]] = outs[self.output_mapping[common_layer]]
         return feed_dict
 
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'decoder_', with_prefix)
-
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'decoder_', with_prefix)
 
     def init_feed_dict(self, encoder_output):
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
@@ -195,9 +211,6 @@ class PostNetModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'postnet_', with_prefix)
-
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'postnet_', with_prefix)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):

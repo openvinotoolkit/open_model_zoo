@@ -68,8 +68,7 @@ class ModelEvaluator:
         model_name = model_config['name']
         dataset_config = model_config['datasets']
         launcher_config = model_config['launchers'][0]
-        framework = launcher_config.pop('framework', 'openvino')
-        if framework != 'openvino':
+        if launcher_config.get('framework') != 'openvino':
             launcher_config['framework'] = 'openvino'
         launcher = create_launcher(launcher_config, model_name, delayed_model_loading=True)
         config_adapter = launcher_config.get('adapter')

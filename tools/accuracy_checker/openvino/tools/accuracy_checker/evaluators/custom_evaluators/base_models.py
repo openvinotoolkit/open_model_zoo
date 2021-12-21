@@ -323,17 +323,11 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.output_blob is None:
-                output_blob = next(iter(outputs)).get_node().friendly_name
-            else:
-                output_blob = (
-                    '_'.join([self.default_model_suffix, self.output_blob])
-                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
-                )
+                self.output_blob = next(iter(outputs)).get_node().friendly_name
             self.input_blob = input_blob
-            self.output_blob = output_blob
             self.with_prefix = with_prefix
             if hasattr(self, 'adapter') and self.adapter is not None:
-                self.adapter.output_blob = output_blob
+                self.adapter.output_blob = self.output_blob
 
     @property
     def inputs(self):
@@ -349,7 +343,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return {self.input_blob: np.array(input_data)}
 
-    def infer(self, input_data, raw_resuls=False):
+    def infer(self, input_data, raw_results=False):
         if not hasattr(self, 'infer_request') or self.infer_request is None:
             self.infer_request = self.exec_network.create_infer_request()
         tensors_mapping = self.input_tensors_mapping()
@@ -359,7 +353,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             out_node.get_node().friendly_name: out_res
             for out_node, out_res in outputs.items()
         }
-        if raw_resuls:
+        if raw_results:
             return res_outputs, outputs
         return res_outputs
 

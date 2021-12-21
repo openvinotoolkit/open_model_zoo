@@ -297,7 +297,7 @@ class CommonOpenVINOModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         raise NotImplementedError
 
-    def infer(self, input_data, raw_resuls=False):
+    def infer(self, input_data, raw_results=False):
         return super().infer(input_data, True)
 
 

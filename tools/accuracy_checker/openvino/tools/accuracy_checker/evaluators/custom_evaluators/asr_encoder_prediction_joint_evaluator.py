@@ -266,7 +266,7 @@ class CommonOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data, raw_resuls=True)
+        results = self.infer(input_data, raw_results=True)
         return results, results[self.output_blob] if not isinstance(results, tuple) else results[0][self.output_blob]
 
     def fit_to_input(self, input_data):
@@ -284,31 +284,6 @@ class CommonOVModel(BaseOpenVINOModel):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
-
-    def set_input_and_output(self):
-        input_blob = next(iter(self.inputs))
-        with_prefix = input_blob.startswith(self.default_model_suffix)
-        if self.input_blob is None or with_prefix != self.with_prefix:
-            if self.output_blob is None:
-                output_blob = next(iter(self.exec_network.outputs)).get_node().friendly_name
-            else:
-                output_blob = (
-                    '_'.join([self.default_model_suffix, self.output_blob])
-                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
-                )
-            self.input_blob = input_blob
-            self.output_blob = output_blob
-            self.with_prefix = with_prefix
-            for idx, inp in enumerate(self.input_layers):
-                self.input_layers[idx] = (
-                    '_'.join([self.default_model_suffix, inp])
-                    if with_prefix else inp.split(self.default_model_suffix)[-1]
-                )
-            for idx, out in enumerate(self.output_layers):
-                self.output_layers[idx] = (
-                    '_'.join([self.default_model_suffix, out])
-                    if with_prefix else out.split(self.default_model_suffix)[-1]
-                )
 
 
 class EncoderDLSDKModel(CommonDLSDKModel):

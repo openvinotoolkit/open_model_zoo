@@ -404,6 +404,7 @@ class DLSDKModelMixin:
                 self.exec_network = None
         if not self.dynamic_inputs:
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
@@ -482,17 +483,18 @@ class OVModelMixin(BaseOpenVINOModel):
     def _infer(self, input_blobs, batch_meta):
         for meta in batch_meta:
             meta['input_shape'] = []
-        results = [], raw_results = []
+        results = []
+        raw_results = []
         for feed_dict in input_blobs:
             input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
             if not self.is_dynamic:
                 self.reshape_net(input_shapes)
-            result, raw_result = self.infer(feed_dict, raw_resuls=True)
+            result, raw_result = self.infer(feed_dict, raw_results=True)
             results.append(result)
             raw_results.append(raw_result)
             for meta in batch_meta:
                 meta['input_shape'].append(input_shapes)
-        return (results, raw_results)
+        return results, raw_results
 
     def predict(self, identifiers, input_data):
         raise NotImplementedError
@@ -570,6 +572,7 @@ class OVModelMixin(BaseOpenVINOModel):
                 self.exec_network = None
         if not self.dynamic_inputs:
             self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         self.infer_request = None
@@ -583,6 +586,22 @@ class OVModelMixin(BaseOpenVINOModel):
         if log:
             self.print_input_output_info()
         self.infer_request = None
+
+    def update_input_output_info(self, model_prefix):
+        def generate_name(prefix, with_prefix, layer_name):
+            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+        if model_prefix is None:
+            return
+        config_inputs = self.model_info.get('inputs', [])
+        network_with_prefix = next(iter(self.inputs)).startswith(model_prefix)
+        if config_inputs:
+            config_with_prefix = config_inputs[0]['name'].startswith(model_prefix)
+            if config_with_prefix == network_with_prefix:
+                return
+            for c_input in config_inputs:
+                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+            self.model_info['inputs'] = config_inputs
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
@@ -639,6 +658,7 @@ class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
                 self.exec_network = None
         if not self.dynamic_inputs:
             self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
+        self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = self.model_info['outputs']
@@ -657,7 +677,7 @@ class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
         if output_callback:
             for out in raw_outputs:
                 output_callback(out)
-        return outputs
+        return outputs, raw_outputs
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
@@ -727,7 +747,7 @@ class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
         if output_callback:
             batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
             output_callback(transform_for_callback(batch_size, raw_outputs[1]))
-        return raw_outputs[0]
+        return raw_outputs
 
 
 class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):

@@ -222,7 +222,7 @@ class CoCosNetModelOV(BaseOpenVINOModel):
             data = self.fit_to_input(current_input)
             if not self.is_dynamic and self.dynamic_inputs:
                 self._reshape_input({k: v.shape for k, v in data.items()})
-            prediction, raw_prediction = self.infer(data, raw_resuls=True)
+            prediction, raw_prediction = self.infer(data, raw_results=True)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, raw_prediction
 
