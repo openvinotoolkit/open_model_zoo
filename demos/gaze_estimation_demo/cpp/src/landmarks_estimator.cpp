@@ -62,15 +62,12 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
     const auto& heatMapsDims = outputInfo.at(outputBlobName);
     numberLandmarks = heatMapsDims[1];
     std::vector<cv::Mat> heatMaps = split(rawLandmarks, heatMapsDims);
-    for (size_t i = 0; i < numberLandmarks; ++i) {
-        for (size_t j = heatMaps[i].cols - 1; j > 0; --j) {
-            cv::Mat tmpCol = heatMaps[i].col(j);
-            heatMaps[i].col(j - 1).copyTo(tmpCol);
-        }
-    }
-    cv::Point2f center(faceCrop.cols * 0.5f, faceCrop.rows * 0.5f);
-    cv::Point2f scale(static_cast<float>(faceCrop.cols), static_cast<float>(faceCrop.rows));
+    float w = faceBoundingBox.width, h = faceBoundingBox.height;
+    cv::Point2f center(faceBoundingBox.tl().x + w * 0.5f, faceBoundingBox.tl().y + h * 0.5f);
+    cv::Point2f scale(w / 200.0, h / 200.0);
+
     std::vector<cv::Point2f> preds = getMaxPreds(heatMaps);
+
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
         const cv::Mat& heatMap = heatMaps[landmarkId];
         int px = int(preds[landmarkId].x);
@@ -93,9 +90,9 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
         cv::Mat point;
         trans.convertTo(trans, CV_32F);
         point = trans * coord;
-        int x = static_cast<int>(point.at<float>(0, 0) + faceBoundingBox.tl().x);
-        int y = static_cast<int>(point.at<float>(1, 0) + faceBoundingBox.tl().y);
-        landmarks.push_back(cv::Point2i(x,y));
+        int x = static_cast<int>(point.at<float>(0, 0));
+        int y = static_cast<int>(point.at<float>(1, 0));
+        landmarks.push_back(cv::Point2i(x, y));
     }
     return landmarks;
 }
@@ -146,7 +143,7 @@ int LandmarksEstimator::sign(float number) {
 
 cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center, cv::Point2f scale,
     float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv) {
-    cv::Point2f scale_tmp = scale;
+    cv::Point2f scale_tmp = scale * 200.0;
     const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
     cv::Point2f src_dir = rotatePoint(cv::Point2f(0.f, scale_tmp.y * -0.5f), rot_rad);
