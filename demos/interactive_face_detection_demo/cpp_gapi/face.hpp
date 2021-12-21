@@ -22,9 +22,11 @@ public:
     void updateEmotions(const std::map<std::string, float>& values);
     void updateHeadPose(float y, float p, float r);
     void updateLandmarks(std::vector<float> values);
+    void updateRealFaceConfidence(float value);
 
     int getAge();
     bool isMale();
+    bool isReal();
     std::map<std::string, float> getEmotions();
     std::pair<std::string, float> getMainEmotion();
     const std::vector<float>& getLandmarks();
@@ -43,7 +45,8 @@ public:
     float _pitch;
     float _roll;
     std::vector<float> _landmarks;
+    float _realFaceConfidence;
 };
 
-// ----------------------------------- Utils -----------------------------------------------------------------
+// ----------------- Utils -----------------
 Face::Ptr matchFace(cv::Rect rect, const std::list<Face::Ptr>& faces);
