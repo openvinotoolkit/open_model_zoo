@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
-        std::shared_ptr<ov::Function> model = reshape(core.read_model(FLAGS_m), FLAGS_bs);
+        std::shared_ptr<ov::Model> model = setBatch(core.read_model(FLAGS_m), FLAGS_bs);
 
         struct {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
@@ -212,14 +212,10 @@ int main(int argc, char* argv[]) {
         postParams.pafsOut = model->outputs()[0];
         postParams.heatMapsOut = model->outputs()[1];
         const ov::Layout outLayout{"NCHW"};
-        model = ov::preprocess::PrePostProcessor(model)
-            .output(ov::preprocess::OutputInfo(postParams.pafsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                .set_layout(outLayout)
-                .set_element_type(ov::element::f32)))
-            .output(ov::preprocess::OutputInfo(postParams.heatMapsOut.get_any_name()).tensor(ov::preprocess::OutputTensorInfo()
-                .set_layout(outLayout)
-                .set_element_type(ov::element::f32)))
-            .build();
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.output(postParams.pafsOut.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout(outLayout);
+        ppp.output(postParams.heatMapsOut.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout(outLayout);
+        model = ppp.build();
         postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
         postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
         postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];

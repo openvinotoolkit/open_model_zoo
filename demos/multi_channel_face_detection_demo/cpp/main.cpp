@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
 
         ov::runtime::Core core;
         std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
-            reshape(core.read_model(FLAGS_m), FLAGS_bs),
+            setBatch(core.read_model(FLAGS_m), FLAGS_bs),
             FLAGS_m,
             FLAGS_d,
             roundUp(params.count, FLAGS_bs),

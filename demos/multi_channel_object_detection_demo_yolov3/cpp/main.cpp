@@ -80,6 +80,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_duplicate_num == 0) {
         throw std::logic_error("Parameter -duplicate_num must be positive");
     }
+    if (FLAGS_bs != 1) {
+        throw std::logic_error("Parameter -bs must be 1");
+    }
 
     return true;
 }
@@ -317,7 +320,7 @@ int main(int argc, char* argv[]) {
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
         ov::runtime::Core core;
-        std::shared_ptr<ov::Function> model = reshape(core.read_model(FLAGS_m), FLAGS_bs);
+        std::shared_ptr<ov::Model> model = setBatch(core.read_model(FLAGS_m), FLAGS_bs);
 
         std::vector<std::pair<size_t, YoloParams>> yoloParams;
         for (const ov::Output<ov::Node>& out : model->outputs()) {
