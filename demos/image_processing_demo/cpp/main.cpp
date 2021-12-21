@@ -148,7 +148,7 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
         return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
     }
 	if (type == "style") {
-        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m, frameSize));
+        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
