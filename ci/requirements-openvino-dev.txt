@@ -8,6 +8,10 @@ charset-normalizer==2.0.8
     # via requests
 click==8.0.3
     # via nltk
+colorama==0.4.4
+    # via
+    #   click
+    #   tqdm
 cycler==0.11.0
     # via matplotlib
 decorator==4.4.2
