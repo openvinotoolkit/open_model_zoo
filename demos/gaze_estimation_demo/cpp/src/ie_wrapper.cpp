@@ -11,11 +11,10 @@
 
 namespace gaze_estimation {
 
-IEWrapper::IEWrapper(InferenceEngine::Core& ie,
-                     const std::string& modelPath,
-                     const std::string& modelType,
-                     const std::string& deviceName):
-           modelPath(modelPath), modelType(modelType), deviceName(deviceName), ie(ie) {
+IEWrapper::IEWrapper(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
+        modelPath(modelPath), modelType(modelType), deviceName(deviceName), ie(ie)
+{
     network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
@@ -59,8 +58,7 @@ void IEWrapper::setExecPart() {
     request = executableNetwork.CreateInferRequest();
 }
 
-void IEWrapper::setInputBlob(const std::string& blobName,
-                             const cv::Mat& image) {
+void IEWrapper::setInputBlob(const std::string& blobName, const cv::Mat& image) {
     auto blobDims = inputBlobsDimsInfo[blobName];
 
     if (blobDims.size() != 4) {
@@ -75,8 +73,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     matToBlob(resizedImage, inputBlob);
 }
 
-void IEWrapper::setInputBlob(const std::string& blobName,
-                             const std::vector<float>& data) {
+void IEWrapper::setInputBlob(const std::string& blobName, const std::vector<float>& data) {
     auto blobDims = inputBlobsDimsInfo[blobName];
     unsigned long dimsProduct = 1;
     for (auto const& dim : blobDims) {
@@ -93,8 +90,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     }
 }
 
-void IEWrapper::getOutputBlob(const std::string& blobName,
-                              std::vector<float> &output) {
+void IEWrapper::getOutputBlob(const std::string& blobName, std::vector<float>& output) {
     output.clear();
     auto blobDims = outputBlobsDimsInfo[blobName];
     auto dataSize = 1;
@@ -104,7 +100,7 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
 
     InferenceEngine::LockedMemory<const void> blobMapped =
         InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(blobName))->rmap();
-    auto buffer = blobMapped.as<float *>();
+    auto buffer = blobMapped.as<float*>();
 
     for (int i = 0; i < dataSize; ++i) {
         output.push_back(buffer[i]);
@@ -146,7 +142,7 @@ void IEWrapper::infer() {
     request.Infer();
 }
 
-void IEWrapper::reshape(const std::map<std::string, std::vector<unsigned long> > &newBlobsDimsInfo) {
+void IEWrapper::reshape(const std::map<std::string, std::vector<unsigned long> >& newBlobsDimsInfo) {
     if (inputBlobsDimsInfo.size() != newBlobsDimsInfo.size()) {
         throw std::runtime_error("Mismatch in the number of blobs being reshaped");
     }

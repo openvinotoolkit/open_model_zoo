@@ -8,10 +8,11 @@
 #include "landmarks_estimator.hpp"
 
 namespace gaze_estimation {
-LandmarksEstimator::LandmarksEstimator(InferenceEngine::Core& ie,
-                                       const std::string& modelPath,
-                                       const std::string& deviceName):
-                    ieWrapper(ie, modelPath, modelType, deviceName) {
+
+LandmarksEstimator::LandmarksEstimator(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+        ieWrapper(ie, modelPath, modelType, deviceName)
+{
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
 
@@ -25,8 +26,7 @@ LandmarksEstimator::LandmarksEstimator(InferenceEngine::Core& ie,
     }
 }
 
-void LandmarksEstimator::estimate(const cv::Mat& image,
-                                  FaceInferenceResults& outputResults) {
+void LandmarksEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
@@ -37,8 +37,7 @@ void LandmarksEstimator::estimate(const cv::Mat& image,
     const auto& outputBlobDims = outputInfo.at(outputBlobName);
     if (outputBlobDims.size() == 2) {
         outputResults.faceLandmarks=simplePostprocess(faceBoundingBox, faceCrop);
-    }
-    else {
+    } else {
         outputResults.faceLandmarks = heatMapPostprocess(faceBoundingBox, faceCrop);
     }
 }
@@ -79,6 +78,7 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
             preds[landmarkId].y += sign(diffSecond) * 0.25f;
         }
     }
+
     //transform preds
     cv::Mat trans = affineTransform(center, scale, 0, heatMapsDims[2], heatMapsDims[3], cv::Point2f(0., 0.), true);
     std::vector<cv::Point2i> landmarks;
@@ -123,8 +123,7 @@ std::vector<cv::Point2f> LandmarksEstimator::getMaxPreds(std::vector<cv::Mat> he
         float maxVal = heatMapData[idx];
         if (maxVal > 0) {
             preds.push_back(cv::Point2f(static_cast<float>(idx % heatMaps[0].cols), static_cast<float>(idx / heatMaps[0].cols)));
-        }
-        else {
+        } else {
             preds.push_back(cv::Point2f(-1, -1));
         }
     }
@@ -141,8 +140,9 @@ int LandmarksEstimator::sign(float number) {
     return 0;
 }
 
-cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center, cv::Point2f scale,
-    float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv) {
+cv::Mat LandmarksEstimator::affineTransform(
+    cv::Point2f center, cv::Point2f scale, float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv)
+{
     cv::Point2f scale_tmp = scale;
     const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
@@ -159,8 +159,7 @@ cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center, cv::Point2f scal
     cv::Mat trans;
     if (inv) {
         trans = cv::getAffineTransform(dst, src);
-    }
-    else {
+    } else {
         trans = cv::getAffineTransform(src, dst);
     }
     return trans;

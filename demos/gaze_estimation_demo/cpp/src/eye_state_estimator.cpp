@@ -9,18 +9,17 @@
 
 namespace gaze_estimation {
 
-EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
-                                     const std::string& modelPath,
-                                     const std::string& deviceName):
-                                     ieWrapper(ie, modelPath, modelType, deviceName) {
+EyeStateEstimator::EyeStateEstimator(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+        ieWrapper(ie, modelPath, modelType, deviceName)
+{
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
     outputBlobName = ieWrapper.expectSingleOutput();
 }
 
-cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
-                                                 const cv::Point2i& p2,
-                                                 float scale) const {
+cv::Rect EyeStateEstimator::createEyeBoundingBox(
+    const cv::Point2i& p1, const cv::Point2i& p2, float scale) const {
     cv::Rect result;
     float size = static_cast<float>(cv::norm(p1 - p2));
 
@@ -35,9 +34,8 @@ cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
     return result;
 }
 
-void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
-                                                cv::Mat& dstImage,
-                                                float angle) const {
+void EyeStateEstimator::rotateImageAroundCenter(
+    const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const {
     auto w = srcImage.cols;
     auto h = srcImage.rows;
 
@@ -49,7 +47,8 @@ void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
     cv::warpAffine(srcImage, dstImage, rotMatrix, size, 1, cv::BORDER_REPLICATE);
 }
 
-void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
+void EyeStateEstimator::estimate(
+    const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto roll = outputResults.headPoseAngles.z;
     std::vector<cv::Point2f> eyeLandmarks = outputResults.getEyeLandmarks();
 

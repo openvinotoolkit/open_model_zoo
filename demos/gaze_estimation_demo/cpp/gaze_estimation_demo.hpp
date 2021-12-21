@@ -7,10 +7,10 @@
 
 #include <string>
 #include <vector>
-#include <gflags/gflags.h>
 #include <iostream>
 
-#include <utils/default_flags.hpp>
+#include "gflags/gflags.h"
+#include "utils/default_flags.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS

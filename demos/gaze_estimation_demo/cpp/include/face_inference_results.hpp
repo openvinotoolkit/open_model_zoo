@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <opencv2/core/core.hpp>
-#include <utils/slog.hpp>
+#include "utils/slog.hpp"
 
 namespace gaze_estimation {
 struct FaceInferenceResults {
