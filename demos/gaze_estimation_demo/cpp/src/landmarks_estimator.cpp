@@ -62,9 +62,9 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
     const auto& heatMapsDims = outputInfo.at(outputBlobName);
     numberLandmarks = heatMapsDims[1];
     std::vector<cv::Mat> heatMaps = split(rawLandmarks, heatMapsDims);
-    float w = faceBoundingBox.width, h = faceBoundingBox.height;
+    float w = static_cast<float>(faceBoundingBox.width), h = static_cast<float>(faceBoundingBox.height);
     cv::Point2f center(faceBoundingBox.tl().x + w * 0.5f, faceBoundingBox.tl().y + h * 0.5f);
-    cv::Point2f scale(w / 200.0, h / 200.0);
+    cv::Point2f scale(w, h);
 
     std::vector<cv::Point2f> preds = getMaxPreds(heatMaps);
 
@@ -143,7 +143,7 @@ int LandmarksEstimator::sign(float number) {
 
 cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center, cv::Point2f scale,
     float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv) {
-    cv::Point2f scale_tmp = scale * 200.0;
+    cv::Point2f scale_tmp = scale;
     const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
     cv::Point2f src_dir = rotatePoint(cv::Point2f(0.f, scale_tmp.y * -0.5f), rot_rad);
