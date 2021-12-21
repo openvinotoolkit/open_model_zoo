@@ -481,7 +481,7 @@ class AutoResize(Preprocessor):
         def is_image_input(shape):
             return len(shape) == 4 and (shape[1] in [1, 3, 4] or shape[-1] in [1, 3, 4])
 
-        def is_nhwc(shape)
+        def is_nhwc(shape):
             return shape[-1] in [1, 3, 4]
         if input_shape is None:
             raise ConfigError('resize to input size impossible')
