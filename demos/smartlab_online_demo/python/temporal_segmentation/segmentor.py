@@ -17,6 +17,8 @@
 
 import cv2
 import numpy as np
+import sys
+sys.path.append('temporal_segmentation')
 from multiview_mobilenetv3_tsm import create_mbv3s_model
 from openvino.inference_engine import IECore
 

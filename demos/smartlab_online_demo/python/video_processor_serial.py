@@ -18,11 +18,11 @@
 
 import os
 import cv2
+import time
 import pandas as pd
 import numpy as np
-import time
-from collections import deque
 import threading
+from collections import deque
 from object_detection.detector import Detector
 from temporal_segmentation.segmentor import Segmentor
 from score_evaluation.evaluator import Evaluator
@@ -55,20 +55,20 @@ class Application(object):
                 False)
         self.detector.initialize()  # Initialize the session and load the model parameters
 
-        '''Video Segmentation Variables'''
-        self.segmentor = Segmentor(
-                "./intel/smartlab-action-recognition-encoder-0001/FP32-INT1/1280vec-mobilenet-v2.pt",
-                "./intel/smartlab-action-recognition-decoder-0001/FP32-INT1/concat-classifier.pth")
-        self.segmentor.initialize()  # Initialize the session and load the model parameters
+        # '''Video Segmentation Variables'''
+        # self.segmentor = Segmentor(
+        #         "./intel/smartlab-action-recognition-encoder-0001/FP32-INT1/1280vec-mobilenet-v2.pt",
+        #         "./intel/smartlab-action-recognition-decoder-0001/FP32-INT1/concat-classifier.pth")
+        # self.segmentor.initialize()  # Initialize the session and load the model parameters
 
 
-        '''Score Evaluation Variables'''
-        self.evaluator = Evaluator()
-        self.evaluator.initialize()
+        # '''Score Evaluation Variables'''
+        # self.evaluator = Evaluator()
+        # self.evaluator.initialize()
 
-        '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
-        self.display = Display()
-        self.display.initialize()
+        # '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
+        # self.display = Display()
+        # self.display.initialize()
 
     def video_parser(self, top_video_path, front_video_path):
         """
@@ -89,30 +89,30 @@ class Application(object):
                 ''' The object detection module need to generate detection results(for the current frame) '''
                 top_det_results, front_det_results = self.detector.inference(img_top=frame_top, img_front=frame_front,frame_counter=self.frame_counter)
 
-                ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-                top_seg_results, front_seg_results = self.segmentor.inference(buffer_top=self.buffer_top,
-                                                                            buffer_front=self.buffer_front,
-                                                                            frame_index=self.frame_counter
-                                                                            )
+                # ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
+                # top_seg_results, front_seg_results = self.segmentor.inference(buffer_top=self.buffer_top,
+                #                                                             buffer_front=self.buffer_front,
+                #                                                             frame_index=self.frame_counter
+                #                                                             )
 
-                ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-                self.state, self.scoring = self.evaluator.inference(top_det_results=top_det_results,
-                                                                front_det_results=front_det_results,
-                                                                top_seg_results=top_seg_results,
-                                                                front_seg_results=front_seg_results,
-                                                                frame_top=frame_top,
-                                                                frame_front=frame_front
-                                                                )
+                # ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
+                # self.state, self.scoring = self.evaluator.inference(top_det_results=top_det_results,
+                #                                                 front_det_results=front_det_results,
+                #                                                 top_seg_results=top_seg_results,
+                #                                                 front_seg_results=front_seg_results,
+                #                                                 frame_top=frame_top,
+                #                                                 frame_front=frame_front
+                #                                                 )
 
-                self.display.display_result(frame_top=frame_top,
-                                            frame_front=frame_front,
-                                            front_seg_results=front_seg_results,
-                                            top_seg_results=top_seg_results,
-                                            top_det_results=top_det_results,
-                                            front_det_results=front_det_results,
-                                            scoring=self.scoring,
-                                            state=self.state,
-                                            frame_counter=self.frame_counter)
+                # self.display.display_result(frame_top=frame_top,
+                #                             frame_front=frame_front,
+                #                             front_seg_results=front_seg_results,
+                #                             top_seg_results=top_seg_results,
+                #                             top_det_results=top_det_results,
+                #                             front_det_results=front_det_results,
+                #                             scoring=self.scoring,
+                #                             state=self.state,
+                #                             frame_counter=self.frame_counter)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):     #press 'q' to exit
                     break
