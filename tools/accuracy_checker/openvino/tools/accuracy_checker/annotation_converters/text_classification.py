@@ -99,7 +99,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
     def read_annotation(self):
         lines = []
         with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
-            reader = csv.reader(ann_file, delimiter=self.column_separator, quotechar=None)
+            reader = csv.reader(ann_file, delimiter=self.column_separator)
             for idx, line in enumerate(reader):
                 if idx == 0:
                     continue
@@ -490,7 +490,7 @@ class ColumnDataset(BaseGLUETextClassificationConverter):
     def select_label_map(self):
         label_map = {}
         if 'labels_list' in self.config:
-            label_map = dict(enumerate(self.get_value_from_config('label_list')))
+            label_map = dict(enumerate(self.get_value_from_config('labels_list')))
         if 'dataset_meta_file' in self.config:
             meta = read_json(self.get_value_from_config('dataset_meta_file'))
             if 'label_map' in meta:
