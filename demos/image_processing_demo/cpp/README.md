@@ -37,11 +37,11 @@ Super resolution:
 
 ![](./assets/parrots_restoration.png)
 
+For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
+
 4. Example for style_transfer:
 
 ![](./assets/cat_style_transfer.jpg)
-
-For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
 
 ## How It Works
 
@@ -56,9 +56,9 @@ For `deblurring` user can use [deblurgan-v2](../../../models/public/deblurgan-v2
 
 For `jpeg_restoration` user can use [fbcnn](../../../models/public/fbcnn/README.md) - flexible blind convolutional neural network for JPEG artifacts removal.
 
-The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
-
 For `style_transfer` user can use [fast-neural-style-mosaic-onnx](../../../models/public/fast-neural-style-mosaic-onnx/README.md) - one of the style transfer models designed to mix the content of an image with the style of another image.
+
+The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
