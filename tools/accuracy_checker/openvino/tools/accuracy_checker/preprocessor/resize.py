@@ -479,17 +479,22 @@ class AutoResize(Preprocessor):
 
     def set_input_shape(self, input_shape):
         def is_image_input(shape):
-            return len(shape) == 4 and shape[1] in [1, 3, 4]
+            return len(shape) == 4 and (shape[1] in [1, 3, 4] or shape[-1] in [1, 3, 4])
+
+        def is_nhwc(shape):
+            return shape[-1] in [1, 3, 4]
         if input_shape is None:
             raise ConfigError('resize to input size impossible')
         image_inputs = [value for value in input_shape.values() if is_image_input(value)]
         if not image_inputs:
             raise ConfigError('image input is not detected')
         if len(image_inputs) == 1:
-            self.dst_height, self.dst_width = image_inputs[0][2:]
+            self.dst_height, self.dst_width = (
+                image_inputs[0][2:] if not is_nhwc(image_inputs[0]) else image_inputs[0][1:3]
+            )
         else:
-            self.dst_height = [im_input[2] for im_input in image_inputs]
-            self.dst_width = [im_input[3] for im_input in image_inputs]
+            self.dst_height = [im_input[2] if not is_nhwc(im_input) else im_input[1] for im_input in image_inputs]
+            self.dst_width = [im_input[3] if not is_nhwc(im_input) else im_input[2] for im_input in image_inputs]
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
