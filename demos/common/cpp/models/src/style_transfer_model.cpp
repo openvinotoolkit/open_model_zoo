@@ -26,7 +26,8 @@
 using namespace InferenceEngine;
 
 StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
-    ImageModel(modelFileName, false) {}
+    ImageModel(modelFileName, false) {
+}
 
 template<typename T>
 void tell_me_type(T t, std::string name) {
