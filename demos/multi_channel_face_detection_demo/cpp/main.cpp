@@ -31,58 +31,42 @@
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
-#include "multichannel_face_detection_params.hpp"
 #include "output.hpp"
 #include "threading.hpp"
 #include "graph.hpp"
 
 namespace {
+constexpr char threshold_message[] = "Probability threshold for detections";
+DEFINE_double(t, 0.5, threshold_message);
 
-/**
-* \brief This function show a help message
-*/
-void showUsage() {
-    std::cout << std::endl;
-    std::cout << "multi_channel_face_detection_demo [OPTION]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << std::endl;
-    std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -i                           " << input_message << std::endl;
-    std::cout << "    -loop                        " << loop_message << std::endl;
-    std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
-    std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
-    std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
-    std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
-    std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
-    std::cout << "    -t                           " << thresh_output_message << std::endl;
-    std::cout << "    -no_show                     " << no_show_message << std::endl;
-    std::cout << "    -show_stats                  " << show_statistics << std::endl;
-    std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
-    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
-}
-
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
-    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-    if (FLAGS_h) {
-        showUsage();
+void parse(int argc, char *argv[]) {
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
+    slog::info << ov::get_openvino_version() << slog::endl;
+    if (FLAGS_h || argc == 1) {
+        std::cout << "\n    [-h]              " << help_message
+                  << "\n     -i               " << input_message
+                  << "\n    [-loop]           " << loop_message
+                  << "\n    [-duplicate_num]  " << duplication_channel_number_message
+                  << "\n     -m <path>        " << model_path_message
+                  << "\n    [-d <device>]     " << target_device_message
+                  << "\n    [-bs]             " << batch_size
+                  << "\n    [-n_iqs]          " << input_queue_size
+                  << "\n    [-fps_sp]         " << fps_sampling_period
+                  << "\n    [-n_sp]           " << num_sampling_periods
+                  << "\n    [-t]              " << threshold_message
+                  << "\n    [-no_show]        " << no_show_message
+                  << "\n    [-show_stats]     " << show_statistics
+                  << "\n    [-real_input_fps] " << real_input_fps
+                  << "\n    [-u]              " << utilization_monitors_message;
         showAvailableDevices();
-        return false;
+        std::exit(0);
+    } if (FLAGS_m.empty()) {
+        throw std::runtime_error("Parameter -m is not set");
+    } if (FLAGS_i.empty()) {
+        throw std::runtime_error("Parameter -i is not set");
+    } if (FLAGS_duplicate_num == 0) {
+        throw std::runtime_error("Parameter -duplicate_num must be positive");
     }
-
-    if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
-    }
-    if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
-    }
-    if (FLAGS_duplicate_num == 0) {
-        throw std::logic_error("Parameter -duplicate_num must be positive");
-    }
-
-    return true;
 }
 
 struct Face {
@@ -195,11 +179,7 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        if (!ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
-        }
-        slog::info << ov::get_openvino_version() << slog::endl;
-
+        parse(argc, argv);
         const std::vector<std::string>& inputs = split(FLAGS_i, ',');
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 

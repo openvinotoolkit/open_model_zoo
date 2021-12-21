@@ -22,7 +22,7 @@
 #include "input.hpp"
 
 namespace {
-constexpr size_t roundUp(size_t enumerator, size_t denominator) noexcept {
+constexpr size_t roundUp(size_t enumerator, size_t denominator) {
     assert(enumerator > 0);
     assert(denominator > 0);
     return 1 + (enumerator - 1) / denominator;

@@ -39,31 +39,9 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
+Running the demo with the `-h` option yields a usage message.
 
-```
-multi_channel_human_pose_estimation_demo [OPTION]
-Options:
-
-    -h                           Print a usage message
-    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
-    -loop                        Optional. Enable reading the inputs in a loop.
-    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
-    -m "<path>"                  Required. Path to an .xml file with a trained model.
-    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -n_iqs                       Optional. Frame queue size for input channels
-    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
-    -n_sp                        Optional. Number of sampling periods
-    -no_show                     Optional. Don't show output.
-    -show_stats                  Optional. Enable statistics report
-    -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
-    -u                           Optional. List of monitors to show initially.
-```
-
-Running the application with an empty list of options yields the usage message given above and an error message.
-
-For example, to run the demo with the pre-trained Human Pose Estimation model on CPU with one camera, use the following command:
+To run the demo with the pre-trained Human Pose Estimation model on CPU with one camera, use the following command:
 
 ```sh
 ./multi_channel_human_pose_estimation_demo \
