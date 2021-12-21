@@ -48,18 +48,19 @@ class Application(object):
         self.eval_process_counter = 0  # Number of frames processed by the score evaluation module
 
         ''' Object Detection Variables'''
-        self.detector = Detector(["./intel/smartlab-object-detection-0001/FP32-INT1/mw-topview-all-yolox-n.bin",
-                "./intel/smartlab-object-detection-0002/FP32-INT1/mw-topview-move-yolox-n.bin"],
-                ["./intel/smartlab-object-detection-0003/FP32-INT1/mw-frontview-all-yolox-n.bin",
-                "./intel/smartlab-object-detection-0004/FP32-INT1/mw-frontview-move-yolox-n.bin"],
+        self.detector = Detector(
+                ["./intel/smartlab-object-detection-0001/FP32/mw-topview-all-yolox-n.bin",
+                "./intel/smartlab-object-detection-0002/FP32/mw-topview-move-yolox-n.bin"],
+                ["./intel/smartlab-object-detection-0003/FP32/mw-frontview-all-yolox-n.bin",
+                "./intel/smartlab-object-detection-0004/FP32/mw-frontview-move-yolox-n.bin"],
                 False)
         self.detector.initialize()  # Initialize the session and load the model parameters
 
-        # '''Video Segmentation Variables'''
-        # self.segmentor = Segmentor(
-        #         "./intel/smartlab-action-recognition-encoder-0001/FP32-INT1/1280vec-mobilenet-v2.pt",
-        #         "./intel/smartlab-action-recognition-decoder-0001/FP32-INT1/concat-classifier.pth")
-        # self.segmentor.initialize()  # Initialize the session and load the model parameters
+        '''Video Segmentation Variables'''
+        self.segmentor = Segmentor(
+                "./intel/smartlab-action-recognition-encoder-0001/FP32/1280vec-mobilenet-v2.bin",
+                "./intel/smartlab-action-recognition-decoder-0001/FP32/concat-classifier.bin")
+        self.segmentor.initialize()  # Initialize the session and load the model parameters
 
 
         # '''Score Evaluation Variables'''
@@ -88,13 +89,15 @@ class Application(object):
 
                 print(self.frame_counter)
                 ''' The object detection module need to generate detection results(for the current frame) '''
-                top_det_results, front_det_results = self.detector.inference(img_top=frame_top, img_front=frame_front)
+                top_det_results, front_det_results = self.detector.inference(
+                    img_top=frame_top, img_front=frame_front)
 
-                # ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-                # top_seg_results, front_seg_results = self.segmentor.inference(buffer_top=self.buffer_top,
-                #                                                             buffer_front=self.buffer_front,
-                #                                                             frame_index=self.frame_counter
-                #                                                             )
+                ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
+                top_seg_results, front_seg_results = self.segmentor.inference(
+                    buffer_top=frame_top,
+                    buffer_front=frame_front,
+                    frame_index=self.frame_counter
+                    )
 
                 # ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
                 # self.state, self.scoring = self.evaluator.inference(top_det_results=top_det_results,

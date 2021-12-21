@@ -19,6 +19,8 @@
 
 import os
 import torch.nn as nn
+import sys
+sys.path.append('object_detection')
 from tools.yolox_exp import Exp as MyExp
 from model.yolox import YOLOX, YOLOPAFPN, YOLOXHead
 

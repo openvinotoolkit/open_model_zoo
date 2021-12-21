@@ -79,13 +79,14 @@ class Segmentor(object):
             inputs={self.backbone_input_keys[0]: buffer_front})[self.backbone_output_key[0]]
         feature_vector_top = self.backbone.infer(
             inputs={self.backbone_input_keys[0]: buffer_top})[self.backbone_output_key[0]]
-        output = [feature_vector_high, feature_vector_top]
 
-        feature_vector_top = self.classifier.infer(
-            inputs={self.classifier_input_keys[0]: features})[self.classifier_output_key[0]]
+        output = self.classifier.infer(inputs={
+            self.classifier_input_keys[0]: feature_vector_front,
+            self.classifier_input_keys[1]: feature_vector_top}
+            )[self.classifier_output_key[0]]
 
         ### yoclo classifier ###
         isAction = (output.squeeze()[0] >= .5).astype(int)
-        predicted = (np.argmax(output.squeeze()[1:]) + 1)
+        predicted = isAction*(np.argmax(output.squeeze()[1:]) + 1)
 
         return self.terms[predicted], self.terms[predicted]
