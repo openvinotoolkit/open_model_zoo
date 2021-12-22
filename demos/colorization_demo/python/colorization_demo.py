@@ -74,7 +74,8 @@ if __name__ == '__main__':
     model = ie.read_model(args.model, args.model.with_suffix(".bin"))
 
     input_tensor_name = 'data_l'
-    assert input_tensor_name in [input.get_any_name() for input in model.inputs], "Expected input with name 'data_l'"
+    assert input_tensor_name in set().union(*[input.get_names() for input in model.inputs]),\
+           "Expected input with name 'data_l'"
     input_shape = model.inputs[0].shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
@@ -118,7 +119,7 @@ if __name__ == '__main__':
         img_lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
         img_l_rs = cv.resize(img_lab.copy(), (w_in, h_in))[:, :, 0]
 
-        inputs[input_tensor_name] = np.expand_dims(img_l_rs, axis=[0,1])
+        inputs[input_tensor_name] = np.expand_dims(img_l_rs, axis=[0, 1])
 
         res = next(iter(infer_request.infer(inputs).values()))
 
