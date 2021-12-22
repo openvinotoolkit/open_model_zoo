@@ -52,7 +52,49 @@ smartlab-object-detection-0004
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
-TO DO
+
+Running the application with the `-h` option yields the following usage message:
+
+```
+usage: video_processor_serial.py [-h] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL -m_fm M_FRONTMOVE {multiview,mstcn} ...
+
+positional arguments:
+  {multiview,mstcn}     sub-command help
+    multiview           multiview help
+    mstcn               mstcm help
+
+Options:
+  -h, --help            Show this help message and exit.
+  -tv TOPVIEW, --topview TOPVIEW
+                        Required. Topview stream to be processed. The input must be a single image, a folder of images, video file or camera id.       
+  -fv FRONTVIEW, --frontview FRONTVIEW
+                        Required. FrontView to be processed. The input must be a single image, a folder of images, video file or camera id.
+  -m_ta M_TOPALL, --m_topall M_TOPALL
+                        Required. Path to topview all class model.
+  -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
+                        Required. Path to topview moving class model.
+  -m_fa M_FRONTALL, --m_frontall M_FRONTALL
+                        Required. Path to frontview all class model.
+  -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
+                        Required. Path to frontview moving class model.
+```
+
+Running the application with an empty list of options yields the usage message given above and an error message.
+
+**For example**, to run the demo, please provide a pathes of models, two input streams:
+
+```sh
+python3 video_processor_serial.py 
+    -tv ./stream_1_top.mp4
+    -fv ./stream_1_high.mp4
+    -m_ta "./intel/smartlab-object-detection-0001/FP32/mw-topview-all-yolox-n.bin"
+    -m_tm "./intel/smartlab-object-detection-0002/FP32/mw-topview-move-yolox-n.bin"
+    -m_fa "./intel/smartlab-object-detection-0003/FP32/mw-frontview-all-yolox-n.bin"
+    -m_fm "./intel/smartlab-object-detection-0004/FP32/mw-frontview-move-yolox-n.bin"
+    multiview
+    -m_en "./intel/smartlab-action-recognition-encoder-0001/FP32/1280vec-mobilenet-v2.bin"
+    -m_de "./intel/smartlab-action-recognition-decoder-0001/FP32/concat-classifier.bin"
+```
 
 ## Demo Output
 

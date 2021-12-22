@@ -23,6 +23,7 @@ import pandas as pd
 import numpy as np
 import threading
 from collections import deque
+from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector
 from temporal_segmentation.segmentor import Segmentor
 from score_evaluation.evaluator import Evaluator
@@ -132,7 +133,39 @@ class Application(object):
     def get_video_total_frames(self, cap):
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
+
+def build_argparser():
+    parser = ArgumentParser(add_help=False)
+    args = parser.add_argument_group('Options')
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
+                    help='Show this help message and exit.')
+    args.add_argument('-tv', '--topview', required=True,
+                    help='Required. Topview stream to be processed. The input must be a single image, '
+                    'a folder of images, video file or camera id.')
+    args.add_argument('-fv', '--frontview', required=True,
+                    help='Required. FrontView to be processed. The input must be a single image, '
+                    'a folder of images, video file or camera id.')
+    args.add_argument('-m_ta', '--m_topall', help='Required. Path to topview all class model.', required=True, type=str)
+    args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
+    args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
+    args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+    args_mutiview = subparsers.add_parser('multiview', help='multiview help')
+    args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
+    args_mutiview.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+    args_mstcn = subparsers.add_parser('mstcn', help='mstcm help')
+    args_mstcn.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
+    args_mstcn.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+
+
+    return parser
+
+
+
 if __name__ == "__main__":
-    application = Application()
-    application.video_parser(top_video_path="./stream_1_top.mp4",
-                             front_video_path="./stream_1_high.mp4")
+    args = build_argparser().parse_args()
+
+    # application = Application()
+    # application.video_parser(top_video_path="./stream_1_top.mp4",
+    #                          front_video_path="./stream_1_high.mp4")
