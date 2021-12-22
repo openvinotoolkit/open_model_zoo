@@ -489,4 +489,6 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with bounding boxes coordinates.
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.01).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.45).
-  * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
+  * `keep_top_k` - maximal number of boxes which should be kept during NMS (optional, default 200).
+  * `diff_coord_order` - ordering convention of coordinates differs from standard (optional, default False).
+  * `max_detections` - maximal number of boxes which should be kept (optional).
