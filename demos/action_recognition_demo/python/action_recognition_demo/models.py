@@ -16,6 +16,7 @@
 
 from collections import deque
 from itertools import cycle
+import sys
 
 import logging as log
 import cv2
@@ -42,19 +43,20 @@ def adaptive_resize(frame, dst_size):
         return frame
     return cv2.resize(frame, (ow, oh))
 
-def preprocess_frame(frame, size=224, crop_size=224):
+
+def preprocess_frame(frame, size=224, crop_size=224, chw_layout=True):
     frame = adaptive_resize(frame, size)
     frame = center_crop(frame, (crop_size, crop_size))
-    frame = frame.transpose((2, 0, 1))  # HWC -> CHW
+    if chw_layout:
+        frame = frame.transpose((2, 0, 1))  # HWC -> CHW
 
     return frame
 
 
 class AsyncWrapper:
     def __init__(self, ie_model, num_requests):
-        self.net = ie_model
+        self.model = ie_model
         self.num_requests = num_requests
-
         self._result_ready = False
         self._req_ids = cycle(range(num_requests))
         self._result_ids = cycle(range(num_requests))
@@ -63,7 +65,7 @@ class AsyncWrapper:
     def infer(self, model_input, frame=None):
         """Schedule current model input to infer, return last result"""
         next_req_id = next(self._req_ids)
-        self.net.async_infer(model_input, next_req_id)
+        self.model.async_infer(model_input, next_req_id)
 
         last_frame = self._frames[0] if self._frames else frame
 
@@ -73,41 +75,48 @@ class AsyncWrapper:
 
         if self._result_ready:
             result_req_id = next(self._result_ids)
-            result = self.net.wait_request(result_req_id)
+            result = self.model.wait_request(result_req_id)
             return result, last_frame
         else:
             return None, None
 
 
 class IEModel:
-    def __init__(self, model_path, ie_core, target_device, num_requests, model_type, batch_size=1):
+    def __init__(self, model_path, core, target_device, num_requests, model_type):
         log.info('Reading {} model {}'.format(model_type, model_path))
-        self.net = ie_core.read_network(model_path)
-        self.net.batch_size = batch_size
-        assert len(self.net.input_info) == 1, "One input is expected"
-        assert len(self.net.outputs) == 1, "One output is expected"
+        self.model = core.read_model(model_path)
+        if len(self.model.inputs) != 1:
+            log.error("Demo supports only models with 1 input")
+            sys.exit(1)
 
-        self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
-        self.input_name = next(iter(self.net.input_info))
-        self.output_name = next(iter(self.net.outputs))
-        self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
+        if len(self.model.outputs) != 1:
+            log.error("Demo supports only models with 1 output")
+            sys.exit(1)
+
+        self.compiled_model = core.compile_model(self.model, target_device)
+        self.input_name = self.model.inputs[0].get_any_name()
+        self.input_shape = self.model.inputs[0].shape
+
+        self.output_name = self.model.outputs[0].get_any_name()
+        self.output_shape = self.model.outputs[0].shape
+
         self.num_requests = num_requests
+        self.infer_requests = [self.compiled_model.create_infer_request() for _ in range(self.num_requests)]
         log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
 
     def infer(self, frame):
         input_data = {self.input_name: frame}
-        infer_result = self.exec_net.infer(input_data)
+        infer_result = self.compiled_model.infer(input_data)
         return infer_result[self.output_name]
 
     def async_infer(self, frame, req_id):
         input_data = {self.input_name: frame}
-        self.exec_net.start_async(request_id=req_id, inputs=input_data)
+        self.infer_requests[req_id].start_async(inputs=input_data)
         pass
 
     def wait_request(self, req_id):
-        self.exec_net.requests[req_id].wait()
-        return self.exec_net.requests[req_id].output_blobs[self.output_name].buffer
+        self.infer_requests[req_id].wait()
+        return next(iter(self.infer_requests[req_id].results.values()))
 
 
 class DummyDecoder:
