@@ -14,11 +14,10 @@ const char BLOB_HEAD_POSE_ANGLES[] = "head_pose_angles";
 const char BLOB_LEFT_EYE_IMAGE[] = "left_eye_image";
 const char BLOB_RIGHT_EYE_IMAGE[] = "right_eye_image";
 
-GazeEstimator::GazeEstimator(InferenceEngine::Core& ie,
-                             const std::string& modelPath,
-                             const std::string& deviceName,
-                             bool doRollAlign):
-               ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign) {
+GazeEstimator::GazeEstimator(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
+        ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign)
+{
     const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
 
     for (const auto& blobName: {BLOB_HEAD_POSE_ANGLES, BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
@@ -47,9 +46,7 @@ GazeEstimator::GazeEstimator(InferenceEngine::Core& ie,
     expectAngles(outputBlobName, outputInfo.at(outputBlobName));
 }
 
-void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
-                                              cv::Mat& dstImage,
-                                              float angle) const {
+void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const {
     auto w = srcImage.cols;
     auto h = srcImage.rows;
 
@@ -61,9 +58,8 @@ void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
     cv::warpAffine(srcImage, dstImage, rotMatrix, size, 1, cv::BORDER_REPLICATE);
 }
 
-void GazeEstimator::estimate(const cv::Mat& image,
-                             FaceInferenceResults& outputResults) {
-    if (!outputResults.leftEyeState && !outputResults.rightEyeState)
+void GazeEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
+    if (!outputResults.leftEyeState || !outputResults.rightEyeState)
         return;
     std::vector<float> headPoseAngles(3);
     auto roll = outputResults.headPoseAngles.z;
