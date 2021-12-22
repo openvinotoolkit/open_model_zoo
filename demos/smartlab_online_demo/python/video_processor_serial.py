@@ -50,18 +50,18 @@ class Application(object):
 
         ''' Object Detection Variables'''
         self.detector = Detector(
-                ["./intel/smartlab-object-detection-0001/FP32/mw-topview-all-yolox-n.bin",
-                "./intel/smartlab-object-detection-0002/FP32/mw-topview-move-yolox-n.bin"],
-                ["./intel/smartlab-object-detection-0003/FP32/mw-frontview-all-yolox-n.bin",
-                "./intel/smartlab-object-detection-0004/FP32/mw-frontview-move-yolox-n.bin"],
+                [args.m_topall, args.m_topmove],
+                [args.m_frontall, args.m_frontmove],
                 False)
         self.detector.initialize()  # Initialize the session and load the model parameters
 
         '''Video Segmentation Variables'''
-        self.segmentor = Segmentor(
-                "./intel/smartlab-action-recognition-encoder-0001/FP32/1280vec-mobilenet-v2.bin",
-                "./intel/smartlab-action-recognition-decoder-0001/FP32/concat-classifier.bin")
-        self.segmentor.initialize()  # Initialize the session and load the model parameters
+        if(args.mode == "multiview"):
+            self.segmentor = Segmentor(args.m_encoder, args.m_decoder)
+            self.segmentor.initialize()  # Initialize the session and load the model parameters
+        elif(args.mode == "mstcn"):
+            self.segmentor = Segmentor(args.m_i3d, args.m_mstcn)
+            self.segmentor.initialize()  # Initialize the session and load the model parameters
 
         '''Score Evaluation Variables'''
         self.evaluator = Evaluator()
@@ -93,11 +93,18 @@ class Application(object):
                         img_top=frame_top, img_front=frame_front)
 
                 ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-                top_seg_results, front_seg_results = self.segmentor.inference(
-                        buffer_top=frame_top,
-                        buffer_front=frame_front,
-                        frame_index=self.frame_counter
-                        )
+                if(args.mode == "multiview"):
+                    top_seg_results, front_seg_results = self.segmentor.inference(
+                            buffer_top=frame_top,
+                            buffer_front=frame_front,
+                            frame_index=self.frame_counter
+                            )
+                elif(args.mode == "mstcn"):
+                    top_seg_results, front_seg_results = self.segmentor.inference(
+                            buffer_top=frame_top,
+                            buffer_front=frame_front,
+                            frame_index=self.frame_counter
+                            )
 
                 ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
                 self.state, self.scoring = self.evaluator.inference(
@@ -154,18 +161,17 @@ def build_argparser():
     args_mutiview = subparsers.add_parser('multiview', help='multiview help')
     args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     args_mutiview.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+    args_mutiview.add_argument('--mode', default='multiview', help='Option. Path to decoder model.', type=str)
     args_mstcn = subparsers.add_parser('mstcn', help='mstcm help')
-    args_mstcn.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
-    args_mstcn.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
-
+    args_mstcn.add_argument('-m_i3d', '--m_i3d', help='Required. Path to i3d model.', required=True, type=str)
+    args_mstcn.add_argument('-m_mstcn', '--m_mstcn', help='Required. Path to mstcn model.', required=True, type=str)
+    args_mstcn.add_argument('--mode', default='mstcn', help='Option. Path to decoder model.', type=str)
 
     return parser
-
-
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
 
-    # application = Application()
-    # application.video_parser(top_video_path="./stream_1_top.mp4",
-    #                          front_video_path="./stream_1_high.mp4")
+    application = Application()
+    application.video_parser(top_video_path=args.topview,
+                             front_video_path=args.frontview)
