@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 #include "openvino/openvino.hpp"
 
@@ -151,30 +152,26 @@ int main(int argc, char* argv[]) {
         ov::OutputVector inputs = model->inputs();
         ov::OutputVector outputs = model->outputs();
 
-        // get state names pairs (inp,out)
-        std::vector<std::string> inp_names;
-        std::vector<std::string> out_names;
-        for (size_t i = 0; i < inputs.size(); i++) {
-            inp_names.push_back(inputs[i].get_any_name());
-            out_names.push_back(outputs[i].get_any_name());
-        }
-        std::sort(inp_names.begin(), inp_names.end(), [](const std::string& a, const std::string& b) { return a < b; });
-        std::sort(out_names.begin(), out_names.end(), [](const std::string& a, const std::string& b) { return a < b; });
-
-        std::vector<std::pair<std::string, std::string>> state_names;
-
+        // get state names pairs (inp,out) and compute overall states size
         size_t state_size = 0;
+        std::regex state_regex{ "^(inp|out)(_state_)(\\d\\d\\d)" };
+        std::vector<std::pair<std::string, std::string>> state_names;
         for (size_t i = 0; i < inputs.size(); i++) {
-//            std::string inp_state_name = inputs[i].get_any_name();
-//            std::string out_state_name = outputs[i].get_any_name();
-//
-//            if (inp_state_name.find("inp_state") == std::string::npos)
-//                continue;
-            if (inp_names[i].find("inp_state") == std::string::npos)
+            std::smatch match;
+            std::string inp_state_name = inputs[i].get_any_name();
+            if (!std::regex_match(inp_state_name, match, state_regex)) {
+                // skip not relevant input
                 continue;
+            }
 
-//            state_names.emplace_back(inp_state_name, out_state_name);
-            state_names.emplace_back(inp_names[i], out_names[i]);
+            // find corresponding output state
+            std::string state_num = match.str(3);
+            std::string out_state_name = std::string("out_state_") + state_num;
+            auto scmp = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
+            if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), scmp))
+                throw std::logic_error("model output state name not corresponf input state name");
+
+            state_names.emplace_back(inp_state_name, out_state_name);
 
             ov::Shape shape = inputs[i].get_shape();
             size_t tensor_size = 1;
@@ -183,7 +180,15 @@ int main(int argc, char* argv[]) {
 
             state_size += tensor_size;
         }
+
+        if (state_size == 0)
+            throw std::logic_error("no expected model state inputs found");
+
         std::cout << "State_param_num = " << state_size << " (" << state_size * 4e-6f << "Mb)" << std::endl;
+
+        // sort names
+        auto scmp = [](const std::pair<std::string, std::string>& a, const std::pair<std::string,std::string>& b) { return a.first < b.first; };
+        std::sort(state_names.begin(), state_names.end(), scmp);
 
         ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
         log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
