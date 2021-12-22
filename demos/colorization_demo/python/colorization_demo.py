@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2018-2020 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 import cv2 as cv
 import numpy as np
 import logging as log
@@ -68,25 +68,24 @@ if __name__ == '__main__':
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    ie = Core()
 
     log.info('Reading model {}'.format(args.model))
-    load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
-    load_net.batch_size = 1
+    model = ie.read_model(args.model, args.model.with_suffix(".bin"))
 
-    input_blob = next(iter(load_net.input_info))
-    input_shape = load_net.input_info[input_blob].input_data.shape
+    input_tensor_name = 'data_l'
+    assert input_tensor_name in [input.get_any_name() for input in model.inputs], "Expected input with name 'data_l'"
+    input_shape = model.inputs[0].shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
     inputs = {}
-    for input_name in load_net.input_info:
-        inputs[input_name] = np.zeros(load_net.input_info[input_name].input_data.shape)
+    for input in model.inputs:
+        inputs[input.get_any_name()] = np.zeros(input.shape)
 
-    assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
-    output_blob = next(iter(load_net.outputs))
-    output_shape = load_net.outputs[output_blob].shape
+    assert len(model.outputs) == 1, "Expected number of outputs is equal 1"
 
-    exec_net = ie.load_network(network=load_net, device_name=args.device)
+    compiled_model = ie.compile_model(model, device_name=args.device)
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     _, _, h_in, w_in = input_shape
@@ -118,11 +117,12 @@ if __name__ == '__main__':
         img_rgb = frame.astype(np.float32) / 255
         img_lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
         img_l_rs = cv.resize(img_lab.copy(), (w_in, h_in))[:, :, 0]
-        inputs[input_blob] = img_l_rs
 
-        res = exec_net.infer(inputs=inputs)
+        inputs[input_tensor_name] = np.expand_dims(img_l_rs, axis=[0,1])
 
-        update_res = np.squeeze(res[output_blob])
+        res = next(iter(infer_request.infer(inputs).values()))
+
+        update_res = np.squeeze(res)
 
         out = update_res.transpose((1, 2, 0))
         out = cv.resize(out, (w_orig, h_orig))
