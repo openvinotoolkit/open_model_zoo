@@ -19,7 +19,7 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
 ## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
-* [Pre-Trained Models](https://docs.openvino.ai/latest/trained_models.html)
+* [Pre-Trained Models](https://docs.openvino.ai/latest/model_zoo.html)
 * [Demos and Samples](https://docs.openvino.ai/latest/omz_demos.html)
 
 ## Other Usage Examples
