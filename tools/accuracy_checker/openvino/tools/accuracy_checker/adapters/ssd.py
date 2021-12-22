@@ -393,7 +393,10 @@ class SSDMultiLabelAdapter(Adapter):
             'boxes_out': StringField(description='boxes output'),
             'confidence_threshold': NumberField(optional=True, default=0.01, description="confidence threshold"),
             'nms_threshold': NumberField(optional=True, default=0.45, description="NMS threshold"),
-            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="keep top K")
+            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="keep top K during NMS"),
+            'diff_coord_order': BoolField(optional=True, default=False,
+                                          description='Ordering convention of coordinates differs from standard'),
+            'max_detections': NumberField(optional=True, value_type=int, description="maximal number of detections")
         })
         return params
 
@@ -403,6 +406,8 @@ class SSDMultiLabelAdapter(Adapter):
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.iou_threshold = self.get_value_from_config('nms_threshold')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
+        self.diff_coord_order = self.get_value_from_config('diff_coord_order')
+        self.max_detections = self.get_value_from_config('max_detections')
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
@@ -426,7 +431,10 @@ class SSDMultiLabelAdapter(Adapter):
                     continue
                 subset_boxes = boxes[mask, :]
 
-                x_mins, y_mins, x_maxs, y_maxs = subset_boxes.T
+                if self.diff_coord_order:
+                    y_mins, x_mins, y_maxs, x_maxs = subset_boxes.T
+                else:
+                    x_mins, y_mins, x_maxs, y_maxs = subset_boxes.T
 
                 keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, probs, self.iou_threshold, include_boundaries=False,
                                keep_top_k=self.keep_top_k)
@@ -444,6 +452,15 @@ class SSDMultiLabelAdapter(Adapter):
                 detections['y_mins'].extend(y_mins)
                 detections['x_maxs'].extend(x_maxs)
                 detections['y_maxs'].extend(y_maxs)
+
+            if self.max_detections:
+                max_ids = np.argsort(-np.array(detections['scores']))[:self.max_detections]
+                detections['labels'] = np.array(detections['labels'])[max_ids]
+                detections['scores'] = np.array(detections['scores'])[max_ids]
+                detections['x_mins'] = np.array(detections['x_mins'])[max_ids]
+                detections['y_mins'] = np.array(detections['y_mins'])[max_ids]
+                detections['x_maxs'] = np.array(detections['x_maxs'])[max_ids]
+                detections['y_maxs'] = np.array(detections['y_maxs'])[max_ids]
 
             result.append(DetectionPrediction(identifier, detections['labels'], detections['scores'],
                                               detections['x_mins'], detections['y_mins'], detections['x_maxs'],

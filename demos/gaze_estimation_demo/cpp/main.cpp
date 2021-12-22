@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,7 +7,6 @@
 * \file gaze_estimation_demo/main.cpp
 * \example gaze_estimation_demo/main.cpp
 */
-#include <gflags/gflags.h>
 #include <functional>
 #include <iostream>
 #include <fstream>
@@ -27,6 +26,7 @@
 
 #include <inference_engine.hpp>
 
+#include <gflags/gflags.h>
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
@@ -34,26 +34,22 @@
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
-#include "gaze_estimation_demo.hpp"
-
 #include "face_inference_results.hpp"
-
 #include "face_detector.hpp"
-
 #include "base_estimator.hpp"
 #include "head_pose_estimator.hpp"
 #include "landmarks_estimator.hpp"
 #include "eye_state_estimator.hpp"
 #include "gaze_estimator.hpp"
-
 #include "results_marker.hpp"
-
 #include "utils.hpp"
+
+#include "gaze_estimation_demo.hpp"
 
 using namespace gaze_estimation;
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validating input arguments--------------------------------------
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
+    // Parsing and validating input arguments
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -78,11 +74,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        // ------------------------------ Parsing and validating of input arguments --------------------------
+        // Parsing and validating of input arguments
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -108,8 +104,8 @@ int main(int argc, char *argv[]) {
         int delay = 1;
         std::string windowName = "Gaze estimation demo";
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
-            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(
+            FLAGS_i, FLAGS_loop, 0, std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
@@ -118,8 +114,9 @@ int main(int argc, char *argv[]) {
         }
 
         cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame.size())) {
+        if (!FLAGS_o.empty() &&
+            !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), cap->fps(), frame.size()))
+        {
             throw std::runtime_error("Can't open video writer");
         }
         uint32_t framesProcessed = 0;

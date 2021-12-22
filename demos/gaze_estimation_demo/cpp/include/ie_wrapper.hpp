@@ -6,13 +6,12 @@
 
 #include <cstdio>
 #include <string>
-
 #include <map>
 #include <vector>
 
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
+#include "utils/slog.hpp"
 
 namespace gaze_estimation {
 class IEWrapper {

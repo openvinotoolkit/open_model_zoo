@@ -43,12 +43,20 @@ void Face::updateLandmarks(std::vector<float> values) {
     _landmarks = std::move(values);
 }
 
+void Face::updateRealFaceConfidence(float value) {
+    _realFaceConfidence = value;
+}
+
 int Face::getAge() {
     return static_cast<int>(std::floor(_age + 0.5f));
 }
 
 bool Face::isMale() {
     return _maleScore > _femaleScore;
+}
+
+bool Face::isReal() {
+    return _realFaceConfidence > 50.f;
 }
 
 std::map<std::string, float> Face::getEmotions() {
