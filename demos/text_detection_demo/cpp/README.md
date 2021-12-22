@@ -11,8 +11,8 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
 * `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0015/README.md) for details.
 * `text-recognition-0016`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyz"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0016/README.md) for details.
-* `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
-* `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
+* `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and `-dt simple` (to specify decoder type).
+* `handwritten-score-recognition-0003`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`. You should add options `-m_tr_ss "0123456789._"` (supported symbols set) and `-dt ctc` (to specify decoder type).
 * `vitstr-small-patch16-224`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss <path to vocab file>/.vocab.txt` (supported symbols set), `-dt simple` (to specify decoder type), `-start_index 1` (to process output from provided index) and `-pad " "` (to use specific pad symbol).
 
 ## How It Works
@@ -96,8 +96,6 @@ Options:
     -max_rect_num "<value>"        Optional. Maximum number of rectangles to recognize. If it is negative, number of rectangles to recognize is not limited.
     -d_td "<device>"               Optional. Specify the target device for the Text Detection model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
     -d_tr "<device>"               Optional. Specify the target device for the Text Recognition model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
-    -l "<absolute_path>"           Optional. Absolute path to a shared library with the CPU kernels implementation for custom layers.
-    -c "<absolute_path>"           Optional. Absolute path to the GPU kernels implementation for custom layers.
     -no_show                       Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
     -r                             Optional. Output Inference results as raw values.
     -u                             Optional. List of monitors to show initially.

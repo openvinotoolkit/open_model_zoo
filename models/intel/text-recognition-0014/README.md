@@ -40,7 +40,7 @@ The net output is a blob with name `logits` and the shape `16, 1, 37` in the for
 
 - `W` - output sequence length
 - `B` - batch size
-- `L` - confidence distribution across alphanumeric symbols: `#0123456789abcdefghijklmnopqrstuvwxyz`, where # - special blank character for CTC decoding algorithm.
+- `L` - confidence distribution across alphanumeric symbols: `0123456789abcdefghijklmnopqrstuvwxyz`, where # - special blank character for CTC decoding algorithm.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 
