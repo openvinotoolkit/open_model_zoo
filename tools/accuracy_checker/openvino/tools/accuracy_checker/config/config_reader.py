@@ -622,11 +622,39 @@ def filtered(launcher, targets, args):
     return targets and launcher.get('device', '').lower() not in targets
 
 
+def complete_openvino_launchers(launchers, use_new_api):
+    if use_new_api is None:
+        return launchers
+    orig_ov_launchers = []
+    updated_ov_launchers = []
+
+    for idx, launcher in enumerate(launchers):
+        fwk = launcher.get('framework')
+        if fwk not in ['openvino', 'dlsdk']:
+            continue
+        if use_new_api:
+            if fwk == 'openvino':
+                orig_ov_launchers.append(idx)
+            else:
+                updated_ov_launchers.append(idx)
+        else:
+            if fwk == 'openvino':
+                updated_ov_launchers.append(idx)
+            else:
+                orig_ov_launchers.append(idx)
+    if not orig_ov_launchers:
+        for idx in updated_ov_launchers:
+            launchers[idx]['framework'] = 'openvino' if use_new_api else 'dlsdk'
+    return launchers
+
+
 def filter_models(config, target_devices, args):
     models_after_filtration = []
     for model in config['models']:
         launchers_after_filtration = []
         launchers = model['launchers']
+        if 'use_new_api' in args:
+            launchers = complete_openvino_launchers(launchers, args['use_new_api'])
         for launcher in launchers:
             if 'device' not in launcher and target_devices:
                 for device in target_devices:
@@ -661,6 +689,8 @@ def filter_modules(config, target_devices, args):
             continue
         module_config = evaluation['module_config']
         launchers = module_config['launchers']
+        if 'use_new_api' in args:
+            launchers = complete_openvino_launchers(launchers, args['use_new_api'])
         if target_devices:
             launchers_without_device = [launcher for launcher in launchers if 'device' not in launcher]
             for launcher in launchers_without_device:
@@ -856,11 +886,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
     if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
-    if 'use_new_api' in arguments and arguments.use_new_api is not None:
-        if launcher_entry['framework'].lower() == 'dlsdk' and arguments.use_new_api:
-            launcher_entry['framework'] = 'openvino'
-        elif launcher_entry['framework'].lower() == 'openvino' and not arguments.use_new_api:
-            launcher_entry['framework'] = 'dlsdk'
 
     launcher_entry.update(update_launcher_entry)
     _convert_models_args(launcher_entry)
