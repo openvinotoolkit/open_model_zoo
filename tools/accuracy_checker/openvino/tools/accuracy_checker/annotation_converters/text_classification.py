@@ -165,6 +165,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
             if len(tokens) > self.max_seq_length:
                 tokens = tokens[:self.max_seq_length]
+                segment_ids = segment_ids[:self.max_seq_length]
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab or self.external_tok else tokens
         input_mask = [0 if not self.class_token_first else 1] * len(input_ids)
