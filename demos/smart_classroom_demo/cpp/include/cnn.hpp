@@ -89,7 +89,7 @@ protected:
     ov::OutputVector outInfo_;
     /** @brief IE network */
     // InferenceEngine::ExecutableNetwork executable_network_;
-    ov::runtime::ExecutableNetwork executable_network_;
+    ov::runtime::CompiledModel compiled_model_;
     /** @brief IE InferRequest */
     // mutable InferenceEngine::InferRequest infer_request_;
     mutable ov::runtime::InferRequest infer_request_;

@@ -58,7 +58,7 @@ void FaceDetection::submitRequest() {
 void FaceDetection::enqueue(const cv::Mat &frame) {
     if (request == nullptr) {
         // request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
-        request = std::make_shared<ov::runtime::InferRequest>(net_.create_infer_request());
+        request = std::make_shared<ov::runtime::InferRequest>(model_.create_infer_request());
     }
 
     width_ = static_cast<float>(frame.cols);
@@ -151,9 +151,9 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     input_name_ = cnnNetwork->input().get_any_name();
     cnnNetwork = proc.build();
-    net_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
+    model_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
 
-    logExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
+    logExecNetworkInfo(model_, config_.path_to_model, config_.deviceName, topoName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {

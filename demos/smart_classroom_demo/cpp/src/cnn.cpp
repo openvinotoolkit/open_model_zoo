@@ -25,13 +25,20 @@ void CnnDLSDKBase::Load() {
     auto cnnNetwork = config_.ie.read_model(config_.path_to_model);
 
     // const int currentBatchSize = cnnNetwork.getBatchSize();
+
+    // const int currentBatchSize = cnnNetwork->input().get_shape()[0];
+    // if (currentBatchSize != config_.max_batch_size)
+    //     // cnnNetwork.setBatchSize(config_.max_batch_size);
+    //     const ov::Layout layout_nchw{"NCHW"};
+    //     ov::Shape input_shape = cnnNetwork->input().get_shape();
+    //     input_shape[0] = config_.max_batch_size;
+    //     cnnNetwork->reshape({{cnnNetwork->input().get_any_name(), input_shape}});
+
     const int currentBatchSize = cnnNetwork->input().get_shape()[0];
-    if (currentBatchSize != config_.max_batch_size)
-        // cnnNetwork.setBatchSize(config_.max_batch_size);
-        const ov::Layout layout_nchw{"NCHW"};
-        ov::Shape input_shape = cnnNetwork->input().get_shape();
-        input_shape[0] = config_.max_batch_size;
-        cnnNetwork->reshape({{cnnNetwork->input().get_any_name(), input_shape}});
+    if (currentBatchSize != config_.max_batch_size) {
+      cnnNetwork->get_parameters()[0]->set_layout("NCHW");
+      ov::set_batch(cnnNetwork, config_.max_batch_size);
+    }
 
     // InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
     ov::OutputVector in = cnnNetwork->inputs();
@@ -42,34 +49,50 @@ void CnnDLSDKBase::Load() {
     // in.begin()->second->setPrecision(InferenceEngine::Precision::U8);
     // in.begin()->second->setLayout(InferenceEngine::Layout::NCHW);
     // input_blob_name_ = in.begin()->first;
+
+    // ov::preprocess::PrePostProcessor proc(cnnNetwork);
+    // ov::preprocess::InputInfo& input_info = proc.input();
+    // input_info.tensor().set_element_type(ov::element::f32).set_layout({"NCHW"});
+    // input_blob_name_ = cnnNetwork->input().get_any_name();
+    // ov::OutputVector outputs = cnnNetwork->outputs();
+    // for (auto&& item : outputs) {
+    //     proc.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
+    //     output_blobs_names_.push_back(item.get_any_name());
+    // }
+    // cnnNetwork = proc.build();
+
     ov::preprocess::PrePostProcessor proc(cnnNetwork);
-    ov::preprocess::InputInfo& input_info = proc.input();
-    input_info.tensor().set_element_type(ov::element::f32).set_layout({"NCHW"});
+    proc.input().tensor().
+      set_element_type(ov::element::f32).
+      set_layout({"NCHW"});
     input_blob_name_ = cnnNetwork->input().get_any_name();
     ov::OutputVector outputs = cnnNetwork->outputs();
     for (auto&& item : outputs) {
-        proc.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
-        output_blobs_names_.push_back(item.get_any_name());
+      proc.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
+      output_blobs_names_.push_back(item.get_any_name());
     }
     cnnNetwork = proc.build();
 
     try {
         // executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-        executable_network_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
+        compiled_model_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
     // } catch (const InferenceEngine::Exception&) {  // in case the model does not work with dynamic batch
     } catch (const ov::Exception&) {
         // cnnNetwork.setBatchSize(1);
         // executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName,
             // {{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED, InferenceEngine::PluginConfigParams::NO}});
-        const ov::Layout layout_nchw{"NCHW"};
-        ov::Shape input_shape = cnnNetwork->input().get_shape();
-        input_shape[ov::layout::batch_idx(layout_nchw)] = 1;
-        cnnNetwork->reshape({{cnnNetwork->input().get_any_name(), input_shape}});
-        executable_network_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
+
+        // const ov::Layout layout_nchw{"NCHW"};
+        // ov::Shape input_shape = cnnNetwork->input().get_shape();
+        // input_shape[ov::layout::batch_idx(layout_nchw)] = 1;
+        // cnnNetwork->reshape({{cnnNetwork->input().get_any_name(), input_shape}});
+        ov::set_batch(cnnNetwork, 1);
+
+        compiled_model_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
     }
-    logExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
+    logExecNetworkInfo(compiled_model_, config_.path_to_model, config_.deviceName, config_.model_type);
     // infer_request_ = executable_network_.CreateInferRequest();
-    infer_request_ = executable_network_.create_infer_request();
+    infer_request_ = compiled_model_.create_infer_request();
 }
 
 void CnnDLSDKBase::InferBatch(

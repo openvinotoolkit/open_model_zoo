@@ -557,20 +557,6 @@ int main(int argc, char* argv[]) {
         for (const auto &device : devices) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-            /** Load extensions for the CPU device **/
-            if ((device.find("CPU") != std::string::npos)) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
-                    // ie.AddExtension(extension_ptr, "CPU");
-                    core.add_extension(extension_ptr);
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-            } else if (!FLAGS_c.empty()) {
-                // Load Extensions for other plugins not CPU
-                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-                core.set_config({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            }
             if (device.find("CPU") != std::string::npos) {
                 // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                 core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,

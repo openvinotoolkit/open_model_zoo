@@ -33,7 +33,7 @@ void ActionDetection::submitRequest() {
 void ActionDetection::enqueue(const cv::Mat &frame) {
     if (request == nullptr) {
         // request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
-        request = std::make_shared<ov::runtime::InferRequest>(net_.create_infer_request());
+        request = std::make_shared<ov::runtime::InferRequest>(model_.create_infer_request());
     }
 
     width_ = static_cast<float>(frame.cols);
@@ -53,10 +53,14 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
     topoName = "action detector";
     auto network = config.ie.read_model(config.path_to_model);
     // network.setBatchSize(config.max_batch_size);
-    const ov::Layout layout_nchw{ "NCHW" };
-    ov::Shape input_shape = network->input().get_shape();
-    input_shape[ov::layout::batch_idx(layout_nchw)] = config.max_batch_size;
-    network->reshape({ {network->input().get_any_name(), input_shape} });
+
+    // const ov::Layout layout_nchw{ "NCHW" };
+    // ov::Shape input_shape = network->input().get_shape();
+    // input_shape[ov::layout::batch_idx(layout_nchw)] = config.max_batch_size;
+    // network->reshape({ {network->input().get_any_name(), input_shape} });
+    network->get_parameters()[0]->set_layout("NCHW");
+    ov::set_batch(network, config_.max_batch_size);
+
     // InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     // if (inputInfo.size() != 1) {
     ov::OutputVector inputInfo = network->inputs();
@@ -87,17 +91,21 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     new_network_ = false;
 
+    // ov::preprocess::PrePostProcessor proc(network);
+    // ov::preprocess::InputInfo& input_info = proc.input();
+    // input_info.tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
     ov::preprocess::PrePostProcessor proc(network);
-    ov::preprocess::InputInfo& input_info = proc.input();
-    input_info.tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
+    proc.input().tensor().
+      set_element_type(ov::element::u8).
+      set_layout({"NCHW"});
 
     for (auto&& item : outputs) {
         proc.output(item.get_any_name()).tensor().set_element_type(ov::element::f32);
         new_network_ = item.get_any_name() == config_.new_loc_blob_name;
     }
     network = proc.build();
-    net_ = config_.ie.compile_model(network, config_.deviceName);
-    logExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, config_.model_type);
+    model_ = config_.ie.compile_model(network, config_.deviceName);
+    logExecNetworkInfo(model_, config_.path_to_model, config_.deviceName, config_.model_type);
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
     const int num_heads = head_anchors.size();
     head_ranges_.resize(num_heads + 1);
@@ -115,7 +123,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
                   : config_.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
             glob_anchor_names_.push_back(glob_anchor_name);
             // const auto anchor_dims = outputInfo[glob_anchor_name]->getDims();// ???
-            const auto anchor_dims = net_.output(glob_anchor_name).get_shape();
+            const auto anchor_dims = model_.output(glob_anchor_name).get_shape();
             anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
             anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
             std::size_t action_dimension_idx = new_network_ ? 1 : 3;
@@ -158,7 +166,7 @@ DetectedActions ActionDetection::fetchResults() {
     // const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
     //                       CV_32F, locBlobMapped.as<float*>());
 
-    auto loc_out_size = ieSizeToVector(net_.output(loc_blob_name).get_shape());
+    auto loc_out_size = ieSizeToVector(model_.output(loc_blob_name).get_shape());
     const cv::Mat loc_out(loc_out_size[0],
                           loc_out_size[1],
                           CV_32F,
@@ -173,7 +181,7 @@ DetectedActions ActionDetection::fetchResults() {
     //                             request->get_tensor(det_conf_blob_name).get_shape()[3], CV_32F,
     //                             request->get_tensor(det_conf_blob_name).data());
 
-    auto main_conf_out_size = ieSizeToVector(net_.output(det_conf_blob_name).get_shape());
+    auto main_conf_out_size = ieSizeToVector(model_.output(det_conf_blob_name).get_shape());
     const cv::Mat main_conf_out(main_conf_out_size[0],
                                 main_conf_out_size[1],
                                 CV_32F,
@@ -212,7 +220,7 @@ DetectedActions ActionDetection::fetchResults() {
     // const cv::Mat priorbox_out(request->get_tensor(config_.old_priorbox_blob_name).get_shape()[2],
     //                            request->get_tensor(config_.old_priorbox_blob_name).get_shape()[3], CV_32F,
     //                            request->get_tensor(config_.old_priorbox_blob_name).data());
-    const cv::Mat priorbox_out(ieSizeToVector(net_.output(config_.old_priorbox_blob_name).get_shape()),
+    const cv::Mat priorbox_out(ieSizeToVector(model_.output(config_.old_priorbox_blob_name).get_shape()),
                           CV_32F,
                           request->get_tensor(config_.old_priorbox_blob_name).data());
     return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
