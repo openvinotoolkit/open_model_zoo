@@ -833,13 +833,15 @@ class OpenVINOLauncher(Launcher):
         network_outputs = network.outputs
         for input_info in network_inputs:
             input_node = input_info.get_node()
-            print_info('\tLayer name: {}'.format(input_node.friendly_name))
+            print_info('\tNode name: {}'.format(input_node.friendly_name))
+            print_info('\tTensor names: {}'.format(', '.join(input_info.get_names())))
             print_info('\tprecision: {}'.format(input_node.element_type.get_type_name()))
             print_info('\tshape: {}\n'.format(parse_partial_shape(input_node.get_partial_shape())))
         print_info('Output info')
         for output_info in network_outputs:
             out_node = output_info.get_node()
-            print_info('\tLayer name: {}'.format(out_node.friendly_name))
+            print_info('\tNode name: {}'.format(out_node.friendly_name))
+            print_info('\tTensor names: {}'.format(', '.join(output_info.get_names())))
             precision = out_node.get_output_element_type(0).get_type_name()
             print_info('\tprecision: {}'.format(precision))
             shape = parse_partial_shape(out_node.get_output_partial_shape(0))
