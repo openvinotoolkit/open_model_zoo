@@ -1,0 +1,56 @@
+models:
+  - name: smartlab-action-recognition-decoder-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: super_resolution
+          reverse_channels: True
+        inputs:
+          - name: "0"
+            type: INPUT
+            value: ".*lr_x3*.png"
+          - name: "1"
+            type: INPUT
+            value: ".*upsample_x3*.png"
+
+    datasets:
+      - name: super_resolution_x3
+
+        metrics:
+          - type: psnr
+            scale_border: 4
+            presenter: print_vector
+            reference:
+              mean: 30.97
+
+
+evaluations:
+  - name: smartlab-action-recognition-decoder-0001
+    module: custom_evaluators.sequential_action_recognition_evaluator.SequentialActionRecognitionEvaluator
+    module_config:
+      network_info:
+        encoder: {}
+
+        decoder:
+          num_processing_frames: 16
+          adapter: classification
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: DSI1867
+
+          preprocessing:
+            - type: resize
+              size: 224
+              aspect_ratio_scale: fit_to_window
+
+          metrics:
+            - type: clip_accuracy
+              presenter: print_vector
+              reference:
+                clip_accuracy: #TODO
+                video_accuracy: #TODO
+                mean: #TODO
