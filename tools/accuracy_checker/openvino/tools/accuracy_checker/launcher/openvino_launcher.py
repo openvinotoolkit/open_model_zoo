@@ -331,7 +331,7 @@ class OpenVINOLauncher(Launcher):
             p_shape = PartialShape(
                 [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
             )
-            partial_shapes[self.input_to_tensor_name[name]] = p_shape
+            partial_shapes[self.input_to_index[name]] = p_shape
 
         self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
@@ -549,6 +549,7 @@ class OpenVINOLauncher(Launcher):
         if self.network is not None:
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
+        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
 
         if not self._postpone_input_configuration:
             self._set_precision()

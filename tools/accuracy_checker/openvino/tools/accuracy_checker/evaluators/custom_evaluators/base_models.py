@@ -262,14 +262,18 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return node_to_tensor
 
+    def input_index_mapping(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        return {inp.get_node().friendly_name: idx for idx, inp in enumerate(inputs)}
+
     def _reshape_input(self, input_shapes):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
             del self.infer_request
             del self.exec_network
-        tensor_mapping = self.input_tensors_mapping()
-        input_shapes_for_tensors = {tensor_mapping[name]: shape for name, shape in input_shapes.items()}
+        index_mapping = self.input_index_mapping()
+        input_shapes_for_tensors = {index_mapping[name]: shape for name, shape in input_shapes.items()}
         self.launcher.reshape_network(self.network, input_shapes_for_tensors)
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:
