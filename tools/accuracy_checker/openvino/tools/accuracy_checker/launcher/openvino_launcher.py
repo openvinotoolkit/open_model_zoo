@@ -38,6 +38,7 @@ from ..utils import (
     string_to_tuple,
     get_or_parse_value,
     parse_partial_shape,
+    postprocess_output_name
 )
 from .launcher import Launcher
 from ..logging import print_info
@@ -813,8 +814,8 @@ class OpenVINOLauncher(Launcher):
         feed_dict = {}
         for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = parse_partial_shape(self.inputs[lstm_var].partial_shape)
-            if infer_outputs and output_layer not in infer_outputs:
-                raise ConfigError('Output node with name {} not found'.format(output_layer))
+            if infer_outputs:
+                output_layer = postprocess_output_name(output_layer, infer_outputs)
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
                 layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()]
             )

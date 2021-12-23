@@ -16,7 +16,7 @@ limitations under the License.
 
 from ..config import BaseField, ConfigValidator, StringField, ConfigError
 from ..dependency import ClassProvider, UnregisteredProviderException
-from ..utils import get_parameter_value_from_config
+from ..utils import get_parameter_value_from_config, postprocess_output_name
 
 
 class Adapter(ClassProvider):
@@ -53,18 +53,7 @@ class Adapter(ClassProvider):
 
     @staticmethod
     def check_output_name(output_name, outputs, suffix=('/sink_port_0', ':0')):
-        suffixes = [suffix] if isinstance(suffix, str) else suffix
-        outputs = outputs[0] if isinstance(outputs, list) else outputs
-        if output_name in outputs:
-            return output_name
-        for suffix_ in suffixes:
-            if suffix_ in output_name:
-                preprocessed_output_name = output_name.replace(suffix_, '')
-            else:
-                preprocessed_output_name = '{}{}'.format(output_name, suffix_)
-            if preprocessed_output_name in outputs:
-                return preprocessed_output_name
-        return output_name
+        return postprocess_output_name(output_name, outputs, suffix, raise_error=False)
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix='', **kwargs):
@@ -120,6 +109,7 @@ class Adapter(ClassProvider):
 
     def release(self):
         pass
+
 
 class AdapterField(BaseField):
     def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
