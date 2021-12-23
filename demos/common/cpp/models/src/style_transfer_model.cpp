@@ -29,11 +29,6 @@ StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
     ImageModel(modelFileName, false) {
 }
 
-template<typename T>
-void tell_me_type(T t, std::string name) {
-    std::cout << name << " " << __PRETTY_FUNCTION__ << std::endl;
-}
-
 void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs --------------------------------------------------
