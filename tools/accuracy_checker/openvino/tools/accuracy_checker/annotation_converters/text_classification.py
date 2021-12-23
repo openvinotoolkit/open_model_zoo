@@ -20,6 +20,7 @@ import numpy as np
 
 
 from ..config import PathField, StringField, NumberField, BoolField, ListField, ConfigError
+from ..data_readers import AnnotationDataIdentifier
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list, UnsupportedPackage, read_json
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
@@ -112,11 +113,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         return lines
 
     def convert_single_example(self, example): # pylint:disable=R0912
-        identifier = [
-            'input_ids_{}'.format(example.guid),
-            'input_mask_{}'.format(example.guid),
-            'segment_ids_{}'.format(example.guid)
-        ]
+        identifier = AnnotationDataIdentifier(example.guid, [])
         if not self.external_tok:
             tokens_a = self.tokenizer.tokenize(example.text_a)
             tokens_b = None
