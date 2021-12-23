@@ -15,10 +15,10 @@ const std::pair<const char*, float cv::Point3f::*> OUTPUTS[] = {
     {"angle_r_fc", &cv::Point3f::z},
 };
 
-HeadPoseEstimator::HeadPoseEstimator(InferenceEngine::Core& ie,
-                                     const std::string& modelPath,
-                                     const std::string& deviceName):
-                   ieWrapper(ie, modelPath, modelType, deviceName) {
+HeadPoseEstimator::HeadPoseEstimator(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+        ieWrapper(ie, modelPath, modelType, deviceName)
+{
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
 
@@ -39,8 +39,7 @@ HeadPoseEstimator::HeadPoseEstimator(InferenceEngine::Core& ie,
     }
 }
 
-void HeadPoseEstimator::estimate(const cv::Mat& image,
-                                 FaceInferenceResults& outputResults) {
+void HeadPoseEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 

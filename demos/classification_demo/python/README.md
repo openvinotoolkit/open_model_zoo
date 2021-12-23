@@ -50,6 +50,8 @@ omz_converter --list models.lst
 * efficientnet-b5-pytorch
 * efficientnet-b7_auto_aug
 * efficientnet-b7-pytorch
+* efficientnet-v2-b0
+* efficientnet-v2-s
 * googlenet-v1
 * googlenet-v1-tf
 * googlenet-v2

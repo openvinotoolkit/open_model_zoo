@@ -16,6 +16,7 @@ static const char age_gender_model_message[] = "Optional. Path to an .xml file w
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
+static const char antispoofing_model_message[] = "Optional. Path to an .xml file with a trained Antispoofing Classification model.";
 static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). "
                                             "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
 static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). "
@@ -26,6 +27,9 @@ static const char target_device_message_em[] = "Optional. Target device for Emot
                                                "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
 static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network "
                                                "(the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.";
+static const char target_device_message_am[] = "Optional. Target device for Antispoofing Classification network (the list of available devices is shown below). "
+                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+                                               "The demo will look for a suitable plugin for a specified device.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 static const char raw_output_message[] = "Optional. Output inference results as raw values";
@@ -59,11 +63,13 @@ DEFINE_string(m_ag, "", age_gender_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
 DEFINE_string(m_em, "", emotions_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
+DEFINE_string(m_am, "", antispoofing_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_ag, "CPU", target_device_message_ag);
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
 DEFINE_string(d_em, "CPU", target_device_message_em);
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
+DEFINE_string(d_am, "CPU", target_device_message_am);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
@@ -93,11 +99,13 @@ static void showUsage() {
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
     std::cout << "    -m_em \"<path>\"             " << emotions_model_message << std::endl;
     std::cout << "    -m_lm \"<path>\"             " << facial_landmarks_model_message << std::endl;
+    std::cout << "    -m_am \"<path>\"             " << antispoofing_model_message << std::endl;
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -d_ag \"<device>\"           " << target_device_message_ag << std::endl;
     std::cout << "    -d_hp \"<device>\"           " << target_device_message_hp << std::endl;
     std::cout << "    -d_em \"<device>\"           " << target_device_message_em << std::endl;
     std::cout << "    -d_lm \"<device>\"           " << target_device_message_lm << std::endl;
+    std::cout << "    -d_am \"<device>\"           " << target_device_message_am << std::endl;
     std::cout << "    -no_show                   " << no_show_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;

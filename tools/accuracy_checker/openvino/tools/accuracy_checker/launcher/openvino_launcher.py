@@ -814,7 +814,7 @@ class OpenVINOLauncher(Launcher):
         for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = parse_partial_shape(self.inputs[lstm_var].partial_shape)
             if infer_outputs and output_layer not in infer_outputs:
-                raise 'Output node with name {} not found'.format(output_layer)
+                raise ConfigError('Output node with name {} not found'.format(output_layer))
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
                 layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()]
             )
