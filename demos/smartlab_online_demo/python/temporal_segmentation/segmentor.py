@@ -22,7 +22,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append('temporal_segmentation')
 from multiview_mobilenetv3_tsm import create_mbv3s_model
-import mstcn
+# import mstcn
 
 
 class Segmentor(object):
@@ -159,13 +159,14 @@ class SegmentorMstcn(Segmentor):
 
         ### run encoder ###
         print("Frame embedding:", frame_index)
-        self.EmbedBufferTop = self.feature_embedding(img_buffer=buffer_top,
-                                                        embedding_buffer=self.EmbedBufferTop,
-                                                        frame_index=frame_index)
-        self.EmbedBufferFront = self.feature_embedding(img_buffer=buffer_front,
-                                                        embedding_buffer=self.EmbedBufferFront,
-                                                        frame_index=frame_index)
-
+        self.EmbedBufferTop = self.feature_embedding(
+            img_buffer=buffer_top,
+            embedding_buffer=self.EmbedBufferTop,
+            frame_index=frame_index)
+        self.EmbedBufferFront = self.feature_embedding(
+            img_buffer=buffer_front,
+            embedding_buffer=self.EmbedBufferFront,
+            frame_index=frame_index)
 
         ### run decoder wit vec 1x64x2048 ###
         # i3d_vec = np.zeros((1,64,2048)) 

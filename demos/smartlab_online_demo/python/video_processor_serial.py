@@ -88,9 +88,9 @@ class Application(object):
                 self.frame_counter += 1
 
                 print(self.frame_counter)
-                # ''' The object detection module need to generate detection results(for the current frame) '''
-                # top_det_results, front_det_results = self.detector.inference(
-                #         img_top=frame_top, img_front=frame_front)
+                ''' The object detection module need to generate detection results(for the current frame) '''
+                top_det_results, front_det_results = self.detector.inference(
+                        img_top=frame_top, img_front=frame_front)
 
                 ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
                 if(args.mode == "multiview"):
@@ -106,26 +106,26 @@ class Application(object):
                             frame_index=self.frame_counter
                             )
 
-                # ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-                # self.state, self.scoring = self.evaluator.inference(
-                #         top_det_results=top_det_results,
-                #         front_det_results=front_det_results,
-                #         top_seg_results=top_seg_results,
-                #         front_seg_results=front_seg_results,
-                #         frame_top=frame_top,
-                #         frame_front=frame_front
-                #         )
+                ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
+                self.state, self.scoring = self.evaluator.inference(
+                        top_det_results=top_det_results,
+                        front_det_results=front_det_results,
+                        top_seg_results=top_seg_results,
+                        front_seg_results=front_seg_results,
+                        frame_top=frame_top,
+                        frame_front=frame_front
+                        )
 
-                # self.display.display_result(
-                #         frame_top=frame_top,
-                #         frame_front=frame_front,
-                #         front_seg_results=front_seg_results,
-                #         top_seg_results=top_seg_results,
-                #         top_det_results=top_det_results,
-                #         front_det_results=front_det_results,
-                #         scoring=self.scoring,
-                #         state=self.state,
-                #         frame_counter=self.frame_counter)
+                self.display.display_result(
+                        frame_top=frame_top,
+                        frame_front=frame_front,
+                        front_seg_results=front_seg_results,
+                        top_seg_results=top_seg_results,
+                        top_det_results=top_det_results,
+                        front_det_results=front_det_results,
+                        scoring=self.scoring,
+                        state=self.state,
+                        frame_counter=self.frame_counter)
 
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):     #press 'q' to exit
