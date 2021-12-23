@@ -51,28 +51,28 @@ Similarly, training dataset has 17084 images with:
 
 ## Inputs
 
-Image, name: `image_input`, shape: `1, 3, 416, 416` in the format `B, C, H, W`, where:
+Image, name: `image_input`, shape: `1, 416, 416, 3` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
 ## Outputs
 
-1. The array of detection summary info, name: `conv2d_58/Conv2D/YoloRegion`,  shape: `1, 255, 13, 13`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name: `conv2d_58/Conv2D/YoloRegion`,  shape: `1, 13, 13, 255`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name: `conv2d_66/Conv2D/YoloRegion`,  shape: `1, 255, 26, 26`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name: `conv2d_66/Conv2D/YoloRegion`,  shape: `1, 26, 26, 255`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name: `conv2d_74/Conv2D/YoloRegion`,  shape: `1, 255, 52, 52`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name: `conv2d_74/Conv2D/YoloRegion`,  shape: `1, 52, 52, 255`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each of the arrays the output format is `B, N*85, Cx, Cy`, where:
+For each of the arrays the output format is `B, Cx, Cy, N*85`, where:
 
 - `B` - batch size
-- `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
+- `N` - number of detection boxes for cell
 
 Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
 
@@ -83,7 +83,7 @@ Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `c
 - `class_no_1`, ..., `class_no_80` - probability distribution over the classes in the [0, 1] range,
     multiply them by the confidence value `box_score` to get confidence of each class
 
-Since the model is finetuned on person/vehicle/bike detection dataset, it returns non-zero scores for the following classes:
+Since the model is fine-tuned on person/vehicle/bike detection dataset, it returns non-zero scores for the following classes:
 * person - the first class score
 * non-vehicle (bike/motorcycle) - the second class score
 * vehicle - the third class score
