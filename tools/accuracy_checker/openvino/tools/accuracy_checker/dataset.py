@@ -53,7 +53,7 @@ from .representation import (
 )
 from .data_readers import (
     DataReaderField, REQUIRES_ANNOTATIONS, BaseReader,
-    serialize_identifier, deserialize_identifier, create_identifier_key
+    serialize_identifier, deserialize_identifier, create_ann_identifier_key
 )
 from .logging import print_info
 
@@ -460,15 +460,15 @@ class AnnotationProvider:
         self._data_buffer = OrderedDict()
         self._meta = meta
         for ann in annotations:
-            idx = create_identifier_key(ann.identifier)
+            idx = create_ann_identifier_key(ann.identifier)
             self._data_buffer[idx] = ann
 
     def __getitem__(self, item):
-        return self._data_buffer[item]
+        return self._data_buffer[create_ann_identifier_key(item)]
 
     @property
     def identifiers(self):
-        return list(self._data_buffer)
+        return list(map(lambda ann: ann.identifier, self._data_buffer.values()))
 
     def __len__(self):
         return len(self._data_buffer)
