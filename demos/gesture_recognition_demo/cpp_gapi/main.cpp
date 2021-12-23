@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 
             /** Share id with graph **/
             if (current_id < out_detections.size()) {
-                *drop_batch = !(last_id != current_id);
+                *drop_batch = last_id != current_id;
                 *current_person_id_m = current_id;
                 last_id = current_id;
             }

@@ -57,7 +57,7 @@ public:
     }
 private:
     float batch_fps = 0; // constant FPS for batch
-    const std::shared_ptr<bool>& drop_batch;
+    const std::shared_ptr<bool> drop_batch; // drop parameters of batch
     std::vector<cv::Mat> batch; // pack of images for graph
     size_t first_el = 0; // place of first image in batch
     size_t images_in_batch_count = 0; // number of images in batch
@@ -68,8 +68,7 @@ private:
         if (images_in_batch_count < batch_size) {
             /** case when batch isn't filled **/
             return images_in_batch_count++;
-        }
-        else {
+        } else {
             if (!is_filled) {
                 auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
                 ptr[1] = 1;
@@ -94,10 +93,11 @@ private:
     }
 };
 
-void runBatchFill(const cv::Mat& frame,
-                  BatchProducer& producer,
-    std::chrono::steady_clock::time_point& time) {
-    while (!frame.empty()) {
+static void runBatchFill(const cv::Mat& frame,
+                         BatchProducer& producer,
+                         std::chrono::steady_clock::time_point& time,
+                         bool& is_filling_possible) {
+    while (is_filling_possible) {
         producer.fillBatch(frame, time);
     }
 }
@@ -127,14 +127,14 @@ public:
         if (!fast_frame.data) {
             GAPI_Assert(false && "Couldn't grab the frame");
         }
-
         producer.fillFastFrame(fast_frame);
         fast_frame.copyTo(thread_frame);
         /** Batch filling with constant time step **/
         std::thread fill_bath_thr(runBatchFill,
                                   std::cref(thread_frame),
                                   std::ref(producer),
-                                  std::ref(read_time));
+                                  std::ref(read_time),
+                                  std::ref(is_filling_possible));
         fill_bath_thr.detach();
         first_batch = producer.getBatch();
     }
@@ -147,8 +147,9 @@ protected:
     bool first_pulled = false; // is first already pulled
     std::vector<cv::Mat> first_batch; // batch from constructor
     cv::Mat thread_frame; // frame for batch constant filling
-    std::mutex thread_frame_lock;
+    std::mutex thread_frame_lock; // lock for shared frame
     std::chrono::steady_clock::time_point read_time; // timepoint from cv::read()
+    bool is_filling_possible = true; // access for batch filling
 
     virtual bool pull(cv::gapi::wip::Data& data) override {
         /** Is first already pulled **/
@@ -165,6 +166,7 @@ protected:
         cv::Mat fast_frame = cap->read();
 
         if (!fast_frame.data) {
+            is_filling_possible = false;
             return false;
         }
 
