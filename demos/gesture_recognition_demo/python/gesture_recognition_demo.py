@@ -117,7 +117,8 @@ def main():
     args = build_argparser().parse_args()
 
     class_map = load_class_map(args.class_map)
-    assert class_map is not None
+    if class_map is None:
+        raise RuntimeError("Can't read {}".format(args.class_map))
 
     ie = load_ie_core(args.device, args.cpu_extension)
 
