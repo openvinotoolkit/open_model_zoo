@@ -49,6 +49,11 @@ class DataRepresentation:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
 
+class AnnotationDataIdentifier:
+    def __init__(self, ann_id, data_id):
+        self.annotation_id = ann_id
+        self.data_id = data_id
+
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
@@ -64,6 +69,10 @@ IdentifierSerializationOptions = namedtuple(
 )
 
 identifier_serialization = {
+    'AnnotationDataIdentifier': IdentifierSerializationOptions(
+        'annotation_data_identifier', ['annotation_id', 'data_id'],
+        AnnotationDataIdentifier, [False, True], [False, True]
+    ),
     'ClipIdentifier': IdentifierSerializationOptions(
         'clip_identifier', ['video', 'clip_id', 'frames'], ClipIdentifier, [False, False, False], [False, False, True]),
     'MultiFramesInputIdentifier': IdentifierSerializationOptions(
@@ -120,15 +129,31 @@ def deserialize_identifier(identifier):
     return identifier
 
 
-def create_identifier_key(identifier):
+def create_ann_identifier_key(identifier):
     if isinstance(identifier, list):
-        return ListIdentifier(tuple(create_identifier_key(elem) for elem in identifier))
+        return ListIdentifier(tuple(create_ann_identifier_key(elem) for elem in identifier))
     if isinstance(identifier, ClipIdentifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
         return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
     if isinstance(identifier, ParametricImageIdentifier):
         return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
+    if isinstance(identifier, AnnotationDataIdentifier):
+        return identifier.annotation_id
+    return identifier
+
+
+def create_identifier_key(identifier):
+    if isinstance(identifier, list):
+        return ListIdentifier(tuple(create_ann_identifier_key(elem) for elem in identifier))
+    if isinstance(identifier, ClipIdentifier):
+        return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
+    if isinstance(identifier, ParametricImageIdentifier):
+        return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
+    if isinstance(identifier, AnnotationDataIdentifier):
+        return AnnotationDataIdentifier(identifier.annotation_id, tuple(identifier.data_id))
     return identifier
 
 
