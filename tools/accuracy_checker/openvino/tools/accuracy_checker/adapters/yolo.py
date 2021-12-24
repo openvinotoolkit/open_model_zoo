@@ -272,7 +272,7 @@ class YoloV2Adapter(Adapter):
         self.select_output_blob(predictions)
         predictions = predictions[self.output_blob]
         out_precision = frame_meta[0].get('output_precision', {})
-        out_layout = frame_meta[0].get('outpupt_layout', {})
+        out_layout = frame_meta[0].get('output_layout', {})
         if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
             predictions = predictions.view(out_precision[self.output_blob])
         if self.output_blob in out_layout and out_layout[self.output_blob] == 'NHWC':
@@ -367,7 +367,7 @@ class YoloV3Adapter(Adapter):
                 description="Preprocesses output in the original way."
             ),
             'output_format': StringField(
-                choices=['BHW', 'HWB'], optional=True, default='BHW',
+                choices=['BHW', 'HWB'], optional=True,
                 description="Set output layer format"
             ),
             'multiple_labels': BoolField(
@@ -456,6 +456,8 @@ class YoloV3Adapter(Adapter):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
             nchw_layout = input_shape[1] == 3
+            if self.output_format is None:
+                self.output_format = 'BHW' if nchw_layout else 'HWB'
             self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
             self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
             for layer_id, p in enumerate(prediction):
