@@ -100,8 +100,8 @@ conversion_to_onnx_args:
   - --model-param=decoder_weights=r"$dl_dir/models/.nemo_tmp/JasperDecoderForCTC.pt"
   - --input-names=audio_signal
   - --output-names=output
+  - '--conversion-param=dynamic_axes={"audio_signal": {0: "batch_size", 1: "num_bins", 2: "duration"}}'
 model_optimizer_args:
-  - --input_shape=[1,64,128]
   - --input=audio_signal
   - --output=output
   - --input_model=$conv_dir/quartznet.onnx

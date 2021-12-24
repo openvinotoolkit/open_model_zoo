@@ -25,7 +25,6 @@ files:
     checksum: 7c3000c0b24236b75a2eee4222ac971185229614d49eb896e340409392f31b539ae62fde2df1d0b1024184b829316f28
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/se-resnext-101/SE-ResNeXt-101.caffemodel
 model_optimizer_args:
-  - --input_shape=[1,3,224,224]
   - --input=data
   - --mean_values=data[104.0,117.0,123.0]
   - --output=prob

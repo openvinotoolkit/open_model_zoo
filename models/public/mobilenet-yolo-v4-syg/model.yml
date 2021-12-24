@@ -29,7 +29,6 @@ files:
     source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-v4-syg/yolo_pb2ir.json
 model_optimizer_args:
   - --input_model=$dl_dir/mobilenet-yolo-v4-syg.pb
-  - --input_shape=[1,416,416,3]
   - --input=input_1
   - --scale_values=input_1[255]
   - --transformations_config=$dl_dir/yolo_pb2ir.json

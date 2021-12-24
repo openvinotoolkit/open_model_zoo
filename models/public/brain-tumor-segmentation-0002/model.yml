@@ -25,7 +25,6 @@ files:
       $type: google_drive
       id: 1NhH51NgKJKhu0Bax_IKQ_Byvoe2bItPX
 model_optimizer_args:
-  - --input_shape=[1,4,128,128,128]
   - --input_model=$dl_dir/brain-tumor-segmentation-0002.onnx
 framework: onnx
 license: https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE

@@ -61,9 +61,9 @@ conversion_to_onnx_args:
   - --input-names=data
   - --output-names=prob
   - --output-file=$conv_dir/efficientnet-b0.onnx
+  - '--conversion-param=dynamic_axes={"data": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,3,224,224]
   - --input=data
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]

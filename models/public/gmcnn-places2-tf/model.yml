@@ -31,7 +31,6 @@ postprocessing:
 
 model_optimizer_args:
   - --input_model=$dl_dir/gmcnn-places2-tf/frozen_model.pb
-  - --input_shape=[1,512,680,3],[1,512,680,1]
   - --input=Placeholder,Placeholder_1
   - --output=Minimum
 framework: tf

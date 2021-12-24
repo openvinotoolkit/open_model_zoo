@@ -36,6 +36,7 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/hbonet_0_5.onnx
   - --input-names=data
   - --output-names=prob
+  - '--conversion-param=dynamic_axes={"data": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
   - --input=data
   - --mean_values=data[123.675,116.28,103.53]

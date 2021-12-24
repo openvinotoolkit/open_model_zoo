@@ -33,7 +33,6 @@ postprocessing:
     format: gztar
     file: mixnet-l.tar.gz
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
   - --input=IteratorGetNext:0
   - --output=logits
   - --input_meta_graph=$dl_dir/mixnet-l/model.ckpt.meta

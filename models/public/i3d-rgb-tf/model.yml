@@ -28,7 +28,6 @@ files:
     source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
 framework: tf
 model_optimizer_args:
-  - --input_shape=[1,79,224,224,3]
   - --mean_values=Placeholder[127.5]
   - --scale_values=Placeholder[127.5]
   - --input_model=$dl_dir/i3d-rgb.frozen.pb

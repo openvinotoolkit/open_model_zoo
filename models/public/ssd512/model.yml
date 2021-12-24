@@ -48,7 +48,6 @@ postprocessing:
     pattern: ' +save_output_param \{.*\n.*\n +\}\n'
     replacement: ''
 model_optimizer_args:
-  - --input_shape=[1,3,512,512]
   - --input=data
   - --mean_values=data[104.0,117.0,123.0]
   - --output=detection_out

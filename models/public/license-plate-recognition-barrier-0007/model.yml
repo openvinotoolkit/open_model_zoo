@@ -27,7 +27,6 @@ postprocessing:
     file: license-plate-recognition-barrier-0007.tar.gz
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,24,94,3]
   - --input=input
   - --scale_values=input[255.0]
   - --output=d_predictions

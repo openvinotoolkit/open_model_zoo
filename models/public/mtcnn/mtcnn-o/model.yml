@@ -38,7 +38,6 @@ files:
     checksum: 77bb0c7ec10017793e903e73a70b33b3f9e9bb36569c39e87eec0b8ac7ff58ec7a4ed813822467dceb8549cb1e3c03e0
     source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
 model_optimizer_args:
-  - --input_shape=[1,3,48,48]
   - --input=data
   - --mean_values=data[127.5,127.5,127.5]
   - --scale_values=data[128.0]

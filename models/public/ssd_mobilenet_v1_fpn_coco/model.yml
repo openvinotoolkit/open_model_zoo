@@ -26,7 +26,6 @@ postprocessing:
     file: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,640,640,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
   - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json

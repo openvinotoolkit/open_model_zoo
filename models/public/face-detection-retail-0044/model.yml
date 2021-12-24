@@ -28,7 +28,6 @@ files:
     checksum: a86e975a6cad2ca8d0a28d8e9492cffbf45e3a9210baa456761e0c4708f09c024ac6c5f174c190e86b31a8bef77932fc
     source: https://github.com/opencv/training_toolbox_caffe/raw/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/face-detection-retail-0044.caffemodel
 model_optimizer_args:
-  - --input_shape=[1,3,300,300]
   - --input=data
   - --input_model=$dl_dir/face-detection-retail-0044.caffemodel
   - --input_proto=$dl_dir/face-detection-retail-0044.prototxt

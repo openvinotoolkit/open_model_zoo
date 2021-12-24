@@ -26,7 +26,6 @@ files:
     size: 35511756
     source: https://media.githubusercontent.com/media/onnx/models/41ccf18ba5a815dab714899ac234e9b1e4293c20/vision/object_detection_segmentation/tiny-yolov3/model/tiny-yolov3-11.onnx
 model_optimizer_args:
-  - --input_shape=[1,3,416,416],[1,2]
   - --input=input_1,image_shape
   - --scale_values=input_1[255]
   - --reverse_input_channels

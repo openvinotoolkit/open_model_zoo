@@ -117,6 +117,7 @@ conversion_to_onnx_args:
   - --model-param=gen_weights=r"$dl_dir/model_files/ckpt/latest_net_G.pth"
   - --input-names=input_seg_map,ref_image,ref_seg_map
   - --output-names=exemplar_based_output
+  - '--conversion-param=dynamic_axes={"input_seg_map": {0: "batch_size", 2: "height", 3: "width"}, "ref_image": {0: "batch_size", 2: "height", 3: "width"}, "ref_seg_map": {0: "batch_size", 2: "height", 3: "width"}}'
 model_optimizer_args:
   - --input_model=$conv_dir/cocosnet.onnx
   - --input=input_seg_map,ref_image,ref_seg_map

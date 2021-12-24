@@ -27,7 +27,6 @@ postprocessing:
     file: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,256,256,3]
   - --scale=127.5
   - --mean_values=[127.5,127.5,127.5]
   - --transformations_config=$dl_dir/model/model.tfmo.json

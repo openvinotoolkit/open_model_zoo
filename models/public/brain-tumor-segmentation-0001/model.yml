@@ -37,7 +37,7 @@ files:
       $type: google_drive
       id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
 model_optimizer_args:
-  - --input_shape=[1,4,128,128,128]
+  - --input_shape=[-1,4,-1,-1,-1]
   - --input=data_crop
   - --output=blockgrad7
   - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params

@@ -25,7 +25,6 @@ files:
     source: https://storage.googleapis.com/tensorflow/keras-applications/densenet/densenet201_weights_tf_dim_ordering_tf_kernels.h5
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
   - --input=input_1
   - --mean_values=input_1[123.68,116.78,103.94]
   - --scale_values=input_1[58.395,57.12,57.375]

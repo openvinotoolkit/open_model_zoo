@@ -53,8 +53,8 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/colorization-siggraph.onnx
   - --input-names=data_l,user_ab,user_map
   - --output-names=color_ab
+  - '--conversion-param=dynamic_axes={"data_l": {0: "batch_size", 2: "height", 3: "width"}, "user_ab": {0: "batch_size", 2: "height", 3: "width"}, "user_map": {0: "batch_size", 2: "height", 3: "width"}'
 model_optimizer_args:
-  - --input_shape=[1,1,256,256],[1,2,256,256],[1,1,256,256]
   - --input=data_l,user_ab,user_map
   - --output=color_ab
   - --input_model=$conv_dir/colorization-siggraph.onnx

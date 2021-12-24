@@ -29,7 +29,6 @@ postprocessing:
     format: gztar
     file: efficientnet-b0.tar.gz
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
   - --input=0:sub
   - --output=logits
   - --input_meta_graph=$dl_dir/efficientnet-b0/model.ckpt.meta
