@@ -122,14 +122,13 @@ class SegmentorMstcn(Segmentor):
 
     def initialize(self):
         ie = IECore()
-        # net = ie.read_network(
-        #     model=self.i3d_path[:-4]+".xml",
-        #     weights=self.i3d_path[:-4]+".bin"
-        # )
-        # self.i3d = ie.load_network(network=net, device_name="CPU")
-        # self.bi3d_input_keys =  list(self.i3d.input_info.keys())
-        # self.i3d_output_key = list(self.i3d.outputs.keys())
-
+        net = ie.read_network(
+            model=self.i3d_path[:-4]+".xml",
+            weights=self.i3d_path[:-4]+".bin"
+        )
+        self.i3d = ie.load_network(network=net, device_name="CPU")
+        self.bi3d_input_keys =  list(self.i3d.input_info.keys())
+        self.i3d_output_key = list(self.i3d.outputs.keys())
         net = ie.read_network(
             model=self.mstcn_path[:-4]+".xml",
             weights=self.mstcn_path[:-4]+".bin"
@@ -174,19 +173,21 @@ class SegmentorMstcn(Segmentor):
         #     self.mstcn_input_keys[0]: i3d_vec}
         #     )[self.mstcn_output_key[0]]
 
-        ### run tsmcn only batch size 1###
-        if min(self.EmbedBufferTop.shape[-1], self.EmbedBufferFront.shape[-1]) > 0:
-            self.action_segmentation()
+        # ### run tsmcn only batch size 1###
+        # if min(self.EmbedBufferTop.shape[-1], self.EmbedBufferFront.shape[-1]) > 0:
+        #     self.action_segmentation()
 
-        ### get label ###
-        isValid = self.TemporalLogits.shape[0]
-        if isValid:
-            return [], []
-        else:
-            frame_predictions = [self.ActionTerms[i] for i in np.argmax(self.TemporalLogits, axis=1)]
-            frame_predictions = ["background" for i in range(self.EnbedWindowSize- 1)] + frame_predictions
+        # ### get label ###
+        # isValid = self.TemporalLogits.shape[0]
+        # if isValid:
+        #     return [], []
+        # else:
+        #     frame_predictions = [self.ActionTerms[i] for i in np.argmax(self.TemporalLogits, axis=1)]
+        #     frame_predictions = ["background" for i in range(self.EnbedWindowSize- 1)] + frame_predictions
         
-        return frame_predictions, frame_predictions
+        # return frame_predictions, frame_predictions
+
+        return [], []
 
     def feature_embedding(self, img_buffer, embedding_buffer, frame_index):
         # minimal temporal length for processor
