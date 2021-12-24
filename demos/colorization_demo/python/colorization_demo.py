@@ -74,9 +74,7 @@ if __name__ == '__main__':
     model = ie.read_model(args.model, args.model.with_suffix(".bin"))
 
     input_tensor_name = 'data_l'
-    assert input_tensor_name in set().union(*[input.get_names() for input in model.inputs]),\
-           "Expected input with name 'data_l'"
-    input_shape = model.inputs[0].shape
+    input_shape = model.input(input_tensor_name).shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
     inputs = {}
