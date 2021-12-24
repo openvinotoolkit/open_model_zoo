@@ -59,7 +59,13 @@ The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
 
 ### Outputs
 
-1.	Name: `decoder_hidden`, shape: `1, 3`. Classification confidence scores in the [0, 1] range
+1.	Name: `decoder_hidden`, shape: `1, 3`. The foramt [`has_action_conf_score`, `action_1_logits`, `action_2_logits`]
+
+- `has_action_conf_score` - confidence for action frame
+- `noise_action` - confidence for the noise_action class
+- `adjust_rider` - confidence for the adjust_rider class
+
+Classification confidence scores in the [0, 1] range
     for every smartlab actions.
 
 ## Use smartlab demo
