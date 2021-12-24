@@ -8,7 +8,7 @@ from openvino.inference_engine import IECore
 
 class TestTopologies(unittest.TestCase):
     def test_load_intel(self):
-        face_detection = omz.Model.download_model('face-detection-0200', precision='FP16-INT8')
+        face_detection = omz.Model.download('face-detection-0200', precision='FP16-INT8')
         xml_path = face_detection.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -23,7 +23,7 @@ class TestTopologies(unittest.TestCase):
         self.assertEqual(net.outputs[output_name].shape, [1, 1, 200, 7])
 
     def test_load_public(self):
-        model = omz.Model.download_model('colorization-v2', precision='FP32')
+        model = omz.Model.download('colorization-v2', precision='FP32')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -37,7 +37,7 @@ class TestTopologies(unittest.TestCase):
         self.assertEqual(net.input_info[input_name].input_data.shape, [1, 1, 256, 256])
         self.assertEqual(net.outputs[output_name].shape, [1, 2, 256, 256])
 
-    def test_load_from_prtained(self):
+    def test_load_from_pretrained(self):
         model = omz.Model.from_pretrained('models/public/colorization-v2/FP32/colorization-v2.xml')
         xml_path = model.model_path
 
@@ -53,15 +53,15 @@ class TestTopologies(unittest.TestCase):
         self.assertEqual(net.outputs[output_name].shape, [1, 2, 256, 256])
 
     def test_get_accuracy_checker_config(self):
-        model = omz.Model.download_model('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.accuracy_checker_config, dict)
 
     def test_get_model_config(self):
-        model = omz.Model.download_model('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.model_config, dict)
 
     def test_infer_model(self):
-        model = omz.Model.download_model('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
 
         ie = IECore()
         net = ie.read_network(model.model_path)
@@ -73,7 +73,7 @@ class TestTopologies(unittest.TestCase):
         self.assertEqual(output[output_name].shape, (1, 2, 256, 256))
 
     def test_load_public_composite(self):
-        model = omz.Model.download_model('mtcnn-p', precision='FP32')
+        model = omz.Model.download('mtcnn-p', precision='FP32')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))

@@ -25,7 +25,7 @@ class Model:
         self._model_config = None
 
     @classmethod
-    def download_model(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None):
+    def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None):
         '''
         Downloads target model. If the model has already been downloaded,
         retrieves the model from the cache instead of downloading it again.
