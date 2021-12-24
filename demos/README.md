@@ -351,7 +351,7 @@ list above.
 
 ## See Also
 
-* [Intel OpenVINO Documentation](https://docs.openvinotoolkit.org/latest/documentation.html)
+* [Intel OpenVINO Documentation](https://docs.openvino.ai/latest/documentation.html)
 * [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../models/intel/index.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../models/public/index.md)
 

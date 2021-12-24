@@ -129,7 +129,7 @@ length of the context plus length of the question (both in tokens), if the resul
 sequence length that the network expects. This is performance (speed) and memory footprint saving option.
 Since some networks are not-reshapable (due to limitations of the internal layers) the reshaping might fail,
 so you will need to run the demo without it.
-Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
+Please see general [reshape intro and limitations](https://docs.openvino.ai/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
 
@@ -147,6 +147,6 @@ Thus, for the long texts, the network is called multiple times. The results are 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
-* [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
+* [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)
