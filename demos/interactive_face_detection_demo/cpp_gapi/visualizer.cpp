@@ -152,7 +152,7 @@ void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, float yaw, flo
 }
 
 // Visualizer
-Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm,
+Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm, bool m_am,
                        int leftPadding, int rightPadding, int topPadding, int bottomPadding):
     emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
     headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
@@ -160,7 +160,7 @@ Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm,
     rightPadding(rightPadding), topPadding(topPadding),
     bottomPadding(bottomPadding), frameCounter(0),
     _isAgeGenderEnabled(m_ag), _isEmotionsEnabled(m_em),
-    _isHeadPoseEnabled(m_hp), _isLandmarksEnabled(m_lm) {}
+    _isHeadPoseEnabled(m_hp), _isLandmarksEnabled(m_lm), _isAntispoofingEnabled(m_am) {}
 
 void Visualizer::enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames) {
     if (inImgSize != imgSize) {
@@ -199,6 +199,10 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     if (_isAgeGenderEnabled) {
         out << (f->isMale() ? "Male" : "Female");
         out << "," << f->getAge();
+    }
+
+    if (_isAntispoofingEnabled) {
+        out << (f->isReal() ? ",real" : ",spoof");
     }
 
     if (_isEmotionsEnabled) {

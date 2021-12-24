@@ -99,7 +99,7 @@ public:
     };
 
     explicit Visualizer(bool m_ag = false, bool m_em = false,
-                        bool m_hp = false, bool m_lm = false,
+                        bool m_hp = false, bool m_lm = false, bool m_am = false,
                         int leftPadding = 10, int rightPadding = 10,
                         int topPadding = 75, int bottomPadding = 10);
 
@@ -133,4 +133,5 @@ private:
     bool _isEmotionsEnabled;
     bool _isHeadPoseEnabled;
     bool _isLandmarksEnabled;
+    bool _isAntispoofingEnabled;
 };

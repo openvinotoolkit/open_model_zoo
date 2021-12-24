@@ -16,20 +16,17 @@
 #include "utils.hpp"
 
 namespace gaze_estimation {
-ResultsMarker::ResultsMarker(bool showFaceBoundingBox,
-                             bool showHeadPoseAxes,
-                             bool showLandmarks,
-                             bool showGaze,
-                             bool showEyeState):
-                             showFaceBoundingBox(showFaceBoundingBox),
-                             showHeadPoseAxes(showHeadPoseAxes),
-                             showLandmarks(showLandmarks),
-                             showGaze(showGaze),
-                             showEyeState(showEyeState) {
+ResultsMarker::ResultsMarker(
+    bool showFaceBoundingBox, bool showHeadPoseAxes, bool showLandmarks, bool showGaze, bool showEyeState) :
+        showFaceBoundingBox(showFaceBoundingBox),
+        showHeadPoseAxes(showHeadPoseAxes),
+        showLandmarks(showLandmarks),
+        showGaze(showGaze),
+        showEyeState(showEyeState)
+{
 }
 
-void ResultsMarker::mark(cv::Mat& image,
-                         const FaceInferenceResults& faceInferenceResults) const {
+void ResultsMarker::mark(cv::Mat& image, const FaceInferenceResults& faceInferenceResults) const {
     auto faceBoundingBox = faceInferenceResults.faceBoundingBox;
     auto faceBoundingBoxWidth = faceBoundingBox.width;
     auto faceBoundingBoxHeight = faceBoundingBox.height;

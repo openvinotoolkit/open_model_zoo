@@ -4,21 +4,20 @@
 
 #include <cstdio>
 #include <string>
-
 #include <vector>
 #include <map>
 
 #include "face_detector.hpp"
 
 namespace gaze_estimation {
-FaceDetector::FaceDetector(InferenceEngine::Core& ie,
-                           const std::string& modelPath,
-                           const std::string& deviceName,
-                           double detectionConfidenceThreshold,
-                           bool enableReshape):
-             ieWrapper(ie, modelPath, modelType, deviceName),
-             detectionThreshold(detectionConfidenceThreshold),
-             enableReshape(enableReshape) {
+
+FaceDetector::FaceDetector(
+    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName,
+    double detectionConfidenceThreshold, bool enableReshape) :
+        ieWrapper(ie, modelPath, modelType, deviceName),
+        detectionThreshold(detectionConfidenceThreshold),
+        enableReshape(enableReshape)
+{
     const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
 
     inputBlobName = ieWrapper.expectSingleInput();

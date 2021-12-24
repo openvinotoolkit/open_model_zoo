@@ -19,6 +19,7 @@ from .data_reader import (
     DataReaderField,
     ReaderCombiner,
     DataRepresentation,
+    AnnotationDataIdentifier,
     ClipIdentifier,
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
@@ -32,6 +33,7 @@ from .data_reader import (
     serialize_identifier,
     deserialize_identifier,
     create_identifier_key,
+    create_ann_identifier_key,
 
     create_reader,
     REQUIRES_ANNOTATIONS
@@ -67,6 +69,7 @@ __all__ = [
     'KaldiFrameIdentifier',
     'ParametricImageIdentifier',
     'VideoFrameIdentifier',
+    'AnnotationDataIdentifier',
 
     'OpenCVFrameReader',
     'OpenCVImageReader',
@@ -94,5 +97,6 @@ __all__ = [
 
     'serialize_identifier',
     'deserialize_identifier',
-    'create_identifier_key'
+    'create_identifier_key',
+    'create_ann_identifier_key'
 ]
