@@ -158,7 +158,7 @@ class Model:
             try:
                 self.net = ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie argumnet must be of IECore type.')
+                raise TypeError('ie argument must be of IECore type.')
 
         input_blob = self.net.input_info
 
@@ -169,7 +169,7 @@ class Model:
             try:
                 self.net = ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie argumnet must be of IECore type.')
+                raise TypeError('ie argument must be of IECore type.')
 
         output_blob = self.net.outputs
 
