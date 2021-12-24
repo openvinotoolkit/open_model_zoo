@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import copy
 import json
 import logging as log
 import os
@@ -233,8 +234,7 @@ class Model:
         infer_status_decoder = self.infer_request_decoder.wait_for(timeout)
         if infer_status_decoder is False and self.is_async:
             return None
-        dec_res = self.infer_request_decoder.results
-        self._unpack_dec_results(dec_res)
+        self._unpack_dec_results()
 
         if self.tgt[0][0][0] == END_TOKEN or self.num_infers_decoder >= self.args.max_formula_len:
             self.num_infers_decoder = 0
@@ -257,36 +257,23 @@ class Model:
         self.model_status = Model.Status.ENCODER_INFER
 
     def _start_decoder(self):
-        enc_res = self.infer_request_encoder.results
-        self._unpack_enc_results(enc_res)
+        self._unpack_enc_results()
         self._async_infer_decoder(self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt)
         self.model_status = Model.Status.DECODER_INFER
 
-    def _unpack_dec_results(self, dec_res):
-        for key, value in dec_res.items():
-            valid_names = key.get_names()
-            if self.args.dec_st_h_t_layer in valid_names:
-                self.dec_states_h = value
-            if self.args.dec_st_c_t_layer in valid_names:
-                self.dec_states_c = value
-            if self.args.output_layer in valid_names:
-                self.output = value
-            if self.args.logit_layer in valid_names:
-                logit = value
-        self.logits.append(logit)
+    def _unpack_dec_results(self):
+        self.dec_states_h = self.infer_request_decoder.get_tensor(self.args.dec_st_h_t_layer).data
+        self.dec_states_c = self.infer_request_decoder.get_tensor(self.args.dec_st_c_t_layer).data
+        self.output = self.infer_request_decoder.get_tensor(self.args.output_layer).data
+        logit = self.infer_request_decoder.get_tensor(self.args.logit_layer).data
+        self.logits.append(copy.deepcopy(logit))
         self.tgt = np.array([[np.argmax(logit, axis=1)]])
 
-    def _unpack_enc_results(self, enc_res):
-        for key, value in enc_res.items():
-            valid_names = key.get_names()
-            if self.args.row_enc_out_layer in valid_names:
-                self.row_enc_out = value
-            if self.args.hidden_layer in valid_names:
-                self.dec_states_h = value
-            if self.args.context_layer in valid_names:
-                self.dec_states_c = value
-            if self.args.init_0_layer in valid_names:
-                self.output = value
+    def _unpack_enc_results(self):
+        self.row_enc_out = self.infer_request_encoder.get_tensor(self.args.row_enc_out_layer).data
+        self.dec_states_h = self.infer_request_encoder.get_tensor(self.args.hidden_layer).data
+        self.dec_states_c = self.infer_request_encoder.get_tensor(self.args.context_layer).data
+        self.output = self.infer_request_encoder.get_tensor(self.args.init_0_layer).data
         self.tgt = np.array([[START_TOKEN]])
         self.logits = []
 
