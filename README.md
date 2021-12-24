@@ -1,4 +1,4 @@
-# [OpenVINO™ Toolkit](https://01.org/openvinotoolkit) - Open Model Zoo repository
+# [OpenVINO™ Toolkit](https://docs.openvino.ai/latest/index.html) - Open Model Zoo repository
 [![Stable release](https://img.shields.io/badge/version-2021.4-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.1)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
@@ -23,8 +23,8 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 * [Demos and Samples](https://docs.openvino.ai/latest/omz_demos.html)
 
 ## Other Usage Examples
-* [Open Visual Cloud](https://01.org/openvisualcloud)
-  * [Tutorial: Build and Run the AD Insertion Sample on public cloud or local machine](https://01.org/openvisualcloud/documents/tutorial-build-and-run-ad-insertion-sample-public-cloud-or-local-machine)
+* [Open Visual Cloud](https://www.intel.com/content/www/us/en/developer/articles/technical/open-visual-cloud.html)
+  * [Tutorial: Running AD Insertion on Public Cloud](https://github.com/OpenVisualCloud/Ad-Insertion-Sample/wiki/Tutorial:-Running-AD-Insertion-on-Public-Cloud)
   * [GitHub Repo for Ad Insertion Sample](https://github.com/OpenVisualCloud/Ad-Insertion-Sample)
 * [OpenVINO for Smart City](https://github.com/incluit/OpenVino-For-SmartCity)
 * [OpenVINO Driver Behavior](https://github.com/incluit/OpenVino-Driver-Behaviour)
