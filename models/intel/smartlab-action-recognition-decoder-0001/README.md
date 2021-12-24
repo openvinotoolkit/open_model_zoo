@@ -1,4 +1,4 @@
-# smartlab-action-recognition-decoder-0001 (composite)
+# smartlab-action-recognition-encoder-0001 (composite)
 
 ## Use Case and High-Level Description
 
@@ -7,7 +7,7 @@ The model uses smartlab dataset to predict actions.
 The model is classfier for 3 class actions.
 
 ## Example of the input data
-<!-- ![](./assets/text-recognition-0015.jpg) -->
+<!-- ![](./assets/frame0001.jpg) -->
 
 ## Example of the output
 
@@ -17,28 +17,22 @@ The model is classfier for 3 class actions.
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 0.8995             |
-| Accuracy on the alphanumeric subset of ICDAR03 | 0.9389             |
-| Accuracy on the alphanumeric subset of ICDAR15 | 0.7355             |
-| Accuracy on the alphanumeric subset of SVT     | 0.8764             |
-| Accuracy on the alphanumeric subset of IIIT5K  | 0.8413             |
-| Text location requirements                     | Tight aligned crop |
+| Accuracy on the DSI1867                        | TODO               |
 | Source framework                               | PyTorch\*          |
 
-The above accuracies are calculated for case-insensitive mode (i.e. GT text and predicted text are all casted to lowercase).
 
 ## Encoder model specification
 
-The text-recognition-0015-encoder model is a ResNeXt-101 like backbone with convolutional encoder part of the text recognition.
+The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone with convolutional encoder part of the action recognition.
 
 | Metric  | Value |
 | ------- | ----- |
-| GFlops  | 12.4  |
-| MParams | 398   |
+| GFlops  | TODO  |
+| MParams | TODO  |
 
 ### Inputs
 
-Image, name: `imgs`, shape: `1, 1, 64, 256` in the `1, C, H, W` format, where:
+Image, name: `input_image`, shape: `1, 1, 224, 224` in the `1, C, H, W` format, where:
 
 - `C` - number of channels
 - `H` - image height
@@ -47,39 +41,31 @@ Image, name: `imgs`, shape: `1, 1, 64, 256` in the `1, C, H, W` format, where:
 
 ### Outputs
 
-1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Initial context state of the GRU cell.
-2.	Name: `features`, shape: `1, 16, 1024`. Features from encoder part of text recognition head.
+1.	Name: `output_feature`, shape: `1, 1280`. Features from encoder part of action recogntion head.
 
 ## Decoder model specification
 
-The text-recognition-15-decoder model is a GRU based decoder with 2d attention module.
+The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
 
 | Metric  | Value |
 | ------- | ----- |
-| GFlops  | 0.03  |
-| MParams | 4.33  |
+| GFlops  | TODO  |
+| MParams | TODO  |
 
 ### Inputs
 
-1.	Name: `decoder_input`, shape: `1`. Previous predicted letter.
-2.	Name: `features`, shape: `1, 16, 1024`. Encoded features.
-3.	Name: `hidden`, shape: `1, 1, 1024`. Current state of the decoder.
+1.	Name: `input_feature_1`, shape: `1, 1280`. Encoded features from topview.
+2.	Name: `input_feature_1`, shape: `1, 1280`. Encoded features from frontview.
 
 ### Outputs
 
-1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the LSTM cell.
-2.	Name: `decoder_output`, shape: `1, 66`. Classification confidence scores in the [0, 1] range
-    for every letter.
-## Use text-detection demo
+1.	Name: `decoder_hidden`, shape: `1, 3`. Classification confidence scores in the [0, 1] range
+    for every smartlab actions.
 
-Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
-```
--tr_pt_first
--m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
--tr_o_blb_nm "logits"
--tr_composite
--dt simple -lower
-```
+## Use smartlab demo
+
+Model is supported by [smartlab_online_demo python demo](../../../demos/smartlab_online_demo/python/README.md).
+
 
 For more information, please, see documentation of the demo.
 ## Legal Information
