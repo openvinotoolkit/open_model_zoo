@@ -92,7 +92,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
     model_format = model.framework
     mo_extension_dir = mo_props.base_dir / 'extensions'
     if not mo_extension_dir.exists():
-        mo_extension_dir = mo_props.base_dir / 'mo'
+        mo_extension_dir = mo_props.base_dir
 
     template_variables = {
         'config_dir': _common.MODEL_ROOT / model.subdirectory,
@@ -232,11 +232,12 @@ def main():
                 mo_dir = mo_path.parent
             else:
                 mo_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.mo')
+                mo_dir = mo_package_path
                 if mo_package_path is None:
                     mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                    mo_dir = mo_package_path.parent
                     if mo_package_path is None:
                         sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
-                mo_dir = mo_package_path.parent
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
