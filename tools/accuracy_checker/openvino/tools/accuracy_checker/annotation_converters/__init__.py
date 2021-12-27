@@ -126,6 +126,7 @@ from .common_text_recognition import CommonTextRecognition
 from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .speaker_identification import SpeakerReIdentificationDatasetConverter
 from .mvtec import MVTecDatasetConverter
+from .gan_annotation_converter import GANAnnotationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -252,4 +253,5 @@ __all__ = [
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
+    'GANAnnotationConverter'
 ]
