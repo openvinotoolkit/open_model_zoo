@@ -41,7 +41,7 @@ For this type of image processing user can use flag `-jc`. It allows to perform 
 
 4. Example for style_transfer:
 
-![](./assets/cat_style_transfer.jpg)
+![](./assets/style_transfer.jpg)
 
 ## How It Works
 
