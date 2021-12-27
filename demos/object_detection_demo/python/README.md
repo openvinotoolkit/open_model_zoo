@@ -60,7 +60,6 @@ omz_converter --list models.lst
 ### Supported Models
 
 * architecture_type = centernet
-  - ctdet_coco_dlav0_384
   - ctdet_coco_dlav0_512
 * architecture_type = ctpn
   - ctpn
@@ -104,8 +103,6 @@ omz_converter --list models.lst
   - ssd512
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco
-  - ssd_mobilenet_v2_coco
-  - ssd_resnet50_v1_fpn_coco
   - ssd-resnet34-1200-onnx
   - ssdlite_mobilenet_v2
   - vehicle-detection-0200

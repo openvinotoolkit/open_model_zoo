@@ -4,7 +4,6 @@ We appreciate your intention to contribute model to the OpenVINO&trade; Open Mod
 
 Frameworks supported by the Open Model Zoo:
 * Caffe\*
-* Caffe2\* (via conversion to ONNX\*)
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
 * MXNet\*
@@ -113,7 +112,7 @@ For replacement operation:
 - `replacement` — Replacement string
 - `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
-**`conversion_to_onnx_args`** (*only for Caffe2\*, PyTorch\* models*)
+**`conversion_to_onnx_args`** (*only for PyTorch\* models*)
 
 List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
