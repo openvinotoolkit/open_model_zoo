@@ -21,7 +21,7 @@ import numpy as np
 
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, read_pickle, parse_partial_shape
+from ...utils import contains_all, read_pickle, parse_partial_shape, postprocess_output_name, generate_layer_name
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 from .base_models import (
     BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, BaseONNXModel, create_model, create_encoder
@@ -284,6 +284,26 @@ class CommonOVModel(BaseOpenVINOModel):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(self.outputs))
+            else:
+                output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
+
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            for idx, inp in enumerate(self.input_layers):
+                self.input_layers[idx] = (
+                    '_'.join([self.default_model_suffix, inp])
+                    if with_prefix else inp.split(self.default_model_suffix)[-1]
+                )
+        for idx, out in enumerate(self.output_layers):
+            self.output_layers[idx] = postprocess_output_name(out, self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(CommonDLSDKModel):

@@ -22,7 +22,14 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, parse_partial_shape, generate_layer_name, softmax
+from ...utils import (
+    contains_all,
+    extract_image_representations,
+    parse_partial_shape,
+    generate_layer_name,
+    softmax,
+    postprocess_output_name
+)
 
 
 class TextSpottingEvaluator(BaseCustomEvaluator):
@@ -161,13 +168,13 @@ class SequentialModel(BaseCascadeModel):
 
                 if callback:
                     callback(raw_decoder_outputs)
-                decoder_output = decoder_outputs[self.recognizer_decoder.outputs['symbols_distribution']]
+                decoder_output = decoder_outputs[self.recognizer_decoder.model_outputs['symbols_distribution']]
                 softmaxed = softmax(decoder_output[0])
                 prev_symbol_index = np.argmax(decoder_output, axis=1)
                 confidence *= softmaxed[prev_symbol_index]
                 if prev_symbol_index == self.eos_index:
                     break
-                hidden = decoder_outputs[self.recognizer_decoder.outputs['cur_hidden']]
+                hidden = decoder_outputs[self.recognizer_decoder.model_outputs['cur_hidden']]
                 text += self.alphabet[int(prev_symbol_index)]
             texts.append(text if confidence >= self.confidence_threshold else '')
 
@@ -188,6 +195,17 @@ class SequentialModel(BaseCascadeModel):
         with_prefix = (
             isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
         )
+        self.adapter.outputs_verified = False
+        if hasattr(self.detector, 'outputs'):
+            self.detector.text_feats_out = postprocess_output_name(
+                self.detector.text_feats_out, self.detector.outputs, raise_error=False)
+            self.recognizer_encoder.output = postprocess_output_name(
+                self.recognizer_encoder.output, self.recognizer_encoder.outputs, raise_error=False
+            )
+            for out, out_value in self.recognizer_decoder.model_outputs.items():
+                self.recognizer_decoder.model_outputs[out] = postprocess_output_name(
+                out_value, self.recognizer_decoder.outputs, raise_error=False
+            )
         if with_prefix != self.with_prefix:
             self.recognizer_encoder.input = generate_layer_name(
                 self.recognizer_encoder.input, 'recognizer_encoder_', with_prefix
@@ -345,7 +363,7 @@ class RecognizerDecoderDLSDKModel(RecognizerDLSDKModel):
                 return out_name + '/sink_port_0'
             return out_name
         self.model_inputs = network_info['inputs']
-        self.outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
+        self.model_outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -356,5 +374,5 @@ class RecognizerDecoderOVModel(RecognizerOVModel):
                 return out_name + '/sink_port_0'
             return out_name
         self.model_inputs = network_info['inputs']
-        self.outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
+        self.model_outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
         super().__init__(network_info, launcher, suffix, delayed_model_loading)

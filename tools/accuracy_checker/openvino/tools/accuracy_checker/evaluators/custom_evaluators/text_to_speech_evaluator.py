@@ -21,7 +21,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, generate_layer_name
+from ...utils import contains_all, extract_image_representations, generate_layer_name, postprocess_output_name
 
 
 class TextToSpeechEvaluator(BaseCustomEvaluator):
@@ -239,6 +239,15 @@ class SequentialModel(BaseCascadeModel):
         return a[tuple(expanded_index)]
 
     def update_inputs_outputs_info(self):
+        if hasattr(self.forward_tacotron_duration, 'outputs'):
+            self.duration_output = postprocess_output_name(
+                self.duration_output, self.forward_tacotron_duration.outputs, raise_error=False)
+            self.embeddings_output = postprocess_output_name(
+                self.embeddings_output, self.forward_tacotron_duration.outputs, raise_error=False)
+            self.mel_output = postprocess_output_name(self.mel_output, self.forward_tacotron_regression.outputs,
+                                                      raise_error=False)
+            self.audio_output = postprocess_output_name(self.audio_output, self.melgan.outputs, raise_error=False)
+            self.adapter.output_blob = self.audio_output
         current_name = next(iter(self.forward_tacotron_duration.inputs))
         with_prefix = current_name.startswith('forward_tacotron_duration_')
         if with_prefix != self.with_prefix:

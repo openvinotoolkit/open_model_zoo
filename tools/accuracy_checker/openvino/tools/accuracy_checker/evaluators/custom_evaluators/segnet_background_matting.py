@@ -18,7 +18,7 @@ import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
 from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
-from ...utils import contains_all, generate_layer_name, extract_image_representations
+from ...utils import contains_all, generate_layer_name, extract_image_representations, postprocess_output_name
 from ...config import ConfigError
 
 
@@ -135,9 +135,10 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if self.input_blob is None:
             self.input_blob = input_blob
-            self.output_blob = next(iter(self.exec_network.outputs)).get_any_name()
+            self.output_blob = next(iter(self.outputs)).get_any_name()
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
+        self.output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
 
         self.with_prefix = with_prefix
 

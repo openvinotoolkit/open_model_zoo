@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_shape
+from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_shape, postprocess_output_name
 
 
 class Synthesizer(BaseCascadeModel):
@@ -157,6 +157,9 @@ class EncoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'encoder_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
 
 class DecoderModel:
@@ -180,6 +183,9 @@ class DecoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'decoder_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
     def init_feed_dict(self, encoder_output):
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
@@ -211,6 +217,9 @@ class PostNetModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'postnet_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):

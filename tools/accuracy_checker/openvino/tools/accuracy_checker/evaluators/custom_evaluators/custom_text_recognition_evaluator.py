@@ -20,7 +20,7 @@ import numpy as np
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, generate_layer_name
+from ...utils import contains_all, extract_image_representations, generate_layer_name, postprocess_output_name
 from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
 
 
@@ -120,7 +120,7 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
-        with_prefix = next(iter(self.recognizer_encoder.network.input_info)).startswith('encoder')
+        with_prefix = next(iter(self.recognizer_encoder.inputs)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
                 self.recognizer_encoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'encoder_',
@@ -129,6 +129,17 @@ class BaseSequentialModel(BaseCascadeModel):
                 self.recognizer_decoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'decoder_',
                                                                                       with_prefix)
         self.with_prefix = with_prefix
+        if hasattr(self.recognizer_encoder, 'outputs'):
+            outputs_mapping = self.recognizer_encoder.outputs
+            for output_k in self.recognizer_encoder.outputs_mapping:
+                self.recognizer_encoder.outputs_mapping[output_k] = postprocess_output_name(
+                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                )
+            outputs_mapping = self.recognizer_decoder.outputs
+            for output_k in self.recognizer_decoder.outputs_mapping:
+                self.recognizer_decoder.outputs_mapping[output_k] = postprocess_output_name(
+                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                )
 
     def predict(self, identifiers, input_data):
         pass

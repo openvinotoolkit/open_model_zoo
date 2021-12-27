@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, parse_partial_shape, generate_layer_name
+from ...utils import contains_all, parse_partial_shape, generate_layer_name, postprocess_output_name
 
 
 scale = 255.0/32768.0
@@ -120,6 +120,8 @@ class EncoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
         self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
+        if hasattr(self, 'outputs'):
+            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -235,6 +237,10 @@ class DecoderModel:
         self.input2 = generate_layer_name(self.input2, prefix, with_prefix)
         self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
+        if hasattr(self, 'outputs'):
+            self.output = postprocess_output_name(self.output,self.outputs, raise_error=False)
+            self.rnn_output1 = postprocess_output_name(self.rnn_output1, self.outputs, raise_error=False)
+            self.rnn_output2 = postprocess_output_name(self.rnn_output2, self.outputs, raise_error=False)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

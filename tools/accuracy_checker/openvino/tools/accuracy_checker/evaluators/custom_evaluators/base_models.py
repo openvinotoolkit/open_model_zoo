@@ -335,6 +335,12 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             return {node.get_node().friendly_name: node.get_node() for node in self.network.inputs}
         return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.inputs}
 
+    @property
+    def outputs(self):
+        if self.network:
+            return {node.get_node().friendly_name: node.get_node() for node in self.network.outputs}
+        return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.outputs}
+
     def fit_to_input(self, input_data):
         input_info = self.inputs[self.input_blob]
         if (self.input_blob in self.dynamic_inputs or
