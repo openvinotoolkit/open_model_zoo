@@ -263,6 +263,8 @@ summed across all devices used.
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.
 
+> **NOTE**: This demo is based on Open Model Zoo Model API. Refer to [`ModelAPI`](../../common/python/openvino/model_zoo/model_api/README.md) to learn about it.
+
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
 
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
