@@ -5,6 +5,7 @@ This demo processes the image according to the selected type of processing. The 
 * `super_resolution`
 * `deblurring`
 * `jpeg_restoration`
+* `style_transfer`
 
 ## Examples
 
@@ -38,6 +39,10 @@ Super resolution:
 
 For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
 
+4. Example for style_transfer:
+
+![](./assets/style_transfer.jpg)
+
 ## How It Works
 
 Before running the demo, user must choose type of processing and model for this processing.\
@@ -50,6 +55,8 @@ For `super_resolution` user can choose the next models:
 For `deblurring` user can use [deblurgan-v2](../../../models/public/deblurgan-v2/README.md) - generative adversarial network for single image motion deblurring.
 
 For `jpeg_restoration` user can use [fbcnn](../../../models/public/fbcnn/README.md) - flexible blind convolutional neural network for JPEG artifacts removal.
+
+For `style_transfer` user can use [fast-neural-style-mosaic-onnx](../../../models/public/fast-neural-style-mosaic-onnx/README.md) - one of the style transfer models designed to mix the content of an image with the style of another image.
 
 The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
 
@@ -68,6 +75,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 * text-image-super-resolution-0001
 * deblurgan-v2
 * fbcnn
+* fast-neural-style-mosaic-onnx
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -82,7 +90,7 @@ image_processing_demo_async [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration.
+    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer.
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
