@@ -150,7 +150,8 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
                                 {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
-                                -i INPUT [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
+                                -i INPUT [--adapter {openvino,ovms}]
+                                [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
                                 [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
                                 [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
                                 [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
@@ -163,15 +164,14 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model or
-                        address of model inference service if using ovms
-                        adapter.
+                        address of model inference service if using OVMS adapter.
   -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
-  --adapter {openvino,ovms}
-                        Optional. Specify the model adapter. Default is
-                        openvino.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -280,7 +280,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Running with OpenVINO Model Server
 
-You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OvmsAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
 
 Exemplary command:
 

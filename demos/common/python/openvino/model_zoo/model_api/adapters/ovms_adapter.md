@@ -1,12 +1,10 @@
+# OpenVINO Model Server Adapter
 
-## OpenVINO Model Server Adapter
-
-The `OvmsAdapter` implements `ModelAdapter` interface which makes it possible to use Model API with models hosted in OpenVINO Model Server.
-
+The `OVMSAdapter` implements `ModelAdapter` interface which makes it possible to use Model API with models hosted in OpenVINO Model Server.
 
 ## Prerequisites
 
-`OvmsAdapter` enables inference via gRPC calls to OpenVINO Model Server, so in order to use it you need two things:
+`OVMSAdapter` enables inference via gRPC calls to OpenVINO Model Server, so in order to use it you need two things:
 - OpenVINO Model Server that serves your model
 - [`ovmsclient`](https://pypi.org/project/ovmsclient/) package installed to enable communication with the model server
 
@@ -19,7 +17,6 @@ docker pull openvino/model_server
 ```
 
 See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
-
 
 ### Install ovmsclient
 
@@ -54,9 +51,9 @@ docker run -d --rm -v <models_repository>:/models -p 9000:9000 openvino/model_se
 
 > **Note**: In demos, while using `--adapter ovms`, inference options like: `-nireq`, `-nstreams` `-nthreads` as well as device specification with `-d` will be ignored.
 
-## Running demos with OvmsAdapter
+## Running demos with OVMSAdapter
 
-To run the demo with model served in OpenVINO Model Server, you would have to provide `--adapter ovms` option and modify `-m` parameter to indicate model inference service instead of the model files. Model parameter for `OvmsAdapter` follows this schema:
+To run the demo with model served in OpenVINO Model Server, you would have to provide `--adapter ovms` option and modify `-m` parameter to indicate model inference service instead of the model files. Model parameter for `OVMSAdapter` follows this schema:
 
 ```<service_address>/models/<model_name>[:<model_option>]```
 

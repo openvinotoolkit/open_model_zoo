@@ -37,6 +37,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                             [--adapter {openvino,ovms}]
                                              [--input_names INPUT_NAMES]
                                              [-d DEVICE]
 
@@ -45,9 +46,13 @@ Options:
   -v VOCAB, --vocab VOCAB
                         Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. URL to a page with context
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   --input_names INPUT_NAMES
                         Optional. Inputs names for the network. Default values
                         are "input_ids,attention_mask,token_type_ids"

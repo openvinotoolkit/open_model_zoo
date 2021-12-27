@@ -26,7 +26,7 @@ import logging as log
 from .model_adapter import ModelAdapter, Metadata
 
 
-class OvmsAdapter(ModelAdapter):
+class OVMSAdapter(ModelAdapter):
     """
     Class that allows working with models served by the OpenVINO Model Server
     """
@@ -104,7 +104,7 @@ class OvmsAdapter(ModelAdapter):
             raise ImportError("The ovmsclient package is not installed")
 
         log.info('Connecting to remote model: {}'.format(target_model))
-        service_url, model_name, model_version = OvmsAdapter.parse_model_arg(target_model)
+        service_url, model_name, model_version = OVMSAdapter.parse_model_arg(target_model)
         self.model_name = model_name
         self.model_version = model_version
         self.client = ovmsclient.make_grpc_client(url=service_url)

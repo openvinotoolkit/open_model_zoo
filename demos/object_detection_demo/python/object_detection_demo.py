@@ -32,7 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 from model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, OvmsAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -45,7 +45,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', 
+    args.add_argument('-m', '--model', required=True,
                       help='Required. Path to an .xml file with a trained model '
                            'or address of model inference service if using ovms adapter.',
                       required=True)
@@ -209,7 +209,7 @@ def main():
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     elif args.adapter == 'ovms':
-        model_adapter = OvmsAdapter(args.model)
+        model_adapter = OVMSAdapter(args.model)
 
     configuration = {
         'resize_type': args.resize_type,

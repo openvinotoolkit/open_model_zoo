@@ -57,7 +57,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-at {segmentation,salient_object_detection}
-                            [-d DEVICE] [-c COLORS]
+                            [--adapter {openvino,ovms}] [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
@@ -68,12 +68,16 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
                         Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo

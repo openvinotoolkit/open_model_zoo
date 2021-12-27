@@ -52,6 +52,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                       [--adapter {openvino,ovms}]
                                        [--questions QUESTION [QUESTION ...]]
                                        [--input_names INPUT_NAMES]
                                        [--output_names OUTPUT_NAMES]
@@ -65,9 +66,13 @@ Options:
   -v VOCAB, --vocab VOCAB
                         Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. URL to a page with context
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   --questions QUESTION [QUESTION ...]
                         Optional. Prepared questions
   --input_names INPUT_NAMES

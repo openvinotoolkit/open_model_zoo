@@ -16,10 +16,10 @@
 
 
 from .openvino_adapter import create_core, OpenvinoAdapter
-from .ovms_adapter import OvmsAdapter
+from .ovms_adapter import OVMSAdapter
 
 __all__ = [
     'create_core',
     'OpenvinoAdapter',
-    'OvmsAdapter',
+    'OVMSAdapter',
 ]

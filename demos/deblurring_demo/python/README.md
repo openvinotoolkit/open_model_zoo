@@ -46,7 +46,7 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+usage: deblurring_demo.py [-h] -m MODEL -i INPUT [--adapter {openvino,ovms}] [-d DEVICE]
                           [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                           [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                           [-limit OUTPUT_LIMIT] [--no_show]
@@ -55,11 +55,15 @@ usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images or anything that
                         cv2.VideoCapture can process.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo will

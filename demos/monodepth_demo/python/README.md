@@ -47,17 +47,22 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+                         [--adapter {openvino,ovms}] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                          [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                          [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image, a folder of images, video
                         file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The
                         demo will look for a suitable plugin for device specified. Default value is CPU.

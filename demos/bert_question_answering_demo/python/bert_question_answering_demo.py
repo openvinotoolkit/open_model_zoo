@@ -32,7 +32,7 @@ from html_reader import get_paragraphs
 from model_api.models import BertQuestionAnswering
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
 from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, OvmsAdapter
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -43,8 +43,9 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=str)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
@@ -168,7 +169,7 @@ def main():
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     elif args.adapter == 'ovms':
-        model_adapter = OvmsAdapter(args.model)
+        model_adapter = OVMSAdapter(args.model)
 
     config = {
         'vocab': vocab,
