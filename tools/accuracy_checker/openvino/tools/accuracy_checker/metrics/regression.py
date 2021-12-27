@@ -80,7 +80,6 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         })
         self.magnitude = []
 
-
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
         if isinstance(diff, dict):
