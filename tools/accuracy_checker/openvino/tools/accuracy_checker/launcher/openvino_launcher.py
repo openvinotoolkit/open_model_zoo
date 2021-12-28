@@ -31,7 +31,7 @@ from .dlsdk_launcher_config import (
 from .dlsdk_async_request import AsyncInferRequestWrapper
 
 from ..config import ConfigError
-from ..logging import warning
+from ..logging import warning, debug, print_info
 from ..utils import (
     read_yaml,
     contains_any,
@@ -41,7 +41,6 @@ from ..utils import (
     postprocess_output_name
 )
 from .launcher import Launcher
-from ..logging import print_info
 
 
 format_map = {
@@ -317,11 +316,8 @@ class OpenVINOLauncher(Launcher):
 
     @async_mode.setter
     def async_mode(self, flag):
-        if flag:
-            if 'CPU' in self._devices_list():
-                self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
-            if 'GPU' in self._devices_list():
-                self.ie_core.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}, 'GPU')
+        for device in self._devices_list():
+            self.ie_core.set_config({'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device.upper())
         self._async_mode = flag
 
     def get_async_requests(self):
@@ -663,6 +659,7 @@ class OpenVINOLauncher(Launcher):
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
+        self.async_mode = True
         self.load_network(log=log)
         self.try_to_set_default_layout()
 
@@ -916,12 +913,14 @@ class OpenVINOLauncher(Launcher):
 
     def get_infer_queue(self, log=True):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':
-            num_requests = 0
+            num_requests = self.auto_num_requests()
         else:
             num_requests = self.num_requests or 0
         queue = AsyncInferQueue(self.exec_network, num_requests)
         if log:
             print_info('Prepared async infer queue with {} requests'.format(len(queue)))
+        else:
+            debug('Prepared async infer queue with {} requests'.format(len(queue)))
         return queue
 
     def prepare_data_for_request(self,

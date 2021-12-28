@@ -238,7 +238,7 @@ class DecoderModel:
         self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
         if hasattr(self, 'outputs'):
-            self.output = postprocess_output_name(self.output,self.outputs, raise_error=False)
+            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
             self.rnn_output1 = postprocess_output_name(self.rnn_output1, self.outputs, raise_error=False)
             self.rnn_output2 = postprocess_output_name(self.rnn_output2, self.outputs, raise_error=False)
 

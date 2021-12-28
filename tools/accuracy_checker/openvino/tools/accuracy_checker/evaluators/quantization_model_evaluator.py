@@ -194,7 +194,7 @@ class ModelEvaluator:
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
 
-        infer_queue = self.launcher.get_infer_queue()
+        infer_queue = self.launcher.get_infer_queue(log=False)
         infer_queue.set_callback(completion_callback)
         for batch_id, dataset_item in dataset_iterator:
             batch_input_ids, batch_annotation, batch_input, batch_identifiers = dataset_item

@@ -21,7 +21,7 @@ import numpy as np
 
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, read_pickle, parse_partial_shape, postprocess_output_name, generate_layer_name
+from ...utils import contains_all, read_pickle, parse_partial_shape, postprocess_output_name
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 from .base_models import (
     BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, BaseONNXModel, create_model, create_encoder
