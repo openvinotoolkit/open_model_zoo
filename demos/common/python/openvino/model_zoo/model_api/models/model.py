@@ -180,11 +180,14 @@ class Model:
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()
 
+    def set_callback(self, callback_fn):
+        self.model_adapter.async_queue.set_callback(callback_fn)
+
     def infer_sync(self, dict_data):
         return self.model_adapter.infer_sync(dict_data)
 
-    def infer_async(self, dict_data, callback_fn, callback_data):
-        self.model_adapter.infer_async(dict_data, callback_fn, callback_data)
+    def infer_async(self, dict_data, callback_data):
+        self.model_adapter.infer_async(dict_data, callback_data)
 
     def is_ready(self):
         return self.model_adapter.is_ready()

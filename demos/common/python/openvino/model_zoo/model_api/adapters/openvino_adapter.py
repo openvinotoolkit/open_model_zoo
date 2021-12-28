@@ -19,7 +19,7 @@ from collections import deque
 from pathlib import Path
 
 try:
-    from openvino.inference_engine import IECore, get_version
+    from openvino.runtime import AsyncInferQueue, Core, get_version
     import ngraph
     openvino_absent = False
 except ImportError:
@@ -35,7 +35,7 @@ def create_core():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    return IECore()
+    return Core()
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -57,19 +57,14 @@ class OpenvinoAdapter(ModelAdapter):
 
         self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
         log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
-        self.net = ie.read_network(model_path, weights_path, self.model_from_buffer)
+        weights = weights_path if self.model_from_buffer else ''
+        self.model = ie.read_model(model_path, weights)
 
     def load_model(self):
-        self.exec_net = self.ie.load_network(self.net, self.device,
-            self.plugin_config, self.max_num_requests)
-        if self.max_num_requests == 0:
-            # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
-            # +1 to use it as a buffer of the pipeline
-            self.exec_net = self.ie.load_network(self.net, self.device,
-                self.plugin_config, len(self.exec_net.requests) + 1)
+        self.compiled_model = self.ie.compile_model(self.model, self.device, self.plugin_config)
 
         log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
-        self.empty_requests = deque(self.exec_net.requests)
+        self.async_queue = AsyncInferQueue(self.compiled_model)
         self.log_runtime_settings()
 
     def log_runtime_settings(self):
@@ -77,64 +72,58 @@ class OpenvinoAdapter(ModelAdapter):
         if 'AUTO' not in devices:
             for device in devices:
                 try:
-                    nstreams = self.exec_net.get_config(device + '_THROUGHPUT_STREAMS')
+                    nstreams = self.compiled_model.get_config(device + '_THROUGHPUT_STREAMS')
                     log.info('\tDevice: {}'.format(device))
                     log.info('\t\tNumber of streams: {}'.format(nstreams))
                     if device == 'CPU':
-                        nthreads = self.exec_net.get_config('CPU_THREADS_NUM')
+                        nthreads = self.compiled_model.get_config('CPU_THREADS_NUM')
                         log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
                 except RuntimeError:
                     pass
-        log.info('\tNumber of network infer requests: {}'.format(len(self.exec_net.requests)))
+        log.info('\tNumber of network infer requests: {}'.format(len(self.async_queue)))
 
     def get_input_layers(self):
         inputs = {}
-        for name, layer in self.net.input_info.items():
-            inputs[name] = Metadata(layer.input_data.shape, layer.input_data.precision)
+        for input in self.model.inputs:
+            inputs[input.get_any_name()] = Metadata(list(input.shape))
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
     def get_output_layers(self):
         outputs = {}
-        for name, layer in self.net.outputs.items():
-            outputs[name] = Metadata(layer.shape, layer.precision)
+        for output in self.model.outputs:
+            outputs[output.get_any_name()] = Metadata(list(output.shape))
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
     def reshape_model(self, new_shape):
-        self.net.reshape(new_shape)
+        self.model.reshape(new_shape)
 
     def infer_sync(self, dict_data):
-        return self.exec_net.infer(dict_data)
+        return self.compiled_model.infer_new_request(dict_data)
 
-    def infer_async(self, dict_data, callback_fn, callback_data):
+    def infer_async(self, dict_data, callback_data):
 
         def get_raw_result(request):
-            raw_result = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            self.empty_requests.append(request)
+            raw_result = {key: request.get_tensor(key).data for key in self.get_output_layers().keys()}
             return raw_result
 
-        request = self.empty_requests.popleft()
-        request.set_completion_callback(py_callback=callback_fn,
-                                        py_data=(get_raw_result, request, callback_data))
-        request.async_infer(dict_data)
+        self.async_queue.start_async(dict_data, (get_raw_result, callback_data))
 
     def is_ready(self):
-        return len(self.empty_requests) != 0
+        return self.async_queue.is_ready()
 
     def await_all(self):
-        for request in self.exec_net.requests:
-            request.wait()
+        self.async_queue.wait_all()
 
     def await_any(self):
-        self.exec_net.wait(num_requests=1)
+        self.async_queue.is_ready()
 
     def _get_meta_from_ngraph(self, layers_info):
-        ng_func = ngraph.function_from_cnn(self.net)
-        for node in ng_func.get_ordered_ops():
+        for node in self.model.get_ordered_ops():
             layer_name = node.get_friendly_name()
             if layer_name not in layers_info.keys():
                 continue
-            layers_info[layer_name].meta = node._get_attributes()
+            # layers_info[layer_name].meta = node._get_attributes()
             layers_info[layer_name].type = node.get_type_name()
         return layers_info
