@@ -392,11 +392,9 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     }
     return face_track_id_to_label;
 }
-// bool checkDynamicBatchSupport(const InferenceEngine::Core& ie, const std::string& device)  {
 bool checkDynamicBatchSupport(const ov::runtime::Core& core, const std::string& device)  {
     try  {
-        // if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES) # oldreplaced
-        if (core.get_config(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)// ov::runtime::Parameter???
+        if (core.get_config(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
             return false;
     }
     catch(const std::exception&)  {
@@ -506,7 +504,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-}  // namespace
+}
 
 int main(int argc, char* argv[]) {
     try {
@@ -546,8 +544,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        // slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        // InferenceEngine::Core ie;
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
 
@@ -558,11 +554,9 @@ int main(int argc, char* argv[]) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
             if (device.find("CPU") != std::string::npos) {
-                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                 core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                     InferenceEngine::PluginConfigParams::YES}}, "CPU");
             } else if (device.find("GPU") != std::string::npos) {
-                // ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                 core.set_config({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
                     InferenceEngine::PluginConfigParams::YES}}, "GPU");
             }
@@ -575,7 +569,6 @@ int main(int argc, char* argv[]) {
             // Load action detector
             ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
-            // action_config.ie = ie;
             action_config.ie = core;
             action_config.is_async = true;
             action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
@@ -610,7 +603,6 @@ int main(int argc, char* argv[]) {
             // Create face recognizer
             detection::DetectorConfig face_registration_det_config(fd_model_path);
             face_registration_det_config.deviceName = FLAGS_d_fd;
-            // face_registration_det_config.ie = ie;
             face_registration_det_config.ie = core;
             face_registration_det_config.is_async = false;
             face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
@@ -619,22 +611,18 @@ int main(int argc, char* argv[]) {
 
             CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
-            // if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
             if (checkDynamicBatchSupport(core, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
             else
                 reid_config.max_batch_size = 1;
-            // reid_config.ie = ie;
             reid_config.ie = core;
 
             CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
-            // if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
             if (checkDynamicBatchSupport(core, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
             else
                 landmarks_config.max_batch_size = 1;
-            // landmarks_config.ie = ie;
             landmarks_config.ie = core;
             face_recognizer.reset(new FaceRecognizerDefault(
                 landmarks_config, reid_config,

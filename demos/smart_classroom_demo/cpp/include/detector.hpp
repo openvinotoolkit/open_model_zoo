@@ -41,7 +41,6 @@ struct DetectorConfig : public CnnConfig {
 class FaceDetection : public AsyncDetection<DetectedObject>, public BaseCnnDetection {
 private:
     DetectorConfig config_;
-    // InferenceEngine::ExecutableNetwork net_;
     ov::runtime::CompiledModel model_;
     std::string input_name_;
     std::string output_name_;

@@ -122,10 +122,8 @@ public:
 
 private:
     ActionDetectorConfig config_;
-    // InferenceEngine::ExecutableNetwork net_;
     ov::runtime::CompiledModel model_;
     std::string input_name_;
-    // InferenceEngine::BlobMap outputs_;
     std::map<std::string, ov::runtime::Tensor> outputs_;
 
     int enqueued_frames_ = 0;
