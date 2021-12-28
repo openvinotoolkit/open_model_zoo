@@ -131,10 +131,24 @@ class OpenvinoAdapter(ModelAdapter):
 
     def _get_meta_from_ngraph(self, layers_info):
         ng_func = ngraph.function_from_cnn(self.net)
-        for node in ng_func.get_ordered_ops():
+        for idx, node in enumerate(ng_func.get_ordered_ops()):
             layer_name = node.get_friendly_name()
             if layer_name not in layers_info.keys():
                 continue
-            layers_info[layer_name].meta = node._get_attributes()
+            layers_info[layer_name].meta = node.get_attributes()
             layers_info[layer_name].type = node.get_type_name()
+            layers_info[layer_name].index = idx
         return layers_info
+
+    def operations_by_type(self, operation_type):
+        layers_info = {}
+        ng_func = ngraph.function_from_cnn(self.net)
+        for idx, node in enumerate(ng_func.get_ordered_ops()):
+            if node.get_type_name() == operation_type:
+                layer_name = node.get_friendly_name()
+                layers_info[layer_name] = Metadata()
+                layers_info[layer_name].meta = node.get_attributes()
+                layers_info[layer_name].type = node.get_type_name()
+                layers_info[layer_name].index = idx
+        return layers_info
+

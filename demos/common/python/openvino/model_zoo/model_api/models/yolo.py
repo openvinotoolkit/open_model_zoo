@@ -92,8 +92,10 @@ class YOLO(DetectionModel):
 
     def _get_output_info(self):
         output_info = {}
+        yolo_regions = self.model_adapter.operations_by_type('RegionYolo')
         for name, info in self.outputs.items():
             shape = info.shape
+
             if len(shape) == 2:
                 # we use 32x32 cell as default, cause 1D tensor is V2 specific
                 cx = self.w // 32
@@ -104,7 +106,19 @@ class YOLO(DetectionModel):
                 if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
                     raise WrapperError(self.__model__, 'The cannot reshape 2D output tensor into 4D')
                 shape = (shape[0], bboxes, cy, cx)
-            params = self.Params(info.meta, shape[2:4])
+            meta = info.meta
+            if info.type != 'RegionYolo' and yolo_regions:
+                closest_diff, closest_name = None, None
+                for reg, r_info in yolo_regions.items():
+                    if r_info.index > info.index:
+                        continue
+                    if closest_diff is None or info.index - r_info.index < closest_diff:
+                        closest_diff = info.index - r_info.index
+                        closest_name = reg
+                if closest_name is not None:
+                    meta = yolo_regions[closest_name].meta
+                    print(meta, closest_name, yolo_regions[closest_name].index, name, info.index)
+            params = self.Params(meta, shape[2:4])
             output_info[name] = (shape, params)
         return output_info
 
