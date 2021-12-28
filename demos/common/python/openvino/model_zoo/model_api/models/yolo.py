@@ -117,7 +117,6 @@ class YOLO(DetectionModel):
                         closest_name = reg
                 if closest_name is not None:
                     meta = yolo_regions[closest_name].meta
-                    print(meta, closest_name, yolo_regions[closest_name].index, name, info.index)
             params = self.Params(meta, shape[2:4])
             output_info[name] = (shape, params)
         return output_info
