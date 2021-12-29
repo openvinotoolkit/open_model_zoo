@@ -23,7 +23,7 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 from tokenizers import Tokenizer, pre_tokenizers, decoders
 from tokenizers.models import BPE
 
@@ -74,26 +74,26 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    ie = Core()
 
     # read IR
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
+    model_path = args.model
     log.info('Reading model {}'.format(args.model))
-    ie_net = ie.read_network(model=model_xml, weights=model_bin)
+    model = ie.read_model(model_path)
 
     # check input and output names
-    if len(ie_net.input_info) != 1:
+    if len(model.inputs) != 1:
         raise RuntimeError('The demo expects model with single input, while provided {}'.format(
-            len(ie_net.input_info)))
-    if len(ie_net.outputs) != 1:
+            len(model.inputs)))
+    if len(model.outputs) != 1:
         raise RuntimeError('The demo expects model with single output, while provided {}'.format(
-            len(ie_net.outputs)))
-    input_names = next(iter(ie_net.input_info))
-    output_names = next(iter(ie_net.outputs))
+            len(model.outputs)))
+    input_tensor = model.inputs[0].any_name
+    output_tensor = model.outputs[0]
 
     # load model to the device
-    ie_net_exec = ie.load_network(network=ie_net, device_name=args.device)
+    compiled_model = ie.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.input:
@@ -116,7 +116,7 @@ def main():
         input_ids = np.array([tokens], dtype=np.int32)
 
         # maximum number of tokens that can be processed by network at once
-        max_length = ie_net.input_info[input_names].input_data.shape[1]
+        max_length = model.inputs[0].shape[1]
 
         eos_token_id = len(vocab) - 1
 
@@ -135,18 +135,18 @@ def main():
 
             # create numpy inputs for IE
             inputs = {
-                input_names: model_input,
+                input_tensor: model_input,
             }
 
             # infer by IE
             t_start = time.perf_counter()
-            res = ie_net_exec.infer(inputs=inputs)
+            res = infer_request.infer(inputs)
             t_end = time.perf_counter()
             t_count += 1
             log.info("Sequence of length {} is processed with {:0.2f} requests/sec ({:0.2} sec per request)".format(
                 max_length, 1 / (t_end - t_start), t_end - t_start))
 
-            outputs = res[output_names]
+            outputs = next(iter(res.values()))
             next_token_logits = outputs[:, cur_input_len-1, :]
 
             # pre-process distribution
