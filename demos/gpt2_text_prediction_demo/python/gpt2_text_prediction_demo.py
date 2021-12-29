@@ -57,8 +57,8 @@ def build_argparser():
                       help="Optional. Target device to perform inference on. "
                            "Default value is CPU",
                       default="CPU", type=str)
-    args.add_argument('--dynamic_shape', action='store_true', help='Run model with dynamic input sequence')
-    args.add_argument('--max_seq_len', type=int, required=False, default=1024, help='Maximum sequence length for processing')
+    args.add_argument('--dynamic_shape', action='store_true', help='Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
+    args.add_argument('--max_seq_len', type=int, required=False, default=1024, help='Maximum sequence length for processing. Default value is 1024')
     return parser
 
 
@@ -83,7 +83,7 @@ def main():
     log.info('Reading model {}'.format(args.model))
     model = ie.read_model(model_path)
 
-    # check input and output names
+    # check number inputs and outputs
     if len(model.inputs) != 1:
         raise RuntimeError('The demo expects model with single input, while provided {}'.format(
             len(model.inputs)))
@@ -92,12 +92,11 @@ def main():
             len(model.outputs)))
     input_tensor = model.inputs[0].any_name
     # maximum number of tokens that can be processed by network at once
-    if not args.dynamic_shape and (model.inputs[0].partial_shape.is_dynamic or model.inputs[0].shape[1] < args.max_seq_len):
+    if not args.dynamic_shape and (model.inputs[0].partial_shape.is_dynamic or model.inputs[0].shape[1] != args.max_seq_len):
         model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(args.max_seq_len)])})
     
     if args.dynamic_shape:
         model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(0, args.max_seq_len)])})
-
 
     # load model to the device
     compiled_model = ie.compile_model(model, args.device)
