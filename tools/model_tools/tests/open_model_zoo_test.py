@@ -91,6 +91,13 @@ class TestTopologies(unittest.TestCase):
         for name, value in net.outputs.items():
             self.assertEqual(expected_shapes[name], value.shape)
 
+    def test_input_shape(self):
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        self.assertEqual(model.input_shape('data_l'), [1, 1, 256, 256])
+
+    def test_input_layout(self):
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        self.assertEqual(model.layout('data_l'), 'NCHW')
 
 if __name__ == '__main__':
     unittest.main()

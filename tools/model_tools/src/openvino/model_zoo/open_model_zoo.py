@@ -23,6 +23,7 @@ class Model:
         self.exec_net = None
         self._accuracy_config = None
         self._model_config = None
+        self._model = None
 
     @classmethod
     def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None):
@@ -174,3 +175,19 @@ class Model:
         output_blob = self.net.outputs
 
         return output_blob
+
+    def input_shape(self, name):
+        input_info = self.model_config.get('input_info', [])
+        for input in input_info:
+            if input['name'] == name:
+                return input['shape']
+
+        return None
+
+    def layout(self, name):
+        input_info = self.model_config.get('input_info', [])
+        for input in input_info:
+            if input['name'] == name:
+                return input['layout']
+
+        return None
