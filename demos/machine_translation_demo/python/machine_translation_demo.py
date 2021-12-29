@@ -72,11 +72,11 @@ class TranslationEngine:
     def __init__(self, model_xml, model_bin, device, output_name):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = Core()
+        core = Core()
 
         log.info('Reading model {}'.format(model_xml))
-        self.model = ie.read_model(model_xml, model_bin)
-        compiled_model = ie.compile_model(self.model, args.device)
+        self.model = core.read_model(model_xml, model_bin)
+        compiled_model = core.compile_model(self.model, args.device)
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_xml, device))
         self.input_tensor_name = "tokens"
