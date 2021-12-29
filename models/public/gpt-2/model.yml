@@ -111,8 +111,9 @@ conversion_to_onnx_args:
   - --input-shapes=[1,1024]
   - --output-file=$conv_dir/gpt-2.onnx
   - --inputs-dtype=long
+  - '--conversion-param=dynamic_axes={"input": {0: "batch_size", 1: "sequence_len"},
+    "output": {0: "batch_size", 1: "sequence_len"}}'
 model_optimizer_args:
-  - --input_shape=[1,1024]
   - --input=input
   - --input_model=$dl_dir/gpt-2.onnx
   - --output=output
