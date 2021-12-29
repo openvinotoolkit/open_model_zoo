@@ -58,7 +58,7 @@ def build_argparser():
                            "Default value is CPU",
                       default="CPU", type=str)
     args.add_argument('--dynamic_shape', action='store_true', help='Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
-    args.add_argument('--max_seq_len', type=int, required=False, default=1024, help='Maximum sequence length for processing. Default value is 1024')
+    args.add_argument('--max_seq_len', type=int, required=False, default=1024, help='Optional. Maximum sequence length for processing. Default value is 1024')
     return parser
 
 
@@ -94,7 +94,7 @@ def main():
     # maximum number of tokens that can be processed by network at once
     if not args.dynamic_shape and (model.inputs[0].partial_shape.is_dynamic or model.inputs[0].shape[1] != args.max_seq_len):
         model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(args.max_seq_len)])})
-    
+
     if args.dynamic_shape:
         model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(0, args.max_seq_len)])})
 
