@@ -182,7 +182,7 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
         dec_state = enc_res[self.recognizer_encoder.outputs_mapping['decoder_hidden']]
 
-        tgt = np.array([[self.sos_index]])
+        tgt = np.array([self.sos_index])
         logits = []
         for _ in range(self.max_seq_len):
 
@@ -328,7 +328,7 @@ class RecognizerOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
-        return self.infer(input_data)
+        return self.infer(input_data, raw_results=True)
 
 
 MODEL_TYPES = {

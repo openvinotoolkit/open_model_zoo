@@ -492,6 +492,7 @@ class ModelEvaluator:
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
+        self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 
@@ -503,6 +504,7 @@ class ModelEvaluator:
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
+        self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 
