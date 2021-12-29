@@ -97,7 +97,7 @@ class NumPyReader(BaseReader):
             for key in data.keys():
                 npz_result.append(data[key])
             return npz_result
-        
+
         key = next(iter(data.keys()))
         data = data[key]
         if self.record_mode and self.id_sep in field_id:
