@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -211,38 +211,42 @@ class MelGANIE:
         self.scales = 4
         self.hop_length = 256
 
-        self.net = self.load_network(model)
-        if self.net.input_info['mel'].input_data.shape[2] != default_width:
-            orig_shape = self.net.input_info['mel'].input_data.shape
+        self.model = self.load_network(model)
+        if self.model.input('mel').shape[2] != default_width:
+            orig_shape = self.model.input('mel').shape
             new_shape = (orig_shape[0], orig_shape[1], default_width)
-            self.net.reshape({"mel": new_shape})
+            self.model.reshape({"mel": PartialShape([Dimension(new_shape[0]), Dimension(new_shape[1]), Dimension(new_shape[2])])})
 
-        self.exec_net = self.create_exec_network(self.net, self.scales)
+        self.compiled_model, self.requests = self.create_exec_network(self.model, model, self.scales)
 
         # fixed number of columns in mel-spectrogramm
-        self.mel_len = self.net.input_info['mel'].input_data.shape[2]
+        self.mel_len = self.model.input('mel').shape[2]
         self.widths = [self.mel_len * (i + 1) for i in range(self.scales)]
 
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
         log.info('Reading MelGAN model {}'.format(model_xml))
-        net = self.ie.read_network(model=model_xml, weights=model_bin)
-        return net
+        model = self.ie.read_model(model=model_xml, weights=model_bin)
+        return model
 
-    def create_exec_network(self, net, path, scales=None):
+    def create_exec_network(self, model, path, scales=None):
         if scales is not None:
-            orig_shape = net.input_info['mel'].input_data.shape
-            exec_net = []
+            orig_shape = model.input('mel').shape
+            compiled_model = []
+            requests = []
             for i in range(scales):
                 new_shape = (orig_shape[0], orig_shape[1], orig_shape[2] * (i + 1))
-                net.reshape({"mel": new_shape})
-                exec_net.append(self.ie.load_network(network=net, device_name=self.device))
-                net.reshape({"mel": orig_shape})
+                model.reshape({"mel": PartialShape([Dimension(new_shape[0]), Dimension(new_shape[1]), Dimension(new_shape[2])])})
+                compiled_model_i = self.ie.compile_model(model, device_name=self.device)
+                compiled_model.append(compiled_model_i)
+                requests.append(compiled_model_i.create_infer_request())
+                model.reshape({"mel": PartialShape([Dimension(orig_shape[0]), Dimension(orig_shape[1]), Dimension(orig_shape[2])])})
         else:
-            exec_net = self.ie.load_network(network=net, device_name=self.device)
+            compiled_model = self.ie.compile_model(model, device_name=self.device)
+            requests = compiled_model.create_infer_request()
         log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
-        return exec_net
+        return compiled_model, requests
 
     def forward(self, mel):
         mel = np.expand_dims(mel, axis=0)
@@ -268,7 +272,8 @@ class MelGANIE:
         c_begin = 0
         c_end = cur_w
         while c_begin < cols:
-            audio = self.exec_net[active_net].infer(inputs={"mel": mel[:, :, c_begin:c_end]})["audio"]
+            self.requests[active_net].infer(inputs={"mel": mel[:, :, c_begin:c_end]})
+            audio = self.requests[active_net].get_tensor("audio").data
             res_audio.extend(audio)
 
             c_begin = c_end
