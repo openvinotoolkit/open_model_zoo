@@ -182,7 +182,7 @@ def main():
         n, c, h, w = mask_rcnn_model.input(input_tensor_name).shape
         if n != 1:
             raise RuntimeError('Only batch 1 is supported by the demo application')
-    except:
+    except RuntimeError:
         raise RuntimeError('Demo supports only topologies with the following input tensor name: {}'.format(input_tensor_name))
 
     required_output_names = {'boxes', 'labels', 'masks', 'text_features.0'}
