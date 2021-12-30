@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -55,20 +55,25 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 
 
 def mask_rcnn_postprocess(
-        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+        infer_request, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    segmentoly_postprocess = 'raw_masks' in outputs
-    boxes = outputs['boxes'] if segmentoly_postprocess else outputs['boxes'][:, :4]
-    scores = outputs['scores'] if segmentoly_postprocess else outputs['boxes'][:, 4]
+    try:
+        infer_request.get_tensor('raw_masks')
+        segmentoly_postprocess = True
+    except:
+        segmentoly_postprocess = False
+
+    boxes = infer_request.get_tensor('boxes').data if segmentoly_postprocess else infer_request.get_tensor('boxes').data[:, :4]
+    scores = infer_request.get_tensor('scores').data if segmentoly_postprocess else infer_request.get_tensor('boxes').data[:, 4]
     boxes[:, 0::2] /= scale_x
     boxes[:, 1::2] /= scale_y
     if segmentoly_postprocess:
-        classes = outputs['classes'].astype(np.uint32)
+        classes = infer_request.get_tensor('classes').data.astype(np.uint32)
     else:
-        classes = outputs['labels'].astype(np.uint32) + 1
+        classes = infer_request.get_tensor('labels').data.astype(np.uint32) + 1
     masks = []
     masks_name = 'raw_masks' if segmentoly_postprocess else 'masks'
-    for box, cls, raw_mask in zip(boxes, classes, outputs[masks_name]):
+    for box, cls, raw_mask in zip(boxes, classes, infer_request.get_tensor(masks_name).data):
         raw_cls_mask = raw_mask[cls, ...] if segmentoly_postprocess else raw_mask
         mask = segm_postprocess(box, raw_cls_mask, frame_height, frame_width)
         masks.append(mask)
@@ -82,12 +87,12 @@ def mask_rcnn_postprocess(
 
 
 def yolact_postprocess(
-        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+        infer_request, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    boxes = outputs['boxes'][0]
-    conf = np.transpose(outputs['conf'][0])
-    masks = outputs['mask'][0]
-    proto = outputs['proto'][0]
+    boxes = infer_request.get_tensor('boxes').data[0]
+    conf = np.transpose(infer_request.get_tensor('conf').data[0])
+    masks = infer_request.get_tensor('mask').data[0]
+    proto = infer_request.get_tensor('proto').data[0]
     num_classes = conf.shape[0]
     idx_lst, cls_lst, scr_lst = [], [], []
     shift_x = (input_width - (frame_width * scale_x)) / frame_width
@@ -202,30 +207,39 @@ MODEL_ATTRIBUTES = {
 }
 
 
-def check_model(net):
-    num_inputs = len(net.input_info)
-    assert num_inputs <= 2, 'Demo supports only topologies with 1 or 2 inputs.'
-    image_input = [input_name for input_name, in_info in net.input_info.items() if len(in_info.input_data.shape) == 4]
-    assert len(image_input) == 1, 'Demo supports only model with single input for images'
+def check_model(model):
+    if len(model.inputs) not in (1, 2):
+        raise RuntimeError("Demo supports only models with 1 or 2 input layers")
+
+    image_input = [input_tensor.get_any_name() for input_tensor in model.inputs if len(input_tensor.shape) == 4]
+    if len(image_input) != 1:
+        raise RuntimeError("Demo supports only models with single input for images")
     image_input = image_input[0]
     image_info_input = None
-    if num_inputs == 2:
+    if len(model.inputs) == 2:
         image_info_input = [
-            input_name for input_name, in_info in net.input_info.items()
-            if len(in_info.input_data.shape) == 2 and in_info.input_data.shape[-1] == 3
+            input_tensor.get_any_name() for input_tensor in model.inputs
+            if len(input_tensor.shape) == 2 and input_tensor.shape[-1] == 3
         ]
-        assert len(image_info_input) == 1, 'Demo supports only model with single im_info input'
+        if len(image_info_input) != 1:
+            raise RuntimeError("Demo supports only model with single image_info input")
         image_info_input = image_info_input[0]
-    if image_info_input:
         model_type = 'mask_rcnn_segmentoly'
+    elif len(model.inputs) == 1 and len(model.outputs) in (3, 5):
+        model_type = 'mask_rcnn'
     else:
-        model_type = 'mask_rcnn' if len(net.input_info) == 1 and len(net.outputs) in [3, 5] else 'yolact'
-    model_attributes = MODEL_ATTRIBUTES[model_type]
-    assert set(model_attributes.required_outputs) <= net.outputs.keys(), \
-        'Demo supports only topologies with the following output keys: {}'.format(
-            ', '.join(model_attributes.required_outputs))
+        model_type = 'yolact'
 
-    input_shape = net.input_info[image_input].input_data.shape
-    assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
+    model_attributes = MODEL_ATTRIBUTES[model_type]
+    for output_tensor_name in set(model_attributes.required_outputs):
+        try:
+            model.output(output_tensor_name)
+        except:
+            raise RuntimeError("Demo supports only topologies with the following output keys: {}".format(
+                ', '.join(model_attributes.required_outputs)))
+
+    input_shape = model.input(image_input).shape
+    if input_shape[0] != 1:
+        raise RuntimeError("Only batch 1 is supported by the demo")
 
     return image_input, image_info_input, input_shape, model_type, model_attributes.postprocessor
