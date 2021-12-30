@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
@@ -31,16 +31,16 @@ class IEModel: # pylint: disable=too-few-public-methods
     def __init__(self, model_path, device, cpu_extension):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
+        core = Core()
         if cpu_extension and device == 'CPU':
-            ie.add_extension(cpu_extension, 'CPU')
+            core.add_extension(cpu_extension, 'CPU')
 
         log.info('Reading model {}'.format(model_path))
-        self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
-        self.input_name = next(iter(self.net.input_info))
-        self.output_name = next(iter(self.net.outputs))
-        self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.exec_net = ie.load_network(network=self.net, device_name=device)
+        self.model = core.read_model(model_path, model_path.with_suffix('.bin'))
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+        self.input_size = list(self.model.input(self.input_tensor_name).shape)
+        compiled_model = core.compile_model(self.model, device)
+        self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
@@ -48,7 +48,7 @@ class IEModel: # pylint: disable=too-few-public-methods
 
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={self.input_name: image})[self.output_name]
+        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
         return out
 
 
