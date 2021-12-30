@@ -229,7 +229,7 @@ def check_model(model):
     for output_tensor_name in set(model_attributes.required_outputs):
         try:
             model.output(output_tensor_name)
-        except:
+        except RuntimeError:
             raise RuntimeError("Demo supports only topologies with the following output keys: {}".format(
                 ', '.join(model_attributes.required_outputs)))
 
