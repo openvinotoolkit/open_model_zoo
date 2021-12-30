@@ -19,6 +19,7 @@ import os.path as osp
 
 import numpy as np
 
+from openvino.runtime import PartialShape, Dimension, set_batch, Layout
 from utils.wav_processing import (
     fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
 )
@@ -49,37 +50,43 @@ class WaveRNNIE:
         self.batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256]
         self.ie = ie
 
-        self.upsample_net = self.load_network(model_upsample)
+        self.upsample_model = self.load_network(model_upsample)
         if upsampler_width > 0:
-            orig_shape = self.upsample_net.input_info['mels'].input_data.shape
-            self.upsample_net.reshape({"mels": (orig_shape[0], upsampler_width, orig_shape[2])})
+            orig_shape = self.upsample_model.input('mels').shape
+            self.upsample_model.reshape({"mels": PartialShape([Dimension(orig_shape[0]), Dimension(upsampler_width), Dimension(orig_shape[2])])})
 
-        self.upsample_exec = self.create_exec_network(self.upsample_net, model_upsample)
+        self.upsample_exec, self.upsample_request = self.create_exec_network(self.upsample_model, model_upsample)
 
-        self.rnn_net = self.load_network(model_rnn)
-        self.rnn_exec = self.create_exec_network(self.rnn_net, model_rnn, batch_sizes=self.batch_sizes)
+        self.rnn_model = self.load_network(model_rnn)
+        self.rnn_exec, self.rnn_request = self.create_exec_network(self.rnn_model, model_rnn, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
-        self.mel_len = self.upsample_net.input_info['mels'].input_data.shape[1] - 2 * self.pad
-        self.rnn_width = self.rnn_net.input_info['x'].input_data.shape[1]
+        self.mel_len = self.upsample_model.input('mels').shape[1] - 2 * self.pad
+        self.rnn_width = self.rnn_model.input('x').shape[1]
 
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
         log.info('Reading WaveRNN model {}'.format(model_xml))
-        net = self.ie.read_network(model=model_xml, weights=model_bin)
-        return net
+        model = self.ie.read_model(model=model_xml, weights=model_bin)
+        return model
 
-    def create_exec_network(self, net, path, batch_sizes=None):
+    def create_exec_network(self, model, path, batch_sizes=None):
         if batch_sizes is not None:
-            exec_net = []
+            compiled_model = []
+            requests = []
+            for parameter in model.get_parameters():
+                parameter.set_layout(Layout("BC"))
             for b_s in batch_sizes:
-                net.batch_size = b_s
-                exec_net.append(self.ie.load_network(network=net, device_name=self.device))
+                set_batch(model, b_s)
+                compiled_model_i = self.ie.compile_model(model, device_name=self.device)
+                compiled_model.append(compiled_model_i)
+                requests.append(compiled_model_i.create_infer_request())
         else:
-            exec_net = self.ie.load_network(network=net, device_name=self.device)
+            compiled_model = self.ie.compile_model(model, device_name=self.device)
+            requests = compiled_model.create_infer_request()
         log.info('The WaveRNN model {} is loaded to {}'.format(path, self.device))
-        return exec_net
+        return compiled_model, requests
 
     @staticmethod
     def get_rnn_init_states(b_size=1, rnn_dims=328):
@@ -133,8 +140,9 @@ class WaveRNNIE:
     def forward_upsample(self, mels):
         mels = pad_tensor(mels, pad=self.pad)
 
-        out = self.upsample_exec.infer(inputs={"mels": mels})
-        upsample_mels, aux = out["upsample_mels"][:, self.indent:-self.indent, :], out["aux"]
+        self.upsample_request.infer(inputs={"mels": mels})
+        upsample_mels = self.upsample_request.get_tensor("upsample_mels").data[:, self.indent:-self.indent, :]
+        aux = self.upsample_request.get_tensor("aux").data
         return upsample_mels, aux
 
     def forward_rnn(self, mels, upsampled_mels, aux):
@@ -151,7 +159,7 @@ class WaveRNNIE:
 
         active_network = self.batch_sizes.index(b_size)
 
-        h1, h2, x = self.get_rnn_init_states(b_size, self.rnn_width)
+        h1, h2, x = self.get_rnn_init_states(b_size, 512)
 
         output = []
 
@@ -160,13 +168,12 @@ class WaveRNNIE:
 
             a1_t, a2_t, a3_t, a4_t = \
                 (a[:, i, :] for a in aux_split)
+            self.rnn_request[active_network].infer(inputs={"m_t": m_t, "a1_t": a1_t, "a2_t": a2_t, "a3_t": a3_t,
+                                                           "a4_t": a4_t, "h1.1": h1, "h2.1": h2, "x": x})
 
-            out = self.rnn_exec[active_network].infer(inputs={"m_t": m_t, "a1_t": a1_t, "a2_t": a2_t, "a3_t": a3_t,
-                                                              "a4_t": a4_t, "h1.1": h1, "h2.1": h2, "x": x})
-
-            logits = out["logits"]
-            h1 = out["h1"]
-            h2 = out["h2"]
+            logits = self.rnn_request[active_network].get_tensor('logits').data
+            h1 = self.rnn_request[active_network].get_tensor('h1').data
+            h2 = self.rnn_request[active_network].get_tensor('h2').data
 
             sample = infer_from_discretized_mix_logistic(logits)
 

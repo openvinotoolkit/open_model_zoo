@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from argparse import ArgumentParser, SUPPRESS
 from tqdm import tqdm
 import numpy as np
 import wave
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
@@ -119,7 +119,7 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    ie = Core()
 
     if args.model_melgan is not None:
         vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
