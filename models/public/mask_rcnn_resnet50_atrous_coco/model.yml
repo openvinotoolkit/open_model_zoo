@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ files:
   - name: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
     size: 449505463
     checksum: a61ae308c03f9b9554851f5d564b3cc09659a2d8d2a4dd2f4e57be92669fe4bdc9c505839eaa075b44926466e4073299
-    source: http://download.tensorflow.org/models/object_detection/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

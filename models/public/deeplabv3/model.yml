@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ files:
   - name: deeplabv3.tar.gz
     size: 23882985
     checksum: d3f2b27bb00c485ca45d68731f7198a23926cb865dd010fc444bcad9158e33413cd60da2588a9be3ff1e8c9b4557362b
-    source: http://download.tensorflow.org/models/deeplabv3_mnv2_pascal_train_aug_2018_01_29.tar.gz
+    original_source: http://download.tensorflow.org/models/deeplabv3_mnv2_pascal_train_aug_2018_01_29.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/deeplabv3/deeplabv3_mnv2_pascal_train_aug_2018_01_29.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -32,5 +33,5 @@ model_optimizer_args:
   - --output=ArgMax
   - --input_model=$dl_dir/deeplabv3_mnv2_pascal_train_aug/frozen_inference_graph.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

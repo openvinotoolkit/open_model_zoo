@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ files:
   - name: yolo-v1-tiny.pb
     size: 63501195
     checksum: b25e5dfb0c140e06d97ac8c0cf8c44f167a6287f1d4a883d41897973643628efd41621389fb1a27dda7cb404400688e9
-    source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v1/saved_model.pb
+    original_source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v1/saved_model.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolo-v1-tiny-tf/saved_model.pb
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=input_1
@@ -28,6 +29,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny_voc.json
   - --input_model=$dl_dir/yolo-v1-tiny.pb
-quantizable: yes
+quantizable: true
 framework: tf
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE
