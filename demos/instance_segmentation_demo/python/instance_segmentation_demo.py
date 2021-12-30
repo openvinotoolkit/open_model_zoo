@@ -117,7 +117,7 @@ def main():
     # Read IR
     log.info('Reading model {}'.format(args.model))
     model = core.read_model(args.model, args.model.with_suffix('.bin'))
-    image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(model)
+    image_input, image_info_input, (n, c, h, w), model_type, output_names, postprocessor = check_model(model)
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
     compiled_model = core.compile_model(model, args.device)
@@ -176,11 +176,13 @@ def main():
         feed_dict = {image_input: input_image}
         if image_info_input:
             feed_dict[image_info_input] = input_image_info
+
         infer_request.infer(feed_dict)
+        outputs = {name: infer_request.get_tensor(name).data for name in output_names}
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
-            infer_request, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
+            outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
 
         if len(boxes) and args.raw_output_message:
             log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))

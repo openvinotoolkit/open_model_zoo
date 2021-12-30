@@ -55,25 +55,20 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 
 
 def mask_rcnn_postprocess(
-        infer_request, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    try:
-        infer_request.get_tensor('raw_masks')
-        segmentoly_postprocess = True
-    except:
-        segmentoly_postprocess = False
-
-    boxes = infer_request.get_tensor('boxes').data if segmentoly_postprocess else infer_request.get_tensor('boxes').data[:, :4]
-    scores = infer_request.get_tensor('scores').data if segmentoly_postprocess else infer_request.get_tensor('boxes').data[:, 4]
+    segmentoly_postprocess = 'raw_masks' in outputs
+    boxes = outputs['boxes'] if segmentoly_postprocess else outputs['boxes'][:, :4]
+    scores = outputs['scores'] if segmentoly_postprocess else outputs['boxes'][:, 4]
     boxes[:, 0::2] /= scale_x
     boxes[:, 1::2] /= scale_y
     if segmentoly_postprocess:
-        classes = infer_request.get_tensor('classes').data.astype(np.uint32)
+        classes = outputs['classes'].astype(np.uint32)
     else:
-        classes = infer_request.get_tensor('labels').data.astype(np.uint32) + 1
+        classes = outputs['labels'].astype(np.uint32) + 1
     masks = []
     masks_name = 'raw_masks' if segmentoly_postprocess else 'masks'
-    for box, cls, raw_mask in zip(boxes, classes, infer_request.get_tensor(masks_name).data):
+    for box, cls, raw_mask in zip(boxes, classes, outputs[masks_name]):
         raw_cls_mask = raw_mask[cls, ...] if segmentoly_postprocess else raw_mask
         mask = segm_postprocess(box, raw_cls_mask, frame_height, frame_width)
         masks.append(mask)
@@ -87,12 +82,12 @@ def mask_rcnn_postprocess(
 
 
 def yolact_postprocess(
-        infer_request, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    boxes = infer_request.get_tensor('boxes').data[0]
-    conf = np.transpose(infer_request.get_tensor('conf').data[0])
-    masks = infer_request.get_tensor('mask').data[0]
-    proto = infer_request.get_tensor('proto').data[0]
+    boxes = outputs['boxes'][0]
+    conf = np.transpose(outputs['conf'][0])
+    masks = outputs['mask'][0]
+    proto = outputs['proto'][0]
     num_classes = conf.shape[0]
     idx_lst, cls_lst, scr_lst = [], [], []
     shift_x = (input_width - (frame_width * scale_x)) / frame_width
@@ -242,4 +237,5 @@ def check_model(model):
     if input_shape[0] != 1:
         raise RuntimeError("Only batch 1 is supported by the demo")
 
-    return image_input, image_info_input, input_shape, model_type, model_attributes.postprocessor
+    return (image_input, image_info_input, input_shape, model_type,
+            model_attributes.required_outputs, model_attributes.postprocessor)
