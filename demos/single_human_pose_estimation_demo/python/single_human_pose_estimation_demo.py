@@ -5,7 +5,6 @@ from pathlib import Path
 import sys
 import logging as log
 from time import perf_counter
-from pathlib import Path
 import cv2
 
 from openvino.runtime import Core, get_version
