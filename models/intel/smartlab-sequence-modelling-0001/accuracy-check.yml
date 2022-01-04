@@ -1,24 +1,19 @@
 evaluations:
-  - name: smartlab-sequence-modelling-0001
-    module: custom_evaluators.mstcn_online_evaluator.MSTCNEvaluator
-    module_config:
-      network_info:
-        colorization_network: {}
+    -   name: smartlab-sequence-modelling-0001
+        module: custom_evaluators.online_mstcn++_evaluator.MSTCNEvaluator
+        module_config:
+            network_info:
+                # openvino model: please specify absolute path
+                model: smartlab-sequence-modelling-0001.xml
+                reader:
+                  type: numpy_reader
+                  # please specify the absolute directory path for input files
+                  data_source: inputs
 
-        verification_network:
-          adapter: classification
+            launchers:
+                - framework: dlsdk
 
-      launchers:
-        - framework: dlsdk
-
-      datasets:
-        - name: imagenet_1000_classes
-          reader: pillow_imread
-
-          preprocessing:
-            - type: resize
-              size: 256
-              use_pillow: True
-              interpolation: Bicubic
-            - type: normalization
-              std: 255
+            datasets:
+                - name: custom_online_mstcn++
+                  # annotation director: prefixed with directory specified in "-s/--source" option
+                  data_source: annotation
