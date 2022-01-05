@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a smartlab object detector that is based on YoloX for 224x224 resolution.
+This is a smartlab object detector that is based on YoloX for 416x416 resolution.
 
 ## Example
 
@@ -12,10 +12,22 @@ This is a smartlab object detector that is based on YoloX for 224x224 resolution
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | TODO  (internal test set)                 |
-| GFlops                          | TODO                                      |
-| MParams                         | TODO                                      |
+| AP @ [ IoU=0.50:0.95 ]          | see PASCAL per-cls AP (internal test set) |
+| GFlops                          | 1.05                                      |
+| MParams                         | 0.9                                       |
 | Source framework                | PyTorch\*                                 |
+
+PASCAL per-cls AP:
+      "balance",  # top-AP 0.92
+      "weights",  # top-AP 0 omit in this model
+      "tweezers", # top-AP 0 omit in this model
+      "box",      # top-AP 0.94
+      "battery",  # top-AP 0.65
+      "tray",     # top-AP 0.98
+      "ruler",    # top-AP 0.69
+      "rider",    # top-AP 0 omit in this model
+      "scale",    # top-AP 0.41
+      "hand"      # top-AP 0.92
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
