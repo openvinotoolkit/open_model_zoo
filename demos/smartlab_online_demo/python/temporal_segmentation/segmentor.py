@@ -19,44 +19,40 @@ import cv2
 import numpy as np
 import sys
 from openvino.inference_engine import IECore
+from collections import deque
+from scipy.special import softmax
 
 sys.path.append('temporal_segmentation')
-from multiview_mobilenetv3_tsm import create_mbv3s_model
-# import mstcn
 
 
 class Segmentor(object):
     def __init__(self, backbone_path, classifier_path):
-        self.embed_model = 0
-        self.seg_model = 0
-        self.temporal_predictions = 0
-
         self.backbone_path = backbone_path
         self.classifier_path = classifier_path
 
         self.terms = [
             "noise_action",
             "put_take",
-            "adjust_rider"
-            ]
+            "adjust_rider",
+        ]
 
     def initialize(self):
         ie = IECore()
         net = ie.read_network(
-            model=self.backbone_path[:-4]+".xml",
-            weights=self.backbone_path[:-4]+".bin"
+            model=self.backbone_path[:-4] + ".xml",
+            weights=self.backbone_path[:-4] + ".bin"
         )
         self.backbone = ie.load_network(network=net, device_name="CPU")
-        self.backbone_input_keys =  list(self.backbone.input_info.keys())
+        self.backbone_input_keys = list(self.backbone.input_info.keys())
         self.backbone_output_key = list(self.backbone.outputs.keys())
 
         net = ie.read_network(
-            model=self.classifier_path[:-4]+".xml",
-            weights=self.classifier_path[:-4]+".bin"
+            model=self.classifier_path[:-4] + ".xml",
+            weights=self.classifier_path[:-4] + ".bin"
         )
         self.classifier = ie.load_network(network=net, device_name="CPU")
-        self.classifier_input_keys =  list(self.classifier .input_info.keys())
-        self.classifier_output_key = list(self.classifier .outputs.keys())
+        self.classifier_input_keys = list(self.classifier.input_info.keys())
+        self.classifier_output_key = list(self.classifier.outputs.keys())
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -69,13 +65,13 @@ class Segmentor(object):
         """
 
         ### preprocess ###
-        buffer_front = cv2.resize(buffer_front,(224,224), interpolation= cv2.INTER_LINEAR)
-        buffer_top = cv2.resize(buffer_top,(224,224), interpolation= cv2.INTER_LINEAR)
-        buffer_front = buffer_front/255
-        buffer_top = buffer_top/255
+        buffer_front = cv2.resize(buffer_front, (224, 224), interpolation=cv2.INTER_LINEAR)
+        buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
+        buffer_front = buffer_front / 255
+        buffer_top = buffer_top / 255
 
-        buffer_front = buffer_front[np.newaxis,:,:,:].transpose((0,3,1,2)).astype(np.float32)
-        buffer_top = buffer_top[np.newaxis,:,:,:].transpose((0,3,1,2)).astype(np.float32)
+        buffer_front = buffer_front[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run ###
         feature_vector_front = self.backbone.infer(
@@ -86,17 +82,18 @@ class Segmentor(object):
         output = self.classifier.infer(inputs={
             self.classifier_input_keys[0]: feature_vector_front,
             self.classifier_input_keys[1]: feature_vector_top}
-            )[self.classifier_output_key[0]]
+        )[self.classifier_output_key[0]]
 
         ### yoclo classifier ###
         isAction = (output.squeeze()[0] >= .5).astype(int)
-        predicted = isAction*(np.argmax(output.squeeze()[1:]) + 1)
+        predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
         return self.terms[predicted], self.terms[predicted]
 
 
 class SegmentorMstcn(Segmentor):
     def __init__(self, i3d_path, mstcn_path):
+        super().__init__(i3d_path, mstcn_path)
         self.embed_model = 0
         self.seg_model = 0
         self.temporal_predictions = 0
@@ -105,37 +102,59 @@ class SegmentorMstcn(Segmentor):
         self.mstcn_path = mstcn_path
 
         self.ActionTerms = [
+            "background",
             "noise_action",
-            "put_take",
-            "adjust_rider"
-            ]
+            "remove_support_sleeve",
+            "remove_pointer_sleeve",
+            "adjust_rider",
+            "adjust_nut",
+            "adjust_balancing",
+            "open_box",
+            "close_box",
+            "choose_weight",
+            "put_left",
+            "put_right",
+            "take_left",
+            "take_right",
+            "install_support_sleeve",
+            "install_pointer_sleeve",
+        ]
 
-        self.EmbedBufferTop = []
-        self.EmbedBufferFront = []
-        self.ImgSizeHeight  = 224
-        self.ImgSizeWidth  = 224
-        self.BatchSize = 1
-        self.EnbedWindowLength = 16
-        self.EnbedWindowStride = 1
-        self.EnbedWindowAtrous = 3
-        self.TemporalLogits = np.zeros((0, len(self.terms)))
+        self.EmbedBufferTop = np.zeros((1024, 0))
+        self.EmbedBufferFront = np.zeros((1024, 0))
+        self.ImgSizeHeight = 224
+        self.ImgSizeWidth = 224
+        self.EmbedBatchSize = 1
+        self.SegBatchSize = 24
+        self.EmbedWindowLength = 16
+        self.EmbedWindowStride = 1
+        self.EmbedWindowAtrous = 3
+        self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
+        self.his_fea = []
 
     def initialize(self):
         ie = IECore()
         net = ie.read_network(
-            model=self.i3d_path[:-4]+".xml",
-            weights=self.i3d_path[:-4]+".bin"
+            model=self.i3d_path[:-4] + ".xml",
+            weights=self.i3d_path[:-4] + ".bin"
         )
+        net.reshape({next(iter(net.input_info)): (
+            self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
+        net.add_outputs("RGB/inception_i3d/Logits/Conv3d_0c_1x1/conv_3d/convolution/fq_input_0")
+
         self.i3d = ie.load_network(network=net, device_name="CPU")
-        self.bi3d_input_keys =  list(self.i3d.input_info.keys())
+        self.i3d_input_keys = list(self.i3d.input_info.keys())
         self.i3d_output_key = list(self.i3d.outputs.keys())
-        net = ie.read_network(
-            model=self.mstcn_path[:-4]+".xml",
-            weights=self.mstcn_path[:-4]+".bin"
+
+        self.mstcn_net = ie.read_network(
+            model=self.mstcn_path[:-4] + ".xml",
+            weights=self.mstcn_path[:-4] + ".bin"
         )
-        self.mstcn = ie.load_network(network=net, device_name="CPU")
-        self.mstcn_input_keys =  list(self.mstcn .input_info.keys())
-        self.mstcn_output_key = list(self.mstcn .outputs.keys())
+        self.mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
+        self.mstcn_input_keys = list(self.mstcn.input_info.keys())
+        self.mstcn_output_key = list(self.mstcn.outputs.keys())
+        self.mstcn_net.reshape({'input': (1, 2048, 1)})
+        self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -147,14 +166,14 @@ class SegmentorMstcn(Segmentor):
                  length of predictions == frame_index()
         """
 
-        ### preprocess ###
-        buffer_front = cv2.resize(buffer_front,(224,224), interpolation= cv2.INTER_LINEAR)
-        buffer_top = cv2.resize(buffer_top,(224,224), interpolation= cv2.INTER_LINEAR)
-        buffer_front = buffer_front/255
-        buffer_top = buffer_top/255
-
-        buffer_front = buffer_front[np.newaxis,:,:,:].transpose((0,3,1,2)).astype(np.float32)
-        buffer_top = buffer_top[np.newaxis,:,:,:].transpose((0,3,1,2)).astype(np.float32)
+        # ### preprocess ###
+        # buffer_front = cv2.resize(buffer_front, (224, 224), interpolation=cv2.INTER_LINEAR)
+        # buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
+        # buffer_front = buffer_front / 255
+        # buffer_top = buffer_top / 255
+        #
+        # buffer_front = buffer_front[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        # buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run encoder ###
         print("Frame embedding:", frame_index)
@@ -167,109 +186,130 @@ class SegmentorMstcn(Segmentor):
             embedding_buffer=self.EmbedBufferFront,
             frame_index=frame_index)
 
-        ### run decoder wit vec 1x64x2048 ###
-        # i3d_vec = np.zeros((1,64,2048)) 
-        # output = self.mstcn.infer(inputs={
-        #     self.mstcn_input_keys[0]: i3d_vec}
-        #     )[self.mstcn_output_key[0]]
-
-        # ### run tsmcn only batch size 1###
-        # if min(self.EmbedBufferTop.shape[-1], self.EmbedBufferFront.shape[-1]) > 0:
-        #     self.action_segmentation()
+        ### run mstcn++ only batch size 1###
+        if min(self.EmbedBufferTop.shape[-1], self.EmbedBufferFront.shape[-1]) > 0:
+            self.action_segmentation()
 
         # ### get label ###
-        # isValid = self.TemporalLogits.shape[0]
-        # if isValid:
-        #     return [], []
-        # else:
-        #     frame_predictions = [self.ActionTerms[i] for i in np.argmax(self.TemporalLogits, axis=1)]
-        #     frame_predictions = ["background" for i in range(self.EnbedWindowSize- 1)] + frame_predictions
-        
-        # return frame_predictions, frame_predictions
+        valid_index = self.TemporalLogits.shape[0]
+        if valid_index == 0:
+            return []
+        else:
+            frame_predictions = [self.ActionTerms[i] for i in np.argmax(self.TemporalLogits, axis=1)]
+            frame_predictions = ["background" for i in range(self.EmbedWindowLength - 1)] + frame_predictions
 
-        return [], []
+        return frame_predictions
 
     def feature_embedding(self, img_buffer, embedding_buffer, frame_index):
         # minimal temporal length for processor
-        min_t = 0 + self.EnbedWindowStride * 0 + (self.EnbedWindowLength - 1) * self.EnbedWindowAtrous
+        min_t = (self.EmbedWindowLength - 1) * self.EmbedWindowAtrous
 
         if frame_index > min_t:
             num_embedding = embedding_buffer.shape[-1]
             img_buffer = list(img_buffer)
-            feed_dict = {}
-
-            curr_t = self.EnbedWindowStride * num_embedding + (self.EnbedWindowLength - 1) * self.EnbedWindowAtrous
+            curr_t = self.EmbedWindowStride * num_embedding + (self.EmbedWindowLength - 1) * self.EmbedWindowAtrous
             while curr_t < frame_index:
                 # absolute index in temporal shaft
-                start_index = self.EnbedWindowStride * num_embedding
-                
+                start_index = self.EmbedWindowStride * num_embedding
+
                 if frame_index > len(img_buffer):
                     # absolute index in buffer shaft
                     start_index = start_index - (frame_index - len(img_buffer))
 
                 input_data = [
-                    [cv2.resize(img_buffer[start_index + i * self.EnbedWindowAtrous],
-                    (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EnbedWindowLength)]
-                    for j in range(self.BatchSize)]
+                    [cv2.resize(img_buffer[start_index + i * self.EmbedWindowAtrous],
+                                (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
+                    for j in range(self.EmbedBatchSize)]
 
                 ###               ###
                 ### inference i3d ###
                 ###               ###
-                out_logits, _ = self.i3d.infer(
-                    inputs={self.backbone_input_keys[0]: input_data})[self.backbone_output_key[0]]
-                embedding_buffer = np.concatenate([embedding_buffer, out_logits.T], axis=1)  # ndarray: C x num_embedding
+                input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
+                out_logits = self.i3d.infer(
+                    inputs={self.i3d_input_keys[0]: input_data})[self.i3d_output_key[0]]
+                out_logits = out_logits.squeeze((0, 3, 4))
+                embedding_buffer = np.concatenate([embedding_buffer, out_logits],
+                                                  axis=1)  # ndarray: C x num_embedding
 
-                num_embedding += 1
-                curr_t = self.EnbedWindowStride * num_embedding + (self.EnbedWindowLength - 1) * self.EnbedWindowAtrous
-
+                curr_t += self.EmbedWindowStride
+        return embedding_buffer
 
     def action_segmentation(self):
         # read buffer
         embed_buffer_top = self.EmbedBufferTop
         embed_buffer_front = self.EmbedBufferFront
-        batch_size = self.BatchSize
-
-        def softmax(x):
-            """ applies softmax to an input x"""
-            e_x = np.exp(x)
-            return e_x / e_x.sum()
-
-        start_index = self.temporal_logits.shape[0]
+        batch_size = self.SegBatchSize
+        start_index = self.TemporalLogits.shape[0]
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
         if num_batch < 0:
             print("Waiting for the next frame ...")
         elif num_batch == 0:
-            print("start_index:",start_index,"end_index:",end_index)
+            print("start_index:", start_index, "end_index:", end_index)
 
             unit1 = embed_buffer_top[:, start_index:end_index]
             unit2 = embed_buffer_front[:, start_index:end_index]
             feature_unit = np.concatenate([unit1[:, ], unit2[:, ]], axis=0)
-            input = feature_unit.unsqueeze_(0) # 2048xN
+            input_mstcn = np.expand_dims(feature_unit, 0)
 
-            predictions, self.his_fea = self.seg_model(input)
+            feed_dict = {}
+            if len(self.his_fea) != 0:
+                feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
+            feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
+            if input_mstcn.shape == (1, 2048, 1):
+                out = self.reshape_mstcn.infer(inputs=feed_dict)
+
+            predictions = out[self.mstcn_output_key[-1]]
+            self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
+
             """
                 predictions --> 4x1x64x24
                 his_fea --> [12*[1x64x2048], 11*[1x64x2048], 11*[1x64x2048], 11*[1x64x2048]]
             """
-            temporal_logits = predictions[:, :, :len(self.terms), :]  # 4x1x16xN
+            temporal_logits = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
             temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
-            temporal_logits = temporal_logits.permute(0, 2, 1).squeeze(dim=0)
+            temporal_logits = temporal_logits.transpose((0, 2, 1)).squeeze(axis=0)
             self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
-
         else:
             for batch_idx in range(num_batch):
                 unit1 = embed_buffer_top[:,
-                    start_index + batch_idx * batch_size:start_index + batch_idx * batch_size + batch_size]
+                        start_index + batch_idx * batch_size:start_index + batch_idx * batch_size + batch_size]
                 unit2 = embed_buffer_front[:,
-                    start_index + batch_idx * batch_size:start_index + batch_idx * batch_size + batch_size]
+                        start_index + batch_idx * batch_size:start_index + batch_idx * batch_size + batch_size]
                 feature_unit = np.concatenate([unit1[:, ], unit2[:, ]], axis=0)
-                input = feature_unit.unsqueeze_(0) # 2048x24
+                feed_dict = {}
+                if len(self.his_fea) != 0:
+                    feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
+                feed_dict[self.mstcn_input_keys[-1]] = feature_unit
+                out = self.mstcn.infer(inputs=feed_dict)
+                predictions = out[self.mstcn_output_key[-1]]
+                self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
 
-                # predictions, self.his_fea = self.seg_model(input, self.his_fea)
-                predictions, self.his_fea = self.seg_model(input)
-
-                temporal_logits = predictions[:, :, :len(self.terms), :]  # 4x1x16xN
+                temporal_logits = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
                 temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
-                temporal_logits = temporal_logits.permute(0, 2, 1).squeeze(dim=0)
+                temporal_logits = temporal_logits.transpose((0, 2, 1)).squeeze(axis=0)
                 self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
+
+
+if __name__ == '__main__':
+    segmentor = SegmentorMstcn("i3d-rgb.xml", "mstcn_online.xml")
+    segmentor.initialize()
+    frame_counter = 0  # Frame index counter
+    buffer1 = deque(maxlen=1000)  # Array buffer
+    buffer2 = deque(maxlen=1000)
+    cap1 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_1.mp4")
+    cap2 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_2.mp4")
+
+    while cap1.isOpened() and cap2.isOpened():
+        ret1, frame1 = cap1.read()  # frame:480 x 640 x 3
+        ret2, frame2 = cap2.read()  # frame:480 x 640 x 3
+        if ret1 and ret2:
+            buffer1.append(cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB))
+            buffer2.append(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB))
+            frame_counter += 1
+
+            frame_predictions = segmentor.inference(buffer_top=buffer1, buffer_front=buffer2, frame_index=frame_counter)
+            print("Frame predictions:", frame_predictions)
+        else:
+            print("Finished!")
+            break
