@@ -61,16 +61,32 @@ class TestTopologies(unittest.TestCase):
         self.assertIsInstance(model.model_config, dict)
 
     def test_infer_model(self):
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
-
         ie = IECore()
+        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
+
         net = ie.read_network(model.model_path)
         input_name = next(iter(net.input_info))
         output_name = next(iter(net.outputs))
 
         inputs = {input_name: np.zeros((1, 1, 256, 256))}
-        output = model(inputs, ie)
+        output = model(inputs)
         self.assertEqual(output[output_name].shape, (1, 2, 256, 256))
+
+    def test_infer_non_vision_model(self):
+        ie = IECore()
+        model = omz.Model.download('bert-base-ner', ie=ie)
+
+        net = ie.read_network(model.model_path)
+        input_names = net.input_info.keys()
+        output_name = next(iter(net.outputs))
+
+        inputs = {}
+        for input_name in input_names:
+            inputs[input_name] = np.zeros(net.input_info[input_name].input_data.shape)
+
+        output = model(inputs)
+
+        self.assertEqual(output[output_name].shape, (1, 128, 9))
 
     def test_load_public_composite(self):
         model = omz.Model.download('mtcnn-p', precision='FP32')
@@ -91,9 +107,9 @@ class TestTopologies(unittest.TestCase):
         for name, value in net.outputs.items():
             self.assertEqual(expected_shapes[name], value.shape)
 
-    def test_input_shape(self):
+    def test_preferable_input_shape(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
-        self.assertEqual(model.input_shape('data_l'), [1, 1, 256, 256])
+        self.assertEqual(model.preferable_input_shape('data_l'), [1, 1, 256, 256])
 
     def test_input_layout(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')

@@ -1,4 +1,3 @@
-import cv2
 import os
 import argparse
 import yaml
@@ -12,7 +11,7 @@ from openvino.model_zoo.download_engine import validation
 
 
 class Model:
-    def __init__(self, name=None, model_path=None, description=None, task_type=None, subdirectory=None):
+    def __init__(self, name=None, model_path=None, description=None, task_type=None, subdirectory=None, ie=None):
         self.model_path = model_path
         self.description = description
         self.task_type = task_type
@@ -21,12 +20,12 @@ class Model:
 
         self.net = None
         self.exec_net = None
+        self.ie = ie
         self._accuracy_config = None
         self._model_config = None
-        self._model = None
 
     @classmethod
-    def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None):
+    def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None, ie=None):
         '''
         Downloads target model. If the model has already been downloaded,
         retrieves the model from the cache instead of downloading it again.
@@ -48,14 +47,13 @@ class Model:
                 The script will place a copy of each downloaded file in the cache, or,
                 if it is already there, retrieve it from the cache.
                 By default creates a folder '.cache' in current download directory.
+            ie
+                Inference Engine instance
         '''
         download_dir = Path(download_dir)
         cache_dir = cache_dir or download_dir / '.cache'
 
-        parser = argparse.ArgumentParser()
-        args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
-        model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT,
-                    mode=_configuration.ModelLoadingMode.ignore_composite)[0]
+        model = cls._load_model(cls, model_name)
 
         model_dir = download_dir / model.subdirectory
 
@@ -84,10 +82,10 @@ class Model:
         if not os.path.exists(model_path) or not os.path.exists(bin_path):
             omz_converter.converter(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
-        return cls(name, model_path, description, task_type, subdirectory)
+        return cls(name, model_path, description, task_type, subdirectory, ie)
 
     @classmethod
-    def from_pretrained(cls, model_path, *, task_type=None):
+    def from_pretrained(cls, model_path, *, task_type=None, ie=None):
         '''
         Loads model from existing .xml, .onnx files.
         Parameters
@@ -96,6 +94,8 @@ class Model:
                 Path to .xml or .onnx file.
             task_type
                 Type of task that the model performs.
+            ie
+                Inference Engine instance
         '''
         model_path = Path(model_path).resolve()
 
@@ -107,28 +107,36 @@ class Model:
 
         description = 'Pretrained model {}'.format(model_path.name)
         name = model_path.name
+        model = cls._load_model(cls, name)
         task_type = task_type
-        subdirectory = model_path.parent
+        subdirectory = model.subdirectory if model else model_path.parent
         model_path = str(model_path)
 
-        return cls(name, model_path, description, task_type, subdirectory)
+        return cls(name, model_path, description, task_type, subdirectory, ie)
 
-    def _load(self, ie, device):
-        self.net = ie.read_network(self.model_path)
-        self.exec_net = ie.load_network(self.net, device)
+    def _load_model(self, model_name):
+        parser = argparse.ArgumentParser()
+        args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
+        try:
+            model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT,
+                        mode=_configuration.ModelLoadingMode.ignore_composite)[0]
+        except SystemExit:
+            model = None
 
-    def __call__(self, inputs, ie, device='CPU'):
-        if self.exec_net is None:
-            self._load(ie, device)
+        return model
 
-        input_names = next(iter(self.net.input_info))
-        for input_name, value in inputs.items():
+    def __call__(self, inputs, device='CPU'):
+        if self.ie is None:
+            raise TypeError('ie must be of IECore type.')
+
+        self.net = self.ie.read_network(self.model_path)
+        self.exec_net = self.ie.load_network(self.net, device)
+
+        input_names = self.net.input_info.keys()
+        for input_name in inputs.keys():
             if input_name not in input_names:
                 raise ValueError('Unknown input name {}'.format(input_name))
 
-            input_shape = self.net.input_info[input_name].input_data.shape
-            if input_shape != list(value.shape):
-                value = cv2.resize(value, input_shape)
         res = self.exec_net.infer(inputs=inputs)
         return res
 
@@ -154,29 +162,29 @@ class Model:
 
         return self._model_config
 
-    def inputs(self, ie=None):
+    def inputs(self):
         if self.net is None:
             try:
-                self.net = ie.read_network(self.model_path)
+                self.net = self.ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie argument must be of IECore type.')
+                raise TypeError('ie must be of IECore type.')
 
-        input_blob = self.net.input_info
+        input_blobs = self.net.input_info
 
-        return input_blob
+        return input_blobs
 
-    def outputs(self, ie=None):
+    def outputs(self):
         if self.net is None:
             try:
-                self.net = ie.read_network(self.model_path)
+                self.net = self.ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie argument must be of IECore type.')
+                raise TypeError('ie must be of IECore type.')
 
         output_blob = self.net.outputs
 
         return output_blob
 
-    def input_shape(self, name):
+    def preferable_input_shape(self, name):
         input_info = self.model_config.get('input_info', [])
         for input in input_info:
             if input['name'] == name:
@@ -191,3 +199,6 @@ class Model:
                 return input['layout']
 
         return None
+
+    def input_info(self):
+        return self.model_config.get('input_info', [])
