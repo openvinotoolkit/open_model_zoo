@@ -237,45 +237,6 @@ def add_openvino_specific_args(parser):
         required=False
     )
     openvino_specific_args.add_argument(
-        '-M', '--model_optimizer',
-        help='path to model optimizer directory',
-        type=partial(get_path, is_directory=True),
-        # there is no default value because if user did not specify it we use specific locations
-        # defined in model_conversion.py
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--tf_custom_op_config_dir',
-        help='path to directory with tensorflow custom operation configuration files for model optimizer',
-        type=partial(get_path, is_directory=True),
-        # there is no default value because if user did not specify it we use specific location
-        # defined in model_conversion.py
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--transformations_config_dir',
-        help='path to directory with Model Optimizer transformations configuration files',
-        type=partial(get_path, is_directory=True),
-        # there is no default value because if user did not specify it we use specific location
-        # defined in model_conversion.py
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--tf_obj_detection_api_pipeline_config_path',
-        help='path to directory with tensorflow object detection api pipeline configuration files for model optimizer',
-        type=partial(get_path, is_directory=True),
-        # there is no default value because if user did not specify it we use specific location
-        # defined in model_conversion.py
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--deprecated_ir_v7',
-        help='allow generation IR v7 via Model Optimizer',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    openvino_specific_args.add_argument(
         '-dc', '--device_config',
         help='Inference Engine device specific config file',
         type=get_path,
@@ -297,13 +258,6 @@ def add_openvino_specific_args(parser):
     openvino_specific_args.add_argument(
         '--model_type',
         help='model format for automatic search (e.g. blob, xml, onnx)',
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '-C', '--converted_models',
-        help='directory to store Model Optimizer converted models. Used for DLSDK launcher only',
-        type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     openvino_specific_args.add_argument(

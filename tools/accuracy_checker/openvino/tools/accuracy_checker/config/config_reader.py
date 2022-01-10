@@ -68,13 +68,6 @@ LIST_ENTRIES_PATHS = {
     'model': 'models',
     'weights': 'models',
     'color_coeff': ['model_attributes', 'models'],
-    'caffe_model': 'models',
-    'caffe_weights': 'models',
-    'tf_model': 'models',
-    'tf_meta': 'models',
-    'mxnet_weights': 'models',
-    'onnx_model': 'models',
-    'kaldi_model': 'models',
     'saved_model_dir': 'models',
     'params': 'models'
 }
@@ -90,11 +83,6 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = []
 ACCEPTABLE_MODEL = [
-    'caffe_model', 'caffe_weights',
-    'tf_model', 'tf_meta',
-    'mxnet_weights',
-    'onnx_model',
-    'kaldi_model',
     'model',
     'saved_model_dir',
     'params'
@@ -393,9 +381,6 @@ class ConfigReader:
         }
 
         additional_keys = [
-            'model_optimizer', 'tf_custom_op_config_dir',
-            'tf_obj_detection_api_pipeline_config_path',
-            'transformations_config_dir',
             'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
@@ -843,32 +828,7 @@ def get_mode(config):
     return next(iter(evaluation_keys))
 
 
-def merge_converted_model_path(converted_models_dir, mo_output_dir):
-    if mo_output_dir:
-        mo_output_dir = Path(mo_output_dir)
-        if mo_output_dir.is_absolute():
-            return mo_output_dir
-        return converted_models_dir / mo_output_dir
-    return converted_models_dir
-
-
 def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
-    def _convert_models_args(launcher_entry):
-        if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
-            mo_flags = launcher_entry.get('mo_flags', [])
-            mo_flags.append('generate_deprecated_IR_V7')
-            launcher_entry['mo_flags'] = mo_flags
-        if 'converted_models' in arguments and arguments.converted_models:
-            mo_params = launcher_entry.get('mo_params', {})
-            mo_params.update({
-                'output_dir': merge_converted_model_path(arguments.converted_models,
-                                                         mo_params.get('output_dir'))
-            })
-
-            launcher_entry['mo_params'] = mo_params
-
-        return launcher_entry
-
     def _async_evaluation_args(launcher_entry):
         if 'async_mode' in arguments:
             launcher_entry['async_mode'] = arguments.async_mode
@@ -888,7 +848,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         return launcher_entry
 
     launcher_entry.update(update_launcher_entry)
-    _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
 
     if 'device_config' in arguments and arguments.device_config:
