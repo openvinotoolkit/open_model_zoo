@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -195,13 +195,14 @@ class BaseDLSDKModel:
         return model, weights
 
     def set_input_and_output(self):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        network = self.exec_network if self.exec_network is not None else self.network
+        has_info = hasattr(network, 'input_info')
+        input_info = network.input_info if has_info else network.inputs
         input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.output_blob is None:
-                output_blob = next(iter(self.exec_network.outputs))
+                output_blob = next(iter(network.outputs))
             else:
                 output_blob = (
                     '_'.join([self.default_model_suffix, self.output_blob])
@@ -261,14 +262,18 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return node_to_tensor
 
+    def input_index_mapping(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        return {inp.get_node().friendly_name: idx for idx, inp in enumerate(inputs)}
+
     def _reshape_input(self, input_shapes):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
             del self.infer_request
             del self.exec_network
-        tensor_mapping = self.input_tensors_mapping()
-        input_shapes_for_tensors = {tensor_mapping[name]: shape for name, shape in input_shapes.items()}
+        index_mapping = self.input_index_mapping()
+        input_shapes_for_tensors = {index_mapping[name]: shape for name, shape in input_shapes.items()}
         self.launcher.reshape_network(self.network, input_shapes_for_tensors)
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import numpy as np
 
 
 from ..config import PathField, StringField, NumberField, BoolField, ListField, ConfigError
+from ..data_readers import AnnotationDataIdentifier
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list, UnsupportedPackage, read_json
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
@@ -112,11 +113,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         return lines
 
     def convert_single_example(self, example): # pylint:disable=R0912
-        identifier = [
-            'input_ids_{}'.format(example.guid),
-            'input_mask_{}'.format(example.guid),
-            'segment_ids_{}'.format(example.guid)
-        ]
+        identifier = AnnotationDataIdentifier(example.guid, [])
         if not self.external_tok:
             tokens_a = self.tokenizer.tokenize(example.text_a)
             tokens_b = None
@@ -165,6 +162,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
             if len(tokens) > self.max_seq_length:
                 tokens = tokens[:self.max_seq_length]
+                segment_ids = segment_ids[:self.max_seq_length]
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab or self.external_tok else tokens
         input_mask = [0 if not self.class_token_first else 1] * len(input_ids)

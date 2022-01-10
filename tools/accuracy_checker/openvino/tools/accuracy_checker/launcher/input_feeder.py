@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,11 @@ import numpy as np
 from ..config import ConfigError
 from ..utils import extract_image_representations
 from ..data_readers import (
-    MultiFramesInputIdentifier, KaldiFrameIdentifier, KaldiMatrixIdentifier, ParametricImageIdentifier
+    MultiFramesInputIdentifier,
+    KaldiFrameIdentifier,
+    KaldiMatrixIdentifier,
+    ParametricImageIdentifier,
+    AnnotationDataIdentifier
 )
 
 LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
@@ -192,6 +196,9 @@ class InputFeeder:
             for data_representation in data_representation_batch:
                 identifiers = data_representation.identifier
                 data = data_representation.data
+                if isinstance(identifiers, AnnotationDataIdentifier):
+                    identifiers = identifiers.data_id
+
                 if isinstance(identifiers, ParametricImageIdentifier):
                     input_batch.append(data[idx])
                     continue

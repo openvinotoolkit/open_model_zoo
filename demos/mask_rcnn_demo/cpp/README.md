@@ -31,8 +31,6 @@ omz_converter --list models.lst
 ### Supported Models
 
 * mask_rcnn_inception_resnet_v2_atrous_coco
-* mask_rcnn_inception_v2_coco
-* mask_rcnn_resnet101_atrous_coco
 * mask_rcnn_resnet50_atrous_coco
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
@@ -79,5 +77,5 @@ You can use this metric to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -223,11 +223,14 @@ def write_scalar_result(
 def compare_with_ref(reference, res_value, name=None):
     if isinstance(reference, dict):
         if name is None:
-            reference = next(iter(reference.values()))
-        reference = reference.get(name)
-    if reference is None:
+            ref = next(iter(reference.values()))
+        else:
+            ref = reference.get(name)
+    else:
+        ref = reference
+    if ref is None:
         return None
-    return abs(reference - res_value), abs(reference - res_value) / reference
+    return abs(ref - res_value), abs(ref - res_value) / ref
 
 
 def get_result_format_parameters(meta, use_default_formatting):

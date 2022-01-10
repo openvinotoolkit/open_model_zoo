@@ -39,6 +39,7 @@
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
 #include <models/jpeg_restoration_model.h>
+#include <models/style_transfer_model.h>
 #include <pipelines/metadata.h>
 #include "visualizer.hpp"
 
@@ -46,7 +47,7 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration.";
+static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -145,6 +146,9 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     }
     if (type == "jr") {
         return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
+    }
+	if (type == "style") {
+        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }

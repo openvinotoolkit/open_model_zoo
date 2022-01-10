@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ from ..utils import (
     string_to_tuple,
     get_or_parse_value,
     parse_partial_shape,
+    postprocess_output_name
 )
 from .launcher import Launcher
 from ..logging import print_info
@@ -330,7 +331,7 @@ class OpenVINOLauncher(Launcher):
             p_shape = PartialShape(
                 [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
             )
-            partial_shapes[self.input_to_tensor_name[name]] = p_shape
+            partial_shapes[self.input_to_index[name]] = p_shape
 
         self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
@@ -548,6 +549,7 @@ class OpenVINOLauncher(Launcher):
         if self.network is not None:
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
+        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
 
         if not self._postpone_input_configuration:
             self._set_precision()
@@ -813,8 +815,8 @@ class OpenVINOLauncher(Launcher):
         feed_dict = {}
         for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = parse_partial_shape(self.inputs[lstm_var].partial_shape)
-            if infer_outputs and output_layer not in infer_outputs:
-                raise ConfigError('Output node with name {} not found'.format(output_layer))
+            if infer_outputs:
+                output_layer = postprocess_output_name(output_layer, infer_outputs)
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
                 layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()]
             )
@@ -831,13 +833,15 @@ class OpenVINOLauncher(Launcher):
         network_outputs = network.outputs
         for input_info in network_inputs:
             input_node = input_info.get_node()
-            print_info('\tLayer name: {}'.format(input_node.friendly_name))
+            print_info('\tNode name: {}'.format(input_node.friendly_name))
+            print_info('\tTensor names: {}'.format(', '.join(input_info.get_names())))
             print_info('\tprecision: {}'.format(input_node.element_type.get_type_name()))
             print_info('\tshape: {}\n'.format(parse_partial_shape(input_node.get_partial_shape())))
         print_info('Output info')
         for output_info in network_outputs:
             out_node = output_info.get_node()
-            print_info('\tLayer name: {}'.format(out_node.friendly_name))
+            print_info('\tNode name: {}'.format(out_node.friendly_name))
+            print_info('\tTensor names: {}'.format(', '.join(output_info.get_names())))
             precision = out_node.get_output_element_type(0).get_type_name()
             print_info('\tprecision: {}'.format(precision))
             shape = parse_partial_shape(out_node.get_output_partial_shape(0))

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -975,3 +975,20 @@ def parse_partial_shape(partial_shape):
         shape_list.append(string_to_tuple(shape_range, casting_type=int))
         s_pos = min(close_brace + 2, e_pos)
     return shape_list
+
+
+def postprocess_output_name(output_name, outputs, suffix=('/sink_port_0', ':0'), raise_error=True):
+    suffixes = [suffix] if isinstance(suffix, str) else suffix
+    outputs = outputs[0] if isinstance(outputs, list) else outputs
+    if output_name in outputs:
+        return output_name
+    for suffix_ in suffixes:
+        if suffix_ in output_name:
+            preprocessed_output_name = output_name.replace(suffix_, '')
+        else:
+            preprocessed_output_name = '{}{}'.format(output_name, suffix_)
+        if preprocessed_output_name in outputs:
+            return preprocessed_output_name
+    if raise_error:
+        raise ValueError('Output name: {} not found'.format(output_name))
+    return output_name

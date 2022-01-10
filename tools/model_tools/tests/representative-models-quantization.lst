@@ -3,4 +3,4 @@
 # default quantization config
 mobilenet-v1-0.25-128
 # custom quantization config
-hbonet-0.5
+mobilenet-v3-small-1.0-224-tf

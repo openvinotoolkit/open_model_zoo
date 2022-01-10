@@ -17,7 +17,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_object_detection_demo_yolov3/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvino.ai/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
 An example of using the Model Downloader:
 
@@ -133,5 +133,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
