@@ -29,6 +29,7 @@ description: >-
   will typically use this output as input to the "mtcnn-r" model.
 task_type: detection
 files:
+#
   - name: mtcnn-p.prototxt
     size: 2353
     checksum: 372af5af8ba5c1820b587b64670ef957e40c5118f7775381d46e4eb88ec8f9cadb7abdeadfa3863459e17bf7b87318fd
