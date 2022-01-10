@@ -353,37 +353,8 @@ class DLSDKModelMixin:
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher):
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get(
-                'mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in model_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-
-            model_config['mo_flags'] = model_mo_flags
-            model_config['mo_params'] = model_mo_params
-
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            model, weights = launcher.convert_model(self.model_info)
-        else:
-            model, weights = self.auto_model_search(self.model_info)
+    def prepare_model(self):
+        model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
     def auto_model_search(self, network_info):
@@ -547,37 +518,8 @@ class OVModelMixin(BaseOpenVINOModel):
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher):
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get(
-                'mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in model_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-
-            model_config['mo_flags'] = model_mo_flags
-            model_config['mo_params'] = model_mo_params
-
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            model, weights = launcher.convert_model(self.model_info)
-        else:
-            model, weights = self.auto_model_search(self.model_info)
+    def prepare_model(self):
+        model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
     def auto_model_search(self, network_info):
@@ -758,7 +700,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.adapter = None
         self.is_dynamic = False
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
             pnet_outs = model_info['outputs']
             pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
@@ -810,7 +752,7 @@ class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
@@ -829,7 +771,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
@@ -848,7 +790,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
@@ -865,7 +807,7 @@ class OpenVINOOutputStage(OutputBaseStage, OVModelMixin):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):

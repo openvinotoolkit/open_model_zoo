@@ -215,11 +215,7 @@ class BaseDLSDKModel:
                 self.adapter.output_blob = output_blob
 
     def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
+        model, weights = self.automatic_model_search(network_info)
         if weights is None and model.suffix != '.onnx':
             self.exec_network = launcher.ie_core.import_network(str(model))
         else:
@@ -302,11 +298,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
 
     def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
+        model, weights = self.automatic_model_search(network_info)
         if weights is None and model.suffix != '.onnx':
             self.exec_network = launcher.ie_core.import_network(str(model))
         else:
