@@ -14,13 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
 from pathlib import Path
 import platform
 from ..config import PathField, ConfigError, StringField, NumberField, ListField, DictField, BaseField, BoolField
 from .launcher import LauncherConfigValidator
 from ..logging import warning, print_info
-from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config
+from ..utils import get_path, contains_all, UnsupportedPackage
 
 try:
     from openvino.inference_engine import known_plugins  # pylint:disable=W9902
@@ -116,9 +115,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         """
         error_stack = []
         if not self.delayed_model_loading:
-            framework_parameters, error_stack = self.check_model_source(entry, fetch_only, field_uri, validation_scheme)
-            if not error_stack:
-                self._set_model_source(framework_parameters)
+            _, error_stack = self.check_model_source(entry, fetch_only, field_uri, validation_scheme)
         error_stack += super().validate(entry, field_uri, fetch_only, validation_scheme)
         self.create_device_regex(known_plugins)
         if 'device' not in entry:
@@ -160,7 +157,6 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             return None, [error]
         
         return specified[0], []
-
 
 DLSDK_LAUNCHER_PARAMETERS = {
     'model': PathField(description="Path to model.", file_or_directory=True),

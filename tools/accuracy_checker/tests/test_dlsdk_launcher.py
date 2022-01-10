@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import subprocess # nosec - disable B404:import-subprocess check
-
 import pytest
 
 pytest.importorskip('openvino.tools.accuracy_checker.launcher.dlsdk_launcher')

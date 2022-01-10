@@ -20,8 +20,8 @@ pytest.importorskip('tensorflow')
 import cv2
 import numpy as np
 
-from accuracy_checker.launcher.launcher import create_launcher
-from accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
+from openvino.tools.accuracy_checker.config import ConfigError
 
 
 def no_tf2():
