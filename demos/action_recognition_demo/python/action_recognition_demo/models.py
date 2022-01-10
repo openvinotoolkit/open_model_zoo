@@ -98,7 +98,6 @@ class IEModel:
         self.input_shape = self.model.inputs[0].shape
 
         self.output_name = self.model.outputs[0].get_any_name()
-        self.output_shape = self.model.outputs[0].shape
 
         self.num_requests = num_requests
         self.infer_requests = [self.compiled_model.create_infer_request() for _ in range(self.num_requests)]
@@ -112,7 +111,6 @@ class IEModel:
     def async_infer(self, frame, req_id):
         input_data = {self.input_name: frame}
         self.infer_requests[req_id].start_async(inputs=input_data)
-        pass
 
     def wait_request(self, req_id):
         self.infer_requests[req_id].wait()
