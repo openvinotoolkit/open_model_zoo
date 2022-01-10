@@ -140,7 +140,8 @@ class SegmentorMstcn(Segmentor):
         )
         net.reshape({next(iter(net.input_info)): (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
-        net.add_outputs("RGB/inception_i3d/Logits/Conv3d_0c_1x1/conv_3d/convolution/fq_input_0")
+        # net.add_outputs("RGB/inception_i3d/Logits/Conv3d_0c_1x1/conv_3d/convolution/fq_input_0")
+        net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
         self.i3d = ie.load_network(network=net, device_name="CPU")
         self.i3d_input_keys = list(self.i3d.input_info.keys())
@@ -155,6 +156,9 @@ class SegmentorMstcn(Segmentor):
         self.mstcn_output_key = list(self.mstcn.outputs.keys())
         self.mstcn_net.reshape({'input': (1, 2048, 1)})
         self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
+        init_his_feature = np.load('init_his.npz')
+        self.his_fea = [init_his_feature['arr_0'], init_his_feature['arr_1'], init_his_feature['arr_2'],
+                        init_his_feature['arr_3']]
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -165,15 +169,6 @@ class SegmentorMstcn(Segmentor):
         Returns: the temporal prediction results for each frame (including the historical predictions)，
                  length of predictions == frame_index()
         """
-
-        # ### preprocess ###
-        # buffer_front = cv2.resize(buffer_front, (224, 224), interpolation=cv2.INTER_LINEAR)
-        # buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
-        # buffer_front = buffer_front / 255
-        # buffer_top = buffer_top / 255
-        #
-        # buffer_front = buffer_front[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
-        # buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run encoder ###
         print("Frame embedding:", frame_index)
@@ -220,11 +215,9 @@ class SegmentorMstcn(Segmentor):
                     [cv2.resize(img_buffer[start_index + i * self.EmbedWindowAtrous],
                                 (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
                     for j in range(self.EmbedBatchSize)]
-
-                ###               ###
-                ### inference i3d ###
-                ###               ###
                 input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
+                input_data = input_data * 127.5 + 127.5
+
                 out_logits = self.i3d.infer(
                     inputs={self.i3d_input_keys[0]: input_data})[self.i3d_output_key[0]]
                 out_logits = out_logits.squeeze((0, 3, 4))
@@ -292,14 +285,13 @@ class SegmentorMstcn(Segmentor):
 
 
 if __name__ == '__main__':
-    segmentor = SegmentorMstcn("i3d-rgb.xml", "mstcn_online.xml")
+    segmentor = SegmentorMstcn("fp32/i3d-rgb.xml", "mstcn_online.xml")
     segmentor.initialize()
     frame_counter = 0  # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
-    cap1 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_1.mp4")
-    cap2 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_2.mp4")
-
+    cap1 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_1.mp4", cv2.CAP_FFMPEG)
+    cap2 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_2.mp4", cv2.CAP_FFMPEG)
     while cap1.isOpened() and cap2.isOpened():
         ret1, frame1 = cap1.read()  # frame:480 x 640 x 3
         ret2, frame2 = cap2.read()  # frame:480 x 640 x 3
