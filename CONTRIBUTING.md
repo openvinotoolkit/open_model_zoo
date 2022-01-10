@@ -4,7 +4,6 @@ We appreciate your intention to contribute model to the OpenVINO&trade; Open Mod
 
 Frameworks supported by the Open Model Zoo:
 * Caffe\*
-* Caffe2\* (via conversion to ONNX\*)
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
 * MXNet\*
@@ -113,7 +112,7 @@ For replacement operation:
 - `replacement` — Replacement string
 - `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
-**`conversion_to_onnx_args`** (*only for Caffe2\*, PyTorch\* models*)
+**`conversion_to_onnx_args`** (*only for PyTorch\* models*)
 
 List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
@@ -177,7 +176,7 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model Conversion
 
-Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
+Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
 
 > **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
@@ -185,7 +184,7 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
+A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 

@@ -40,7 +40,6 @@ omz_converter --list models.lst
 * ssd512
 * ssd_mobilenet_v1_coco
 * ssd_mobilenet_v1_fpn_coco
-* ssd_mobilenet_v2_coco
 * ssdlite_mobilenet_v2
 * single-human-pose-estimation-0001
 
@@ -110,5 +109,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
