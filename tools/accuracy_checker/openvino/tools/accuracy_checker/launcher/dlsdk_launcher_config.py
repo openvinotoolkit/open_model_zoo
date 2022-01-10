@@ -155,7 +155,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             if not fetch_only:
                 raise error
             return None, [error]
-        
+
         return specified[0], []
 
 DLSDK_LAUNCHER_PARAMETERS = {

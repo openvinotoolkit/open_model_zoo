@@ -649,7 +649,7 @@ class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
         self.adapter = None
         self.is_dynamic = False
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
             pnet_outs = model_info['outputs']
             pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})

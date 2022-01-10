@@ -21,7 +21,7 @@ tar xvf cifar-10-python.tar.gz -C sample
 ### 2. Evaluate sample topology
 
 Typically you need to write a configuration file describing evaluation process of your topology.
-There is already a config file for evaluating SampLeNet using the OpenVINO framework, so please read it carefully.
+There is already a prepared config file for evaluating SampLeNet using the OpenVINO framework at `<omz_dir>/tools/accuracy_checker/sample/sample_config.yml`, so please read it carefully before using.
 
 Then run Accuracy Checker with the following command:
 
