@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ files:
   - name: forward-tacotron-duration-prediction.zip
     size: 54840281
     checksum: abaa75849759d344010c2e549b140b22241e6c4f72fcf482ad3f47f84b5b992c8d622d95312f3b0a34db67744981f7f2
-    source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-duration-prediction.zip
+    original_source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-duration-prediction.zip
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/forward-tacotron/forward-tacotron-duration-prediction/forward-tacotron-duration-prediction.zip
 postprocessing:
   - $type: unpack_archive
     format: zip

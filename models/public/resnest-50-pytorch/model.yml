@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ files:
   - name: resnest50-528c19ca.pth
     checksum: c08c80b6c826ea76eda8f638b1c06535aed947cf8ccc26c027dbda917fb1afad72191f753a7a6029d6126360973f0a06
     size: 110273258
-    source: https://github.com/zhanghang1989/ResNeSt/releases/download/weights_step1/resnest50-528c19ca.pth
+    original_source: https://github.com/zhanghang1989/ResNeSt/releases/download/weights_step1/resnest50-528c19ca.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnest-50-pytorch/resnest50-528c19ca.pth
   - name: model/resnest.py
     size: 2908
     checksum: 00a948bbe8a8aeb671724cc2ddca21de34ede1d9908b5f22ac05681518b7f929eb89eddcd23694aaea7999a0e9808477

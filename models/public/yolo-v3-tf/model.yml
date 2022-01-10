@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ files:
   - name: yolo-v3.pb
     size: 248128731
     checksum: 169977adef481096e57b73d0602ec9f0a85bd692ad90bd46afcf97d1d808ccfa3d1beb719d91cfd22e6e463e0b27a2bd
-    source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolov3.pb
+    original_source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolov3.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolo-v3-tf/yolov3.pb
   - name: yolo-v3.json
     size: 384
     checksum: 9367c59fbd1208675cfa40fc6ebe1c73c1d316e14d59fc7226d2773ed6d0e9d83b276a294db705ace92f60c7a83e1ad6
-    source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
+    original_source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolo-v3-tf/yolo_v3_new.json
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=input_1
@@ -35,5 +37,5 @@ model_optimizer_args:
   - --transformations_config=$dl_dir/yolo-v3.json
   - --input_model=$dl_dir/yolo-v3.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

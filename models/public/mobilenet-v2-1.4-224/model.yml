@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ files:
   - name: mobilenet-v2-1.4-224.tar.gz
     size: 135977516
     checksum: fd257f73e8ee5280328903afa6bbd646dcf4e8ae7c090e3424cf05d973c0940fe02ee220a3a5a20ea51cb9caacbf4961
-    source: https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz
+    original_source: https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-v2-1.4-224/mobilenet_v2_1.4_224.tgz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -36,5 +37,5 @@ model_optimizer_args:
   - --output=MobilenetV2/Predictions/Reshape_1
   - --input_model=$dl_dir/mobilenet_v2_1.4_224_frozen.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

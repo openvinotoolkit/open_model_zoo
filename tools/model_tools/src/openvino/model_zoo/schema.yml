@@ -32,6 +32,9 @@ required:
                 $type: "//str"
                 value: "//str"
         source:
+          type: "//str"
+      optional:
+        original_source:
           type: "//any"
           of:
             - "//str"

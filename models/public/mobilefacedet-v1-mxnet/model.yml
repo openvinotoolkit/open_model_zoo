@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,5 +33,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/mobilefacedet_v1_mxnet-0000.params
   - --transformations_config=$config_dir/mobileface_det.json
 framework: mxnet
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/becauseofAI/MobileFace/master/LICENSE

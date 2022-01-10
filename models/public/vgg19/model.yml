@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ files:
   - name: vgg19.prototxt
     size: 5499
     checksum: f3c8a34cbaba8c92fbd7744f4a26d244555e1b9a541fef3294622483b316465dad2363bdbab548dfd6733da66213a2d3
-    source: https://gist.githubusercontent.com/ksimonyan/3785162f95cd2d5fee77/raw/f02f8769e64494bcd3d7e97d5d747ac275825721/VGG_ILSVRC_19_layers_deploy.prototxt
+    original_source: https://gist.githubusercontent.com/ksimonyan/3785162f95cd2d5fee77/raw/f02f8769e64494bcd3d7e97d5d747ac275825721/VGG_ILSVRC_19_layers_deploy.prototxt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vgg19/VGG_ILSVRC_19_layers_deploy.prototxt
   - name: vgg19.caffemodel
     size: 574671192
     checksum: 86b83739d448a81ddc927922d4d7581e06113478106b59480097b02cc63ff51c9da7c3cd8a865b08946d07d0281d5b2e
-    source: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_19_layers.caffemodel
+    original_source: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_19_layers.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vgg19/VGG_ILSVRC_19_layers.caffemodel
 postprocessing:
   - $type: regex_replace
     file: vgg19.prototxt
@@ -45,5 +47,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/vgg19.caffemodel
   - --input_proto=$dl_dir/vgg19.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://creativecommons.org/licenses/by/4.0/legalcode.txt

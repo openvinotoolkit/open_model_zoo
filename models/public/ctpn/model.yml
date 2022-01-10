@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
 # limitations under the License.
 
 description: >-
-  Detecting Text in Natural Image with Connectionist Text Proposal Network. For
-  details see paper <https://arxiv.org/abs/1609.03605>.
+  Detecting Text in Natural Image with Connectionist Text Proposal Network. For details
+  see paper <https://arxiv.org/abs/1609.03605>.
 task_type: detection
 files:
   - name: ctpn.pb
     size: 71638063
     checksum: edc59e0375fb56fc51e0333f4cd2377494d50ef3b86cb64b81e801a6d1ed3256dce068fce80bb7b7fd665258fae76cb4
-    source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
+    original_source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ctpn/ctpn.pb
 model_optimizer_args:
   - --input_shape=[1,600,600,3]
   - --input=Placeholder

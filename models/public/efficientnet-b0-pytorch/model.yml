@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,11 +47,13 @@ files:
   - name: model/__init__.py
     size: 32
     checksum: 56056cd865f696313e48aa09cc4d6dd334dd5aa71ba9495bdc443ac209c42485d864c31c216ee3befd8dd03e723c2113
-    source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
+    original_source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/__init__.py
   - name: efficientnet-b0.pth
     size: 21376958
     checksum: f44c3ff7ceeeda4ccf95a6720483cf2bee89f2db59d47e8349d2a7d46024e006b76e92105b6723060b898505312e70ff
-    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/efficientnet_b0-d6904d92.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=efficientnet_b0
@@ -70,5 +72,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/efficientnet-b0.onnx
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE
