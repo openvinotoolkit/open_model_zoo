@@ -9,17 +9,17 @@
 | Metric            | Value                |
 |-------------------|----------------------|
 | Type              | Semantic segmentation|
-| GFlops            | TBD                  |
-| MParams           | TBD                  |
+| GFlops            | 324.66               |
+| MParams           | 70.47                |
 | Source framework  | Paddle\*             |
 
 ## Accuracy
 
 | Metric    | Value |
 | --------- | ----- |
-| mean_iou  | TBD   |
+| mean_iou  | 82.15%|
 
-Accuracy metrics were obtained with fixed input resolution 2048x1024.
+Accuracy metrics were obtained with fixed input resolution 2048x1024 on CityScapes dataset.
 
 ## Input
 
