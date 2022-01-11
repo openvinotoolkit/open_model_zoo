@@ -97,6 +97,21 @@ class MultiOutputRegression(Adapter):
         return result
 
 
+class OnlineMultiOutputRegression(MultiOutputRegression):
+    __provider__ = 'online_multi_output_regression'
+    prediction_types = (RegressionPrediction,)
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        result = []
+        for batch_id, identfier in enumerate(identifiers):
+            res_dict = {}
+            for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
+                res_dict.update({output_name_k: raw_outputs[output_name_v]})
+            result.append(RegressionPrediction(identfier, res_dict))
+        return result
+
+
 class KaldiFeatsRegression(Adapter):
     __provider__ = 'kaldi_feat_regression'
 
