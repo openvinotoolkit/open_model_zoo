@@ -24,7 +24,7 @@ evaluations:
       datasets:
         - name: DSI1867
           data_source: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3\high
-          batch: 10 # Default batch size is 1
+          batch: 1 # Default batch size is 1
 
           annotation_conversion:
             images_dir: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3

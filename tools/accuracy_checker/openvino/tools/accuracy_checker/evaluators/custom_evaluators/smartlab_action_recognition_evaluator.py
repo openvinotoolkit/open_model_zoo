@@ -94,8 +94,8 @@ class SmarlabActionRecognitionEvaluator(BaseCustomEvaluator):
 
             # 11Jan2022 dones't work accurayc metric for classfiiction.
 
-            # metrics_result = self._get_metrics_result(
-            #     batch_input_ids, batch_annotation, batch_prediction, calculate_metrics)
+            metrics_result = self._get_metrics_result(
+                batch_input_ids, batch_annotation, batch_prediction, calculate_metrics)
             metrics_result = {}
 
             if output_callback:
