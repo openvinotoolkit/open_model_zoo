@@ -91,13 +91,6 @@ class NumPyReader(BaseReader):
                     res = data[key[0]][recno - start, :]
                 return res
 
-        # if npz file contain multi array
-        if not self.record_mode:
-            npz_result = []
-            for key in data.keys():
-                npz_result.append(data[key])
-            return npz_result
-
         key = next(iter(data.keys()))
         data = data[key]
         if self.record_mode and self.id_sep in field_id:
