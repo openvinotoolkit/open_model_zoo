@@ -21,6 +21,7 @@ class Model:
         self.net = None
         self.exec_net = None
         self.ie = ie
+        self.device = None
         self._accuracy_config = None
         self._model_config = None
 
@@ -125,15 +126,20 @@ class Model:
 
         return model
 
-    def __call__(self, inputs, device='CPU'):
-        if self.ie is None:
-            raise TypeError('ie must be of IECore type.')
-
+    def _load(self, device):
         self.net = self.ie.read_network(self.model_path)
         self.exec_net = self.ie.load_network(self.net, device)
+        self.device = device
+
+    def __call__(self, inputs, device='CPU'):
+        if self.ie is None:
+            raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
+
+        if self.exec_net is None or device != self.device:
+            self._load(device)
 
         input_names = self.net.input_info.keys()
-        for input_name in inputs.keys():
+        for input_name in inputs:
             if input_name not in input_names:
                 raise ValueError('Unknown input name {}'.format(input_name))
 
@@ -167,7 +173,7 @@ class Model:
             try:
                 self.net = self.ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie must be of IECore type.')
+                raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
 
         input_blobs = self.net.input_info
 
@@ -178,7 +184,7 @@ class Model:
             try:
                 self.net = self.ie.read_network(self.model_path)
             except AttributeError:
-                raise TypeError('ie must be of IECore type.')
+                raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
 
         output_blob = self.net.outputs
 
