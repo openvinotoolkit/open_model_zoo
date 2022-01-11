@@ -55,15 +55,16 @@ docker run -d --rm -v <models_repository>:/models -p 9000:9000 openvino/model_se
 
 To run the demo with model served in OpenVINO Model Server, you would have to provide `--adapter ovms` option and modify `-m` parameter to indicate model inference service instead of the model files. Model parameter for `OVMSAdapter` follows this schema:
 
-```<service_address>/models/<model_name>[:<model_option>]```
+```<service_address>/models/<model_name>[:<model_version>]```
 
 - `<service_address>` - OVMS gRPC service address in form `<address>:<port>`
 - `<model_name>` - name of the target model (the one specified by `model_name` parameter in the model server startup command)
 - `<model_version>` *(optional)* - version of the target model (default: latest)
 
- Assuming that model server is running on the same machine as the demo, expose gRPC service on port 9000 and serves model called `my_model`, the value of `-m` parameter would be:
+ Assuming that model server runs on the same machine as the demo, exposes gRPC service on port 9000 and serves model called `my_model`, the value of `-m` parameter would be:
 
-`localhost:9000/models/my_model`
+- `localhost:9000/models/my_model` - requesting latest model version
+- `localhost:9000/models/my_model:2` - requesting model version number 2
 
 ## See Also
 
