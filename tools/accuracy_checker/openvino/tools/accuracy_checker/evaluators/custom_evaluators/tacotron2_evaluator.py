@@ -481,7 +481,7 @@ class DecodeOpenVINOModel(DecoderModel, TTSOVModel):
         if len(feed_dict) != len(self.inputs):
             extra_inputs = set(self.inputs).difference(set(feed_dict))
             for input_layer in extra_inputs:
-                shape = self.inputs[input_layer].input_data.shape
+                shape = parse_partial_shape(self.inputs[input_layer].get_partial_shape())
                 if self.additional_inputs_filling == 'zeros':
                     feed_dict[input_layer] = np.zeros(shape, dtype=np.float32)
                 else:

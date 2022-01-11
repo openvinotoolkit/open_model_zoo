@@ -64,25 +64,6 @@ Each input description should has following info:
     Optionally you can determine `shape` of input (by default OpenVINO™ launcher uses info given from network, this option allows override default. It required for running ONNX\* models with dynamic input shape on devices, where dynamic shape is not supported), `layout` in case when your model was trained with non-standard data layout (For OpenVINO™ launcher default layout is `NCHW`)
     and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
-## Launcher configuration in case of conversion from source framework
-
-Launcher may optionally accept model parameters in source framework format which will be converted to Inference Engine IR using Model Optimizer.
-If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
-You can provide:
-
-* `caffe_model` and `caffe_weights` for Caffe model and weights (*.prototxt and *.caffemodel).
-* `tf_model` for TensorFlow model (*.pb, *.pb.frozen, *.pbtxt).
-* `tf_meta` for TensorFlow MetaGraph (*.meta).
-* `mxnet_weights` for MXNet params (*.params).
-* `onnx_model` for ONNX model (*.onnx). You also able to pass your ONNX model directly using `model` option if you do not need Model Optimizer conversion step.
-* `kaldi_model` for Kaldi model (*.nnet).
-
-In case when you want to determine additional parameters for model conversion (data_type, input_shape and so on), you can use `mo_params` for arguments with values and `mo_flags` for positional arguments like `legacy_mxnet_model` .
-Full list of supported parameters you can find in [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
-
-Model will be converted before every evaluation.
-You can provide `converted_model_dir` for saving converted model in specific folder, otherwise, converted models will be saved in path provided via `-C` command line argument or source model directory.
-
 ## Configuration example
 
 OpenVINO™ launcher config example:
@@ -91,12 +72,8 @@ OpenVINO™ launcher config example:
 launchers:
   - framework: dlsdk
     device: HETERO:GPU,CPU
-    caffe_model: path_to_model/alexnet.prototxt
-    caffe_weights: path_to_weights/alexnet.caffemodel
+    model: path_to_model/alexnet.xml
+    weights: path_to_weights/alexnet.bin
     adapter: classification
-    mo_params:
-      batch: 4
-    mo_flags:
-      - reverse_input_channels
     cpu_extensions: custom_cpu_extensions.so
 ```

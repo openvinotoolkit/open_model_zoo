@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,15 +33,18 @@ files:
   - name: wav2vec2-base-960h/pytorch_model.bin
     size: 377667514
     checksum: 647658a0fc4376ddccb8430207fd50f22a59f607f821ddb6e7dfec7bf2f41d3bbe4d6e62c2779530f1a2e20ec75acf9b
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/pytorch_model.bin
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/pytorch_model.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/pytorch_model.bin
   - name: wav2vec2-base-960h/config.json
     size: 1596
     checksum: 1c28d7ba60f46b0212c73afde1ff9a77a0bc2801c3dc6bcac77835ed147e0df49a28bc627c0a76b1f6b8959170e7627b
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/config.json
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/config.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/config.json
   - name: wav2vec2-base-960h/vocab.json
     size: 291
     checksum: 87dc62dd416ca1d37674e5169d701d443b0644f23c0584d52b5813d025ebb5cecf9ea64850c4c09fe10766e7b2e8435c
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/vocab.json
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/vocab.json
   - name: packaging-20.9-py2.py3-none-any.whl
     size: 40870
     checksum: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
@@ -109,5 +112,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/wav2vec2-base.onnx
   - --output=logits
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,15 +36,18 @@ files:
   - name: bert-base-ner/pytorch_model.bin
     size: 433316646
     checksum: 59e6fefd0f29534cab9681891a15e9762b1d2dd8d047f55a792b39243631a008ac91a0e354f2ca2aa942be443540a8cb
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/pytorch_model.bin
   - name: bert-base-ner/config.json
     size: 829
     checksum: 66d217d33ba89085a56afc3b485b4e997d278d5253519e6a536c234fce3e065fb80ef39d27894df176148cb457c1cfcb
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/config.json
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/config.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/config.json
   - name: bert-base-ner/vocab.txt
     size: 213450
     checksum: b13bb7bd69958cf6d486a291894d90a8693adcea0cb177d1fbe652000def2b169dc82b292ef51736d1f6f15fee1ab486
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/vocab.txt
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/vocab.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/vocab.txt
   - name: packaging-20.9-py2.py3-none-any.whl
     size: 40870
     checksum: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
@@ -89,5 +92,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/bert-base-ner.onnx
   - --output=output
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE

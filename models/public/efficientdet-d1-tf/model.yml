@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ files:
     size: 48828228
     checksum: 0178799e293b54bb7a478b1671accfe5fb14d947cc196434db829dae216f55fff5de972a0291a71b7d3b3186aed8dfe9
     source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d1.tar.gz
+    original_source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientdet-d1-tf/efficientdet-d1.tar.gz
   - name: model/model_inspect.py
     size: 20388
     checksum: d67e6eb34695a2ed0ab0c7444ecc763ff111834b4e7bb7183ec5bd66bc8b95443c5538b7322da2ffe589db8c4d4091f3
@@ -110,7 +111,6 @@ postprocessing:
     file: model/keras/anchors.py
     pattern: 'from object_detection'
     replacement: '# \g<0>'
-
   - $type: unpack_archive
     format: gztar
     file: efficientdet-d1.tar.gz

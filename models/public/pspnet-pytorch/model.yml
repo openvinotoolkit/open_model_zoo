@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ files:
   - name: pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
     size: 196212259
     checksum: be24b179a6b45e794a03dc153dcfa854cc9f3ee5beefad70072b47902d720d9d1d0ed6dfefb1a43412ed356e2f44fa98
-    source: https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x512_20k_voc12aug/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+    original_source: https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x512_20k_voc12aug/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/pspnet-pytorch/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
   - name: models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
     size: 263
     checksum: 08bf47369c9070d3f8685a587801335ee894a73de38e4c71f913813ad0d4b7584528d0640e06efcf904f1b3f2cd7d223
@@ -67,7 +68,6 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: models/mmsegmentation-0.11.0-py3-none-any.whl
-
   - $type: regex_replace
     pattern: '''../_base_/schedules/schedule_20k.py'''
     replacement: '# \g<0>'
@@ -108,7 +108,6 @@ postprocessing:
     pattern: 'import regex as re'
     replacement: 'import re'
     file: models/mmcv-1.2.0/mmcv/utils/config.py
-
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models
