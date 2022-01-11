@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019-2020 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -15,32 +15,36 @@ import numpy as np
 
 
 class ImageInpainting:
-    def __init__(self, ie, model_path, device='CPU'):
-        model = ie.read_network(model_path, model_path.with_suffix('.bin'))
+    def __init__(self, core, model_path, device='CPU'):
+        model = core.read_model(model_path, model_path.with_suffix('.bin'))
 
-        assert len(model.input_info) == 2, "Expected 2 input blob"
-        assert len(model.outputs) == 1, "Expected 1 output blobs"
+        if len(model.inputs) != 2:
+            raise RuntimeError("The model expects 2 input layers")
+        if len(model.outputs) != 1:
+            raise RuntimeError("The model expects 1 output layer")
 
-        self._input_layer_names = sorted(model.input_info)
-        self._output_layer_name = next(iter(model.outputs))
+        self.image_input_layer, self.mask_input_layer = sorted([node.get_any_name() for node in model.inputs])
 
-        self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
 
-        _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape
-        assert channels == 3, "Expected 3-channel input"
+        _, channels, input_height, input_width = model.input(self.image_input_layer).shape
+        if channels != 3:
+            raise RuntimeError("The model expects 3 channels for {} input layer".format(self.image_input_layer))
 
-        _, channels, mask_height, mask_width = model.input_info[self._input_layer_names[1]].input_data.shape
-        assert channels == 1, "Expected 1-channel input"
+        _, channels, mask_height, mask_width = model.input(self.mask_input_layer).shape
+        if channels != 1:
+            raise RuntimeError("The model expects 3 channels for {} input layer".format(self.mask_input_layer))
 
-        assert mask_height == input_height and mask_width == input_width, "Mask size expected to be equal to image size"
+        if mask_height != input_height or mask_width != input_width:
+            raise RuntimeError("Mask size is expected to be equal to image size")
         self.input_height = input_height
         self.input_width = input_width
 
 
     def infer(self, image, mask):
-        output = self._exec_model.infer(inputs={self._input_layer_names[0]: image, self._input_layer_names[1]: mask})
-        return output[self._output_layer_name]
+        output = self.infer_request.infer(inputs={self.image_input_layer: image, self.mask_input_layer: mask})
+        return next(iter(output.values()))
 
 
     def process(self, src_image, mask):
