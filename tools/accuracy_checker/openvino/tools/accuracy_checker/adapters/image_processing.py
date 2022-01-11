@@ -72,7 +72,7 @@ class ImageProcessingAdapter(Adapter):
         self.output_verified = False
 
     def select_output_blob(self, outputs):
-        self.outputs_checked = True
+        self.outputs_verified = True
         if not self.target_out:
             super().select_output_blob(outputs)
             self.target_out = self.output_blob
@@ -114,7 +114,7 @@ class SuperResolutionAdapter(ImageProcessingAdapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.target_out:
+        if not self.outputs_verified:
             self.select_output_blob(raw_outputs)
             self.target_out = self.output_blob
 
