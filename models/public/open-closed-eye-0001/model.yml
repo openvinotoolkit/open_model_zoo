@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ files:
   - name: open-closed-eye.onnx
     size: 46164
     checksum: 2615bce53b55620c629db21b043057600ccc53466f053c0a8277c43577c2db21e48f330cf9b15213016d17cddb8cba27
-    source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
+    original_source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/open-closed-eye-0001/open_closed_eye.onnx
 framework: onnx
 model_optimizer_args:
   - --mean_values=[127.0, 127.0, 127.0]
   - --scale_values=[255, 255, 255]
   - --output=19
   - --input_model=$dl_dir/open-closed-eye.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

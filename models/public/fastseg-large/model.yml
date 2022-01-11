@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ files:
   - name: mobilev3large-lraspp-f128-9cbabfde.pt
     size: 26476800
     checksum: f30098181481da6b3c4b2bc59896986e905e75768f5f454515dfd2a36433f11d292e503b1c9d0a7b05a8cfdcc2d58a3f
-    source: https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f128-9cbabfde.pt
+    original_source: https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3large-lraspp-f128-9cbabfde.pt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fastseg-large/mobilev3large-lraspp-f128-9cbabfde.pt
   - name: model/geffnet-1.0.0-py3-none-any.whl
     size: 39902
     checksum: 5f52af3fe57f79f9b24198fea8a8beddd1f53f6333feb2beeb8616abdad2b753dd26c8b1af97be5eee04970ded28e299
@@ -55,7 +56,6 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: model/geffnet-1.0.0-py3-none-any.whl
-
   - $type: regex_replace
     pattern: 'from .efficientnet'
     replacement: '# \g<0>'

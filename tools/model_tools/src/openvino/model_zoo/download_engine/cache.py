@@ -106,7 +106,7 @@ class ChecksumSHA384(Checksum):
     RE_SHA384SUM = re.compile(r'[0-9a-fA-F]{96}')
 
     def __init__(self, value):
-        self.type = hashlib.sha384()
+        self.type = hashlib.sha384
         self.value = value
 
     @classmethod

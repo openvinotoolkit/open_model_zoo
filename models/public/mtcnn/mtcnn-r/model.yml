@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
 # limitations under the License.
 
 description: >-
-  The "mtcnn-r" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
-  group of models designed to perform face detection. Short for "Multi-task Cascaded
-  Convolutional Neural Network", it is implemented using the Caffe* framework. The
-  "r" designation indicates that this model is the "refine" network intended to refine
-  the data returned as output from the "proposal" "mtcnn-p" network. For details about
-  this family of models, check out the repository <https://github.com/DuinoDu/mtcnn>.
+  The "mtcnn-r" model is one of the mtcnn <https://arxiv.org/abs/1604.02878> group
+  of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional
+  Neural Network", it is implemented using the Caffe* framework. The "r" designation
+  indicates that this model is the "refine" network intended to refine the data returned
+  as output from the "proposal" "mtcnn-p" network. For details about this family of
+  models, check out the repository <https://github.com/DuinoDu/mtcnn>.
 
   The model input is a blob with a vector containing the first pass of face data,
   as returned by the "mtcnn-p" model. The mean values need to be subtracted as follows:
@@ -37,7 +37,8 @@ files:
   - name: mtcnn-r.caffemodel
     size: 407910
     checksum: 87b9a7262724688cb5825e2584b623110b1df2e44308abe5be1800cbcd7a37940e44547466cd016ce9141733b62fbd8f
-    source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
+    original_source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mtcnn/mtcnn-r/det2.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,24,24]
   - --input=data
