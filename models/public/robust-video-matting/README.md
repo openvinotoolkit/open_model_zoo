@@ -30,11 +30,11 @@ Accuracy measured on the test subset of `VideoMatte240K` dataset with input reso
 | Alpha dtSSD    | 1.86           | 1.86            |
 | Foreground MSE | 93.66          | 93.66           |
 
-Alpha MAD - mean of absolute difference for alpha.
-Alpha MSE - mean squared error for alpha.
-Alpha GRAD - spatial-gradient metric for alpha.
-Alpha dtSSD - time-differentiated sum of squared differences for alpha (shows temporal coherence).
-Foreground MSE - mean squared error for foreground.
+* Alpha MAD - mean of absolute difference for alpha.
+* Alpha MSE - mean squared error for alpha.
+* Alpha GRAD - spatial-gradient metric for alpha.
+* Alpha dtSSD - time-differentiated sum of squared differences for alpha (shows temporal coherence).
+* Foreground MSE - mean squared error for foreground.
 
 ## Input
 

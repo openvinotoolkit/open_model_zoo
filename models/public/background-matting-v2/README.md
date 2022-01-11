@@ -29,10 +29,10 @@ Accuracy measured on the `PhotoMatte85` dataset with input resolution 1280x720.
 | Alpha GRAD     | 3.35           | 3.35            |
 | Foreground MSE | 1.62           | 1.62            |
 
-Alpha MAD - mean of absolute difference for alpha.
-Alpha MSE - mean squared error for alpha.
-Alpha GRAD - spatial-gradient metric for alpha.
-Foreground MSE - mean squared error for foreground.
+* Alpha MAD - mean of absolute difference for alpha.
+* Alpha MSE - mean squared error for alpha.
+* Alpha GRAD - spatial-gradient metric for alpha.
+* Foreground MSE - mean squared error for foreground.
 
 > **Note**: metrics were measured using the [script](https://github.com/DmitriySidnev/RobustVideoMatting/blob/master/evaluation/evaluate_hr.py).
 > Following the original paper the test dataset obtained from the original one by compositing
