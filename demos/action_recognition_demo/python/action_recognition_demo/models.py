@@ -97,16 +97,9 @@ class IEModel:
         self.input_name = self.model.inputs[0].get_any_name()
         self.input_shape = self.model.inputs[0].shape
 
-        self.output_name = self.model.outputs[0].get_any_name()
-
         self.num_requests = num_requests
         self.infer_requests = [self.compiled_model.create_infer_request() for _ in range(self.num_requests)]
         log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
-
-    def infer(self, frame):
-        input_data = {self.input_name: frame}
-        infer_result = self.compiled_model.infer(input_data)
-        return infer_result[self.output_name]
 
     def async_infer(self, frame, req_id):
         input_data = {self.input_name: frame}
@@ -129,21 +122,6 @@ class DummyDecoder:
     def async_infer(self, model_input, req_id):
         self.requests[req_id] = self._average(model_input)
 
-    def infer(self, model_input):
-        return self._average(model_input)
-
     def wait_request(self, req_id):
         assert req_id in self.requests
         return self.requests.pop(req_id)
-
-
-class ActionRecognitionSequential:
-    def __init__(self, encoder, decoder=None):
-        self.encoder = encoder
-        self.decoder = decoder
-
-    def infer(self, input):
-        if self.decoder is not None:
-            embeddigns = self.encoder.infer(input[0])
-            decoder_input = embeddigns.reshape(1, 16, 512)
-            return self.decoder.infer(decoder_input)

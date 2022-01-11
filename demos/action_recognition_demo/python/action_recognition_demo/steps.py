@@ -43,8 +43,13 @@ def run_pipeline(capture, model_type, model, render_fn, raw_output, seq_size=16,
     pipeline.print_statistics()
 
 
-class I3DRGBModelStep(PipelineStep):
+def softmax(x, axis=None):
+    """Normalizes logits to get confidence values along specified axis"""
+    exp = np.exp(x)
+    return exp / np.sum(exp, axis=axis)
 
+
+class I3DRGBModelStep(PipelineStep):
     def __init__(self, model, sequence_size, frame_size, crop_size):
         super().__init__()
         self.model = model
@@ -73,7 +78,6 @@ class I3DRGBModelStep(PipelineStep):
 
 
 class DataStep(PipelineStep):
-
     def __init__(self, capture):
         super().__init__()
         self.cap = capture
@@ -92,7 +96,6 @@ class DataStep(PipelineStep):
 
 
 class EncoderStep(PipelineStep):
-
     def __init__(self, encoder):
         super().__init__()
         self.encoder = encoder
@@ -110,7 +113,6 @@ class EncoderStep(PipelineStep):
 
 
 class DecoderStep(PipelineStep):
-
     def __init__(self, decoder, sequence_size=16):
         super().__init__()
         assert sequence_size > 0
@@ -142,10 +144,6 @@ class DecoderStep(PipelineStep):
         return frame, None, timers
 
 
-def softmax(x, axis=None):
-    """Normalizes logits to get confidence values along specified axis"""
-    exp = np.exp(x)
-    return exp / np.sum(exp, axis=axis)
 
 
 class RenderStep(PipelineStep):
