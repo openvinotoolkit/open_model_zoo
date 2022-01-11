@@ -62,7 +62,7 @@ class OVMSAdapter(ModelAdapter):
         # Expecting format: <address>:<port>/models/<model_name>[:<model_version>]
         pattern = re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/\w+(\:\d+)*")
         if not pattern.fullmatch(target_model):
-            raise TypeError("invalid --model option format")
+            raise ValueError("invalid --model option format")
         [service_url, _, model] = target_model.split("/")
         model_spec = model.split(":")
         if len(model_spec) == 1:
@@ -71,7 +71,7 @@ class OVMSAdapter(ModelAdapter):
         elif len(model_spec) == 2:
             return service_url, model_spec[0], int(model_spec[1])
         else:
-            raise TypeError("invalid --model option format")
+            raise ValueError("invalid --model option format")
 
 
     def _is_model_available(self):
