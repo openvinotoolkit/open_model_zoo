@@ -709,7 +709,7 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
-            '--delay': '1'}),
+        }),
         single_option_cases('-m',
     #       ModelArg('instance-segmentation-person-0007'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
