@@ -105,7 +105,7 @@ def print_raw_results(outputs, frame_id):
     scores, classes, boxes, masks = outputs
     log.debug('  -------------------------- Frame # {} --------------------------  '.format(frame_id))
     log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
-    for box, cls, score, mask in zip(boxes, classes, scores, masks):
+    for box, cls, score in zip(boxes, classes, scores):
         log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
 
