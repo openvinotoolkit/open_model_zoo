@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,24 +13,24 @@
 # limitations under the License.
 
 description: >-
-  The "background-matting-v2" model is a high-resolution background replacement technique based on
-  background matting (with MobileNetV2 backbone), where an additional frame of the background is
-  captured and used in recovering the alpha matte and the foreground layer. This model is
-  pre-trained in PyTorch* framework and converted to ONNX* format. More details provided in
-  the paper <https://arxiv.org/abs/2012.07810>.
-  For details see the repository <https://github.com/DmitriySidnev/BackgroundMattingV2>.
+  The "robust-video-matting" model is a robust high-resolution human video matting method
+  that achieves new state-of-the-art performance that uses a recurrent architecture to exploit
+  temporal information in videos and achieves significant improvements in temporal coherence
+  and matting quality This model is pre-trained in PyTorch* framework and converted to ONNX* format.
+  More details provided in the paper <https://arxiv.org/abs/2108.11515>.
+  For details see the repository <https://github.com/DmitriySidnev/RobustVideoMatting>.
 task_type: background_matting
 files:
-  - name: bgm_mobilenetv2.onnx
-    size: 19540
-    checksum: 6641f8d0ba012ed0da0e93af4bcf4a4782a361da4c33c193c69cd0ba29ab4ef5
-    source: https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/onnx/bgm_mobilenetv2.onnx
+  - name: robust_video_matting_mobilenetv3.onnx
+    size: 14981904
+    checksum: d6eeb320496d9a7de7d740806f1edf4c7144d97bffec0f279abd2eb3c6c8f3dd9b311eb48f8e70478a1d4e8c172ea720
+    source: https://github.com/DmitriySidnev/RobustVideoMatting/raw/master/onnx/robust_video_matting_mobilenetv3.onnx
 model_optimizer_args:
-  - --input_shape=src[1,3,720,1280],bgr[1,3,720,1280]
-  - --input=src,bgr
-  - --input=pha,fgr
+  - --input_shape=src[1,3,720,1280],bgr[1,3,720,1280],r1[1,16,144,256],r2[1,20,72,128],r3[1,40,36,64],[1,64,18,32]
+  - --input=src,bgr,r1,r2,r3,r4
+  - --output=pha,fgr,rr1,rr2,rr3,rr4
   - --scale=255
   - --reverse_input_channels
-  - --input_model=$dl_dir/bgm_mobilenetv2.onnx
+  - --input_model=$dl_dir/robust_video_matting_mobilenetv3.onnx
 framework: onnx
-license: https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/LICENSE
+license: https://github.com/DmitriySidnev/RobustVideoMatting/blob/master/LICENSE
