@@ -18,26 +18,42 @@ import cv2
 import numpy as np
 
 from .image_model import ImageModel
-from .utils import RESIZE_TYPES, load_labels, nms, pad_image
+from .model import WrapperError
+from .types import ListValue, NumericalValue
+from .utils import load_labels, nms
 
 
 class MaskRCNNModel(ImageModel):
-    def __init__(self, model_adapter, prob_threshold=0.5, labels=None, keep_aspect_ratio=False):
-        super().__init__(model_adapter)
-        self.resize_type = 'fit_to_window' if keep_aspect_ratio else 'standard'
-        self.resize = RESIZE_TYPES[self.resize_type]
-        self.prob_threshold = prob_threshold
+    __model__ = 'MaskRCNN'
+
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number((1, 2), (3, 4, 5, 8))
-        self.type = 'segmentoly' if len(self.inputs) == 2 else 'mask_rcnn'
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
+        self.is_segmentoly = len(self.inputs) == 2
+        if isinstance(self.labels, (list, tuple)):
+            self.labels = self.labels
         else:
-            self.labels = load_labels(labels) if labels else None
+            self.labels = load_labels(self.labels) if self.labels else None
 
         self.output_blob_name = self._get_outputs()
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'prob_threshold': NumericalValue(
+                default_value=None,
+                description='Probability threshold for detections filtering'
+            ),
+            'labels': ListValue(
+                default_value=None,
+                description='List of labels'
+            ),
+        })
+        return parameters
+
     def _get_outputs(self):
-        if self.type == 'segmentoly':
+        if self.is_segmentoly:
             return self._get_segmentoly_outputs()
         outputs = {}
         for layer_name in self.outputs:
@@ -52,7 +68,7 @@ class MaskRCNNModel(ImageModel):
             elif len(layer_shape) == 3:
                 outputs['masks'] = layer_name
             else:
-                raise Exception("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
 
         return outputs
 
@@ -69,34 +85,34 @@ class MaskRCNNModel(ImageModel):
             elif layer_name == 'raw_masks' and len(layer_shape) == 4:
                 outputs['masks'] = layer_name
             else:
-                raise Exception("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
         return outputs
 
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)
-        input_image_size = meta['resized_shape'].shape[:2]
-        if self.type == 'segmentoly':
+        input_image_size = meta['resized_shape'][:2]
+        if self.is_segmentoly:
             assert len(self.image_info_blob_names) == 1
             input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
             dict_inputs[self.image_info_blob_names[0]] = input_image_info
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
-        boxes = outputs[self.output_blob_name['boxes']] if self.type == 'segmentoly' else \
+        boxes = outputs[self.output_blob_name['boxes']] if self.is_segmentoly else \
             outputs[self.output_blob_name['boxes']][:, :4]
-        scores = outputs[self.output_blob_name['scores']] if self.type == 'segmentoly' else \
+        scores = outputs[self.output_blob_name['scores']] if self.is_segmentoly else \
             outputs[self.output_blob_name['boxes']][:, 4]
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
         boxes[:, 0::2] /= scale_x
         boxes[:, 1::2] /= scale_y
-        if self.type == 'segmentoly':
+        if self.is_segmentoly:
             classes = outputs[self.output_blob_name['labels']].astype(np.uint32)
         else:
             classes = outputs[self.output_blob_name['labels']].astype(np.uint32) + 1
         masks = []
         for box, cls, raw_mask in zip(boxes, classes, outputs[self.output_blob_name['masks']]):
-            raw_cls_mask = raw_mask[cls, ...] if self.type == 'segmentoly' else raw_mask
+            raw_cls_mask = raw_mask[cls, ...] if self.is_segmentoly else raw_mask
             masks.append(self._segm_postprocess(box, raw_cls_mask, *meta['original_shape'][:-1]))
         # Filter out detections with low confidence.
         detections_filter = scores > self.prob_threshold
@@ -139,18 +155,32 @@ class MaskRCNNModel(ImageModel):
 
 
 class YolactModel(ImageModel):
-    def __init__(self, model_adapter, prob_threshold=0.5, labels=None, keep_aspect_ratio=False):
-        super().__init__(model_adapter)
-        self.resize_type = 'fit_to_window' if keep_aspect_ratio else 'standard'
-        self.resize = RESIZE_TYPES[self.resize_type]
-        self.prob_threshold = prob_threshold
+    __model__ = 'Yolact'
+
+    def __init__(self, model_adapter, configuration):
+        super().__init__(model_adapter, configuration)
         self._check_io_number(1, 4)
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
+        if isinstance(self.labels, (list, tuple)):
+            self.labels = self.labels
         else:
-            self.labels = load_labels(labels) if labels else None
+            self.labels = load_labels(self.labels) if self.labels else None
 
         self.output_blob_name = self._get_outputs()
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'prob_threshold': NumericalValue(
+                default_value=None,
+                description='Probability threshold for detections filtering'
+            ),
+            'labels': ListValue(
+                default_value=None,
+                description='List of labels'
+            ),
+        })
+        return parameters
 
     def _get_outputs(self):
         outputs = {}
@@ -165,7 +195,7 @@ class YolactModel(ImageModel):
             elif layer_name == 'mask' and len(layer_shape) == 3:
                 outputs['masks'] = layer_name
             else:
-                raise Exception("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
         return outputs
 
     def postprocess(self, outputs, meta):
@@ -276,10 +306,10 @@ class YolactModel(ImageModel):
         return x1, x2
 
 
-def get_instance_segmentation_model(model_adapter, prob_threshold=0.5, labels=None, keep_aspect_ratio=False):
+def get_instance_segmentation_model(model_adapter, configuration):
     inputs = model_adapter.get_input_layers()
     outputs = model_adapter.get_output_layers()
     if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
-        return YolactModel(model_adapter, prob_threshold, labels, keep_aspect_ratio)
+        return YolactModel(model_adapter, configuration)
     else:
-        return MaskRCNNModel(model_adapter, prob_threshold, labels, keep_aspect_ratio)
+        return MaskRCNNModel(model_adapter, configuration)

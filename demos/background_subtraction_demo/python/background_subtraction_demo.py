@@ -126,10 +126,13 @@ def fit_to_window(input_img, output_resolution):
 
 
 def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_bgr=False, show_with_original_frame=False):
+    blur_kernel = (11, 11)
     if target_bgr is None:
-        target_bgr = np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
+        target_bgr = cv2.blur(frame, blur_kernel) if blur_bgr else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
     else:
         target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
+        if blur_bgr:
+            target_bgr = cv2.blur(target_bgr, blur_kernel)
     classes, masks = objects[1], objects[3]
     # Choose masks only for person class
     valid_inds = classes == person_id
@@ -143,8 +146,6 @@ def render_results(frame, objects, output_resolution, target_bgr, person_id, blu
         # Smooth contours of the predicted mask
         composed_mask = cv2.medianBlur(composed_mask.astype(np.uint8), 11)
         composed_mask = np.repeat(np.expand_dims(composed_mask, axis=-1), 3, axis=2)
-        if target_bgr is not None and blur_bgr:
-            target_bgr = cv2.blur(cv2.resize(target_bgr, (target_bgr.shape[1], target_bgr.shape[0])), (7, 7))
         output = np.where(composed_mask == 1, frame, target_bgr)
     if show_with_original_frame:
         output = cv2.hconcat([frame, output])
@@ -172,8 +173,14 @@ def main():
 
     labels = ['__background__', 'person'] if args.labels is None else args.labels
 
-    model = get_instance_segmentation_model(model_adapter, prob_threshold=args.prob_threshold,
-                                            labels=labels, keep_aspect_ratio=args.keep_aspect_ratio)
+    configuration = dict(
+        prob_threshold=args.prob_threshold,
+        labels=labels,
+        resize_type='fit_to_window' if args.keep_aspect_ratio else 'standard'
+    )
+
+    model = get_instance_segmentation_model(model_adapter, configuration)
+
     person_id = -1
     for i, label in enumerate(labels):
         if label == 'person':
