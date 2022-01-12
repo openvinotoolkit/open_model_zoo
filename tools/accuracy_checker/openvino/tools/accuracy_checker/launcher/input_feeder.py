@@ -545,5 +545,17 @@ class InputFeeder:
                 inputs_entry.append(input_config)
         return inputs_entry
 
+    def update_layout_configuration(self, layout_mapping, override=False):
+        for layer_name, layout in layout_mapping.items():
+            if layer_name in self.layouts_mapping:
+                if not override:
+                    continue
+                if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                    self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                else:
+                    del self.layouts_mapping[layer_name]
+            elif layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+
     def release(self):
         del self.network_inputs
