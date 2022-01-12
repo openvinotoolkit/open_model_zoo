@@ -322,6 +322,14 @@ Deep Learning models for time series forecasting.
 |------------|---------------------|-----------|
 | [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
 
+## Action Sequence Modeling
+
+Deep Learning models for sequence modeling.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | TODO | TODO |
+
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
