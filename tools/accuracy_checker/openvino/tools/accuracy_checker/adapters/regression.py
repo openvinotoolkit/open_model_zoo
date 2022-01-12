@@ -104,11 +104,11 @@ class OnlineMultiOutputRegression(MultiOutputRegression):
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
-        for batch_id, identfier in enumerate(identifiers):
+        for identifier in identifiers:
             res_dict = {}
             for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
                 res_dict.update({output_name_k: raw_outputs[output_name_v]})
-            result.append(RegressionPrediction(identfier, res_dict))
+            result.append(RegressionPrediction(identifier, res_dict))
         return result
 
 
