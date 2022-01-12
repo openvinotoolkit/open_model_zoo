@@ -73,16 +73,8 @@ class MaskRCNNModel(ImageModel):
         return outputs
 
     def preprocess(self, inputs):
-        image = inputs
-        meta = {'original_shape': image.shape}
-        resized_image = self.resize(image, (self.w, self.h))
-        meta.update({'resized_shape': resized_image.shape})
-        input_image_size = resized_image.shape[:2]
-        if self.resize_type == 'fit_to_window':
-            resized_image = pad_image(resized_image, (self.w, self.h))
-        resized_image = self.input_transform(resized_image)
-        resized_image = self._change_layout(resized_image)
-        dict_inputs = {self.image_blob_name: resized_image}
+        dict_inputs, meta = super().preprocess(inputs)
+        input_image_size = meta['resized_shape'].shape[:2]
         if self.type == 'segmentoly':
             assert len(self.image_info_blob_names) == 1
             input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
