@@ -147,10 +147,9 @@ Running the application with an empty list of options yields the short version o
 To run the demo, please provide paths to the model in the IR format, and to an input video, image, or folder with images:
 
 ```bash
-python3 background_subtraction_demo/background_subtraction_demo.py \
+python3 background_subtraction_demo/python/background_subtraction_demo.py \
     -m <path_to_model>/instance-segmentation-person-0007.xml \
-    -i 0 \
-    --delay 1
+    -i 0
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
