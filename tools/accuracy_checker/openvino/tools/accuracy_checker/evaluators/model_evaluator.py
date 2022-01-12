@@ -100,6 +100,7 @@ class ModelEvaluator(BaseEvaluator):
         if not postpone_model_loading:
             if input_precision:
                 launcher.update_input_configuration(input_feeder.inputs_config)
+            input_feeder.update_layout_configuration(launcher.layout_mapping)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
         metric_dispatcher = None

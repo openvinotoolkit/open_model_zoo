@@ -151,12 +151,16 @@ class OpenVINOLauncher(Launcher):
             shape = parse_partial_shape(input_node.get_node().partial_shape)
             if len(shape) != 4:
                 continue
+            if input_node.get_node().layout.has_name('C'):
+                channel_dim = input_node.get_node().layout.get_index_by_name('C')
+                if channel_dim in [3, -1]:
+                    self.default_layout = 'NHWC'
+                    return
             if shape[-1] in [1, 3, 4]:
                 self.default_layout = 'NHWC'
                 return
         self.default_layout = 'NCHW'
         return
-
 
     @property
     def device(self):
@@ -500,16 +504,15 @@ class OpenVINOLauncher(Launcher):
         if compiled_model:
             self.network = None
             self.exec_network = self.ie_core.import_model(str(self._model), self._device)
-            self.original_outputs = list(self.exec_network.outputs.keys())
-            has_info = hasattr(self.exec_network, 'input_info')
-            if has_info:
-                ie_input_info = {name: data.input_data for name, data in self.exec_network.input_info.items()}
-            else:
-                ie_input_info = self.exec_network.inputs
-            first_input = next(iter(ie_input_info))
-            input_info = ie_input_info[first_input]
-            batch_pos = input_info.layout.find('N')
-            self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
+            self.original_outputs = self.exec_network.outputs
+            ie_input_info = self.exec_network.inputs
+            input_info = ie_input_info[0]
+            batch_pos = (
+                input_info.get_node().layout.get_index_by_name('N')
+                if input_info.get_node().layout.has_name('N') else -1
+            )
+
+            self._batch = parse_partial_shape(input_info.partial_shape)[batch_pos] if batch_pos != -1 else 1
             return
         if self._weights is None and self._model.suffix != '.onnx':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
@@ -611,9 +614,17 @@ class OpenVINOLauncher(Launcher):
             return True
         for input_name in self.dyn_input_layers:
             partial_shape = self._partial_shapes[input_name]
+            num_undef = 0
+            for i in partial_shape:
+                if i == -1:
+                    num_undef += 1
+                if num_undef > 1:
+                    return False
             layout = self.inputs[input_name].layout
-            if str(layout) == '[...]':
+            if '...' in str(layout):
                 layout = self.get_layout_from_config(input_name)
+            else:
+                layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
             if not layout:
                 return False
             for dim, layout_dim in zip(partial_shape, layout):
@@ -627,6 +638,17 @@ class OpenVINOLauncher(Launcher):
                 continue
             return input_config.get('layout', '')
         return ''
+
+    @property
+    def layout_mapping(self):
+        def prepare_layout_string(layout):
+            layout = str(layout)
+            return layout.replace('[', '').replace(']', '').replace(',', '')
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        layouts = {}
+        for input_node in inputs:
+            layouts[input_node.get_node().friendly_name] = prepare_layout_string(input_node.get_node().layout)
+        return layouts
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
