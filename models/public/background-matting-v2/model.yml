@@ -28,7 +28,7 @@ files:
 model_optimizer_args:
   - --input_shape=src[1,3,720,1280],bgr[1,3,720,1280]
   - --input=src,bgr
-  - --input=pha,fgr
+  - --output=pha,fgr
   - --scale=255
   - --reverse_input_channels
   - --input_model=$dl_dir/bgm_mobilenetv2.onnx
