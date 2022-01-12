@@ -180,7 +180,7 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
         auto pRawBox = reinterpret_cast<const Box*>(memPtr + i*sz[2]);
         auto& prior = priors[i];
         float cX = priors[i].cX + pRawBox->cX * variance[0] * prior.width;
-        float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.width;
+        float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
         float width = prior.width * exp(pRawBox->width * variance[1]);
         float height = prior.height * exp(pRawBox->height * variance[1]);
         rects.push_back(Rect{
