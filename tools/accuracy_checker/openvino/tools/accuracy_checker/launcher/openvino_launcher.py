@@ -905,7 +905,7 @@ class OpenVINOLauncher(Launcher):
     @staticmethod
     def get_result_from_request(request):
         return [{
-            out.get_node().friendly_name: tensor.data for out, tensor
+            out.get_node().friendly_name: data for out, data
             in request.results.items()}
         ]
 

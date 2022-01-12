@@ -79,6 +79,8 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
+openvino-telemetry==2022.1.0
+    # via -r tools/accuracy_checker/requirements-core.in
 packaging==21.0
     # via
     #   huggingface-hub
@@ -129,6 +131,7 @@ requests==2.26.0
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
     #   huggingface-hub
+    #   openvino-telemetry
     #   transformers
 sacremoses==0.0.45
     # via transformers

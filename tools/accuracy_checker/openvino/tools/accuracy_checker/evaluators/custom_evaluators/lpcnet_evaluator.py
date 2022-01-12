@@ -150,7 +150,7 @@ class EncoderOpenVINOModel(EncoderModel, TTSOVModel):
         if self.feature_input in self.dynamic_inputs or feature_layer_shape != input_data[self.feature_input].shape:
             input_shapes = {in_name: value.shape for in_name, value in input_data.items()}
             self._reshape_input(input_shapes)
-        return self.infer(input_data)
+        return super().infer(input_data)
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
