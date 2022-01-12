@@ -173,11 +173,11 @@ def main():
 
     labels = ['__background__', 'person'] if args.labels is None else args.labels
 
-    configuration = dict(
-        prob_threshold=args.prob_threshold,
-        labels=labels,
-        resize_type='fit_to_window' if args.keep_aspect_ratio else 'standard'
-    )
+    configuration = {
+        'prob_threshold': args.prob_threshold,
+        'labels': labels,
+        'resize_type': 'fit_to_window' if args.keep_aspect_ratio else 'standard'
+    }
 
     model = get_instance_segmentation_model(model_adapter, configuration)
 
