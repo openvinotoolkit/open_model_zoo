@@ -24,7 +24,7 @@ files:
   - name: bgm_mobilenetv2.onnx
     size: 20006715
     checksum: 3fc7bad659149e3e9e0feb4ef531c177ab158e5bbcfdabba9952c3832053f353d23560ff488aeae857245734ef639e6b
-    source: https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/onnx/bgm_mobilenetv2.onnx
+    source: https://github.com/DmitriySidnev/BackgroundMattingV2/raw/master/onnx/bgm_mobilenetv2.onnx
 model_optimizer_args:
   - --input_shape=src[1,3,720,1280],bgr[1,3,720,1280]
   - --input=src,bgr
