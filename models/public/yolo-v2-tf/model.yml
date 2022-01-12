@@ -22,8 +22,7 @@ files:
   - name: yolo-v2.pb
     size: 203970473
     checksum: d97d0e4736a210879c1e3db84e19a7b9cf8dd138350d66ef65715514a1ce361ec822133789020b6adca9bd25f0d73817
-    original_source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolo-v2-tf/yolo-v2.pb
+    source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
 model_optimizer_args:
   - --input_shape=[1,608,608,3]
   - --input=image_input
