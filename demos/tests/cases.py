@@ -266,9 +266,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
-            TestCase(options={'-at': 'jr',
-                '-m': ModelArg('fbcnn')}
-            )
+            #TestCase(options={'-at': 'jr',
+            #    '-m': ModelArg('fbcnn')}
+            #)
         ]
     )),
 
@@ -374,8 +374,8 @@ NATIVE_DEMOS = [
              '-i': DataPatternArg('object-detection-demo')}),
         single_option_cases('-m',
             ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-            ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf')),
+            # ModelArg('yolo-v3-tf'),
+            # ModelArg('yolo-v3-tiny-tf')),
     )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -782,13 +782,13 @@ PYTHON_DEMOS = [
         ]
     )),
 
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
+    #PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={
+    #        '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+    #        '-m': ModelArg('bert-base-ner'),
+    #        '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
+    #    }),
+    #)),
 
     PythonDemo(name='classification_demo',
             device_keys=['-d'],
@@ -867,13 +867,13 @@ PYTHON_DEMOS = [
                model_keys=['-m_encoder', '-m_decoder'], test_cases=combine_cases(
         TestCase(options={'--no_show': None}),
         [
-            TestCase(options={
-                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
-                                    'assets/formula-recognition-medium-scan-0001.png'),
-                '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
-                '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
-            }),
+            #TestCase(options={
+            #    '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
+            #                        'assets/formula-recognition-medium-scan-0001.png'),
+            #    '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
+            #    '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
+            #    '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
+            #}),
             TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
                                     'assets/formula-recognition-polynomials-handwritten-0001.png'),
@@ -952,13 +952,13 @@ PYTHON_DEMOS = [
                           '-ar': None})
     )),
 
-    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          **MONITORS,
-                          '-m': ModelArg('image-retrieval-0001')}),
-        single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-        single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    )),
+    #PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-m': ModelArg('image-retrieval-0001')}),
+    #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
+    #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
+    #)),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
