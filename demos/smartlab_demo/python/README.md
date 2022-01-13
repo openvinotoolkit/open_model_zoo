@@ -1,4 +1,4 @@
-# Smartlab online Python\* Demo
+# Smartlab Python\* Demo
 
 This is the demo application with smartlab action recognition and smartlab object detection algorithms.
 This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
@@ -13,14 +13,13 @@ The following pre-trained models are delived with the product:
 
 ## How It works
 
-The demo pipeline consists of several steps, namely 'Decode', 'Detector', 'Segmentor', 'Evaluator', 'Display'.
-Every step is implemeted in correcponding class.
+The demo pipeline consists of several steps:
 
-* `Decode` reads frames from the input videos.
+* `Decode` reads frames from the input videos
 * `Detector` detects smartlab objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)
-* `Segmentor` segments video frames based on action of the frame.
-* `Evaluator` calculates scores of the current state.
-* `Display` displays detected objects, regnized action, calculated scores on the current frame.
+* `Segmentor` segments video frames based on action of the frame
+* `Evaluator` calculates scores of the current state
+* `Display` displays detected objects, regnized action, calculated scores on the current frame
 
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
@@ -54,30 +53,7 @@ smartlab-object-detection-0004
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-usage: video_processor_serial.py [-h] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL -m_fm M_FRONTMOVE -m_en M_ENCODER -m_de M_DECODER
-
-Options:
-  -h, --help            Show this help message and exit.
-  -tv TOPVIEW, --topview TOPVIEW
-                        Required. Topview stream to be processed. The input must be a single image, a folder of images, video file or camera id.       
-  -fv FRONTVIEW, --frontview FRONTVIEW
-                        Required. FrontView to be processed. The input must be a single image, a folder of images, video file or camera id.
-  -m_ta M_TOPALL, --m_topall M_TOPALL
-                        Required. Path to topview all class model.
-  -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
-                        Required. Path to topview moving class model.
-  -m_fa M_FRONTALL, --m_frontall M_FRONTALL
-                        Required. Path to frontview all class model.
-  -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
-                        Required. Path to frontview moving class model.
-  -m_en M_ENCODER, --m_encoder M_ENCODER
-                        Required. Path to encoder model.
-  -m_de M_DECODER, --m_decoder M_DECODER
-                        Required. Path to decoder model.
-```
+Running the application with the `-h` option yields the help usage message.
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
@@ -105,7 +81,3 @@ The application uses OpenCV to display the real-time object detection, action re
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
-
-# Pipeline for Online Video Analysis
-
-The main file is `video_processor_serial.py`. In this ensemble version, given the pre-recorded videos, we aim to mimic the online process ( the results for frame k is calculated only by the historical frames)  .
