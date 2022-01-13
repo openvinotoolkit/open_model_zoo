@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018-2021 Intel Corporation
+ Copyright (c) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -40,19 +40,19 @@ class FaceIdentifier(Module):
             self.distance = distance
             self.descriptor = desc
 
-    def __init__(self, ie, model, match_threshold=0.5, match_algo='HUNGARIAN'):
-        super(FaceIdentifier, self).__init__(ie, model, 'Face Reidentification')
+    def __init__(self, core, model, match_threshold=0.5, match_algo='HUNGARIAN'):
+        super(FaceIdentifier, self).__init__(core, model, 'Face Reidentification')
 
-        assert len(self.model.input_info) == 1, 'Expected 1 input blob'
-        assert len(self.model.outputs) == 1, 'Expected 1 output blob'
+        if len(self.model.inputs) != 1:
+            raise RuntimeError("The model expects 1 input layer")
+        if len(self.model.outputs) != 1:
+            raise RuntimeError("The model expects 1 output layer")
 
-        self.input_blob = next(iter(self.model.input_info))
-        self.output_blob = next(iter(self.model.outputs))
-        self.input_shape = self.model.input_info[self.input_blob].input_data.shape
-        output_shape = self.model.outputs[self.output_blob].shape
-
-        assert len(output_shape) in (2, 4), \
-            'Expected model output shape [1, n, 1, 1] or [1, n], got {}'.format(output_shape)
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+        self.input_shape = self.model.inputs[0].shape
+        output_shape = self.model.outputs[0].shape
+        if len(output_shape) not in (2, 4):
+            raise RuntimeError("The model expects output shape [1, n, 1, 1] or [1, n], got {}".format(output_shape))
 
         self.faces_database = None
         self.match_threshold = match_threshold
@@ -74,7 +74,7 @@ class FaceIdentifier(Module):
         return inputs
 
     def enqueue(self, input):
-        return super(FaceIdentifier, self).enqueue({self.input_blob: input})
+        return super(FaceIdentifier, self).enqueue({self.input_tensor_name: input})
 
     def start_async(self, frame, rois, landmarks):
         inputs = self.preprocess(frame, rois, landmarks)
@@ -104,7 +104,7 @@ class FaceIdentifier(Module):
         return results, unknowns_list
 
     def get_descriptors(self):
-        return [out[self.output_blob].buffer.flatten() for out in self.get_outputs()]
+        return [out.flatten() for out in self.get_outputs()]
 
     @staticmethod
     def normalize(array, axis):
