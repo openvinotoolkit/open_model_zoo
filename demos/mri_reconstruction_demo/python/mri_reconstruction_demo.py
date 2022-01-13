@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
@@ -8,7 +8,7 @@ import sys
 
 import numpy as np
 import cv2 as cv
-from openvino.inference_engine import IECore
+from openvino.runtime import Core
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('mri_reconstruction_demo')
@@ -38,9 +38,10 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    ie = IECore()
-    net = ie.read_network(args.model)
-    exec_net = ie.load_network(net, args.device)
+    core = Core()
+    model = core.read_model(args.model)
+    compiled_model = core.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
 
     # Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
     stats = np.array([2.20295299e-01, 1.11048916e+03], dtype=np.float32)
@@ -64,7 +65,7 @@ def main():
 
         # Forward through network
         input = np.expand_dims(kspace.transpose(2, 0, 1), axis=0)
-        outputs = exec_net.infer(inputs={'input_1': input})
+        outputs = infer_request.infer(inputs={'input_1': input})
         output = next(iter(outputs.values()))
         output = output.reshape(height, width)
 
