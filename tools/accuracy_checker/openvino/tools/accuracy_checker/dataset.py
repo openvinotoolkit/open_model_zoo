@@ -17,7 +17,6 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
-from typing import Optional
 import warnings
 import pickle  # nosec - disable B403:import-pickle check
 import numpy as np
@@ -621,7 +620,6 @@ class DataProvider:
             data_reader_type = data_reader_config['type']
         else:
             raise ConfigError('reader should be dict or string')
-       
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = annotation_provider
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
@@ -629,7 +627,6 @@ class DataProvider:
             data_reader, annotation_provider, dataset_config=config
         )
 
-        
     def create_data_list(self, data_list=None):
         if data_list is not None:
             self._data_list = data_list
