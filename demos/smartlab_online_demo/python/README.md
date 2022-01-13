@@ -1,12 +1,15 @@
 # Smartlab online Python\* Demo
 
-This is the demo applicatio with smartlab action recognition and smartlab object detection algorithms.
+This is the demo application with smartlab action recognition and smartlab object detection algorithms.
+This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
+Action recognition architecure uses two encoders for front-view and top-view respectively, and a single decoder.
+Object detection uses two models for each view to detect large object and small objects, respectively.
 The following pre-trained models are delived with the product:
-`
 
-* `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions of smartlab (2 actions). They recognize actions like adjust rider, put_take.
 
-* `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecing smartlab objectsi (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
+* `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions of smartlab 2 actions of smartlab (adjust_rider, put_take).
+
+* `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
 For more information about the pre-trained models, refer to the [Intel](../../../models/intel/index.md) and [public](../../../models/public/index.md) models documentation
 
@@ -56,12 +59,7 @@ smartlab-object-detection-0004
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: video_processor_serial.py [-h] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL -m_fm M_FRONTMOVE {multiview,mstcn} ...
-
-positional arguments:
-  {multiview,mstcn}     sub-command help
-    multiview           multiview help
-    mstcn               mstcm help
+usage: video_processor_serial.py [-h] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL -m_fm M_FRONTMOVE -m_en M_ENCODER -m_de M_DECODER
 
 Options:
   -h, --help            Show this help message and exit.
@@ -77,6 +75,10 @@ Options:
                         Required. Path to frontview all class model.
   -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
                         Required. Path to frontview moving class model.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required. Path to encoder model.
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Required. Path to decoder model.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
