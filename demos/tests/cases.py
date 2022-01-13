@@ -1230,6 +1230,11 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    # TODO
+    PythonDemo(name='smartlab_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-h': None}),
+    )),
+
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('aclnet')}),
