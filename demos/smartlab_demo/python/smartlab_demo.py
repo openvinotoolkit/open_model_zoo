@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
  Copyright (C) 2021-2022 Intel Corporation
 
@@ -16,19 +14,14 @@
  limitations under the License.
 """
 
-import os
+
 import cv2
-import time
-import numpy as np
-import pandas as pd
-import logging as log
-import threading
-from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector
-from temporal_segmentation.segmentor import Segmentor, SegmentorMstcn
-from score_evaluation.evaluator import Evaluator
-from display.display import Display
+from segmentor import Segmentor, SegmentorMstcn
+from evaluator import Evaluator
+from display import Display
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -51,32 +44,19 @@ def build_argparser():
     return parser
 
 
-if __name__ == "__main__":
+def main()
     args = build_argparser().parse_args()
 
-    """
-        Initialize Variables
-    """
-    playing = True  # Control button for video processing
-    frame_counter =  0 # Frame index counter
-    buffer_top = deque(maxlen=1000)  # Array buffer
-    buffer_front = deque(maxlen=1000)
-
-    ''' Progress Variables'''
-    det_process_counter = 0  # Number of frames processed by the object detection module
-    seg_process_counter = 0  # Number of frames processed by the temporal segmentation module
-    eval_process_counter = 0  # Number of frames processed by the score evaluation module
+    frame_counter = 0 # Frame index counter
 
     ''' Object Detection Variables'''
     detector = Detector(
             [args.m_topall, args.m_topmove],
             [args.m_frontall, args.m_frontmove],
             False)
-    detector.initialize()  # Initialize the session and load the model parameters
 
     '''Video Segmentation Variables'''
     segmentor = Segmentor(args.m_encoder, args.m_decoder)
-    segmentor.initialize()  # Initialize the session and load the model parameters
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
@@ -84,7 +64,6 @@ if __name__ == "__main__":
 
     '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
     display = Display()
-    display.initialize()
 
     """
         Process the video.
@@ -92,13 +71,11 @@ if __name__ == "__main__":
     cap_top = cv2.VideoCapture(args.topview)
     cap_front = cv2.VideoCapture(args.frontview)
 
-    while cap_top.isOpened() and cap_front.isOpened() and playing:
+    while cap_top.isOpened() and cap_front.isOpened():
         ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
         ret_front, frame_front = cap_front.read()
 
         if ret_top and ret_front:
-            buffer_top.append(cv2.cvtColor(frame_top, cv2.COLOR_BGR2RGB))
-            buffer_front.append(cv2.cvtColor(frame_front, cv2.COLOR_BGR2RGB))
             frame_counter += 1
 
             ''' The object detection module need to generate detection results(for the current frame) '''
@@ -109,8 +86,7 @@ if __name__ == "__main__":
             top_seg_results, front_seg_results = segmentor.inference(
                     buffer_top=frame_top,
                     buffer_front=frame_front,
-                    frame_index=frame_counter
-                    )
+                    frame_index=frame_counter)
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             state, scoring = evaluator.inference(
@@ -119,8 +95,7 @@ if __name__ == "__main__":
                     top_seg_results=top_seg_results,
                     front_seg_results=front_seg_results,
                     frame_top=frame_top,
-                    frame_front=frame_front
-                    )
+                    frame_front=frame_front)
 
             display.display_result(
                     frame_top=frame_top,
@@ -133,9 +108,8 @@ if __name__ == "__main__":
                     state=state,
                     frame_counter=frame_counter)
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):     #press 'q' to exit
+            if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
                 break
-        else:
-            log.info('Finished !')
-            break
+
+if __name__ == "__main__":
+        main()
