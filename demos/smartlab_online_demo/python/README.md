@@ -11,18 +11,16 @@ The following pre-trained models are delived with the product:
 
 * `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
-For more information about the pre-trained models, refer to the [Intel](../../../models/intel/index.md) and [public](../../../models/public/index.md) models documentation
-
 ## How It works
 
 The demo pipeline consists of several steps, namely 'Decode', 'Detector', 'Segmentor', 'Evaluator', 'Display'.
-Every step is implemeted by correcponding class. Decode is implemented by opencv API, Detector is imlemeted `detector.py`. Segmentor is implemented by `segmentor.py`. Evaluator is implemented by `segmentor.py`. Evaluator is implemented by `evaluator.py`. Display is implemneted by `display.py`
+Every step is implemeted in correcponding class. Decode is implemented by opencv API, Detector is imlemeted `detector.py`. Segmentor is implemented by `segmentor.py`. Evaluator is implemented by `segmentor.py`. Evaluator is implemented by `evaluator.py`. Display is implemneted by `display.py`
 
 * `Decode` reads frames from the input videos.
 * `Detector` detects smartlab objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)
-* `Segmentor` segment video frames based on action of the frame.
+* `Segmentor` segments video frames based on action of the frame.
 * `Evaluator` calculates scores of the current state.
-* `Display` display detected objects, regnized action, calculated scores on the current frame.
+* `Display` displays detected objects, regnized action, calculated scores on the current frame.
 
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
