@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
  Copyright (C) 2021-2022 Intel Corporation
 
@@ -15,21 +14,13 @@
  limitations under the License.
 """
 
-import os
-import cv2
-import torch
 import numpy as np
 
-import sys
-sys.path.append('object_detection')
-from data.data_augment import ValTransform
-from data.data_augment import preproc as preprocess
-from data.vis import vis
-from settings import MwGlobalExp
-from tools.geometry import postprocess, bboxes_iou
-from tools.deploy_util import mkdir, multiclass_nms, demo_postprocess
-from openvino.inference_engine import IECore
-from subdetectors import SubDetector
+from .preprocess import preprocess
+from .settings import MwGlobalExp
+from .deploy_util import multiclass_nms, demo_postprocess
+from .subdetectors import SubDetector
+from .vis import vis
 
 
 class Detector(object):
@@ -139,11 +130,6 @@ class Detector(object):
         self.repeat_cls2_ids = self.cls2tocls1.keys()
         self.norepeat_num_classes = len(self.classes) - len(self.repeat_cls2_ids)
 
-    def initialize(self):
-        """
-        todo Initialize the model & load the weights for two view
-        todo Initialize the variables (specific data structure) for storing detection results.
-        """
         ### load models for top view
         self.top1_subdetector = SubDetector(self.top1_exp, self.backend)
         self.top2_subdetector = SubDetector(self.top2_exp, self.backend)

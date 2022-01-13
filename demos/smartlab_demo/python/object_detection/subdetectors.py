@@ -1,26 +1,15 @@
-import os
-import cv2
-import sys
 import torch
 import numpy as np
 
-sys.path.append('object_detection')
-from data.vis import vis
-from data.data_augment import ValTransform, preproc
-from tools.geometry import postprocess
-from settings import MwGlobalExp
-from object_detection.tools.deploy_util import demo_postprocess
+from .preprocess import preprocess
+from .postprocess import postprocess
+from .settings import MwGlobalExp
+from .deploy_util import demo_postprocess
+from .vis import vis
 
 class SubDetector(object):
-    def __init__(
-        self,
-        exp:MwGlobalExp,
-        backend:str='openvino'
-    ):
-        # assert exp.fp_model.endswith('.xml')
-        self.inode, self.onode, self.input_shape, self.model = \
-            exp.get_openvino_model()
-        self.preproc = preproc
+    def __init__(self, exp:MwGlobalExp, backend:str='openvino'):
+        self.inode, self.onode, self.input_shape, self.model = exp.get_openvino_model()
 
         self.cls_names = exp.mw_classes
         self.num_classes = exp.num_classes
@@ -33,9 +22,8 @@ class SubDetector(object):
         height, width = img.shape[:2]
         img_info["height"] = height
         img_info["width"] = width
-        # img_info["raw_img"] = img
 
-        img_feed, ratio = self.preproc(img, self.input_shape)
+        img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
         res = self.model.infer(inputs={self.inode:img_feed})[self.onode]
         outputs = demo_postprocess(res, self.input_shape, p6=False)

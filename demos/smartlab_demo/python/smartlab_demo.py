@@ -44,7 +44,7 @@ def build_argparser():
     return parser
 
 
-def main()
+def main():
     args = build_argparser().parse_args()
 
     frame_counter = 0 # Frame index counter
@@ -81,6 +81,7 @@ def main()
             ''' The object detection module need to generate detection results(for the current frame) '''
             top_det_results, front_det_results = detector.inference(
                     img_top=frame_top, img_front=frame_front)
+            
 
             ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
             top_seg_results, front_seg_results = segmentor.inference(

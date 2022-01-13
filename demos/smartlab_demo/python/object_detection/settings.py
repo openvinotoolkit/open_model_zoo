@@ -18,20 +18,16 @@
 """
 
 import os
-import torch.nn as nn
-import sys
-sys.path.append('object_detection')
-from tools.yolox_exp import Exp as MyExp
-from model.yolox import YOLOX, YOLOPAFPN, YOLOXHead
+from tabulate import tabulate
 from openvino.inference_engine import IECore
 
 # class maps
 mw_glb2acls6 = (
-  "balance", 
-  "box", 
-  "tray", 
-  "ruler", 
-  "hand", 
+  "balance",
+  "box",
+  "tray",
+  "ruler",
+  "hand",
   "scale"
 )
 
@@ -55,7 +51,7 @@ mw_glb1cls10 = (
 )
 
 # global setting of obj-det
-class MwGlobalExp(MyExp):
+class MwGlobalExp:
     def __init__(self,
         num_classes,
         fp_model,
@@ -64,7 +60,56 @@ class MwGlobalExp(MyExp):
         nms_thresh=0.3,
         is_show=False
     ):
-        super(MwGlobalExp, self).__init__()
+        self.print_interval = 100
+        self.eval_interval = 10
+        # ---------------- model config ---------------- #
+        self.num_classes = 80
+        self.depth = 1.00
+        self.width = 1.00
+        # ---------------- dataloader config ---------------- #
+        # set worker to 4 for shorter dataloader init time
+        self.data_num_workers = 4
+        self.input_size = (640, 640)  # (height, width)
+        # Actual multiscale ranges: [640-5*32, 640+5*32].
+        # To disable multiscale training, set the
+        # self.multiscale_range to 0.
+        self.multiscale_range = 5
+        # You can uncomment this line to specify a multiscale range
+        # self.random_size = (14, 26)
+        self.data_dir = None
+        self.train_ann = "instances_train2017.json"
+        self.val_ann = "instances_val2017.json"
+        # --------------- transform config ----------------- #
+        self.mosaic_prob = 1.0
+        self.mixup_prob = 1.0
+        self.hsv_prob = 1.0
+        self.flip_prob = 0.5
+        self.degrees = 10.0
+        self.translate = 0.1
+        self.mosaic_scale = (0.1, 2)
+        self.mixup_scale = (0.5, 1.5)
+        self.shear = 2.0
+        self.perspective = 0.0
+        self.enable_mixup = True
+        # --------------  training config --------------------- #
+        self.warmup_epochs = 5
+        self.max_epoch = 300
+        self.warmup_lr = 0
+        self.basic_lr_per_img = 0.01 / 64.0
+        self.scheduler = "yoloxwarmcos"
+        self.no_aug_epochs = 15
+        self.min_lr_ratio = 0.05
+        self.ema = True
+        self.weight_decay = 5e-4
+        self.momentum = 0.9
+        self.print_interval = 10
+        self.eval_interval = 10
+        self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
+        # -----------------  testing config ------------------ #
+        self.test_size = (640, 640)
+        self.test_conf = 0.01
+        self.nmsthre = 0.65
+
         self.depth = 0.33
         self.width = 0.25
         self.input_size = (416, 416)
@@ -130,3 +175,11 @@ class MwGlobalExp(MyExp):
             ie.load_network(network=net, device_name=device)
             )
 
+    def __repr__(self):
+        table_header = ["keys", "values"]
+        exp_table = [
+            (str(k), pprint.pformat(v))
+            for k, v in vars(self).items()
+            if not k.startswith("_")
+        ]
+        return tabulate(exp_table, headers=table_header, tablefmt="fancy_grid")
