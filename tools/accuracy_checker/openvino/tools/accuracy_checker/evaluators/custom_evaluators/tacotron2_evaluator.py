@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_shape
+from ...utils import contains_all, sigmoid, generate_layer_name, parse_partial_shape, postprocess_output_name
 
 
 class Synthesizer(BaseCascadeModel):
@@ -60,8 +60,7 @@ class Synthesizer(BaseCascadeModel):
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_outputs = self.encoder.predict(identifiers, input_data[0])
-        if callback:
-            callback(encoder_outputs)
+        encoder_outputs = send_callback(encoder_outputs, callback)
         postnet_outputs = []
         mel_outputs = []
         n = 0
@@ -74,8 +73,7 @@ class Synthesizer(BaseCascadeModel):
         feed_dict = self.decoder.init_feed_dict(encoder_output)
         for _ in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(identifiers, feed_dict)
-            if callback:
-                callback(decoder_outs)
+            decoder_outs = send_callback(decoder_outs, callback)
             decoder_input = decoder_outs[self.decoder.output_mapping['decoder_input']]
             finished = decoder_outs[self.decoder.output_mapping['finished']]
             # padding for the first chunk for postnet
@@ -89,8 +87,7 @@ class Synthesizer(BaseCascadeModel):
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
                 postnet_outs = self.postnet.predict(identifiers,
                                                     {self.postnet.input_mapping['mel_outputs']: postnet_input})
-                if callback:
-                    callback(postnet_outs)
+                postnet_outs = send_callback(postnet_outs, callback)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
@@ -107,8 +104,7 @@ class Synthesizer(BaseCascadeModel):
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
                 postnet_outs = self.postnet.predict(identifiers,
                                                     {self.postnet.input_mapping['mel_outputs']: postnet_input})
-                if callback:
-                    callback(postnet_outs)
+                postnet_outs = send_callback(postnet_outs, callback)
                 postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
@@ -137,6 +133,16 @@ class Synthesizer(BaseCascadeModel):
         self.with_prefix = with_prefix
 
 
+def send_callback(outs, callback):
+    if isinstance(outs, tuple):
+        outs, raw_outs = outs
+    else:
+        raw_outs = outs
+    if callback:
+        callback(raw_outs)
+    return outs
+
+
 class EncoderModel:
     def predict(self, identifiers, input_data):
         feed_dict = self.prepare_inputs(input_data)
@@ -151,29 +157,35 @@ class EncoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'encoder_', with_prefix)
-
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'encoder_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
 
 class DecoderModel:
     def predict(self, identifiers, input_data):
         feed_dict = self.prepare_inputs(input_data)
         outputs = self.infer(feed_dict)
+        if isinstance(outputs, tuple):
+            return outputs, self.prepare_next_state_inputs(feed_dict, outputs)
         return outputs, self.prepare_next_state_inputs(feed_dict, outputs)
 
     def prepare_next_state_inputs(self, feed_dict, outputs):
         common_layers = set(self.input_mapping).intersection(set(self.output_mapping))
+        if isinstance(outputs, tuple):
+            outs = outputs[0]
+        else:
+            outs = outputs
         for common_layer in common_layers:
-            feed_dict[self.input_mapping[common_layer]] = outputs[self.output_mapping[common_layer]]
+            feed_dict[self.input_mapping[common_layer]] = outs[self.output_mapping[common_layer]]
         return feed_dict
 
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'decoder_', with_prefix)
-
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'decoder_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
     def init_feed_dict(self, encoder_output):
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
@@ -205,9 +217,9 @@ class PostNetModel:
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_layer_name(input_name, 'postnet_', with_prefix)
-
-        for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_layer_name(out_name, 'postnet_', with_prefix)
+        if hasattr(self, 'outputs'):
+            for out_id, out_name in self.output_mapping.items():
+                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):

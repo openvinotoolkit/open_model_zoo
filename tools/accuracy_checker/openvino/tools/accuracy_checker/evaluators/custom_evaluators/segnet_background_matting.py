@@ -18,7 +18,7 @@ import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
 from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
-from ...utils import contains_all, generate_layer_name, extract_image_representations
+from ...utils import contains_all, generate_layer_name, extract_image_representations, postprocess_output_name
 from ...config import ConfigError
 
 
@@ -97,8 +97,6 @@ class DLSDKFeedbackModel(FeedbackModel, BaseDLSDKModel):
             self.output_blob = next(iter(self.exec_network.outputs))
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
-            self.output_blob = generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix)
-            self.adapter.output_blob = self.output_blob
 
         self.with_prefix = with_prefix
 
@@ -118,7 +116,9 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
         data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: in_data.shape for key, in_data in data.items()})
-        raw_result = self.infer(data)
+        raw_result = self.infer(data, raw_results=True)
+        if isinstance(raw_result, tuple):
+            return raw_result[1], self.adapter.process([raw_result[0]], identifiers, [{}])[0]
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result[0]
 
@@ -135,11 +135,10 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if self.input_blob is None:
             self.input_blob = input_blob
-            self.output_blob = next(iter(self.exec_network.outputs))
+            self.output_blob = next(iter(self.outputs)).get_any_name()
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
-            self.output_blob = generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix)
-            self.adapter.output_blob = self.output_blob
+        self.output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
 
         self.with_prefix = with_prefix
 
