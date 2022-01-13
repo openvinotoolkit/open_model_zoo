@@ -160,9 +160,7 @@ class YolactModel(ImageModel):
     def __init__(self, model_adapter, configuration):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 4)
-        if isinstance(self.labels, (list, tuple)):
-            self.labels = self.labels
-        else:
+        if not isinstance(self.labels, (list, tuple)):
             self.labels = load_labels(self.labels) if self.labels else None
 
         self.output_blob_name = self._get_outputs()
