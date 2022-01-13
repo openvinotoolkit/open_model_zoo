@@ -7,14 +7,14 @@ Object detection uses two models for each view to detect large object and small 
 The following pre-trained models are delived with the product:
 
 
-* `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions of smartlab 2 actions of smartlab (adjust_rider, put_take).
+* `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions of smartlab 2 actions (adjust_rider, put_take).
 
 * `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
 ## How It works
 
 The demo pipeline consists of several steps, namely 'Decode', 'Detector', 'Segmentor', 'Evaluator', 'Display'.
-Every step is implemeted in correcponding class. Decode is implemented by opencv API, Detector is imlemeted `detector.py`. Segmentor is implemented by `segmentor.py`. Evaluator is implemented by `segmentor.py`. Evaluator is implemented by `evaluator.py`. Display is implemneted by `display.py`
+Every step is implemeted in correcponding class.
 
 * `Decode` reads frames from the input videos.
 * `Detector` detects smartlab objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)

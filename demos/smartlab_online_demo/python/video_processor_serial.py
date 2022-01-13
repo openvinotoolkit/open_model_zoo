@@ -75,12 +75,8 @@ if __name__ == "__main__":
     detector.initialize()  # Initialize the session and load the model parameters
 
     '''Video Segmentation Variables'''
-    if(args.mode == "multiview"):
-        segmentor = Segmentor(args.m_encoder, args.m_decoder)
-        segmentor.initialize()  # Initialize the session and load the model parameters
-    elif(args.mode == "mstcn"):
-        segmentor = SegmentorMstcn(args.m_i3d, args.m_mstcn)
-        segmentor.initialize()  # Initialize the session and load the model parameters
+    segmentor = Segmentor(args.m_encoder, args.m_decoder)
+    segmentor.initialize()  # Initialize the session and load the model parameters
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
@@ -93,8 +89,8 @@ if __name__ == "__main__":
     """
         Process the video.
     """
-    cap_top = cv2.VideoCapture(top_video_path=args.topview)
-    cap_front = cv2.VideoCapture(top_video_path=args.frontview)
+    cap_top = cv2.VideoCapture(args.topview)
+    cap_front = cv2.VideoCapture(args.frontview)
 
     while cap_top.isOpened() and cap_front.isOpened() and playing:
         ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
@@ -133,9 +129,9 @@ if __name__ == "__main__":
                     top_seg_results=top_seg_results,
                     top_det_results=top_det_results,
                     front_det_results=front_det_results,
-                    scoring=self.scoring,
-                    state=self.state,
-                    frame_counter=self.frame_counter)
+                    scoring=scoring,
+                    state=state,
+                    frame_counter=frame_counter)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):     #press 'q' to exit

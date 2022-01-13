@@ -128,6 +128,8 @@ from .speaker_identification import SpeakerReIdentificationDatasetConverter
 from .mvtec import MVTecDatasetConverter
 from .gan_annotation_converter import GANAnnotationConverter
 
+from .smartlab_action import SmartlabActionConverter
+
 __all__ = [
     'BaseFormatConverter',
     'DatasetConversionInfo',
@@ -253,5 +255,6 @@ __all__ = [
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
-    'GANAnnotationConverter'
+    'GANAnnotationConverter',
+    'SmartlabActionConverter'
 ]

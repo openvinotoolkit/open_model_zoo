@@ -10,16 +10,12 @@ evaluations:
           model: C:\Users\kminemur\open_model_zoo\intel\smartlab-action-recognition-encoder-0001\FP32\1280vec-mobilenet-v2.xml
         decoder:
           model: C:\Users\kminemur\open_model_zoo\intel\smartlab-action-recognition-decoder-0001\FP32\concat-classifier.xml
-        # encoder:
-        #   model: C:\Users\kminemur\open_model_zoo\intel\smartlab-action-recognition-encoder-0001\FP32\1280vec-mobilenet-v2.xml
-        # decoder:
-        #   model: C:\Users\kminemur\open_model_zoo\intel\smartlab-action-recognition-decoder-0001\FP32\concat-classifier.xml
-
 
       launchers:
         - framework: dlsdk
           # to an appropriate representation with adapter
           adapter: classification
+          # adapter: action_detection
 
       datasets:
         - name: DSI1867
@@ -27,9 +23,9 @@ evaluations:
           batch: 1 # Default batch size is 1
 
           annotation_conversion:
-            images_dir: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3
-            annotation_txt: C:\Users\kminemur\DSI-1867_small\action_recognition\labels\streams_3.txt
-            converter: smartlab_action
+              images_dir: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3
+              annotation_txt: C:\Users\kminemur\DSI-1867_small\action_recognition\labels\streams_3.txt
+              converter: smartlab_action
 
           preprocessing:
             - type: resize
@@ -38,4 +34,5 @@ evaluations:
 
           metrics:
             - type: accuracy
+            # - type: accuracy_per_class
               top_k: 1
