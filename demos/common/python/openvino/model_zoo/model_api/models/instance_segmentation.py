@@ -19,8 +19,8 @@ import numpy as np
 
 from .image_model import ImageModel
 from .model import WrapperError
-from .types import ListValue, NumericalValue
-from .utils import load_labels, nms
+from .types import NumericalValue
+from .utils import nms
 
 
 class MaskRCNNModel(ImageModel):
@@ -30,11 +30,6 @@ class MaskRCNNModel(ImageModel):
         super().__init__(model_adapter, configuration)
         self._check_io_number((1, 2), (3, 4, 5, 8))
         self.is_segmentoly = len(self.inputs) == 2
-        if isinstance(self.labels, (list, tuple)):
-            self.labels = self.labels
-        else:
-            self.labels = load_labels(self.labels) if self.labels else None
-
         self.output_blob_name = self._get_outputs()
 
     @classmethod
@@ -44,10 +39,6 @@ class MaskRCNNModel(ImageModel):
             'prob_threshold': NumericalValue(
                 default_value=None,
                 description='Probability threshold for detections filtering'
-            ),
-            'labels': ListValue(
-                default_value=None,
-                description='List of labels'
             ),
         })
         return parameters
@@ -160,9 +151,6 @@ class YolactModel(ImageModel):
     def __init__(self, model_adapter, configuration):
         super().__init__(model_adapter, configuration)
         self._check_io_number(1, 4)
-        if not isinstance(self.labels, (list, tuple)):
-            self.labels = load_labels(self.labels) if self.labels else None
-
         self.output_blob_name = self._get_outputs()
 
     @classmethod
@@ -172,10 +160,6 @@ class YolactModel(ImageModel):
             'prob_threshold': NumericalValue(
                 default_value=None,
                 description='Probability threshold for detections filtering'
-            ),
-            'labels': ListValue(
-                default_value=None,
-                description='List of labels'
             ),
         })
         return parameters
@@ -302,12 +286,3 @@ class YolactModel(ImageModel):
         x1 = np.clip(_x1 - padding, 0, img_size)
         x2 = np.clip(_x2 + padding, 0, img_size)
         return x1, x2
-
-
-def get_instance_segmentation_model(model_adapter, configuration):
-    inputs = model_adapter.get_input_layers()
-    outputs = model_adapter.get_output_layers()
-    if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
-        return YolactModel(model_adapter, configuration)
-    else:
-        return MaskRCNNModel(model_adapter, configuration)

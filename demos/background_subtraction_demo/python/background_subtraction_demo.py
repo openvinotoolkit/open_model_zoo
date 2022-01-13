@@ -27,7 +27,7 @@ import numpy as np
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import OutputTransform, get_instance_segmentation_model
+from model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel
 from model_api.performance_metrics import PerformanceMetrics
 from model_api.pipelines import get_user_config, AsyncPipeline
 from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
@@ -54,17 +54,15 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
-    args.add_argument('-pt', '--prob_threshold',
-                      help='Optional. Probability threshold for detections filtering.',
-                      default=0.5, type=float, metavar='"<num>"')
-    args.add_argument('--keep_aspect_ratio',
-                      help='Optional. Force image resize to keep aspect ratio.',
-                      action='store_true')
+    args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
+                      help='Optional. Probability threshold for detections filtering.')
+    args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
+                      help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
-    args.add_argument('--blur_bgr', default=False, action='store_true',
-                      help='Optional. Blur background.')
+    args.add_argument('--blur_bgr', default=0, type=int,
+                      help='Optional. Background blur strength (by default with value 0 is not applied).')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -101,6 +99,15 @@ def build_argparser():
     return parser
 
 
+def get_model(model_adapter, configuration):
+    inputs = model_adapter.get_input_layers()
+    outputs = model_adapter.get_output_layers()
+    if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
+        return YolactModel(model_adapter, configuration)
+    else:
+        return MaskRCNNModel(model_adapter, configuration)
+
+
 def print_raw_results(outputs, frame_id):
     scores, classes, boxes, masks = outputs
     log.debug('  -------------------------- Frame # {} --------------------------  '.format(frame_id))
@@ -125,13 +132,13 @@ def fit_to_window(input_img, output_resolution):
     return output
 
 
-def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_bgr=False, show_with_original_frame=False):
-    blur_kernel = (11, 11)
+def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_kernel=0, show_with_original_frame=False):
+    blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
     if target_bgr is None:
-        target_bgr = cv2.blur(frame, blur_kernel) if blur_bgr else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
+        target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
     else:
         target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
-        if blur_bgr:
+        if blur_kernel:
             target_bgr = cv2.blur(target_bgr, blur_kernel)
     classes, masks = objects[1], objects[3]
     # Choose masks only for person class
@@ -175,11 +182,10 @@ def main():
 
     configuration = {
         'prob_threshold': args.prob_threshold,
-        'labels': labels,
-        'resize_type': 'fit_to_window' if args.keep_aspect_ratio else 'standard'
+        'resize_type': args.resize_type
     }
 
-    model = get_instance_segmentation_model(model_adapter, configuration)
+    model = get_model(model_adapter, configuration)
 
     person_id = -1
     for i, label in enumerate(labels):

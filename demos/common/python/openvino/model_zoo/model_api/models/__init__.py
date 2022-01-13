@@ -25,7 +25,7 @@ from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .image_model import ImageModel
-from .instance_segmentation import get_instance_segmentation_model
+from .instance_segmentation import MaskRCNNModel, YolactModel
 from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
@@ -51,6 +51,7 @@ __all__ = [
     'HpeAssociativeEmbedding',
     'ImageModel',
     'InputTransform',
+    'MaskRCNNModel',
     'Model',
     'MonoDepthModel',
     'OpenPose',
@@ -62,10 +63,10 @@ __all__ = [
     'SegmentationModel',
     'SSD',
     'UltraLightweightFaceDetection',
+    'YolactModel',
     'YOLO',
     'YoloV3ONNX',
     'YoloV4',
     'YOLOF',
     'YOLOX',
-    'get_instance_segmentation_model',
 ]

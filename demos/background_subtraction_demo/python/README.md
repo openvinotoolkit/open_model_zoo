@@ -33,8 +33,8 @@ The demo workflow is the following:
 1. The demo application reads image/video frames one by one, resizes them to fit into the input image blob of the network (`image`).
 2. The demo visualizes the resulting background subtraction. Certain command-line options affect the visualization:
     * If you specify `--target_bgr`, background will be replaced by a chosen image or video. By default background replaced by green field.
-    * If you specify `--blur_bgr`, background will be slightly blurred to make the result image more natural.
-    * If you specify `--show_with_original_frame`, the result image will be merged with an original input image.
+    * If you specify `--blur_bgr`, background will be blurred according to a set value. By default equal to zero and is not applied.
+    * If you specify `--show_with_original_frame`, the result image will be merged with an input one.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
@@ -68,18 +68,20 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-sage: background_subtraction_demo.py [-h] -m MODEL
-                                     [--adapter {openvino,remote}] -i INPUT
-                                     [-d DEVICE] [-pt "<num>"]
-                                     [--keep_aspect_ratio] [--labels LABELS]
-                                     [--target_bgr TARGET_BGR] [--blur_bgr]
-                                     [-nireq NUM_INFER_REQUESTS]
-                                     [-nstreams NUM_STREAMS]
-                                     [-nthreads NUM_THREADS] [--loop]
-                                     [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                                     [--no_show] [--show_with_original_frame]
-                                     [--output_resolution OUTPUT_RESOLUTION]
-                                     [-u UTILIZATION_MONITORS] [-r]
+usage: background_subtraction_demo.py [-h] -m MODEL
+                                      [--adapter {openvino,remote}] -i INPUT
+                                      [-d DEVICE] [-t PROB_THRESHOLD]
+                                      [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
+                                      [--labels LABELS]
+                                      [--target_bgr TARGET_BGR]
+                                      [--blur_bgr BLUR_BGR]
+                                      [-nireq NUM_INFER_REQUESTS]
+                                      [-nstreams NUM_STREAMS]
+                                      [-nthreads NUM_THREADS] [--loop]
+                                      [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                                      [--no_show] [--show_with_original_frame]
+                                      [--output_resolution OUTPUT_RESOLUTION]
+                                      [-u UTILIZATION_MONITORS] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -97,15 +99,18 @@ Options:
                         GPU, HDDL or MYRIAD is acceptable. The demo will look
                         for a suitable plugin for device specified. Default
                         value is CPU.
-  -pt "<num>", --prob_threshold "<num>"
+  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
                         Optional. Probability threshold for detections
                         filtering.
-  --keep_aspect_ratio   Optional. Force image resize to keep aspect ratio.
+  --resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}
+                        Optional. A resize type for model preprocess. By
+                        defauld used model predefined type.
   --labels LABELS       Optional. Labels mapping file.
   --target_bgr TARGET_BGR
                         Optional. Background onto which to composite the
                         output (by default to green field).
-  --blur_bgr            Optional. Blur background.
+  --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with
+                        value 0 is not applied).
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -140,6 +145,7 @@ Input/output options:
 
 Debug options:
   -r, --raw_output_message
+                        Optional. Output inference results as mask histogram.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
