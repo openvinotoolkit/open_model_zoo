@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2019-2021 Intel Corporation
+# Copyright (C) 2019-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
@@ -16,7 +16,7 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
@@ -73,11 +73,11 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     start_load_time = time.perf_counter()
     stt = DeepSpeechSeqPipeline(
-        ie = ie,
+        core = core,
         model = args.model,
         lm = args.lm,
         beam_width = args.beam_width,
