@@ -57,6 +57,10 @@ class MTCNNEvaluator(BaseCustomEvaluator):
                     copy.deepcopy(batch_inputs), batch_annotation, previous_stage_predictions
                 )
                 batch_raw_prediction = stage.predict(filled_inputs, batch_meta, intermediate_callback)
+                if isinstance(batch_raw_prediction, tuple):
+                    batch_raw_prediction, _batch_raw_prediction = batch_raw_prediction
+                else:
+                    _batch_raw_prediction = batch_raw_prediction
                 batch_size = np.shape(next(iter(filled_inputs[0].values())))[0]
                 batch_prediction = stage.postprocess_result(
                     batch_identifiers, batch_raw_prediction, batch_meta, previous_stage_predictions
@@ -67,7 +71,7 @@ class MTCNNEvaluator(BaseCustomEvaluator):
             metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
                                                       calculate_metrics)
             if output_callback:
-                output_callback(transform_for_callback(batch_size, batch_raw_prediction),
+                output_callback(transform_for_callback(batch_size, _batch_raw_prediction),
                                 metrics_result=metrics_result, element_identifiers=batch_identifiers,
                                 dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)

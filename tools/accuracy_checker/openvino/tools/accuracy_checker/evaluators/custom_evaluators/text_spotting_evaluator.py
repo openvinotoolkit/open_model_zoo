@@ -22,7 +22,14 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, parse_partial_shape, generate_layer_name, softmax
+from ...utils import (
+    contains_all,
+    extract_image_representations,
+    parse_partial_shape,
+    generate_layer_name,
+    softmax,
+    postprocess_output_name
+)
 
 
 class TextSpottingEvaluator(BaseCustomEvaluator):
@@ -119,14 +126,24 @@ class SequentialModel(BaseCascadeModel):
         assert len(identifiers) == 1
 
         detector_outputs = self.detector.predict(identifiers, input_data)
+        if isinstance(detector_outputs, tuple):
+            detector_outputs, raw_detector_outputs = detector_outputs
+        else:
+            raw_detector_outputs = detector_outputs
         text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
         for feature in text_features:
             encoder_outputs = self.recognizer_encoder.predict(
                 identifiers, {self.recognizer_encoder.input: np.expand_dims(feature, 0)})
+
+            if isinstance(encoder_outputs, tuple):
+                encoder_outputs, raw_encoder_outputs = encoder_outputs
+            else:
+                raw_encoder_outputs = encoder_outputs
+
             if callback:
-                callback(encoder_outputs)
+                callback(raw_encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder.output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
@@ -144,22 +161,27 @@ class SequentialModel(BaseCascadeModel):
                     self.recognizer_decoder.model_inputs['prev_hidden']: hidden,
                     self.recognizer_decoder.model_inputs['encoder_outputs']: feature}
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
+                if isinstance(decoder_outputs, tuple):
+                    decoder_outputs, raw_decoder_outputs = decoder_outputs
+                else:
+                    raw_decoder_outputs = decoder_outputs
+
                 if callback:
-                    callback(decoder_outputs)
-                decoder_output = decoder_outputs[self.recognizer_decoder.outputs['symbols_distribution']]
+                    callback(raw_decoder_outputs)
+                decoder_output = decoder_outputs[self.recognizer_decoder.model_outputs['symbols_distribution']]
                 softmaxed = softmax(decoder_output[0])
                 prev_symbol_index = np.argmax(decoder_output, axis=1)
                 confidence *= softmaxed[prev_symbol_index]
                 if prev_symbol_index == self.eos_index:
                     break
-                hidden = decoder_outputs[self.recognizer_decoder.outputs['cur_hidden']]
+                hidden = decoder_outputs[self.recognizer_decoder.model_outputs['cur_hidden']]
                 text += self.alphabet[int(prev_symbol_index)]
             texts.append(text if confidence >= self.confidence_threshold else '')
 
         texts = np.array(texts)
         detector_outputs['texts'] = texts
         output = self.adapter.process(detector_outputs, identifiers, frame_meta)
-        return detector_outputs, output
+        return raw_detector_outputs, output
 
     def load_model(self, network_list, launcher):
         super().load_model(network_list, launcher)
@@ -173,28 +195,26 @@ class SequentialModel(BaseCascadeModel):
         with_prefix = (
             isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
         )
+        self.adapter.outputs_verified = False
+        if hasattr(self.detector, 'outputs'):
+            self.detector.text_feats_out = postprocess_output_name(
+                self.detector.text_feats_out, self.detector.outputs, raise_error=False)
+            self.recognizer_encoder.output = postprocess_output_name(
+                self.recognizer_encoder.output, self.recognizer_encoder.outputs, raise_error=False
+            )
+            for out, out_value in self.recognizer_decoder.model_outputs.items():
+                self.recognizer_decoder.model_outputs[out] = postprocess_output_name(
+                out_value, self.recognizer_decoder.outputs, raise_error=False
+            )
         if with_prefix != self.with_prefix:
-            self.adapter.classes_out = generate_layer_name(self.adapter.classes_out, 'detector_', with_prefix)
-            if self.adapter.scores_out is not None:
-                self.adapter.scores_out = generate_layer_name(self.adapter.scores_out, 'detector_', with_prefix)
-            self.adapter.boxes_out = generate_layer_name(self.adapter.boxes_out, 'detector_', with_prefix)
-            self.adapter.raw_masks_out = generate_layer_name(self.adapter.raw_masks_out, 'detector_', with_prefix)
             self.recognizer_encoder.input = generate_layer_name(
                 self.recognizer_encoder.input, 'recognizer_encoder_', with_prefix
-            )
-            self.recognizer_encoder.output = generate_layer_name(
-                self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix
             )
             recognizer_decoder_inputs = {
                 key: generate_layer_name(value, 'recognizer_decoder_', with_prefix)
                 for key, value in self.recognizer_decoder.model_inputs.items()
             }
-            recognizer_decoder_outputs = {
-                key: generate_layer_name(value, 'recognizer_decoder_', with_prefix)
-                for key, value in self.recognizer_decoder.outputs.items()
-            }
             self.recognizer_decoder.model_inputs = recognizer_decoder_inputs
-            self.recognizer_decoder.outputs = recognizer_decoder_outputs
         self.with_prefix = with_prefix
 
 
@@ -275,7 +295,7 @@ class DetectorOVModel(BaseOpenVINOModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
 
-        output = self.infer(input_data)
+        output = self.infer(input_data, raw_results=True)
 
         return output
 
@@ -292,11 +312,9 @@ class DetectorOVModel(BaseOpenVINOModel):
         ]
         if self.im_info_name:
             self.im_info_name = self.im_info_name[0]
-            self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
-                'detector_') else 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features/sink_port_0'
         else:
-            self.text_feats_out = 'detector_text_features/sink_port_0' if self.im_data_name.startswith(
-                'detector_') else 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features/sink_port_0'
 
 
 class RecognizerDLSDKModel(BaseDLSDKModel):
@@ -318,7 +336,7 @@ class RecognizerOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
-        return self.infer(input_data)
+        return self.infer(input_data, raw_results=True)
 
     def get_hidden_shape(self, name):
         return parse_partial_shape(self.inputs[name].get_partial_shape())
@@ -340,13 +358,21 @@ class RecognizerEncoderOVModel(RecognizerOVModel):
 
 class RecognizerDecoderDLSDKModel(RecognizerDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        def preprocess_out(out_name):
+            if not out_name.endswith('/sink_port_0'):
+                return out_name + '/sink_port_0'
+            return out_name
         self.model_inputs = network_info['inputs']
-        self.outputs = network_info['outputs']
+        self.model_outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class RecognizerDecoderOVModel(RecognizerOVModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        def preprocess_out(out_name):
+            if not out_name.endswith('/sink_port_0'):
+                return out_name + '/sink_port_0'
+            return out_name
         self.model_inputs = network_info['inputs']
-        self.outputs = network_info['outputs']
+        self.model_outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
         super().__init__(network_info, launcher, suffix, delayed_model_loading)

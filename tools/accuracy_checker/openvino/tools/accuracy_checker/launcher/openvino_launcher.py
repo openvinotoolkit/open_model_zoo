@@ -31,7 +31,7 @@ from .dlsdk_launcher_config import (
 from .dlsdk_async_request import AsyncInferRequestWrapper
 
 from ..config import ConfigError
-from ..logging import warning
+from ..logging import warning, debug, print_info
 from ..utils import (
     read_yaml,
     contains_any,
@@ -41,7 +41,6 @@ from ..utils import (
     postprocess_output_name
 )
 from .launcher import Launcher
-from ..logging import print_info
 
 
 format_map = {
@@ -118,6 +117,7 @@ class OpenVINOLauncher(Launcher):
         self.is_dynamic = False
         self.preprocessor = preprocessor
         self.infer_request = None
+        self._num_requests = None
 
         if not delayed_model_loading:
             self._model, self._weights = automatic_model_search(
@@ -184,11 +184,12 @@ class OpenVINOLauncher(Launcher):
             return next(iter(self.original_outputs)).get_node().friendly_name
         return None
 
-    def predict(self, inputs, metadata=None, **kwargs):
+    def predict(self, inputs, metadata=None, return_raw=False, **kwargs):
         if self._lstm_inputs:
-            return self._predict_sequential(inputs, metadata)
+            return self._predict_sequential(inputs, metadata, return_raw)
 
         results = []
+        raw_results = []
         for infer_inputs in inputs:
             if self._do_reshape:
                 input_shapes = {
@@ -199,6 +200,7 @@ class OpenVINOLauncher(Launcher):
                 self.infer_request = self.exec_network.create_infer_request()
             feed_dict = {self.input_to_tensor_name[layer_name]: data for layer_name, data in infer_inputs.items()}
             outputs = self.infer_request.infer(inputs=feed_dict)
+            raw_results.append(outputs)
             results.append({
                 out_node.get_node().friendly_name: out_res
                 for out_node, out_res in outputs.items()
@@ -211,13 +213,16 @@ class OpenVINOLauncher(Launcher):
             self._fill_meta(metadata)
         self._do_reshape = False
 
+        if return_raw:
+            return results, raw_results
         return results
 
-    def _predict_sequential(self, inputs, metadata=None, **kwargs):
+    def _predict_sequential(self, inputs, metadata=None, return_raw=False, **kwargs):
         lstm_inputs_feed = self._fill_lstm_inputs()
         if not self.infer_request:
             self.infer_request = self.exec_network.create_infer_request()
         results = []
+        raw_results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
             infer_inputs = {self.input_to_tensor_name[layer_name]: data for layer_name, data in feed_dict.items()}
@@ -228,6 +233,8 @@ class OpenVINOLauncher(Launcher):
             }
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
+            if return_raw:
+                raw_results.append(out_tensors)
 
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
@@ -236,6 +243,8 @@ class OpenVINOLauncher(Launcher):
         if metadata is not None:
             self._fill_meta(metadata)
         self._do_reshape = False
+        if return_raw:
+            return results, raw_results
         return results
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
@@ -307,11 +316,8 @@ class OpenVINOLauncher(Launcher):
 
     @async_mode.setter
     def async_mode(self, flag):
-        if flag:
-            if 'CPU' in self._devices_list():
-                self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
-            if 'GPU' in self._devices_list():
-                self.ie_core.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}, 'GPU')
+        for device in self._devices_list():
+            self.ie_core.set_config({'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device.upper())
         self._async_mode = flag
 
     def get_async_requests(self):
@@ -653,6 +659,7 @@ class OpenVINOLauncher(Launcher):
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
+        self.async_mode = True
         self.load_network(log=log)
         self.try_to_set_default_layout()
 
@@ -765,7 +772,7 @@ class OpenVINOLauncher(Launcher):
                 data = np.expand_dims(data, -1)
             data_shape = np.shape(data)
             if len(data_shape) < 4:
-                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                if np.size(np.squeeze(np.zeros(layer_shape))) == np.size(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
             return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:
@@ -906,12 +913,14 @@ class OpenVINOLauncher(Launcher):
 
     def get_infer_queue(self, log=True):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':
-            num_requests = 0
+            num_requests = self.auto_num_requests()
         else:
-            num_requests = self.num_requests
+            num_requests = self.num_requests or 0
         queue = AsyncInferQueue(self.exec_network, num_requests)
         if log:
             print_info('Prepared async infer queue with {} requests'.format(len(queue)))
+        else:
+            debug('Prepared async infer queue with {} requests'.format(len(queue)))
         return queue
 
     def prepare_data_for_request(self,
@@ -925,11 +934,14 @@ class OpenVINOLauncher(Launcher):
         return feed_dict, context
 
     @staticmethod
-    def get_result_from_request(request):
-        return [{
+    def get_result_from_request(request, return_raw=False):
+        preprocessed_results = [{
             out.get_node().friendly_name: data for out, data
             in request.results.items()}
         ]
+        if return_raw:
+            return preprocessed_results, [request.results]
+        return preprocessed_results
 
     def input_shape(self, input_name):
         return parse_partial_shape(self.inputs[input_name].get_partial_shape())
