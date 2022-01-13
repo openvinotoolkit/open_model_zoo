@@ -44,8 +44,8 @@ public:
     float _yaw;
     float _pitch;
     float _roll;
-    std::vector<float> _landmarks;
     float _realFaceConfidence;
+    std::vector<float> _landmarks;
 };
 
 // ----------------- Utils -----------------

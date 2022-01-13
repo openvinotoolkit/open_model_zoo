@@ -11,8 +11,7 @@ namespace gaze_estimation {
 
 LandmarksEstimator::LandmarksEstimator(
     InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
-        ieWrapper(ie, modelPath, modelType, deviceName)
-{
+        ieWrapper(ie, modelPath, modelType, deviceName), numberLandmarks (0u) {
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
 
@@ -99,10 +98,7 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
 
 std::vector<cv::Mat> LandmarksEstimator::split(std::vector<float>& data, const std::vector<unsigned long>& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
-    float* output = new float[data.size()];
-    for (size_t i = 0; i < data.size(); i++) {
-        output[i] = data[i];
-    }
+    float* output = &data.front();
     for (size_t i = 0; i < flattenData.size(); i++) {
         flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, output + i * shape[2] * shape[3]);
     }
