@@ -21,30 +21,30 @@ from .segm_postprocess import postprocess
 
 
 class MaskRCNN(IEModel):
-    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
-        super().__init__(ie, model_path, labels_file, conf, device, ext_path)
+    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
+        super().__init__(core, model_path, labels_file, conf, device, ext_path)
 
-        required_input_keys = {'image'}
-        required_output_keys = {'boxes', 'labels', 'masks'}
-
-        required_input_keys_segmentoly = {'im_info', 'im_data'}
-        required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
-
-        current_input_keys = self.inputs_info.keys()
-
-        assert (current_input_keys == required_input_keys and
-                required_output_keys.issubset(self.net.outputs)) or \
-               (current_input_keys == required_input_keys_segmentoly and
-                required_output_keys_segmentoly.issubset(self.net.outputs))
+        self.input_keys = {'image'}
+        self.output_keys = {'boxes', 'labels', 'masks'}
+        self.input_keys_segmentoly = {'im_info', 'im_data'}
+        self.output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
 
         self.segmentoly_type = self.check_segmentoly_type()
-        input_name = 'im_data' if self.segmentoly_type else 'image'
-        self.n, self.c, self.h, self.w = self.inputs_info[input_name].input_data.shape
+        self.input_tensor_name = 'im_data' if self.segmentoly_type else 'image'
+        self.n, self.c, self.h, self.w = self.model.input(self.input_tensor_name).shape
 
     def check_segmentoly_type(self):
-        required_inputs = {'im_info', 'im_data'}
-        required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
-        return self.inputs_info.keys() == required_inputs and required_outputs.issubset(self.net.outputs.keys())
+        for input_tensor_name in self.input_keys_segmentoly:
+            try:
+                self.model.input(input_tensor_name)
+            except RuntimeError:
+                return False
+        for output_tensor_name in self.output_keys_segmentoly:
+            try:
+                self.model.output(output_tensor_name)
+            except RuntimeError:
+                return False
+        return True
 
     def get_allowed_inputs_len(self):
         return (1, 2)
@@ -66,7 +66,6 @@ class MaskRCNN(IEModel):
         return processed_image, im_info, meta
 
     def forward(self, im_data, im_info):
-        input_name = 'im_data' if self.segmentoly_type else 'image'
         if (self.h - im_data.shape[1] < 0) or (self.w - im_data.shape[2] < 0):
             raise ValueError('Input image should have the resolution of {}x{} or less, '
                              'got {}x{}.'.format(self.w, self.h, im_data.shape[2], im_data.shape[1]))
@@ -74,19 +73,20 @@ class MaskRCNN(IEModel):
                                    (0, self.h - im_data.shape[1]),
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
-        feed_dict = {input_name: im_data}
+        feed_dict = {self.input_tensor_name: im_data}
         if im_info is not None:
             im_info = im_info.reshape(1, *im_info.shape)
             feed_dict['im_info'] = im_info
-        output = self.net.infer(feed_dict)
-
+        self.infer_request.infer(feed_dict)
         if self.segmentoly_type:
+            output = {name: self.infer_request.get_tensor(name).data for name in self.output_keys_segmentoly}
             valid_detections_mask = output['classes'] > 0
             classes = output['classes'][valid_detections_mask]
             boxes = output['boxes'][valid_detections_mask]
             scores = output['scores'][valid_detections_mask]
             masks = output['raw_masks'][valid_detections_mask]
         else:
+            output = {name: self.infer_request.get_tensor(name).data for name in self.output_keys}
             valid_detections_mask = np.sum(output['boxes'], axis=1) > 0
             classes = output['labels'][valid_detections_mask] + 1
             boxes = output['boxes'][valid_detections_mask][:, :4]
