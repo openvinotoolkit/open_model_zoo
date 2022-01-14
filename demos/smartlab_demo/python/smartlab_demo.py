@@ -15,6 +15,7 @@
 """
 
 import cv2
+from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector
 from segmentor import Segmentor, SegmentorMstcn
@@ -37,8 +38,16 @@ def build_argparser():
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
-    args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
-    args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+    
+    subparsers = parser.add_subparsers(help='sub-command help')
+    args_mutiview = subparsers.add_parser('multiview', help='multiview help')
+    args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
+    args_mutiview.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+    args_mutiview.add_argument('--mode', default='multiview', help='Option. Path to decoder model.', type=str)
+    args_mstcn = subparsers.add_parser('mstcn', help='mstcm help')
+    args_mstcn.add_argument('-m_i3d', '--m_i3d', help='Required. Path to i3d model.', required=True, type=str)
+    args_mstcn.add_argument('-m_mstcn', '--m_mstcn', help='Required. Path to mstcn model.', required=True, type=str)
+    args_mstcn.add_argument('--mode', default='mstcn', help='Option. Path to decoder model.', type=str)
 
     return parser
 
@@ -47,8 +56,10 @@ def main():
     args = build_argparser().parse_args()
 
     frame_counter = 0 # Frame index counter
+    buffer1 = deque(maxlen=1000)  # Array buffer
+    buffer2 = deque(maxlen=1000)
     ie = IECore()
-
+    
     ''' Object Detection Variables'''
     detector = Detector(
             ie,
@@ -57,7 +68,10 @@ def main():
             False)
 
     '''Video Segmentation Variables'''
-    segmentor = Segmentor(ie, args.m_encoder, args.m_decoder)
+    if(args.mode == "multiview"):
+        segmentor = Segmentor(ie, args.m_encoder, args.m_decoder)
+    elif(args.mode == "mstcn"):
+        segmentor = SegmentorMstcn(ie, args.m_i3d, args.m_mstcn)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
@@ -85,10 +99,23 @@ def main():
             
 
             ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-            top_seg_results, front_seg_results = segmentor.inference(
-                    buffer_top=frame_top,
-                    buffer_front=frame_front,
-                    frame_index=frame_counter)
+            if(args.mode == "multiview"):
+                top_seg_results, front_seg_results = segmentor.inference(
+                        buffer_top=frame_top,
+                        buffer_front=frame_front,
+                        frame_index=frame_counter)
+            elif(args.mode == "mstcn"):
+                buffer1.append(cv2.cvtColor(frame_top, cv2.COLOR_BGR2RGB))
+                buffer2.append(cv2.cvtColor(frame_front, cv2.COLOR_BGR2RGB))
+
+                frame_predictions = segmentor.inference(
+                        buffer_top=buffer1,
+                        buffer_front=buffer2,
+                        frame_index=frame_counter)
+                top_seg_results = frame_predictions
+                front_seg_results = frame_predictions
+            if(len(top_seg_results) == 0):
+                continue
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             state, scoring = evaluator.inference(
