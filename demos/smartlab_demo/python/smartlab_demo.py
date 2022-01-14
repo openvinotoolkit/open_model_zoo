@@ -20,7 +20,7 @@ from object_detection.detector import Detector
 from segmentor import Segmentor, SegmentorMstcn
 from evaluator import Evaluator
 from display import Display
-
+from openvino.inference_engine import IECore
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -47,15 +47,17 @@ def main():
     args = build_argparser().parse_args()
 
     frame_counter = 0 # Frame index counter
+    ie = IECore()
 
     ''' Object Detection Variables'''
     detector = Detector(
+            ie,
             [args.m_topall, args.m_topmove],
             [args.m_frontall, args.m_frontmove],
             False)
 
     '''Video Segmentation Variables'''
-    segmentor = Segmentor(args.m_encoder, args.m_decoder)
+    segmentor = Segmentor(ie, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
