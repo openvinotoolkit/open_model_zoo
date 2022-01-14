@@ -154,7 +154,7 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             for key, values in self.magnitude.items():
                 names.extend(
                     ['{}@mean'.format(key), '{}@std'.format(key)]
-                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_errir'.format(key)]
+                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_error'.format(key)]
                 )
                 result.extend([np.mean(values), np.std(values)])
                 if self.max_error:
