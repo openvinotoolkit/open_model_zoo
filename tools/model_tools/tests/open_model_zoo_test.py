@@ -4,23 +4,20 @@ import os
 
 import openvino.model_zoo.open_model_zoo as omz
 
-from openvino.inference_engine import IECore
+from openvino.runtime import Core
 
-class TestTopologies(unittest.TestCase):
+class TestModel(unittest.TestCase):
     def test_load_intel(self):
         face_detection = omz.Model.download('face-detection-0200', precision='FP16-INT8')
         xml_path = face_detection.model_path
 
         self.assertTrue(os.path.exists(xml_path))
 
-        ie = IECore()
-        net = ie.read_network(xml_path)
+        ie = Core()
+        net = ie.read_model(xml_path)
 
-        input_name = next(iter(net.input_info))
-        output_name = next(iter(net.outputs))
-
-        self.assertEqual(net.input_info[input_name].input_data.shape, [1, 3, 256, 256])
-        self.assertEqual(net.outputs[output_name].shape, [1, 1, 200, 7])
+        self.assertEqual(list(net.inputs[0].shape), [1, 3, 256, 256])
+        self.assertEqual(list(net.outputs[0].shape), [1, 1, 200, 7])
 
     def test_load_public(self):
         model = omz.Model.download('colorization-v2', precision='FP32')
@@ -28,29 +25,23 @@ class TestTopologies(unittest.TestCase):
 
         self.assertTrue(os.path.exists(xml_path))
 
-        ie = IECore()
-        net = ie.read_network(xml_path)
+        ie = Core()
+        net = ie.read_model(xml_path)
 
-        input_name = next(iter(net.input_info))
-        output_name = next(iter(net.outputs))
-
-        self.assertEqual(net.input_info[input_name].input_data.shape, [1, 1, 256, 256])
-        self.assertEqual(net.outputs[output_name].shape, [1, 2, 256, 256])
+        self.assertEqual(list(net.inputs[0].shape), [1, 1, 256, 256])
+        self.assertEqual(list(net.outputs[0].shape), [1, 2, 256, 256])
 
     def test_load_from_pretrained(self):
-        model = omz.Model.from_pretrained('models/public/colorization-v2/FP32/colorization-v2.xml')
+        model = omz.Model.from_pretrained('models/intel/face-detection-0200/FP16-INT8/face-detection-0200.xml')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))
 
-        ie = IECore()
-        net = ie.read_network(xml_path)
+        ie = Core()
+        net = ie.read_model(xml_path)
 
-        input_name = next(iter(net.input_info))
-        output_name = next(iter(net.outputs))
-
-        self.assertEqual(net.input_info[input_name].input_data.shape, [1, 1, 256, 256])
-        self.assertEqual(net.outputs[output_name].shape, [1, 2, 256, 256])
+        self.assertEqual(list(net.inputs[0].shape), [1, 3, 256, 256])
+        self.assertEqual(list(net.outputs[0].shape), [1, 1, 200, 7])
 
     def test_get_accuracy_checker_config(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
@@ -61,32 +52,36 @@ class TestTopologies(unittest.TestCase):
         self.assertIsInstance(model.model_config, dict)
 
     def test_infer_model(self):
-        ie = IECore()
+        ie = Core()
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
 
-        net = ie.read_network(model.model_path)
-        input_name = next(iter(net.input_info))
-        output_name = next(iter(net.outputs))
+        net = ie.read_model(model.model_path)
+        input_name = net.inputs[0].get_any_name()
 
         inputs = {input_name: np.zeros((1, 1, 256, 256))}
-        output = model(inputs)
-        self.assertEqual(output[output_name].shape, (1, 2, 256, 256))
+        output = next(iter(model(inputs).values()))
+        self.assertEqual(output.shape, (1, 2, 256, 256))
 
     def test_infer_non_vision_model(self):
-        ie = IECore()
-        model = omz.Model.download('bert-base-ner', ie=ie)
+        ie = Core()
+        model = omz.Model.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16', ie=ie)
 
-        net = ie.read_network(model.model_path)
-        input_names = net.input_info.keys()
-        output_name = next(iter(net.outputs))
+        net = ie.read_model(model.model_path)
+        input_names = [input.get_any_name() for input in net.inputs]
+        input_shapes = [input.shape for input in net.inputs]
+
+        expected_shapes = {
+            'output_s': (1, 384),
+            'output_e': (1, 384)
+        }
 
         inputs = {}
-        for input_name in input_names:
-            inputs[input_name] = np.zeros(net.input_info[input_name].input_data.shape)
+        for name, shape in zip(input_names, input_shapes):
+            inputs[name] = np.zeros(list(shape))
 
-        output = model(inputs)
-
-        self.assertEqual(output[output_name].shape, (1, 128, 9))
+        outputs = model(inputs)
+        for name, output in outputs.items():
+            self.assertEqual(output.shape, expected_shapes[name])
 
     def test_load_public_composite(self):
         model = omz.Model.download('mtcnn-p', precision='FP32')
@@ -94,18 +89,18 @@ class TestTopologies(unittest.TestCase):
 
         self.assertTrue(os.path.exists(xml_path))
 
-        ie = IECore()
-        net = ie.read_network(xml_path)
+        ie = Core()
+        net = ie.read_model(xml_path)
 
-        input_name = next(iter(net.input_info))
         expected_shapes = {
             'conv4-2': [1, 4, 355, 635],
             'prob1': [1, 2, 355, 635]
         }
 
-        self.assertEqual(net.input_info[input_name].input_data.shape, [1, 3, 720, 1280])
-        for name, value in net.outputs.items():
-            self.assertEqual(expected_shapes[name], value.shape)
+        self.assertEqual(list(net.inputs[0].shape), [1, 3, 720, 1280])
+        for output in net.outputs:
+            output_name = output.get_any_name()
+            self.assertEqual(list(output.shape), expected_shapes[output_name])
 
     def test_preferable_input_shape(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')

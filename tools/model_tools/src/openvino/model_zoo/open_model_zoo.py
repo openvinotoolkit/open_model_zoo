@@ -107,9 +107,9 @@ class Model:
             raise ValueError('Unsupported model format {}. Only .xml or .onnx supported.'.format(model_path.suffix))
 
         description = 'Pretrained model {}'.format(model_path.name)
-        name = model_path.name
+        name = model_path.stem
         model = cls._load_model(cls, name)
-        task_type = task_type
+        task_type = model.task_type if model else task_type
         subdirectory = model.subdirectory if model else model_path.parent
         model_path = str(model_path)
 
@@ -127,24 +127,29 @@ class Model:
         return model
 
     def _load(self, device):
-        self.net = self.ie.read_network(self.model_path)
-        self.exec_net = self.ie.load_network(self.net, device)
+        self.net = self.ie.read_model(self.model_path)
+        self.exec_net = self.ie.compile_model(self.net, device)
         self.device = device
 
     def __call__(self, inputs, device='CPU'):
         if self.ie is None:
-            raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
+            raise TypeError('ie is not specified or is of the wrong type.'
+                            'Please check ie is of openvino.runtime.Core type.')
 
         if self.exec_net is None or device != self.device:
             self._load(device)
 
-        input_names = self.net.input_info.keys()
+        input_names = [input.get_any_name() for input in self.net.inputs]
+        infer_request = self.exec_net.create_infer_request()
+
         for input_name in inputs:
             if input_name not in input_names:
                 raise ValueError('Unknown input name {}'.format(input_name))
 
-        res = self.exec_net.infer(inputs=inputs)
-        return res
+        output_names = [output.get_any_name() for output in self.net.outputs]
+        infer_request.infer(inputs)
+        result = {name: infer_request.get_tensor(name).data for name in output_names}
+        return result
 
     @property
     def accuracy_checker_config(self):
@@ -171,20 +176,22 @@ class Model:
     def inputs(self):
         if self.net is None:
             try:
-                self.net = self.ie.read_network(self.model_path)
+                self.net = self.ie.read_model(self.model_path)
             except AttributeError:
-                raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
+                raise TypeError('ie is not specified or is of the wrong type.'
+                                'Please check ie is of openvino.runtime.Core type.')
 
-        input_blobs = self.net.input_info
+        input_blobs = self.net.inputs
 
         return input_blobs
 
     def outputs(self):
         if self.net is None:
             try:
-                self.net = self.ie.read_network(self.model_path)
+                self.net = self.ie.read_model(self.model_path)
             except AttributeError:
-                raise TypeError('ie is not specified or is of the wrong type. Please check ie is of IECore type.')
+                raise TypeError('ie is not specified or is of the wrong type.'
+                                'Please check ie is of openvino.runtime.Core type.')
 
         output_blob = self.net.outputs
 
