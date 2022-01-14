@@ -18,7 +18,7 @@ import sys
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
-    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, # image_retrieval_arg
 )
 from data_sequences import DATA_SEQUENCES
 
@@ -962,6 +962,7 @@ PYTHON_DEMOS = [
                           '-ar': None})
     )),
 
+    # TODO: Put image_retrieval_arg import back
     #PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
     #                      **MONITORS,
