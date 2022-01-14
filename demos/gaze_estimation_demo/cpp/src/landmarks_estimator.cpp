@@ -98,7 +98,7 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
 
 std::vector<cv::Mat> LandmarksEstimator::split(std::vector<float>& data, const std::vector<unsigned long>& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
-    float* output = &data.front();
+    float* output = data.data();
     for (size_t i = 0; i < flattenData.size(); i++) {
         flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, output + i * shape[2] * shape[3]);
     }
