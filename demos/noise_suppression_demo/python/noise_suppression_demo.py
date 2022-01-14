@@ -15,7 +15,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from json import encoder
 import logging as log
 import sys
 import copy
