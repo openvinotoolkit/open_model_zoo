@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-
 import cv2
 from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector

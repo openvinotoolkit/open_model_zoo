@@ -52,6 +52,7 @@ class Segmentor(object):
         self.classifier_input_keys = list(self.classifier.input_info.keys())
         self.classifier_output_key = list(self.classifier.outputs.keys())
 
+
     def inference(self, buffer_top, buffer_front, frame_index):
         """
         Args:
