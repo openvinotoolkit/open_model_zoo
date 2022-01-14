@@ -182,12 +182,12 @@ def main():
         output = next(iter(infer_request.infer({input_tensor_name: chunk}).values()))
         clips += batch_size
         for batch, data in enumerate(output):
-            start_time = (idx*batch_size + batch)*hop / audio.samplerate
-            end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
+            chunk_start_time = (idx*batch_size + batch)*hop / audio.samplerate
+            chunk_end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
             outputs.append(data)
             label = np.argmax(data)
-            if start_time < audio.duration():
-                log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
+            if chunk_start_time < audio.duration():
+                log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(chunk_start_time, chunk_end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
