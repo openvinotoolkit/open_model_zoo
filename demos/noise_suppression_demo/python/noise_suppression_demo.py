@@ -91,8 +91,8 @@ def main():
         for const_obj in ov_encoder.outputs:
             output_names.append(const_obj.get_names().pop())
     else:
-        log.error("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
-
+        raise RuntimeError("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
+        sys.exit(-1)
 
     assert "input" in input_shapes.keys(), "'input' is not presented in model"
     assert "output" in output_names, "'output' is not presented in model"
