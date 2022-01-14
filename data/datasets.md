@@ -1,16 +1,5 @@
 # Dataset Preparation Guide
 
-@sphinxdirective
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   
-   openvino_docs_IE_DG_Integrate_with_customer_application_new_API
-   openvino_docs_deployment_optimization_guide_dldt_optimization_guide
-
-@endsphinxdirective
-
 If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize `<DATASET_DIR>` folder with validation datasets in a certain way. Instructions for preparing validation data are described in this document.
 
 Each dataset description consists of the following sections:
