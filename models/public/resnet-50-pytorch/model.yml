@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ files:
   - name: resnet50-19c8e357.pth
     checksum: de63f5f0157c6781341f7b8e6cca587b462a0d80425b51b7a333d3f38a9be0ff198df25bf6ce107112c0136ce5b9ee50
     size: 102502400
-    source: https://download.pytorch.org/models/resnet50-19c8e357.pth
+    original_source: https://download.pytorch.org/models/resnet50-19c8e357.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-50-pytorch/resnet50-19c8e357.pth
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=resnet50
@@ -45,5 +46,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/resnet-v1-50.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

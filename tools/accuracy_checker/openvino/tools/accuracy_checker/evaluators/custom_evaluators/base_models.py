@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -215,11 +215,7 @@ class BaseDLSDKModel:
                 self.adapter.output_blob = output_blob
 
     def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
+        model, weights = self.automatic_model_search(network_info)
         if weights is None and model.suffix != '.onnx':
             self.exec_network = launcher.ie_core.import_network(str(model))
         else:
@@ -262,14 +258,19 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return node_to_tensor
 
+    def input_index_mapping(self):
+        inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        return {inp.get_node().friendly_name: idx for idx, inp in enumerate(inputs)}
+
     def _reshape_input(self, input_shapes):
         if self.is_dynamic:
             return
         if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.infer_request
+            if hasattr(self, 'infer_request'):
+                del self.infer_request
             del self.exec_network
-        tensor_mapping = self.input_tensors_mapping()
-        input_shapes_for_tensors = {tensor_mapping[name]: shape for name, shape in input_shapes.items()}
+        index_mapping = self.input_index_mapping()
+        input_shapes_for_tensors = {index_mapping[name]: shape for name, shape in input_shapes.items()}
         self.launcher.reshape_network(self.network, input_shapes_for_tensors)
         self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
         if not self.is_dynamic and self.dynamic_inputs:
@@ -298,11 +299,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             self.exec_network = launcher.ie_core.compile_model(self.network, launcher.device)
 
     def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
+        model, weights = self.automatic_model_search(network_info)
         if weights is None and model.suffix != '.onnx':
             self.exec_network = launcher.ie_core.import_network(str(model))
         else:
@@ -326,23 +323,23 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.output_blob is None:
-                output_blob = next(iter(outputs)).get_node().friendly_name
-            else:
-                output_blob = (
-                    '_'.join([self.default_model_suffix, self.output_blob])
-                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
-                )
+                self.output_blob = next(iter(outputs)).get_node().friendly_name
             self.input_blob = input_blob
-            self.output_blob = output_blob
             self.with_prefix = with_prefix
             if hasattr(self, 'adapter') and self.adapter is not None:
-                self.adapter.output_blob = output_blob
+                self.adapter.output_blob = self.output_blob
 
     @property
     def inputs(self):
         if self.network:
             return {node.get_node().friendly_name: node.get_node() for node in self.network.inputs}
         return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.inputs}
+
+    @property
+    def outputs(self):
+        if self.network:
+            return {node.get_node().friendly_name: node.get_node() for node in self.network.outputs}
+        return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.outputs}
 
     def fit_to_input(self, input_data):
         input_info = self.inputs[self.input_blob]
@@ -352,16 +349,19 @@ class BaseOpenVINOModel(BaseDLSDKModel):
 
         return {self.input_blob: np.array(input_data)}
 
-    def infer(self, input_data):
+    def infer(self, input_data, raw_results=False):
         if not hasattr(self, 'infer_request') or self.infer_request is None:
             self.infer_request = self.exec_network.create_infer_request()
         tensors_mapping = self.input_tensors_mapping()
         feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
         outputs = self.infer_request.infer(feed_dict)
-        return {
+        res_outputs = {
             out_node.get_node().friendly_name: out_res
             for out_node, out_res in outputs.items()
         }
+        if raw_results:
+            return res_outputs, outputs
+        return res_outputs
 
 
 class BaseONNXModel:

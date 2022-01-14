@@ -135,20 +135,17 @@ NATIVE_DEMOS = [
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
-            ModelArg('densenet-169'),
             ModelArg('googlenet-v1'),
             ModelArg('googlenet-v1-tf'),
             ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
-            ModelArg('efficientnet-b7-pytorch'),
             ModelArg('mixnet-l'),
             ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
-            ModelArg('resnet-50-caffe2')),
-    )),
+    ))),
 
     CppDemo(name='crossroad_camera_demo',
             model_keys=['-m', '-m_pa', '-m_reid'],
@@ -345,8 +342,6 @@ NATIVE_DEMOS = [
         TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
-            ModelArg('mask_rcnn_inception_v2_coco'),
-            ModelArg('mask_rcnn_resnet101_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
@@ -392,7 +387,6 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -401,7 +395,6 @@ NATIVE_DEMOS = [
                             '-scale_values': "73.695 69.87 70.89",
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -458,8 +451,6 @@ NATIVE_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
                         ModelArg('vehicle-detection-0201'),
@@ -725,6 +716,16 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+        }),
+        single_option_cases('-m',
+    #       ModelArg('instance-segmentation-person-0007'),
+            ModelArg('yolact-resnet50-fpn-pytorch')),
+    )),
+
     PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
                           '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
@@ -810,20 +811,17 @@ PYTHON_DEMOS = [
             *single_option_cases('-m',
                 ModelArg('alexnet'),
                 ModelArg('densenet-121-tf'),
-                ModelArg('densenet-169'),
                 ModelArg('googlenet-v1'),
                 ModelArg('googlenet-v1-tf'),
                 ModelArg('googlenet-v3'),
                 ModelArg('googlenet-v3-pytorch'),
-                ModelArg('efficientnet-b7-pytorch'),
                 ModelArg('mixnet-l'),
                 ModelArg('mobilenet-v2-pytorch'),
                 ModelArg('repvgg-a0'),
                 ModelArg('repvgg-b1'),
-                ModelArg('repvgg-b3'),
-                ModelArg('resnet-50-caffe2')),
+                ModelArg('repvgg-b3')),
 
-            TestCase(options={'-m': ModelFileArg('efficientnet-b7-pytorch', 'efficientnet-b7.onnx'),
+            TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
                         '--reverse_input_channels': None,
                         '--mean_values': ['123.675', '116.28', '103.53'],
                         '--scale_values': ['58.395', '57.12', '57.375']}),
@@ -1047,7 +1045,6 @@ PYTHON_DEMOS = [
                 TestCase(options={'--architecture_type': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -1056,7 +1053,6 @@ PYTHON_DEMOS = [
                             '--scale_values': ['73.695', '69.87', '70.89']
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -1116,8 +1112,6 @@ PYTHON_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssd-resnet34-1200-onnx'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
@@ -1246,6 +1240,11 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    # TODO
+    PythonDemo(name='smartlab_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-h': None}),
+    )),
+    
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('aclnet')}),

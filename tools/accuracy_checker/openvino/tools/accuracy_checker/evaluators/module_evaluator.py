@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class ModuleEvaluator(BaseEvaluator):
 
         return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+    def process_dataset(self, *args, stored_predictions=None, progress_reporter=None, **kwargs):
         self._internal_module.process_dataset(
             *args, stored_predictions=stored_predictions, progress_reporter=progress_reporter, **kwargs
         )

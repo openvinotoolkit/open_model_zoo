@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -208,7 +208,9 @@ class ClassificationProfilingSummaryHelper:
         gt_bin = np.zeros((len(self.gt), max_v))
         pred_bin = np.zeros((len(self.pred), max_v))
         np.put_along_axis(gt_bin, np.expand_dims(np.array(self.gt).astype(int), 1), 1, axis=1)
-        np.put_along_axis(pred_bin, np.expand_dims(np.array(self.pred).astype(int), 1), 1, axis=1)
+        for top in np.transpose(self.pred, (1, 0)):
+            np.put_along_axis(
+                pred_bin, np.expand_dims(top.astype(int), 1), 1, axis=1)
         return gt_bin, pred_bin
 
     def roc(self, y_true, y_score):

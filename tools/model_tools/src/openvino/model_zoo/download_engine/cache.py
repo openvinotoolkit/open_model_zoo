@@ -50,7 +50,7 @@ class DirCache:
 
     def get(self, model_file, path, reporter):
         cache_path = self._hash_path(model_file.checksum.value)
-        cache_sha = model_file.checksum.type
+        cache_sha = model_file.checksum.type()
         cache_size = 0
 
         with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
@@ -106,7 +106,7 @@ class ChecksumSHA384(Checksum):
     RE_SHA384SUM = re.compile(r'[0-9a-fA-F]{96}')
 
     def __init__(self, value):
-        self.type = hashlib.sha384()
+        self.type = hashlib.sha384
         self.value = value
 
     @classmethod

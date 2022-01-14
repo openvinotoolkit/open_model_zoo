@@ -3,16 +3,16 @@ models:
 
     # list of launchers for your topology.
     launchers:
-      # launcher framework (e.g. caffe, dlsdk)
+      # launcher framework (e.g. caffe, openvino)
       - framework: dlsdk
         # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
         device: CPU
-        # topology IR (*.prototxt for caffe, *.xml for InferenceEngine, etc)
+        # model topology file (.xml, .onnx, e.t.c.)
         # path to topology is prefixed with directory, specified in "-m/--models" option
         # If you use dlsdk launcher, you can specify model in source framework format in this case Model Optimizer will be used for getting converted model.
-        caffe_model:   SampLeNet.prototxt
-        # topology weights binary (*.caffemodel for caffe, *.bin for InferenceEngine)
-        caffe_weights: SampLeNet.caffemodel
+        model:   SampLeNet.xml
+        # topology weights binary (*.bin) - optional, can be found automatically based on model path if required
+        weights: SampLeNet.bin
         # launcher returns raw result, so it should be converted
         # to an appropriate representation with adapter
         adapter: classification

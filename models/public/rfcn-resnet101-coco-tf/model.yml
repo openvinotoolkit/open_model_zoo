@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ files:
   - name: rfcn_resnet101_coco_2018_01_28.tar.gz
     size: 652955004
     checksum: 23641344acd2eacc6da60af24e62271b6e3b878b8a085d25321e40b64141e295c37cd7559ff47b1695850acbb48d4a24
-    source: http://download.tensorflow.org/models/object_detection/rfcn_resnet101_coco_2018_01_28.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/rfcn_resnet101_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/rfcn-resnet101-coco-tf/rfcn_resnet101_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

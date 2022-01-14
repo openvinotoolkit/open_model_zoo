@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ files:
   - name: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
     size: 727390102
     checksum: fe7871a3b291e30b299b859ffddc2b73f25890c259aedcd5bde6fb6dd6b5507a24e7d370365e3bdd3497f1786a0f4d36
-    source: http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mask_rcnn_inception_resnet_v2_atrous_coco/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

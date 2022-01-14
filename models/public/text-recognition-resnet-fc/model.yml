@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -206,9 +206,10 @@ files:
   - name: vedastr/ckpt/resnet_fc.pth
     size: 712199075
     checksum: 731cfa8125b4176f3ee668dd78d8f4dc964dc2e60bd1959e07931804a59292c10c94bee6548ee50b8626b09b8f442d07
-    source:
+    original_source:
       $type: google_drive
       id: 1OnUGdv9RFhFbQGXUUkWMcxUZg0mPV0kK
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/text-recognition-resnet-fc/vedastr/ckpt/resnet_fc.pth
   - name: vedastr/addict-2.4.0-py3-none-any.whl
     size: 3832
     checksum: 0b3d7c226551078ffcd70e4d512194f2cb67c6c06dc8c7a7b8001752b842b934990817f9236f73fb7c38cba5573205ab
@@ -239,44 +240,44 @@ postprocessing:
     pattern: 'from \.(pva) '
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/models/bodies/feature_extractors/encoders/backbones/__init__.py
+    file: vedastr/models/bodies/feature_extractors/encoders/backbones/__init__.py
     pattern: 'from \.(vgg) '
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/models/bodies/feature_extractors/encoders/enhance_modules/__init__.py
+    file: vedastr/models/bodies/feature_extractors/encoders/enhance_modules/__init__.py
     pattern: 'from \.(aspp|ppm) '
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/models/utils/__init__.py
+    file: vedastr/models/utils/__init__.py
     pattern: 'from \.(upsample) '
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/utils/__init__.py
+    file: vedastr/utils/__init__.py
     pattern: 'from \.(checkpoint) | load_url'
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/utils/config.py
+    file: vedastr/utils/config.py
     pattern: 'from .misc import collections_abc'
     replacement: 'import collections.abc'
   - $type: regex_replace
-    file:  vedastr/utils/config.py
+    file: vedastr/utils/config.py
     pattern: 'collections_abc'
     replacement: 'collections.abc'
   - $type: regex_replace
-    file:  vedastr/utils/config.py
+    file: vedastr/utils/config.py
     pattern: 'from \.(path)'
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/utils/config.py
+    file: vedastr/utils/config.py
     pattern: 'check_file_exist\(.*\)'
     replacement: '# \g<0>'
   - $type: regex_replace
-    file:  vedastr/utils/config.py
+    file: vedastr/utils/config.py
     pattern: 'addict'
     replacement: 'vedastr.addict'
   - $type: unpack_archive
     format: zip
-    file:  vedastr/addict-2.4.0-py3-none-any.whl
+    file: vedastr/addict-2.4.0-py3-none-any.whl
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

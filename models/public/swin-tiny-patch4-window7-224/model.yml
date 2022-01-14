@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ files:
   - name: swin_tiny_patch4_window7_224.pth
     size: 114342173
     checksum: 210021216e1f205617d885836b1ac59d725b8c41dbff8dc4c513e838911436b0b75e06529737e472d3167519a7c1a6ad
-    source: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth
+    original_source: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/swin-tiny-patch4-window7-224/swin_tiny_patch4_window7_224.pth
 postprocessing:
   - $type: unpack_archive
     format: zip

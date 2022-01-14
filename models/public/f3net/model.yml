@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ files:
   - name: f3net/model-32
     size: 102506472
     checksum: 6476078ef447502af76f214b96161f6295662ccef6d412aec90d0aca03fc5d7759fdd880c9ddec146e656114805acfc2
-    source:
+    original_source:
       $type: google_drive
       id: 1jcsmxZHL6DGwDplLp93H4VeN2ZjqBsOF
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/f3net/f3net/model-32
 postprocessing:
   - $type: regex_replace
     file: f3net/net.py
@@ -49,7 +50,6 @@ postprocessing:
     file: f3net/dataset.py
     pattern: 'import cv2'
     replacement: ''
-
 conversion_to_onnx_args:
   - --model-name=f3net
   - --model-path=$config_dir
@@ -69,5 +69,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output="saliency_map"
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://github.com/weijun88/F3Net/blob/master/LICENSE

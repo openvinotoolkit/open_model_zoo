@@ -11,6 +11,7 @@ The Open Model Zoo includes the following demos:
 - [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
 - [3D Segmentation Python\* Demo](./3d_segmentation_demo/python/README.md) - Segmentation demo segments 3D images using 3D convolutional networks.
 - [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [Background Subtraction Python\* Demo](./background_subtraction_demo/python/README.md) - Background subtraction using instance segmentation based models.
 - [BERT Named Entity Recognition Python\* Demo](./bert_named_entity_recognition_demo/python/README.md) - NER Demo application that uses a CONLL2003-tuned BERT model for inference.
 - [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
@@ -62,6 +63,7 @@ The Open Model Zoo includes the following demos:
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
 - [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-PI version.
+- [Smartlab Python\* Demo](./smartlab_demo/python/README.md) - action recognition and object detection for smartlab.
 - [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
@@ -351,7 +353,7 @@ list above.
 
 ## See Also
 
-* [Intel OpenVINO Documentation](https://docs.openvinotoolkit.org/latest/documentation.html)
+* [Intel OpenVINO Documentation](https://docs.openvino.ai/latest/documentation.html)
 * [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../models/intel/index.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../models/public/index.md)
 

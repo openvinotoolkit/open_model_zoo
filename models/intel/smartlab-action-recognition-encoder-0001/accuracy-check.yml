@@ -13,19 +13,26 @@ evaluations:
 
       launchers:
         - framework: dlsdk
+          # to an appropriate representation with adapter
+          adapter: classification
+          # adapter: action_detection
 
       datasets:
         - name: DSI1867
+          data_source: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3\high
+          batch: 1 # Default batch size is 1
+
+          annotation_conversion:
+              images_dir: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3
+              annotation_txt: C:\Users\kminemur\DSI-1867_small\action_recognition\labels\streams_3.txt
+              converter: smartlab_action
 
           preprocessing:
             - type: resize
               size: 224
-              aspect_ratio_scale: fit_to_window
+            - type: bgr_to_rgb
 
           metrics:
-            - type: clip_accuracy
-              presenter: print_vector
-              reference:
-                clip_accuracy: -1.0 #TODO
-                video_accuracy: -1.0 #TODO
-                mean: -1.0 #TODO
+            - type: accuracy
+            # - type: accuracy_per_class
+              top_k: 1

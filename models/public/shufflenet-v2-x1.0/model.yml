@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ description: >-
 
   The model output is typical object classifier for the 1000 different classifications
   matching with those in the ImageNet database.
-
 task_type: classification
 files:
   - name: shufflenetv2_x1-5666bf0f80.pth
     checksum: 95dbe93b68849d149e4964cfc2cef9d847da6da6f6d2618c661eaddaebc29772a9becad45a455d80cf59aab1d35b411e
     size: 9218294
-    source: https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+    original_source: https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/shufflenet-v2-x1.0/shufflenetv2_x1-5666bf0f80.pth
 framework: pytorch
 conversion_to_onnx_args:
   - --model-path=$dl_dir
@@ -47,5 +47,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=output
   - --input_model=$conv_dir/shufflenet-v2-x1.0.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ files:
   - name: mtcnn-o.caffemodel
     size: 1558412
     checksum: 77bb0c7ec10017793e903e73a70b33b3f9e9bb36569c39e87eec0b8ac7ff58ec7a4ed813822467dceb8549cb1e3c03e0
-    source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
+    original_source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mtcnn/mtcnn-o/det3.caffemodel
 model_optimizer_args:
   - --input_shape=[1,3,48,48]
   - --input=data

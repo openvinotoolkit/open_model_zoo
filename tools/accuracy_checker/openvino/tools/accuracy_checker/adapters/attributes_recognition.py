@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -304,12 +304,13 @@ class PersonAttributesAdapter(Adapter):
 
     def configure(self):
         self.attributes_recognition_out = self.launcher_config.get('attributes_recognition_out', self.output_blob)
+        self.output_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_output)
-        self.attributes_recognition_out = self.attributes_recognition_out or self.output_blob
+        if not self.output_verified:
+            self.select_output_blob(raw_output)
         for identifier, multi_label in zip(identifiers, raw_output[self.attributes_recognition_out]):
             multi_label[multi_label > 0.5] = 1.
             multi_label[multi_label <= 0.5] = 0.
@@ -317,6 +318,15 @@ class PersonAttributesAdapter(Adapter):
             result.append(MultiLabelRecognitionPrediction(identifier, multi_label.reshape(-1)))
 
         return result
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.attributes_recognition_out:
+            self.attributes_recognition_out = self.check_output_name(self.attributes_recognition_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.attributes_recognition_out = self.output_blob
+        return
 
 
 class GazeEstimationAdapter(Adapter):
