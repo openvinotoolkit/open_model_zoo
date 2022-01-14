@@ -56,7 +56,6 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.3,
-            is_show = self.is_show
             )
 
         ###           topview.global_subdetector2          ###
@@ -70,7 +69,6 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            is_show = self.is_show
             )
         
         '''configure settings for 2 models in front view'''
@@ -88,12 +86,11 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.2,
             nms_thresh = 0.3,
-            is_show = self.is_show
             )
 
         ###           frontview.global_subdetector2          ###
         #  max-number constraints:
-        #     "weights", 6; "tweezers", 1; "battery", 1;      
+        #     "weights", 6; "tweezers", 1; "battery", 1;
         #  other conditions:
         #     conf 0.1; nms 0.2
         self.front2_exp = MwGlobalExp(
@@ -102,7 +99,6 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            is_show = self.is_show
             )
 
         ### concatenate list of class names for topview

@@ -138,7 +138,6 @@ class SegmentorMstcn(Segmentor):
         )
         net.reshape({next(iter(net.input_info)): (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
-        net.add_outputs("RGB/inception_i3d/Logits/Conv3d_0c_1x1/conv_3d/convolution/fq_input_0")
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
         self.i3d = ie.load_network(network=net, device_name="CPU")
