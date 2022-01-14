@@ -37,7 +37,7 @@ Installation from source is as follows:
 2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) python package of the corresponding version:
 
 ```sh
-pip install openvino-dev[caffe,caffe2,onnx,tensorflow2,pytorch,mxnet]
+pip install openvino-dev[caffe,onnx,tensorflow2,pytorch,mxnet]
 ```
 > **NOTE**: For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
 
@@ -55,11 +55,6 @@ pip install .
 To convert models from certain frameworks, you may also need to install
 additional dependencies.
 
-For models from Caffe2:
-
-```sh
-python -mpip install --user -r ./requirements-caffe2.in
-```
 
 For models from PyTorch:
 
@@ -240,7 +235,7 @@ omz_converter --all
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. Models in PyTorch and Caffe2 formats will be
+were originally in that format are ignored. Models in PyTorch format will be
 converted in ONNX format first.
 
 The `--all` option can be replaced with other filter options to convert only
@@ -442,7 +437,7 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `caffe2`, `mxnet`, `onnx`,
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `onnx`,
   `pytorch` and `tf` (TensorFlow). Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.

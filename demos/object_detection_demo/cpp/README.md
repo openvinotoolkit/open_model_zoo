@@ -14,7 +14,7 @@ For example, if the inference is performed on the HDDL, and the CPU is essential
 in parallel. But if the inference is performed, say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
 
-This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
+This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvino.ai/latest/_docs_optimization_guide_dldt_optimization_guide.html)
 
 Other demo objectives are:
 
@@ -52,7 +52,7 @@ as shown in code mockup below:
     }
 ```
 
-For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine with Your Application](https://docs.openvino.ai/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
 ## Preparing to Run
 
@@ -75,7 +75,6 @@ omz_converter --list models.lst
 ### Supported Models
 
 * architecture_type = centernet
-  - ctdet_coco_dlav0_384
   - ctdet_coco_dlav0_512
 * architecture_type = faceboxes
   - faceboxes-pytorch
@@ -115,8 +114,6 @@ omz_converter --list models.lst
   - ssd-resnet34-1200-onnx
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco
-  - ssd_mobilenet_v2_coco
-  - ssd_resnet50_v1_fpn_coco
   - ssdlite_mobilenet_v2
   - vehicle-detection-0200
   - vehicle-detection-0201
@@ -231,5 +228,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

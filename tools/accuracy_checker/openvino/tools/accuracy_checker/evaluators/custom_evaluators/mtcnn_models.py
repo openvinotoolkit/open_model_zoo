@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -353,37 +353,8 @@ class DLSDKModelMixin:
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher):
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get(
-                'mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in model_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-
-            model_config['mo_flags'] = model_mo_flags
-            model_config['mo_params'] = model_mo_params
-
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            model, weights = launcher.convert_model(self.model_info)
-        else:
-            model, weights = self.auto_model_search(self.model_info)
+    def prepare_model(self):
+        model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
     def auto_model_search(self, network_info):
@@ -513,14 +484,17 @@ class OVModelMixin(BaseOpenVINOModel):
         for meta in batch_meta:
             meta['input_shape'] = []
         results = []
+        raw_results = []
         for feed_dict in input_blobs:
             input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
             if not self.is_dynamic:
                 self.reshape_net(input_shapes)
-            results.append(self.infer(feed_dict))
+            result, raw_result = self.infer(feed_dict, raw_results=True)
+            results.append(result)
+            raw_results.append(raw_result)
             for meta in batch_meta:
                 meta['input_shape'].append(input_shapes)
-        return results
+        return results, raw_results
 
     def predict(self, identifiers, input_data):
         raise NotImplementedError
@@ -547,37 +521,8 @@ class OVModelMixin(BaseOpenVINOModel):
             data = data.astype(precision)
         return data
 
-    def prepare_model(self, launcher):
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get(
-                'mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in model_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-
-            model_config['mo_flags'] = model_mo_flags
-            model_config['mo_params'] = model_mo_params
-
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            model, weights = launcher.convert_model(self.model_info)
-        else:
-            model, weights = self.auto_model_search(self.model_info)
+    def prepare_model(self):
+        model, weights = self.auto_model_search(self.model_info)
         return model, weights
 
     def auto_model_search(self, network_info):
@@ -633,16 +578,7 @@ class OVModelMixin(BaseOpenVINOModel):
         self.infer_request = None
 
     def reshape_net(self, shape):
-        if self.is_dynamic:
-            return
-        if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.exec_network
-        self.launcher.reshape_network(self.network, shape)
-        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-        if not self.is_dynamic and self.dynamic_inputs:
-            return
-        self.exec_network = self.launcher.ie_core.compile_model(self.network, self.launcher.device)
-        self.infer_request = None
+        self._reshape_input(shape)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
@@ -666,12 +602,6 @@ class OVModelMixin(BaseOpenVINOModel):
             for c_input in config_inputs:
                 c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
             self.model_info['inputs'] = config_inputs
-        config_outputs = self.model_info['outputs']
-        for key, value in config_outputs.items():
-            config_with_prefix = value.startswith(model_prefix)
-            if config_with_prefix != network_with_prefix:
-                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
-        self.model_info['outputs'] = config_outputs
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
@@ -707,7 +637,7 @@ class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
         self.adapter = None
         self.is_dynamic = False
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
             pnet_outs = model_info['outputs']
             pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
@@ -743,11 +673,11 @@ class OpenVINOProposalStage(ProposalBaseStage, OVModelMixin):
             self.print_input_output_info()
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
-        raw_outputs = self._infer(input_blobs, batch_meta)
+        outputs, raw_outputs = self._infer(input_blobs, batch_meta)
         if output_callback:
             for out in raw_outputs:
                 output_callback(out)
-        return raw_outputs
+        return outputs, raw_outputs
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
@@ -758,7 +688,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.adapter = None
         self.is_dynamic = False
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
             pnet_outs = model_info['outputs']
             pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
@@ -779,7 +709,6 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
                 self.exec_network = None
         if not self.dynamic_inputs:
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(
             self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = self.model_info['outputs']
@@ -810,14 +739,14 @@ class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
         if output_callback:
             batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
-            output_callback(transform_for_callback(batch_size, raw_outputs))
+            output_callback(transform_for_callback(batch_size, raw_outputs[1]))
         return raw_outputs
 
 
@@ -829,7 +758,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
@@ -848,7 +777,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
@@ -865,7 +794,7 @@ class OpenVINOOutputStage(OutputBaseStage, OVModelMixin):
         self.is_dynamic = False
         self.launcher = launcher
         if not delayed_model_loading:
-            model_xml, model_bin = self.prepare_model(launcher)
+            model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):

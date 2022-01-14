@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
 
 description: >-
   The "ssdlite_mobilenet_v2" model is used for object detection. For details, see
-  the paper <https://arxiv.org/abs/1801.04381>, MobileNetV2: Inverted Residuals
-  and Linear Bottlenecks.
+  the paper <https://arxiv.org/abs/1801.04381>, MobileNetV2: Inverted Residuals and
+  Linear Bottlenecks.
 task_type: detection
 files:
   - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
     size: 51025348
     checksum: 8e205630237f1913ac0ed623d48798f1fa03a9e95c467bd149eb5f6107e704a8131cdb0a72fcf6517dafa0ff47d32a4e
-    source: http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ssdlite_mobilenet_v2/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -35,5 +36,5 @@ model_optimizer_args:
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/pipeline.config
   - --input_model=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

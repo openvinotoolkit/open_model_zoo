@@ -15,7 +15,7 @@ For enabling OpenVINO™ launcher you need to add `framework: openvino` in launc
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 **Note:**
-   You can generate executable blob using [compile_tool](https://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html).
+   You can generate executable blob using [compile_tool](https://docs.openvino.ai/latest/_inference_engine_tools_compile_tool_README.html).
    Before evaluation executable blob, please make sure that selected device support it.
 
 Additionally you can provide device specific parameters:
@@ -33,7 +33,7 @@ Device config contains device specific options which should be set to Inference 
 1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are plugin configuration for each device. Plugin configuration represented as dictionary where keys are plugin specific configuration keys and values are their values respectively.
 
-Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
+Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvino.ai/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
 
 **Note:** Since OpenVINO 2020.4 on platforms with native bfloat16 support models will be executed on this precision by default. For disabling this behaviour, you need to use device_config with following configuration:
 ```yml
@@ -64,25 +64,6 @@ Each input description should has following info:
     Optionally you can determine `shape` of input (by default OpenVINO™ launcher uses info given from network, this option allows override default. It required for running ONNX\* models with dynamic input shape on devices, where dynamic shape is not supported), `layout` in case when your model was trained with non-standard data layout (For OpenVINO™ launcher default layout is `NCHW`)
     and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
-## Launcher configuration in case of conversion from source framework
-
-Launcher may optionally accept model parameters in source framework format which will be converted to Inference Engine IR using Model Optimizer.
-If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
-You can provide:
-
-* `caffe_model` and `caffe_weights` for Caffe model and weights (*.prototxt and *.caffemodel).
-* `tf_model` for TensorFlow model (*.pb, *.pb.frozen, *.pbtxt).
-* `tf_meta` for TensorFlow MetaGraph (*.meta).
-* `mxnet_weights` for MXNet params (*.params).
-* `onnx_model` for ONNX model (*.onnx). You also able to pass your ONNX model directly using `model` option if you do not need Model Optimizer conversion step.
-* `kaldi_model` for Kaldi model (*.nnet).
-
-In case when you want to determine additional parameters for model conversion (data_type, input_shape and so on), you can use `mo_params` for arguments with values and `mo_flags` for positional arguments like `legacy_mxnet_model` .
-Full list of supported parameters you can find in [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
-
-Model will be converted before every evaluation.
-You can provide `converted_model_dir` for saving converted model in specific folder, otherwise, converted models will be saved in path provided via `-C` command line argument or source model directory.
-
 ## Configuration example
 
 OpenVINO™ launcher config example:
@@ -91,12 +72,8 @@ OpenVINO™ launcher config example:
 launchers:
   - framework: dlsdk
     device: HETERO:GPU,CPU
-    caffe_model: path_to_model/alexnet.prototxt
-    caffe_weights: path_to_weights/alexnet.caffemodel
+    model: path_to_model/alexnet.xml
+    weights: path_to_weights/alexnet.bin
     adapter: classification
-    mo_params:
-      batch: 4
-    mo_flags:
-      - reverse_input_channels
     cpu_extensions: custom_cpu_extensions.so
 ```

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ files:
     size: 29948456
     checksum: c58dc63650b2f1b45a30891ff2669cf205f7b5fbafff65a4a2a37ddebb2ba4521110dabf27752121ce3ef8369439004e
     source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-regression.zip
+    original_source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/forward-tacotron/forward-tacotron-regression/forward-tacotron-regression.zip
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -30,5 +31,4 @@ model_optimizer_args:
   - --output=mel
   - --input_model=$dl_dir/forward-tacotron-regression/forward_tacotron_regression.onnx
 framework: onnx
-
 license: https://github.com/as-ideas/ForwardTacotron/blob/master/LICENSE

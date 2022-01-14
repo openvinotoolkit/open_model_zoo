@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ from argparse import Namespace
 from pathlib import Path
 from .config import ConfigReader
 from .evaluators import ModelEvaluator, ModuleEvaluator
+from .logging import init_logging
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -26,6 +27,7 @@ EVALUATION_MODE = {
 
 
 def get_metric_references(config_path, definitions_path=None, additional_info=None, return_header=True):
+    init_logging()
     args = {'config': Path(config_path), 'definitions': Path(definitions_path) if definitions_path else None}
     if additional_info:
         args.update(additional_info)

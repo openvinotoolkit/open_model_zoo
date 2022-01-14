@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ files:
   - name: wavernn-rnn.zip
     size: 14297518
     checksum: 77186c83348d404c547d5706af7541d9a5cb430ed4236595d4f5b5f5e034d01ee5a74e3d39307324d5cdac5007cd013a
-    source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
+    original_source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wavernn/wavernn-rnn/wavernn-rnn.zip
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -29,5 +30,4 @@ model_optimizer_args:
   - --output=logits,h1,h2
   - --input_model=$dl_dir/wavernn-rnn/wavernn_rnn.onnx
 framework: onnx
-
 license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt

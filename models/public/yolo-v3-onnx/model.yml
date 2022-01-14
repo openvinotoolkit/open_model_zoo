@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ files:
   - name: yolov3-10.onnx
     checksum: 832bb4c2be2f9a0eb3e69c426ceaadf472ef260802995fc694b5e8e36a63f0bdfe005058d16e18f091bfdefde3489746
     size: 247908721
-    source: https://media.githubusercontent.com/media/onnx/models/41ccf18ba5a815dab714899ac234e9b1e4293c20/vision/object_detection_segmentation/yolov3/model/yolov3-10.onnx
+    original_source: https://media.githubusercontent.com/media/onnx/models/41ccf18ba5a815dab714899ac234e9b1e4293c20/vision/object_detection_segmentation/yolov3/model/yolov3-10.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolo-v3-onnx/yolov3-10.onnx
 model_optimizer_args:
   - --input_shape=[1,3,416,416],[1,2]
   - --input=input_1,image_shape

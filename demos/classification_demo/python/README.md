@@ -34,22 +34,10 @@ omz_converter --list models.lst
 * alexnet
 * caffenet
 * densenet-121
-* densenet-121-caffe2
 * densenet-121-tf
-* densenet-161
-* densenet-161-tf
-* densenet-169
-* densenet-169-tf
-* densenet-201
-* densenet-201-tf
 * dla-34
 * efficientnet-b0
-* efficientnet-b0_auto_aug
 * efficientnet-b0-pytorch
-* efficientnet-b5
-* efficientnet-b5-pytorch
-* efficientnet-b7_auto_aug
-* efficientnet-b7-pytorch
 * efficientnet-v2-b0
 * efficientnet-v2-s
 * googlenet-v1
@@ -59,13 +47,10 @@ omz_converter --list models.lst
 * googlenet-v3-pytorch
 * googlenet-v4-tf
 * hbonet-0.25
-* hbonet-0.5
 * hbonet-1.0
 * inception-resnet-v2-tf
 * mixnet-l
 * mobilenet-v1-0.25-128
-* mobilenet-v1-0.50-160
-* mobilenet-v1-0.50-224
 * mobilenet-v1-1.0-224
 * mobilenet-v1-1.0-224-tf
 * mobilenet-v2
@@ -73,41 +58,28 @@ omz_converter --list models.lst
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
 * nfnet-f0
-* octave-densenet-121-0.125
-* octave-resnet-101-0.125
-* octave-resnet-200-0.125
 * octave-resnet-26-0.25
-* octave-resnet-50-0.125
-* octave-resnext-101-0.25
-* octave-resnext-50-0.25
-* octave-se-resnet-50-0.125
 * regnetx-3.2gf
 * repvgg-a0
 * repvgg-b1
 * repvgg-b3
 * resnest-50-pytorch
 * resnet-18-pytorch
-* resnet-50-caffe2
 * resnet-50-pytorch
 * resnet-50-tf
 * resnet18-xnor-binary-onnx-0001
 * resnet50-binary-0001
 * rexnet-v1-x1.0
 * se-inception
-* se-resnet-101
-* se-resnet-152
 * se-resnet-50
-* se-resnext-101
 * se-resnext-50
 * shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
 * squeezenet1.0
 * squeezenet1.1
-* squeezenet1.1-caffe2
 * swin-tiny-patch4-window7-224
 * vgg16
 * vgg19
-* vgg19-caffe2
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -119,10 +91,7 @@ Please note that you should use `<omz_dir>/data/dataset_classes/imagenet_2015.tx
 
 * googlenet-v2
 * se-inception
-* se-resnet-101
-* se-resnet-152
 * se-resnet-50
-* se-resnext-101
 * se-resnext-50
 
 and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all other models supported by the demo.
@@ -242,5 +211,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

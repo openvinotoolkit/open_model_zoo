@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -166,10 +166,10 @@ class ColorizationTestOVModel(BaseOpenVINOModel):
         self._inputs[self.input_blob] = img_l_rs
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in self._inputs.items()})
-        res = self.infer(self._inputs)
+        res, raw_res = self.infer(self._inputs, raw_results=True)
 
         new_result = self.postprocessing(res[self.output_blob], img_l)
-        return res, np.array(new_result)
+        return raw_res, np.array(new_result)
 
     def set_input_and_output(self):
         super().set_input_and_output()
@@ -209,9 +209,9 @@ class ColorizationCheckOVModel(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_dict.items()})
-        raw_result = self.infer(input_dict)
+        raw_result, raw_outputs = self.infer(input_dict, raw_results=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
-        return raw_result, result
+        return raw_outputs, result
 
     def fit_to_input(self, input_data):
         constant_normalization = 255.
