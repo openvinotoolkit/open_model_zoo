@@ -374,8 +374,8 @@ NATIVE_DEMOS = [
              '-i': DataPatternArg('object-detection-demo')}),
         single_option_cases('-m',
             ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-            # ModelArg('yolo-v3-tf'),
-            # ModelArg('yolo-v3-tiny-tf'),
+            ModelArg('yolo-v3-tf'),
+            ModelArg('yolo-v3-tiny-tf'),
     ))),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -722,7 +722,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-    #       ModelArg('instance-segmentation-person-0007'),
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -792,13 +792,13 @@ PYTHON_DEMOS = [
         ]
     )),
 
-    #PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={
-    #        '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-    #        '-m': ModelArg('bert-base-ner'),
-    #        '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-    #    }),
-    #)),
+    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+            '-m': ModelArg('bert-base-ner'),
+            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
+        }),
+    )),
 
     PythonDemo(name='classification_demo',
             device_keys=['-d'],
@@ -877,13 +877,13 @@ PYTHON_DEMOS = [
                model_keys=['-m_encoder', '-m_decoder'], test_cases=combine_cases(
         TestCase(options={'--no_show': None}),
         [
-            #TestCase(options={
-            #    '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
-            #                        'assets/formula-recognition-medium-scan-0001.png'),
-            #    '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
-            #    '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-            #    '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
-            #}),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
+                                    'assets/formula-recognition-medium-scan-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
+                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
+            }),
             TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
                                     'assets/formula-recognition-polynomials-handwritten-0001.png'),
@@ -1149,7 +1149,7 @@ PYTHON_DEMOS = [
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilefacedet-v1-mxnet'),
-                    # ModelArg('mobilenet-yolo-v4-syg'),
+                    ModelArg('mobilenet-yolo-v4-syg'),
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
