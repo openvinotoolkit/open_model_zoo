@@ -62,10 +62,10 @@ class IEModel:
         self.model = core.read_model(model_xml)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():
-            raise RuntimeError("Supports topologies with only {} inputs, but got {}" \
+            raise RuntimeError("Supports topologies with only {} inputs, but got {}"
                 .format(self.get_allowed_inputs_len(), len(self.model.inputs)))
         if len(self.model.outputs) not in self.get_allowed_outputs_len():
-            raise RuntimeError("Supports topologies with only {} outputs, but got {}" \
+            raise RuntimeError("Supports topologies with only {} outputs, but got {}"
                 .format(self.get_allowed_outputs_len(), len(self.model.outputs)))
 
         self.input_tensor_name = self.model.inputs[0].get_any_name()
