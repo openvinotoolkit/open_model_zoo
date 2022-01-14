@@ -35,7 +35,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
+    args.add_argument("-m", "--model_path", help="Required. Path to an .xml file with a trained model",
                       required=True, type=Path)
     args.add_argument("-i", "--input", help="Required. Path to a 16kHz wav file with speech+noise",
                       required=True, type=str)
