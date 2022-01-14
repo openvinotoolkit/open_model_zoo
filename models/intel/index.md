@@ -324,11 +324,11 @@ Deep Learning models for time series forecasting.
 
 ## Action Sequence Modeling
 
-Deep Learning models for sequence modeling.
+Deep Learning models for online sequence modeling.
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | TODO | TODO |
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
 
 ## See Also
 

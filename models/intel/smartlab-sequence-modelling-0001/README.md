@@ -1,55 +1,54 @@
 # online mstcn++
 
 ## Use Case and High-Level Description
-TODO
+This is an online action segmentation network for 16 classes trained on Intel dataset. It is an online version of MSTCN++ [1]. The difference between online mstcn++ and mstcn++ is that the former accept stream video as input while the latter assume the whole video is given.
 
-## ONNX Models
+For the original mstcn++ model details see [paper](https://arxiv.org/abs/2006.09220)
 
-We provide pre-trained models in ONNX format for user convenience.
-
-### Steps to Reproduce PyTorch to ONNX Conversion
-
-Model is provided in ONNX format, which was obtained by the following steps.
-TODO
-
-## Model specification
+## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
+| TODO Accuracy                   | TODO                                          |
+| GOPs                            | 0.048915                                  |
+| MParams                         | 1.018179                                  |
 | Source framework                | PyTorch\*                                 |
 
-### Accuracy
+## Inputs
+The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as i3d-rgb and resnet-50, and feature outputs of the previous frame.
 
-TODO
+1. Input feature, name: `input`, shape: `1, 2048, 24`, format: `B, W, H`, where:
 
+   - `B` - batch size
+   - `W` - feature map width
+   - `H` - feature map height
 
+2. History feature 1, name: `fhis_in_0`, shape: `12, 64, 2048`, format: `C, H', W`,
+3. History feature 2, name: `fhis_in_1`, shape: `11, 64, 2048`, format: `C, H', W`,
+4. History feature 3, name: `fhis_in_2`, shape: `11, 64, 2048`, format: `C, H', W`,
+5. History feature 4, name: `fhis_in_3`, shape: `11, 64, 2048`, format: `C, H', W`, where:
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
-| GOPs                            | TODO                                   |
-| MParams                         | TODO                                      |
+   - `C` - the channel number of feature vector
+   - `H'`- feature map height
+   - `W` - feature map width
 
-### Input
+## Outputs
 
-TODO
+The outputs also include two parts: predictions and four feature outputs. Predictions is the action classification and prediction results. Four Feature maps are the model layer features in past frames.
+1. Prediction, name: `output`, shape: `4, 1, 64, 24`, format: `C, B, H', W`,
+   - `C` - the channel number of feature vector
+   - `B` - batch size
+   - `H'`- feature map height
+   - `W` - feature map width
+After post-process with argmx() function, the prediction result can be used to decide the action type of the current frame.
+2. History feature 1, name: `fhis_out_0`, shape: `12, 64, 2048`, format: `C, H', W`,
+3. History feature 2, name: `fhis_out_1`, shape: `11, 64, 2048`, format: `C, H', W`,
+4. History feature 3, name: `fhis_out_2`, shape: `11, 64, 2048`, format: `C, H', W`,
+5. History feature 4, name: `fhis_out_3`, shape: `11, 64, 2048`, format: `C, H', W`, where:
 
-### Output
-
-TODO
-
-## Download a Model and Convert it into Inference Engine Format
-
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
-
-An example of using the Model Downloader:
-```
-omz_downloader --name <model_name>
-```
-
-An example of using the Model Converter:
-```
-omz_converter --name <model_name>
-```
+   - `C` - the channel number of feature vector
+   - `H'`- feature map height
+   - `W` - feature map width
 
 ## Legal Information
 
