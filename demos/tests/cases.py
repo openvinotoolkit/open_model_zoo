@@ -18,7 +18,7 @@ import sys
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
-    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, # image_retrieval_arg
 )
 from data_sequences import DATA_SEQUENCES
 
@@ -266,9 +266,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
-            TestCase(options={'-at': 'jr',
-                '-m': ModelArg('fbcnn')}
-            )
+            #TestCase(options={'-at': 'jr',
+            #    '-m': ModelArg('fbcnn')}
+            #)
         ]
     )),
 
@@ -962,13 +962,14 @@ PYTHON_DEMOS = [
                           '-ar': None})
     )),
 
-    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          **MONITORS,
-                          '-m': ModelArg('image-retrieval-0001')}),
-        single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-        single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    )),
+    # TODO: Put image_retrieval_arg import back
+    #PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-m': ModelArg('image-retrieval-0001')}),
+    #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
+    #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
+    #)),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1170,13 +1171,13 @@ PYTHON_DEMOS = [
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'detr'}),
+                TestCase(options={'--architecture_type': 'detr'}), # detr-resnet50 model fails to convert on 2022.1 package
                 [
-                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
-                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
-                                      '--reverse_input_channels': None,
-                                      '--mean_values': ['123.675', '116.28', '103.53'],
-                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                    #TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    #TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                    #                 '--reverse_input_channels': None,
+                    #                  '--mean_values': ['123.675', '116.28', '103.53'],
+                    #                  '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
