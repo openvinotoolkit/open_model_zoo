@@ -228,6 +228,7 @@ def compare_with_ref(reference, res_value, name=None):
             ref = reference.get(name)
     else:
         ref = reference
+    ref = ref if ref is None else float(ref)
     if ref is None:
         return None
     return abs(ref - res_value), abs(ref - res_value) / ref

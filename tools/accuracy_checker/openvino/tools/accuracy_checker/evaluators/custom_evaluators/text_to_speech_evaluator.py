@@ -21,7 +21,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, generate_layer_name
+from ...utils import contains_all, extract_image_representations, generate_layer_name, postprocess_output_name
 
 
 class TextToSpeechEvaluator(BaseCustomEvaluator):
@@ -158,8 +158,13 @@ class SequentialModel(BaseCascadeModel):
 
         duration_input = dict(zip(input_names, input_data[0]))
         duration_output = self.forward_tacotron_duration.predict(identifiers, duration_input)
+        if isinstance(duration_output, tuple):
+            duration_output, raw_duration_output = duration_output
+        else:
+            raw_duration_output = duration_output
+
         if callback:
-            callback(duration_output)
+            callback(raw_duration_output)
 
         duration = duration_output[self.duration_output]
         duration = (duration + 0.5).astype('int').flatten()
@@ -183,15 +188,23 @@ class SequentialModel(BaseCascadeModel):
         else:
             mels = self.forward_tacotron_regression.predict(identifiers,
                                                             {self.forward_tacotron_regression_input: processed_emb})
+        if isinstance(mels, tuple):
+            mels, raw_mels = mels
+        else:
+            raw_mels = mels
         if callback:
-            callback(mels)
+            callback(raw_mels)
         melgan_input = mels[self.mel_output]
         if np.ndim(melgan_input) != 3:
             melgan_input = np.expand_dims(melgan_input, 0)
         melgan_input = melgan_input[:, :, :self.max_mel_len]
         audio = self.melgan.predict(identifiers, {self.melgan_input: melgan_input})
+        if isinstance(audio, tuple):
+            audio, raw_audio = audio
+        else:
+            raw_audio = audio
 
-        return audio, self.adapter.process(audio, identifiers, input_meta)
+        return raw_audio, self.adapter.process(audio, identifiers, input_meta)
 
     def load_model(self, network_list, launcher):
         super().load_model(network_list, launcher)
@@ -226,15 +239,18 @@ class SequentialModel(BaseCascadeModel):
         return a[tuple(expanded_index)]
 
     def update_inputs_outputs_info(self):
+        if hasattr(self.forward_tacotron_duration, 'outputs'):
+            self.duration_output = postprocess_output_name(
+                self.duration_output, self.forward_tacotron_duration.outputs, raise_error=False)
+            self.embeddings_output = postprocess_output_name(
+                self.embeddings_output, self.forward_tacotron_duration.outputs, raise_error=False)
+            self.mel_output = postprocess_output_name(self.mel_output, self.forward_tacotron_regression.outputs,
+                                                      raise_error=False)
+            self.audio_output = postprocess_output_name(self.audio_output, self.melgan.outputs, raise_error=False)
+            self.adapter.output_blob = self.audio_output
         current_name = next(iter(self.forward_tacotron_duration.inputs))
         with_prefix = current_name.startswith('forward_tacotron_duration_')
         if with_prefix != self.with_prefix:
-            self.duration_output = generate_layer_name(self.duration_output, 'forward_tacotron_duration_', with_prefix)
-            self.embeddings_output = generate_layer_name(self.embeddings_output, 'forward_tacotron_duration_',
-                                                         with_prefix)
-            self.mel_output = generate_layer_name(self.mel_output, 'forward_tacotron_regression_', with_prefix)
-            self.audio_output = generate_layer_name(self.audio_output, 'melgan_', with_prefix)
-            self.adapter.output_blob = self.audio_output
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
             if self.duration_speaker_embeddings:
@@ -267,6 +283,9 @@ class TTSOVModel(BaseOpenVINOModel):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
         return self.infer(input_data)
+
+    def infer(self, input_data, raw_results=True):
+        return super().infer(input_data, raw_results)
 
     def set_input_and_output(self):
         pass

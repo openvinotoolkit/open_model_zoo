@@ -219,10 +219,10 @@ class CommonOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data)
+        results, raw_results = self.infer(input_data, raw_results=True)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(results[name] for name in names) + (results,)
+        return tuple(results[name] for name in names) + (raw_results,)
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
