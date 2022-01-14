@@ -375,8 +375,8 @@ NATIVE_DEMOS = [
         single_option_cases('-m',
             ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
             ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf'),
-    ))),
+            ModelArg('yolo-v3-tiny-tf')),
+    )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -722,7 +722,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
+    #       ModelArg('instance-segmentation-person-0007'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
