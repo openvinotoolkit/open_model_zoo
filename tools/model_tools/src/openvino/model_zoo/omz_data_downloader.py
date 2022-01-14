@@ -30,6 +30,12 @@ def copy_data(output_dir):
         str(data_path),
     )
 
+
+def read_dataset_classes(file_name):
+    file_path = _common.PACKAGE_DIR / 'data' / 'dataset_classes' / file_name
+    return file_path.read_text()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
