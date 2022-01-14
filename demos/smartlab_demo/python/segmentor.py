@@ -17,6 +17,7 @@
 import cv2
 import sys
 import numpy as np
+import logging as log
 from collections import deque
 from scipy.special import softmax
 from openvino.inference_engine import IECore
@@ -220,9 +221,9 @@ class SegmentorMstcn(object):
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
         if num_batch < 0:
-            print("Waiting for the next frame ...")
+            log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
-            print("start_index:", start_index, "end_index:", end_index)
+            log.debug(f"start_index: {start_index} end_index: {end_index}")
 
             unit1 = embed_buffer_top[:, start_index:end_index]
             unit2 = embed_buffer_front[:, start_index:end_index]
