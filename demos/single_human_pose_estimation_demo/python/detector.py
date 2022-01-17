@@ -13,8 +13,7 @@ class Detector:
             raise RuntimeError("Detector supports only models with 1 output layer")
 
         input_shape = self.model.inputs[0].shape
-        if len(input_shape) != 4 or input_shape[1] != 3:
-            raise RuntimeError("Expected model input shape [1, 3, H, W]")
+        self.nchw_layout = input_shape[1] == 3
 
         OUTPUT_SIZE = 7
         output_shape = self.model.outputs[0].shape
@@ -24,14 +23,18 @@ class Detector:
         compiled_model = core.compile_model(self.model, device)
         self.infer_request = compiled_model.create_infer_request()
         self.input_tensor_name = self.model.inputs[0].get_any_name()
-        _, _, self.input_h, self.input_w = input_shape
+        if self.nchw_layout:
+            _, _, self.input_h, self.input_w = input_shape
+        else:
+            _, self.input_h, self.input_w, _ = input_shape
 
     def _preprocess(self, img):
         self._h, self._w, _ = img.shape
         if self._h != self.input_h or self._w != self.input_w:
             img = cv2.resize(img, dsize=(self.input_w, self.input_h), fy=self._h / self.input_h,
                              fx=self._h / self.input_h)
-        img = img.transpose(2, 0, 1)
+        if self.nchw_layout:
+            img = img.transpose(2, 0, 1)
         return img[None, ]
 
     def _infer(self, prep_img):
