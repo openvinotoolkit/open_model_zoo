@@ -38,6 +38,7 @@ class ImageInpainting:
 
         if mask_channels != 1:
             raise RuntimeError("The model expects 1 channel for {} input layer".format(self.mask_input_layer))
+
         if mask_height != input_height or mask_width != input_width:
             raise RuntimeError("Mask size is expected to be equal to image size")
         self.input_height = input_height
