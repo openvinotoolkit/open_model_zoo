@@ -57,10 +57,6 @@ bounding boxes. Each detection has the format [`x_min`, `y_min`, `x_max`, `y_max
 - `conf2` - confidence for the predicted class local?
 - `label` - predicted class ID (0 - balance, 1 - weights, 2 - tweezers, 3 - box, 4 - battery, 5 - tray, 6 - ruler, 7 - rider, 8 - scale, 9 - hand)
 
-## Training Pipeline
-
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/person-vehicle-bike-detection/readme.md), allowing to fine-tune the model on custom dataset.
-
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

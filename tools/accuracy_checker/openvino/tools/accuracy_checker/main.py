@@ -84,6 +84,7 @@ def main():
                     print_results=True, ignore_results_formatting=args.ignore_result_formatting,
                     ignore_metric_reference=args.ignore_metric_reference
                 )
+
                 if args.csv_result:
                     write_csv_result(
                         args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
