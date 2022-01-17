@@ -22,12 +22,12 @@ The network is able to recognize school marks that should have format either `<d
 
 ## Inputs
 
-Image, name: `Placeholder`, shape: `1, 1, 32, 64` in the format `B, C, H, W`, where:
+Image, name: `Placeholder`, shape: `1, 32, 64, 1` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 

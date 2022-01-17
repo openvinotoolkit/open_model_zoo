@@ -19,12 +19,12 @@ Tested on the VOC 2012 validation dataset.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 416, 416` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 416, 416, 3` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order is `BGR`.
 
