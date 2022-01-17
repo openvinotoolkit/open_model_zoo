@@ -212,7 +212,7 @@ class Model:
 
         if self.model_status == Model.Status.ENCODER_INFER:
             infer_status_encoder = self.infer_request_encoder.wait_for(0)
-            if infer_status_encoder is True:
+            if infer_status_encoder:
                 self._start_decoder()
             return None
 
@@ -232,7 +232,7 @@ class Model:
     def _process_decoding_results(self):
         timeout = 0 if self.is_async else -1
         infer_status_decoder = self.infer_request_decoder.wait_for(timeout)
-        if infer_status_decoder is False and self.is_async:
+        if not infer_status_decoder and self.is_async:
             return None
         self._unpack_dec_results()
 
