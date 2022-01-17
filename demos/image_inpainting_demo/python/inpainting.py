@@ -28,14 +28,16 @@ class ImageInpainting:
         compiled_model = core.compile_model(model, device)
         self.infer_request = compiled_model.create_infer_request()
 
-        _, channels, input_height, input_width = model.input(self.image_input_layer).shape
-        if channels != 3:
-            raise RuntimeError("The model expects 3 channels for {} input layer".format(self.image_input_layer))
+        self.nchw_layout = model.input(self.image_input_layer).shape[1] == 3
+        if self.nchw_layout:
+            _, _, input_height, input_width = model.input(self.image_input_layer).shape
+            _, mask_channels, mask_height, mask_width = model.input(self.mask_input_layer).shape
+        else:
+            _, input_height, input_width, = model.input(self.image_input_layer).shape
+            _, mask_height, mask_width, mask_channels = model.input(self.mask_input_layer).shape
 
-        _, channels, mask_height, mask_width = model.input(self.mask_input_layer).shape
-        if channels != 1:
-            raise RuntimeError("The model expects 3 channels for {} input layer".format(self.mask_input_layer))
-
+        if mask_channels != 1:
+            raise RuntimeError("The model expects 1 channel for {} input layer".format(self.mask_input_layer))
         if mask_height != input_height or mask_width != input_width:
             raise RuntimeError("Mask size is expected to be equal to image size")
         self.input_height = input_height
