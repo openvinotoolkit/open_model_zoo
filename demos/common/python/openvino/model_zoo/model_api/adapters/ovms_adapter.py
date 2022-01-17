@@ -63,7 +63,7 @@ class OVMSAdapter(ModelAdapter):
         pattern = re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/\w+(\:\d+)*")
         if not pattern.fullmatch(target_model):
             raise ValueError("invalid --model option format")
-        [service_url, _, model] = target_model.split("/")
+        service_url, _, model = target_model.split("/")
         model_spec = model.split(":")
         if len(model_spec) == 1:
             # model version not specified - use latest

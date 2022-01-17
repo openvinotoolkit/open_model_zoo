@@ -1,6 +1,6 @@
 # OpenVINO Model Server Adapter
 
-The `OVMSAdapter` implements `ModelAdapter` interface which makes it possible to use Model API with models hosted in OpenVINO Model Server.
+The `OVMSAdapter` implements `ModelAdapter` interface. The `OVMSAdapter` makes it possible to use Model API with models hosted in OpenVINO Model Server.
 
 ## Prerequisites
 
@@ -45,8 +45,7 @@ See [model server configuration parameters](https://github.com/openvinotoolkit/m
 
 ### Example OVMS startup command
 ```
-docker run -d --rm -v <models_repository>:/models -p 9000:9000 openvino/model_server:latest \
---model_path <path_to_model> --model_name <model_name> --port 9000 --shape auto --nireq 32 --target_device CPU --plugin_config "{\"CPU_THROUGHPUT_STREAMS\": \"CPU_THROUGHPUT_AUTO\"}"
+docker run -d --rm -v <models_repository>:/models -p 9000:9000 openvino/model_server:latest --model_path <path_to_model> --model_name <model_name> --port 9000 --shape auto --nireq 32 --target_device CPU --plugin_config "{\"CPU_THROUGHPUT_STREAMS\": \"CPU_THROUGHPUT_AUTO\"}"
 ```
 
 > **Note**: In demos, while using `--adapter ovms`, inference options like: `-nireq`, `-nstreams` `-nthreads` as well as device specification with `-d` will be ignored.
