@@ -6,6 +6,7 @@ Frameworks supported by the Open Model Zoo:
 * Caffe\*
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
+* PaddlePaddle\*
 * MXNet\*
 
 Open Model Zoo also supports models already in the ONNX format.
@@ -38,7 +39,7 @@ Examples of model names:
 
 ### Files Location
 
-Place your files as shown in the table below:
+Place your filesas shown in the table below:
 
 File | Destination
 ---|---
