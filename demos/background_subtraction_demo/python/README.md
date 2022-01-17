@@ -87,7 +87,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  --adapter {openvino,remote}
+  --adapter {openvino,ovms}
                         Optional. Specify the model adapter. Default is
                         openvino.
   -i INPUT, --input INPUT
