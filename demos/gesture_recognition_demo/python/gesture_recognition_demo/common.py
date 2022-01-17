@@ -69,7 +69,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
 
         input_data = {self.input_tensor_name: data}
         self.infer_requests[0].infer(input_data)
-        return self.infer_requests[0].get_tensor(self.output_tensor_name).data
+        return self.infer_requests[0].get_tensor(self.output_tensor_name).data[:]
 
     def async_infer(self, data, req_id):
         """Requests model inference for the specified input"""
@@ -81,4 +81,4 @@ class IEModel:  # pylint: disable=too-few-public-methods
         """Waits for the model output by the specified request ID"""
 
         if self.infer_requests[req_id].wait_for(-1):
-            return self.infer_requests[req_id].get_tensor(self.output_tensor_name).data
+            return self.infer_requests[req_id].get_tensor(self.output_tensor_name).data[:]

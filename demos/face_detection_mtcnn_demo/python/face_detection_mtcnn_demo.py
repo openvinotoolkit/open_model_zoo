@@ -197,7 +197,7 @@ def main():
                 log.info("The Proposal model {} is loaded to {}".format(args.model_pnet, args.device))
 
             infer_request_pnet.infer(inputs={pnet_input_tensor_name: image})
-            p_res = {name: infer_request_pnet.get_tensor(name).data for name in {pnet_roi_name, pnet_cls_name}}
+            p_res = {name: infer_request_pnet.get_tensor(name).data[:] for name in {pnet_roi_name, pnet_cls_name}}
             pnet_res.append(p_res)
 
         image_num = len(scales)
@@ -228,7 +228,7 @@ def main():
                 rnet_input.extend(crop_img)
 
             infer_request_rnet.infer(inputs={rnet_input_tensor_name: rnet_input})
-            rnet_res = {name: infer_request_rnet.get_tensor(name).data for name in {rnet_roi_name, rnet_cls_name}}
+            rnet_res = {name: infer_request_rnet.get_tensor(name).data[:] for name in {rnet_roi_name, rnet_cls_name}}
 
             roi = rnet_res[rnet_roi_name]
             cls = rnet_res[rnet_cls_name]
@@ -251,7 +251,7 @@ def main():
                 onet_input.extend(crop_img)
 
             infer_request_onet.infer(inputs={onet_input_tensor_name: onet_input})
-            onet_res = {name: infer_request_onet.get_tensor(name).data for name in {onet_roi_name, onet_cls_name, onet_pts_name}}
+            onet_res = {name: infer_request_onet.get_tensor(name).data[:] for name in {onet_roi_name, onet_cls_name, onet_pts_name}}
 
             roi = onet_res[onet_roi_name]
             cls = onet_res[onet_cls_name]

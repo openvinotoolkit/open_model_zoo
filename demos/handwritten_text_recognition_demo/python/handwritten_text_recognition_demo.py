@@ -119,7 +119,7 @@ def main():
     start_time = perf_counter()
     for _ in range(args.number_iter):
         infer_request.infer(inputs={input_tensor_name: input_image})
-        preds = infer_request.get_tensor(output_tensor_name).data
+        preds = infer_request.get_tensor(output_tensor_name).data[:]
         result = codec.decode(preds)
         print(result)
     total_latency = ((perf_counter() - start_time) / args.number_iter + preprocessing_total_time) * 1e3

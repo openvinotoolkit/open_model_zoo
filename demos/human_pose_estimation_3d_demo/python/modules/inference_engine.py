@@ -53,7 +53,7 @@ class InferenceEngine:
         img = np.transpose(img, (2, 0, 1))[None, ]
 
         self.infer_request.infer({self.input_tensor_name: img})
-        inference_result = {name: self.infer_request.get_tensor(name).data for name in {'features', 'heatmaps', 'pafs'}}
+        inference_result = {name: self.infer_request.get_tensor(name).data[:] for name in {'features', 'heatmaps', 'pafs'}}
 
         inference_result = (inference_result['features'][0],
                             inference_result['heatmaps'][0], inference_result['pafs'][0])
