@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pre-trained on the [Pittsburgh 250k](http://www.ok.ctrl.titech.ac.jp/~torii/project/repttile/) dataset.
+NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pre-trained on the [Pittsburgh 250k](https://www.di.ens.fr/willow/research/netvlad/) dataset.
 
 For details see [repository](https://github.com/uzh-rpg/netvlad_tf_open) and [paper](https://arxiv.org/abs/1511.07247).
 
