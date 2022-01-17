@@ -148,13 +148,12 @@ def main():
     if len(model.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")
         sys.exit(1)
-    input_shape = model.inputs[0].shape
     input_tensor_name = model.inputs[0].get_any_name()
     if len(model.outputs) != 1:
         log.error("Demo supports only models with 1 output layer")
         sys.exit(1)
 
-    batch_size, channels, one, length = input_shape
+    batch_size, channels, one, length = model.inputs[0].shape
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
 
@@ -178,7 +177,7 @@ def main():
     outputs = []
     clips = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
-        chunk.shape = input_shape
+        chunk = np.reshape(chunk, model.inputs[0].shape)
         output = next(iter(infer_request.infer({input_tensor_name: chunk}).values()))
         clips += batch_size
         for batch, data in enumerate(output):
