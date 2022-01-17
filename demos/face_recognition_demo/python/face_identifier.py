@@ -50,6 +50,7 @@ class FaceIdentifier(Module):
 
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         self.input_shape = self.model.inputs[0].shape
+        self.nchw_layout = self.input_shape[1] == 3
         output_shape = self.model.outputs[0].shape
         if len(output_shape) not in (2, 4):
             raise RuntimeError("The model expects output shape [1, n, 1, 1] or [1, n], got {}".format(output_shape))
@@ -70,7 +71,7 @@ class FaceIdentifier(Module):
         image = frame.copy()
         inputs = cut_rois(image, rois)
         self._align_rois(inputs, landmarks)
-        inputs = [resize_input(input, self.input_shape) for input in inputs]
+        inputs = [resize_input(input, self.input_shape, self.nchw_layout) for input in inputs]
         return inputs
 
     def enqueue(self, input):

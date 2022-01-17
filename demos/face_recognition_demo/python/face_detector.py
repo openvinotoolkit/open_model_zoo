@@ -64,6 +64,7 @@ class FaceDetector(Module):
             raise ValueError("Both input height and width should be positive for Face Detector reshape")
 
         self.input_shape = self.model.inputs[0].shape
+        self.nchw_layout = self.input_shape[1] == 3
         self.output_shape = self.model.outputs[0].shape
         if len(self.output_shape) != 4 or self.output_shape[3] != self.Result.OUTPUT_SIZE:
             raise RuntimeError("The model expects output shape with {} outputs".format(self.Result.OUTPUT_SIZE))
@@ -78,7 +79,7 @@ class FaceDetector(Module):
 
     def preprocess(self, frame):
         self.input_size = frame.shape
-        return resize_input(frame, self.input_shape)
+        return resize_input(frame, self.input_shape, self.nchw_layout)
 
     def start_async(self, frame):
         input = self.preprocess(frame)
