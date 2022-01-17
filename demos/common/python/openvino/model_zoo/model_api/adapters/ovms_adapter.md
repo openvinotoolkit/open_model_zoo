@@ -10,13 +10,7 @@ The `OVMSAdapter` implements `ModelAdapter` interface. The `OVMSAdapter` makes i
 
 ### Deploy OpenVINO Model Server
 
-Model Server is distributed as a docker image, so you can pull it from Docker Hub with:
-
-```
-docker pull openvino/model_server
-```
-
-See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
+Model Server is distributed as a docker image and it's available in DockerHub, so you can use it with `docker run` command. See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
 
 ### Install ovmsclient
 
@@ -45,7 +39,7 @@ See [model server configuration parameters](https://github.com/openvinotoolkit/m
 
 ### Example OVMS startup command
 ```
-docker run -d --rm -v <models_repository>:/models -p 9000:9000 openvino/model_server:latest --model_path <path_to_model> --model_name <model_name> --port 9000 --shape auto --nireq 32 --target_device CPU --plugin_config "{\"CPU_THROUGHPUT_STREAMS\": \"CPU_THROUGHPUT_AUTO\"}"
+docker run -d --rm -v /home/user/models:/models -p 9000:9000 openvino/model_server:latest --model_path /models/model1 --model_name model1 --port 9000 --shape auto --nireq 32 --target_device CPU --plugin_config "{\"CPU_THROUGHPUT_STREAMS\": \"CPU_THROUGHPUT_AUTO\"}"
 ```
 
 > **Note**: In demos, while using `--adapter ovms`, inference options like: `-nireq`, `-nstreams` `-nthreads` as well as device specification with `-d` will be ignored.
@@ -60,10 +54,10 @@ To run the demo with model served in OpenVINO Model Server, you would have to pr
 - `<model_name>` - name of the target model (the one specified by `model_name` parameter in the model server startup command)
 - `<model_version>` *(optional)* - version of the target model (default: latest)
 
- Assuming that model server runs on the same machine as the demo, exposes gRPC service on port 9000 and serves model called `my_model`, the value of `-m` parameter would be:
+ Assuming that model server runs on the same machine as the demo, exposes gRPC service on port 9000 and serves model called `model1`, the value of `-m` parameter would be:
 
-- `localhost:9000/models/my_model` - requesting latest model version
-- `localhost:9000/models/my_model:2` - requesting model version number 2
+- `localhost:9000/models/model1` - requesting latest model version
+- `localhost:9000/models/model1:2` - requesting model version number 2
 
 ## See Also
 
