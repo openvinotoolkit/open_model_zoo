@@ -44,7 +44,7 @@ models:
             max_error: True
             presenter: print_vector
             reference:
-              output@@max_error: 1e-5
+              output@max_error: 1e-5
               fhis_out_0@max_error: 1e-5
               fhis_out_1@max_error: 1e-5
               fhis_out_2@max_error: 1e-5
