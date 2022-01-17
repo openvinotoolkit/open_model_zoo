@@ -418,6 +418,7 @@ AccuracyChecker supports following set of adapters:
     * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
 * `multi_output_regression` - converting raw output features to `RegressionPrediction` for regression with gt data.
   * `output` - list of target output names.
+  * `online` - if online is True, adapter will ignore the batch-size. Default is False.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
     * `adapters` - Dict where key is an output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
