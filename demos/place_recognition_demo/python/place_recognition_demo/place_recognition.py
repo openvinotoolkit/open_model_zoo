@@ -38,7 +38,7 @@ class IEModel: # pylint: disable=too-few-public-methods
         log.info('Reading model {}'.format(model_path))
         self.model = core.read_model(model_path, model_path.with_suffix('.bin'))
         self.input_tensor_name = self.model.inputs[0].get_any_name()
-        self.input_size = list(self.model.input(self.input_tensor_name).shape)
+        self.input_size = self.model.input(self.input_tensor_name).shape
         compiled_model = core.compile_model(self.model, device)
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
@@ -58,7 +58,7 @@ class PlaceRecognition:
     def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
         self.model = IEModel(model_path, device, cpu_extension)
-        self.input_size = self.model.input_size[2:]
+        self.input_size = self.model.input_size[2], self.model.input_size[3]
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):
