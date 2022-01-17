@@ -19,7 +19,7 @@ import os.path as osp
 
 import numpy as np
 
-from openvino.runtime import PartialShape, Dimension, set_batch, Layout
+from openvino.runtime import PartialShape, set_batch, Layout
 from utils.wav_processing import (
     fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
 )
@@ -53,12 +53,12 @@ class WaveRNNIE:
         self.upsample_model = self.load_network(model_upsample)
         if upsampler_width > 0:
             orig_shape = self.upsample_model.input('mels').shape
-            self.upsample_model.reshape({"mels": PartialShape([Dimension(orig_shape[0]), Dimension(upsampler_width), Dimension(orig_shape[2])])})
+            self.upsample_model.reshape({"mels": PartialShape([orig_shape[0], upsampler_width, orig_shape[2]])})
 
-        self.upsample_exec, self.upsample_request = self.create_exec_network(self.upsample_model, model_upsample)
+        self.upsample_request = self.create_exec_network(self.upsample_model, model_upsample)
 
         self.rnn_model = self.load_network(model_rnn)
-        self.rnn_exec, self.rnn_request = self.create_exec_network(self.rnn_model, model_rnn, batch_sizes=self.batch_sizes)
+        self.rnn_requests = self.create_exec_network(self.rnn_model, model_rnn, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
         self.mel_len = self.upsample_model.input('mels').shape[1] - 2 * self.pad
@@ -73,20 +73,18 @@ class WaveRNNIE:
 
     def create_exec_network(self, model, path, batch_sizes=None):
         if batch_sizes is not None:
-            compiled_model = []
             requests = []
             for parameter in model.get_parameters():
                 parameter.set_layout(Layout("BC"))
             for b_s in batch_sizes:
                 set_batch(model, b_s)
-                compiled_model_i = self.ie.compile_model(model, device_name=self.device)
-                compiled_model.append(compiled_model_i)
-                requests.append(compiled_model_i.create_infer_request())
+                compiled_model = self.ie.compile_model(model, device_name=self.device)
+                requests.append(compiled_model.create_infer_request())
         else:
             compiled_model = self.ie.compile_model(model, device_name=self.device)
             requests = compiled_model.create_infer_request()
         log.info('The WaveRNN model {} is loaded to {}'.format(path, self.device))
-        return compiled_model, requests
+        return requests
 
     @staticmethod
     def get_rnn_init_states(b_size=1, rnn_dims=328):
@@ -142,7 +140,7 @@ class WaveRNNIE:
 
         self.upsample_request.infer(inputs={"mels": mels})
         upsample_mels = self.upsample_request.get_tensor("upsample_mels").data[:, self.indent:-self.indent, :]
-        aux = self.upsample_request.get_tensor("aux").data
+        aux = self.upsample_request.get_tensor("aux").data[:]
         return upsample_mels, aux
 
     def forward_rnn(self, mels, upsampled_mels, aux):
@@ -159,6 +157,7 @@ class WaveRNNIE:
 
         active_network = self.batch_sizes.index(b_size)
 
+        print(self.rnn_width)
         h1, h2, x = self.get_rnn_init_states(b_size, 512)
 
         output = []
@@ -168,12 +167,12 @@ class WaveRNNIE:
 
             a1_t, a2_t, a3_t, a4_t = \
                 (a[:, i, :] for a in aux_split)
-            self.rnn_request[active_network].infer(inputs={"m_t": m_t, "a1_t": a1_t, "a2_t": a2_t, "a3_t": a3_t,
+            self.rnn_requests[active_network].infer(inputs={"m_t": m_t, "a1_t": a1_t, "a2_t": a2_t, "a3_t": a3_t,
                                                            "a4_t": a4_t, "h1.1": h1, "h2.1": h2, "x": x})
 
-            logits = self.rnn_request[active_network].get_tensor('logits').data
-            h1 = self.rnn_request[active_network].get_tensor('h1').data
-            h2 = self.rnn_request[active_network].get_tensor('h2').data
+            logits = self.rnn_requests[active_network].get_tensor('logits').data[:]
+            h1 = self.rnn_requests[active_network].get_tensor('h1').data[:]
+            h2 = self.rnn_requests[active_network].get_tensor('h2').data[:]
 
             sample = infer_from_discretized_mix_logistic(logits)
 
@@ -215,9 +214,9 @@ class MelGANIE:
         if self.model.input('mel').shape[2] != default_width:
             orig_shape = self.model.input('mel').shape
             new_shape = (orig_shape[0], orig_shape[1], default_width)
-            self.model.reshape({"mel": PartialShape([Dimension(new_shape[0]), Dimension(new_shape[1]), Dimension(new_shape[2])])})
+            self.model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
 
-        self.compiled_model, self.requests = self.create_exec_network(self.model, model, self.scales)
+        self.requests = self.create_exec_network(self.model, model, self.scales)
 
         # fixed number of columns in mel-spectrogramm
         self.mel_len = self.model.input('mel').shape[2]
@@ -233,20 +232,18 @@ class MelGANIE:
     def create_exec_network(self, model, path, scales=None):
         if scales is not None:
             orig_shape = model.input('mel').shape
-            compiled_model = []
             requests = []
             for i in range(scales):
                 new_shape = (orig_shape[0], orig_shape[1], orig_shape[2] * (i + 1))
-                model.reshape({"mel": PartialShape([Dimension(new_shape[0]), Dimension(new_shape[1]), Dimension(new_shape[2])])})
-                compiled_model_i = self.ie.compile_model(model, device_name=self.device)
-                compiled_model.append(compiled_model_i)
-                requests.append(compiled_model_i.create_infer_request())
-                model.reshape({"mel": PartialShape([Dimension(orig_shape[0]), Dimension(orig_shape[1]), Dimension(orig_shape[2])])})
+                model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
+                compiled_model = self.ie.compile_model(model, device_name=self.device)
+                requests.append(compiled_model.create_infer_request())
+                model.reshape({"mel": PartialShape([orig_shape[0], orig_shape[1], orig_shape[2]])})
         else:
             compiled_model = self.ie.compile_model(model, device_name=self.device)
             requests = compiled_model.create_infer_request()
         log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
-        return compiled_model, requests
+        return requests
 
     def forward(self, mel):
         mel = np.expand_dims(mel, axis=0)
@@ -273,7 +270,7 @@ class MelGANIE:
         c_end = cur_w
         while c_begin < cols:
             self.requests[active_net].infer(inputs={"mel": mel[:, :, c_begin:c_end]})
-            audio = self.requests[active_net].get_tensor("audio").data
+            audio = self.requests[active_net].get_tensor("audio").data[:]
             res_audio.extend(audio)
 
             c_begin = c_end

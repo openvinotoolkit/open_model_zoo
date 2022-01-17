@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020-2021 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ def main():
     audio_res = np.array([], dtype=np.int16)
 
     speaker_emb = None
-    if forward_tacotron.has_speaker_embeddings():
+    if forward_tacotron.is_multi_speaker:
         if args.speaker_id == -1:
             interactive_parameter = init_parameters_interactive(args)
             args.alpha = 1.0 / interactive_parameter["speed"]

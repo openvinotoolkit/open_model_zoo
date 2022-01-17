@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020-2021 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,6 +23,14 @@ from utils.text_preprocessing import text_to_sequence, _symbol_to_id
 from utils.embeddings_processing import PCA
 
 
+def check_input_name(model, input_tensor_name):
+    try:
+        model.input(input_tensor_name)
+        return True
+    except RuntimeError:
+        return False
+
+
 class ForwardTacotronIE:
     def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
         self.verbose = verbose
@@ -30,12 +38,10 @@ class ForwardTacotronIE:
         self.ie = ie
 
         self.duration_predictor_model = self.load_network(model_duration)
-        self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_model, model_duration)
-        self.duration_predictor_request = self.duration_predictor_exec.create_infer_request()
+        self.duration_predictor_request = self.create_infer_request(self.duration_predictor_model, model_duration)
 
         self.forward_model = self.load_network(model_forward)
-        self.forward_exec = self.create_exec_network(self.forward_model, model_forward)
-        self.forward_request = self.forward_exec.create_infer_request()
+        self.forward_request = self.create_infer_request(self.forward_model, model_forward)
 
         # fixed length of the sequence of symbols
         self.duration_len = self.duration_predictor_model.input('input_seq').shape[1]
@@ -43,13 +49,13 @@ class ForwardTacotronIE:
         self.forward_len = self.forward_model.input('data').shape[1]
         if self.verbose:
             log.debug('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
-        self.is_attention = 'pos_mask' in [input.get_any_name() for input in self.forward_model.inputs]
+        self.is_attention = check_input_name(self.forward_model, "pos_mask")
         if self.is_attention:
             self.init_pos_mask()
         else:
             self.pos_mask = None
 
-        self.is_multi_speaker = self.has_speaker_embeddings()
+        self.is_multi_speaker = check_input_name(self.duration_predictor_model, "speaker_embedding")
         if self.is_multi_speaker:
             self.init_speaker_information()
         else:
@@ -111,10 +117,10 @@ class ForwardTacotronIE:
         model = self.ie.read_model(model=model_xml, weights=model_bin)
         return model
 
-    def create_exec_network(self, model, path):
+    def create_infer_request(self, model, path):
         compiled_model = self.ie.compile_model(model, device_name=self.device)
         log.info('The ForwardTacotron model {} is loaded to {}'.format(path, self.device))
-        return compiled_model
+        return compiled_model.create_infer_request()
 
     def infer_duration(self, sequence, speaker_embedding=None, alpha=1.0, non_empty_symbols=None):
         if self.is_attention:
@@ -128,11 +134,11 @@ class ForwardTacotronIE:
             self.duration_predictor_request.infer(inputs)
         else:
             self.duration_predictor_request.infer(inputs={"input_seq": sequence})
-        duration = self.duration_predictor_request.get_tensor("duration").data * alpha
+        duration = self.duration_predictor_request.get_tensor("duration").data[:] * alpha
 
         duration = (duration + 0.5).astype('int').flatten()
         duration = np.expand_dims(duration, axis=0)
-        preprocessed_embeddings = self.duration_predictor_request.get_tensor("embeddings").data
+        preprocessed_embeddings = self.duration_predictor_request.get_tensor("embeddings").data[:]
 
         if non_empty_symbols is not None:
             duration = duration[:, :non_empty_symbols]
@@ -240,16 +246,12 @@ class ForwardTacotronIE:
         return res
 
     def get_speaker_embeddings(self):
-        if self.has_speaker_embeddings():
+        if self.is_multi_speaker:
             return self.speaker_embeddings
-        else:
-            return None
-
-    def has_speaker_embeddings(self):
-        return 'speaker_embedding' in [input.get_any_name() for input in self.duration_predictor_model.inputs]
+        return None
 
     def get_pca_speaker_embedding(self, gender, alpha):
-        if not self.has_speaker_embeddings():
+        if not self.is_multi_speaker:
             return None
 
         emb = self.male_embeddings if gender == "Male" else self.female_embeddings
