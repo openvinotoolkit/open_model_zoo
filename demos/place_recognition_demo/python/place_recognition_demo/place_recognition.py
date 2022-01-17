@@ -39,6 +39,7 @@ class IEModel: # pylint: disable=too-few-public-methods
         self.model = core.read_model(model_path, model_path.with_suffix('.bin'))
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         self.input_size = self.model.input(self.input_tensor_name).shape
+        self.nchw_layout = self.input_size[1] == 3
         compiled_model = core.compile_model(self.model, device)
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
@@ -47,7 +48,8 @@ class IEModel: # pylint: disable=too-few-public-methods
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
         assert len(image.shape) == 4
-        image = np.transpose(image, (0, 3, 1, 2))
+        if self.nchw_layout:
+            image = np.transpose(image, (0, 3, 1, 2))
         out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
         return out
 
@@ -58,7 +60,10 @@ class PlaceRecognition:
     def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
         self.model = IEModel(model_path, device, cpu_extension)
-        self.input_size = self.model.input_size[2], self.model.input_size[3]
+        if self.model.nchw_layout:
+            self.input_size = self.model.input_size[2], self.model.input_size[3]
+        else:
+            self.input_size = self.model.input_size[1], self.model.input_size[2]
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):
