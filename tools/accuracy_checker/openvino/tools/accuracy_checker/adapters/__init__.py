@@ -244,7 +244,6 @@ __all__ = [
 
     'RegressionAdapter',
     'MultiOutputRegression',
-    'OnlineMultiOutputRegression',
     'KaldiFeatsRegression',
     'MixedAdapter',
 
