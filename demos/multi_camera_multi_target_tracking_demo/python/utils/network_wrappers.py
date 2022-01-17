@@ -187,14 +187,14 @@ class MaskRCNN(DetectorInterface):
             feed_dict['im_info'] = im_info
         self.infer_request.infer(feed_dict)
         if self.segmentoly_type:
-            output = {name: self.infer_request.get_tensor(name).data for name in self.output_keys_segmentoly}
+            output = {name: self.infer_request.get_tensor(name).data[:] for name in self.output_keys_segmentoly}
             valid_detections_mask = output['classes'] > 0
             classes = output['classes'][valid_detections_mask]
             boxes = output['boxes'][valid_detections_mask]
             scores = output['scores'][valid_detections_mask]
             masks = output['raw_masks'][valid_detections_mask]
         else:
-            output = {name: self.infer_request.get_tensor(name).data for name in self.output_keys}
+            output = {name: self.infer_request.get_tensor(name).data[:] for name in self.output_keys}
             valid_detections_mask = np.sum(output['boxes'], axis=1) > 0
             classes = output['labels'][valid_detections_mask] + 1
             boxes = output['boxes'][valid_detections_mask][:, :4]
