@@ -116,7 +116,7 @@ from .audio_recognition import (
     Wav2VecDecoder
 )
 from .kaldi_asr_decoder import KaldiLatGenDecoder
-from .regression import RegressionAdapter, MultiOutputRegression, OnlineMultiOutputRegression, KaldiFeatsRegression
+from .regression import RegressionAdapter, MultiOutputRegression, KaldiFeatsRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition

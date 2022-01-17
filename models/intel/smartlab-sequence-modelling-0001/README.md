@@ -1,9 +1,9 @@
 # online mstcn++
 
 ## Use Case and High-Level Description
-This is an online action segmentation network for 16 classes trained on Intel dataset. It is an online version of MSTCN++ [1]. The difference between online mstcn++ and mstcn++ is that the former accept stream video as input while the latter assume the whole video is given.
+This is an online action segmentation network for 16 classes trained on Intel dataset. It is an online version of MSTCN++. The difference between online MSTCN++ and MSTCN++ is that the former accept stream video as input while the latter assume the whole video is given.
 
-For the original mstcn++ model details see [paper](https://arxiv.org/abs/2006.09220)
+For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09220)
 
 ## Specification
 

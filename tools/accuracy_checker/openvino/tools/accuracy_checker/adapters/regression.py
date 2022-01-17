@@ -73,11 +73,15 @@ class MultiOutputRegression(Adapter):
         params.update({
             'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names')
         })
+        params.update({
+            'online': BoolField(optional=True, default=False, description='online version means batch size is ignored')
+        })
         return params
 
     def configure(self):
         self.output_list_keys = self.get_value_from_config('outputs')
         self.output_list_values = self.get_value_from_config('outputs')
+        self.online = self.get_value_from_config('online')
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
@@ -92,23 +96,11 @@ class MultiOutputRegression(Adapter):
         for batch_id, identfier in enumerate(identifiers):
             res_dict = {}
             for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
-                res_dict.update({output_name_k: raw_outputs[output_name_v][batch_id]})
+                if self.online:
+                    res_dict.update({output_name_k: raw_outputs[output_name_v]})
+                else:
+                    res_dict.update({output_name_k: raw_outputs[output_name_v][batch_id]})
             result.append(RegressionPrediction(identfier, res_dict))
-        return result
-
-
-class OnlineMultiOutputRegression(MultiOutputRegression):
-    __provider__ = 'online_multi_output_regression'
-    prediction_types = (RegressionPrediction,)
-
-    def process(self, raw, identifiers, frame_meta):
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        result = []
-        for identifier in identifiers:
-            res_dict = {}
-            for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
-                res_dict.update({output_name_k: raw_outputs[output_name_v]})
-            result.append(RegressionPrediction(identifier, res_dict))
         return result
 
 

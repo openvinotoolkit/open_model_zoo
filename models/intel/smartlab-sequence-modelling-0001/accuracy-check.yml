@@ -3,7 +3,8 @@ models:
     launchers:
       - framework: dlsdk
         adapter:
-          type: online_multi_output_regression
+          type: multi_output_regression
+          online: True
           outputs:
             - output
             - fhis_out_0
@@ -43,9 +44,21 @@ models:
           - type: mae
             max_error: True
             presenter: print_vector
+            abs_threshold: 0.1
+            rel_threshold: 1
             reference:
               output@max_error: 1e-5
+              output@mean: 1e-5
+              output@std: 0
               fhis_out_0@max_error: 1e-5
+              fhis_out_0@mean: 1e-5
+              fhis_out_0@std: 0
               fhis_out_1@max_error: 1e-5
+              fhis_out_1@mean: 1e-5
+              fhis_out_1@std: 0
               fhis_out_2@max_error: 1e-5
+              fhis_out_2@mean: 1e-5
+              fhis_out_2@std: 0
               fhis_out_3@max_error: 1e-5
+              fhis_out_3@mean: 1e-5
+              fhis_out_3@std: 0
