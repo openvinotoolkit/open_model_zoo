@@ -101,7 +101,7 @@ class TranslationEngine:
             translation (np.array): translated sentence in tokenized format.
         """
         self.infer_request.infer({self.input_tensor_name: tokens})
-        return self.infer_request.get_tensor(self.output_tensor_name).data
+        return self.infer_request.get_tensor(self.output_tensor_name).data[:]
 
 
 class Tokenizer:
