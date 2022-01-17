@@ -54,7 +54,7 @@ postprocessing:
     file: paddleseg-2.3.0-py3-none-any.whl
   # skip backbone downloading for weights intialization
   - $type: regex_replace
-    file: paddleseg\models\backbones\hrnet.py
+    file: paddleseg/models/backbones/hrnet.py
     pattern: 'self.init_weight()'
     replacement: '# \g<0>'
 model_optimizer_args:
