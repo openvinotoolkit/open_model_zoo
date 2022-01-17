@@ -261,8 +261,7 @@ void logCompiledModelInfo(
     const ov::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
-    const std::string& modelType = "")
-{
+    const std::string& modelType = "") {
     slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
@@ -285,8 +284,7 @@ void logCompiledModelInfo(
     }
 }
 
-inline
-void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
+inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     slog::info << "model name: " << model->get_friendly_name() << slog::endl;
 
     // Dump information about model inputs/outputs
