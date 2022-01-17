@@ -11,8 +11,6 @@
  limitations under the License.
 """
 
-import copy
-
 import numpy as np
 import cv2
 
@@ -31,7 +29,7 @@ class IEModel:
     def forward(self, img):
         """Performs forward pass of the wrapped IE model"""
         self.infer_requests[0].infer({self.input_tensor_name: self._preprocess(img)})
-        return self.infer_requests[0].get_tensor(self.output_tensor_name).data
+        return self.infer_requests[0].get_tensor(self.output_tensor_name).data[:]
 
     def forward_async(self, img):
         id = len(self.reqs_ids)
@@ -42,8 +40,8 @@ class IEModel:
         outputs = []
         for id in self.reqs_ids:
             self.infer_requests[id].wait()
-            res = self.infer_requests[id].get_tensor(self.output_tensor_name).data
-            outputs.append(copy.deepcopy(res))
+            res = self.infer_requests[id].get_tensor(self.output_tensor_name).data[:]
+            outputs.append(res)
         self.reqs_ids = []
         return outputs
 

@@ -40,14 +40,14 @@ class ForecastingEngine:
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
         log.info('Reading model {}'.format(model_xml))
-        self.model = core.read_model(model_xml)
-        compiled_model = core.compile_model(self.model, device)
+        model = core.read_model(model_xml)
+        compiled_model = core.compile_model(model, device)
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_xml, device))
         self.input_tensor_name = input_name
         self.output_tensor_name = output_name
         self.quantiles = quantiles
-        assert self.output_tensor_name != "", "there is not output in model"
+        model.output(self.output_tensor_name) # ensure a tensor with the name exists
 
     def __call__(self, inputs):
         """ Main forecasting method.
@@ -59,7 +59,7 @@ class ForecastingEngine:
             preds (dict): predicted quantiles.
         """
         self.infer_request.infer(inputs={self.input_tensor_name: inputs})
-        preds = self.infer_request.get_tensor(self.output_tensor_name).data
+        preds = self.infer_request.get_tensor(self.output_tensor_name).data[:]
         out = {}
         for i, q in enumerate(self.quantiles):
             out[q] = preds[:, :, i].flatten()
