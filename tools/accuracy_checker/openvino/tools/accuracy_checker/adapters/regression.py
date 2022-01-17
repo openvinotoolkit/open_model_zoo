@@ -96,10 +96,8 @@ class MultiOutputRegression(Adapter):
         for batch_id, identfier in enumerate(identifiers):
             res_dict = {}
             for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
-                if self.online:
-                    res_dict.update({output_name_k: raw_outputs[output_name_v]})
-                else:
-                    res_dict.update({output_name_k: raw_outputs[output_name_v][batch_id]})
+                result_value = raw_outputs[output_name_v] if self.online else raw_outputs[output_name_v][batch_id]
+                res_dict.update({output_name_k: result_value})
             result.append(RegressionPrediction(identfier, res_dict))
         return result
 
