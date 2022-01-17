@@ -41,6 +41,7 @@ models:
       - name: online_mstcn_plus_dataset
         metrics:
           - type: mae
+            max_error: True
             presenter: print_vector
             reference:
               output@@max_error: 1e-5
