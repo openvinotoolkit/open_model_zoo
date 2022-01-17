@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ class ModelEvaluator(BaseEvaluator):
         if not postpone_model_loading:
             if input_precision:
                 launcher.update_input_configuration(input_feeder.inputs_config)
+            input_feeder.update_layout_configuration(launcher.layout_mapping)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
         metric_dispatcher = None

@@ -181,7 +181,12 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `target_suffix` - target ground truth file name's suffix (default `out`).
   * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
-* `parametric_image_processing` - converts dataset for image processing which required variable conditions for getting result, to `ImageProcessingAnnotation. Parameters provided as float value in reference image name using `_` as delimeter.
+* `image_generation` - converts dataset for generation images from noise to `ImageProcessingAnnotation`,
+  * `data_dir` - dataset root directory where pregenerated input sequences are located in subdirectories.
+  * `input_subdirectories` - list of relative paths for input data. If model have multiple inputs, data for each input should be located in separated directory.
+  * `reference_dir` - directory with reference data.
+  annotation_loader - which library will be used for ground truth image reading. Supported: opencv, pillow (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+* `parametric_image_processing` - converts dataset for image processing which required variable conditions for getting result, to `ImageProcessingAnnotation`. Parameters provided as float value in reference image name using `_` as delimeter.
   * `input_dir` - directory with input images.
   * `reference_dir` - directory with reference images.
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
@@ -566,7 +571,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/master/misc/pytorch_toolkit/action_recognition#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/action_recognition/model_templates/custom-action-recognition/README.md#3-prepare-data).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).

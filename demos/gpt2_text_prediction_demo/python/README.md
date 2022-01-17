@@ -1,6 +1,6 @@
 # GPT-2 Text Prediction Python\* Demo
 
-This README describes the Text Prediction demo application that uses a gpt-2 model for inference.
+This demo shows how to use gpt-2 model for inference to perform interactive conditional text prediction, where content is generated based on text provided by user.
 
 ## How It Works
 
@@ -58,7 +58,12 @@ Options:
                         probability and lower will be kept for generation
   -d DEVICE, --device DEVICE
                         Optional. Target device to perform inference
-                        on.Default value is CPU
+                        on. Default value is CPU
+  --dynamic_shape       Run model with dynamic input sequence. If not
+                        provided, input sequence will be padded to
+                        max_seq_len
+  --max_seq_len MAX_SEQ_LEN
+                        Optional. Maximum sequence length for processing. Default value is 1024
 ```
 
 ## Demo Inputs
@@ -84,5 +89,5 @@ You can use the following command to try the demo (assuming the used model from 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

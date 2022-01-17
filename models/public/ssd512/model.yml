@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,5 +55,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
   - --input_proto=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE

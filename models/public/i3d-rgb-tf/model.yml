@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ files:
   - name: i3d-rgb.frozen.pb
     checksum: 8f1c32cc56cc1ca6880b7725430ae8ec369485e60f9bcce9724042ecb6e5bd97d25a04148c38bfde60b0ed00c918bc96
     size: 51046552
-    source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
+    original_source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/i3d-rgb-tf/rgb.frozen.pb
 framework: tf
 model_optimizer_args:
   - --input_shape=[1,79,224,224,3]

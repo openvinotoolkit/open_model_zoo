@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import numpy as np
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, generate_layer_name
+from ...utils import contains_all, extract_image_representations, generate_layer_name, postprocess_output_name
 from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
 
 
@@ -120,21 +120,26 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
-        with_prefix = next(iter(self.recognizer_encoder.network.input_info)).startswith('encoder')
+        with_prefix = next(iter(self.recognizer_encoder.inputs)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
                 self.recognizer_encoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'encoder_',
                                                                                       with_prefix)
-            for out_k, out_name in self.recognizer_encoder.outputs_mapping.items():
-                self.recognizer_encoder.outputs_mapping[out_k] = generate_layer_name(out_name, 'encoder_',
-                                                                                     with_prefix)
             for input_k, input_name in self.recognizer_decoder.inputs_mapping.items():
                 self.recognizer_decoder.inputs_mapping[input_k] = generate_layer_name(input_name, 'decoder_',
                                                                                       with_prefix)
-            for out_k, out_name in self.recognizer_decoder.outputs_mapping.items():
-                self.recognizer_decoder.outputs_mapping[out_k] = generate_layer_name(out_name, 'decoder_',
-                                                                                     with_prefix)
         self.with_prefix = with_prefix
+        if hasattr(self.recognizer_encoder, 'outputs'):
+            outputs_mapping = self.recognizer_encoder.outputs
+            for output_k in self.recognizer_encoder.outputs_mapping:
+                self.recognizer_encoder.outputs_mapping[output_k] = postprocess_output_name(
+                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                )
+            outputs_mapping = self.recognizer_decoder.outputs
+            for output_k in self.recognizer_decoder.outputs_mapping:
+                self.recognizer_decoder.outputs_mapping[output_k] = postprocess_output_name(
+                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                )
 
     def predict(self, identifiers, input_data):
         pass
@@ -167,12 +172,17 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         enc_res = self.recognizer_encoder.predict(identifiers,
                                                   {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        if isinstance(enc_res, tuple):
+            enc_res, enc_raw_res = enc_res
+        else:
+            enc_raw_res = enc_res
+
         if callback:
-            callback(enc_res)
+            callback(enc_raw_res)
         features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
         dec_state = enc_res[self.recognizer_encoder.outputs_mapping['decoder_hidden']]
 
-        tgt = np.array([[self.sos_index]])
+        tgt = np.array([self.sos_index])
         logits = []
         for _ in range(self.max_seq_len):
 
@@ -183,6 +193,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
                     self.recognizer_decoder.inputs_mapping['hidden']: dec_state,
                     self.recognizer_decoder.inputs_mapping['decoder_input']: tgt
                  })
+            if isinstance(dec_res, tuple):
+                dec_res, dec_raw_res = dec_res
+            else:
+                dec_raw_res = dec_res
 
             dec_state = dec_res[self.recognizer_decoder.outputs_mapping['decoder_hidden']]
             logit = dec_res[self.recognizer_decoder.outputs_mapping['decoder_output']]
@@ -191,13 +205,13 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
                 break
             logits.append(logit)
             if callback:
-                callback(dec_res)
+                callback(dec_raw_res)
 
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
         result_phrase = self.get_phrase(targets)
-        return result_phrase, dec_res
+        return result_phrase, dec_raw_res
 
 
 class SequentialFormulaRecognitionModel(BaseSequentialModel):
@@ -243,8 +257,12 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         enc_res = self.recognizer_encoder.predict(identifiers,
                                                   {self.recognizer_encoder.inputs_mapping['imgs']: input_data})
+        if isinstance(enc_res, tuple):
+            enc_res, enc_raw_res = enc_res
+        else:
+            dec_raw_res = enc_res
         if callback:
-            callback(enc_res)
+            callback(enc_raw_res)
         row_enc_out = enc_res[self.recognizer_encoder.outputs_mapping['row_enc_out']]
         dec_states_h = enc_res[self.recognizer_encoder.outputs_mapping['hidden']]
         dec_states_c = enc_res[self.recognizer_encoder.outputs_mapping['context']]
@@ -263,8 +281,12 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
                     self.recognizer_decoder.inputs_mapping['output_prev']: O_t,
                     self.recognizer_decoder.inputs_mapping['tgt']: tgt
                 })
+            if isinstance(dec_res, tuple):
+                dec_res, dec_raw_res = dec_res
+            else:
+                dec_raw_res = dec_res
             if callback:
-                callback(dec_res)
+                callback(dec_raw_res)
 
             dec_states_h = dec_res[self.recognizer_decoder.outputs_mapping['dec_st_h_t']]
             dec_states_c = dec_res[self.recognizer_decoder.outputs_mapping['dec_st_c_t']]
@@ -280,7 +302,7 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
         result_phrase = self.get_phrase(targets)
-        return result_phrase, dec_res
+        return result_phrase, dec_raw_res
 
 
 class RecognizerDLSDKModel(BaseDLSDKModel):
@@ -306,7 +328,7 @@ class RecognizerOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({k: v.shape for k, v in input_data.items()})
-        return self.infer(input_data)
+        return self.infer(input_data, raw_results=True)
 
 
 MODEL_TYPES = {

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class HumanPoseHRNetAdapter(Adapter):
         self.embeddings = self.get_value_from_config('embeddings_out')
         self.heatmaps = self.get_value_from_config('heatmaps_out')
         self.nms_heatmaps = self.get_value_from_config('nms_heatmaps_out')
-        self.ourputs_verified = False
+        self.outputs_verified = False
 
         self.num_joints = 17
         self.decoder = AssociativeEmbeddingDecoder(

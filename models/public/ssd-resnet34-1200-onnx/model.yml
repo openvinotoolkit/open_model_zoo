@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ files:
   - name: resnet34-ssd1200.onnx
     size: 80363696
     checksum: 754dd59fdb244e6a93f6173efe26c45bce804305f71b1d0a8a3eb555b3a120894658a0b97475840b93f3c2a30c5efd99
-    source: https://zenodo.org/record/3228411/files/resnet34-ssd1200.onnx
+    original_source: https://zenodo.org/record/3228411/files/resnet34-ssd1200.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ssd-resnet34-1200-onnx/resnet34-ssd1200.onnx
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1200,1200]

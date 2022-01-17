@@ -6,3 +6,5 @@ text-image-super-resolution-????
 deblurgan-v2
 # For -at jr
 fbcnn
+# For -at style
+fast-neural-style-mosaic-onnx

@@ -92,7 +92,7 @@ alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols 
 
 ## Training Pipeline
 
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/text_spotting/model_templates/alphanumeric-text-spotting/readme.md), allowing to fine-tune the model on custom dataset.
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/text_spotting/model_templates/alphanumeric-text-spotting/readme.md), allowing to fine-tune the model on custom dataset.
 
 ## Legal Information
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import cv2
 
 from .argparser import build_arguments_parser
 from .config import ConfigReader
-from .logging import print_info, add_file_handler, exception
+from .logging import print_info, add_file_handler, exception, init_logging
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .presenters import write_csv_result
@@ -40,6 +40,7 @@ EVALUATION_MODE = {
 
 
 def main():
+    init_logging()
     return_code = 0
     args = build_arguments_parser().parse_args()
     tm = start_telemetry()

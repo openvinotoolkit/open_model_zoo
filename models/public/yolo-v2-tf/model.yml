@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2.json
   - --input_model=$dl_dir/yolo-v2.pb
-quantizable: yes
+quantizable: true
 framework: tf
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

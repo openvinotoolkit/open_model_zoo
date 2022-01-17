@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@ description: >-
   described in "YOLACT: Real-time Instance Segmentation" paper <https://arxiv.org/abs/1904.02689>.
   Model pre-trained in Pytorch* on Common Objects in Context (COCO) <https://cocodataset.org/#home>
   dataset. For details, see the repository <https://github.com/dbolya/yolact>.
-
 task_type: instance_segmentation
-
 files:
   - name: yolact/yolact.py
     size: 31516
@@ -48,9 +46,10 @@ files:
   - name: yolact/yolact_resnet50_54_800000.pth
     size: 127300392
     checksum: 7ef5b5367fd30871c77814500bbecbaf32f0a9e5721bba0a1cc4479e78e4d6ed25363ebfe6982b94189a11da1e45cf78
-    source:
+    original_source:
       $type: google_drive
       id: 1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolact-resnet50-fpn-pytorch/yolact/yolact_resnet50_54_800000.pth
 framework: pytorch
 postprocessing:
   - $type: regex_replace

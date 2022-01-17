@@ -86,7 +86,7 @@ class Downloader:
                     file.seek(0)
                     file.truncate()
                     progress.size = 0
-                    progress.hasher = hasher
+                    progress.hasher = hasher()
 
                 self._process_download(reporter, chunk_iterable, size, progress, file)
 

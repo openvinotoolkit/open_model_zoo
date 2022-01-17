@@ -16,6 +16,7 @@
 
 import cv2
 import ngraph as ng
+import ngraph.opset7 as opset7
 import numpy as np
 try:
     from numpy.core.umath import clip
@@ -60,7 +61,7 @@ class OpenPose(ImageModel):
         # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
         p = int(np.round(6 / 7 * self.upsample_ratio))
         k = 2 * p + 1
-        pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
+        pooled_heatmap = opset7.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
                                      strides=(1, 1), name=self.pooled_heatmaps_blob_name)
         f = ng.impl.Function(
             [ng.result(heatmap, name=self.heatmaps_blob_name),

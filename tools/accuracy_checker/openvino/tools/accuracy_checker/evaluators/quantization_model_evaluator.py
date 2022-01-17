@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import numpy as np
 from ..utils import extract_image_representations, contains_any
 from ..dataset import Dataset, DataProvider, AnnotationProvider
 from ..launcher import create_launcher, InputFeeder
-from ..logging import warning
+from ..logging import warning, init_logging
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
@@ -32,9 +32,13 @@ from .module_evaluator import ModuleEvaluator
 
 
 def create_model_evaluator(config):
+    init_logging()
     cascade = 'evaluations' in config
     if not cascade:
         return ModelEvaluator.from_configs(config)
+
+    if config['evaluations'][0]['module_config']['launchers'][0]['framework'] != 'openvino':
+        config['evaluations'][0]['module_config']['launchers'][0]['framework'] = 'openvino'
 
     return ModuleEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
 
@@ -64,6 +68,8 @@ class ModelEvaluator:
         model_name = model_config['name']
         dataset_config = model_config['datasets']
         launcher_config = model_config['launchers'][0]
+        if launcher_config.get('framework') != 'openvino':
+            launcher_config['framework'] = 'openvino'
         launcher = create_launcher(launcher_config, model_name, delayed_model_loading=True)
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(
@@ -98,19 +104,6 @@ class ModelEvaluator:
             calculate_metrics=True,
             **kwargs
     ):
-
-        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, calculate_metrics=True):
-            if self.adapter and calculate_metrics:
-                return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
-
-            return batch_raw_predictions
-
-        def completion_callback(status_code, request_id):
-            if status_code:
-                warning('Request {} failed with status code {}'.format(request_id, status_code))
-            queued_irs.remove(request_id)
-            ready_irs.append(request_id)
-
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
         if self._switch_to_sync():
@@ -134,65 +127,81 @@ class ModelEvaluator:
             check_progress, self.dataset.size
         )
         dataset_iterator = iter(enumerate(self.dataset))
-        free_irs, queued_irs, ready_irs = [], [], []
-        infer_requests_pool = self._prepare_requests_pool(completion_callback)
-        free_irs = list(infer_requests_pool)
-        while free_irs or queued_irs or ready_irs:
-            self._fill_free_irs(free_irs, queued_irs, infer_requests_pool, dataset_iterator, **kwargs)
-            free_irs[:] = []
-
-            if ready_irs:
-                while ready_irs:
-                    ready_ir_id = ready_irs.pop(0)
-                    ready_data = infer_requests_pool[ready_ir_id].get_result()
-                    (
-                        (batch_id, batch_input_ids, batch_annotation, batch_identifiers),
-                        batch_meta,
-                        batch_raw_predictions,
-                    ) = ready_data
-                    batch_predictions = _process_ready_predictions(
-                        batch_raw_predictions, batch_identifiers, batch_meta,
-                        calculate_metrics or dump_prediction_to_annotation
-                    )
-                    free_irs.append(ready_ir_id)
-
-                    metrics_result = None
-                    if calculate_metrics:
-                        annotations, predictions = self.postprocessor.process_batch(
-                            batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-                        )
-                        if dump_prediction_to_annotation:
-                            threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                            annotations = []
-                            for prediction in predictions:
-                                generated_annotation = prediction.to_annotation(threshold=threshold)
-                                if generated_annotation:
-                                    annotations.append(generated_annotation)
-                            self._dumped_annotations.extend(annotations)
-                        if self.metric_executor:
-                            metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                                batch_input_ids, annotations, predictions
-                            )
-                            if self.metric_executor.need_store_predictions:
-                                self._annotations.extend(annotations)
-                                self._predictions.extend(predictions)
-
-                    if output_callback:
-                        output_callback(
-                            batch_raw_predictions,
-                            metrics_result=metrics_result,
-                            element_identifiers=batch_identifiers,
-                            dataset_indices=batch_input_ids
-                        )
-
-                    if progress_reporter:
-                        progress_reporter.update(batch_id, len(batch_predictions))
+        self.process_dataset_async_infer_queue(
+                dataset_iterator, progress_reporter, calculate_metrics, output_callback, dump_prediction_to_annotation,
+                **kwargs
+            )
 
         if dump_prediction_to_annotation:
             self.register_dumped_annotations()
 
         if progress_reporter:
             progress_reporter.finish()
+
+        return None
+
+    def process_dataset_async_infer_queue(
+        self, dataset_iterator, progress_reporter, calculate_metrics, output_callback,
+        dump_prediction_to_annotation, **kwargs):
+
+        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, calculate_metrics=True):
+            if self.adapter and calculate_metrics:
+                return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
+
+            return batch_raw_predictions
+
+        def completion_callback(request, user_data):
+            batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta = user_data
+            batch_processed_predictions, batch_raw_predictions = self.launcher.get_result_from_request(
+                request, return_raw=True
+            )
+            batch_predictions = _process_ready_predictions(
+                batch_processed_predictions, batch_identifiers, batch_meta,
+                calculate_metrics or dump_prediction_to_annotation
+            )
+            metrics_result = None
+            if calculate_metrics:
+                annotations, predictions = self.postprocessor.process_batch(
+                    batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
+                )
+                if dump_prediction_to_annotation:
+                    threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                    annotations = []
+                    for prediction in predictions:
+                        generated_annotation = prediction.to_annotation(threshold=threshold)
+                        if generated_annotation:
+                            annotations.append(generated_annotation)
+                            self._dumped_annotations.extend(annotations)
+                if self.metric_executor:
+                    metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                        batch_input_ids, annotations, predictions
+                    )
+                    if self.metric_executor.need_store_predictions:
+                        self._annotations.extend(annotations)
+                        self._predictions.extend(predictions)
+
+            if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
+                batch_raw_predictions = batch_raw_predictions[0]
+
+            if output_callback:
+                output_callback(
+                    batch_raw_predictions,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
+
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_predictions))
+
+        infer_queue = self.launcher.get_infer_queue(log=False)
+        infer_queue.set_callback(completion_callback)
+        for batch_id, dataset_item in dataset_iterator:
+            batch_input_ids, batch_annotation, batch_input, batch_identifiers = dataset_item
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_input, batch_annotation)
+            infer_queue.start_async(*self.launcher.prepare_data_for_request(
+                filled_inputs, batch_meta, batch_id, batch_input_ids, batch_annotation, batch_identifiers))
+        infer_queue.wait_all()
 
     def register_dumped_annotations(self):
         if not self._dumped_annotations:
@@ -258,12 +267,13 @@ class ModelEvaluator:
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta, _ = self._get_batch_input(batch_inputs, batch_annotation)
-            batch_raw_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
+            batch_processed_predictions, batch_raw_predictions = self.launcher.predict(
+                filled_inputs, batch_meta, return_raw=True, **kwargs)
             if self.adapter and (calculate_metrics or dump_prediction_to_annotation):
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
-                batch_predictions = self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
+                batch_predictions = self.adapter.process(batch_processed_predictions, batch_identifiers, batch_meta)
             else:
-                batch_predictions = batch_raw_predictions
+                batch_predictions = batch_processed_predictions
 
             metrics_result = None
             if calculate_metrics:
@@ -482,6 +492,7 @@ class ModelEvaluator:
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
+        self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 
@@ -493,6 +504,7 @@ class ModelEvaluator:
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
+        self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ files:
   - name: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
     size: 4387714
     checksum: 71a1b74e9612204e4533d44a8eff105490bb3248043d22ef894c19d5da4fb135a989946307b86191ba4ec2ce391b34bf
-    source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    original_source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vehicle-license-plate-detection-barrier-0123/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

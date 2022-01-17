@@ -23,7 +23,7 @@ to process 2048 samples that is 128ms for 16kHz
 | Source framework  | PyTorch\*             |
 ## Accuracy
 
-The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/tree/icassp2021-final/datasets/ICASSP_dev_test_set/track_1/synthetic).
+The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge 2021 dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README-DNS3.md).
 
 
 | Metric                          | Value         |

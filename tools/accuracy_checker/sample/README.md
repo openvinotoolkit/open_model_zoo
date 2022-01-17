@@ -21,12 +21,7 @@ tar xvf cifar-10-python.tar.gz -C sample
 ### 2. Evaluate sample topology
 
 Typically you need to write a configuration file describing evaluation process of your topology.
-There is already a config file for evaluating SampLeNet using the OpenVINO framework, so please read it carefully. It runs a Caffe model using Model Optimizer and requires that Caffe be installed. If you do not have Caffe installed, you can replace the `caffe_model` and `caffe_weights` keys with the following keys:
-
-```yaml
-model: SampleNet.xml
-weights: SampleNet.bin
-```
+There is already a prepared config file for evaluating SampLeNet using the OpenVINO framework at `<omz_dir>/tools/accuracy_checker/sample/sample_config.yml`, so please read it carefully before using.
 
 Then run Accuracy Checker with the following command:
 
@@ -42,7 +37,7 @@ Now try edit config, to run SampLeNet on other device or framework (e.g., Caffe,
 
 ###  Additional useful resources
 
+* large collection of configuration files for models from Open Model Zoo. You can find instruction how to use predefined configuration [here](../configs/README.md)
 * config at `<omz_dir>/tools/accuracy_checker/sample/opencv_sample_config.yml` for running SampleNet via [OpenCV launcher](../openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md).
 * config at `<omz_dir>/tools/accuracy_checker/sample/sample_blob_config.yml` for running SampleNet using compiled executable network blob.
-
->**NOTE**: Not all Inference Engine plugins support compiled network blob execution.
+  >**NOTE**: Not all OpenVINO devices support compiled blob execution.
