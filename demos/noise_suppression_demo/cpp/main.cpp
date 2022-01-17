@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -14,7 +14,6 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
-#include <regex>
 
 #include "openvino/openvino.hpp"
 
@@ -154,19 +153,16 @@ int main(int argc, char* argv[]) {
 
         // get state names pairs (inp,out) and compute overall states size
         size_t state_size = 0;
-        std::regex state_regex{ "^(inp|out)(_state_)(\\d\\d\\d)" };
         std::vector<std::pair<std::string, std::string>> state_names;
         for (size_t i = 0; i < inputs.size(); i++) {
-            std::smatch match;
             std::string inp_state_name = inputs[i].get_any_name();
-            if (!std::regex_match(inp_state_name, match, state_regex)) {
-                // skip not relevant input
+            if (inp_state_name.find("inp_state_") == std::string::npos)
                 continue;
-            }
+
+            std::string out_state_name(inp_state_name);
+            out_state_name.replace(0, 3, "out");
 
             // find corresponding output state
-            std::string state_num = match.str(3);
-            std::string out_state_name = std::string("out_state_") + state_num;
             auto scmp = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
             if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), scmp))
                 throw std::logic_error("model output state name not corresponf input state name");
