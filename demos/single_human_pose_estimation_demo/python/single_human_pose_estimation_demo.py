@@ -120,4 +120,4 @@ def run_demo(args):
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
-    run_demo(args)
+    sys.exit(run_demo(args) or 0)
