@@ -366,3 +366,4 @@ def load_models_from_args(parser, args, models_root):
                 models[model.name] = model
 
         return list(models.values())
+

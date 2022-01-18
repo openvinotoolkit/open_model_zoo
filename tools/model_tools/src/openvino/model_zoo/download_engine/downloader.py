@@ -12,24 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import functools
 import requests
 import ssl
+import sys
+import threading
 import time
 import types
 
+from pathlib import Path
+from typing import Set
+
+from openvino.model_zoo import _common, _concurrency, _reporting
 from openvino.model_zoo.download_engine import cache
 
 DOWNLOAD_TIMEOUT = 5 * 60
 
+
+# There is no evidence that the requests.Session class is thread-safe,
+# so for safety, we use one Session per thread. This class ensures that
+# each thread gets its own Session.
+class ThreadSessionFactory:
+    def __init__(self, exit_stack):
+        self._lock = threading.Lock()
+        self._thread_local = threading.local()
+        self._exit_stack = exit_stack
+
+    def __call__(self):
+        try:
+            session = self._thread_local.session
+        except AttributeError:
+            with self._lock: # ExitStack might not be thread-safe either
+                session = self._exit_stack.enter_context(requests.Session())
+            self._thread_local.session = session
+        return session
+
+
 class Downloader:
-    def __init__(self, output_dir=None, cache_dir=None, num_attempts=1, timeout=DOWNLOAD_TIMEOUT):
+    def __init__(self, requested_precisions: str = None, output_dir: Path = None, 
+                 cache_dir: Path = None, num_attempts: int = 1, timeout: int = DOWNLOAD_TIMEOUT):
         self.output_dir = output_dir
         self.cache = cache.NullCache() if cache_dir is None else cache.DirCache(cache_dir)
         self.num_attempts = num_attempts
         self.timeout = timeout
+        self.requested_precisions = requested_precisions
+        
+    @property
+    def requested_precisions(self) -> Set[str]:
+        return self._requested_precisions
+    
+    @requested_precisions.setter
+    def requested_precisions(self, value: str = None):
+        if value is None:
+            _requested_precisions = _common.KNOWN_PRECISIONS
+        else:
+            _requested_precisions = set(value.split(','))
+            
+        unknown_precisions = _requested_precisions - _common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
+        
+        self._requested_precisions = _requested_precisions
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
+        #same
         start_time = time.monotonic()
         start_size = progress.size
 
@@ -130,6 +177,14 @@ class Downloader:
             cache.put(hash, source)
         except Exception:
             reporter.log_warning('Failed to update the cache', exc_info=True)
+            
+    @staticmethod
+    def make_reporter(progress_format: str, context=None):
+        if context is None:
+            context = _reporting.DirectOutputContext()
+        return _reporting.Reporter(context,
+                                   enable_human_output=progress_format == 'text',
+                                   enable_json_output=progress_format == 'json')
 
     def _try_retrieve(self, reporter, destination, model_file, start_download):
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -151,7 +206,10 @@ class Downloader:
         reporter.print()
         return success
 
-    def download_model(self, reporter, session_factory, requested_precisions, model, known_precisions):
+    def _download_model(self, reporter, session_factory, model, known_precisions: set = None):
+        if known_precisions is None:
+            known_precisions = _common.KNOWN_PRECISIONS
+        
         session = session_factory()
 
         reporter.print_group_heading('Downloading {}', model.name)
@@ -164,7 +222,7 @@ class Downloader:
         for model_file in model.files:
             if len(model_file.name.parts) == 2:
                 p = model_file.name.parts[0]
-                if p in known_precisions and p not in requested_precisions:
+                if p in known_precisions and p not in self.requested_precisions:
                     continue
 
             model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
@@ -198,3 +256,25 @@ class Downloader:
             reporter.print()
 
         return True
+    
+    def download_model(self, model, reporter, session):
+        if model.model_stages:
+            results = []
+            for model_stage in model.model_stages:
+                results.append(self._download_model(reporter, session, model_stage))
+            return sum(results) == len(model.model_stages)
+        else:
+            return self._download_model(reporter, session, model)
+        
+    def bulk_download_model(self, models, reporter, jobs: int, progress_format: str) -> Set[str]:
+        with contextlib.ExitStack() as exit_stack:
+            session_factory = ThreadSessionFactory(exit_stack)
+            if jobs == 1:
+                results = [self.download_model(model, reporter, session_factory) for model in models]
+            else:
+                results = _concurrency.run_in_parallel(jobs,
+                    lambda context, model: self.download_model(model, self.make_reporter(progress_format, context), 
+                                                               session_factory),
+                    models)
+
+        return {model.name for model, successful in zip(models, results) if not successful}

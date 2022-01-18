@@ -118,9 +118,28 @@ class ChecksumSHA384(Checksum):
 
         sha384 = bytes.fromhex(sha384_str)
         return cls(sha384)
+    
+    
+class ChecksumSHA256(Checksum):
+    RE_SHA256SUM = re.compile(r"[0-9a-fA-F]{64}")
+
+    def __init__(self, value):
+        self.type = hashlib.sha256
+        self.value = value
+
+    @classmethod
+    def deserialize(cls, checksum):
+        sha256_str = validation.validate_string('"sha256"', checksum['value'])
+        if not cls.RE_SHA256SUM.fullmatch(sha256_str):
+            raise validation.DeserializationError(
+                '"sha256": got invalid hash {!r}'.format(sha256_str))
+
+        sha256 = bytes.fromhex(sha256_str)
+        return cls(sha256)
 
 
 Checksum.types['sha384'] = ChecksumSHA384
+Checksum.types['sha256'] = ChecksumSHA256
 
 
 def verify_hash(reporter, actual_hash, expected_hash, path):
