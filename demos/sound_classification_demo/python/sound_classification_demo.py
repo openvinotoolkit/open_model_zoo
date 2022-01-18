@@ -191,6 +191,7 @@ def main():
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
