@@ -511,7 +511,7 @@ void DetectionsProcessor::process() {
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
                         ov::runtime::InferRequest &reidRequest, cv::Rect rect, Context &context) {
-                                    //reidRequest.set_callback([]() {}); // destroy the stored bind object
+                                    reidRequest.set_callback(std::function<void(std::exception_ptr)>()); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
                                     classifiersAggregator->push(cv::Rect(rect));

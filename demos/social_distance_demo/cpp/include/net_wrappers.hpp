@@ -198,17 +198,14 @@ public:
 
     void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
         ov::runtime::Tensor input = inferRequest.get_input_tensor();
-        //slog::info << input.get_shape() << slog::endl;
         if (autoResize) {
             ov::runtime::Tensor frameTensor = wrapMat2Tensor(img);
-            //slog::info << frameTensor.get_shape() << slog::endl;
             ov::Shape tensorShape = frameTensor.get_shape();
             ov::Layout layout("NHWC");
             const size_t batch = tensorShape[ov::layout::batch_idx(layout)];
             const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
             ov::runtime::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
                 {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height), static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
-            //slog::info << roiTensor.get_shape() << slog::endl;
             inferRequest.set_input_tensor(roiTensor);
         } else {
             const cv::Mat& personImage = img(personRect);
