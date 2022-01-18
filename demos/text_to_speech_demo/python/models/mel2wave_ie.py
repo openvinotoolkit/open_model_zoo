@@ -62,7 +62,7 @@ class WaveRNNIE:
 
         # fixed number of the mels in mel-spectrogramm
         self.mel_len = self.upsample_model.input('mels').shape[1] - 2 * self.pad
-        self.rnn_width = self.rnn_model.input('x').shape[1]
+        self.rnn_width = self.rnn_model.input('h1.1').shape[1]
 
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
@@ -157,8 +157,7 @@ class WaveRNNIE:
 
         active_network = self.batch_sizes.index(b_size)
 
-        print(self.rnn_width)
-        h1, h2, x = self.get_rnn_init_states(b_size, 512)
+        h1, h2, x = self.get_rnn_init_states(b_size, self.rnn_width)
 
         output = []
 
