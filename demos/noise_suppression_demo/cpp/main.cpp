@@ -221,8 +221,8 @@ int main(int argc, char* argv[]) {
 
         auto start_time = Time::now();
         for(size_t i = 0; i < iter; ++i) {
-            ov::runtime::Tensor inputBlob(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
-            infer_request.set_tensor(input_name, inputBlob);
+            ov::runtime::Tensor input_tensor(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
+            infer_request.set_tensor(input_name, input_tensor);
 
             for (auto& state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
@@ -230,14 +230,14 @@ int main(int argc, char* argv[]) {
 
                 if (i > 0) {
                     // set input state by coresponding output state from prev infer
-                    ov::runtime::Tensor blob_ptr = infer_request.get_tensor(out_state_name);
-                    infer_request.set_tensor(inp_state_name, blob_ptr);
+                    ov::runtime::Tensor state_tensor = infer_request.get_tensor(out_state_name);
+                    infer_request.set_tensor(inp_state_name, state_tensor);
                 } else {
                     // first iteration. set input state to zero tensor.
                     ov::Shape state_shape = model->input(inp_state_name).get_shape();
-                    ov::runtime::Tensor blob_ptr(ov::element::f32, state_shape);
-                    memset(blob_ptr.data<float>(), 0, blob_ptr.get_byte_size());
-                    infer_request.set_tensor(inp_state_name, blob_ptr);
+                    ov::runtime::Tensor state_tensor(ov::element::f32, state_shape);
+                    memset(state_tensor.data<float>(), 0, state_tensor.get_byte_size());
+                    infer_request.set_tensor(inp_state_name, state_tensor);
                 }
             }
 
