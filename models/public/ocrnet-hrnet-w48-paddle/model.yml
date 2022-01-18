@@ -44,6 +44,10 @@ files:
     size: 236075
     checksum: c07c5530539772265ff118245e5ed62be87b9481c95a4d9049570b61148d0ea13e862cf8e8347c99ed3b2d7b34c7b0cf
     source: https://files.pythonhosted.org/packages/a6/f9/c42edf1e595478d9578595aa23dbae848b68553b98048f6457c3c4c9003d/paddleseg-2.3.0-py3-none-any.whl
+  - name: filelock-3.4.1-py3-none-any.whl
+    size: 9852
+    checksum: 4f46d9acefa1e93f1279e12fd800dfc3a3004a70130e34d29889bf461fa39293f3dd868214f7d306b72719584a27268d
+    source: https://files.pythonhosted.org/packages/84/ce/8916d10ef537f3f3b046843255f9799504aa41862bfa87844b9bdc5361cd/filelock-3.4.1-py3-none-any.whl
   - name: export.py
     size: 3982
     checksum: fbb592915c00af2d466847ffdf6eb71f16a49b261e13da5c4c71a9601e88e1eab18c1c554b27ee76ee74362938bd9423
@@ -52,6 +56,9 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: paddleseg-2.3.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: filelock-3.4.1-py3-none-any.whl
   # skip backbone downloading for weights intialization
   - $type: regex_replace
     file: paddleseg/models/backbones/hrnet.py
