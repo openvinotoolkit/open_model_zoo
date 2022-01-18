@@ -209,7 +209,6 @@ public:
             inferRequest.set_input_tensor(roiTensor);
         } else {
             const cv::Mat& personImage = img(personRect);
-            slog::info << personImage.size() << slog::endl;
             matToTensor(personImage, input);
         }
     }
