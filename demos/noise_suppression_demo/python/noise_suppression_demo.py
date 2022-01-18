@@ -85,11 +85,27 @@ def main():
         input_shapes = {}
         output_names = []
 
+        try:
+            data_input = ov_encoder.input('input')
+            input_shapes['input'] = data_input.shape
+        except RuntimeError:
+            raise RuntimeError('Input tensor with name \'input\' is not presented in the model')
+
+        try:
+            if ov_encoder.output('output'):
+                output_names.append("output")
+        except RuntimeError:
+            raise RuntimeError('Output tensor with name \'output\' is not presented in the model')
+
         for const_obj in ov_encoder.inputs:
-            input_shapes[const_obj.get_names().pop()] = const_obj.shape
+            for name in const_obj.get_names():
+                if ("inp" in name) and ("state" in name):
+                    input_shapes[name] = const_obj.shape
 
         for const_obj in ov_encoder.outputs:
-            output_names.append(const_obj.get_names().pop())
+            for name in const_obj.get_names():
+                if ("out" in name) and ("state" in name):
+                    output_names.append(name)
     else:
         raise RuntimeError("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
 
