@@ -55,10 +55,10 @@ class WaveRNNIE:
             orig_shape = self.upsample_model.input('mels').shape
             self.upsample_model.reshape({"mels": PartialShape([orig_shape[0], upsampler_width, orig_shape[2]])})
 
-        self.upsample_request = self.create_exec_network(self.upsample_model, model_upsample)
+        self.upsample_request = self.create_infer_requests(self.upsample_model, model_upsample)
 
         self.rnn_model = self.load_network(model_rnn)
-        self.rnn_requests = self.create_exec_network(self.rnn_model, model_rnn, batch_sizes=self.batch_sizes)
+        self.rnn_requests = self.create_infer_requests(self.rnn_model, model_rnn, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
         self.mel_len = self.upsample_model.input('mels').shape[1] - 2 * self.pad
@@ -71,7 +71,7 @@ class WaveRNNIE:
         model = self.ie.read_model(model=model_xml, weights=model_bin)
         return model
 
-    def create_exec_network(self, model, path, batch_sizes=None):
+    def create_infer_requests(self, model, path, batch_sizes=None):
         if batch_sizes is not None:
             requests = []
             for parameter in model.get_parameters():
@@ -215,7 +215,7 @@ class MelGANIE:
             new_shape = (orig_shape[0], orig_shape[1], default_width)
             self.model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
 
-        self.requests = self.create_exec_network(self.model, model, self.scales)
+        self.requests = self.create_infer_requests(self.model, model, self.scales)
 
         # fixed number of columns in mel-spectrogramm
         self.mel_len = self.model.input('mel').shape[2]
@@ -228,7 +228,7 @@ class MelGANIE:
         model = self.ie.read_model(model=model_xml, weights=model_bin)
         return model
 
-    def create_exec_network(self, model, path, scales=None):
+    def create_infer_requests(self, model, path, scales=None):
         if scales is not None:
             orig_shape = model.input('mel').shape
             requests = []
