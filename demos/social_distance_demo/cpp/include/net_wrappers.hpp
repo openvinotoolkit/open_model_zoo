@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -29,8 +29,9 @@ public:
     PersonDetector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
+        slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
-        logModelInfo(model);
+        logLayersInfo(model);
         ov::OutputVector inputInfo = model->inputs();
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection model should have only one input");
@@ -146,8 +147,9 @@ public:
         const std::map<std::string, std::string>& pluginConfig) :
         autoResize {autoResize},
         core_{core} {
+        slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
-        logModelInfo(model);
+        logLayersInfo(model);
         /** Re-ID model should have only one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         ov::OutputVector inputInfo = model->inputs();

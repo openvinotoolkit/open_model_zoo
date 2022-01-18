@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -23,8 +23,6 @@ static const char target_device_message_reid[] = "Optional. Specify the target d
                                                 "The application looks for a suitable plugin for the specified device.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char thresh_output_message[] = "Optional. Probability threshold for person detections.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to an .xml file with the kernels description.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char ninfer_request_message[] = "Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.";
