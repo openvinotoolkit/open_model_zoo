@@ -71,9 +71,7 @@ class MultiOutputRegression(Adapter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names')
-        })
-        params.update({
+            'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names'),
             'online': BoolField(optional=True, default=False, description='online version means batch size is ignored')
         })
         return params
