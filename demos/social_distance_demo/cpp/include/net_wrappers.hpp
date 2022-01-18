@@ -29,8 +29,8 @@ public:
     PersonDetector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
-        slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
+        slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
         logLayersInfo(model);
         ov::OutputVector inputInfo = model->inputs();
         if (inputInfo.size() != 1) {
@@ -56,8 +56,6 @@ public:
                 set_layout({ "NCHW" });
         }
 
-        //detectorInputTensorName = model->input().get_any_name();
-
         // ---------------------------Check outputs ------------------------------------------------------
         ov::OutputVector outputInfo = model->outputs();
         if (outputInfo.size() != 1) {
@@ -79,8 +77,6 @@ public:
         model = ppp.build();
         compiledModel = core_.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
-
-        //detectorOutputTensorName = model->output().get_any_name();
     }
 
     ov::runtime::InferRequest createInferRequest() {
@@ -147,8 +143,8 @@ public:
         const std::map<std::string, std::string>& pluginConfig) :
         autoResize {autoResize},
         core_{core} {
-        slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
+        slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
         logLayersInfo(model);
         /** Re-ID model should have only one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
@@ -202,15 +198,21 @@ public:
 
     void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
         ov::runtime::Tensor input = inferRequest.get_input_tensor();
+        //slog::info << input.get_shape() << slog::endl;
         if (autoResize) {
-            InferenceEngine::ROI cropRoi{0, static_cast<size_t>(personRect.x), static_cast<size_t>(personRect.y), static_cast<size_t>(personRect.width),
-                static_cast<size_t>(personRect.height)};
             ov::runtime::Tensor frameTensor = wrapMat2Tensor(img);
-            ov::runtime::Tensor roiTensor(frameTensor, {}, {});
-            //InferenceEngine::Blob::Ptr roiBlob = make_shared_blob(frameTensor, cropRoi)
+            //slog::info << frameTensor.get_shape() << slog::endl;
+            ov::Shape tensorShape = frameTensor.get_shape();
+            ov::Layout layout("NHWC");
+            const size_t batch = tensorShape[ov::layout::batch_idx(layout)];
+            const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
+            ov::runtime::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
+                {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height), static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
+            //slog::info << roiTensor.get_shape() << slog::endl;
             inferRequest.set_input_tensor(roiTensor);
         } else {
             const cv::Mat& personImage = img(personRect);
+            slog::info << personImage.size() << slog::endl;
             matToTensor(personImage, input);
         }
     }

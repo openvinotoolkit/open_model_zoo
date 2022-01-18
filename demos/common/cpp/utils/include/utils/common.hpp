@@ -293,7 +293,7 @@ inline void logLayersInfo(const std::shared_ptr<ov::Model>& model) {
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
 
-        slog::info << "\tInput layer: " << name << ", shape: " << shape << ", type: " << type << slog::endl;
+        slog::info << "\tInput layer: " << name << ", shape: " << shape << ", precision: " << type << slog::endl;
     }
 
     for (const ov::Output<ov::Node> output : outputs) {
@@ -301,6 +301,6 @@ inline void logLayersInfo(const std::shared_ptr<ov::Model>& model) {
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
 
-        slog::info << "\tOutput layer: " << name << ", shape: " << shape << ", type: " << type << slog::endl;
+        slog::info << "\tOutput layer: " << name << ", shape: " << shape << ", precision: " << type << slog::endl;
     }
 }
