@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -228,6 +228,7 @@ def compare_with_ref(reference, res_value, name=None):
             ref = reference.get(name)
     else:
         ref = reference
+    ref = ref if ref is None else float(ref)
     if ref is None:
         return None
     return abs(ref - res_value), abs(ref - res_value) / ref

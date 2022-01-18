@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ files:
   - name: densenet121_weights_tf_dim_ordering_tf_kernels.h5
     size: 33188688
     checksum: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
-    source: https://storage.googleapis.com/tensorflow/keras-applications/densenet/densenet121_weights_tf_dim_ordering_tf_kernels.h5
+    original_source: https://storage.googleapis.com/tensorflow/keras-applications/densenet/densenet121_weights_tf_dim_ordering_tf_kernels.h5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/densenet-121-tf/densenet121_weights_tf_dim_ordering_tf_kernels.h5
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
@@ -32,5 +33,5 @@ model_optimizer_args:
   - --output=StatefulPartitionedCall/densenet121/predictions/Softmax
   - --saved_model_dir=$conv_dir/densenet-121.savedmodel
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/tensorflow/master/LICENSE

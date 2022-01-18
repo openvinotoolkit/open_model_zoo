@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ files:
   - name: dm_nfnet_f0-604f9c3a.pth
     size: 285993610
     checksum: dd903d64b8b6404e9b33b5fb664ac803916d51e1d4a03ff5c9f286084dd2240d29472e2dacff5768f731780ce2102da5
-    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-dnf-weights/dm_nfnet_f0-604f9c3a.pth
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-dnf-weights/dm_nfnet_f0-604f9c3a.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/nfnet-f0/dm_nfnet_f0-604f9c3a.pth
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -63,5 +64,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=probs
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

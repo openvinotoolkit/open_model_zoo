@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,9 +37,10 @@ files:
   - name: RepVGG-A0-train.pth
     size: 36588855
     checksum: 7efb6b28b0376d80753c86b43687b38f2a7ae94f3ef58552b602a55767b4187dbb7b1fe8770b16133427c93e6cf137d7
-    source:
+    original_source:
       $type: google_drive
       id: 13Gn8rq1PztoMEgK7rCOPMUYHjGzk-w11
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-a0/RepVGG-A0-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG

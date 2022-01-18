@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ files:
   - name: mixnet-l.tar.gz
     size: 54302843
     checksum: 6207ab87851c7e2c8f3dafe716a596b2f52dd88c6c5db0d51795e312f3cad62c715a35c1f03311084f43566660ac691b
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/mixnet/mixnet-l.tar.gz
+    original_source: https://storage.googleapis.com/cloud-tpu-checkpoints/mixnet/mixnet-l.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mixnet-l/mixnet-l.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

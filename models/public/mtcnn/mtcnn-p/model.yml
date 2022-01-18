@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
 # limitations under the License.
 
 description: >-
-  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
-  group of models designed to perform face detection. Short for "Multi-task Cascaded
-  Convolutional Neural Network", it is implemented using the Caffe* framework. The
-  "p" designation indicates that this model is the "proposal" network intended to
-  find the initial set of faces. For details about this family of models, check out
-  the repository <https://github.com/DuinoDu/mtcnn>.
+  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/abs/1604.02878> group
+  of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional
+  Neural Network", it is implemented using the Caffe* framework. The "p" designation
+  indicates that this model is the "proposal" network intended to find the initial
+  set of faces. For details about this family of models, check out the repository
+  <https://github.com/DuinoDu/mtcnn>.
 
   The model input is an image containing the data to be analyzed. The mean values
   need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image
@@ -36,7 +36,8 @@ files:
   - name: mtcnn-p.caffemodel
     size: 28163
     checksum: abf640a47ec5b87724564741121a235581dd15f3782cf0b9380acfa45ef665974b97d8e8122114a66d9973696ae3b35e
-    source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+    original_source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mtcnn/mtcnn-p/det1.caffemodel
 postprocessing:
   - $type: regex_replace
     file: mtcnn-p.prototxt

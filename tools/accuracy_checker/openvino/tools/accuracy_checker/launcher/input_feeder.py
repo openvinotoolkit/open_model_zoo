@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -367,7 +367,9 @@ class InputFeeder:
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
-                layout = input_.get('layout', layouts_info.get(name, default_layout))
+                layout = layouts_info.get(name, input_.get('layout', default_layout))
+                if name in layouts_info:
+                    input_['layout'] = layout
                 if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
                     layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
@@ -544,6 +546,18 @@ class InputFeeder:
             if precision is not None or layout is not None:
                 inputs_entry.append(input_config)
         return inputs_entry
+
+    def update_layout_configuration(self, layout_mapping, override=False):
+        for layer_name, layout in layout_mapping.items():
+            if layer_name in self.layouts_mapping:
+                if not override:
+                    continue
+                if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                    self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                else:
+                    del self.layouts_mapping[layer_name]
+            elif layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
 
     def release(self):
         del self.network_inputs

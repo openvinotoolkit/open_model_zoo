@@ -39,6 +39,15 @@ required:
               required:
                 $type: "//str"
                 id: "//str"
+      optional:
+        original_source:
+          type: "//any"
+          of:
+            - "//str"
+            - type: "//rec"
+              required:
+                $type: "//str"
+                id: "//str"
   framework: "//str"
   license: "//str"
 optional:

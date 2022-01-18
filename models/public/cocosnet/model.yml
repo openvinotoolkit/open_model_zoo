@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,15 +74,17 @@ files:
   - name: model_files/ckpt/latest_net_Corr.pth
     size: 237624725
     checksum: f756f61b5b4d7ca0e23b7a3208ec8c8d5307fd834cef0dbeea7b7d8bc051eda9ecee2b71a378a2ecc5086a769242fc9a
-    source:
+    original_source:
       $type: google_drive
       id: 1yNCapBY7YqMoKeyVWwTwceqrEKHpUzYN
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/cocosnet/model_files/ckpt/latest_net_Corr.pth
   - name: model_files/ckpt/latest_net_G.pth
     size: 387069636
     checksum: 25b790181bbb30c5bd09627756bd70c8bd528431c57c8508ea48f3f352fda987203f19cc129b5706927bd68878d46e0d
-    source:
+    original_source:
       $type: google_drive
       id: 1zVG4SnR1uI8bC8fagZrgxNYCI5GRmJuR
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/cocosnet/model_files/ckpt/latest_net_G.pth
 postprocessing:
   - $type: regex_replace
     file: model_files/models/networks/__init__.py

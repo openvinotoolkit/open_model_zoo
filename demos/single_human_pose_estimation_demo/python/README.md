@@ -40,7 +40,6 @@ omz_converter --list models.lst
 * ssd512
 * ssd_mobilenet_v1_coco
 * ssd_mobilenet_v1_fpn_coco
-* ssd_mobilenet_v2_coco
 * ssdlite_mobilenet_v2
 * single-human-pose-estimation-0001
 

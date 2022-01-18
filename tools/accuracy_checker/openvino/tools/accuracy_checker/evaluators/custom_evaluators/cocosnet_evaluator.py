@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -217,14 +217,14 @@ class CoCosNetModelOV(BaseOpenVINOModel):
         results = []
         prediction = None
         if self.infer_request is None:
-            self.infer_request = self.exec_network.create_infer_reuqest()
+            self.infer_request = self.exec_network.create_infer_request()
         for current_input in input_data:
             data = self.fit_to_input(current_input)
             if not self.is_dynamic and self.dynamic_inputs:
                 self._reshape_input({k: v.shape for k, v in data.items()})
-            prediction = self.infer(data)
+            prediction, raw_prediction = self.infer(data, raw_results=True)
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
-        return results, prediction
+        return results, raw_prediction
 
 
 class GanCheckModel(BaseDLSDKModel):

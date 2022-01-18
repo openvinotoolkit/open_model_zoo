@@ -16,12 +16,9 @@ ssd512
 ssd-resnet34-1200-onnx
 ssd_mobilenet_v1_coco
 ssd_mobilenet_v1_fpn_coco
-ssd_mobilenet_v2_coco
-ssd_resnet50_v1_fpn_coco
 ssdlite_mobilenet_v2
 vehicle-detection-adas-????
 # For -at centernet
-ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at yolo
 person-vehicle-bike-detection-crossroad-yolov3-1020

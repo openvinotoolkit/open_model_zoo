@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
-    get_cpu_extension, mo_convert_model,
+    get_cpu_extension,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
     automatic_model_search
@@ -110,16 +110,11 @@ class DLSDKLauncher(Launcher):
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
-            if dlsdk_launcher_config.need_conversion:
-                self._model, self._weights = mo_convert_model(
-                    self.config, self.parameters(), dlsdk_launcher_config.framework
-                )
-            else:
-                self._model, self._weights = automatic_model_search(
-                    self._model_name, self.get_value_from_config('model'),
-                    self.get_value_from_config('weights'),
-                    self.get_value_from_config('_model_type')
-                )
+            self._model, self._weights = automatic_model_search(
+                self._model_name, self.get_value_from_config('model'),
+                self.get_value_from_config('weights'),
+                self.get_value_from_config('_model_type')
+            )
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:

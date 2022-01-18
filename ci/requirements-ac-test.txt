@@ -20,8 +20,6 @@ decorator==4.4.2
     # via networkx
 defusedxml==0.7.1
     # via -r tools/accuracy_checker/requirements-core.in
-editdistance==0.5.3
-    # via -r tools/accuracy_checker/requirements.in
 fast-ctc-decode==0.3.0
     # via -r tools/accuracy_checker/requirements.in
 filelock==3.0.12
@@ -78,6 +76,8 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
+openvino-telemetry==2022.1.0
+    # via -r tools/accuracy_checker/requirements-core.in
 packaging==21.0
     # via
     #   huggingface-hub
@@ -136,6 +136,7 @@ regex==2021.8.28
 requests==2.26.0
     # via
     #   huggingface-hub
+    #   openvino-telemetry
     #   transformers
 sacremoses==0.0.45
     # via transformers

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,8 +96,12 @@ class ASRModel(BaseCascadeModel):
         predictions, raw_outputs = [], []
         for data in input_data:
             encoder_prediction, decoder_inputs = self.encoder.predict(identifiers, data)
+            if isinstance(encoder_prediction, tuple):
+                encoder_prediction, raw_encoder_prediction = encoder_prediction
+            else:
+                raw_encoder_prediction = encoder_prediction
             if encoder_callback:
-                encoder_callback(encoder_prediction)
+                encoder_callback(raw_encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
             raw_output, prediction = self.decoder.predict(identifiers, decoder_inputs)
@@ -137,8 +141,8 @@ class EncoderDLSDKModel(BaseDLSDKModel):
 class EncoderOVModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data)
-        return results, results[self.output_blob]
+        results = self.infer(input_data, raw_results=True)
+        return results, results[self.output_blob] if not isinstance(results, tuple) else results[0][self.output_blob]
 
 
 class DecoderDLSDKModel(BaseDLSDKModel):
@@ -167,10 +171,10 @@ class DecoderOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data):
         feed_dict = self.fit_to_input(input_data)
-        results = self.infer(feed_dict)
+        results, raw_results = self.infer(feed_dict, raw_results=True)
         result = self.adapter.process([results], identifiers, [{}])
 
-        return results, result
+        return raw_results, result
 
     def set_input_and_output(self):
         super().set_input_and_output()

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ files:
   - name: ckpt/dla34.pth
     size: 63228658
     checksum: 38c035736538b6c67f2539bf1ca1cc1349c3691f41321bd58de9e97aa9eb83ea6f52c4aeef7c4cd54c92b6f8c3f3e89b
-    source: http://dl.yf.io/dla/models/imagenet/dla34-ba72cf86.pth
+    original_source: http://dl.yf.io/dla/models/imagenet/dla34-ba72cf86.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/dla-34/dla34-ba72cf86.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=dla34
@@ -50,5 +51,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/dla-34.onnx
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/ucbdrive/dla/master/LICENSE
