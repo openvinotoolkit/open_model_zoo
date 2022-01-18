@@ -39,7 +39,7 @@ Examples of model names:
 
 ### Files Location
 
-Place your filesas shown in the table below:
+Place your files as shown in the table below:
 
 File | Destination
 ---|---
