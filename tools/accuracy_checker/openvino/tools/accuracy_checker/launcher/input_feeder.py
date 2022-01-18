@@ -367,7 +367,9 @@ class InputFeeder:
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
-                layout = input_.get('layout', layouts_info.get(name, default_layout))
+                layout = layouts_info.get(name, input_.get('layout', default_layout))
+                if name in layouts_info:
+                    input_['layout'] = layout
                 if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
                     layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
