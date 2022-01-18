@@ -388,4 +388,4 @@ def main():
             log.debug("Result nifti file was saved to {}".format(nii_filename))
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

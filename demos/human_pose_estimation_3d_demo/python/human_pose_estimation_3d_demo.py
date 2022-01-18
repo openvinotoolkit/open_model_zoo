@@ -186,3 +186,5 @@ if __name__ == '__main__':
     metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
+
+    sys.exit()
