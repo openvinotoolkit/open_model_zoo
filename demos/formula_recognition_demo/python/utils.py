@@ -262,18 +262,18 @@ class Model:
         self.model_status = Model.Status.DECODER_INFER
 
     def _unpack_dec_results(self):
-        self.dec_states_h = self.infer_request_decoder.get_tensor(self.args.dec_st_h_t_layer).data
-        self.dec_states_c = self.infer_request_decoder.get_tensor(self.args.dec_st_c_t_layer).data
-        self.output = self.infer_request_decoder.get_tensor(self.args.output_layer).data
-        logit = self.infer_request_decoder.get_tensor(self.args.logit_layer).data
+        self.dec_states_h = self.infer_request_decoder.get_tensor(self.args.dec_st_h_t_layer).data[:]
+        self.dec_states_c = self.infer_request_decoder.get_tensor(self.args.dec_st_c_t_layer).data[:]
+        self.output = self.infer_request_decoder.get_tensor(self.args.output_layer).data[:]
+        logit = self.infer_request_decoder.get_tensor(self.args.logit_layer).data[:]
         self.logits.append(copy.deepcopy(logit))
         self.tgt = np.array([[np.argmax(logit, axis=1)]])
 
     def _unpack_enc_results(self):
-        self.row_enc_out = self.infer_request_encoder.get_tensor(self.args.row_enc_out_layer).data
-        self.dec_states_h = self.infer_request_encoder.get_tensor(self.args.hidden_layer).data
-        self.dec_states_c = self.infer_request_encoder.get_tensor(self.args.context_layer).data
-        self.output = self.infer_request_encoder.get_tensor(self.args.init_0_layer).data
+        self.row_enc_out = self.infer_request_encoder.get_tensor(self.args.row_enc_out_layer).data[:]
+        self.dec_states_h = self.infer_request_encoder.get_tensor(self.args.hidden_layer).data[:]
+        self.dec_states_c = self.infer_request_encoder.get_tensor(self.args.context_layer).data[:]
+        self.output = self.infer_request_encoder.get_tensor(self.args.init_0_layer).data[:]
         self.tgt = np.array([[START_TOKEN]])
         self.logits = []
 
