@@ -252,7 +252,7 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
 }
 
 inline
-void log_compiled_model_info(
+void logCompiledModelInfo(
     const ov::runtime::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
@@ -281,7 +281,7 @@ void log_compiled_model_info(
 }
 
 inline
-void log_model_info(const std::shared_ptr<ov::Model>& model) {
+void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     slog::info << "model name: " << model->get_friendly_name() << slog::endl;
 
     // Prepare input blobs

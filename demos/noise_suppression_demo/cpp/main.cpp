@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
         slog::info << "model file: " << FLAGS_m << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         ov::OutputVector inputs = model->inputs();
         ov::OutputVector outputs = model->outputs();
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
         std::sort(state_names.begin(), state_names.end(), scmp);
 
         ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
-        log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
+        logCompiledModelInfo(compiled_model, FLAGS_m, FLAGS_d);
 
         ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
