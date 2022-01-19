@@ -83,34 +83,22 @@ def main():
     # check input and output names
     if len(ov_encoder.inputs) == len(ov_encoder.outputs):
         input_shapes = {}
-        output_names = []
-
-        try:
-            data_input = ov_encoder.input('input')
-            input_shapes['input'] = data_input.shape
-        except RuntimeError:
-            raise RuntimeError('Input tensor with name \'input\' is not presented in the model')
-
-        try:
-            if ov_encoder.output('output'):
-                output_names.append("output")
-        except RuntimeError:
-            raise RuntimeError('Output tensor with name \'output\' is not presented in the model')
 
         for const_obj in ov_encoder.inputs:
             for name in const_obj.get_names():
-                if ("inp" in name) and ("state" in name):
+                if ("state" in name) or ("input" in name):
                     input_shapes[name] = const_obj.shape
+                else:
+                    raise RuntimeError("The model expected input tensor with name 'input' or 'inp_state_*'")
 
         for const_obj in ov_encoder.outputs:
             for name in const_obj.get_names():
-                if ("out" in name) and ("state" in name):
-                    output_names.append(name)
+                if ("state" not in name) and ("output" not in name):
+                    raise RuntimeError("The model expected output tensor with names 'output' and 'out_state_*'")
+
     else:
         raise RuntimeError("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
 
-    assert "input" in input_shapes.keys(), "'input' is not presented in model"
-    assert "output" in output_names, "'output' is not presented in model"
     state_inp_names = [n for n in input_shapes.keys() if "state" in n]
     state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
     log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
