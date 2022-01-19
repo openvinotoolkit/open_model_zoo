@@ -45,10 +45,18 @@ int main(int argc, char** argv) {
     std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
     slog::info << "Reading model " << FLAGS_m << slog::endl;
     logLayersInfo(model);
+    std::string outputTensorName = "";
+    for (const auto& output : model->outputs()) {
+        if (output.get_any_name().find("89") != std::string::npos) {
+            outputTensorName = output.get_any_name();
+        }
+    }
+    if (outputTensorName == "") {
+        throw std::logic_error("Not found suitable output!");
+    }
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().model().set_layout("NHWC");
     model = ppp.build();
-   // model.getInputsInfo().begin()->second->setLayout(InferenceEngine::Layout::NHWC);
 
     ov::runtime::CompiledModel compiledModel = core.compile_model(model, FLAGS_d);
     logCompiledModelInfo(compiledModel, FLAGS_m, FLAGS_d);
@@ -72,7 +80,7 @@ int main(int argc, char** argv) {
     slog::info << "Compute..." << slog::endl;
 
     cv::Mat inputBlob = tensorToMat(infReq.get_input_tensor());
-    cv::Mat outputBlob = tensorToMat(infReq.get_output_tensor());
+    cv::Mat outputBlob = tensorToMat(infReq.get_tensor(outputTensorName));
     outputBlob = outputBlob.reshape(1, height);
 
     const auto startTime = std::chrono::steady_clock::now();
@@ -83,7 +91,6 @@ int main(int argc, char** argv) {
         kspace.setTo(0, mri.samplingMask);
         kspace = (kspace - cv::Scalar(mri.stats[0], mri.stats[0])) / cv::Scalar(mri.stats[1], mri.stats[1]);
         kspace.reshape(1, 1).convertTo(inputBlob.reshape(1, 1), CV_32F);
-
         // Forward pass
         infReq.infer();
 
