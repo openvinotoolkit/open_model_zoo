@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import argparse
+import json
 import shutil
 import sys
-
 from pathlib import Path
+from typing import Dict, List
 
 from openvino.model_zoo import _common
 
@@ -29,6 +30,34 @@ def copy_data(output_dir):
         str(_common.PACKAGE_DIR / 'data'),
         str(data_path),
     )
+
+
+def read_dataset_classes(file_name: Path) -> Dict[int, str]:
+    file_path = _common.PACKAGE_DIR / 'data' / 'dataset_classes' / file_name
+
+    if not file_path.exists():
+        raise FileNotFoundError(f'File with name: {str(file_name)} not found')
+
+    if file_path.suffix == '.txt':
+        classes = _read_txt_classes(file_path)
+    elif file_path.suffix == '.json':
+        classes = _read_json_classes(file_path)
+    else:
+        raise NotImplementedError(f'Not supported file extension: {file_path.suffix}')
+
+    return dict(enumerate(classes))
+
+
+def _read_txt_classes(file_path: Path) -> List[str]:
+    with file_path.open() as file:
+        return file.read().splitlines()
+
+
+def _read_json_classes(file_path: Path) -> List[str]:
+    with file_path.open() as file:
+        # expected json with an array of strings
+        return json.load(file)
+
 
 def main():
     parser = argparse.ArgumentParser()

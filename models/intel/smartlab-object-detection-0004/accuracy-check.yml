@@ -1,5 +1,5 @@
 models:
-  - name: smartlab-object-detection-0001
+  - name: smartlab-object-detection-0004
 
     launchers:
       - framework: dlsdk

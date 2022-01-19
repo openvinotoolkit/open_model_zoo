@@ -1,6 +1,4 @@
-import torch
 import numpy as np
-
 from .preprocess import preprocess
 from .postprocess import postprocess
 from .settings import MwGlobalExp
@@ -13,9 +11,8 @@ class SubDetector(object):
 
         self.cls_names = exp.mw_classes
         self.num_classes = exp.num_classes
-        self.confthre = exp.confthre
-        self.nmsthre = exp.nmsthre
-        self.test_size = exp.test_size
+        self.conf_thresh = exp.conf_thresh
+        self.nms_thresh = exp.nms_thresh
 
     def inference(self, img):
         img_info = {"id": 0}
@@ -29,8 +26,8 @@ class SubDetector(object):
         outputs = demo_postprocess(res, self.input_shape, p6=False)
 
         outputs = postprocess(
-            torch.tensor(outputs), self.num_classes, self.confthre,
-            self.nmsthre, class_agnostic=True)
+            outputs, self.num_classes, self.conf_thresh,
+            self.nms_thresh, class_agnostic=True)
 
         return outputs, img_info
 

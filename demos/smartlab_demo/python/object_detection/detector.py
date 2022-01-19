@@ -25,11 +25,11 @@ from .vis import vis
 
 class Detector(object):
     def __init__(self,
+        ie,
         fp_top_models:list,
         fp_front_models:list,
         is_show:bool,
-        backend:str='openvino'
-        ):
+        backend:str='openvino'):
 
         '''Object Detection Variables'''
         self.object_detection_boxes = []
@@ -56,8 +56,7 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.3,
-            is_show = self.is_show
-            )
+            ie=ie)
 
         ###           topview.global_subdetector2          ###
         #  max-number constraints:
@@ -70,8 +69,7 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            is_show = self.is_show
-            )
+            ie=ie)
         
         '''configure settings for 2 models in front view'''
         ###          frontview.global_subdetector1           ###
@@ -88,12 +86,11 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.2,
             nms_thresh = 0.3,
-            is_show = self.is_show
-            )
+            ie=ie)
 
         ###           frontview.global_subdetector2          ###
         #  max-number constraints:
-        #     "weights", 6; "tweezers", 1; "battery", 1;      
+        #     "weights", 6; "tweezers", 1; "battery", 1;
         #  other conditions:
         #     conf 0.1; nms 0.2
         self.front2_exp = MwGlobalExp(
@@ -102,8 +99,7 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            is_show = self.is_show
-            )
+            ie=ie)
 
         ### concatenate list of class names for topview
         cls1 = self.top1_exp.mw_classes

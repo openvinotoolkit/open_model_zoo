@@ -15,17 +15,16 @@
 """
 
 import cv2
-import numpy as np
 import sys
-from openvino.inference_engine import IECore
+import numpy as np
+import logging as log
 from collections import deque
 from scipy.special import softmax
-
-sys.path.append('temporal_segmentation')
+from openvino.inference_engine import IECore
 
 
 class Segmentor(object):
-    def __init__(self, backbone_path, classifier_path):
+    def __init__(self, ie, backbone_path, classifier_path):
         self.backbone_path = backbone_path
         self.classifier_path = classifier_path
 
@@ -35,19 +34,11 @@ class Segmentor(object):
             "adjust_rider",
         ]
 
-        ie = IECore()
-        net = ie.read_network(
-            model=self.backbone_path[:-4] + ".xml",
-            weights=self.backbone_path[:-4] + ".bin"
-        )
+        net = ie.read_network(self.backbone_path)
         self.backbone = ie.load_network(network=net, device_name="CPU")
         self.backbone_input_keys = list(self.backbone.input_info.keys())
         self.backbone_output_key = list(self.backbone.outputs.keys())
-
-        net = ie.read_network(
-            model=self.classifier_path[:-4] + ".xml",
-            weights=self.classifier_path[:-4] + ".bin"
-        )
+        net = ie.read_network(self.classifier_path)
         self.classifier = ie.load_network(network=net, device_name="CPU")
         self.classifier_input_keys = list(self.classifier.input_info.keys())
         self.classifier_output_key = list(self.classifier.outputs.keys())
@@ -90,9 +81,8 @@ class Segmentor(object):
         return self.terms[predicted], self.terms[predicted]
 
 
-class SegmentorMstcn(Segmentor):
-    def __init__(self, i3d_path, mstcn_path):
-        super().__init__(i3d_path, mstcn_path)
+class SegmentorMstcn(object):
+    def __init__(self, ie, i3d_path, mstcn_path):
         self.embed_model = 0
         self.seg_model = 0
         self.temporal_predictions = 0
@@ -131,24 +121,17 @@ class SegmentorMstcn(Segmentor):
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
         self.his_fea = []
 
-        ie = IECore()
-        net = ie.read_network(
-            model=self.i3d_path[:-4] + ".xml",
-            weights=self.i3d_path[:-4] + ".bin"
-        )
+        net = ie.read_network(self.i3d_path)
         net.reshape({next(iter(net.input_info)): (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
-        # net.add_outputs("RGB/inception_i3d/Logits/Conv3d_0c_1x1/conv_3d/convolution/fq_input_0")
+
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
         self.i3d = ie.load_network(network=net, device_name="CPU")
         self.i3d_input_keys = list(self.i3d.input_info.keys())
         self.i3d_output_key = list(self.i3d.outputs.keys())
 
-        self.mstcn_net = ie.read_network(
-            model=self.mstcn_path[:-4] + ".xml",
-            weights=self.mstcn_path[:-4] + ".bin"
-        )
+        self.mstcn_net = ie.read_network(self.mstcn_path)
         self.mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
         self.mstcn_input_keys = list(self.mstcn.input_info.keys())
         self.mstcn_output_key = list(self.mstcn.outputs.keys())
@@ -192,7 +175,7 @@ class SegmentorMstcn(Segmentor):
             frame_predictions = [self.ActionTerms[i] for i in np.argmax(self.TemporalLogits, axis=1)]
             frame_predictions = ["background" for i in range(self.EmbedWindowLength - 1)] + frame_predictions
 
-        return frame_predictions
+        return frame_predictions[-1]
 
     def feature_embedding(self, img_buffer, embedding_buffer, frame_index):
         # minimal temporal length for processor
@@ -235,9 +218,9 @@ class SegmentorMstcn(Segmentor):
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
         if num_batch < 0:
-            print("Waiting for the next frame ...")
+            log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
-            print("start_index:", start_index, "end_index:", end_index)
+            log.debug(f"start_index: {start_index} end_index: {end_index}")
 
             unit1 = embed_buffer_top[:, start_index:end_index]
             unit2 = embed_buffer_front[:, start_index:end_index]
@@ -284,13 +267,15 @@ class SegmentorMstcn(Segmentor):
 
 
 if __name__ == '__main__':
-    segmentor = SegmentorMstcn("fp32/i3d-rgb.xml", "mstcn_online.xml")
-    segmentor.initialize()
+    ie = IECore()
+    segmentor = SegmentorMstcn(ie, "i3d-rgb.xml", "mstcn_online.xml")
     frame_counter = 0  # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
-    cap1 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_1.mp4", cv2.CAP_FFMPEG)
-    cap2 = cv2.VideoCapture("P03_A5130001992103255012_2021-10-18_10-19-30_2.mp4", cv2.CAP_FFMPEG)
+
+    cap1 = cv2.VideoCapture("stream_1_top.mp4")
+    cap2 = cv2.VideoCapture("stream_1_high.mp4")
+
     while cap1.isOpened() and cap2.isOpened():
         ret1, frame1 = cap1.read()  # frame:480 x 640 x 3
         ret2, frame2 = cap2.read()  # frame:480 x 640 x 3
@@ -299,7 +284,10 @@ if __name__ == '__main__':
             buffer2.append(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB))
             frame_counter += 1
 
-            frame_predictions = segmentor.inference(buffer_top=buffer1, buffer_front=buffer2, frame_index=frame_counter)
+            frame_predictions = segmentor.inference(
+                    buffer_top=buffer1,
+                    buffer_front=buffer2,
+                    frame_index=frame_counter)
             print("Frame predictions:", frame_predictions)
         else:
             print("Finished!")
