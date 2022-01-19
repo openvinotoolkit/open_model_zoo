@@ -124,6 +124,7 @@ class SegmentorMstcn(object):
         net = ie.read_network(self.i3d_path)
         net.reshape({next(iter(net.input_info)): (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
+
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
         self.i3d = ie.load_network(network=net, device_name="CPU")
@@ -152,7 +153,6 @@ class SegmentorMstcn(object):
         Returns: the temporal prediction results for each frame (including the historical predictions)，
                  length of predictions == frame_index()
         """
-
         ### run encoder ###
         self.EmbedBufferTop = self.feature_embedding(
             img_buffer=buffer_top,
@@ -197,12 +197,9 @@ class SegmentorMstcn(object):
                     [cv2.resize(img_buffer[start_index + i * self.EmbedWindowAtrous],
                                 (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
                     for j in range(self.EmbedBatchSize)]
-
-                ###               ###
-                ### inference i3d ###
-                ###               ###
                 input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
                 input_data = input_data * 127.5 + 127.5
+
                 out_logits = self.i3d.infer(
                     inputs={self.i3d_input_keys[0]: input_data})[self.i3d_output_key[0]]
                 out_logits = out_logits.squeeze((0, 3, 4))
@@ -275,6 +272,7 @@ if __name__ == '__main__':
     frame_counter = 0  # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
+
     cap1 = cv2.VideoCapture("stream_1_top.mp4")
     cap2 = cv2.VideoCapture("stream_1_high.mp4")
 
