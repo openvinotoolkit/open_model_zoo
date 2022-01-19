@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
             // find corresponding output state
             auto scmp = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
             if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), scmp))
-                throw std::logic_error("model output state name not corresponf input state name");
+                throw std::logic_error("model output state name does not correspond input state name");
 
             state_names.emplace_back(inp_state_name, out_state_name);
 
