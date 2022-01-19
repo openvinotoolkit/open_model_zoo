@@ -15,7 +15,7 @@
 """
 
 import logging as log
-from openvino.runtime import Core, get_version
+from openvino.runtime import Core, get_version, AsyncInferQueue
 
 
 def load_core(device, cpu_extension=None):
@@ -38,8 +38,10 @@ class IEModel:  # pylint: disable=too-few-public-methods
         if len(self.model.inputs) != 1:
             raise RuntimeError("The {} wrapper supports only models with 1 input layer".format(model_type))
 
+        self.outputs = {}
         compiled_model = core.compile_model(self.model, device)
-        self.infer_requests = [compiled_model.create_infer_request() for _ in range(num_requests)]
+        self.infer_queue = AsyncInferQueue(compiled_model, num_requests)
+        self.infer_queue.set_callback(self.completion_callback)
         log.info('The {} model {} is loaded to {}'.format(model_type, model_path, device))
 
         self.input_tensor_name = self.model.inputs[0].get_any_name()
@@ -64,21 +66,25 @@ class IEModel:  # pylint: disable=too-few-public-methods
 
         self.input_size = self.model.input(self.input_tensor_name).shape
 
+    def completion_callback(self, infer_request, id):
+        self.outputs[id] = infer_request.get_tensor(self.output_tensor_name).data[:]
+
     def infer(self, data):
         """Runs model on the specified input"""
 
-        input_data = {self.input_tensor_name: data}
-        self.infer_requests[0].infer(input_data)
-        return self.infer_requests[0].get_tensor(self.output_tensor_name).data[:]
+        self.async_infer(data, 0)
+        return self.wait_request(0)
 
     def async_infer(self, data, req_id):
         """Requests model inference for the specified input"""
 
         input_data = {self.input_tensor_name: data}
-        self.infer_requests[req_id].start_async(inputs=input_data)
+        self.infer_queue.start_async(input_data, req_id)
 
     def wait_request(self, req_id):
         """Waits for the model output by the specified request ID"""
-
-        self.infer_requests[req_id].wait()
-        return self.infer_requests[req_id].get_tensor(self.output_tensor_name).data[:]
+        self.infer_queue.wait_all()
+        try:
+            return self.outputs.pop(req_id)
+        except KeyError:
+            return None
