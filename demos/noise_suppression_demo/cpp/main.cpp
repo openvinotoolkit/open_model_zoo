@@ -229,7 +229,6 @@ int main(int argc, char* argv[]) {
                     ov::Shape state_shape = model->input(inp_state_name).get_shape();
                     state_tensor = ov::runtime::Tensor(ov::element::f32, state_shape);
                     memset(state_tensor.data<float>(), 0, state_tensor.get_byte_size());
-                    infer_request.set_tensor(inp_state_name, state_tensor);
                 }
                 infer_request.set_tensor(inp_state_name, state_tensor);
             }
