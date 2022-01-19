@@ -1016,6 +1016,7 @@ PYTHON_DEMOS = [
                           '-m': ModelArg('midasnet')})
     )),
 
+    # commented because the demo is hanging with OV2.0
     #PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
     #           model_keys=['-m', '--m_reid'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
