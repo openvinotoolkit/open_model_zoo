@@ -20,8 +20,8 @@ evaluations:
           batch: 10 # Default batch size is 1
 
           annotation_conversion:
-              images_dir: C:\Users\kminemur\DSI-1867_small\action_recognition\streams_3
-              annotation_txt: C:\Users\kminemur\DSI-1867_small\action_recognition\labels\streams_3.txt
+              images_dir: .\action_recognition\streams_3
+              annotation_txt: .\action_recognition\labels\streams_3.txt
               converter: smartlab_action
 
           preprocessing:
