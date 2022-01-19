@@ -18,16 +18,16 @@
 #include "openvino/openvino.hpp"
 
 
- /**
- * @brief Get cv::Mat value in the correct format.
- */
+/**
+* @brief Get cv::Mat value in the correct format.
+*/
 template <typename T>
 static const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     switch (mat.type()) {
-    case CV_8UC1:  return (T)mat.at<uchar>(h, w);
-    case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
-    case CV_32FC1: return (T)mat.at<float>(h, w);
-    case CV_32FC3: return (T)mat.at<cv::Vec3f>(h, w)[c];
+        case CV_8UC1:  return (T)mat.at<uchar>(h, w);
+        case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
+        case CV_32FC1: return (T)mat.at<float>(h, w);
+        case CV_32FC3: return (T)mat.at<cv::Vec3f>(h, w)[c];
     }
     throw std::runtime_error("cv::Mat type is not recognized");
 };
@@ -75,7 +75,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     blobData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<uint8_t>(resizedMat, h, w, c);
+                        getMatValue<uint8_t>(resizedMat, h, w, c);
     }
 }
 
@@ -114,7 +114,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<float_t>(resizedMat, h, w, c);
+                        getMatValue<float_t>(resizedMat, h, w, c);
     }
     else {
         uint8_t* tensorData = tensor.data<uint8_t>();
@@ -125,7 +125,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<uint8_t>(resizedMat, h, w, c);
+                        getMatValue<uint8_t>(resizedMat, h, w, c);
     }
 }
 
@@ -184,7 +184,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
  * @param mat - given cv::Mat object with an image data.
  * @return resulting Blob pointer.
  */
-static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
+static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
     auto matType = mat.type() & CV_MAT_DEPTH_MASK;
     if (matType != CV_8U && matType != CV_32F) {
         throw std::runtime_error("Unsupported mat type for wrapping");
@@ -206,8 +206,8 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     InferenceEngine::Precision precision = isMatFloat ?
         InferenceEngine::Precision::FP32 : InferenceEngine::Precision::U8;
     InferenceEngine::TensorDesc tDesc(precision,
-        { 1, channels, height, width },
-        InferenceEngine::Layout::NHWC);
+                                      {1, channels, height, width},
+                                      InferenceEngine::Layout::NHWC);
 
     InferenceEngine::Blob::Ptr blob;
     if (isMatFloat) {
@@ -246,12 +246,12 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
  * @param thickness - thickness of the lines used to draw a text.
  */
 inline void putHighlightedText(const cv::Mat& frame,
-    const std::string& message,
-    cv::Point position,
-    int fontFace,
-    double fontScale,
-    cv::Scalar color,
-    int thickness) {
+                               const std::string& message,
+                               cv::Point position,
+                               int fontFace,
+                               double fontScale,
+                               cv::Scalar color,
+                               int thickness) {
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
@@ -268,7 +268,7 @@ public:
         float inputWidth = static_cast<float>(inputSize.width);
         float inputHeight = static_cast<float>(inputSize.height);
         scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
-        newResolution = cv::Size{ static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor) };
+        newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
         return newResolution;
     }
 
@@ -312,21 +312,20 @@ class InputTransform {
 public:
     InputTransform() : reverseInputChannels(false), isTrivial(true) {}
 
-    InputTransform(bool reverseInputChannels, const std::string& meanValues, const std::string& scaleValues) :
+    InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) :
         reverseInputChannels(reverseInputChannels),
         isTrivial(!reverseInputChannels && meanValues.empty() && scaleValues.empty()),
         means(meanValues.empty() ? cv::Scalar(0.0, 0.0, 0.0) : string2Vec(meanValues)),
         stdScales(scaleValues.empty() ? cv::Scalar(1.0, 1.0, 1.0) : string2Vec(scaleValues)) {
     }
 
-    cv::Scalar string2Vec(const std::string& string) {
+    cv::Scalar string2Vec(const std::string &string) {
         const auto& strValues = split(string, ' ');
         std::vector<float> values;
         try {
             for (auto& str : strValues)
                 values.push_back(std::stof(str));
-        }
-        catch (const std::invalid_argument&) {
+        } catch (const std::invalid_argument&) {
             throw std::runtime_error("Invalid parameter --mean_values or --scale_values is provided.");
         }
         if (values.size() != 3) {
