@@ -72,8 +72,7 @@ public:
             throw std::logic_error("Incorrect output dimensions for SSD");
         }
 
-        ppp.output().tensor().
-            set_element_type(ov::element::f32);
+        ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
         compiledModel = core_.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
@@ -132,7 +131,7 @@ public:
 private:
     bool autoResize;
     std::vector<float> detectionTresholds;
-    ov::runtime::Core core_;  // The only reason to store a plugin as to assure that it lives at least as long as Executablemodel
+    ov::runtime::Core core_;  // The only reason to store a plugin as to assure that it lives at least as long as CompiledModel
     ov::runtime::CompiledModel compiledModel;
 };
 
@@ -185,8 +184,7 @@ public:
         }
 
         reidLen = outputShape[1];
-        ppp.output().tensor().
-            set_element_type(ov::element::f32);
+        ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
         compiledModel = core_.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-Identification");
@@ -205,7 +203,8 @@ public:
             const size_t batch = tensorShape[ov::layout::batch_idx(layout)];
             const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
             ov::runtime::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
-                {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height), static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
+                {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height),
+                static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
             inferRequest.set_input_tensor(roiTensor);
         } else {
             const cv::Mat& personImage = img(personRect);
@@ -225,6 +224,6 @@ public:
 private:
     bool autoResize;
     int reidLen;
-    ov::runtime::Core core_;  // The only reason to store a device as to assure that it lives at least as long as Executablemodel
+    ov::runtime::Core core_;  // The only reason to store a device as to assure that it lives at least as long as  CompiledModel
     ov::runtime::CompiledModel compiledModel;
 };

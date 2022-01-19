@@ -511,7 +511,7 @@ void DetectionsProcessor::process() {
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
                         ov::runtime::InferRequest &reidRequest, cv::Rect rect, Context &context) {
-                                    reidRequest.set_callback([](std::exception_ptr e) {}); // destroy the stored bind object
+                                    reidRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
                                     classifiersAggregator->push(cv::Rect(rect));
@@ -568,7 +568,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::runtime::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback([](std::exception_ptr e) {});  // destroy the stored bind object
+                    inferRequest.set_callback([](const std::exception_ptr& e) {});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
                             std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
@@ -621,7 +621,10 @@ int main(int argc, char* argv[]) {
 
         std::vector<std::string> files;
         parseInputFilesArguments(files);
-        if (files.empty() && 0 == FLAGS_nc) throw std::logic_error("No inputs were found");
+        if (files.empty() && 0 == FLAGS_nc) {
+            throw std::logic_error("No inputs were found");
+        }
+
         std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSources;
         std::vector<std::shared_ptr<ImageSource>> imageSources;
         if (FLAGS_nc) {
@@ -638,6 +641,7 @@ int main(int argc, char* argv[]) {
                 videoCapturSources.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             }
         }
+
         for (const std::string& file : files) {
             cv::Mat frame = cv::imread(file, cv::IMREAD_COLOR);
             if (frame.empty()) {
