@@ -18,12 +18,18 @@ class Model:
         self.name = name
         self.subdirectory = subdirectory
 
-        self.net = None
-        self.exec_net = None
+        self.model = None
+        self.compiled_model = None
         self.ie = ie
         self.device = None
-        self._accuracy_config = None
-        self._model_config = None
+        self._set_config_paths()
+
+    def _set_config_paths(self):
+        accuracy_config_path = _common.MODEL_ROOT / self.subdirectory / 'accuracy-check.yml'
+        self.accuracy_config_path = accuracy_config_path if accuracy_config_path.exists() else None
+
+        model_config_path = _common.MODEL_ROOT / self.subdirectory / 'model.yml'
+        self.model_config_path = model_config_path if model_config_path.exists() else None
 
     @classmethod
     def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None, ie=None):
@@ -127,8 +133,8 @@ class Model:
         return model
 
     def _load(self, device):
-        self.net = self.ie.read_model(self.model_path)
-        self.exec_net = self.ie.compile_model(self.net, device)
+        self.model = self.ie.read_model(self.model_path)
+        self.compiled_model = self.ie.compile_model(self.model, device)
         self.device = device
 
     def __call__(self, inputs, device='CPU'):
@@ -136,69 +142,57 @@ class Model:
             raise TypeError('ie is not specified or is of the wrong type.'
                             'Please check ie is of openvino.runtime.Core type.')
 
-        if self.exec_net is None or device != self.device:
+        if self.compiled_model is None or device != self.device:
             self._load(device)
 
-        input_names = [input.get_any_name() for input in self.net.inputs]
-        infer_request = self.exec_net.create_infer_request()
+        input_names = [input.get_any_name() for input in self.model.inputs]
 
         for input_name in inputs:
             if input_name not in input_names:
                 raise ValueError('Unknown input name {}'.format(input_name))
 
-        output_names = [output.get_any_name() for output in self.net.outputs]
-        infer_request.infer(inputs)
-        result = {name: infer_request.get_tensor(name).data for name in output_names}
-        return result
+        return self.compiled_model.infer_new_request(inputs)
 
-    @property
     def accuracy_checker_config(self):
-        if self._accuracy_config is None:
-            config_path = _common.MODEL_ROOT / self.subdirectory / 'accuracy-check.yml'
-            if config_path.exists():
-                with config_path.open('rb') as config_file, \
-                        validation.deserialization_context('Loading config "{}"'.format(config_path)):
-                    self._accuracy_config = yaml.safe_load(config_file)
+        accuracy_config = None
+        if self.accuracy_config_path is not None:
+            with self.accuracy_config_path.open('rb') as config_file, \
+                    validation.deserialization_context('Loading config "{}"'.format(self.accuracy_config_path)):
+                accuracy_config = yaml.safe_load(config_file)
 
-        return self._accuracy_config
+        return accuracy_config
 
-    @property
     def model_config(self):
-        if self._model_config is None:
-            config_path = _common.MODEL_ROOT / self.subdirectory / 'model.yml'
-            if config_path.exists():
-                with config_path.open('rb') as config_file, \
-                        validation.deserialization_context('Loading config "{}"'.format(config_path)):
-                    self._model_config = yaml.safe_load(config_file)
+        model_config = None
+        if self.model_config_path is not None:
+            with self.model_config_path.open('rb') as config_file, \
+                    validation.deserialization_context('Loading config "{}"'.format(self.model_config_path)):
+                model_config = yaml.safe_load(config_file)
 
-        return self._model_config
+        return model_config
 
     def inputs(self):
-        if self.net is None:
+        if self.model is None:
             try:
-                self.net = self.ie.read_model(self.model_path)
+                self.model = self.ie.read_model(self.model_path)
             except AttributeError:
                 raise TypeError('ie is not specified or is of the wrong type.'
                                 'Please check ie is of openvino.runtime.Core type.')
 
-        input_blobs = self.net.inputs
-
-        return input_blobs
+        return self.model.inputs
 
     def outputs(self):
-        if self.net is None:
+        if self.model is None:
             try:
-                self.net = self.ie.read_model(self.model_path)
+                self.model = self.ie.read_model(self.model_path)
             except AttributeError:
                 raise TypeError('ie is not specified or is of the wrong type.'
                                 'Please check ie is of openvino.runtime.Core type.')
 
-        output_blob = self.net.outputs
-
-        return output_blob
+        return self.model.outputs
 
     def preferable_input_shape(self, name):
-        input_info = self.model_config.get('input_info', [])
+        input_info = self.model_config().get('input_info', [])
         for input in input_info:
             if input['name'] == name:
                 return input['shape']
@@ -206,7 +200,7 @@ class Model:
         return None
 
     def layout(self, name):
-        input_info = self.model_config.get('input_info', [])
+        input_info = self.model_config().get('input_info', [])
         for input in input_info:
             if input['name'] == name:
                 return input['layout']
@@ -214,4 +208,4 @@ class Model:
         return None
 
     def input_info(self):
-        return self.model_config.get('input_info', [])
+        return self.model_config().get('input_info', [])

@@ -14,10 +14,10 @@ class TestModel(unittest.TestCase):
         self.assertTrue(os.path.exists(xml_path))
 
         ie = Core()
-        net = ie.read_model(xml_path)
+        ie_model = ie.read_model(xml_path)
 
-        self.assertEqual(list(net.inputs[0].shape), [1, 3, 256, 256])
-        self.assertEqual(list(net.outputs[0].shape), [1, 1, 200, 7])
+        self.assertEqual(list(ie_model.inputs[0].shape), [1, 3, 256, 256])
+        self.assertEqual(list(ie_model.outputs[0].shape), [1, 1, 200, 7])
 
     def test_load_public(self):
         model = omz.Model.download('colorization-v2', precision='FP32')
@@ -26,10 +26,10 @@ class TestModel(unittest.TestCase):
         self.assertTrue(os.path.exists(xml_path))
 
         ie = Core()
-        net = ie.read_model(xml_path)
+        ie_model = ie.read_model(xml_path)
 
-        self.assertEqual(list(net.inputs[0].shape), [1, 1, 256, 256])
-        self.assertEqual(list(net.outputs[0].shape), [1, 2, 256, 256])
+        self.assertEqual(list(ie_model.inputs[0].shape), [1, 1, 256, 256])
+        self.assertEqual(list(ie_model.outputs[0].shape), [1, 2, 256, 256])
 
     def test_load_from_pretrained(self):
         model = omz.Model.from_pretrained('models/intel/face-detection-0200/FP16-INT8/face-detection-0200.xml')
@@ -38,25 +38,25 @@ class TestModel(unittest.TestCase):
         self.assertTrue(os.path.exists(xml_path))
 
         ie = Core()
-        net = ie.read_model(xml_path)
+        ie_model = ie.read_model(xml_path)
 
-        self.assertEqual(list(net.inputs[0].shape), [1, 3, 256, 256])
-        self.assertEqual(list(net.outputs[0].shape), [1, 1, 200, 7])
+        self.assertEqual(list(ie_model.inputs[0].shape), [1, 3, 256, 256])
+        self.assertEqual(list(ie_model.outputs[0].shape), [1, 1, 200, 7])
 
     def test_get_accuracy_checker_config(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
-        self.assertIsInstance(model.accuracy_checker_config, dict)
+        self.assertIsInstance(model.accuracy_checker_config(), dict)
 
     def test_get_model_config(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
-        self.assertIsInstance(model.model_config, dict)
+        self.assertIsInstance(model.model_config(), dict)
 
     def test_infer_model(self):
         ie = Core()
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
 
-        net = ie.read_model(model.model_path)
-        input_name = net.inputs[0].get_any_name()
+        ie_model = ie.read_model(model.model_path)
+        input_name = ie_model.inputs[0].get_any_name()
 
         inputs = {input_name: np.zeros((1, 1, 256, 256))}
         output = next(iter(model(inputs).values()))
@@ -66,9 +66,9 @@ class TestModel(unittest.TestCase):
         ie = Core()
         model = omz.Model.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16', ie=ie)
 
-        net = ie.read_model(model.model_path)
-        input_names = [input.get_any_name() for input in net.inputs]
-        input_shapes = [input.shape for input in net.inputs]
+        ie_model = ie.read_model(model.model_path)
+        input_names = [input.get_any_name() for input in ie_model.inputs]
+        input_shapes = [input.shape for input in ie_model.inputs]
 
         expected_shapes = {
             'output_s': (1, 384),
@@ -81,7 +81,7 @@ class TestModel(unittest.TestCase):
 
         outputs = model(inputs)
         for name, output in outputs.items():
-            self.assertEqual(output.shape, expected_shapes[name])
+            self.assertEqual(output.shape, expected_shapes[name.get_any_name()])
 
     def test_load_public_composite(self):
         model = omz.Model.download('mtcnn-p', precision='FP32')
@@ -90,15 +90,15 @@ class TestModel(unittest.TestCase):
         self.assertTrue(os.path.exists(xml_path))
 
         ie = Core()
-        net = ie.read_model(xml_path)
+        ie_model = ie.read_model(xml_path)
 
         expected_shapes = {
             'conv4-2': [1, 4, 355, 635],
             'prob1': [1, 2, 355, 635]
         }
 
-        self.assertEqual(list(net.inputs[0].shape), [1, 3, 720, 1280])
-        for output in net.outputs:
+        self.assertEqual(list(ie_model.inputs[0].shape), [1, 3, 720, 1280])
+        for output in ie_model.outputs:
             output_name = output.get_any_name()
             self.assertEqual(list(output.shape), expected_shapes[output_name])
 
