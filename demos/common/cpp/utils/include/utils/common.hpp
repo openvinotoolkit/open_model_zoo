@@ -284,34 +284,28 @@ inline
 void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     slog::info << "model name: " << model->get_friendly_name() << slog::endl;
 
-    // Prepare input blobs
-
-    // Taking information about all topology inputs
+    // Dump information about model inputs/outputs
     ov::OutputVector inputs = model->inputs();
     ov::OutputVector outputs = model->outputs();
 
+    slog::info << "inputs: " << slog::endl;
     for (const ov::Output<ov::Node> input : inputs)
     {
-        slog::info << slog::endl;
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
 
-        slog::info << "input name: " << name << slog::endl;
-        slog::info << "input type: " << type << slog::endl;
-        slog::info << "input shape: " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
     }
 
+    slog::info << "outputs: " << slog::endl;
     for (const ov::Output<ov::Node> output : outputs)
     {
-        slog::info << slog::endl;
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
 
-        slog::info << "output name: " << name << slog::endl;
-        slog::info << "output type: " << type << slog::endl;
-        slog::info << "output shape: " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
     }
 
     return;

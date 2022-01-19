@@ -49,7 +49,6 @@ static void showUsage() {
 }
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
-    // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -134,7 +133,7 @@ void write_wav(const std::string& file_name, const RiffWaveHeader& wave_header, 
 
 int main(int argc, char* argv[]) {
     try {
-        // ------------------------------ Parsing and validating of input arguments --------------------------
+        // Parsing and validating of input arguments
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return EXIT_FAILURE;
         }
@@ -144,8 +143,8 @@ int main(int argc, char* argv[]) {
         // Loading Inference Engine
         ov::runtime::Core core;
 
+        slog::info << "Reading model: " << FLAGS_m << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
-        slog::info << "model file: " << FLAGS_m << slog::endl;
         logBasicModelInfo(model);
 
         ov::OutputVector inputs = model->inputs();
@@ -163,16 +162,14 @@ int main(int argc, char* argv[]) {
             out_state_name.replace(0, 3, "out");
 
             // find corresponding output state
-            auto scmp = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
-            if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), scmp))
+            auto name_equal = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
+            if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), name_equal))
                 throw std::logic_error("model output state name does not correspond input state name");
 
             state_names.emplace_back(inp_state_name, out_state_name);
 
             ov::Shape shape = inputs[i].get_shape();
-            size_t tensor_size = 1;
-            for (size_t s : shape)
-                tensor_size *= s;
+            size_t tensor_size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
 
             state_size += tensor_size;
         }
@@ -180,11 +177,7 @@ int main(int argc, char* argv[]) {
         if (state_size == 0)
             throw std::logic_error("no expected model state inputs found");
 
-        std::cout << "State_param_num = " << state_size << " (" << state_size * 4e-6f << "Mb)" << std::endl;
-
-        // sort names
-        auto scmp = [](const std::pair<std::string, std::string>& a, const std::pair<std::string,std::string>& b) { return a.first < b.first; };
-        std::sort(state_names.begin(), state_names.end(), scmp);
+        slog::info << "State_param_num = " << state_size << " (" << std::setprecision(4) << state_size * sizeof(float) * 1e-6f << "Mb)" << slog::endl;
 
         ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
         logCompiledModelInfo(compiled_model, FLAGS_m, FLAGS_d);
@@ -192,7 +185,7 @@ int main(int argc, char* argv[]) {
         ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Prepare input
-        // get size of network input (pacth_size)
+        // get size of network input (patch_size)
         std::string input_name("input");
         ov::Shape inp_shape = model->input(input_name).get_shape();
         size_t patch_size = inp_shape[1];
@@ -213,7 +206,7 @@ int main(int argc, char* argv[]) {
         inp_wave_fp32.resize(inp_size, 0);
         out_wave_fp32.resize(inp_size, 0);
 
-        // convert sint16_t  to float
+        // convert sint16_t to float
         float scale = 1.0f / std::numeric_limits<int16_t>::max();
         for(size_t i = 0; i < inp_wave_s16.size(); ++i) {
             inp_wave_fp32[i] = (float)inp_wave_s16[i] * scale;
@@ -227,18 +220,18 @@ int main(int argc, char* argv[]) {
             for (auto& state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
                 const std::string& out_state_name = state_name.second;
-
+                ov::runtime::Tensor state_tensor;
                 if (i > 0) {
                     // set input state by coresponding output state from prev infer
-                    ov::runtime::Tensor state_tensor = infer_request.get_tensor(out_state_name);
-                    infer_request.set_tensor(inp_state_name, state_tensor);
+                    state_tensor = infer_request.get_tensor(out_state_name);
                 } else {
                     // first iteration. set input state to zero tensor.
                     ov::Shape state_shape = model->input(inp_state_name).get_shape();
-                    ov::runtime::Tensor state_tensor(ov::element::f32, state_shape);
+                    state_tensor = ov::runtime::Tensor(ov::element::f32, state_shape);
                     memset(state_tensor.data<float>(), 0, state_tensor.get_byte_size());
                     infer_request.set_tensor(inp_state_name, state_tensor);
                 }
+                infer_request.set_tensor(inp_state_name, state_tensor);
             }
 
             // make infer
