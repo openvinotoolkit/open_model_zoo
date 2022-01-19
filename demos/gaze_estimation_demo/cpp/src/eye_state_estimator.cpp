@@ -10,12 +10,12 @@
 namespace gaze_estimation {
 
 EyeStateEstimator::EyeStateEstimator(
-    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
         ieWrapper(ie, modelPath, modelType, deviceName)
 {
-    inputBlobName = ieWrapper.expectSingleInput();
-    ieWrapper.expectImageInput(inputBlobName);
-    outputBlobName = ieWrapper.expectSingleOutput();
+    inputTensorName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputTensorName);
+    outputTensorName = ieWrapper.expectSingleOutput();
 }
 
 cv::Rect EyeStateEstimator::createEyeBoundingBox(
@@ -61,9 +61,9 @@ void EyeStateEstimator::estimate(
         rotateImageAroundCenter(leftEyeImage, leftEyeImageRotated, roll);
         leftEyeImage = leftEyeImageRotated;
         std::vector<float> outputValue;
-        ieWrapper.setInputBlob(inputBlobName, leftEyeImage);
+        ieWrapper.setInputTensor(inputTensorName, leftEyeImage);
         ieWrapper.infer();
-        ieWrapper.getOutputBlob(outputBlobName, outputValue);
+        ieWrapper.getOutputTensor(outputTensorName, outputValue);
         outputResults.leftEyeState = outputValue[0] < outputValue[1];
     } else {
         // Landmarks collapsed and the eye takes no area on image, pretend it's closed
@@ -79,9 +79,9 @@ void EyeStateEstimator::estimate(
         rotateImageAroundCenter(rightEyeImage, rightEyeImageRotated, roll);
         rightEyeImage = rightEyeImageRotated;
         std::vector<float> outputValue;
-        ieWrapper.setInputBlob(inputBlobName, rightEyeImage);
+        ieWrapper.setInputTensor(inputTensorName, rightEyeImage);
         ieWrapper.infer();
-        ieWrapper.getOutputBlob(outputBlobName, outputValue);
+        ieWrapper.getOutputTensor(outputTensorName, outputValue);
         outputResults.rightEyeState = outputValue[0] < outputValue[1];
     } else {
         // Landmarks collapsed and the eye takes no area on image, pretend it's closed

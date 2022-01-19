@@ -17,7 +17,7 @@
 namespace gaze_estimation {
 class FaceDetector {
 public:
-    FaceDetector(InferenceEngine::Core& ie,
+    FaceDetector(ov::runtime::Core& ie,
                  const std::string& modelPath,
                  const std::string& deviceName,
                  double detectionConfidenceThreshold,
@@ -29,9 +29,9 @@ public:
 
 private:
     IEWrapper ieWrapper;
-    std::string inputBlobName;
-    std::vector<unsigned long> inputBlobDims;
-    std::string outputBlobName;
+    std::string inputTensorName;
+    ov::Shape inputTensorDims;
+    std::string outputTensorName;
     std::size_t numTotalDetections;
 
     double detectionThreshold;

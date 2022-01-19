@@ -24,7 +24,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core.hpp>
 
-#include <inference_engine.hpp>
+//#include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
@@ -84,21 +85,20 @@ int main(int argc, char* argv[]) {
         }
 
         // Loading Inference Engine
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+        slog::info << ov::get_openvino_version() << slog::endl;;
+        ov::runtime::Core core;
 
         // Set up face detector and estimators
-        FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
-        HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
-        LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
-        EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
-        GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
+        FaceDetector faceDetector(core, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
+        HeadPoseEstimator headPoseEstimator(core, FLAGS_m_hp, FLAGS_d_hp);
+        LandmarksEstimator landmarksEstimator(core, FLAGS_m_lm, FLAGS_d_lm);
+        EyeStateEstimator eyeStateEstimator(core, FLAGS_m_es, FLAGS_d_es);
+        GazeEstimator gazeEstimator(core, FLAGS_m, FLAGS_d);
 
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
         BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &eyeStateEstimator, &gazeEstimator};
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
-
         bool flipImage = false;
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
@@ -127,7 +127,6 @@ int main(int argc, char* argv[]) {
             if (flipImage) {
                 cv::flip(frame, frame, 1);
             }
-
             // Infer results
             auto inferenceResults = faceDetector.detect(frame);
             for (auto& inferenceResult : inferenceResults) {

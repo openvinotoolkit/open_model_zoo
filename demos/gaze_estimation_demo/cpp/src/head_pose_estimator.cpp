@@ -16,13 +16,13 @@ const std::pair<const char*, float cv::Point3f::*> OUTPUTS[] = {
 };
 
 HeadPoseEstimator::HeadPoseEstimator(
-    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
         ieWrapper(ie, modelPath, modelType, deviceName)
 {
-    inputBlobName = ieWrapper.expectSingleInput();
-    ieWrapper.expectImageInput(inputBlobName);
+    inputTensorName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputTensorName);
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
 
     for (const auto& output: OUTPUTS) {
         auto it = outputInfo.find(output.first);
@@ -43,13 +43,13 @@ void HeadPoseEstimator::estimate(const cv::Mat& image, FaceInferenceResults& out
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
-    ieWrapper.setInputBlob(inputBlobName, faceCrop);
+    ieWrapper.setInputTensor(inputTensorName, faceCrop);
     ieWrapper.infer();
 
     std::vector<float> outputValue;
 
     for (const auto &output: OUTPUTS) {
-        ieWrapper.getOutputBlob(output.first, outputValue);
+        ieWrapper.getOutputTensor(output.first, outputValue);
         outputResults.headPoseAngles.*output.second = outputValue[0];
     }
 }
