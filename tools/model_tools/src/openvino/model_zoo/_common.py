@@ -40,6 +40,7 @@ KNOWN_FRAMEWORKS = {
     'dldt': None,
     'mxnet': None,
     'onnx': None,
+    'paddle': None,
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
 }

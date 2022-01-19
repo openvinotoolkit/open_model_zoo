@@ -84,6 +84,7 @@
 | mtcnn-r | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
+| ocrnet-hrnet-w48-paddle | YES | YES | |
 | octave-resnet-26-0.25 | YES | YES | YES |
 | open-closed-eye-0001 | YES | YES |    |
 | pelee-coco | YES | YES | YES |
