@@ -255,7 +255,7 @@ def main():
         non_interactive_demo(model, args)
         return
 
-    height, width = model.encoder.input_info['imgs'].input_data.shape[-2:]
+    _, _, height, width = model.encoder.input("imgs").shape
     prev_text = ''
     demo = InteractiveDemo((height, width), resolution=args.resolution)
     show_window = not args.no_show

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import numpy as np
 import scipy
 import wave
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version, PartialShape
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -41,33 +41,35 @@ class QuartzNet:
     pad_to = 16
     alphabet = " abcdefghijklmnopqrstuvwxyz'"
 
-    def __init__(self, ie, model_path, input_shape, device):
+    def __init__(self, core, model_path, input_shape, device):
         assert not input_shape[2] % self.pad_to, f"{self.pad_to} must be a divisor of input_shape's third dimension"
-        self.ie = ie
         log.info('Reading model {}'.format(model_path))
-        network = self.ie.read_network(model_path)
-        if len(network.input_info) != 1:
+        model = core.read_model(model_path)
+        if len(model.inputs) != 1:
             raise RuntimeError('QuartzNet must have one input')
-        model_input_shape = next(iter(network.input_info.values())).input_data.shape
+        self.input_tensor_name = model.inputs[0].get_any_name()
+        model_input_shape = model.inputs[0].shape
         if len(model_input_shape) != 3:
             raise RuntimeError('QuartzNet input must be 3-dimensional')
         if model_input_shape[1] != input_shape[1]:
             raise RuntimeError("QuartzNet input second dimension can't be reshaped")
         if model_input_shape[2] % self.pad_to:
             raise RuntimeError(f'{self.pad_to} must be a divisor of QuartzNet input third dimension')
-        if len(network.outputs) != 1:
+        if len(model.outputs) != 1:
             raise RuntimeError('QuartzNet must have one output')
-        model_output_shape = next(iter(network.outputs.values())).shape
+        model_output_shape = model.outputs[0].shape
         if len(model_output_shape) != 3:
             raise RuntimeError('QuartzNet output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char
             raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
-        network.reshape({next(iter(network.input_info)): input_shape})
-        self.exec_net = self.ie.load_network(network, device)
+        model.reshape({self.input_tensor_name: PartialShape(input_shape)})
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def infer(self, melspectrogram):
-        return next(iter(self.exec_net.infer({next(iter(self.exec_net.input_info)): melspectrogram}).values()))
+        input_data = {self.input_tensor_name: melspectrogram}
+        return next(iter(self.infer_request.infer(input_data).values()))
 
     @classmethod
     def audio_to_melspectrum(cls, audio, sampling_rate):
@@ -126,9 +128,9 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
-    quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)
+    quartz_net = QuartzNet(core, args.model, log_melspectrum.shape, args.device)
     character_probs = quartz_net.infer(log_melspectrum)
     transcription = QuartzNet.ctc_greedy_decode(character_probs)
     total_latency = (perf_counter() - start_time) * 1e3
@@ -137,4 +139,4 @@ def main():
     print(transcription)
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

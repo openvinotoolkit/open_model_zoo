@@ -75,7 +75,7 @@ usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                   [-limit OUTPUT_LIMIT] -at
                                   {en-de,en-mean,i3d-rgb} -m_en M_ENCODER
                                   [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
-                                  [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
+                                  [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
                                   [-u UTILIZATION_MONITORS]
                                   [-r RAW_OUTPUT_MESSAGE]
@@ -101,9 +101,6 @@ Options:
   --seq DECODER_SEQ_SIZE
                         Optional. Length of sequence that decoder takes as
                         input.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. For CPU custom layers, if any. Absolute path
-                        to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo will

@@ -20,7 +20,7 @@ import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer
@@ -57,9 +57,6 @@ def build_argparser():
     decoder_args.add_argument('--seq', dest='decoder_seq_size',
                               help='Optional. Length of sequence that decoder takes as input.',
                               default=16, type=int)
-    args.add_argument('-l', '--cpu_extension',
-                      help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
-                           'kernels implementation.', type=str, default=None)
     args.add_argument('-d', '--device',
                       help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
@@ -88,14 +85,11 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     if 'MYRIAD' in args.device:
         myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
-        ie.set_config(myriad_config, 'MYRIAD')
-
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
+        core.set_config(myriad_config, 'MYRIAD')
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
@@ -103,19 +97,19 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    models = [IEModel(args.m_encoder, ie, encoder_target_device, model_type='Action Recognition Encoder',
+    models = [IEModel(args.m_encoder, core, encoder_target_device, model_type='Action Recognition Encoder',
                       num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
     if args.architecture_type == 'en-de':
         if args.m_decoder is None:
             raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
-        models.append(IEModel(args.m_decoder, ie, decoder_target_device, model_type='Action Recognition Decoder', num_requests=2))
-        seq_size = models[1].input_size[1]
+        models.append(IEModel(args.m_decoder, core, decoder_target_device, model_type='Action Recognition Decoder', num_requests=2))
+        seq_size = models[1].input_shape[1]
     elif args.architecture_type == 'en-mean':
         models.append(DummyDecoder(num_requests=2))
         seq_size = args.decoder_seq_size
     elif args.architecture_type == 'i3d-rgb':
-        seq_size = models[0].input_size[2]
+        seq_size = models[0].input_shape[1]
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,

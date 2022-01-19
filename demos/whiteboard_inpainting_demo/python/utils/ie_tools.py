@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -13,14 +13,13 @@
 
 import cv2
 import numpy as np
-import os
 
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
-    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
+    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         self.confidence = conf
-        self.load_ie_model(ie, model_path, device, ext_path)
+        self.load_model(core, model_path, device, ext_path)
         with open(labels_file, 'r') as f:
             self.labels = f.readlines()
         self.labels = {num: name.replace('\n', '') for num, name in enumerate(self.labels)}
@@ -38,15 +37,15 @@ class IEModel:
 
     def forward(self, img):
         """Performs forward pass of the wrapped IE model"""
-        res = self.net.infer(inputs={self.input_key: self._preprocess(img)})
-        return res[self.output_key]
+        res = self.infer_request.infer(inputs={self.input_tensor_name: self._preprocess(img)})
+        return next(iter(res.values()))
 
     def get_detections(self, input):
         raise NotImplementedError
 
     def get_input_shape(self):
         """Returns an input shape of the wrapped IE model"""
-        return self.inputs_info[self.input_key].input_data.shape
+        return self.model.inputs[0].shape
 
     def get_allowed_inputs_len(self):
         return (1, )
@@ -54,28 +53,22 @@ class IEModel:
     def get_allowed_outputs_len(self):
         return (1, )
 
-    def load_ie_model(self, ie, model_xml, device, cpu_extension=''):
+    def load_model(self, core, model_xml, device, cpu_extension=''):
         """Loads a model in the Inference Engine format"""
-        model_bin = os.path.splitext(model_xml)[0] + ".bin"
         # Plugin initialization for specified device and load extensions library if specified
         if cpu_extension and 'CPU' in device:
-            ie.add_extension(cpu_extension, 'CPU')
+            core.add_extension(cpu_extension, 'CPU')
         # Read IR
-        net = ie.read_network(model=model_xml, weights=model_bin)
+        self.model = core.read_model(model_xml)
 
-        assert len(net.input_info) in self.get_allowed_inputs_len(), \
-            "Supports topologies with only {} inputs, but got {}" \
-            .format(self.get_allowed_inputs_len(), len(net.input_info))
-        assert len(net.outputs) in self.get_allowed_outputs_len(), \
-            "Supports topologies with only {} outputs, but got {}" \
-            .format(self.get_allowed_outputs_len(), len(net.outputs))
+        if len(self.model.inputs) not in self.get_allowed_inputs_len():
+            raise RuntimeError("Supports topologies with only {} inputs, but got {}"
+                .format(self.get_allowed_inputs_len(), len(self.model.inputs)))
+        if len(self.model.outputs) not in self.get_allowed_outputs_len():
+            raise RuntimeError("Supports topologies with only {} outputs, but got {}"
+                .format(self.get_allowed_outputs_len(), len(self.model.outputs)))
 
-        input_blob = next(iter(net.input_info))
-        out_blob = next(iter(net.outputs))
-        net.batch_size = 1
-
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
         # Loading model to the plugin
-        self.net = ie.load_network(network=net, device_name=device)
-        self.inputs_info = net.input_info
-        self.input_key = input_blob
-        self.output_key = out_blob
+        compiled_model = core.compile_model(self.model, device)
+        self.infer_request = compiled_model.create_infer_request()
