@@ -134,7 +134,7 @@ macro(add_demo)
         target_include_directories(${OMZ_DEMO_NAME} PRIVATE ${OMZ_DEMO_INCLUDE_DIRECTORIES})
     endif()
 
-    target_link_libraries(${OMZ_DEMO_NAME} PRIVATE ${OpenCV_LIBRARIES} openvino::runtime
+    target_link_libraries(${OMZ_DEMO_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
                                                     ${OMZ_DEMO_DEPENDENCIES} ngraph::ngraph utils gflags)
 
     if(UNIX)
