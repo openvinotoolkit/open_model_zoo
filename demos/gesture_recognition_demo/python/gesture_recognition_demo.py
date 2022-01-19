@@ -125,7 +125,7 @@ def main():
     person_detector = PersonDetector(args.detection_model, args.device, core,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
     action_recognizer = ActionRecognizer(args.action_model, args.device, core,
-                                         num_requests=2, img_scale=ACTION_IMAGE_SCALE,
+                                         num_requests=1, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=len(class_map))
 
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)
