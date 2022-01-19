@@ -80,5 +80,5 @@ class IEModel:  # pylint: disable=too-few-public-methods
     def wait_request(self, req_id):
         """Waits for the model output by the specified request ID"""
 
-        if self.infer_requests[req_id].wait_for(-1):
-            return self.infer_requests[req_id].get_tensor(self.output_tensor_name).data[:]
+        self.infer_requests[req_id].wait()
+        return self.infer_requests[req_id].get_tensor(self.output_tensor_name).data[:]

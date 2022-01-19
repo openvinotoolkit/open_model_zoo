@@ -78,4 +78,5 @@ class PersonDetector(IEModel):
         if result is None:
             return None
 
-        return self._process_output(result)
+        if len(result):
+            return self._process_output(result)
