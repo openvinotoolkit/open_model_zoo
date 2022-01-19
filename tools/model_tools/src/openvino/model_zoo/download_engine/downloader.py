@@ -119,12 +119,12 @@ class Downloader:
 
             try:
                 reporter.job_context.check_interrupted()
-                chunk_iterable, continue_offset = start_download(offset=progress.size, timeout=self.timeout)
+                chunk_iterable, continue_offset = start_download(offset=progress.size, timeout=self.timeout, size=size, checksum=hasher)
 
                 if continue_offset not in {0, progress.size}:
                     # Somehow we neither restarted nor continued from where we left off.
                     # Try to restart.
-                    chunk_iterable, continue_offset = start_download(offset=0, timeout=self.timeout)
+                    chunk_iterable, continue_offset = start_download(offset=0, timeout=self.timeout, size=size, checksum=hasher)
                     if continue_offset != 0:
                         reporter.log_error("Remote server refuses to send whole file, aborting")
                         return None
@@ -133,7 +133,7 @@ class Downloader:
                     file.seek(0)
                     file.truncate()
                     progress.size = 0
-                    progress.hasher = hasher()
+                    progress.hasher = hasher.type()
 
                 self._process_download(reporter, chunk_iterable, size, progress, file)
 
@@ -197,7 +197,7 @@ class Downloader:
         success = False
 
         with destination.open('w+b') as f:
-            actual_hash = self._try_download(reporter, f, start_download, model_file.size, model_file.checksum.type)
+            actual_hash = self._try_download(reporter, f, start_download, model_file.size, model_file.checksum)
 
         if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.checksum.value, destination):
             self._try_update_cache(reporter, self.cache, model_file.checksum.value, destination)
@@ -231,7 +231,8 @@ class Downloader:
             destination = output / model_file.name
 
             if not self._try_retrieve(model_file_reporter, destination, model_file,
-                    functools.partial(model_file.source.start_download, session, cache.CHUNK_SIZE)):
+                    functools.partial(model_file.source.start_download, session, cache.CHUNK_SIZE, 
+                                      size=model_file.size, checksum=model_file.checksum)):
                 try:
                     destination.unlink()
                 except FileNotFoundError:
