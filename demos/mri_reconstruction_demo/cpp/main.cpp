@@ -1,7 +1,8 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 #include <inference_engine.hpp>
+#include <openvino/openvino.hpp>
 #include <opencv2/opencv.hpp>
 #include <utils/common.hpp>
 #include <utils/performance_metrics.hpp>
@@ -12,7 +13,7 @@
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]);
 
-static cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob);
+static cv::Mat tensorToMat(const ov::runtime::Tensor& tensor);
 
 struct MRIData {
     cv::Mat data;
@@ -39,15 +40,20 @@ int main(int argc, char** argv) {
     }
 
     slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-    InferenceEngine::Core ie;
+    ov::runtime::Core core;
 
-    InferenceEngine::CNNNetwork net = ie.ReadNetwork(FLAGS_m);
-    net.getInputsInfo().begin()->second->setLayout(InferenceEngine::Layout::NHWC);
+    std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+    slog::info << "Reading model " << FLAGS_m << slog::endl;
+    logLayersInfo(model);
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().model().set_layout("NHWC");
+    model = ppp.build();
+   // model.getInputsInfo().begin()->second->setLayout(InferenceEngine::Layout::NHWC);
 
-    InferenceEngine::ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
-    logExecNetworkInfo(execNet, FLAGS_m, FLAGS_d);
+    ov::runtime::CompiledModel compiledModel = core.compile_model(model, FLAGS_d);
+    logCompiledModelInfo(compiledModel, FLAGS_m, FLAGS_d);
 
-    InferenceEngine::InferRequest infReq = execNet.CreateInferRequest();
+    ov::runtime::InferRequest infReq = compiledModel.create_infer_request();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
@@ -65,8 +71,8 @@ int main(int argc, char** argv) {
 
     slog::info << "Compute..." << slog::endl;
 
-    cv::Mat inputBlob = infEngineBlobToMat(infReq.GetBlob(net.getInputsInfo().begin()->first));
-    cv::Mat outputBlob = infEngineBlobToMat(infReq.GetBlob(net.getOutputsInfo().begin()->first));
+    cv::Mat inputBlob = tensorToMat(infReq.get_input_tensor());
+    cv::Mat outputBlob = tensorToMat(infReq.get_output_tensor());
     outputBlob = outputBlob.reshape(1, height);
 
     const auto startTime = std::chrono::steady_clock::now();
@@ -79,7 +85,7 @@ int main(int argc, char** argv) {
         kspace.reshape(1, 1).convertTo(inputBlob.reshape(1, 1), CV_32F);
 
         // Forward pass
-        infReq.Infer();
+        infReq.infer();
 
         // Save prediction
         cv::Mat slice(height, width, CV_8UC1, mri.reconstructed.ptr<uint8_t>(i));
@@ -102,13 +108,13 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob) {
+cv::Mat tensorToMat(const ov::runtime::Tensor& tensor) {
     // NOTE: Inference Engine sizes are reversed.
-    std::vector<size_t> dims = blob->getTensorDesc().getDims();
-    std::vector<int> size(dims.begin(), dims.end());
-    auto precision = blob->getTensorDesc().getPrecision();
-    CV_Assert(precision == InferenceEngine::Precision::FP32);
-    return cv::Mat(size, CV_32F, (void*)blob->buffer());
+    ov::Shape tensorShape = tensor.get_shape();
+    std::vector<int> size(tensorShape.begin(), tensorShape.end());
+    ov::element::Type precision = tensor.get_element_type();
+    CV_Assert(precision == ov::element::f32);
+    return cv::Mat(size, CV_32F, (void*)tensor.data());
 }
 
 void callback(int sliceId, void* userdata) {
