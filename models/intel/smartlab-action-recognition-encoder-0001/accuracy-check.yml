@@ -13,8 +13,6 @@ evaluations:
 
       launchers:
         - framework: dlsdk
-          # to an appropriate representation with adapter
-          # adapter: classification
 
       datasets:
         - name: DSI1867
