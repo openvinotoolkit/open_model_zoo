@@ -38,7 +38,7 @@ class Detector(IEModel, DetectorInterface):
 
     def __init__(self, core, model_path, trg_classes, conf=.6,
                  device='CPU', ext_path='', max_num_frames=1):
-        super().__init__(core, model_path, device, max_num_frames, ext_path)
+        super().__init__(core, model_path, device, 'Object Detection', max_num_frames, ext_path)
 
         self.trg_classes = trg_classes
         self.confidence = conf
@@ -104,7 +104,7 @@ class VectorCNN(IEModel):
 
     def __init__(self, core, model_path, device='CPU', ext_path='', max_reqs=100):
         self.max_reqs = max_reqs
-        super().__init__(core, model_path, device, self.max_reqs, ext_path)
+        super().__init__(core, model_path, device, 'Object Reidentification', self.max_reqs, ext_path)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -133,7 +133,7 @@ class MaskRCNN(DetectorInterface):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        super().__init__(core, model_path, device, self.max_reqs, ext_path)
+        super().__init__(core, model_path, device, 'Instance Segmentation', self.max_reqs, ext_path)
 
         self.input_keys = {'image'}
         self.output_keys = {'boxes', 'labels', 'masks'}

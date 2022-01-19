@@ -11,14 +11,16 @@
  limitations under the License.
 """
 
+import logging as log
+
 import numpy as np
 import cv2
 
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
-    def __init__(self, core, model_path, device, num_reqs=1, cpu_extension=''):
-        self.load_model(core, model_path, device, num_reqs, cpu_extension)
+    def __init__(self, core, model_path, device, model_type, num_reqs=1, cpu_extension=''):
+        self.load_model(core, model_path, device, model_type, num_reqs, cpu_extension)
         self.reqs_ids = []
 
     def _preprocess(self, img):
@@ -55,12 +57,13 @@ class IEModel:
         """Returns an input shape of the wrapped IE model"""
         return self.model.inputs[0].shape
 
-    def load_model(self, core, model_xml, device, num_reqs=1, cpu_extension=''):
+    def load_model(self, core, model_xml, device, model_type, num_reqs=1, cpu_extension=''):
         """Loads a model in the Inference Engine format"""
         # Plugin initialization for specified device and load extensions library if specified
         if cpu_extension and 'CPU' in device:
             core.add_extension(cpu_extension, 'CPU')
         # Read IR
+        log.info('Reading {} model {}'.format(model_type, model_xml))
         self.model = core.read_model(model_xml)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():
@@ -75,3 +78,4 @@ class IEModel:
         # Loading model to the plugin
         compiled_model = core.compile_model(self.model, device)
         self.infer_requests = [compiled_model.create_infer_request() for _ in range(num_reqs)]
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_xml, device))
