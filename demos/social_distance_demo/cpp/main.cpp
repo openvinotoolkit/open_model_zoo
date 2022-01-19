@@ -511,7 +511,7 @@ void DetectionsProcessor::process() {
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
                         ov::runtime::InferRequest &reidRequest, cv::Rect rect, Context &context) {
-                                    reidRequest.set_callback(std::function<void(std::exception_ptr)>()); // destroy the stored bind object
+                                    reidRequest.set_callback([](std::exception_ptr e) {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
                                     classifiersAggregator->push(cv::Rect(rect));
@@ -567,8 +567,8 @@ void InferTask::process() {
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::runtime::InferRequest& inferRequest,
-               Context& context) {
-                    inferRequest.set_callback(std::function<void(std::exception_ptr)>());  // destroy the stored bind object
+                Context& context) {
+                    inferRequest.set_callback([](std::exception_ptr e) {});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
                             std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
