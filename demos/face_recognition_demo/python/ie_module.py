@@ -49,11 +49,14 @@ class Module:
         self.active_requests += 1
         return True
 
-    def get_outputs(self):
+    def wait(self):
         if self.active_requests <= 0:
             return
         self.infer_queue.wait_all()
         self.active_requests = 0
+
+    def get_outputs(self):
+        self.wait()
         return [v for _, v in sorted(self.outputs.items())]
 
     def clear(self):
