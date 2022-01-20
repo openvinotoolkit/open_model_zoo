@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
 */
 
 #pragma once
+#include <openvino/openvino.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/config_factory.h>
+
 #include "input_data.h"
 #include "results.h"
-#include "utils/config_factory.h"
-#include <utils/ocv_common.hpp>
 
 class ModelBase {
 public:
@@ -28,13 +30,13 @@ public:
 
     virtual ~ModelBase() {}
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) = 0;
+    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::runtime::InferRequest& request) = 0;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
-    virtual void onLoadCompleted(const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {}
+    virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::runtime::InferRequest>>& requests) {}
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
-    virtual InferenceEngine::ExecutableNetwork loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core);
+    virtual ov::runtime::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::runtime::Core& core);
 
     std::string getModelFileName() { return modelFileName; }
 
@@ -42,21 +44,18 @@ public:
         this->inputTransform = InputTransform(reverseInputChannels, meanValues, scaleValues);
     }
 
-    void setBatchOne(InferenceEngine::CNNNetwork & cnnNetwork) {
-        auto shapes = cnnNetwork.getInputShapes();
-        for (auto& shape : shapes)
-            shape.second[0] = 1;
-        cnnNetwork.reshape(shapes);
+    void setBatchOne(std::shared_ptr<ov::Model>& model) {
+        ov::set_batch(model, 1);
     }
 
 protected:
-    InferenceEngine::CNNNetwork prepareNetwork(InferenceEngine::Core& core);
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;
+    std::shared_ptr<ov::Model> prepareModel(ov::runtime::Core& core);
+    virtual void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) = 0;
 
     InputTransform inputTransform = InputTransform();
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
-    InferenceEngine::ExecutableNetwork execNetwork;
+    ov::runtime::CompiledModel compiledModel;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
 };

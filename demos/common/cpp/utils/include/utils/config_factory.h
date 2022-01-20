@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,12 +35,10 @@ protected:
 
 class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
-        uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads);
-    static CnnConfig getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, uint32_t flags_nireq);
+    static CnnConfig getUserConfig(const std::string& flags_d, uint32_t flags_nireq,
+        const std::string& flags_nstreams, uint32_t flags_nthreads);
+    static CnnConfig getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq);
 
 protected:
-    static CnnConfig getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, uint32_t flags_nireq);
+    static CnnConfig getCommonConfig(const std::string& flags_d, uint32_t flags_nireq);
 };
