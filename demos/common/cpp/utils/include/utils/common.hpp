@@ -28,15 +28,15 @@
 #include "utils/args_helper.hpp"
 
 #ifndef UNUSED
-  #ifdef _WIN32
-    #define UNUSED
-  #else
-    #define UNUSED  __attribute__((unused))
-  #endif
+#ifdef _WIN32
+#define UNUSED
+#else
+#define UNUSED  __attribute__((unused))
+#endif
 #endif
 
 template <typename T, std::size_t N>
-constexpr std::size_t arraySize(const T (&)[N]) noexcept {
+constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
 }
 
@@ -72,8 +72,8 @@ public:
      * @param b - value for blue channel
      */
     Color(unsigned char r,
-          unsigned char g,
-          unsigned char b) : _r(r), _g(g), _b(b) {}
+        unsigned char g,
+        unsigned char b) : _r(r), _g(g), _b(b) {}
 
     inline unsigned char red() const {
         return _r;
@@ -118,16 +118,17 @@ inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
     if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
+        (layout == InferenceEngine::Layout::NCHW ||
+            layout == InferenceEngine::Layout::NHWC ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC ||
+            layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW)) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.back();
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have width dimension");
     }
     return 0;
@@ -138,16 +139,17 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
     if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
+        (layout == InferenceEngine::Layout::NCHW ||
+            layout == InferenceEngine::Layout::NHWC ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC ||
+            layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW)) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.at(size - 2);
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have height dimension");
     }
     return 0;
@@ -155,28 +157,29 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
 
 inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
-    if (layout == InferenceEngine::Layout::NCHW  ||
-        layout == InferenceEngine::Layout::NHWC  ||
+    if (layout == InferenceEngine::Layout::NCHW ||
+        layout == InferenceEngine::Layout::NHWC ||
         layout == InferenceEngine::Layout::NCDHW ||
         layout == InferenceEngine::Layout::NDHWC ||
-        layout == InferenceEngine::Layout::C     ||
-        layout == InferenceEngine::Layout::CHW   ||
-        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::C ||
+        layout == InferenceEngine::Layout::CHW ||
+        layout == InferenceEngine::Layout::NC ||
         layout == InferenceEngine::Layout::CN) {
         // Regardless of layout, dimensions are stored in fixed order
         const auto& dims = desc.getDims();
         switch (desc.getLayoutByDims(dims)) {
-            case InferenceEngine::Layout::C:     return dims.at(0);
-            case InferenceEngine::Layout::NC:    return dims.at(1);
-            case InferenceEngine::Layout::CHW:   return dims.at(0);
-            case InferenceEngine::Layout::NCHW:  return dims.at(1);
-            case InferenceEngine::Layout::NCDHW: return dims.at(1);
-            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
-            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
-            default:
-                throw std::runtime_error("Tensor does not have channels dimension");
+        case InferenceEngine::Layout::C:     return dims.at(0);
+        case InferenceEngine::Layout::NC:    return dims.at(1);
+        case InferenceEngine::Layout::CHW:   return dims.at(0);
+        case InferenceEngine::Layout::NCHW:  return dims.at(1);
+        case InferenceEngine::Layout::NCDHW: return dims.at(1);
+        case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+        case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+        default:
+            throw std::runtime_error("Tensor does not have channels dimension");
         }
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have channels dimension");
     }
     return 0;
@@ -184,26 +187,27 @@ inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
 
 inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
-    if (layout == InferenceEngine::Layout::NCHW  ||
-        layout == InferenceEngine::Layout::NHWC  ||
+    if (layout == InferenceEngine::Layout::NCHW ||
+        layout == InferenceEngine::Layout::NHWC ||
         layout == InferenceEngine::Layout::NCDHW ||
         layout == InferenceEngine::Layout::NDHWC ||
-        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::NC ||
         layout == InferenceEngine::Layout::CN) {
         // Regardless of layout, dimensions are stored in fixed order
         const auto& dims = desc.getDims();
         switch (desc.getLayoutByDims(dims)) {
-            case InferenceEngine::Layout::NC:    return dims.at(0);
-            case InferenceEngine::Layout::NCHW:  return dims.at(0);
-            case InferenceEngine::Layout::NCDHW: return dims.at(0);
-            case InferenceEngine::Layout::CHW:      // [[fallthrough]]
-            case InferenceEngine::Layout::C:        // [[fallthrough]]
-            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
-            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
-            default:
-                throw std::runtime_error("Tensor does not have channels dimension");
+        case InferenceEngine::Layout::NC:    return dims.at(0);
+        case InferenceEngine::Layout::NCHW:  return dims.at(0);
+        case InferenceEngine::Layout::NCDHW: return dims.at(0);
+        case InferenceEngine::Layout::CHW:      // [[fallthrough]]
+        case InferenceEngine::Layout::C:        // [[fallthrough]]
+        case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+        case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+        default:
+            throw std::runtime_error("Tensor does not have channels dimension");
         }
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have channels dimension");
     }
     return 0;
@@ -221,7 +225,7 @@ inline void showAvailableDevices() {
     std::cout << std::endl;
 }
 
-inline std::string fileNameNoExt(const std::string &filepath) {
+inline std::string fileNameNoExt(const std::string& filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
     return filepath.substr(0, pos);
@@ -252,7 +256,7 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
 }
 
 inline
-void log_compiled_model_info(
+void logCompiledModelInfo(
     const ov::runtime::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
@@ -281,37 +285,31 @@ void log_compiled_model_info(
 }
 
 inline
-void log_model_info(const std::shared_ptr<ov::Model>& model) {
+void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     slog::info << "model name: " << model->get_friendly_name() << slog::endl;
 
-    // Prepare input blobs
-
-    // Taking information about all topology inputs
+    // Dump information about model inputs/outputs
     ov::OutputVector inputs = model->inputs();
     ov::OutputVector outputs = model->outputs();
 
+    slog::info << "inputs: " << slog::endl;
     for (const ov::Output<ov::Node> input : inputs)
     {
-        slog::info << slog::endl;
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
-        const ov::Shape shape = input.get_shape();
+        const ov::PartialShape shape = input.get_partial_shape();
 
-        slog::info << "input name: " << name << slog::endl;
-        slog::info << "input type: " << type << slog::endl;
-        slog::info << "input shape: " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
     }
 
+    slog::info << "outputs: " << slog::endl;
     for (const ov::Output<ov::Node> output : outputs)
     {
-        slog::info << slog::endl;
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
-        const ov::Shape shape = output.get_shape();
+        const ov::PartialShape shape = output.get_partial_shape();
 
-        slog::info << "output name: " << name << slog::endl;
-        slog::info << "output type: " << type << slog::endl;
-        slog::info << "output shape: " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
     }
 
     return;
