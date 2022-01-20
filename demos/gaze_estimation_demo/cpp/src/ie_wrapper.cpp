@@ -18,9 +18,8 @@ IEWrapper::IEWrapper(
     ov::runtime::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
         modelPath(modelPath), modelType(modelType), deviceName(deviceName), core(core)
 {
-    //network = core.ReadNetwork(modelPath);
+    slog::info << "Reading model: " << modelPath << slog::endl;
     model = core.read_model(modelPath);
-    slog::info << "model file: " << modelPath << slog::endl;
     logBasicModelInfo(model);
     setExecPart();
 }
@@ -80,8 +79,8 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const cv::Mat& ima
 
 void IEWrapper::setInputTensor(const std::string& tensorName, const std::vector<float>& data) {
     auto tensorDims = input_tensors_dims_info[tensorName];
-    unsigned long dimsProduct = 1;
-    for (auto const& dim : tensorDims) {
+    size_t dimsProduct = 1;
+    for (size_t dim : tensorDims) {
         dimsProduct *= dim;
     }
     if (dimsProduct != data.size()) {
@@ -90,7 +89,7 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const std::vector<
 
     ov::runtime::Tensor input_tensor = infer_request.get_tensor(tensorName);
     float* buffer  = input_tensor.data<float>();
-    for (unsigned long int i = 0; i < data.size(); ++i) {
+    for (size_t i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
     }
 }
@@ -98,8 +97,8 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const std::vector<
 void IEWrapper::getOutputTensor(const std::string& tensorName, std::vector<float>& output) {
     output.clear();
     auto tensorDims = output_tensors_dims_info[tensorName];
-    auto dataSize = 1;
-    for (auto dim : tensorDims) {
+    size_t dataSize = 1;
+    for (size_t dim : tensorDims) {
         dataSize *= dim;
     }
     float* buffer = infer_request.get_tensor(tensorName).data<float>();

@@ -23,10 +23,10 @@
 template <typename T>
 static const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     switch (mat.type()) {
-    case CV_8UC1:  return (T)mat.at<uchar>(h, w);
-    case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
-    case CV_32FC1: return (T)mat.at<float>(h, w);
-    case CV_32FC3: return (T)mat.at<cv::Vec3f>(h, w)[c];
+        case CV_8UC1:  return (T)mat.at<uchar>(h, w);
+        case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
+        case CV_32FC1: return (T)mat.at<float>(h, w);
+        case CV_32FC3: return (T)mat.at<cv::Vec3f>(h, w)[c];
     }
     throw std::runtime_error("cv::Mat type is not recognized");
 };
@@ -53,8 +53,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
     cv::Mat resizedMat;
     if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
         cv::resize(mat, resizedMat, cv::Size(width, height));
-    }
-    else {
+    } else {
         resizedMat = mat;
     }
 
@@ -65,9 +64,8 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     blobData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<float_t>(resizedMat, h, w, c);
-    }
-    else {
+                        getMatValue<float_t>(resizedMat, h, w, c);
+    } else {
         uint8_t* blobData = blobMapped.as<uint8_t*>();
         if (resizedMat.depth() == CV_32F) {
             throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
@@ -76,7 +74,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     blobData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<uint8_t>(resizedMat, h, w, c);
+                        getMatValue<uint8_t>(resizedMat, h, w, c);
     }
 }
 
@@ -103,11 +101,9 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
     cv::Mat resizedMat;
     if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
         cv::resize(mat, resizedMat, cv::Size(width, height));
-    }
-    else {
+    } else {
         resizedMat = mat;
     }
-
 
     if (tensor.get_element_type() == ov::element::f32) {
         float_t* tensorData = tensor.data<float_t>();
@@ -115,7 +111,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<float_t>(resizedMat, h, w, c);
+                        getMatValue<float_t>(resizedMat, h, w, c);
     }
     else {
         uint8_t* tensorData = tensor.data<uint8_t>();
@@ -126,7 +122,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<uint8_t>(resizedMat, h, w, c);
+                        getMatValue<uint8_t>(resizedMat, h, w, c);
     }
 }
 
@@ -165,8 +161,7 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     InferenceEngine::Blob::Ptr blob;
     if (isMatFloat) {
         blob = InferenceEngine::make_shared_blob<float>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
-    }
-    else {
+    } else {
         blob = InferenceEngine::make_shared_blob<uint8_t>(tDesc, std::make_shared<SharedBlobAllocator>(mat));
     }
 

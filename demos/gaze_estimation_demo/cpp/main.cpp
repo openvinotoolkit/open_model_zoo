@@ -24,7 +24,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core.hpp>
 
-//#include <inference_engine.hpp>
 #include "openvino/openvino.hpp"
 
 #include <gflags/gflags.h>
