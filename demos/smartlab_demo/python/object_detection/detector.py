@@ -134,9 +134,6 @@ class Detector(object):
         self.front2_subdetector = SubDetector(self.front2_exp, self.backend)
 
     def _apply_detection_constraints(self, predictions:np.ndarray, nmsthre=0.3):
-        ndim, predicted = predictions.shape
-        # assert ndim == 2 and predicted == 7
-
         ### sort by conf_score * cls_score
         sorted_preds = sorted(
             predictions, 

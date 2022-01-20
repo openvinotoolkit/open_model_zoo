@@ -85,7 +85,6 @@ def multiclass_nms_class_agnostic(boxes, scores, nms_thr, score_thr):
 
 
 def demo_postprocess(outputs, img_size, p6=False):
-
     grids = []
     expanded_strides = []
 
