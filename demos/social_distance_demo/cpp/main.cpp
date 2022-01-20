@@ -676,7 +676,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
 
         std::set<std::string> devices;
