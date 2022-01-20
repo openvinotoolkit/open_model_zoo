@@ -70,6 +70,12 @@ network to detect objects of the same type better.
 | [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/README.md)          | 6.975 | 15.12  |
 | [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/README.md)          | 6.975 | 15.12  |
 | [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/README.md)  | 5.424 | 11.229 |
+| [smartlab-object-detection-0001](./smartlab-object-detection-0001/README.md)            | TODO  | TODO  |
+| [smartlab-object-detection-0002](./smartlab-object-detection-0002/README.md)            | TODO  | TODO  |
+| [smartlab-object-detection-0003](./smartlab-object-detection-0003/README.md)            | TODO  | TODO  |
+| [smartlab-object-detection-0004](./smartlab-object-detection-0004/README.md)            | TODO  | TODO  |
+
+
 
 ## Object Recognition Models
 
@@ -246,6 +252,11 @@ that predict an actual labels are called *decoder*.
 | [asl-recognition-0004](./asl-recognition-0004/README.md)                               | 6.660 | 4.133  |
 | [common-sign-language-0002](./common-sign-language-0002/README.md)                     | 4.227 | 4.113  |
 | [weld-porosity-detection-0001](./weld-porosity-detection-0001/README.md)               | 3.636 | 11.173 |
+| [smartlab-action-recognition-0001](./smartlab-action-recognition-0001/README.md)       |       |        |
+|   smartlab-action-recognition-encoder-0001                                             | TODO  | TODO   |
+|   smartlab-action-recognition-decoder-0001                                             | TODO  | TODO   |
+| [smartlab-action-recognition-0002](./smartlab-action-recognition-0002/README.md)       |       |        |
+|   smartlab-sequence-modelling-0001                                                     | TODO  | TODO   |
 
 ## Image Retrieval
 
