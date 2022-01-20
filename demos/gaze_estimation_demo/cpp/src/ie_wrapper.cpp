@@ -21,7 +21,7 @@ IEWrapper::IEWrapper(
     //network = core.ReadNetwork(modelPath);
     model = core.read_model(modelPath);
     slog::info << "model file: " << modelPath << slog::endl;
-    log_model_info(model);
+    logBasicModelInfo(model);
     setExecPart();
 }
 
@@ -59,7 +59,7 @@ void IEWrapper::setExecPart() {
     model = ppp.build();
 
     compiled_model = core.compile_model(model, deviceName);
-    log_compiled_model_info(compiled_model, modelPath, deviceName);
+    logCompiledModelInfo(compiled_model, modelPath, deviceName);
     infer_request = compiled_model.create_infer_request();
 }
 
