@@ -15,6 +15,7 @@
 """
 
 import logging as log
+from openvino.runtime import AsyncInferQueue
 
 
 class Module:
@@ -30,8 +31,12 @@ class Module:
     def deploy(self, device, plugin_config, max_requests=1):
         self.max_requests = max_requests
         compiled_model = self.core.compile_model(self.model, device, config=plugin_config)
-        self.infer_requests = [compiled_model.create_infer_request() for _ in range(self.max_requests)]
+        self.infer_queue = AsyncInferQueue(compiled_model, self.max_requests)
+        self.infer_queue.set_callback(self.completion_callback)
         log.info('The {} model {} is loaded to {}'.format(self.model_type, self.model_path, device))
+
+    def completion_callback(self, infer_request, id):
+        self.outputs[id] = next(iter(infer_request.results.values()))
 
     def enqueue(self, input):
         self.clear()
@@ -40,27 +45,19 @@ class Module:
             log.warning('Processing request rejected - too many requests')
             return False
 
-        self.infer_requests[self.active_requests].start_async(input)
+        self.infer_queue.start_async(input, self.active_requests)
         self.active_requests += 1
         return True
 
-    def wait(self):
+    def get_outputs(self):
         if self.active_requests <= 0:
             return
-
-        self.outputs = [None, ] * self.active_requests
-        for i in range(self.active_requests):
-            self.infer_requests[i].wait()
-            self.outputs[i] = next(iter(self.infer_requests[i].results.values()))
-
+        self.infer_queue.wait_all()
         self.active_requests = 0
-
-    def get_outputs(self):
-        self.wait()
-        return self.outputs
+        return [v for _, v in sorted(self.outputs.items())]
 
     def clear(self):
-        self.outputs = []
+        self.outputs = {}
 
     def infer(self, inputs):
         self.clear()
