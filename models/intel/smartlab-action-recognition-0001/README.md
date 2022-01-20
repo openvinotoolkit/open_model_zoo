@@ -1,4 +1,4 @@
-# smartlab-action-recognition-encoder-0001 (composite)
+# smartlab-action-recognition-0001 (composite)
 
 ## Use Case and High-Level Description
 
@@ -70,7 +70,7 @@ Classification confidence scores in the [0, 1] range
 
 ## Use smartlab demo
 
-Model is supported by [smartlab_online_demo python demo](../../../demos/smartlab_online_demo/python/README.md).
+Model is supported by [smartlab_demo python demo](../../../demos/smartlab_demo/python/README.md).
 
 
 For more information, please, see documentation of the demo.
