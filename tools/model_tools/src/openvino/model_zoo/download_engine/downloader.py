@@ -50,29 +50,29 @@ class ThreadSessionFactory:
 
 
 class Downloader:
-    def __init__(self, requested_precisions: str = None, output_dir: Path = None, 
+    def __init__(self, requested_precisions: str = None, output_dir: Path = None,
                  cache_dir: Path = None, num_attempts: int = 1, timeout: int = DOWNLOAD_TIMEOUT):
         self.output_dir = output_dir
         self.cache = cache.NullCache() if cache_dir is None else cache.DirCache(cache_dir)
         self.num_attempts = num_attempts
         self.timeout = timeout
         self.requested_precisions = requested_precisions
-        
+
     @property
     def requested_precisions(self) -> Set[str]:
         return self._requested_precisions
-    
+
     @requested_precisions.setter
     def requested_precisions(self, value: str = None):
         if value is None:
             _requested_precisions = _common.KNOWN_PRECISIONS
         else:
             _requested_precisions = set(value.split(','))
-            
+
         unknown_precisions = _requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
-        
+
         self._requested_precisions = _requested_precisions
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
@@ -177,7 +177,7 @@ class Downloader:
             cache.put(hash, source)
         except Exception:
             reporter.log_warning('Failed to update the cache', exc_info=True)
-            
+
     @staticmethod
     def make_reporter(progress_format: str, context=None):
         if context is None:
@@ -209,7 +209,7 @@ class Downloader:
     def _download_model(self, reporter, session_factory, model, known_precisions: set = None):
         if known_precisions is None:
             known_precisions = _common.KNOWN_PRECISIONS
-        
+
         session = session_factory()
 
         reporter.print_group_heading('Downloading {}', model.name)
@@ -231,7 +231,7 @@ class Downloader:
             destination = output / model_file.name
 
             if not self._try_retrieve(model_file_reporter, destination, model_file,
-                    functools.partial(model_file.source.start_download, session, cache.CHUNK_SIZE, 
+                    functools.partial(model_file.source.start_download, session, cache.CHUNK_SIZE,
                                       size=model_file.size, checksum=model_file.checksum)):
                 try:
                     destination.unlink()
@@ -257,7 +257,7 @@ class Downloader:
             reporter.print()
 
         return True
-    
+
     def download_model(self, model, reporter, session):
         if model.model_stages:
             results = []
@@ -266,7 +266,7 @@ class Downloader:
             return sum(results) == len(model.model_stages)
         else:
             return self._download_model(reporter, session, model)
-        
+
     def bulk_download_model(self, models, reporter, jobs: int, progress_format: str) -> Set[str]:
         with contextlib.ExitStack() as exit_stack:
             session_factory = ThreadSessionFactory(exit_stack)
@@ -274,7 +274,7 @@ class Downloader:
                 results = [self.download_model(model, reporter, session_factory) for model in models]
             else:
                 results = _concurrency.run_in_parallel(jobs,
-                    lambda context, model: self.download_model(model, self.make_reporter(progress_format, context), 
+                    lambda context, model: self.download_model(model, self.make_reporter(progress_format, context),
                                                                session_factory),
                     models)
 

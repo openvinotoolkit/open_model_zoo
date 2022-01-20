@@ -71,11 +71,11 @@ class Model:
 
     @classmethod
     def deserialize(cls, model, name, subdirectory, composite_model_name, known_frameworks = None, known_task_types = None):
-        if known_frameworks is None: 
+        if known_frameworks is None:
             known_frameworks = _common.KNOWN_FRAMEWORKS
         if known_task_types is None:
             known_task_types = _common.KNOWN_TASK_TYPES
-        
+
         with validation.deserialization_context('In model "{}"'.format(name)):
             if not RE_MODEL_NAME.fullmatch(name):
                 raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
@@ -183,11 +183,11 @@ class CompositeModel:
 
     @classmethod
     def deserialize(cls, model, name, subdirectory, stages, known_frameworks = None, known_task_types = None):
-        if known_frameworks is None: 
+        if known_frameworks is None:
             known_frameworks = _common.KNOWN_FRAMEWORKS
         if known_task_types is None:
             known_task_types = _common.KNOWN_TASK_TYPES
-        
+
         with validation.deserialization_context('In model "{}"'.format(name)):
             if not RE_MODEL_NAME.fullmatch(name):
                 raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')

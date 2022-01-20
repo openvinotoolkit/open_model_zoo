@@ -39,7 +39,7 @@ def positive_int_arg(value_str):
         pass
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
-        
+
 
 def main():
     parser = DownloaderArgumentParser()
@@ -79,7 +79,7 @@ def main():
         failed_models = set()
 
         downloader = Downloader(args.precisions, args.output_dir, args.cache_dir, args.num_attempts)
-        
+
         for model in models:
             precisions_to_send = downloader.requested_precisions if args.precisions else downloader.requested_precisions & model.precisions
             model_information = {
