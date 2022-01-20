@@ -30,12 +30,21 @@ class BackgroundMattingConverter(BaseFormatConverter):
             {
                 'images_dir': PathField(description='path to input images directory', is_directory=True),
                 'masks_dir': PathField(description='path to gt masks directory', is_directory=True),
+                'backgrounds_dir': PathField(optional=True, description='path to gt masks directory', is_directory=True),
                 'image_prefix': StringField(optional=True, default='', description='prefix for images'),
                 'mask_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
+                'background_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
                 'image_postfix': StringField(optional=True, default='.png', description='prefix for images'),
                 'mask_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
+                'background_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
                 'mask_to_gray': BoolField(
                     optional=True, default=False, description='allow converting mask to grayscale'
+                ),
+                'with_background': BoolField(
+                    optional=True, default=False, description='allow converting mask to grayscale'
+                ),
+                'with_alpha': BoolField(
+                    optional=True, default=False, description='load image with mask including alpha channel'
                 )
             }
         )
@@ -48,8 +57,12 @@ class BackgroundMattingConverter(BaseFormatConverter):
         self.images_postfix = self.get_value_from_config('image_postfix')
         self.mask_prefix = self.get_value_from_config('mask_prefix')
         self.mask_postfix = self.get_value_from_config('mask_postfix')
+        self.background_prefix = self.get_value_from_config('background_prefix')
+        self.background_postfix = self.get_value_from_config('background_postfix')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
         self.mask_to_gray = self.get_value_from_config('mask_to_gray')
+        self.with_background = self.get_value_from_config('with_background')
+        self.with_alpha = self.get_value_from_config('with_alpha')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -61,7 +74,7 @@ class BackgroundMattingConverter(BaseFormatConverter):
             image_pattern = self.images_prefix + image_pattern
         if self.images_postfix:
             image_pattern = image_pattern + self.images_postfix
-        images_list = list(self.images_dir.glob(image_pattern))
+        images_list = sorted(list(self.images_dir.glob(image_pattern)))
         num_iterations = len(images_list)
         content_errors = None if not check_content else []
         for idx, image in enumerate(images_list):
@@ -76,8 +89,20 @@ class BackgroundMattingConverter(BaseFormatConverter):
             if not mask_file.exists():
                 continue
 
+            if self.with_background:
+                bgr_name = '{prefix}{base}{postfix}'.format(
+                    prefix=self.background_prefix, base=base_name, postfix=self.background_postfix
+                )
+                image_name = '{prefix}{base}{postfix}'.format(
+                    prefix=self.images_prefix, base=base_name, postfix=self.images_postfix
+                )
+                bgr_file = self.images_dir / bgr_name
+                if not bgr_file.exists():
+                    continue
+                identifier = [image_name, bgr_name]
+
             annotations.append(
-                BackgroundMattingAnnotation(identifier, mask_file.name, self.mask_to_gray)
+                BackgroundMattingAnnotation(identifier, mask_name.format(base=base_name), self.mask_to_gray, self.with_alpha)
             )
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
