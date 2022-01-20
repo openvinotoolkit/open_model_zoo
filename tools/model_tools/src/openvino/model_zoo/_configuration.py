@@ -182,7 +182,7 @@ class CompositeModel:
         self.composite_model_name = composite_model_name
 
     @classmethod
-    def deserialize(cls, model, name, subdirectory, stages, known_frameworks = None, known_task_types = None):
+    def deserialize(cls, model, name, subdirectory, stages, known_frameworks=None, known_task_types=None):
         if known_frameworks is None:
             known_frameworks = _common.KNOWN_FRAMEWORKS
         if known_task_types is None:
