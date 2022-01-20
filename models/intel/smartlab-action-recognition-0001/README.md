@@ -27,8 +27,8 @@ The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone wit
 
 | Metric  | Value |
 | ------- | ----- |
-| GFlops  | TODO  |
-| MParams | TODO  |
+| GFlops  | 0.611 |
+| MParams | 3.387 |
 
 ### Inputs
 
@@ -49,8 +49,8 @@ The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
 
 | Metric  | Value |
 | ------- | ----- |
-| GFlops  | TODO  |
-| MParams | TODO  |
+| GFlops  | 0.008 |
+| MParams | 4.099 |
 
 ### Inputs
 
