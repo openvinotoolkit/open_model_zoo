@@ -9,10 +9,107 @@ For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| TODO Accuracy                   | TODO                                          |
 | GOPs                            | 0.048915                                  |
 | MParams                         | 1.018179                                  |
 | Source framework                | PyTorch\*                                 |
+
+## Accuracy
+<table>
+    <thead>
+        <tr>
+            <th colspan="2">Accuracy</th>
+            <th>noise/background</th>
+            <th>remove_support_sleeve</th>
+            <th>adjust_rider</th>
+            <th>adjust_nut</th>
+            <th>adjust_balancing</th>
+            <th>open_box</th>
+            <th>close_box</th>
+            <th>choose_weight</th>
+            <th>put_left</th>
+            <th>put_right</th>
+            <th>take_left</th>
+            <th>take_right</th>
+            <th>install support_sleeve</th>
+            <th>mean</th>
+            <th>mPR (P+R)/2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=2>frame-level</td>
+            <td rowspan=1>precision</td>
+            <td>0.22</td>
+            <td>0.84</td>
+            <td>0.81</td>
+            <td>0.62</td>
+            <td>0.67</td>
+            <td>0.87</td>
+            <td>0.56</td>
+            <td>0.52</td>
+            <td>0.54</td>
+            <td>0.74</td>
+            <td>0.62</td>
+            <td>0.68</td>
+            <td>0.86</td>
+            <td>0.66</td>
+            <td rowspan=2>0.66</td>
+        </tr>
+        <tr>
+            <td rowspan=1>recall</td>
+            <td>0.4</td>
+            <td>0.95</td>
+            <td>0.83</td>
+            <td>0.86</td>
+            <td>0.43</td>
+            <td>0.8</td>
+            <td>0.31</td>
+            <td>0.52</td>
+            <td>0.68</td>
+            <td>0.65</td>
+            <td>0.62</td>
+            <td>0.51</td>
+            <td>0.92</td>
+            <td>0.65</td>
+        </tr>
+        <tr>
+            <td rowspan=2>segment IOU</td>
+            <td rowspan=1>precision</td>
+            <td>0.38</td>
+            <td>0.94</td>
+            <td>0.77</td>
+            <td>0.65</td>
+            <td>0.6</td>
+            <td>0.85</td>
+            <td>0.56</td>
+            <td>0.68</td>
+            <td>0.74</td>
+            <td>0.88</td>
+            <td>0.72</td>
+            <td>0.78</td>
+            <td>0.69</td>
+            <td>0.7</td>
+            <td rowspan=2>0.77</td>
+        </tr>
+        <tr>
+            <td>recall</td>
+            <td>0.64</td>
+            <td>1</td>
+            <td>0.96</td>
+            <td>0.94</td>
+            <td>0.62</td>
+            <td>0.96</td>
+            <td>0.48</td>
+            <td>0.77</td>
+            <td>0.91</td>
+            <td>0.88</td>
+            <td>0.83</td>
+            <td>0.85</td>
+            <td>1</td>
+            <td>0.83</td>
+        </tr>
+    </tbody>
+</table>
 
 ## Inputs
 The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as i3d-rgb and resnet-50, and feature outputs of the previous frame.
