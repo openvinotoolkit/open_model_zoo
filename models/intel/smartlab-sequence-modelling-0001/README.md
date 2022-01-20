@@ -1,4 +1,4 @@
-# online mstcn++
+# smartlab-sequence-modelling-0001
 
 ## Use Case and High-Level Description
 This is an online action segmentation network for 16 classes trained on Intel dataset. It is an online version of MSTCN++. The difference between online MSTCN++ and MSTCN++ is that the former accept stream video as input while the latter assume the whole video is given.
@@ -148,30 +148,4 @@ After post-process with argmx() function, the prediction result can be used to d
    - `W` - feature map width
 
 ## Legal Information
-
-The original model is distributed under the following
-[license](https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt)
-
-```
-MIT License
-
-Copyright (c) 2019 fatchord (https://github.com/fatchord)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+[*] Other names and brands may be claimed as the property of others.

@@ -72,14 +72,14 @@ class MultiOutputRegression(Adapter):
         params = super().parameters()
         params.update({
             'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names'),
-            'online': BoolField(optional=True, default=False, description='online version means batch size is ignored')
+            'ignore_batch': BoolField(optional=True, default=False, description='whether ignore the output batch size. When processing online video streams, the output batch size is ignored.')
         })
         return params
 
     def configure(self):
         self.output_list_keys = self.get_value_from_config('outputs')
         self.output_list_values = self.get_value_from_config('outputs')
-        self.online = self.get_value_from_config('online')
+        self.ignore_batch = self.get_value_from_config('ignore_batch')
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
@@ -94,7 +94,7 @@ class MultiOutputRegression(Adapter):
         for batch_id, identfier in enumerate(identifiers):
             res_dict = {}
             for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
-                result_value = raw_outputs[output_name_v] if self.online else raw_outputs[output_name_v][batch_id]
+                result_value = raw_outputs[output_name_v] if self.ignore_batch else raw_outputs[output_name_v][batch_id]
                 res_dict.update({output_name_k: result_value})
             result.append(RegressionPrediction(identfier, res_dict))
         return result

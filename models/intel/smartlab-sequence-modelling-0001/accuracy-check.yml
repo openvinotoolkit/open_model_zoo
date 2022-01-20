@@ -4,7 +4,7 @@ models:
       - framework: dlsdk
         adapter:
           type: multi_output_regression
-          online: True
+          ignore_batch: True
           outputs:
             - output
             - fhis_out_0
