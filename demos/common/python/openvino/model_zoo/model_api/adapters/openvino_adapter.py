@@ -15,12 +15,10 @@
 """
 
 import logging as log
-from collections import deque
 from pathlib import Path
 
 try:
-    from openvino.runtime import AsyncInferQueue, Core, get_version
-    import ngraph
+    from openvino.runtime import AsyncInferQueue, Core, PartialShape, get_version
     openvino_absent = False
 except ImportError:
     openvino_absent = True
@@ -43,8 +41,8 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     """
 
-    def __init__(self, ie, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
-        self.ie = ie
+    def __init__(self, core, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
+        self.core = core
         self.model_path = model_path
         self.device = device
         self.plugin_config = plugin_config
@@ -58,14 +56,22 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
         log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
         weights = weights_path if self.model_from_buffer else ''
-        self.model = ie.read_model(model_path, weights)
+        self.model = core.read_model(model_path, weights)
 
     def load_model(self):
-        self.compiled_model = self.ie.compile_model(self.model, self.device, self.plugin_config)
+        self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
 
         log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
-        self.async_queue = AsyncInferQueue(self.compiled_model)
+        self.max_num_requests = self.get_optimal_number_of_requests()
+        self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
         self.log_runtime_settings()
+
+    def get_optimal_number_of_requests(self):
+        metrics = self.compiled_model.get_metric('SUPPORTED_METRICS')
+        key = 'OPTIMAL_NUMBER_OF_INFER_REQUESTS'
+        if key in metrics:
+            return self.compiled_model.get_metric(key) + 1
+        return 1
 
     def log_runtime_settings(self):
         devices = set(parse_devices(self.device))
@@ -85,30 +91,32 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for input in self.model.inputs:
-            inputs[input.get_any_name()] = Metadata(list(input.shape))
+            inputs[input.get_any_name()] = Metadata(list(input.shape), input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for output in self.model.outputs:
-            outputs[output.get_any_name()] = Metadata(list(output.shape))
+            outputs[output.get_any_name()] = Metadata(list(output.shape), output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
     def reshape_model(self, new_shape):
+        new_shape = {k: PartialShape(v) for k, v in new_shape.items()}
         self.model.reshape(new_shape)
 
+    def get_raw_result(self, request):
+        raw_result = {key: request.get_tensor(key).data[:] for key in self.get_output_layers().keys()}
+        return raw_result
+
     def infer_sync(self, dict_data):
-        return self.compiled_model.infer_new_request(dict_data)
+        request = self.compiled_model.create_infer_request()
+        request.infer(dict_data)
+        return self.get_raw_result(request)
 
     def infer_async(self, dict_data, callback_data):
-
-        def get_raw_result(request):
-            raw_result = {key: request.get_tensor(key).data for key in self.get_output_layers().keys()}
-            return raw_result
-
-        self.async_queue.start_async(dict_data, (get_raw_result, callback_data))
+        self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))
 
     def is_ready(self):
         return self.async_queue.is_ready()
@@ -124,6 +132,6 @@ class OpenvinoAdapter(ModelAdapter):
             layer_name = node.get_friendly_name()
             if layer_name not in layers_info.keys():
                 continue
-            # layers_info[layer_name].meta = node._get_attributes()
+            layers_info[layer_name].meta = node.get_attributes()
             layers_info[layer_name].type = node.get_type_name()
         return layers_info
