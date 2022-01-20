@@ -15,7 +15,6 @@
 #include <string>
 
 #include <gpu/gpu_config.hpp>
-#include <inference_engine.hpp>
 #include <openvino/openvino.hpp>
 #include <monitors/presenter.h>
 #include <vpu/hddl_config.hpp>

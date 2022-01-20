@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-#include <inference_engine.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 
@@ -29,9 +29,9 @@ public:
     PersonDetector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
-        auto model = core.read_model(xmlPath);
         slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
-        logLayersInfo(model);
+        auto model = core.read_model(xmlPath);
+        logBasicModelInfo(model);
         ov::OutputVector inputInfo = model->inputs();
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection model should have only one input");
@@ -142,9 +142,9 @@ public:
         const std::map<std::string, std::string>& pluginConfig) :
         autoResize {autoResize},
         core_{core} {
-        auto model = core.read_model(xmlPath);
         slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
-        logLayersInfo(model);
+        auto model = core.read_model(xmlPath);
+        logBasicModelInfo(model);
         /** Re-ID model should have only one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         ov::OutputVector inputInfo = model->inputs();
@@ -187,7 +187,7 @@ public:
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
         compiledModel = core_.compile_model(model, deviceName, pluginConfig);
-        logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-Identification");
+        logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-ID");
     }
 
     ov::runtime::InferRequest createInferRequest() {

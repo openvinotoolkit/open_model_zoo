@@ -284,23 +284,25 @@ void logCompiledModelInfo(
     }
 }
 
-inline void logLayersInfo(const std::shared_ptr<ov::Model>& model) {
+inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     // Taking information about all topology inputs
     ov::OutputVector inputs = model->inputs();
     ov::OutputVector outputs = model->outputs();
+    slog::info << "\tInputs: " << slog::endl;
     for (const ov::Output<ov::Node> input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
 
-        slog::info << "\tInput layer: " << name << ", shape: " << shape << ", precision: " << type << slog::endl;
+        slog::info << "\t\t" << name << ", " << shape << ", " << type << slog::endl;
     }
 
+    slog::info << "\tOutputs: " << slog::endl;
     for (const ov::Output<ov::Node> output : outputs) {
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
 
-        slog::info << "\tOutput layer: " << name << ", shape: " << shape << ", precision: " << type << slog::endl;
+        slog::info << "\t\t" << name << ", "<< shape << ", " << type << slog::endl;
     }
 }
