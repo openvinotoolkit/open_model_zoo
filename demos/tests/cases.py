@@ -541,6 +541,7 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'),
+                    ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'))),
         ],
@@ -1016,19 +1017,20 @@ PYTHON_DEMOS = [
                           '-m': ModelArg('midasnet')})
     )),
 
-    PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
-               model_keys=['-m', '--m_reid'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
-                DataPatternArg('multi-camera-multi-target-tracking/repeated')],
-            '-m': ModelArg('person-detection-retail-0013')}),
-        single_option_cases('--m_reid',
-            ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
-    )),
+    # commented because the demo is hanging with OV2.0
+    #PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
+    #           model_keys=['-m', '--m_reid'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #        **MONITORS,
+    #        '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
+    #            DataPatternArg('multi-camera-multi-target-tracking/repeated')],
+    #        '-m': ModelArg('person-detection-retail-0013')}),
+    #    single_option_cases('--m_reid',
+    #        ModelArg('person-reidentification-retail-0277'),
+    #        ModelArg('person-reidentification-retail-0286'),
+    #        ModelArg('person-reidentification-retail-0287'),
+    #        ModelArg('person-reidentification-retail-0288')),
+    #)),
 
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
@@ -1216,6 +1218,7 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'),
+                    ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'))),
             TestCase(options={

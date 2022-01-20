@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 #include "utils/slog.hpp"
 #include "utils/args_helper.hpp"
 
@@ -248,4 +249,64 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
             catch (const InferenceEngine::Exception&) {}
         }
     }
+}
+
+inline
+void logCompiledModelInfo(
+    const ov::runtime::CompiledModel& compiledModel,
+    const std::string& modelName,
+    const std::string& deviceName,
+    const std::string& modelType = "")
+{
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+        for (const auto& device : devices) {
+            try {
+                slog::info << "\tDevice: " << device << slog::endl;
+                std::string nstreams = compiledModel.get_config(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
+                if (device == "CPU") {
+                    std::string nthreads = compiledModel.get_config("CPU_THREADS_NUM").as<std::string>();
+                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
+                }
+            }
+            catch (const ov::Exception&) {}
+        }
+    }
+}
+
+inline
+void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
+    slog::info << "model name: " << model->get_friendly_name() << slog::endl;
+
+    // Dump information about model inputs/outputs
+    ov::OutputVector inputs = model->inputs();
+    ov::OutputVector outputs = model->outputs();
+
+    slog::info << "inputs: " << slog::endl;
+    for (const ov::Output<ov::Node> input : inputs)
+    {
+        const std::string name = input.get_any_name();
+        const ov::element::Type type = input.get_element_type();
+        const ov::PartialShape shape = input.get_partial_shape();
+
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
+    }
+
+    slog::info << "outputs: " << slog::endl;
+    for (const ov::Output<ov::Node> output : outputs)
+    {
+        const std::string name = output.get_any_name();
+        const ov::element::Type type = output.get_element_type();
+        const ov::PartialShape shape = output.get_partial_shape();
+
+        slog::info << name << ", " << type << ", " << shape << slog::endl;
+    }
+
+    return;
 }

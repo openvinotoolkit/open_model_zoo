@@ -41,6 +41,7 @@ omz_converter --list models.lst
   - icnet-camvid-ava-0001
   - icnet-camvid-ava-sparse-30-0001
   - icnet-camvid-ava-sparse-60-0001
+  - ocrnet-hrnet-w48-paddle
   - pspnet-pytorch
   - road-segmentation-adas-0001
   - semantic-segmentation-adas-0001

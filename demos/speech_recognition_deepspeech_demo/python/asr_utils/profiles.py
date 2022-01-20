@@ -24,13 +24,13 @@ PROFILES = {
         # num_context_frames (int)
         'num_context_frames': 19,
         # in_state_c, in_state_h, out_state_c, out_state_h, in_data, out_data (str), IR node names
-        'in_state_c': 'previous_state_c',
-        'in_state_h': 'previous_state_h',
-        'out_state_c': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2',
-        'out_state_h': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1',
-        'in_data': 'input_node',
+        'in_state_c': 'previous_state_c:0',
+        'in_state_h': 'previous_state_h:0',
+        'out_state_c': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd:0',
+        'out_state_h': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0',
+        'in_data': 'input_node:0',
         # (Despite being called "logits", for Mozilla DeepSpeech 0.6.x ... 0.9.x output is probabilities after softmax.)
-        'out_data': 'logits',
+        'out_data': 'logits:0',
 
         # === CTC decoder and LM parameters ===
         # log_probs (bool), True is input data contains base e log(probabilities), False if simply probabilities.
