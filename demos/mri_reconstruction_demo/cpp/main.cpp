@@ -1,7 +1,6 @@
 // Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-#include <inference_engine.hpp>
 #include <openvino/openvino.hpp>
 #include <opencv2/opencv.hpp>
 #include <utils/common.hpp>
@@ -39,12 +38,13 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+    slog::info << ov::get_openvino_version() << slog::endl;
     ov::runtime::Core core;
 
-    std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
     slog::info << "Reading model " << FLAGS_m << slog::endl;
-    logLayersInfo(model);
+    std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+    logBasicModelInfo(model);
+
     std::string outputTensorName = "";
     for (const auto& output : model->outputs()) {
         if (output.get_any_name().find("89") != std::string::npos) {
@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
     if (outputTensorName == "") {
         throw std::logic_error("Not found suitable output!");
     }
+
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().model().set_layout("NHWC");
     model = ppp.build();
