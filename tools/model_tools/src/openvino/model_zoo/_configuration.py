@@ -70,7 +70,7 @@ class Model:
         self.model_stages = {}
 
     @classmethod
-    def deserialize(cls, model, name, subdirectory, composite_model_name, known_frameworks = None, known_task_types = None):
+    def deserialize(cls, model, name, subdirectory, composite_model_name, known_frameworks=None, known_task_types=None):
         if known_frameworks is None:
             known_frameworks = _common.KNOWN_FRAMEWORKS
         if known_task_types is None:
