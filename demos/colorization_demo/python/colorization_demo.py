@@ -60,18 +60,15 @@ def build_arg():
                          help="Optional. List of monitors to show initially.")
     return parser
 
-
-if __name__ == '__main__':
-    args = build_arg().parse_args()
-
+def main(args):
     cap = open_images_capture(args.input, args.loop)
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = Core()
+    core = Core()
 
     log.info('Reading model {}'.format(args.model))
-    model = ie.read_model(args.model, args.model.with_suffix(".bin"))
+    model = core.read_model(args.model, args.model.with_suffix(".bin"))
 
     input_tensor_name = 'data_l'
     input_shape = model.input(input_tensor_name).shape
@@ -83,7 +80,7 @@ if __name__ == '__main__':
 
     assert len(model.outputs) == 1, "Expected number of outputs is equal 1"
 
-    compiled_model = ie.compile_model(model, device_name=args.device)
+    compiled_model = core.compile_model(model, device_name=args.device)
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
@@ -165,3 +162,7 @@ if __name__ == '__main__':
     metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
+
+if __name__ == "__main__":
+    args = build_arg().parse_args()
+    sys.exit(main(args) or 0)
