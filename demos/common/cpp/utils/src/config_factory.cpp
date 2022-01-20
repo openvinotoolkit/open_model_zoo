@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ std::set<std::string> CnnConfig::getDevices() {
     return devices;
 }
 
-CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
+CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d,
     uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads) {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
+    auto config = getCommonConfig(flags_d, flags_nireq);
 
     std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(config.getDevices(), flags_nstreams);
     for (const auto& device : config.getDevices()) {
@@ -44,11 +44,6 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
                 config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
 
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
-
-            // for CPU execution, more throughput-oriented execution via streams
-            config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                    : CONFIG_VALUE(CPU_THROUGHPUT_AUTO)));
         }
         else if (device == "GPU") {
             config.execNetworkConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
@@ -66,9 +61,8 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
     return config;
 }
 
-CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, uint32_t flags_nireq) {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
+CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq) {
+    auto config = getCommonConfig(flags_d, flags_nireq);
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
@@ -80,21 +74,13 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
     return config;
 }
 
-CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, uint32_t flags_nireq) {
+CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, uint32_t flags_nireq) {
     CnnConfig config;
 
     if (!flags_d.empty()) {
         config.deviceName = flags_d;
     }
 
-    if (!flags_l.empty()) {
-        config.cpuExtensionsPath = flags_l;
-    }
-
-    if (!flags_c.empty()) {
-        config.clKernelsConfigPath = flags_c;
-    }
     config.maxAsyncRequests = flags_nireq;
 
     return config;

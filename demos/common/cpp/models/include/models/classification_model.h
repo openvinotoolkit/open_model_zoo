@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 #pragma once
-
+#include <openvino/openvino.hpp>
 #include "models/image_model.h"
 
 class ClassificationModel : public ImageModel {
@@ -36,5 +36,5 @@ protected:
     size_t nTop;
     std::vector<std::string> labels;
 
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

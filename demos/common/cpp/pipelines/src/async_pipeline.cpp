@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,26 +14,28 @@
 // limitations under the License.
 */
 
-#include "pipelines/async_pipeline.h"
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
+#include "pipelines/async_pipeline.h"
+
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, ov::runtime::Core& core) :
     model(std::move(modelInstance)) {
-    execNetwork = model->loadExecutableNetwork(cnnConfig, core);
+    compiledModel = model->compileModel(cnnConfig, core);
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
         try {
             // +1 to use it as a buffer of the pipeline
-            nireq = execNetwork.GetMetric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
-        } catch (const InferenceEngine::Exception& ex) {
+            nireq = compiledModel.get_metric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
+        } catch (const ov::Exception& ex) {
             throw std::runtime_error(std::string("Every device used with the demo should support "
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
     slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
-    requestsPool.reset(new RequestsPool(execNetwork, nireq));
+    requestsPool.reset(new RequestsPool(compiledModel, nireq));
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }
@@ -65,15 +67,16 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     auto frameID = inputFrameId;
 
     auto request = requestsPool->getIdleRequest();
-    if (!request)
+    if (!request) {
         return -1;
+    }
 
     auto startTime = std::chrono::steady_clock::now();
-    auto internalModelData = model->preprocess(inputData, request);
+    auto internalModelData = model->preprocess(inputData, *request);
     preprocessMetrics.update(startTime);
 
-    request->SetCompletionCallback(
-        [this, frameID, request, internalModelData, metaData, startTime]() {
+    request->set_callback(
+        [this, frameID, request, internalModelData, metaData, startTime](const std::exception_ptr& e) {
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
@@ -85,16 +88,16 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.internalModelData = std::move(internalModelData);
 
                     for (const auto& outName : model->getOutputsNames()) {
-                        auto blobPtr = request->GetBlob(outName);
-
-                        if (InferenceEngine::Precision::I32 == blobPtr->getTensorDesc().getPrecision()) {
+                        auto tensor = request->get_tensor(outName);
+                        result.outputsData.emplace(outName, tensor);
+           /*             if (ov::element::i32 == tensor.get_element_type()) {
                             result.outputsData.emplace(outName,
-                                std::make_shared<InferenceEngine::TBlob<int>>(*InferenceEngine::as<InferenceEngine::TBlob<int>>(blobPtr)));
+                                std::make_shared<int*>(tensor.data<int>()));
                         }
                         else {
                             result.outputsData.emplace(outName,
-                                std::make_shared<InferenceEngine::TBlob<float>>(*InferenceEngine::as<InferenceEngine::TBlob<float>>(blobPtr)));
-                        }
+                                std::make_shared<float*>(tensor.data<float_t>()));
+                        }*/
                     }
 
                     completedInferenceResults.emplace(frameID, result);
@@ -113,7 +116,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     if (inputFrameId < 0)
         inputFrameId = 0;
 
-    request->StartAsync();
+    request->start_async();
 
     return frameID;
 }

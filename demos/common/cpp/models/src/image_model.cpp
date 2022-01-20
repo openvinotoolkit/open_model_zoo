@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 
+#include <openvino/openvino.hpp>
 #include "models/image_model.h"
 
 ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
@@ -21,18 +22,18 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     useAutoResize(useAutoResize) {
 }
 
-std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     const auto& img = inputTransform(origImg);
 
     if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+        /* Just set input tensor containing read image. Resize and layout conversion will be done automatically */
+        request.set_input_tensor(wrapMat2Tensor(img));
     }
     else {
-        /* Resize and copy data from the image to the input blob */
-        InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matToBlob(img, frameBlob);
+        /* Resize and copy data from the image to the input tensor */
+        ov::runtime::Tensor frameTensor = request.get_input_tensor();
+        matToTensor(img, frameTensor);
     }
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }

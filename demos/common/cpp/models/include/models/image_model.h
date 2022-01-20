@@ -1,5 +1,5 @@
     /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #pragma once
+#include <openvino/openvino.hpp>
 #include "models/model_base.h"
 
 class ImageModel : public ModelBase {
@@ -23,7 +24,7 @@ public:
     /// @param useAutoResize - if true, image is resized by IE.
     ImageModel(const std::string& modelFileName, bool useAutoResize);
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::runtime::InferRequest& request) override;
 
 protected:
     bool useAutoResize;

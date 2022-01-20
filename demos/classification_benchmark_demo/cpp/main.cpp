@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -13,8 +13,8 @@
 #include <functional>
 #include <atomic>
 
-#include <inference_engine.hpp>
 #include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
 #include <models/classification_model.h>
@@ -40,10 +40,6 @@ static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to the .xml file with kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers."
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
@@ -61,8 +57,6 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
@@ -76,9 +70,6 @@ static void showUsage() {
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
@@ -205,10 +196,10 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core core;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::runtime::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
 
         Presenter presenter(FLAGS_u, 0);
