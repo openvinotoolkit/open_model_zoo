@@ -72,7 +72,8 @@ class MultiOutputRegression(Adapter):
         params = super().parameters()
         params.update({
             'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names'),
-            'ignore_batch': BoolField(optional=True, default=False, description='whether ignore the output batch size. When processing online video streams, the output batch size is ignored.')
+            'ignore_batch': BoolField(optional=True, default=False,
+                                      description='whether ignore the output batch size. When processing online video streams, the output batch size is ignored.')
         })
         return params
 
