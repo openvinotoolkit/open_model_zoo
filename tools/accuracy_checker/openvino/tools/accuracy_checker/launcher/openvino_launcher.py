@@ -511,19 +511,15 @@ class OpenVINOLauncher(Launcher):
             self.network = None
             self.exec_network = self.ie_core.import_model(str(self._model), self._device)
             self.original_outputs = self.exec_network.outputs
-            ie_input_info = self.exec_network.inputs
-            input_info = ie_input_info[0]
-            batch_pos = (
-                input_info.get_node().layout.get_index_by_name('N')
-                if input_info.get_node().layout.has_name('N') else -1
-            )
-
-            self._batch = parse_partial_shape(input_info.partial_shape)[batch_pos] if batch_pos != -1 else 1
+            model_batch = self._get_model_batch_size()
+            self._batch = model_batch if model_batch is not None else 1
             return
         if self._weights is None and self._model.suffix != '.onnx':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
+        model_batch = self._get_model_batch_size()
+        model_batch = 1 if model_batch is None else model_batch
         outputs = self.config.get('outputs')
         if outputs:
             def output_preprocessing(output_string):
@@ -536,12 +532,52 @@ class OpenVINOLauncher(Launcher):
             self.network.add_outputs(preprocessed_outputs)
         if input_shapes is not None:
             self.network.reshape(input_shapes)
-        self._batch = self.config.get('batch', 1)
+        self._batch = self.config.get('batch', model_batch)
+        self._set_batch_size(self._batch)
         affinity_map_path = self.config.get('affinity_map')
         if affinity_map_path and self._is_hetero():
             self._set_affinity(affinity_map_path)
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
+
+    def _set_batch_size(self, batch_size):
+        model_batch_size = self._get_model_batch_size()
+        model_batch_size = 1 if model_batch_size is None else model_batch_size
+        if batch_size is None:
+            batch_size = model_batch_size
+        if batch_size == model_batch_size:
+            self._batch = batch_size
+            return
+        input_shapes = {}
+        for input_node in self.network.inputs:
+            layer_name = input_node.get_node().friendly_name
+            if layer_name in self.const_inputs:
+                input_shapes[layer_name] = parse_partial_shape(layer_name.partial_shape)
+            else:
+                layer_shape = parse_partial_shape(layer_name.partial_shape)
+                layout = self.inputs[layer_name].layout
+                if '...' in str(layout):
+                    layout = self.get_layout_from_config(layer_name)
+                else:
+                    layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
+                batch_pos = layout.find('N')
+                if batch_pos != -1:
+                    layer_shape[batch_pos] = batch_size
+                input_shapes[layer_name] = layer_shape
+        self._reshape_input(input_shapes, batch_size == -1)
+        self._batch = batch_size
+
+    def _get_model_batch_size(self):
+        input_nodes = self.network.inputs if self.network else self.exec_network.inputs
+        input_info = input_nodes[0]
+        if '...' in str(input_info.get_node().layout):
+            layout = self.get_layout_from_config(input_info.get_node().friendly_name)
+        else:
+            layout = str(input_info.get_node().layout).replace('[', '').replace(']', '').replace(',', '')
+        batch_pos = layout.find('N')
+        if batch_pos != -1:
+            return parse_partial_shape(input_info.partial_shape)[batch_pos]
+        return None
 
     def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
@@ -573,6 +609,7 @@ class OpenVINOLauncher(Launcher):
         self._set_precision()
         self._set_input_shape()
         self.try_to_set_default_layout()
+        self._set_batch_size(self.config.get('batch'))
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.print_input_output_info(self.network if self.network is not None else self.exec_network)
         if self.preprocessor:
