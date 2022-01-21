@@ -75,7 +75,6 @@ def main():
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
-    evaluator.initialize()
 
     '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
     display = Display()
@@ -93,6 +92,7 @@ def main():
         if ret_top and ret_front:
             frame_counter += 1
 
+            
             ''' The object detection module need to generate detection results(for the current frame) '''
             top_det_results, front_det_results = detector.inference(
                     img_top=frame_top, img_front=frame_front)
@@ -114,9 +114,9 @@ def main():
                         frame_index=frame_counter)
                 top_seg_results = frame_predictions
                 front_seg_results = frame_predictions
-            if(len(top_seg_results) == 0):
-                continue
-
+                if(len(top_seg_results) == 0):
+                    continue
+    
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             state, scoring = evaluator.inference(
                     top_det_results=top_det_results,

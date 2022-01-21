@@ -24,8 +24,6 @@ class Evaluator(object):
         self.eval_cbs = None
         self.front_scores_df = None
         self.top_scores_df = None
-        
-    def initialize(self):
         self.first_put_take = False
         self.state = "Initial"
         self.use_tweezers_threshold = 50    # if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
@@ -95,7 +93,7 @@ class Evaluator(object):
             y_max = row["y_max"]
         return obj, x_min, y_min, x_max, y_max
 
-    def evaluate_rider(self,front_seg_results,df):
+    def evaluate_rider(self,front_seg_results,front_det_results):
         """
         Function:
             To evaluate whether rider is pushed to zero position
@@ -105,24 +103,33 @@ class Evaluator(object):
             df: front view object detection result a single frame (type: pandas dataframe)
         """
         # only evaluate rider zero if 2 roundscrew and 1 rider are found
-        try:
-            if df.obj.value_counts().roundscrew1 == 2 and df.obj.value_counts().rider == 1: 
-                df_2screw = (df[df['obj']=="roundscrew1"])
-                df_rider = (df[df['obj']=="rider"])
+        bboxes = front_det_results[0] # (x1, y1, x2, y2)
+        cls_ids = front_det_results[1]
+        scores = front_det_results[2]
 
-                roundscrew1_center_coordinate = (x0,y0) = ((df_2screw['x_max'].iloc[0] + df_2screw['x_min'].iloc[0])/2,(df_2screw['y_max'].iloc[0] + df_2screw['y_min'].iloc[0])/2)
-                roundscrew2_center_coordinate = (x1,y1) = ((df_2screw['x_max'].iloc[1] + df_2screw['x_min'].iloc[1])/2,(df_2screw['y_max'].iloc[1] + df_2screw['y_min'].iloc[1])/2)
-                rider_center_coordinate = (x3,y3) = ((df_rider['x_max'].iloc[0] + df_rider['x_min'].iloc[0])/2,(df_rider['y_max'].iloc[0] + df_rider['y_min'].iloc[0])/2)
-                
-                # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
-                if rider_center_coordinate[0] < min(x0,x1)+abs(x0-x1)/10:
-                    self.scoring["initial_score_rider"]=1
-                else:
-                    self.scoring["initial_score_rider"]=0
-        except:
-            pass
+        if cls_ids.count("roundscrew1") == 2 \
+            and cls_ids.count("rider") == 1: 
+            df_2screw = bboxes[np.array(cls_ids) == "roundscrew1"].squeeze()
+            df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
 
-    def evaluate_rider_tweezers(self,front_seg_results,df):
+            roundscrew1_center_coordinate = (x0,y0)  =\
+                ((df_2screw[0,1] + df_2screw[0,0])/2,
+                (df_2screw[0,3] + df_2screw[0,2])/2)
+            roundscrew2_center_coordinate = (x1,y1)  =\
+                ((df_2screw[1,1] + df_2screw[1,0])/2,
+                (df_2screw[1,3] + df_2screw[1,2])/2)
+            rider_center_coordinate  = \
+                ((df_rider[1] + df_rider[0])/2,
+                (df_rider[3] + df_rider[2])/2)
+            
+            # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
+            if rider_center_coordinate[0] < min(x0,x1)+abs(x0-x1)/10:
+                self.scoring["initial_score_rider"]=1
+            else:
+                self.scoring["initial_score_rider"]=0
+
+
+    def evaluate_rider_tweezers(self,front_seg_results,front_det_results):
         """
         Function:
             To evaluate whether rider is pushed using tweezers
@@ -133,58 +140,91 @@ class Evaluator(object):
 
         """
         # only evaluate rider zero if 2 roundscrew and 1 rider are found
-        try:
-            if df.obj.value_counts().rider == 1 and df.obj.value_counts().tweezers == 1: 
-                df_rider = (df[df['obj']=="rider"])
-                df_tweezers = (df[df['obj']=="tweezers"])
+        bboxes = front_det_results[0] # (x1, y1, x2, y2)
+        cls_ids = front_det_results[1]
+        scores = front_det_results[2]
 
-                rider_min_coordinate = (x2,y2) = \
-                    (df_rider['x_min'].iloc[0],df_rider['y_min'].iloc[0])
-                tweezers_min_coordinate = (x3,y3) = \
-                    (df_tweezers['x_min'].iloc[0],df_tweezers['y_min'].iloc[0])
+        if cls_ids.count("rider") == 1 and cls_ids.count("tweezers") == 1:
+            df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
+            df_tweezers = bboxes[np.array(cls_ids) == "balance"].squeeze()
+            rider_min_coordinate = \
+                (df_rider[0],df_rider[2])
+            tweezers_min_coordinate = \
+                (df_tweezers[0],df_tweezers[2])
+            
+            # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
+            if abs(rider_min_coordinate-tweezers_min_coordinate)>self.use_tweezers_threshold:
+                self.scoring['measuring_score_rider_tweezers']=0
+            else:
+                self.scoring['measuring_score_rider_tweezers']=1
+
+    def evaluate_object_left(self,front_seg_results,front_det_results):
+        # boxes: df[1], labels: df[2], scores: df[3]
+        # [top_bboxes, top_cls_ids, top_scores],
+        bboxes = front_det_results[0] # (x1, y1, x2, y2)
+        cls_ids = front_det_results[1]
+        scores = front_det_results[2]
+
+        # isbattety and isbalance labels?
+        if cls_ids.count("balance") == 1 \
+            and cls_ids.count("battery") == 1:
+            df_battery = bboxes[np.array(cls_ids) == "battery"].squeeze()
+            df_balance = bboxes[np.array(cls_ids) == "balance"].squeeze()
+
+            battery_center_coordinate = \
+                ((df_battery[1] + df_battery[0])/2,
+                (df_battery[3] + df_battery[2])/2)
+            (balance_x_min,balance_x_max,balance_y_min,balance_y_max) = \
+                (df_balance[0], df_balance[1], \
+                df_balance[2], df_balance[3])
+
+            if battery_center_coordinate[0]<(balance_x_min+(balance_x_max-balance_x_min)/2) \
+                and battery_center_coordinate[0]>balance_x_min:
                 
-                # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
-                if abs(rider_min_coordinate-tweezers_min_coordinate)>self.use_tweezers_threshold:
-                    self.scoring['measuring_score_rider_tweezers']=0
-                else:
-                    self.scoring['measuring_score_rider_tweezers']=1
-        except:
-            pass
-
-    def evaluate_object_left(self,front_seg_results,df):
-
-        if df.obj.value_counts().balance == 1 and df.obj.value_counts().battery == 1: 
-            df_battery = (df[df['obj']=="battery"])
-            df_balance = (df[df['obj']=="balance"])
-
-            battery_center_coordinate = (x0,y0) = ((df_battery['x_max'].iloc[0] + df_battery['x_min'].iloc[0])/2,(df_battery['y_max'].iloc[0] + df_battery['y_min'].iloc[0])/2)
-            (balance_x_min,balance_x_max,balance_y_min,balance_y_max) = (df_balance['x_min'].iloc[0],df_balance['x_max'].iloc[0],df_balance['y_min'].iloc[0],df_balance['y_max'].iloc[0] )
-
-            if battery_center_coordinate[0]<(balance_x_min+(balance_x_max-balance_x_min)/2) and battery_center_coordinate[0]>balance_x_min:
-                if battery_center_coordinate[1]>balance_y_min and battery_center_coordinate[1]<balance_y_max:
+                if battery_center_coordinate[1]>balance_y_min \
+                    and battery_center_coordinate[1]<balance_y_max:
                     self.scoring['measuring_score_object_left'] = 1
                     self.put_object = 1
-            if battery_center_coordinate[0]<balance_x_min and battery_center_coordinate[0]>balance_x_min:
-                if battery_center_coordinate[1]>balance_y_min and battery_center_coordinate[1]<balance_y_max:
+
+            if battery_center_coordinate[0]<balance_x_min \
+                and battery_center_coordinate[0]>balance_x_min:
+                if battery_center_coordinate[1]>balance_y_min \
+                    and battery_center_coordinate[1]<balance_y_max:
                     self.put_object = 1
             else:
                 self.scoring['measuring_score_object_left'] = 0
     
-    def evaluate_weights_right_tweezers(self,front_seg_results,df):
-        if df.obj.value_counts().balance == 1 and "weights" in df.obj.values: 
-            df_weights = (df[df['obj']=="weights"])
-            df_balance = (df[df['obj']=="balance"])
+    def evaluate_weights_right_tweezers(self,front_seg_results,front_det_results):
+        bboxes = front_det_results[0] # (x1, y1, x2, y2)
+        cls_ids = front_det_results[1]
+        scores = front_det_results[2]
+        if cls_ids.count("balance") == 1 and "weights" in cls_ids:
+            df_weights = bboxes[np.array(cls_ids) == "weights"].squeeze()
+            df_balance = bboxes[np.array(cls_ids) == "balance"].squeeze()
 
-            weights_center_coordinate = (x0,y0) = ((df_weights['x_max'].iloc[0] + df_weights['x_min'].iloc[0])/2,(df_weights['y_max'].iloc[0] + df_weights['y_min'].iloc[0])/2)
-            (balance_x_min,balance_x_max,balance_y_min,balance_y_max) = (df_balance['x_min'].iloc[0],df_balance['x_max'].iloc[0],df_balance['y_min'].iloc[0],df_balance['y_max'].iloc[0] )
+            
+            if df_weights.ndim > 1: # get only first weight box
+                df_weights = df_weights[0]
 
-            if weights_center_coordinate[0]>(balance_x_min+(balance_x_max-balance_x_min)/2) and weights_center_coordinate[0]<balance_x_max:
-                if weights_center_coordinate[1]>balance_y_min and weights_center_coordinate[1]<balance_y_max:
+            weights_center_coordinate = \
+                ((df_weights[1] + df_weights[0])/2,
+                (df_weights[3] + df_weights[2])/2)
+
+            (balance_x_min,balance_x_max,balance_y_min,balance_y_max) = \
+                (df_balance[0],df_balance[1],
+                df_balance[2],df_balance[3])
+
+            if weights_center_coordinate[0]>(balance_x_min+(balance_x_max-balance_x_min)/2) \
+                and weights_center_coordinate[0]<balance_x_max:
+                if weights_center_coordinate[1]>balance_y_min \
+                    and weights_center_coordinate[1]<balance_y_max:
                     self.scoring['measuring_score_weights_right_tweezers'] = 1
                     self.weights_put = 1
 
-            if weights_center_coordinate[0]>(balance_x_min+(balance_x_max-balance_x_min)/2) and weights_center_coordinate[0]<balance_x_max:
-                if weights_center_coordinate[1]>balance_y_min and weights_center_coordinate[1]<balance_y_max:
+            if weights_center_coordinate[0]>(balance_x_min+(balance_x_max-balance_x_min)/2) \
+                and weights_center_coordinate[0]<balance_x_max:
+                if weights_center_coordinate[1]>balance_y_min \
+                    and weights_center_coordinate[1]<balance_y_max:
                     self.weights_put = 1
             else:
                 self.scoring['measuring_score_weights_right_tweezers'] = 0
@@ -194,15 +234,23 @@ class Evaluator(object):
             if self.weights_put ==1:
                 self.can_tidy = True
 
-    def evaluate_end_tidy(self,df):
+    def evaluate_end_tidy(self,front_det_results):
         # define as tidied if no weights is detected(box closed),battery is on the table instead of the balance
-        if df.obj.value_counts().weights == 0:
-            if df.obj.value_counts().balance == 1 and df.obj.value_counts().battery == 1: 
-                df_battery = (df[df['obj']=="battery"])
-                df_balance = (df[df['obj']=="balance"])
+        bboxes = front_det_results[0] # (x1, y1, x2, y2)
+        cls_ids = front_det_results[1]
+        scores = front_det_results[2]
 
-                battery_center_coordinate = (x0,y0) = ((df_battery['x_max'].iloc[0] + df_battery['x_min'].iloc[0])/2,(df_battery['y_max'].iloc[0] + df_battery['y_min'].iloc[0])/2)
-                (balance_x_min,balance_y_min,balance_x_max,balance_y_max) = (df_balance['x_min'].iloc[0],df_balance['y_min'].iloc[0],df_balance['x_max'].iloc[0],df_balance['y_max'].iloc[0] )
+        if cls_ids.count("weights") == 0:
+            if cls_ids.count("balance") == 1 and cls_ids.count("battery") == 1:
+                df_battery = bboxes[np.array(cls_ids) == "battery"].squeeze()
+                df_balance = bboxes[np.array(cls_ids) == "balance"].squeeze()
+
+                battery_center_coordinate = \
+                    ((df_battery[1] + df_battery[0])/2,
+                    (df_battery[3] + df_battery[2])/2)
+                (balance_x_min,balance_y_min,balance_x_max,balance_y_max) = \
+                    (df_balance[0],df_balance[2],
+                    df_balance[1],df_balance[3] )
                 if battery_center_coordinate[1]<balance_y_max:
                     self.scoring["end_score_tidy"] = 1
 
@@ -212,30 +260,3 @@ class Evaluator(object):
 
     def evaluate_weights_order(self):
         pass
-
-    def evaluate_sleeve(self,df):
-        # get balance coordinate
-        filtered_df = df[df['obj'] == 'balance']
-        balance, balance_x_min, balance_y_min, balance_x_max, balance_y_max = self.get_obj_coordinate(filtered_df)
-
-        # get all support sleeve and pointer sleeve coordinate
-        obj_list = ['support_sleeve','pointer_sleeve']
-        filtered_df = df[df['obj'].isin(obj_list)]
-        if len(filtered_df.index) == 0:     # if no sleeve detected, ie all taken away, get marks
-            return True
-        else:
-            obj, x_min, y_min, x_max, y_max = self.get_obj_coordinate(filtered_df)
-
-        try:
-            # if all sleeves detected outside of balance, ie all sleeves has been taken down, get marks
-
-            if x_min > balance_x_max or x_max < balance_x_min:
-                return True
-
-            if y_min > balance_y_max or y_max < balance_y_min:
-                return True
-            else:
-                return False
-
-        except:
-            pass
