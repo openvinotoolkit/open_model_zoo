@@ -15,10 +15,6 @@
  limitations under the License.
 """
 
-import os
-from tabulate import tabulate
-from openvino.inference_engine import IECore
-
 # class maps
 mw_glb2acls6 = (
   "balance",
@@ -87,6 +83,6 @@ class MwGlobalExp:
         return (
             input_name,
             output_name,
-            (h, w), 
-            self.ie.load_network(network=net, device_name=device)
-            )
+            (h, w),
+            self.ie.load_network(network=net, device_name=device))
+            

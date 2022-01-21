@@ -15,7 +15,6 @@
 """
 
 import numpy as np
-
 from .preprocess import preprocess
 from .settings import MwGlobalExp
 from .deploy_util import multiclass_nms, demo_postprocess
@@ -254,3 +253,4 @@ class Detector(object):
             return vis_top, vis_front
         else:
             return [top_bboxes, top_cls_ids, top_scores], [front_bboxes, front_cls_ids, front_scores]
+            

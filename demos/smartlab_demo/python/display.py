@@ -15,7 +15,6 @@
 """
 
 import numpy as np
-import pandas as pd
 import cv2
 
 class Display(object):
@@ -27,11 +26,11 @@ class Display(object):
         self.front_scores_df = None
         self.top_scores_df = None
         # blank page to display score
-        self.score_board = np.zeros([200,1920,3],dtype=np.uint8)
+        self.score_board = np.zeros([200,1920,3], dtype=np.uint8)
 
-    def display_result(self,frame_top,frame_front,front_seg_results,top_seg_results,top_det_results,front_det_results,scoring,state,frame_counter):
+    def display_result(self,frame_top, frame_front, front_seg_results, top_seg_results, top_det_results, front_det_results,scoring, state, frame_counter):
         #renew score board so that when put cv2.puttext text will not overlap
-        self.score_board = np.zeros([200,1920,3],dtype=np.uint8)
+        self.score_board = np.zeros([200,1920,3], dtype=np.uint8)
 
         #add action name of each frame at middle top
         cv2.putText(frame_top, front_seg_results, (700, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
