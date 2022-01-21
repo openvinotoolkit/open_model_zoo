@@ -41,12 +41,12 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d,
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (flags_nthreads != 0)
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
+                config.compiledModelConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
 
-            config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
+            config.compiledModelConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
         }
         else if (device == "GPU") {
-            config.execNetworkConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+            config.compiledModelConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                 (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
                     : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)));
 
@@ -54,7 +54,7 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d,
                 && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config.execNetworkConfig.emplace(GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1");
+                config.compiledModelConfig.emplace(GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1");
             }
         }
     }
@@ -65,10 +65,10 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, uint32_
     auto config = getCommonConfig(flags_d, flags_nireq);
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
-            config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
+            config.compiledModelConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
         }
         else if (device == "GPU") {
-            config.execNetworkConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS), "1");
+            config.compiledModelConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS), "1");
         }
     }
     return config;

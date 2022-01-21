@@ -157,9 +157,9 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         std::make_shared<ngraph::Function>(res, model->get_parameters(), "classification");
 
     model = f;
-    for (auto& out : model->outputs()) {
-        outputsNames.push_back(out.get_any_name());
-    }
-    // outputsNames[0] - scores, outputsNames[1] - indices
-    std::sort(outputsNames.begin(), outputsNames.end());
+    // manually set output tensors name for created topK node
+    model->outputs()[0].set_names({"indices"});
+    outputsNames.push_back("indices");
+    model->outputs()[1].set_names({"scores"});
+    outputsNames.push_back("scores");
 }
