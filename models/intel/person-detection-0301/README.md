@@ -14,8 +14,8 @@ backbone with VFNet head for 1344x800 resolution.
 | Metric                 | Value                    |
 | ---------------------- | ------------------------ |
 | AP @ [ IoU=0.50:0.95 ] | 0.45 (internal test set) |
-| GFlops                 | tbd                    |
-| MParams                | tbd                    |
+| GFlops                 | 79318.2158               |
+| MParams                | 55.5570                  |
 | Source framework       | PyTorch\*                |
 
 Average Precision (AP) is defined as an area under
@@ -45,10 +45,6 @@ Expected color order is `BGR`.
 
 2. The `labels` is a blob with the shape `100` in the format `N`, where `N` is the number of detected
    bounding boxes. In case of person detection, it is equal to `1` for each detected box with person in it and `0` for the background.
-
-<!-- ## Training Pipeline
-
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/object_detection/model_templates/person-detection/readme.md), allowing to fine-tune the model on custom dataset. -->
 
 ## Legal Information
 

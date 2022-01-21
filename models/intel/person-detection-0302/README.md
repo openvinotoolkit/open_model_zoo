@@ -11,12 +11,12 @@ backbone with ATSS head for 1280x720 resolution.
 
 ## Specification
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.449 (internal test set)                 |
-| GFlops                          | tbd                                     |
-| MParams                         | tbd                                     |
-| Source framework                | PyTorch\*                                 |
+| Metric                 | Value                     |
+| ---------------------- | ------------------------- |
+| AP @ [ IoU=0.50:0.95 ] | 0.449 (internal test set) |
+| GFlops                 | 370.2079                  |
+| MParams                | 51.1641                   |
+| Source framework       | PyTorch\*                 |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
