@@ -76,7 +76,6 @@ class Downloader:
         self._requested_precisions = _requested_precisions
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
-        #same
         start_time = time.monotonic()
         start_size = progress.size
 
