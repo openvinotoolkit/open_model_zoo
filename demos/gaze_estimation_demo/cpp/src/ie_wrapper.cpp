@@ -18,7 +18,6 @@ IEWrapper::IEWrapper(
     ov::runtime::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
         modelPath(modelPath), modelType(modelType), deviceName(deviceName), core(core)
 {
-    slog::info << "Reading model: " << modelPath << slog::endl;
     model = core.read_model(modelPath);
     logBasicModelInfo(model);
     setExecPart();
@@ -73,22 +72,18 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const cv::Mat& ima
     cv::Mat resizedImage;
     cv::resize(image, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC);
 
-    ov::runtime::Tensor  input_tensor = infer_request.get_tensor(tensorName);
+    ov::runtime::Tensor input_tensor = infer_request.get_tensor(tensorName);
     matToTensor(resizedImage, input_tensor);
 }
 
 void IEWrapper::setInputTensor(const std::string& tensorName, const std::vector<float>& data) {
     auto tensorDims = input_tensors_dims_info[tensorName];
-    size_t dimsProduct = 1;
-    for (size_t dim : tensorDims) {
-        dimsProduct *= dim;
-    }
+    size_t dimsProduct = std::accumulate(tensorDims.begin(), tensorDims.end(), 1, std::multiplies<size_t>());
     if (dimsProduct != data.size()) {
         throw std::runtime_error("Input data does not match size of the tensor");
     }
 
-    ov::runtime::Tensor input_tensor = infer_request.get_tensor(tensorName);
-    float* buffer  = input_tensor.data<float>();
+    float* buffer = infer_request.get_tensor(tensorName).data<float>();
     for (size_t i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
     }
@@ -97,13 +92,10 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const std::vector<
 void IEWrapper::getOutputTensor(const std::string& tensorName, std::vector<float>& output) {
     output.clear();
     auto tensorDims = output_tensors_dims_info[tensorName];
-    size_t dataSize = 1;
-    for (size_t dim : tensorDims) {
-        dataSize *= dim;
-    }
+    size_t dataSize = std::accumulate(tensorDims.begin(), tensorDims.end(), 1, std::multiplies<size_t>());
     float* buffer = infer_request.get_tensor(tensorName).data<float>();
 
-    for (int i = 0; i < dataSize; ++i) {
+    for (size_t i = 0; i < dataSize; ++i) {
         output.push_back(buffer[i]);
     }
 }

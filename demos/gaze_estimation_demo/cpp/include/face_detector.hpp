@@ -8,7 +8,6 @@
 #include <vector>
 #include <map>
 
-#include <inference_engine.hpp>
 #include <opencv2/core/core.hpp>
 
 #include "face_inference_results.hpp"

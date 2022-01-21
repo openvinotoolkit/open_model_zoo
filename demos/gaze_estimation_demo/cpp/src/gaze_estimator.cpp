@@ -20,7 +20,7 @@ GazeEstimator::GazeEstimator(
 {
     const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();
 
-    for (const auto& TensorName: { TENSOR_HEAD_POSE_ANGLES, TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
+    for (const auto& TensorName: {TENSOR_HEAD_POSE_ANGLES, TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
         if (inputInfo.find(TensorName) == inputInfo.end())
             throw std::runtime_error(modelPath + ": expected to have input named \"" + TensorName + "\"");
     }
