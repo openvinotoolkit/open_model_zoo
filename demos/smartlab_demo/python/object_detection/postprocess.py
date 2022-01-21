@@ -1,9 +1,13 @@
 import numpy as np
+import torch
+import torchvision
 
 def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agnostic=False):
     # original source: https://github.com/Megvii-BaseDetection/YOLOX
     # Copyright (c) 2014-2021 Megvii Inc. All rights reserved.
     box_corner = np.zeros(prediction.shape)
+    
+    # box_corner = prediction.new(prediction.shape)
     box_corner[:, :, 0] = prediction[:, :, 0] - prediction[:, :, 2] / 2
     box_corner[:, :, 1] = prediction[:, :, 1] - prediction[:, :, 3] / 2
     box_corner[:, :, 2] = prediction[:, :, 0] + prediction[:, :, 2] / 2
@@ -17,7 +21,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
             continue
         # Get score and class with highest confidence
         class_conf = np.max(image_pred[:,5:5+num_classes], axis=1, keepdims=True)
-        class_pred = np.amax(image_pred[:,5:5+num_classes], axis=1, keepdims=True)
+        class_pred = np.argmax(image_pred[:,5:5+num_classes], axis=1)
+        class_pred = np.expand_dims(class_pred, axis=1)
 
         conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= conf_thre).squeeze()
         # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
@@ -95,4 +100,3 @@ def multiclass_nms(boxes, scores, nms_thr, score_thr):
     if len(final_dets) == 0:
         return None
     return np.concatenate(final_dets, 0)
-    
