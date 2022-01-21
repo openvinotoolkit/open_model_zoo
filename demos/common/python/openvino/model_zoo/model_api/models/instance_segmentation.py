@@ -26,8 +26,8 @@ from .utils import nms
 class MaskRCNNModel(ImageModel):
     __model__ = 'MaskRCNN'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number((1, 2), (3, 4, 5, 8))
         self.is_segmentoly = len(self.inputs) == 2
         self.output_blob_name = self._get_outputs()
@@ -36,8 +36,8 @@ class MaskRCNNModel(ImageModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'prob_threshold': NumericalValue(
-                default_value=None,
+            'confidence_threshold': NumericalValue(
+                default_value=0.5,
                 description='Probability threshold for detections filtering'
             ),
         })
@@ -148,8 +148,8 @@ class MaskRCNNModel(ImageModel):
 class YolactModel(ImageModel):
     __model__ = 'Yolact'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 4)
         self.output_blob_name = self._get_outputs()
 
@@ -157,8 +157,8 @@ class YolactModel(ImageModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'prob_threshold': NumericalValue(
-                default_value=None,
+            'confidence_threshold': NumericalValue(
+                default_value=0.5,
                 description='Probability threshold for detections filtering'
             ),
         })
