@@ -28,11 +28,9 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
             continue
         if class_agnostic:
             nms_out_index = nms(
-                    detections[:, :4],
-                    detections[:, 4] * detections[:, 5],
-                    nms_thre,
-            )
-      
+                detections[:, :4],
+                detections[:, 4] * detections[:, 5],
+                nms_thre)
         else:
             nms_out_index = multiclass_nms(
                 detections[:, :4],
