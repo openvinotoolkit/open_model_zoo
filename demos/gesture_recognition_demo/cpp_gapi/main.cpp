@@ -101,15 +101,19 @@ int main(int argc, char *argv[]) {
             FLAGS_m_d,                         // path to model
             fileNameNoExt(FLAGS_m_d) + ".bin", // path to weights
             FLAGS_d_d                          // device to use
-        }.cfgOutputLayers({"boxes"}); // This clarification here because
-                                      // of GAPI take the last layer from .xml
-                                      // and last layer sould be the outpul layer
+        }.cfgOutputLayers({"boxes"}); // This clarification here because of
+                                      // GAPI take the first layer name from OutputsInfo
+                                      // for one output G_API_NET API
+        slog::info << "The Person Detection ASL model " << FLAGS_m_d << " is loaded to " << FLAGS_d_d << " device." << slog::endl;
 
         auto action_recognition = cv::gapi::ie::Params<nets::ActionRecognition> {
             FLAGS_m_a,                         // path to model
             fileNameNoExt(FLAGS_m_a) + ".bin", // path to weights
             FLAGS_d_a                          // device to use
-        }.cfgOutputLayers({"output"}); // The same
+        }.cfgOutputLayers({"output"}); // This clarification here because of
+                                       // GAPI take the first layer name from OutputsInfo
+                                       // for one output G_API_NET API
+        slog::info << "The Action Recognition model " << FLAGS_m_a << " is loaded to " << FLAGS_d_a << " device." << slog::endl;
 
         /** Custom kernels **/
         auto kernels = custom::kernels();

@@ -6,7 +6,8 @@
 
 Face::Face(size_t id, cv::Rect& location):
     _location(location), _intensity_mean(0.f), _id(id), _age(-1),
-    _maleScore(0), _femaleScore(0), _yaw(0.f), _pitch(0.f), _roll(0.f) {}
+    _maleScore(0), _femaleScore(0), _yaw(0.f), _pitch(0.f), _roll(0.f),
+    _realFaceConfidence(0.f) {}
 
 void Face::updateAge(float value) {
     _age = (_age == -1) ? value : 0.95f * _age + 0.05f * value;
