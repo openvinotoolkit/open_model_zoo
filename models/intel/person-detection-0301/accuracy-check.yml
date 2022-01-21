@@ -6,7 +6,7 @@ models:
         adapter:
 
           type: class_agnostic_detection
-          scale: [0.0067440476, 0.00125]
+          scale: [0.0007440476, 0.00125]
 
     datasets:
       - name: crossroad_extra_untagged_person_hb
