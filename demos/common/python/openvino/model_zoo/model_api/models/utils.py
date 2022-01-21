@@ -211,3 +211,10 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=Non
 def softmax(logits, axis=None):
     exp = np.exp(logits)
     return exp / np.sum(exp, axis=axis)
+
+def get_layout_from_shape(shape):
+    if len(shape) != 4:
+        raise RuntimeError('Get_layout supports only 4D input shape')
+
+    layout = 'NCHW' if shape[1] == 3 else 'NHWC'
+    return layout

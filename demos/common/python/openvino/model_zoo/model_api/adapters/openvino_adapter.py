@@ -41,7 +41,7 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     """
 
-    def __init__(self, core, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
+    def __init__(self, core, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=0):
         self.core = core
         self.model_path = model_path
         self.device = device
@@ -62,7 +62,8 @@ class OpenvinoAdapter(ModelAdapter):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
 
         log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
-        self.max_num_requests = self.get_optimal_number_of_requests()
+        if self.max_num_requests == 0:
+            self.max_num_requests = self.get_optimal_number_of_requests()
         self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
         self.log_runtime_settings()
 

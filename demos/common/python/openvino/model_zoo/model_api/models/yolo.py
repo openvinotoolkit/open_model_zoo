@@ -34,11 +34,13 @@ ANCHORS = {
                128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
 }
 
-def permute_to_N_HWA_K(tensor, K):
+def permute_to_N_HWA_K(tensor, K, layout='NCHW'):
     """
     Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
     """
     assert tensor.ndim == 4, tensor.shape
+    if layout == 'NHWC':
+        tensor = tensor.transpose(0, 3, 1, 2)
     N, _, H, W = tensor.shape
     tensor = tensor.reshape(N, -1, K, H, W)
     tensor = tensor.transpose(0, 3, 4, 1, 2)
@@ -81,13 +83,6 @@ class YOLO(DetectionModel):
 
         self._check_io_number(1, -1)
 
-        if self.inputs[self.image_blob_name].shape[1] == 3:
-            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
-            self.image_layout = 'NCHW'
-        else:
-            self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
-            self.image_layout = 'NHWС'
-
         self.yolo_layer_params = self._get_output_info()
 
     def _get_output_info(self):
@@ -100,7 +95,6 @@ class YOLO(DetectionModel):
                 cy = self.h // 32
 
                 bboxes = shape[1] // (cx*cy)
-                print(cx, cy, bboxes, self.w)
                 if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
                     raise WrapperError(self.__model__, 'The cannot reshape 2D output tensor into 4D')
                 shape = (shape[0], bboxes, cy, cx)
@@ -123,29 +117,28 @@ class YOLO(DetectionModel):
         detections = self._resize_detections(detections, meta)
         return detections
 
-    @staticmethod
-    def _parse_yolo_region(cls, predictions, input_size, params, confidence_threshold):
+    def _parse_yolo_region(self, predictions, input_size, params):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
         size_normalizer = input_size if params.use_input_size else params.sides
-        predictions = permute_to_N_HWA_K(predictions, params.bbox_size)
+        predictions = permute_to_N_HWA_K(predictions, params.bbox_size, self.input_layout)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
         for prediction in predictions:
             # Getting probabilities from raw outputs
-            class_probabilities = cls._get_probabilities(prediction, params.classes)
+            class_probabilities = self._get_probabilities(prediction, params.classes)
 
             # filter out the proposals with low confidence score
-            keep_idxs = np.nonzero(class_probabilities > confidence_threshold)[0]
+            keep_idxs = np.nonzero(class_probabilities > self.confidence_threshold)[0]
             class_probabilities = class_probabilities[keep_idxs]
             obj_indx = keep_idxs // params.classes
             class_idx = keep_idxs % params.classes
 
             for ind, obj_ind in enumerate(obj_indx):
-                row, col, n = cls._get_location(obj_ind, params.sides[0], params.num)
+                row, col, n = self._get_location(obj_ind, params.sides[0], params.num)
 
                 # Process raw value to get absolute coordinates of boxes
-                raw_box = cls._get_raw_box(prediction, obj_ind)
-                predicted_box = cls._get_absolute_det_box(raw_box, row, col, params.anchors[2 * n:2 * n + 2],
+                raw_box = self._get_raw_box(prediction, obj_ind)
+                predicted_box = self._get_absolute_det_box(raw_box, row, col, params.anchors[2 * n:2 * n + 2],
                                                            params.sides, size_normalizer)
 
                 # Define class_label and cofidence
@@ -222,7 +215,7 @@ class YOLO(DetectionModel):
             out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
             out_blob.shape = layer_params[0]
-            detections += self._parse_yolo_region(self, out_blob, meta['resized_shape'], layer_params[1], self.confidence_threshold)
+            detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1])
 
         detections = self._filter(detections, self.iou_threshold)
         return detections
@@ -259,10 +252,14 @@ class YoloV4(YOLO):
         num = 3
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
-            classes = shape[1] // num - 5
-            if shape[1] % num != 0:
+            if self.input_layout == 'NCHW':
+                channels, h, w = shape[1:]
+            else:
+                h, w, channels = shape[1:]
+            classes = channels // num - 5
+            if channels % num != 0:
                 raise WrapperError(self.__model__, "The output blob {} has wrong 2nd dimension".format(name))
-            yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
+            yolo_params = self.Params(classes, num, (h, w), self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
         return output_info
 
@@ -311,10 +308,14 @@ class YOLOF(YOLO):
 
         output_info = {}
         num = 6
-        for i, (name, layer) in enumerate(self.outputs.items()):
+        for name, layer in self.outputs.items():
             shape = layer.shape
-            classes = shape[1] // num - 4
-            yolo_params = self.Params(classes, num, shape[2:4], anchors)
+            if self.input_layout == 'NCHW':
+                channels, h, w = shape[1:]
+            else:
+                h, w, channels = shape[1:]
+            classes = channels // num - 4
+            yolo_params = self.Params(classes, num, (h, w), anchors)
             output_info[name] = (shape, yolo_params)
         return output_info
 

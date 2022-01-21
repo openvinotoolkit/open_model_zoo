@@ -16,7 +16,7 @@
 
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
-from .utils import RESIZE_TYPES, pad_image, InputTransform
+from .utils import RESIZE_TYPES, pad_image, InputTransform, get_layout_from_shape
 
 
 class ImageModel(Model):
@@ -46,9 +46,11 @@ class ImageModel(Model):
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
-
-        self.image_layout = 'NCHW'
+            self.input_layout = get_layout_from_shape(self.inputs[self.image_blob_name].shape)
+            if self.input_layout == 'NCHW':
+                self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
+            else:
+                self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
         self.resize = RESIZE_TYPES[self.resize_type]
         self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
 
@@ -119,7 +121,7 @@ class ImageModel(Model):
         return dict_inputs, meta
 
     def _change_layout(self, image):
-        if self.image_layout == 'NCHW':
+        if self.input_layout == 'NCHW':
             image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             image = image.reshape((1, self.c, self.h, self.w))
         else:
