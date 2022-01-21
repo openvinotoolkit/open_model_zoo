@@ -43,6 +43,8 @@ from ..representation import (
     BackgroundMattingAnnotation,
     BackgroundMattingPrediction,
     NiftiRegressionAnnotation,
+    HandLandmarksAnnotation,
+    HandLandmarksPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -530,8 +532,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation, HandLandmarksAnnotation, FacialLandmarksAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction, HandLandmarksPrediction, FacialLandmarksPrediction)
 
     @classmethod
     def parameters(cls):
