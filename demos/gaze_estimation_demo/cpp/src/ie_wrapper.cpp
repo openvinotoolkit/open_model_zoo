@@ -18,6 +18,7 @@ IEWrapper::IEWrapper(
     ov::runtime::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
         modelPath(modelPath), modelType(modelType), deviceName(deviceName), core(core)
 {
+    slog::info << "Reading model: " << modelPath << slog::endl;
     model = core.read_model(modelPath);
     logBasicModelInfo(model);
     setExecPart();
