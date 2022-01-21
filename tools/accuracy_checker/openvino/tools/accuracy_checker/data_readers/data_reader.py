@@ -375,6 +375,7 @@ class ReaderCombiner(BaseReader):
 
         self.reading_scheme = reading_scheme
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():
