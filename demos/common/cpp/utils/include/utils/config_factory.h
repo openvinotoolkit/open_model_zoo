@@ -18,6 +18,8 @@
 #include <map>
 #include <set>
 #include <string>
+
+#include <openvino/openvino.hpp>
 #include "gflags/gflags.h"
 
 struct CnnConfig {
@@ -25,7 +27,7 @@ struct CnnConfig {
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
-    std::map<std::string, std::string> execNetworkConfig;
+    ov::AnyMap compiledModelConfig;
 
     std::set<std::string> getDevices();
 
