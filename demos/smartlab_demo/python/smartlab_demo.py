@@ -15,6 +15,7 @@
 """
 
 import cv2
+import time
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector
@@ -85,6 +86,11 @@ def main():
     cap_top = cv2.VideoCapture(args.topview)
     cap_front = cv2.VideoCapture(args.frontview)
 
+    old_time = time.time()
+    fps = 0.0
+    interval_second = 1
+    interval_start_frame = 0
+    total_frame_processed_in_interval = 0.0
     while cap_top.isOpened() and cap_front.isOpened():
         ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
         ret_front, frame_front = cap_front.read()
@@ -126,6 +132,14 @@ def main():
                     frame_top=frame_top,
                     frame_front=frame_front)
 
+            current_time=time.time()
+            current_frame = frame_counter
+            if (current_time - old_time > interval_second):
+                total_frame_processed_in_interval = current_frame - interval_start_frame
+                fps = total_frame_processed_in_interval / (current_time - old_time)
+                interval_start_frame = current_frame
+                old_time = current_time
+
             display.display_result(
                     frame_top=frame_top,
                     frame_front=frame_front,
@@ -135,7 +149,8 @@ def main():
                     front_det_results=front_det_results,
                     scoring=scoring,
                     state=state,
-                    frame_counter=frame_counter)
+                    frame_counter=frame_counter,
+                    fps=fps)
 
             if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
                 break

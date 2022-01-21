@@ -28,7 +28,7 @@ class Display(object):
         # blank page to display score
         self.score_board = np.zeros([200,1920,3], dtype=np.uint8)
 
-    def display_result(self,frame_top, frame_front, front_seg_results, top_seg_results, top_det_results, front_det_results,scoring, state, frame_counter):
+    def display_result(self,frame_top, frame_front, front_seg_results, top_seg_results, top_det_results, front_det_results,scoring, state, frame_counter, fps):
         #renew score board so that when put cv2.puttext text will not overlap
         self.score_board = np.zeros([200,1920,3], dtype=np.uint8)
 
@@ -39,6 +39,11 @@ class Display(object):
         #display frame_number at top left corner
         cv2.putText(frame_top, "frame_"+str(frame_counter).zfill(6), (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
         cv2.putText(frame_front, "frame"+str(frame_counter).zfill(6), (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
+
+        #display FPS at top left corner
+        cv2.putText(frame_top, "FPS: "+str(round(fps, 2)), (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
+        cv2.putText(frame_front, "FPS: "+str(round(fps,2)), (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
+
 
         # show current state for troubleshooting purpose
         cv2.putText(frame_top, state, (1500, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0,0,255), fontScale=1.5, thickness=3)
