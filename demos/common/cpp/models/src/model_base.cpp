@@ -24,7 +24,7 @@ std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::runtime::Core& core) {
     /** Read network model **/
     std::shared_ptr<ov::Model>  model = core.read_model(modelFileName);
     /** Set batch size to 1 **/
-    setBatchOne(model);
+    //setBatchOne(model);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     prepareInputsOutputs(model);
