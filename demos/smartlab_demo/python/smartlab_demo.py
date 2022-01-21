@@ -92,7 +92,7 @@ def main():
         if ret_top and ret_front:
             frame_counter += 1
 
-            
+
             ''' The object detection module need to generate detection results(for the current frame) '''
             top_det_results, front_det_results = detector.inference(
                     img_top=frame_top, img_front=frame_front)

@@ -54,6 +54,8 @@ class Segmentor(object):
         """
 
         ### preprocess ###
+        buffer_front = buffer_front[120:, :, :] # remove date characters
+        buffer_top = buffer_top[120:, :, :] # remove date characters
         buffer_front = cv2.resize(buffer_front, (224, 224), interpolation=cv2.INTER_LINEAR)
         buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
         buffer_front = buffer_front / 255
