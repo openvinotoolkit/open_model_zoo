@@ -36,6 +36,7 @@ class JSONReader(BaseReader):
     def configure(self):
         self.key = self.get_value_from_config('key')
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
         if not self.data_source:
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
