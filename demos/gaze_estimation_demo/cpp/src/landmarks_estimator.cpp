@@ -100,12 +100,15 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
 
 std::vector<cv::Mat> LandmarksEstimator::split(std::vector<float>& data, const ov::Shape& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
-    float* output = new float[data.size()];
-    for (size_t i = 0; i < data.size(); i++) {
-        output[i] = data[i];
-    }
+    size_t itData = 0;
     for (size_t i = 0; i < flattenData.size(); i++) {
-        flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, output + i * shape[2] * shape[3]);
+        flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1);
+        for (size_t row = 0; row < shape[2]; row++) {
+            for (size_t col = 0; col < shape[3]; col++) {
+                flattenData[i].at<float>(row, col) = data[itData];
+                itData++;
+            }
+        }
     }
     return flattenData;
 }

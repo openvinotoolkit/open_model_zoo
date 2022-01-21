@@ -142,7 +142,8 @@ void IEWrapper::reshape(const std::map<std::string, ov::Shape>& newTensorsDimsIn
 
     std::map<std::string, ov::PartialShape> partial_shapes;
     for (auto it : newTensorsDimsInfo) {
-        partial_shapes[it.first] = it.second;
+        ov::PartialShape newShape(it.second);
+        partial_shapes[it.first] = newShape;
     }
     model->reshape(partial_shapes);
     setExecPart();
