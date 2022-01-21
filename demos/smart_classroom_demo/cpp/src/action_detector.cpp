@@ -64,16 +64,16 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     new_network_ = false;
 
-    ov::preprocess::PrePostProcessor proc(network);
-    proc.input().tensor().
+    ov::preprocess::PrePostProcessor ppp(network);
+    ppp.input().tensor().
       set_element_type(ov::element::u8).
       set_layout({"NCHW"});
 
     for (auto&& item : outputs) {
-        proc.output(item.get_any_name()).tensor().set_element_type(ov::element::f32);
+        ppp.output(item.get_any_name()).tensor().set_element_type(ov::element::f32);
         new_network_ = item.get_any_name() == config_.new_loc_blob_name;
     }
-    network = proc.build();
+    network = ppp.build();
     model_ = config_.ie.compile_model(network, config_.deviceName);
     logExecNetworkInfo(model_, config_.path_to_model, config_.deviceName, config_.model_type);
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;

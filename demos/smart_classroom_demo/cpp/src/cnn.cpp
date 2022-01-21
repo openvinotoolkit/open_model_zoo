@@ -24,27 +24,24 @@ void CnnDLSDKBase::Load() {
     auto cnnNetwork = config_.ie.read_model(config_.path_to_model);
 
     const int currentBatchSize = cnnNetwork->input().get_shape()[0];
-    if (currentBatchSize != config_.max_batch_size) {
-      cnnNetwork->get_parameters()[0]->set_layout("NCHW");
-      ov::set_batch(cnnNetwork, config_.max_batch_size);
-    }
 
     ov::OutputVector in = cnnNetwork->inputs();
     if (in.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
 
-    ov::preprocess::PrePostProcessor proc(cnnNetwork);
-    proc.input().tensor().
+    ov::preprocess::PrePostProcessor ppp(cnnNetwork);
+    ppp.input().tensor().
       set_element_type(ov::element::f32).
       set_layout({"NCHW"});
     input_blob_name_ = cnnNetwork->input().get_any_name();
     ov::OutputVector outputs = cnnNetwork->outputs();
     for (auto&& item : outputs) {
-      proc.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
+      ppp.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
       output_blobs_names_.push_back(item.get_any_name());
     }
-    cnnNetwork = proc.build();
+    cnnNetwork = ppp.build();
+    ov::set_batch(cnnNetwork, config_.max_batch_size);
 
     try {
         compiled_model_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
@@ -70,12 +67,12 @@ void CnnDLSDKBase::InferBatch(
         }
 
         infer_request_.infer();
-        std::map<std::string, ov::runtime::Tensor> blobs;
+        std::map<std::string, ov::runtime::Tensor> tensors;
 
         for (const auto& name : output_blobs_names_)  {
-            blobs[name] = infer_request_.get_tensor(name);
+            tensors[name] = infer_request_.get_tensor(name);
         }
-        fetch_results(blobs, current_batch_size);
+        fetch_results(tensors, current_batch_size);
     }
 }
 
@@ -107,23 +104,20 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
     vectors->clear();
     auto results_fetcher = [vectors, outp_shape](const std::map<std::string, ov::runtime::Tensor>& outputs, size_t batch_size) {
         for (auto&& item : outputs) {
-            ov::runtime::Tensor blob = item.second;
-            if (!blob) {
-                throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
+            ov::runtime::Tensor tensor = item.second;
+            ov::Shape ie_output_dims = tensor.get_shape();
+            std::vector<int> tensor_sizes(ie_output_dims.size(), 0);
+            for (size_t i = 0; i < tensor_sizes.size(); ++i) {
+                tensor_sizes[i] = ie_output_dims[i];
             }
-            ov::Shape ie_output_dims = blob.get_shape();
-            std::vector<int> blob_sizes(ie_output_dims.size(), 0);
-            for (size_t i = 0; i < blob_sizes.size(); ++i) {
-                blob_sizes[i] = ie_output_dims[i];
-            }
-            cv::Mat out_blob(blob_sizes, CV_32F, blob.data<float>());
+            cv::Mat out_tensor(tensor_sizes, CV_32F, tensor.data<float>());
             for (size_t b = 0; b < batch_size; b++) {
-                cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,
-                                     reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));
+                cv::Mat tensor_wrapper(out_tensor.size[1], 1, CV_32F,
+                                     reinterpret_cast<void*>((out_tensor.ptr<float>(0) + b * out_tensor.size[1])));
                 vectors->emplace_back();
                 if (outp_shape != cv::Size())
-                    blob_wrapper = blob_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
-                blob_wrapper.copyTo(vectors->back());
+                    tensor_wrapper = tensor_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
+                tensor_wrapper.copyTo(vectors->back());
             }
         }
     };

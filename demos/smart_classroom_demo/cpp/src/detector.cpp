@@ -80,8 +80,8 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
         throw std::runtime_error("Face Detection network should have only one input");
     }
 
-    ov::preprocess::PrePostProcessor proc(cnnNetwork);
-    ov::preprocess::InputInfo& input_info = proc.input();
+    ov::preprocess::PrePostProcessor ppp(cnnNetwork);
+    ov::preprocess::InputInfo& input_info = ppp.input();
     input_info.tensor().set_element_type(ov::element::u8).set_layout({ "NCHW" });
 
     ov::Output<ov::Node> _input = cnnNetwork->input();
@@ -110,11 +110,11 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
             std::to_string(outputDims.size()));
     }
 
-    ov::preprocess::OutputInfo& output_info = proc.output();
+    ov::preprocess::OutputInfo& output_info = ppp.output();
     output_info.tensor().set_element_type(ov::element::f32);
 
     input_name_ = cnnNetwork->input().get_any_name();
-    cnnNetwork = proc.build();
+    cnnNetwork = ppp.build();
     model_ = config_.ie.compile_model(cnnNetwork, config_.deviceName);
 
     logExecNetworkInfo(model_, config_.path_to_model, config_.deviceName, topoName);
