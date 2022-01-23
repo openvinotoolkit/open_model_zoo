@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class HeadPoseEstimator: public BaseEstimator {
 public:
-    HeadPoseEstimator(ov::Core& ie,
+    HeadPoseEstimator(ov::Core& core,
                       const std::string& modelPath,
                       const std::string& deviceName);
     void estimate(const cv::Mat& image,

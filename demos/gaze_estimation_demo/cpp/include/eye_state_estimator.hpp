@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class EyeStateEstimator: public BaseEstimator {
 public:
-    EyeStateEstimator(ov::Core& ie,
+    EyeStateEstimator(ov::Core& core,
                       const std::string& modelPath,
                       const std::string& deviceName);
     void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
