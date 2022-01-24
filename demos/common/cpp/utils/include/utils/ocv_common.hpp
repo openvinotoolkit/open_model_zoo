@@ -16,7 +16,7 @@
 
 #include "openvino/openvino.hpp"
 
-
+namespace {
  /**
  * @brief Get cv::Mat value in the correct format.
  */
@@ -183,6 +183,17 @@ static UNUSED ov::runtime::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     return ov::runtime::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, mat.data);
 }
 
+inline void resize2tensor(const cv::Mat& mat, ov::Tensor& tensor) {
+    static const ov::Layout layout{"NHWC"};
+    const ov::Shape& shape = tensor.get_shape();
+    cv::Size size{int(shape[ov::layout::height_idx(layout)]), int(shape[ov::layout::width_idx(layout)])};
+    assert(tensor.get_element_type() == ov::element::u8);
+    assert(shape.size() == 4);
+    assert(shape[ov::layout::batch_idx(layout)] == 1);
+    assert(shape[ov::layout::channels_idx(layout)] == 3);
+    cv::resize(mat, cv::Mat{size, CV_8UC3, tensor.data()}, size);
+}
+
 /**
  * @brief Puts text message on the frame, highlights the text with a white border to make it distinguishable from
  *        the background.
@@ -305,3 +316,4 @@ private:
     cv::Scalar means;
     cv::Scalar stdScales;
 };
+}  // namespace

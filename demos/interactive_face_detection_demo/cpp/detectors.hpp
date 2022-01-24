@@ -18,40 +18,22 @@
 #include <iterator>
 #include <map>
 
-#include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 
 #include <opencv2/opencv.hpp>
 
-// -------------------------Generic routines for detection networks-------------------------------------------------
-
 struct BaseDetection {
-    InferenceEngine::ExecutableNetwork net;
-    InferenceEngine::InferRequest::Ptr request;
-    std::string topoName;
+    ov::InferRequest request;
     std::string pathToModel;
-    std::string deviceForInference;
-    const size_t maxBatch;
-    bool isBatchDynamic;
-    const bool isAsync;
-    mutable bool enablingChecked;
-    mutable bool _enabled;
+    ov::Shape inShape;
     const bool doRawOutputMessages;
 
-    BaseDetection(const std::string &topoName,
-                  const std::string &pathToModel,
-                  const std::string &deviceForInference,
-                  int maxBatch, bool isBatchDynamic, bool isAsync,
-                  bool doRawOutputMessages);
-
-    virtual ~BaseDetection();
-
-    InferenceEngine::ExecutableNetwork* operator ->();
-    virtual InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) = 0;
-    virtual void submitRequest();
-    virtual void wait();
+    BaseDetection(const std::string &pathToModel, bool doRawOutputMessages);
+    virtual ~BaseDetection() = default;
+    virtual std::shared_ptr<ov::Model> read(const ov::Core& core) = 0;
     bool enabled() const;
 };
 
@@ -62,35 +44,26 @@ struct FaceDetection : BaseDetection {
         cv::Rect location;
     };
 
-    std::string input;
     std::string output;
     std::string labels_output;
     double detectionThreshold;
-    int maxProposalCount;
     int objectSize;
-    int enquedFrames;
     float width;
     float height;
-    size_t network_input_width;
-    size_t network_input_height;
+    size_t model_input_width;
+    size_t model_input_height;
     float bb_enlarge_coefficient;
     float bb_dx_coefficient;
     float bb_dy_coefficient;
-    bool resultsFetched;
-    std::vector<Result> results;
 
     FaceDetection(const std::string &pathToModel,
-                  const std::string &deviceForInference,
-                  int maxBatch, bool isBatchDynamic, bool isAsync,
                   double detectionThreshold, bool doRawOutputMessages,
                   float bb_enlarge_coefficient, float bb_dx_coefficient,
                   float bb_dy_coefficient);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
-
-    void enqueue(const cv::Mat &frame);
-    void fetchResults();
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest(const cv::Mat &frame);
+    std::vector<Result> fetchResults();
 };
 
 struct AgeGenderDetection : BaseDetection {
@@ -99,21 +72,18 @@ struct AgeGenderDetection : BaseDetection {
         float maleProb;
     };
 
-    std::string input;
     std::string outputAge;
     std::string outputGender;
     size_t enquedFaces;
 
     AgeGenderDetection(const std::string &pathToModel,
-                       const std::string &deviceForInference,
-                       int maxBatch, bool isBatchDynamic, bool isAsync,
                        bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    Result operator[] (int idx) const;
+    Result operator[] (int idx);
 };
 
 struct HeadPoseDetection : BaseDetection {
@@ -123,7 +93,6 @@ struct HeadPoseDetection : BaseDetection {
         float angle_y;
     };
 
-    std::string input;
     std::string outputAngleR;
     std::string outputAngleP;
     std::string outputAngleY;
@@ -131,70 +100,56 @@ struct HeadPoseDetection : BaseDetection {
     cv::Mat cameraMatrix;
 
     HeadPoseDetection(const std::string &pathToModel,
-                      const std::string &deviceForInference,
-                      int maxBatch, bool isBatchDynamic, bool isAsync,
                       bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    Results operator[] (int idx) const;
+    Results operator[] (int idx);
 };
 
 struct EmotionsDetection : BaseDetection {
-    std::string input;
-    std::string outputEmotions;
     size_t enquedFaces;
 
     EmotionsDetection(const std::string &pathToModel,
-                      const std::string &deviceForInference,
-                      int maxBatch, bool isBatchDynamic, bool isAsync,
                       bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    std::map<std::string, float> operator[] (int idx) const;
+    std::map<std::string, float> operator[] (int idx);
 
     const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
 };
 
 struct FacialLandmarksDetection : BaseDetection {
-    std::string input;
-    std::string outputFacialLandmarksBlobName;
     size_t enquedFaces;
     std::vector<std::vector<float>> landmarks_results;
     std::vector<cv::Rect> faces_bounding_boxes;
 
     FacialLandmarksDetection(const std::string &pathToModel,
-                             const std::string &deviceForInference,
-                             int maxBatch, bool isBatchDynamic, bool isAsync,
                              bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    std::vector<float> operator[] (int idx) const;
+    std::vector<float> operator[] (int idx);
 };
 
 struct AntispoofingClassifier : BaseDetection {
-    std::string input;
-    std::string prob_output;
     size_t enquedFaces;
 
     AntispoofingClassifier(const std::string &pathToModel,
-        const std::string &deviceForInference,
-        int maxBatch, bool isBatchDynamic, bool isAsync,
         bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
-    void submitRequest() override;
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override;
+    void submitRequest();
 
     void enqueue(const cv::Mat& frame);
-    float operator[] (int idx) const;
+    float operator[] (int idx);
 };
 
 struct Load {
@@ -202,7 +157,7 @@ struct Load {
 
     explicit Load(BaseDetection& detector);
 
-    void into(InferenceEngine::Core & ie, const std::string & deviceName, bool enable_dynamic_batch = false) const;
+    void into(ov::Core& core, const std::string & deviceName) const;
 };
 
 class CallStat {
