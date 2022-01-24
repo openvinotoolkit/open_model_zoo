@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "utils/shared_blob_allocator.h"
+#include "utils/shared_tensor_allocator.hpp"
 
 SharedBlobAllocator::SharedBlobAllocator(const cv::Mat & img) :
     img(img) {
