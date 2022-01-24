@@ -111,8 +111,12 @@ For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09
     </tbody>
 </table>
 
+Notice: In the accuracy report, feature extraction network is i3d-rgb, you can get this model from the [link](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/i3d-rgb-tf).
+
 ## Inputs
-The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as i3d-rgb and resnet-50, and feature outputs of the previous frame.
+The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as [i3d-rgb](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/i3d-rgb-tf) and [resnet-50](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/resnet-50-tf), and feature outputs of the previous frame.
+
+You can check the i3d-rgb and smartlab-sequence-modelling-0001 usage in [smartlab demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/smartlab_demo/python/README.md).
 
 1. Input feature, name: `input`, shape: `1, 2048, 24`, format: `B, W, H`, where:
 
