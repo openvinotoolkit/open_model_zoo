@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
@@ -110,17 +110,18 @@ def main():
     # Plugin initialization for specified device and load extensions library if specified.
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
     if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
+        core.add_extension(args.cpu_extension, 'CPU')
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
-    net = ie.read_network(args.model, args.model.with_suffix('.bin'))
-    image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
+    model = core.read_model(args.model, args.model.with_suffix('.bin'))
+    image_input, image_info_input, (n, c, h, w), model_type, output_names, postprocessor = check_model(model)
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
-    exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
+    compiled_model = core.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.no_track:
@@ -171,11 +172,13 @@ def main():
         input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
 
-        # Run the net.
+        # Run the model.
         feed_dict = {image_input: input_image}
         if image_info_input:
             feed_dict[image_info_input] = input_image_info
-        outputs = exec_net.infer(feed_dict)
+
+        infer_request.infer(feed_dict)
+        outputs = {name: infer_request.get_tensor(name).data for name in output_names}
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
@@ -184,7 +187,7 @@ def main():
         if len(boxes) and args.raw_output_message:
             log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
             log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
-            for box, cls, score, mask in zip(boxes, classes, scores, masks):
+            for box, cls, score in zip(boxes, classes, scores):
                 log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
         # Get instance track IDs.
@@ -217,7 +220,6 @@ def main():
     metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
-    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

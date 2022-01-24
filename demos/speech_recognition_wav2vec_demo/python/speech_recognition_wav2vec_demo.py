@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2021 Intel Corporation
+ Copyright (C) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import sys
 import numpy as np
 import wave
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version, PartialShape
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -51,24 +51,25 @@ class Wav2Vec:
     words_delimiter = '|'
     pad_token = '<pad>'
 
-    def __init__(self, ie, model_path, input_shape, device, vocab_file):
-        self.ie = ie
+    def __init__(self, core, model_path, input_shape, device, vocab_file):
         log.info('Reading model {}'.format(model_path))
-        network = self.ie.read_network(model_path)
-        if len(network.input_info) != 1:
+        model = core.read_model(model_path)
+        if len(model.inputs) != 1:
             raise RuntimeError('Wav2Vec must have one input')
-        model_input_shape = next(iter(network.input_info.values())).input_data.shape
+        self.input_tensor_name = model.inputs[0].get_any_name()
+        model_input_shape = model.inputs[0].shape
         if len(model_input_shape) != 2:
             raise RuntimeError('Wav2Vec input must be 2-dimensional')
-        if len(network.outputs) != 1:
+        if len(model.outputs) != 1:
             raise RuntimeError('Wav2Vec must have one output')
-        model_output_shape = next(iter(network.outputs.values())).shape
+        model_output_shape = model.outputs[0].shape
         if len(model_output_shape) != 3:
             raise RuntimeError('Wav2Vec output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet):
             raise RuntimeError(f'Wav2Vec output third dimension size must be {len(self.alphabet)}')
-        network.reshape({next(iter(network.input_info)): input_shape})
-        self.exec_net = self.ie.load_network(network, device)
+        model.reshape({self.input_tensor_name: PartialShape(input_shape)})
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
         self._init_vocab(vocab_file)
 
@@ -91,7 +92,8 @@ class Wav2Vec:
         return (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
 
     def infer(self, audio):
-        return next(iter(self.exec_net.infer({next(iter(self.exec_net.input_info)): audio}).values()))
+        input_data = {self.input_tensor_name: audio}
+        return next(iter(self.infer_request.infer(input_data).values()))
 
     def decode(self, logits):
         token_ids = np.squeeze(np.argmax(logits, -1))
@@ -119,16 +121,16 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
-    net = Wav2Vec(ie, args.model, audio.shape, args.device, args.vocab)
-    normalized_audio = net.preprocess(audio)
-    character_probs = net.infer(normalized_audio)
-    transcription = net.decode(character_probs)
+    model = Wav2Vec(core, args.model, audio.shape, args.device, args.vocab)
+    normalized_audio = model.preprocess(audio)
+    character_probs = model.infer(normalized_audio)
+    transcription = model.decode(character_probs)
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
     print(transcription)
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

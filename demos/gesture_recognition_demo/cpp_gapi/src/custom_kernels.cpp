@@ -112,6 +112,12 @@ struct Params {
         prepared_mat = params.prepared_mat;
         last_id.fetch_add(params.last_id);
     }
+    Params& operator=(const Params& params) {
+        current_frame = params.current_frame;
+        prepared_mat = params.prepared_mat;
+        last_id.fetch_add(params.last_id);
+        return *this;
+    }
 };
 } // namespace BatchState
 

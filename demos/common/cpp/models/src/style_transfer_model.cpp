@@ -40,7 +40,12 @@ void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNe
     SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+    auto inputsDataMap = cnnNetwork.getInputsInfo();
+    if (inputsDataMap.empty()) {
+        throw std::runtime_error("Network input data node information is empty");
+    }
+    InputInfo& inputInfo = *inputsDataMap.begin()->second;
+
     inputInfo.setPrecision(Precision::FP32);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------

@@ -571,7 +571,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/master/misc/pytorch_toolkit/action_recognition#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/action_recognition/model_templates/custom-action-recognition/README.md#3-prepare-data).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).
@@ -707,12 +707,17 @@ The main difference between this converter and `super_resolution` in data organi
 * `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
   * `annotation_file` - path to image pairs file in txt format.
 * `conll_ner` - converts CONLL 2003 dataset for Named Entity Recognition to `BERTNamedEntityRecognitionAnnotation`.
-  * `annotation_file` - annotation file in txt forma
+  * `annotation_file` - annotation file in txt format.
   * `vocab_file` - vocab file for word piece tokenization.
   * `lower_case` - converts all tokens to lower case during tokenization (Optional, default `False`).
   * `max_length` - maximal input sequence length (Optional, default 128).
   * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
+  * `labels_file` - path to file with custom labels in json format (Optional).
+  Example of labels_file content:
+    ```json
+    {"labels": ["O", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "B-MISC", "I-MISC"]}
+    ```
 * `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
   * `annotation_file` - tsv file with location input data and reference.
 * `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`

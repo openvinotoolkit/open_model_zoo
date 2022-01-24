@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,7 +7,6 @@
 * \file noise_suppression_demo/main.cpp
 * \example noise_suppression_demo/main.cpp
 */
-#include <gflags/gflags.h>
 #include <climits>
 #include <vector>
 #include <string>
@@ -16,10 +15,11 @@
 #include <iostream>
 #include <fstream>
 
-#include <utils/slog.hpp>
+#include "openvino/openvino.hpp"
 
-
-#include <inference_engine.hpp>
+#include "gflags/gflags.h"
+#include "utils/common.hpp"
+#include "utils/slog.hpp"
 
 typedef std::chrono::steady_clock Time;
 
@@ -48,8 +48,7 @@ static void showUsage() {
     std::cout << "    -d DEVICE    " << target_device_message << std::endl;
 }
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validating input arguments--------------------------------------
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -67,26 +66,27 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 struct RiffWaveHeader {
-    unsigned int riff_tag;       /* "RIFF" string */
-    int riff_length;             /* Total length */
-    unsigned int wave_tag;       /* "WAVE" */
-    unsigned int fmt_tag;        /* "fmt " string (note space after 't') */
-    int fmt_length;              /* Remaining length */
-    short data_format;           /* Data format tag, 1 = PCM */
-    short num_of_channels;       /* Number of channels in file */
-    int sampling_freq;           /* Sampling frequency */
-    int bytes_per_sec;           /* Average bytes/sec */
-    short block_align;           /* Block align */
+    unsigned int riff_tag; // "RIFF" string
+    int riff_length;       // Total length
+    unsigned int wave_tag; // "WAVE"
+    unsigned int fmt_tag;  // "fmt " string (note space after 't')
+    int fmt_length;        // Remaining length
+    short data_format;     // Data format tag, 1 = PCM
+    short num_of_channels; // Number of channels in file
+    int sampling_freq;     // Sampling frequency
+    int bytes_per_sec;     // Average bytes/sec
+    short block_align;     // Block align
     short bits_per_sample;
-    unsigned int data_tag;       /* "data" string */
-    int data_length;             /* Raw data length */
+    unsigned int data_tag; // "data" string
+    int data_length;       // Raw data length
 };
 
 
-const unsigned int fourcc(const char c[4]){
+const unsigned int fourcc(const char c[4]) {
     return (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | (c[0]);
 }
-void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWaveHeader& wave_header) {
+
+void read_wav(const std::string& file_name, RiffWaveHeader& wave_header, std::vector<int16_t>& wave) {
     std::ifstream inp_wave(file_name, std::ios::in|std::ios::binary);
     if(!inp_wave.is_open())
         throw std::logic_error("fail to open " + file_name);
@@ -116,119 +116,133 @@ void read_wav(const std::string& file_name, std::vector<int16_t>& wave, RiffWave
         throw std::logic_error(error_msg + "for '" + file_name + "' file.");
     }
 
-    size_t wave_size = wave_header.data_length / 2;
+    size_t wave_size = wave_header.data_length / sizeof(int16_t);
     wave.resize(wave_size);
-    inp_wave.read((char*)&(wave.front()), wave_size*2);
+
+    inp_wave.read((char*)&(wave.front()), wave_size * sizeof(int16_t));
 }
 
-void write_wav(const std::string& file_name, const std::vector<int16_t>& wave, const RiffWaveHeader& wave_header) {
+void write_wav(const std::string& file_name, const RiffWaveHeader& wave_header, const std::vector<int16_t>& wave) {
     std::ofstream out_wave(file_name, std::ios::out|std::ios::binary);
     if(!out_wave.is_open())
         throw std::logic_error("fail to open " + file_name);
+
     out_wave.write((char*)&wave_header, sizeof(RiffWaveHeader));
-    out_wave.write((char*)&(wave.front()), wave.size()*2);
+    out_wave.write((char*)&(wave.front()), wave.size() * sizeof(int16_t));
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
-        // ------------------------------ Parsing and validating of input arguments --------------------------
+        // Parsing and validating of input arguments
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return EXIT_FAILURE;
         }
 
+        slog::info << ov::get_openvino_version() << slog::endl;
+
         // Loading Inference Engine
-        InferenceEngine::Core ie;
+        ov::runtime::Core core;
 
-        InferenceEngine::CNNNetwork network = ie.ReadNetwork(FLAGS_m);
-        InferenceEngine::InputsDataMap inputs = network.getInputsInfo();
+        slog::info << "Reading model: " << FLAGS_m << slog::endl;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        logBasicModelInfo(model);
 
-        //get state names pairs (inp,out)
-        std::vector<std::pair<std::string, std::string>> state_names;
+        ov::OutputVector inputs = model->inputs();
+        ov::OutputVector outputs = model->outputs();
+
+        // get state names pairs (inp,out) and compute overall states size
         size_t state_size = 0;
-        for(auto& inp: inputs) {
-            std::string inp_state_name = inp.first;
-            if (inp_state_name.find("inp_state") == std::string::npos)
+        std::vector<std::pair<std::string, std::string>> state_names;
+        for (size_t i = 0; i < inputs.size(); i++) {
+            std::string inp_state_name = inputs[i].get_any_name();
+            if (inp_state_name.find("inp_state_") == std::string::npos)
                 continue;
+
             std::string out_state_name(inp_state_name);
             out_state_name.replace(0, 3, "out");
+
+            // find corresponding output state
+            auto name_equal = [&](ov::Output<ov::Node> output) { return output.get_any_name() == out_state_name; };
+            if (std::end(outputs) == std::find_if(outputs.begin(), outputs.end(), name_equal))
+                throw std::logic_error("model output state name does not correspond input state name");
+
             state_names.emplace_back(inp_state_name, out_state_name);
-            const InferenceEngine::SizeVector& size = inputs[inp_state_name]->getInputData()->getTensorDesc().getDims();
-            size_t tensor_size = 1;
-            for(size_t s: size) {
-                tensor_size *= s;
-            }
+
+            ov::Shape shape = inputs[i].get_shape();
+            size_t tensor_size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+
             state_size += tensor_size;
         }
-        std::cout << "State_param_num = " << state_size << " (" << state_size*4e-6 << "Mb)" << std::endl;
-        InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
-        InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
+
+        if (state_size == 0)
+            throw std::logic_error("no expected model state inputs found");
+
+        slog::info << "State_param_num = " << state_size << " (" << std::setprecision(4) << state_size * sizeof(float) * 1e-6f << "Mb)" << slog::endl;
+
+        ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
+        logCompiledModelInfo(compiled_model, FLAGS_m, FLAGS_d);
+
+        ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Prepare input
-        // get size of network input (pacth_size)
+        // get size of network input (patch_size)
         std::string input_name("input");
-        InferenceEngine::InputInfo::Ptr input = inputs[input_name];
-        const InferenceEngine::TensorDesc& inp_desc = inputs[input_name]->getInputData()->getTensorDesc();
-        const InferenceEngine::SizeVector& inp_shape = inp_desc.getDims();
+        ov::Shape inp_shape = model->input(input_name).get_shape();
         size_t patch_size = inp_shape[1];
 
-        //read input wav file
-        std::vector<int16_t> inp_wave_s16, out_wave_s16;
-        std::vector<float> inp_wave_fp32, out_wave_fp32;
+        // read input wav file
         RiffWaveHeader wave_header;
-        read_wav(FLAGS_i, inp_wave_s16, wave_header);
+        std::vector<int16_t> inp_wave_s16;
+        read_wav(FLAGS_i, wave_header, inp_wave_s16);
+
+        std::vector<int16_t> out_wave_s16;
         out_wave_s16.resize(inp_wave_s16.size());
 
-        //fp32 input wave will be expanded to be divisible by patch_size
+        std::vector<float> inp_wave_fp32;
+        std::vector<float> out_wave_fp32;
+        // fp32 input wave will be expanded to be divisible by patch_size
         size_t iter = 1 + (inp_wave_s16.size() / patch_size);
         size_t inp_size = patch_size * iter;
         inp_wave_fp32.resize(inp_size, 0);
         out_wave_fp32.resize(inp_size, 0);
 
-        //convert sint16_t  to float
-        float scale = 1.0f/std::numeric_limits<int16_t>::max();
-        size_t i=0;
-        for(; i < inp_wave_s16.size(); ++i) {
+        // convert sint16_t to float
+        float scale = 1.0f / std::numeric_limits<int16_t>::max();
+        for(size_t i = 0; i < inp_wave_s16.size(); ++i) {
             inp_wave_fp32[i] = (float)inp_wave_s16[i] * scale;
         }
 
         auto start_time = Time::now();
-        for(size_t i=0; i<iter; ++i) {
-            auto inputBlob = InferenceEngine::make_shared_blob<float>(inp_desc, &inp_wave_fp32[i * patch_size]);
-            infer_request.SetBlob(input_name, inputBlob);
+        for(size_t i = 0; i < iter; ++i) {
+            ov::runtime::Tensor input_tensor(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
+            infer_request.set_tensor(input_name, input_tensor);
 
-            for (auto &state_name: state_names) {
+            for (auto& state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
                 const std::string& out_state_name = state_name.second;
-
+                ov::runtime::Tensor state_tensor;
                 if (i > 0) {
-                    //set input state by coresponding output state from prev infer
-                    auto blob_ptr = infer_request.GetBlob(out_state_name);
-                    infer_request.SetBlob(inp_state_name,blob_ptr);
+                    // set input state by coresponding output state from prev infer
+                    state_tensor = infer_request.get_tensor(out_state_name);
                 } else {
                     // first iteration. set input state to zero tensor.
-                    const InferenceEngine::TensorDesc &state_desc = inputs[inp_state_name]->getInputData()->getTensorDesc();
-                    auto blob_ptr = InferenceEngine::make_shared_blob<float>(state_desc);
-                    blob_ptr->allocate();
-                    for (auto &val: *blob_ptr) {
-                        val = 0;
-                    }
-                    infer_request.SetBlob(inp_state_name,blob_ptr);
+                    ov::Shape state_shape = model->input(inp_state_name).get_shape();
+                    state_tensor = ov::runtime::Tensor(ov::element::f32, state_shape);
+                    memset(state_tensor.data<float>(), 0, state_tensor.get_byte_size());
                 }
+                infer_request.set_tensor(inp_state_name, state_tensor);
             }
 
             // make infer
-            infer_request.Infer();
-            InferenceEngine::Blob::Ptr output = infer_request.GetBlob("output");
+            infer_request.infer();
 
-            InferenceEngine::MemoryBlob::CPtr moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(output);
             {
-                // locked memory holder should be alive all time while access to its buffer happens
-                auto moutputHolder = moutput->rmap();
-                float* src = moutputHolder.as<float*>();
+                // process output
+                float* src = infer_request.get_tensor("output").data<float>();
                 float* dst = &out_wave_fp32[i * patch_size];
-                memcpy(dst, src, patch_size*sizeof(float));
+                memcpy(dst, src, patch_size * sizeof(float));
             }
-        }
+        } // for iter
 
         using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
         double total_latency = std::chrono::duration_cast<ms>(Time::now() - start_time).count();
@@ -236,11 +250,11 @@ int main(int argc, char *argv[]) {
         slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
         slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / 16.0f << " ms" << slog::endl;
 
-        //convert fp32 to int16_t
-        for(size_t i=0; i < out_wave_s16.size(); ++i) {
+        // convert fp32 to int16_t
+        for(size_t i = 0; i < out_wave_s16.size(); ++i) {
             out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
         }
-        write_wav(FLAGS_o, out_wave_s16, wave_header);
+        write_wav(FLAGS_o, wave_header, out_wave_s16);
     }
     catch (const std::exception& error) {
         std::cerr << error.what() << std::endl;

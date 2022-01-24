@@ -185,7 +185,7 @@ class DecoderDLSDKModel(BaseDLSDKModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_dict.items()})
-        raw_result = self.exec_network.infer(input_dict, raw_results=True)
+        raw_result = self.exec_network.infer(input_dict)
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
