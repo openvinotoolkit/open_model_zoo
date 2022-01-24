@@ -95,9 +95,6 @@ Options:
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -nthreads "<integer>"     Optional. Number of threads.
