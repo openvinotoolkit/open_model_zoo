@@ -36,7 +36,7 @@
 #endif
 
 template <typename T, std::size_t N>
-constexpr std::size_t arraySize(const T (&)[N]) noexcept {
+constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
 }
 
@@ -221,7 +221,7 @@ inline void showAvailableDevices() {
     std::cout << std::endl;
 }
 
-inline std::string fileNameNoExt(const std::string &filepath) {
+inline std::string fileNameNoExt(const std::string& filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
     return filepath.substr(0, pos);

@@ -358,12 +358,8 @@ class RecognizerEncoderOVModel(RecognizerOVModel):
 
 class RecognizerDecoderDLSDKModel(RecognizerDLSDKModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
-        def preprocess_out(out_name):
-            if not out_name.endswith('/sink_port_0'):
-                return out_name + '/sink_port_0'
-            return out_name
         self.model_inputs = network_info['inputs']
-        self.model_outputs = {out: preprocess_out(name) for out, name in network_info['outputs'].items()}
+        self.model_outputs = network_info['outputs']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 

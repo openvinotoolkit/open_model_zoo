@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class GazeEstimator: public BaseEstimator {
 public:
-    GazeEstimator(InferenceEngine::Core& ie,
+    GazeEstimator(ov::runtime::Core& ie,
                   const std::string& modelPath,
                   const std::string& deviceName,
                   bool doRollAlign = true);
@@ -27,7 +27,7 @@ public:
 
 private:
     IEWrapper ieWrapper;
-    std::string outputBlobName;
+    std::string outputTensorName;
     bool rollAlign;
 
     void rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const;
