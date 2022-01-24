@@ -54,7 +54,8 @@ class CTPN(DetectionModel):
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, self.input_size[1], self.input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         default_input_shape = self.inputs[self.image_blob_name].shape
-        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
+        channels = default_input_shape[1] if self.input_layout == 'NCHW' else default_input_shape[3]
+        input_shape = {self.image_blob_name: ([default_input_shape[0]] + [self.h2, self.w2] + [channels])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.reshape(input_shape)
         if preload:
@@ -66,9 +67,16 @@ class CTPN(DetectionModel):
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
             raise WrapperError(self.__model__, "Unexpected output blob shape. Only 4D output blobs are supported")
 
-        if scores_data_repr.shape[1] == boxes_data_repr.shape[1] * 2:
+        if self.input_layout == 'NCHW':
+            scores_channels = scores_data_repr.shape[1]
+            boxes_channels = boxes_data_repr.shape[1]
+        else:
+            scores_channels = scores_data_repr.shape[3]
+            boxes_channels = boxes_data_repr.shape[3]
+
+        if scores_channels == boxes_channels * 2:
             return scores_name, boxes_name
-        if boxes_data_repr.shape[1] == scores_data_repr.shape[1] * 2:
+        if boxes_channels == scores_channels * 2:
             return boxes_name, scores_name
         raise WrapperError(self.__model__, "One of outputs must be two times larger than another")
 
@@ -96,14 +104,16 @@ class CTPN(DetectionModel):
                                                   self.h2 / inputs.shape[0]))
             inputs = cv2.resize(inputs, (self.w2, self.h2))
 
-        inputs = inputs.transpose((2, 0, 1)) # Change data layout from HWC to CHW
+        inputs = self._change_layout(inputs)
         dict_inputs = {self.image_blob_name: inputs}
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         first_scales = meta['scales'].pop()
-        boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0))
-        scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0))
+        boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0)) \
+                if self.input_layout == 'NCHW' else outputs[self.bboxes_blob_name][0]
+        scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0)) \
+                 if self.input_layout == 'NCHW' else outputs[self.scores_blob_name][0]
 
         textsegs, scores = self.get_proposals(scores, boxes, meta['original_shape'])
         textsegs[:, 0::2] /= first_scales[0]
