@@ -72,12 +72,13 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
         throw std::runtime_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
     }
 
-    for (const auto& output: model->outputs()) {
+    for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32);
-        outputsNames.push_back(outTensorName);
-
+        for (const auto& name : output.get_names()) {
+            outputsNames.push_back(name);
+        }
         const ov::Shape& outputShape = output.get_shape();
         if (outputShape.size() != 4 && outputShape.size() != 5) {
             throw std::runtime_error("output tensors are expected to be 4-dimensional or 5-dimensional");
