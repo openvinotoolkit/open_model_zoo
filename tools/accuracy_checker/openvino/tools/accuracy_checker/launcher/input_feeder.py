@@ -468,9 +468,18 @@ class InputFeeder:
             return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
+            layout = self.layouts_mapping.get(layer_name)
+            if 'data_layout' in meta[0]:
+                data_layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT.get(meta[0]['data_layout'])
+                if layout is None and len(self.default_layout) == len(data_layout):
+                    layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
+                if layout is not None and data_layout == layout:
+                    layout = []
+            if layout is None:
+                layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
             layer_data_preprocessed = self.input_transform_func(
                 layer_data, layer_name,
-                self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
+                layout,
                 self.precision_mapping.get(layer_name), template
             )
             if isinstance(layer_data_preprocessed, tuple):

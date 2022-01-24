@@ -130,6 +130,7 @@ class OpenCVFrameReader(BaseReader):
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def reset(self):
         self.current = -1

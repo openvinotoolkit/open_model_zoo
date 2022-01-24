@@ -98,7 +98,7 @@ class ModelEvaluator(BaseEvaluator):
             input_layouts
         )
         if not postpone_model_loading:
-            if input_precision:
+            if input_precision or input_layouts:
                 launcher.update_input_configuration(input_feeder.inputs_config)
             input_feeder.update_layout_configuration(launcher.layout_mapping)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()

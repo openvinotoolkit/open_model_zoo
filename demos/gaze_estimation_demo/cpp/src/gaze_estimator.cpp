@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,40 +10,40 @@
 
 namespace gaze_estimation {
 
-const char BLOB_HEAD_POSE_ANGLES[] = "head_pose_angles";
-const char BLOB_LEFT_EYE_IMAGE[] = "left_eye_image";
-const char BLOB_RIGHT_EYE_IMAGE[] = "right_eye_image";
+const char TENSOR_HEAD_POSE_ANGLES[] = "head_pose_angles";
+const char TENSOR_LEFT_EYE_IMAGE[] = "left_eye_image";
+const char TENSOR_RIGHT_EYE_IMAGE[] = "right_eye_image";
 
 GazeEstimator::GazeEstimator(
-    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
+    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
         ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign)
 {
-    const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
+    const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();
 
-    for (const auto& blobName: {BLOB_HEAD_POSE_ANGLES, BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
-        if (inputInfo.find(blobName) == inputInfo.end())
-            throw std::runtime_error(modelPath + ": expected to have input named \"" + blobName + "\"");
+    for (const auto& TensorName: {TENSOR_HEAD_POSE_ANGLES, TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
+        if (inputInfo.find(TensorName) == inputInfo.end())
+            throw std::runtime_error(modelPath + ": expected to have input named \"" + TensorName + "\"");
     }
 
-    auto expectAngles = [&modelPath](const std::string& blobName, const std::vector<unsigned long>& dims) {
+    auto expectAngles = [&modelPath](const std::string& TensorName, const ov::Shape dims) {
         bool is1Dim = !dims.empty()
             && std::all_of(dims.begin(), dims.end() - 1, [](unsigned long n) { return n == 1; });
 
         if (!is1Dim || dims.back() != 3) {
-            throw std::runtime_error(modelPath + ": expected \"" + blobName + "\" to have dimensions [1x...]3");
+            throw std::runtime_error(modelPath + ": expected \"" + TensorName + "\" to have dimensions [1x...]3");
         }
     };
 
-    expectAngles(BLOB_HEAD_POSE_ANGLES, inputInfo.at(BLOB_HEAD_POSE_ANGLES));
+    expectAngles(TENSOR_HEAD_POSE_ANGLES, inputInfo.at(TENSOR_HEAD_POSE_ANGLES));
 
-    for (const auto& blobName: {BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
-        ieWrapper.expectImageInput(blobName);
+    for (const auto& TensorName: { TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
+        ieWrapper.expectImageInput(TensorName);
     }
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
 
-    outputBlobName = ieWrapper.expectSingleOutput();
-    expectAngles(outputBlobName, outputInfo.at(outputBlobName));
+    outputTensorName = ieWrapper.expectSingleOutput();
+    expectAngles(outputTensorName, outputInfo.at(outputTensorName));
 }
 
 void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const {
@@ -79,15 +79,15 @@ void GazeEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputR
         rightEyeImage = rightEyeImageRotated;
     }
 
-    ieWrapper.setInputBlob(BLOB_HEAD_POSE_ANGLES, headPoseAngles);
-    ieWrapper.setInputBlob(BLOB_LEFT_EYE_IMAGE, leftEyeImage);
-    ieWrapper.setInputBlob(BLOB_RIGHT_EYE_IMAGE, rightEyeImage);
+    ieWrapper.setInputTensor(TENSOR_HEAD_POSE_ANGLES, headPoseAngles);
+    ieWrapper.setInputTensor(TENSOR_LEFT_EYE_IMAGE, leftEyeImage);
+    ieWrapper.setInputTensor(TENSOR_RIGHT_EYE_IMAGE, rightEyeImage);
 
     ieWrapper.infer();
 
     std::vector<float> rawResults;
 
-    ieWrapper.getOutputBlob(outputBlobName, rawResults);
+    ieWrapper.getOutputTensor(outputTensorName, rawResults);
 
     cv::Point3f gazeVector;
     gazeVector.x = rawResults[0];

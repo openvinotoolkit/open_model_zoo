@@ -67,7 +67,7 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size, offset, timeout):
+    def start_download(self, session, chunk_size, offset, timeout, **kwargs):
         response = session.get(self.url, stream=True, timeout=timeout,
             headers=self.http_range_headers(offset))
         response.raise_for_status()
@@ -84,7 +84,7 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size, offset, timeout):
+    def start_download(self, session, chunk_size, offset, timeout, **kwargs):
         range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id': self.id}, headers=range_headers,
