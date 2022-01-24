@@ -64,14 +64,14 @@ int main(int argc, char* argv[]) {
 
         // Load inference engine
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         // Load network (Generated xml/bin files)
 
         // Read network model
+        slog::info << "Reading model: " << FLAGS_m << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
-        slog::info << "model file: " << FLAGS_m << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         // Prepare input blobs
 
@@ -82,9 +82,9 @@ int main(int argc, char* argv[]) {
         if(inputs.size() != 2 || outputs.size() != 2)
             throw std::logic_error("Expected network with 2 inputs and 2 outputs");
 
-        size_t netBatchSize = 0;
-        size_t netInputHeight = 0;
-        size_t netInputWidth = 0;
+        size_t modelBatchSize = 0;
+        size_t modelInputHeight = 0;
+        size_t modelInputWidth = 0;
 
         const ov::Layout layout_nchw{ "NCHW" };
 
@@ -93,9 +93,9 @@ int main(int argc, char* argv[]) {
         if (it != inputs.end()) {
             // ov::set_batch() should know input layout
             model->get_parameters()[it->get_index()]->set_layout("NCHW");
-            netBatchSize = it->get_shape()[ov::layout::batch_idx(layout_nchw)];
-            netInputHeight = it->get_shape()[ov::layout::height_idx(layout_nchw)];
-            netInputWidth = it->get_shape()[ov::layout::width_idx(layout_nchw)];
+            modelBatchSize = it->get_shape()[ov::layout::batch_idx(layout_nchw)];
+            modelInputHeight = it->get_shape()[ov::layout::height_idx(layout_nchw)];
+            modelInputWidth = it->get_shape()[ov::layout::width_idx(layout_nchw)];
         } else {
             throw std::logic_error("Couldn't find model image input");
         }
@@ -103,21 +103,21 @@ int main(int argc, char* argv[]) {
         // Collect images
         std::vector<cv::Mat> images;
 
-        if (netBatchSize > imagePaths.size()) {
-            slog::warn << "Network batch size is greater than number of images (" << imagePaths.size() <<
+        if (modelBatchSize > imagePaths.size()) {
+            slog::warn << "Model batch size is greater than number of images (" << imagePaths.size() <<
                        "), some input files will be duplicated" << slog::endl;
-        } else if (netBatchSize < imagePaths.size()) {
-            netBatchSize = imagePaths.size();
-            slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
+        } else if (modelBatchSize < imagePaths.size()) {
+            modelBatchSize = imagePaths.size();
+            slog::warn << "Model batch size is less than number of images (" << imagePaths.size() <<
                        "), model will be reshaped" << slog::endl;
         }
 
         // set batch size
-        ov::set_batch(model, netBatchSize);
-        slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
+        ov::set_batch(model, modelBatchSize);
+        slog::info << "\tBatch size is set to " << modelBatchSize << slog::endl;
 
         auto startTime = std::chrono::steady_clock::now();
-        for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
+        for (size_t i = 0, inputIndex = 0; i < modelBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
             }
@@ -135,16 +135,16 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Valid input images were not found!");
 
         // Load model to the device
-        ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
-        log_compiled_model_info(compiled_model, FLAGS_m, FLAGS_d);
+        ov::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
+        logCompiledModelInfo(compiled_model, FLAGS_m, FLAGS_d);
 
         // Create Infer Request
-        ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
+        ov::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Set input data
         // Iterate over all the input blobs
         for (size_t idx = 0; idx < inputs.size(); idx++) {
-            ov::runtime::Tensor tensor = infer_request.get_input_tensor(idx);
+            ov::Tensor tensor = infer_request.get_input_tensor(idx);
             ov::Shape shape = tensor.get_shape();
 
             if (shape.size() == 4) {
@@ -154,8 +154,8 @@ int main(int argc, char* argv[]) {
 
             if (shape.size() == 2) {
                 float* data = tensor.data<float>();
-                data[0] = static_cast<float>(netInputHeight); // height
-                data[1] = static_cast<float>(netInputWidth); // width
+                data[0] = static_cast<float>(modelInputHeight); // height
+                data[1] = static_cast<float>(modelInputWidth); // width
                 data[2] = 1;
             }
         }
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
         size_t W = 0;
 
         for (size_t idx = 0; idx < outputs.size(); idx++) {
-            ov::runtime::Tensor tensor = infer_request.get_output_tensor(idx);
+            ov::Tensor tensor = infer_request.get_output_tensor(idx);
             ov::Shape shape = tensor.get_shape();
             size_t dims = shape.size();
             if (dims == 2) {
@@ -212,7 +212,7 @@ int main(int argc, char* argv[]) {
 
             if (batch < 0)
                 break;
-            if (batch >= static_cast<int>(netBatchSize))
+            if (batch >= static_cast<int>(modelBatchSize))
                 throw std::logic_error("Invalid batch ID within detection output box");
 
             float prob = box_info[2];

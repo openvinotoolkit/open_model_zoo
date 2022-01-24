@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <gflags/gflags.h>
 #include <string>
 
 #include "openvino/openvino.hpp"
+
+#include "gflags/gflags.h"
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
 
@@ -61,8 +62,8 @@ struct PersonAttribsDetection : BaseDetection {
                 "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
-        ov::runtime::Tensor attribsBlob = request.get_tensor(outputNameForAttributes);
-        size_t numOfAttrChannels = attribsBlob.get_shape()[1];
+        ov::Tensor attribsTensor = m_infer_request.get_tensor(outputNameForAttributes);
+        size_t numOfAttrChannels = attribsTensor.get_shape()[1];
 
         const char* const* attributeStrings;
         if (numOfAttrChannels == arraySize(attributeStringsFor7Attributes)) {
@@ -80,18 +81,18 @@ struct PersonAttribsDetection : BaseDetection {
 
         AttributesAndColorPoints returnValue;
 
-        auto outputAttrValues = attribsBlob.data<float>();
+        auto outputAttrValues = attribsTensor.data<float>();
         for (size_t i = 0; i < numOfAttrChannels; i++) {
             returnValue.attributes_strings.push_back(attributeStrings[i]);
             returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
         }
 
         if (hasTopBottomColor) {
-            ov::runtime::Tensor topColorPointBlob = request.get_tensor(outputNameForTopColorPoint);
-            ov::runtime::Tensor bottomColorPointBlob = request.get_tensor(outputNameForBottomColorPoint);
+            ov::Tensor topColorPointTensor = m_infer_request.get_tensor(outputNameForTopColorPoint);
+            ov::Tensor bottomColorPointTensor = m_infer_request.get_tensor(outputNameForBottomColorPoint);
 
-            size_t numOfTCPointChannels = topColorPointBlob.get_shape()[1];
-            size_t numOfBCPointChannels = bottomColorPointBlob.get_shape()[1];
+            size_t numOfTCPointChannels = topColorPointTensor.get_shape()[1];
+            size_t numOfBCPointChannels = bottomColorPointTensor.get_shape()[1];
             if (numOfTCPointChannels != 2) {
                 throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
                                        "Person Attributes Recognition network is not equal to point coordinates(2)");
@@ -101,8 +102,8 @@ struct PersonAttribsDetection : BaseDetection {
                                        "Person Attributes Recognition network is not equal to point coordinates (2)");
             }
 
-            auto outputTCPointValues = topColorPointBlob.data<float>();
-            auto outputBCPointValues = bottomColorPointBlob.data<float>();
+            auto outputTCPointValues = topColorPointTensor.data<float>();
+            auto outputBCPointValues = bottomColorPointTensor.data<float>();
 
             returnValue.top_color_point.x = outputTCPointValues[0];
             returnValue.top_color_point.y = outputTCPointValues[1];
@@ -126,11 +127,11 @@ struct PersonAttribsDetection : BaseDetection {
         return true;
     }
 
-    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override {
         // Read network model
+        slog::info << "Reading model: " << FLAGS_m_pa << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_pa);
-        slog::info << "model file: " << FLAGS_m_pa << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         // set batch size 1
         model->get_parameters()[0]->set_layout("NCHW");
@@ -162,7 +163,7 @@ struct PersonAttribsDetection : BaseDetection {
 
         model = ppp.build();
 
-        inputName = model->input().get_any_name();
+        m_inputName = model->input().get_any_name();
 
         // Check outputs
         ov::OutputVector outputs = model->outputs();
@@ -194,7 +195,7 @@ struct PersonAttribsDetection : BaseDetection {
                                    "or a network having three outputs (person attributes, top color point, bottom color point)");
         }
 
-        _enabled = true;
+        m_enabled = true;
 
         return model;
     }

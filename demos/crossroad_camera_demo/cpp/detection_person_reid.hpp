@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <gflags/gflags.h>
 #include <string>
 
 #include "openvino/openvino.hpp"
+
+#include "gflags/gflags.h"
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
 
 using namespace ov::preprocess;
 
 struct PersonReIdentification : BaseDetection {
-    std::vector<std::vector<float>> globalReIdVec;  // contains vectors characterising all detected persons
+    std::vector<std::vector<float>> globalReIdVec; // contains vectors characterising all detected persons
 
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Re-Identification Retail") {}
 
@@ -37,10 +38,10 @@ struct PersonReIdentification : BaseDetection {
     }
 
     std::vector<float> getReidVec() {
-        ov::runtime::Tensor attribsBlob = request.get_tensor(outputName);
+        ov::Tensor attribsTensor = m_infer_request.get_tensor(m_outputName);
 
-        auto numOfChannels = attribsBlob.get_shape()[1];
-        auto outputValues = attribsBlob.data<float>();
+        auto numOfChannels = attribsTensor.get_shape()[1];
+        auto outputValues = attribsTensor.data<float>();
 
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
@@ -69,11 +70,11 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override {
         // Read network model
+        slog::info << "Reading model: " << FLAGS_m_reid << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_reid);
-        slog::info << "model file: " << FLAGS_m_reid << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         // set batch size 1
         model->get_parameters()[0]->set_layout("NCHW");
@@ -106,7 +107,7 @@ struct PersonReIdentification : BaseDetection {
 
         model = ppp.build();
 
-        inputName = model->input().get_any_name();
+        m_inputName = model->input().get_any_name();
 
         // Check outputs
         ov::OutputVector outputs = model->outputs();
@@ -114,9 +115,10 @@ struct PersonReIdentification : BaseDetection {
             throw std::logic_error("Person Re-Identification Model should have 1 output");
         }
 
-        outputName = model->output().get_any_name();
+        m_outputName = model->output().get_any_name();
 
-        _enabled = true;
+        m_enabled = true;
+
         return model;
     }
 };

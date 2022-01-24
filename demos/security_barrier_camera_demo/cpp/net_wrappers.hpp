@@ -29,12 +29,12 @@ public:
     static constexpr int objectSize = 7;  // Output should have 7 as a last dimension"
 
     Detector() = default;
-    Detector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
+    Detector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string>& pluginConfig) :
         detectionTresholds{detectionTresholds}, m_core{core} {
+        slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
-        slog::info << "model file: " << FLAGS_m << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         // Check model inputs and outputs
 
@@ -43,7 +43,7 @@ public:
             throw std::logic_error("Detector should have only one input");
         }
 
-        detectorInputBlobName = model->input().get_any_name();
+        detectorInputName = model->input().get_any_name();
 
         ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
@@ -52,7 +52,7 @@ public:
 
         ov::Output<ov::Node> output = outputs[0];
 
-        detectorOutputBlobName = output.get_any_name();
+        detectorOutputName = output.get_any_name();
         ov::Shape output_shape = output.get_shape();
 
         if (output_shape.size() != 4) {
@@ -91,42 +91,44 @@ public:
         model = ppp.build();
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
-        log_compiled_model_info(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
+        logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
     }
 
-    ov::runtime::InferRequest createInferRequest() {
+    ov::InferRequest createInferRequest() {
         return m_compiled_model.create_infer_request();
     }
 
-    void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img) {
-        ov::runtime::Tensor input = inferRequest.get_tensor(detectorInputBlobName);
-        if (3 == input.get_shape()[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img) {
+        ov::Tensor inputTensor = inferRequest.get_tensor(detectorInputName);
+        ov::Shape shape = inputTensor.get_shape();
+        if (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
             // autoResize is set
             if (!img.isSubmatrix()) {
-                // just wrap Mat object with Blob::Ptr without additional memory allocation
-                ov::runtime::Tensor frameBlob = wrapMat2Tensor(img);
-                inferRequest.set_tensor(detectorInputBlobName, frameBlob);
+                // just wrap Mat object with Tensor without additional memory allocation
+                ov::Tensor frameTensor = wrapMat2Tensor(img);
+                inferRequest.set_tensor(detectorInputName, frameTensor);
             } else {
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
-            matToTensor(img, input);
+            // resize and copy data from image to tensor using OpenCV
+            matToTensor(img, inputTensor);
         }
     }
 
-    std::list<Result> getResults(ov::runtime::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
+    std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed
         // because the processing is the same for the same topology
         std::list<Result> results;
-        ov::runtime::Tensor tensor = inferRequest.get_tensor(detectorOutputBlobName);
-        const float* const detections = tensor.data<float>();
+        ov::Tensor output_tensor = inferRequest.get_tensor(detectorOutputName);
+        const float* const detections = output_tensor.data<float>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
-            float image_id = detections[i * objectSize + 0];  // in case of batch
-            if (image_id < 0) {  // indicates end of detections
+            float image_id = detections[i * objectSize + 0]; // in case of batch
+            if (image_id < 0) { // indicates end of detections
                 break;
             }
-            auto label = static_cast<decltype(detectionTresholds.size())>(detections[i * objectSize + 1]);
+            size_t label = static_cast<decltype(detectionTresholds.size())>(detections[i * objectSize + 1]);
             float confidence = detections[i * objectSize + 2];
             if (label - 1 < detectionTresholds.size() && confidence < detectionTresholds[label - 1]) {
                 continue;
@@ -148,20 +150,20 @@ public:
 
 private:
     std::vector<float> detectionTresholds;
-    std::string detectorInputBlobName;
-    std::string detectorOutputBlobName;
-    ov::runtime::Core m_core;  // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::CompiledModel m_compiled_model;
+    std::string detectorInputName;
+    std::string detectorOutputName;
+    ov::Core m_core; // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
+    ov::CompiledModel m_compiled_model;
 };
 
 class VehicleAttributesClassifier {
 public:
     VehicleAttributesClassifier() = default;
-    VehicleAttributesClassifier(ov::runtime::Core& core, const std::string& deviceName,
+    VehicleAttributesClassifier(ov::Core& core, const std::string& deviceName,
         const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string>& pluginConfig) : m_core(core) {
-        std::shared_ptr<ov::Model> model = m_core.read_model(FLAGS_m_va);
-        slog::info << "model file: " << FLAGS_m_va << slog::endl;
-        log_model_info(model);
+        slog::info << "Reading model: " << xmlPath << slog::endl;
+        std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
+        logBasicModelInfo(model);
 
         ov::OutputVector inputs = model->inputs();
         if (inputs.size() != 1) {
@@ -203,35 +205,31 @@ public:
         model = ppp.build();
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
-        log_compiled_model_info(m_compiled_model, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
+        logCompiledModelInfo(m_compiled_model, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
     }
 
-    ov::runtime::InferRequest createInferRequest() {
+    ov::InferRequest createInferRequest() {
         return m_compiled_model.create_infer_request();
     }
 
-    void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect vehicleRect) {
-        ov::runtime::Tensor roiBlob = inferRequest.get_tensor(attributesInputName);
-        if (3 == roiBlob.get_shape()[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect vehicleRect) {
+        ov::Tensor inputTensor = inferRequest.get_tensor(attributesInputName);
+        ov::Shape shape = inputTensor.get_shape();
+        if (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
             // autoResize is set
-            InferenceEngine::ROI cropRoi{
-                0,
-                static_cast<size_t>(vehicleRect.x), static_cast<size_t>(vehicleRect.y),
-                static_cast<size_t>(vehicleRect.width), static_cast<size_t>(vehicleRect.height) };
-            ov::runtime::Tensor frameBlob = wrapMat2Tensor(img);
-            ov::Coordinate p00({ 0, cropRoi.posY, cropRoi.posX, 0 });
-            ov::Coordinate p01({ 1, cropRoi.posY + cropRoi.sizeY, cropRoi.posX + cropRoi.sizeX, 3 });
-            ov::runtime::Tensor roiBlob(frameBlob, p00, p01);
+            ov::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Coordinate p00({ 0, (size_t)vehicleRect.y, (size_t)vehicleRect.x, 0 });
+            ov::Coordinate p01({ 1, (size_t)(vehicleRect.y + vehicleRect.height), (size_t)vehicleRect.x + vehicleRect.width, 3 });
+            ov::Tensor roiTensor(frameTensor, p00, p01);
 
-            inferRequest.set_tensor(attributesInputName, roiBlob);
-        }
-        else {
+            inferRequest.set_tensor(attributesInputName, roiTensor);
+        } else {
             const cv::Mat& vehicleImage = img(vehicleRect);
-            matToTensor(vehicleImage, roiBlob);
+            matToTensor(vehicleImage, inputTensor);
         }
     }
 
-    std::pair<std::string, std::string> getResults(ov::runtime::InferRequest& inferRequest) {
+    std::pair<std::string, std::string> getResults(ov::InferRequest& inferRequest) {
         static const std::string colors[] = {
             "white", "gray", "yellow", "red", "green", "blue", "black"
         };
@@ -240,12 +238,12 @@ public:
         };
 
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
-        ov::runtime::Tensor colorsMapped = inferRequest.get_tensor(outputNameForColor);
-        const float* colorsValues = colorsMapped.data<float>();
+        ov::Tensor colorsTensor = inferRequest.get_tensor(outputNameForColor);
+        const float* colorsValues = colorsTensor.data<float>();
 
         // 4 possible types for each vehicle and we should select the one with the maximum probability
-        ov::runtime::Tensor typesMapped = inferRequest.get_tensor(outputNameForType);
-        const float* typesValues = typesMapped.data<float>();
+        ov::Tensor typesTensor = inferRequest.get_tensor(outputNameForType);
+        const float* typesValues = typesTensor.data<float>();
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto  type_id = std::max_element(typesValues,  typesValues  + 4) - typesValues;
@@ -257,19 +255,19 @@ private:
     std::string attributesInputName;
     std::string outputNameForColor;
     std::string outputNameForType;
-    ov::runtime::Core m_core;  // The only reason to store a device is to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::CompiledModel m_compiled_model;
+    ov::Core m_core;  // The only reason to store a device is to assure that it lives at least as long as ExecutableNetwork
+    ov::CompiledModel m_compiled_model;
 };
 
 class Lpr {
 public:
     Lpr() = default;
-    Lpr(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
+    Lpr(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
         const std::map<std::string, std::string>& pluginConfig) :
         m_core{core} {
-        std::shared_ptr<ov::Model> model = m_core.read_model(FLAGS_m_lpr);
-        slog::info << "model file: " << FLAGS_m_lpr << slog::endl;
-        log_model_info(model);
+        slog::info << "Reading model: " << xmlPath << slog::endl;
+        std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
+        logBasicModelInfo(model);
 
         // LPR network should have 2 inputs (and second is just a stub) and one output
 
@@ -333,40 +331,36 @@ public:
         model = ppp.build();
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
-        log_compiled_model_info(m_compiled_model, FLAGS_m_lpr, deviceName, "License Plate Recognition");
+        logCompiledModelInfo(m_compiled_model, FLAGS_m_lpr, deviceName, "License Plate Recognition");
     }
 
-    ov::runtime::InferRequest createInferRequest() {
+    ov::InferRequest createInferRequest() {
         return m_compiled_model.create_infer_request();
     }
 
-    void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect plateRect) {
-        ov::runtime::Tensor roiBlob = inferRequest.get_tensor(LprInputName);
-        ov::Shape shape = roiBlob.get_shape();
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect plateRect) {
+        ov::Tensor inputTensor = inferRequest.get_tensor(LprInputName);
+        ov::Shape shape = inputTensor.get_shape();
         if ((shape.size() == 4) && (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))])) {
             // autoResize is set
-            InferenceEngine::ROI cropRoi{
-                0,
-                static_cast<size_t>(plateRect.x), static_cast<size_t>(plateRect.y),
-                static_cast<size_t>(plateRect.width), static_cast<size_t>(plateRect.height) };
-            ov::runtime::Tensor frameBlob = wrapMat2Tensor(img);
-            ov::Coordinate p00({ 0, cropRoi.posY, cropRoi.posX, 0 });
-            ov::Coordinate p01({ 1, cropRoi.posY + cropRoi.sizeY, cropRoi.posX + cropRoi.sizeX, 3 });
-            ov::runtime::Tensor roiBlob(frameBlob, p00, p01);
-            inferRequest.set_tensor(LprInputName, roiBlob);
+            ov::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Coordinate p00({ 0, (size_t)plateRect.y, (size_t)plateRect.x, 0 });
+            ov::Coordinate p01({ 1, (size_t)(plateRect.y + plateRect.height), (size_t)(plateRect.x + plateRect.width), 3 });
+            ov::Tensor roiTensor(frameTensor, p00, p01);
+            inferRequest.set_tensor(LprInputName, roiTensor);
         } else {
             const cv::Mat& vehicleImage = img(plateRect);
-            matToTensor(vehicleImage, roiBlob);
+            matToTensor(vehicleImage, inputTensor);
         }
 
         if (LprInputSeqName != "") {
-            ov::runtime::Tensor seqBlob = inferRequest.get_tensor(LprInputSeqName);
-            float* blob_data = seqBlob.data<float>();
-            std::fill(blob_data, blob_data + seqBlob.get_shape()[0], 1.0f);
+            ov::Tensor inputSeqTensor = inferRequest.get_tensor(LprInputSeqName);
+            float* data = inputSeqTensor.data<float>();
+            std::fill(data, data + inputSeqTensor.get_shape()[0], 1.0f);
         }
     }
 
-    std::string getResults(ov::runtime::InferRequest& inferRequest) {
+    std::string getResults(ov::InferRequest& inferRequest) {
         static const char* const items[] = {
                 "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "<Anhui>", "<Beijing>", "<Chongqing>", "<Fujian>",
@@ -385,14 +379,14 @@ public:
         std::string result;
         result.reserve(14u + 6u);  // the longest province name + 6 plate signs
 
-        ov::runtime::Tensor lprOutputMapped = inferRequest.get_tensor(LprOutputName);
-        ov::element::Type precision = lprOutputMapped.get_element_type();
+        ov::Tensor lprOutputTensor = inferRequest.get_tensor(LprOutputName);
+        ov::element::Type precision = lprOutputTensor.get_element_type();
 
         // up to 88 items per license plate, ended with "-1"
         switch (precision) {
             case ov::element::i32:
             {
-                const auto data = lprOutputMapped.data<int32_t>();
+                const auto data = lprOutputTensor.data<int32_t>();
                 for (int i = 0; i < maxSequenceSizePerPlate; i++) {
                     int32_t val = data[i];
                     if (val == -1) {
@@ -405,7 +399,7 @@ public:
 
             case ov::element::f32:
             {
-                const auto data = lprOutputMapped.data<float>();
+                const auto data = lprOutputTensor.data<float>();
                 for (int i = 0; i < maxSequenceSizePerPlate; i++) {
                     int32_t val = int32_t(data[i]);
                     if (val == -1) {
@@ -428,6 +422,6 @@ private:
     std::string LprInputName;
     std::string LprInputSeqName;
     std::string LprOutputName;
-    ov::runtime::Core m_core;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
-    ov::runtime::CompiledModel m_compiled_model;
+    ov::Core m_core;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
+    ov::CompiledModel m_compiled_model;
 };

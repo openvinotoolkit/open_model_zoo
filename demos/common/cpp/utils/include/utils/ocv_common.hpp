@@ -105,7 +105,6 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
         resizedMat = mat;
     }
 
-
     if (tensor.get_element_type() == ov::element::f32) {
         float_t* tensorData = tensor.data<float_t>();
         for (size_t c = 0; c < channels; c++)

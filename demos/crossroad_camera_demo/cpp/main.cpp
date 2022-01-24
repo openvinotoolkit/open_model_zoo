@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <gflags/gflags.h>
 #include <functional>
 #include <chrono>
 #include <algorithm>
@@ -14,6 +13,7 @@
 
 #include "openvino/openvino.hpp"
 
+#include "gflags/gflags.h"
 #include "monitors/presenter.h"
 #include "utils/images_capture.h"
 #include "utils/ocv_common.hpp"
@@ -64,9 +64,7 @@ int main(int argc, char* argv[]) {
         // 1. Load inference engine
         slog::info << ov::get_openvino_version() << slog::endl;
 
-        ov::runtime::Core core;
-
-        std::set<std::string> loadedDevices;
+        ov::Core core;
 
         PersonDetection personDetection;
         PersonAttribsDetection personAttribs;
@@ -78,9 +76,9 @@ int main(int argc, char* argv[]) {
         Load(personReId).into(core, FLAGS_d_reid);
 
         // 3. Do inference
-        InferenceEngine::ROI cropRoi; // cropped image coordinates
-        ov::runtime::Tensor frameTensor;
-        ov::runtime::Tensor roiTensor;
+        cv::Rect cropRoi; // cropped image coordinates
+        ov::Tensor frameTensor;
+        ov::Tensor roiTensor;
         cv::Mat person; // Mat object containing person data cropped by openCV
 
         // Start inference & calc performance
@@ -107,7 +105,7 @@ int main(int argc, char* argv[]) {
             if (FLAGS_auto_resize) {
                 // just wrap Mat object with Tensor without additional memory allocation
                 frameTensor = wrapMat2Tensor(frame);
-                personDetection.setRoiBlob(frameTensor);
+                personDetection.setRoiTensor(frameTensor);
             } else {
                 // resize Mat and copy data into OpenVINO allocated Tensor
                 personDetection.enqueue(frame);
@@ -128,13 +126,13 @@ int main(int argc, char* argv[]) {
                 if (result.label == FLAGS_person_label) {
                     // person
                     if (FLAGS_auto_resize) {
-                        cropRoi.posX = (result.location.x < 0) ? 0 : result.location.x;
-                        cropRoi.posY = (result.location.y < 0) ? 0 : result.location.y;
-                        cropRoi.sizeX = std::min((size_t) result.location.width, frame.cols - cropRoi.posX);
-                        cropRoi.sizeY = std::min((size_t) result.location.height, frame.rows - cropRoi.posY);
-                        ov::Coordinate p00({ 0, cropRoi.posY, cropRoi.posX, 0 });
-                        ov::Coordinate p01({ 1, cropRoi.posY + cropRoi.sizeY, cropRoi.posX + cropRoi.sizeX, 3 });
-                        roiTensor = ov::runtime::Tensor(frameTensor, p00, p01);
+                        cropRoi.x = (result.location.x < 0) ? 0 : result.location.x;
+                        cropRoi.y = (result.location.y < 0) ? 0 : result.location.y;
+                        cropRoi.width = std::min(result.location.width, frame.cols - cropRoi.x);
+                        cropRoi.height = std::min(result.location.height, frame.rows - cropRoi.y);
+                        ov::Coordinate p00({ 0, (size_t)cropRoi.y, (size_t)cropRoi.x, 0 });
+                        ov::Coordinate p01({ 1, (size_t)(cropRoi.y + cropRoi.height), (size_t)(cropRoi.x + cropRoi.width), 3 });
+                        roiTensor = ov::Tensor(frameTensor, p00, p01);
                     } else {
                         // To crop ROI manually and allocate required memory (cv::Mat) again
                         auto clippedRect = result.location & cv::Rect(0, 0, frame.cols, frame.rows);
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
                     if (personAttribs.enabled()) {
                         // Run Person Attributes Recognition
                         if (FLAGS_auto_resize) {
-                            personAttribs.setRoiBlob(roiTensor);
+                            personAttribs.setRoiTensor(roiTensor);
                         } else {
                             personAttribs.enqueue(person);
                         }
@@ -202,7 +200,7 @@ int main(int argc, char* argv[]) {
                     if (personReId.enabled()) {
                         // Run Person Reidentification
                         if (FLAGS_auto_resize) {
-                            personReId.setRoiBlob(roiTensor);
+                            personReId.setRoiTensor(roiTensor);
                         } else {
                             personReId.enqueue(person);
                         }

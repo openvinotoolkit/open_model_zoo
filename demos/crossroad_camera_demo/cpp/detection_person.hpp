@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <gflags/gflags.h>
 #include <string>
 
 #include "openvino/openvino.hpp"
 
+#include "gflags/gflags.h"
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
 #include "crossroad_camera_demo.hpp"
@@ -34,13 +34,13 @@ struct PersonDetection : BaseDetection {
         BaseDetection::submitRequest();
     }
 
-    void setRoiBlob(const ov::runtime::Tensor& roi_tensor) override {
+    void setRoiTensor(const ov::Tensor& roi_tensor) override {
         ov::Shape shape = roi_tensor.get_shape();
         ov::Layout layout("NHWC");
 
         height = static_cast<float>(roi_tensor.get_shape()[ov::layout::height_idx(layout)]);
         width = static_cast<float>(roi_tensor.get_shape()[ov::layout::width_idx(layout)]);
-        BaseDetection::setRoiBlob(roi_tensor);
+        BaseDetection::setRoiTensor(roi_tensor);
     }
 
     void enqueue(const cv::Mat& frame) override {
@@ -51,11 +51,11 @@ struct PersonDetection : BaseDetection {
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
 
-    std::shared_ptr<ov::Model> read(const ov::runtime::Core& core) override {
+    std::shared_ptr<ov::Model> read(const ov::Core& core) override {
         // Read network model
+        slog::info << "Reading model: " << FLAGS_m << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
-        slog::info << "model file: " << FLAGS_m << slog::endl;
-        log_model_info(model);
+        logBasicModelInfo(model);
 
         // Set batch size to 1
         model->get_parameters()[0]->set_layout("NCHW");
@@ -68,7 +68,7 @@ struct PersonDetection : BaseDetection {
             throw std::logic_error("Person Detection network should have only one input");
         }
 
-        inputName = model->input().get_any_name();
+        m_inputName = model->input().get_any_name();
 
         // Check outputs
         ov::OutputVector outputs = model->outputs();
@@ -76,7 +76,7 @@ struct PersonDetection : BaseDetection {
             throw std::logic_error("Person Detection network should have only one output");
         }
 
-        outputName = model->output().get_any_name();
+        m_outputName = model->output().get_any_name();
 
         maxProposalCount = model->output().get_shape()[2];
         objectSize = model->output().get_shape()[3];
@@ -124,7 +124,7 @@ struct PersonDetection : BaseDetection {
             return;
 
         resultsFetched = true;
-        const float* detections = request.get_output_tensor().data<float>();
+        const float* detections = m_infer_request.get_output_tensor().data<float>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0]; // in case of batch

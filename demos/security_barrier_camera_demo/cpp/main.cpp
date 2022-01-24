@@ -18,6 +18,7 @@
 #include "gpu/gpu_config.hpp"
 #include "vpu/hddl_config.hpp"
 
+#include "gflags/gflags.h"
 #include "monitors/presenter.h"
 #include "utils/args_helper.hpp"
 #include "utils/grid_mat.hpp"
@@ -69,7 +70,7 @@ struct InferRequestsContainer {
     InferRequestsContainer(const InferRequestsContainer&) = delete;
     InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
 
-    void assign(const std::vector<ov::runtime::InferRequest>& inferRequests) {
+    void assign(const std::vector<ov::InferRequest>& inferRequests) {
         actualInferRequests = inferRequests;
         this->inferRequests.container.clear();
 
@@ -78,10 +79,10 @@ struct InferRequestsContainer {
         }
     }
 
-    ConcurrentContainer<std::vector<std::reference_wrapper<ov::runtime::InferRequest>>> inferRequests;
+    ConcurrentContainer<std::vector<std::reference_wrapper<ov::InferRequest>>> inferRequests;
 
 private:
-    std::vector<ov::runtime::InferRequest> actualInferRequests;
+    std::vector<ov::InferRequest> actualInferRequests;
 };
 
 // stores all global data for tasks
@@ -106,9 +107,9 @@ struct Context {
         frameCounter{0}
     {
         assert(inputChannels.size() == gridParam.size());
-        std::vector<ov::runtime::InferRequest> detectorInferRequests;
-        std::vector<ov::runtime::InferRequest> attributesInferRequests;
-        std::vector<ov::runtime::InferRequest> lprInferRequests;
+        std::vector<ov::InferRequest> detectorInferRequests;
+        std::vector<ov::InferRequest> attributesInferRequests;
+        std::vector<ov::InferRequest> lprInferRequests;
         detectorInferRequests.reserve(nireq);
         attributesInferRequests.reserve(nclassifiersireq);
         lprInferRequests.reserve(nrecognizersireq);
@@ -173,7 +174,7 @@ struct Context {
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    std::atomic<std::vector<ov::runtime::InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<std::vector<ov::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers;
     InferRequestsContainer attributesInfers;
@@ -205,7 +206,10 @@ public:
 class ResAggregator : public Task {
 public:
     ResAggregator(const VideoFrame::Ptr& sharedVideoFrame, std::list<BboxAndDescr>&& boxesAndDescrs):
-        Task{ sharedVideoFrame, 4.0 }, boxesAndDescrs{ std::move(boxesAndDescrs) } {name = "ResAggregator";}
+        Task{ sharedVideoFrame, 4.0 }, boxesAndDescrs{ std::move(boxesAndDescrs) } {
+        name = "ResAggregator";
+    }
+
     bool isReady() override {
         return true;
     }
@@ -255,26 +259,26 @@ private:
 // extracts detections from blob InferRequests and runs classifiers and recognisers
 class DetectionsProcessor : public Task {
 public:
-    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, ov::runtime::InferRequest* inferRequest) :
-        Task{sharedVideoFrame, 1.0}, inferRequest{inferRequest}, requireGettingNumberOfDetections{true}
-    { name = "DetectionProcessor"; }
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, ov::InferRequest* inferRequest) :
+        Task{sharedVideoFrame, 1.0}, inferRequest{inferRequest}, requireGettingNumberOfDetections{true} {
+        name = "DetectionProcessor"; }
 
     DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, std::shared_ptr<ClassifiersAggregator>&& classifiersAggregator,
         std::list<cv::Rect>&& vehicleRects, std::list<cv::Rect>&& plateRects) :
             Task{sharedVideoFrame, 1.0}, classifiersAggregator{std::move(classifiersAggregator)}, inferRequest{nullptr},
-            vehicleRects{std::move(vehicleRects)}, plateRects{std::move(plateRects)}, requireGettingNumberOfDetections{false}
-    { name = "DetectionProcessor"; }
+            vehicleRects{std::move(vehicleRects)}, plateRects{std::move(plateRects)}, requireGettingNumberOfDetections{false} {
+        name = "DetectionProcessor"; }
 
     bool isReady() override;
     void process() override;
 
 private:
     std::shared_ptr<ClassifiersAggregator> classifiersAggregator;  // when no one stores this object we will draw
-    ov::runtime::InferRequest* inferRequest;
+    ov::InferRequest* inferRequest;
     std::list<cv::Rect> vehicleRects;
     std::list<cv::Rect> plateRects;
-    std::vector<std::reference_wrapper<ov::runtime::InferRequest>> reservedAttributesRequests;
-    std::vector<std::reference_wrapper<ov::runtime::InferRequest>> reservedLprRequests;
+    std::vector<std::reference_wrapper<ov::InferRequest>> reservedAttributesRequests;
+    std::vector<std::reference_wrapper<ov::InferRequest>> reservedLprRequests;
     bool requireGettingNumberOfDetections;
 };
 
@@ -388,12 +392,10 @@ void Drawer::process() {
             }
             else if (key == 32) {
                 context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-            }
-            else {
+            } else {
                 context.drawersContext.presenter.handleKey(key);
             }
-        }
-        else {
+        } else {
             if (!context.isVideo) {
                 try {
                     std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
@@ -504,13 +506,13 @@ void DetectionsProcessor::process() {
         for (auto attributesRequestIt = reservedAttributesRequests.begin(); attributesRequestIt != reservedAttributesRequests.end();
                 vehicleRectsIt++, attributesRequestIt++) {
             const cv::Rect vehicleRect = *vehicleRectsIt;
-            ov::runtime::InferRequest& attributesRequest = *attributesRequestIt;
+            ov::InferRequest& attributesRequest = *attributesRequestIt;
             context.detectionsProcessorsContext.vehicleAttributesClassifier.setImage(attributesRequest, sharedVideoFrame->frame, vehicleRect);
 
             attributesRequest.set_callback(
                 std::bind(
                     [](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                        ov::runtime::InferRequest& attributesRequest,
+                        ov::InferRequest& attributesRequest,
                         cv::Rect rect,
                         Context& context) {
                             attributesRequest.set_callback({});  // destroy the stored bind object
@@ -543,13 +545,13 @@ void DetectionsProcessor::process() {
         auto plateRectsIt = plateRects.begin();
         for (auto lprRequestsIt = reservedLprRequests.begin(); lprRequestsIt != reservedLprRequests.end(); plateRectsIt++, lprRequestsIt++) {
             const cv::Rect plateRect = *plateRectsIt;
-            ov::runtime::InferRequest& lprRequest = *lprRequestsIt;
+            ov::InferRequest& lprRequest = *lprRequestsIt;
             context.detectionsProcessorsContext.lpr.setImage(lprRequest, sharedVideoFrame->frame, plateRect);
 
             lprRequest.set_callback(
                 std::bind(
                     [](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                        ov::runtime::InferRequest& lprRequest,
+                        ov::InferRequest& lprRequest,
                         cv::Rect rect,
                         Context& context) {
                             lprRequest.set_callback({});  // destroy the stored bind object
@@ -599,7 +601,7 @@ bool InferTask::isReady() {
 void InferTask::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
-    std::reference_wrapper<ov::runtime::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
@@ -608,7 +610,7 @@ void InferTask::process() {
     inferRequest.get().set_callback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
-                ov::runtime::InferRequest& inferRequest,
+                ov::InferRequest& inferRequest,
                 Context& context) {
                     inferRequest.set_callback({});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
@@ -716,9 +718,9 @@ int main(int argc, char* argv[]) {
             inputChannels.push_back(InputChannel::create(inputSources[channelI]));
         }
 
-        // 1. Load Inference Engine
+        // 1. Load OpenVINO Core
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         std::set<std::string> devices;
         for (const std::string& netDevices : {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
