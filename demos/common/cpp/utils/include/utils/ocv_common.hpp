@@ -10,12 +10,12 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+
 #include "openvino/openvino.hpp"
 
 #include "utils/common.hpp"
 #include "utils/shared_blob_allocator.h"
 
-#include "openvino/openvino.hpp"
 
 
 /**
@@ -92,56 +92,6 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
     if (static_cast<size_t>(mat.channels()) != channels) {
-        throw std::runtime_error("The number of channels for model input and image must match");
-    }
-    if (channels != 1 && channels != 3) {
-        throw std::runtime_error("Unsupported number of channels");
-    }
-    int batchOffset = batchIndex * width * height * channels;
-
-    cv::Mat resizedMat;
-    if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
-        cv::resize(mat, resizedMat, cv::Size(width, height));
-    }
-    else {
-        resizedMat = mat;
-    }
-
-
-    if (tensor.get_element_type() == ov::element::f32) {
-        float_t* tensorData = tensor.data<float_t>();
-        for (size_t c = 0; c < channels; c++)
-            for (size_t h = 0; h < height; h++)
-                for (size_t w = 0; w < width; w++)
-                    tensorData[batchOffset + c * width * height + h * width + w] =
-                        getMatValue<float_t>(resizedMat, h, w, c);
-    }
-    else {
-        uint8_t* tensorData = tensor.data<uint8_t>();
-        if (resizedMat.depth() == CV_32F) {
-            throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
-        }
-        for (size_t c = 0; c < channels; c++)
-            for (size_t h = 0; h < height; h++)
-                for (size_t w = 0; w < width; w++)
-                    tensorData[batchOffset + c * width * height + h * width + w] =
-                        getMatValue<uint8_t>(resizedMat, h, w, c);
-    }
-}
-
-/**
-* @brief Resize and copy image data from cv::Mat object to a given Tensor object.
-* @param mat - given cv::Mat object with an image data.
-* @param tensor - Tensor object which to be filled by an image data.
-* @param batchIndex - batch index of an image inside of the blob.
-*/
-static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
-    ov::Shape tensorShape = tensor.get_shape();
-    ov::Layout layout("NCHW");
-    const size_t width = tensorShape[ov::layout::width_idx(layout)];
-    const size_t height = tensorShape[ov::layout::height_idx(layout)];
-    const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
-    if (static_cast<size_t>(mat.channels()) != channels) {
         throw std::runtime_error("The number of channels for net input and image must match");
     }
     if (channels != 1 && channels != 3) {
@@ -163,8 +113,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
                         getMatValue<float_t>(resizedMat, h, w, c);
-    }
-    else {
+    } else {
         uint8_t* tensorData = tensor.data<uint8_t>();
         if (resizedMat.depth() == CV_32F) {
             throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
@@ -184,7 +133,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
  * @param mat - given cv::Mat object with an image data.
  * @return resulting Blob pointer.
  */
-static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
+static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     auto matType = mat.type() & CV_MAT_DEPTH_MASK;
     if (matType != CV_8U && matType != CV_32F) {
         throw std::runtime_error("Unsupported mat type for wrapping");
@@ -312,20 +261,21 @@ class InputTransform {
 public:
     InputTransform() : reverseInputChannels(false), isTrivial(true) {}
 
-    InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) :
+    InputTransform(bool reverseInputChannels, const std::string& meanValues, const std::string& scaleValues) :
         reverseInputChannels(reverseInputChannels),
         isTrivial(!reverseInputChannels && meanValues.empty() && scaleValues.empty()),
         means(meanValues.empty() ? cv::Scalar(0.0, 0.0, 0.0) : string2Vec(meanValues)),
         stdScales(scaleValues.empty() ? cv::Scalar(1.0, 1.0, 1.0) : string2Vec(scaleValues)) {
     }
 
-    cv::Scalar string2Vec(const std::string &string) {
+    cv::Scalar string2Vec(const std::string& string) {
         const auto& strValues = split(string, ' ');
         std::vector<float> values;
         try {
             for (auto& str : strValues)
                 values.push_back(std::stof(str));
-        } catch (const std::invalid_argument&) {
+        }
+        catch (const std::invalid_argument&) {
             throw std::runtime_error("Invalid parameter --mean_values or --scale_values is provided.");
         }
         if (values.size() != 3) {
