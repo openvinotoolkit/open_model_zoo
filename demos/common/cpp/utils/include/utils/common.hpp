@@ -36,7 +36,7 @@
 #endif
 
 template <typename T, std::size_t N>
-constexpr std::size_t arraySize(const T (&)[N]) noexcept {
+constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
 }
 
@@ -210,8 +210,13 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
 }
 
 inline void showAvailableDevices() {
+#if defined(OV_NEW_API)
     ov::runtime::Core core;
     std::vector<std::string> devices = core.get_available_devices();
+#else
+    InferenceEngine::Core ie;
+    std::vector<std::string> devices = ie.GetAvailableDevices();
+#endif
 
     std::cout << std::endl;
     std::cout << "Available target devices:";
@@ -221,7 +226,7 @@ inline void showAvailableDevices() {
     std::cout << std::endl;
 }
 
-inline std::string fileNameNoExt(const std::string &filepath) {
+inline std::string fileNameNoExt(const std::string& filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
     return filepath.substr(0, pos);
@@ -251,11 +256,13 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
     }
 }
 
-inline void logCompiledModelInfo(
+inline
+void logCompiledModelInfo(
     const ov::runtime::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
-    const std::string& modelType = "") {
+    const std::string& modelType = "")
+{
     slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
