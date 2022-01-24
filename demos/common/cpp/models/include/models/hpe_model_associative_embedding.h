@@ -45,9 +45,9 @@ protected:
     float delta;
     RESIZE_MODE resizeMode;
 
-    std::string embeddingsBlobName;
-    std::string heatmapsBlobName;
-    std::string nmsHeatmapsBlobName;
+    std::string embeddingsTensorName;
+    std::string heatmapsTensorName;
+    std::string nmsHeatmapsTensorName;
 
     static const int numJoints = 17;
     static const int stride = 32;
@@ -58,7 +58,7 @@ protected:
 
     void changeInputSize(std::shared_ptr<ov::Model>& model);
 
-    std::string findLayerByName(const std::string layerName,
+    std::string findTensorByName(const std::string tensorName,
                                 const std::vector<std::string>& outputsNames);
 
     std::vector<cv::Mat> split(float* data, const ov::Shape& shape);

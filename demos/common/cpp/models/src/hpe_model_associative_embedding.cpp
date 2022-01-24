@@ -45,7 +45,7 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Prepare input Tensors ------------------------------------------------------
     changeInputSize(model);
 
     const ov::OutputVector& inputsInfo = model->inputs();
@@ -66,7 +66,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
 
     ppp.input().model().set_layout("NCHW");
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Prepare output Tensors -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 2 && outputsInfo.size() != 3) {
         throw std::runtime_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
@@ -88,13 +88,13 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     }
     model = ppp.build();
 
-    embeddingsBlobName = findLayerByName("embeddings", outputsNames);
-    heatmapsBlobName = findLayerByName("heatmaps", outputsNames);
+    embeddingsTensorName = findTensorByName("embeddings", outputsNames);
+    heatmapsTensorName = findTensorByName("heatmaps", outputsNames);
     try {
-        nmsHeatmapsBlobName = findLayerByName("nms_heatmaps", outputsNames);
+        nmsHeatmapsTensorName = findTensorByName("nms_heatmaps", outputsNames);
     }
     catch (const std::runtime_error&) {
-        nmsHeatmapsBlobName = heatmapsBlobName;
+        nmsHeatmapsTensorName = heatmapsTensorName;
     }
 }
 
@@ -134,19 +134,19 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    auto aembds = infResult.outputsData[embeddingsBlobName];
+    auto aembds = infResult.outputsData[embeddingsTensorName];
     const ov::Shape& aembdsShape = aembds.get_shape();
     float* aembdsMapped = aembds.data<float>();
     std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsShape);
 
-    auto heats = infResult.outputsData[heatmapsBlobName];
+    auto heats = infResult.outputsData[heatmapsTensorName];
     const ov::Shape& heatMapsShape = heats.get_shape();
     float* heatMapsMapped = heats.data<float>();
     std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsShape);
 
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
-    if (nmsHeatmapsBlobName != heatmapsBlobName) {
-        auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
+    if (nmsHeatmapsTensorName != heatmapsTensorName) {
+        auto nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
         const InferenceEngine::SizeVector& nmsHeatMapsShape = nmsHeats.get_shape();
         float* nmsHeatMapsMapped = nmsHeats.data<float>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsShape);
@@ -184,18 +184,20 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     return std::unique_ptr<ResultBase>(result);
 }
 
-std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName,
+std::string HpeAssociativeEmbedding::findTensorByName(const std::string tensorName,
                                                      const std::vector<std::string>& outputsNames) {
     std::vector<std::string> suitableLayers;
     for (auto& outputName: outputsNames) {
-        if (outputName.rfind(layerName, 0) == 0) {
+        if (outputName.rfind(tensorName, 0) == 0) {
            suitableLayers.push_back(outputName);
         }
     }
-    if (suitableLayers.empty())
-        throw std::runtime_error("Suitable layer for " + layerName + " output is not found");
-    else if (suitableLayers.size() > 1)
-        throw std::runtime_error("More than 1 layer matched to " + layerName + " output");
+    if (suitableLayers.empty()) {
+        throw std::runtime_error("Suitable tensor for " + tensorName + " output is not found");
+    }
+    else if (suitableLayers.size() > 1) {
+        throw std::runtime_error("More than 1 tensor matched to " + tensorName + " output");
+    }
     return suitableLayers[0];
 }
 
