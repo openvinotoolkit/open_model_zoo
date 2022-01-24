@@ -38,7 +38,7 @@ class SSD(DetectionModel):
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)
         if self.image_info_blob_name:
-            dict_inputs[self.image_info_blob_name] = [self.h, self.w, 1]
+            dict_inputs[self.image_info_blob_name] = np.array([[self.h, self.w, 1]])
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):

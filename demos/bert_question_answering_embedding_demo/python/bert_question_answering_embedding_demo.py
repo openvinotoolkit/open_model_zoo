@@ -168,9 +168,9 @@ def main():
     visualizer = Visualizer(args.colors)
     total_latency = (perf_counter() - vocab_start_time) * 1e3
 
-    ie = create_core()
+    core = create_core()
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config,
+    model_emb_adapter = OpenvinoAdapter(core, args.model_emb, device=args.device, plugin_config=plugin_config,
                                         max_num_requests=args.num_infer_requests)
     model_emb = BertEmbedding(model_emb_adapter, {'vocab': vocab, 'input_names': args.input_names_emb})
     model_emb.log_layers_info()
@@ -182,12 +182,12 @@ def main():
     for new_length in [max_len_question, max_len_context]:
         model_emb.reshape(new_length)
         if new_length == max_len_question:
-            emb_exec_net = ie.load_network(model_emb_adapter.net, args.device)
+            emb_exec_net = core.compile_model(model_emb_adapter.model, args.device)
         else:
             emb_pipeline = AsyncPipeline(model_emb)
 
     if args.model_qa:
-        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config,
+        model_qa_adapter = OpenvinoAdapter(core, args.model_qa, device=args.device, plugin_config=plugin_config,
                                            max_num_requests=args.num_infer_requests)
         config = {
             'vocab': vocab,
