@@ -114,7 +114,7 @@ For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09
 Notice: In the accuracy report, feature extraction network is i3d-rgb, you can get this model from `../../public/i3d-rgb-tf/README.md`.
 
 ## Inputs
-The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as i3d-rgb(`../../public/i3d-rgb-tf/README.md`) and resnet-50(`../../public/resnet-50-tf/README.md`), and feature outputs of the previous frame.
+The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as [i3d-rgb-tf](../../public/i3d-rgb-tf/README.md) and [resnet-50-tf](`../../public/resnet-50-tf/README.md), and feature outputs of the previous frame.
 
 You can check the i3d-rgb and smartlab-sequence-modelling-0001 usage in demos/smartlab_demo
 
