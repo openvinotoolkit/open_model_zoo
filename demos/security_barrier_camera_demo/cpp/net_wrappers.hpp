@@ -119,14 +119,32 @@ public:
             // resize and copy data from image to tensor using OpenCV
             resize2tensor(img, inputTensor);
         }
+        /*
+        InferenceEngine::SizeVector blobSize = input->getTensorDesc().getDims();
+        const size_t width = blobSize[3];
+        const size_t height = blobSize[2];
+        const size_t channels = blobSize[1];
+        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
+        uint8_t* blobData = blobMapped.as<uint8_t*>();
+        for (size_t c = 0; c < channels; c++)
+            for (size_t h = 0; h < height; h++)
+                for (size_t w = 0; w < width; w++)
+                    std::cout << blobData[ c * width * height + h * width + w];
+        std::cout << std::endl;
+        */
     }
 
-    std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
-        // there is no big difference if InferReq of detector from another device is passed
-        // because the processing is the same for the same topology
+    std::list<Result> getResults(ov::InferRequest& inferRequest, const int64_t channelID, const int64_t frameID, cv::Size upscale, std::vector<std::string>& rawResults) {
+        // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         ov::Tensor output_tensor = inferRequest.get_tensor(m_detectorOutputName);
         const float* const detections = output_tensor.data<float>();
+        slog::debug << "------- Channel #" << channelID << " - Frame #" << frameID << " ----- blob size #---"<< blob->size() << slog::endl;
+        for (size_t i = 0; i < blob->size(); i++)
+        {
+            std::cout << detections[i] << " "; 
+        }
+        std::cout << std::endl; 
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0]; // in case of batch
@@ -148,8 +166,12 @@ public:
             std::ostringstream rawResultsStream;
             rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
                         << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
+
             rawResults.push_back(rawResultsStream.str());
         }
+
+        if(results.size() != 3)
+            slog::debug << "==== Channel #" << channelID << "-Frame #" << frameID << "-ROI Number #" << results.size() << " ====" << slog::endl;
         return results;
     }
 

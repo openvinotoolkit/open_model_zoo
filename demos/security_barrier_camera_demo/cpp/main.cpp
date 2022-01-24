@@ -220,7 +220,7 @@ public:
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (FLAGS_r && !rawDetections.empty()) {
-            slog::debug << "Frame #: " << sharedVideoFrame->frameId << slog::endl;
+            //slog::debug << "--Channel #" << sharedVideoFrame->sourceID <<"--Frame #" << sharedVideoFrame->frameId << "-----" << slog::endl;
             slog::debug << rawDetections;
             // destructor assures that none uses the container
             for (const std::string& rawAttribute : rawAttributes.container) {
@@ -333,6 +333,7 @@ bool Drawer::isReady() {
 
 void Drawer::process() {
     const int64_t frameId = sharedVideoFrame->frameId;
+    //slog::debug <<"Drawer::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     std::map<int64_t, GridMat>& gridMats = context.drawersContext.gridMats;
     context.drawersContext.drawerMutex.lock();
@@ -392,6 +393,7 @@ void Drawer::process() {
 }
 
 void ResAggregator::process() {
+    //slog::debug <<"ResAggregator::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
@@ -428,7 +430,7 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<Detector::Result> results;
-        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->sourceID, sharedVideoFrame->frameId, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (Detector::Result result : results) {
             switch (result.label) {
                 case 1:
@@ -481,6 +483,7 @@ bool DetectionsProcessor::isReady() {
 }
 
 void DetectionsProcessor::process() {
+    //slog::debug <<"DetectionProcessor::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     if (!FLAGS_m_va.empty()) {
         auto vehicleRectsIt = vehicleRects.begin();
@@ -586,6 +589,20 @@ void InferTask::process() {
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
+    //for (int i = 0; i < sharedVideoFrame->frame.rows; i++) {
+    //    if(i == sharedVideoFrame->frame.rows - 1)
+    //        slog::debug <<"InferTask::process for channel-frameid-imgsize [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "-" << sharedVideoFrame->frame.total() << "]....." << slog::endl;
+    //    for (int j = 0; j < sharedVideoFrame->frame.cols; j++) {
+    //        auto bgr = sharedVideoFrame->frame.at<cv::Vec3b>(i,j);
+    //        int a = bgr[0];
+    //        int b = bgr[1];
+    //        int c = bgr[2];
+    //        if(i == sharedVideoFrame->frame.rows - 1)
+    //            std::cout << a <<" " << b << " " << c << " ";
+    //    }
+    //    if(i == sharedVideoFrame->frame.rows - 1)
+    //        std::cout << std::endl;
+    //}
     context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
 
     inferRequest.get().set_callback(
@@ -607,6 +624,7 @@ void InferTask::process() {
 bool Reader::isReady() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.readersContext.lastCapturedFrameIdsMutexes[sharedVideoFrame->sourceID].lock();
+    // Look for the next frame
     if (context.readersContext.lastCapturedFrameIds[sharedVideoFrame->sourceID] + 1 == sharedVideoFrame->frameId) {
         return true;
     } else {
@@ -616,6 +634,7 @@ bool Reader::isReady() {
 }
 
 void Reader::process() {
+    //slog::debug <<"Reader::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     unsigned sourceID = sharedVideoFrame->sourceID;
     sharedVideoFrame->timestamp = std::chrono::steady_clock::now();
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
@@ -725,6 +744,7 @@ int main(int argc, char* argv[]) {
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
+<<<<<<< HEAD
             if ("GPU" == device) {
                 core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? ov::streams::Num(device_nstreams["GPU"]) : ov::streams::AUTO));
 
@@ -735,6 +755,23 @@ int main(int argc, char* argv[]) {
                     core.set_property("GPU", ov::intel_gpu::hint::queue_throttle(ov::intel_gpu::hint::ThrottleLevel(1)));
                 }
             }
+=======
+            //if ("GPU" == device) {
+            //    // Load any user-specified clDNN Extensions
+            //    if (!FLAGS_c.empty()) {
+            //        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+            //    }
+            //    ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+            //                    (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
+            //                                                        CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
+            //    device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+            //    if (devices.end() != devices.find("CPU")) {
+            //        // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
+            //        // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
+            //        ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+            //    }
+            //}
+>>>>>>> Add some debug info in security_barrier_camera_demo.
         }
 
         // Graph tagging via config options
@@ -806,12 +843,15 @@ int main(int argc, char* argv[]) {
         context.drawersContext.drawersWorker = worker;
         context.resAggregatorsWorker = worker;
 
+        int readerCount = 0;
         for (uint64_t i = 0; i < FLAGS_n_iqs; i++) {
             for (unsigned sourceID = 0; sourceID < inputChannels.size(); sourceID++) {
                 VideoFrame::Ptr sharedVideoFrame = std::make_shared<ReborningVideoFrame>(context, sourceID, i);
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
+                readerCount++;
             }
         }
+        slog::debug << "Reader Count: " << readerCount << slog::endl;
 
         // Running
         worker->runThreads();
