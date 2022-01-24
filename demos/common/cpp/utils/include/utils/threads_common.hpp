@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,7 +17,7 @@
 #include <vector>
 
 #include <opencv2/core/core.hpp>
-#include <utils/performance_metrics.hpp>
+#include "utils/performance_metrics.hpp"
 
 // VideoFrame can represent not a single image but the whole grid
 class VideoFrame {
@@ -25,10 +25,7 @@ public:
     typedef std::shared_ptr<VideoFrame> Ptr;
 
     VideoFrame(unsigned sourceID, int64_t frameId, const cv::Mat& frame = cv::Mat()) :
-        sourceID{sourceID}, frameId{frameId}, frame{frame}
-    {
-        return;
-    }
+        sourceID{sourceID}, frameId{frameId}, frame{frame} {}
     virtual ~VideoFrame() = default;  // A user has to define how it is reconstructed
 
     const unsigned sourceID;
@@ -129,11 +126,7 @@ private:
 void tryPush(const std::weak_ptr<Worker>& worker, std::shared_ptr<Task>&& task) {
     try {
         std::shared_ptr<Worker>(worker)->push(task);
-    }
-    catch (const std::bad_weak_ptr& e)
-    {
-        throw e;
-    }
+    } catch (const std::bad_weak_ptr& e) {}
 }
 
 template <class C> class ConcurrentContainer {

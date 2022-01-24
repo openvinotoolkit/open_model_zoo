@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -18,7 +18,6 @@
 #include "gpu/gpu_config.hpp"
 #include "vpu/hddl_config.hpp"
 
-#include "gflags/gflags.h"
 #include "monitors/presenter.h"
 #include "utils/args_helper.hpp"
 #include "utils/grid_mat.hpp"
@@ -27,8 +26,8 @@
 #include "utils/slog.hpp"
 #include "utils/threads_common.hpp"
 
-#include "security_barrier_camera_demo.hpp"
 #include "net_wrappers.hpp"
+#include "security_barrier_camera_demo.hpp"
 
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
