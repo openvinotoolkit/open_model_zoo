@@ -17,7 +17,7 @@ Model Server is distributed as a docker image and it's available in DockerHub, s
 `ovmsclient` package is distributed on PyPi, so the easiest way to install it is via:
 
 ```
-pip install ovmsclient
+pip3 install ovmsclient
 ```
 
 ## Model configuration

@@ -99,6 +99,22 @@ You can use the following command to try the demo (assuming the model from the O
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
 ```
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 bert_named_entity_recognition_demo.py.py
+            --vocab=<models_dir>/models/public/bert-base-ner/vocab.txt
+            --model=localhost:9000/models/bert
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            --adapter ovms
+```
+
+
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (text from the url) do not fit the model input

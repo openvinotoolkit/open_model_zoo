@@ -148,6 +148,16 @@ The color palette is used to visualize predicted classes. By default, the colors
 
 Available colors files located in the `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 segmentation_demo.py -i 0 -m localhost:9000/models/image_segmentation --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting images with blended segmentation mask by default. By setting `--only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.

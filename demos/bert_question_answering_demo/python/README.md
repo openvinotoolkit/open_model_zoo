@@ -123,6 +123,23 @@ Options:
 
 The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 bert_question_answering_demo.py
+            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt
+            --model=localhost:9000/models/bert
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --output_names="output_s,output_e"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            --adapter ovms
+            -c
+```
+
 ## Demo Inputs
 
 The application reads text from the HTML page at the given url and then answers questions typed from the console.
