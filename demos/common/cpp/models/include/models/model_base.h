@@ -40,12 +40,8 @@ public:
 
     std::string getModelFileName() { return modelFileName; }
 
-    void SetInputsPreprocessing(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
+    void setInputsPreprocessing(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
         this->inputTransform = InputTransform(reverseInputChannels, meanValues, scaleValues);
-    }
-
-    void setBatchOne(std::shared_ptr<ov::Model>& model) {
-        ov::set_batch(model, 1);
     }
 
 protected:

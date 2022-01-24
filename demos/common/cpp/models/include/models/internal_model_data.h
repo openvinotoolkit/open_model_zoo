@@ -15,8 +15,7 @@
 */
 
 #pragma once
-struct InternalModelData
-{
+struct InternalModelData {
     virtual ~InternalModelData() {}
 
     template<class T> T& asRef() {
@@ -28,8 +27,7 @@ struct InternalModelData
     }
 };
 
-struct InternalImageModelData : public InternalModelData
-{
+struct InternalImageModelData : public InternalModelData {
     InternalImageModelData(int width, int height) :
         inputImgWidth(width),
         inputImgHeight(height) {}
@@ -38,8 +36,7 @@ struct InternalImageModelData : public InternalModelData
     int inputImgHeight;
 };
 
-struct InternalScaleData : public InternalImageModelData
-{
+struct InternalScaleData : public InternalImageModelData {
     InternalScaleData(int width, int height, float scaleX, float scaleY) :
         InternalImageModelData(width, height),
         scaleX(scaleX), scaleY(scaleY) {}

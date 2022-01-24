@@ -26,11 +26,12 @@ std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::runtime::Core& core) {
     slog::info << "Reading model " << modelFileName << slog::endl;
     std::shared_ptr<ov::Model>  model = core.read_model(modelFileName);
     logBasicModelInfo(model);
-    /** Set batch size to 1 **/
-    //setBatchOne(model);
-
-    // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
+    // -------------------------- Reading all outputs names and customizing I/O tensors (in inherited classes)
     prepareInputsOutputs(model);
+
+    /** Set batch size to 1 **/
+    ov::set_batch(model, 1);
+
     return model;
 }
 
