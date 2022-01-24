@@ -4,9 +4,9 @@ models:
     launchers:
       - framework: dlsdk
         adapter: 
-          type: yolo_v3
+          type: yolox
           classes: 3
-          anchors: yolo_v3
+          anchors: yolox
 
     datasets:
       - name: DSI1867
