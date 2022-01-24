@@ -583,6 +583,8 @@ class OpenVINOLauncher(Launcher):
     def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
+        if hasattr(self, 'infer_request'):
+            del self.infer_request
         if network is None:
             self._create_network()
         else:
@@ -604,6 +606,7 @@ class OpenVINOLauncher(Launcher):
                 self.exec_network = self.ie_core.compile_model(
                     self.network, self._device
                 )
+                self.infer_request = self.exec_network.create_infer_request()
 
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
