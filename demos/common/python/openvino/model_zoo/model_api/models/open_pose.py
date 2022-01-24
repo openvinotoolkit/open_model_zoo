@@ -52,10 +52,10 @@ class OpenPose(ImageModel):
                 'of second dimension of another output')
 
         paf = paf.inputs()[0].get_source_output().get_node()
-        paf.get_output_tensor(0).set_names(set([self.pafs_blob_name]))
+        paf.get_output_tensor(0).set_names({self.pafs_blob_name})
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
 
-        heatmap.get_output_tensor(0).set_names(set([self.heatmaps_blob_name]))
+        heatmap.get_output_tensor(0).set_names({self.heatmaps_blob_name})
 
         # Add keypoints NMS to the network.
         # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
@@ -63,7 +63,7 @@ class OpenPose(ImageModel):
         k = 2 * p + 1
         pooled_heatmap = opset8.max_pool(heatmap, kernel_shape=(k, k), dilations=(1, 1), pads_begin=(p, p), pads_end=(p, p),
                                      strides=(1, 1), name=self.pooled_heatmaps_blob_name)
-        pooled_heatmap.output(0).get_tensor().set_names(set([self.pooled_heatmaps_blob_name]))
+        pooled_heatmap.output(0).get_tensor().set_names({self.pooled_heatmaps_blob_name})
         self.model_adapter.model.add_outputs([pooled_heatmap.output(0)])
 
         self.inputs = self.model_adapter.get_input_layers()
