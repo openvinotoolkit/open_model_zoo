@@ -44,10 +44,13 @@ class ImageBackgroundMattingAdapter(Adapter):
         return result
 
     def to_image(self, tensor, meta):
-        return cv2.resize(
+        out = cv2.resize(
             np.transpose((tensor * 255).astype(np.uint8), (1, 2, 0)),
             (meta['original_width'], meta['original_height'])
         )
+        if len(out.shape) == 3 and out.shape[-1] == 3:
+            out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
+        return out
 
     @classmethod
     def parameters(cls):

@@ -23,58 +23,42 @@ from ..representation import (
     BackgroundMattingPrediction
 )
 
+from ..config import BoolField
 from .metric import PerImageEvaluationMetric
-from .average_meter import AverageMeter
-from ..utils import UnsupportedPackage
 
 
-try:
-    from sklearn.metrics import accuracy_score, confusion_matrix
-except ImportError as import_error:
-    accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
-    confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
+class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
+    annotation_types = (BackgroundMattingAnnotation,)
+    prediction_types = (BackgroundMattingPrediction,)
 
+    @staticmethod
+    def prepare_pha(image):
+        if image.shape[-1] == 4:
+            return image[:, :, -1].astype(np.float32) / 255
+        elif image.shape[-1] == 3:
+            return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255
+        elif len(image.shape) == 2:
+            return image.astype(np.float32) / 255
+        else:
+            raise ValueError('Unsupported format of image!')
 
-def prepare_pha(image):
-    if image.shape[-1] == 4:
-        return image[:, :, -1].astype(np.float32) / 255
-    elif image.shape[-1] == 3:
-        return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255
-    elif len(image.shape) == 2:
-        return image.astype(np.float32) / 255
-    else:
-        raise ValueError('Unsupported format of image!')
+    @staticmethod
+    def prepare_fgr(image):
+        if image.shape[-1] == 4:
+            return image[:, :, :-1].astype(np.float32) / 255
+        elif image.shape[-1] == 3:
+            return image.astype(np.float32) / 255
+        else:
+            raise ValueError('Unsupported format of image!')
 
+    def get_annotation(self, annotation):
+        return getattr(self, f'prepare_{self.prediction_source}')(annotation.value)
 
-def prepare_fgr(image):
-    if image.shape[-1] == 4:
-        return image[:, :, :-1].astype(np.float32) / 255
-    elif image.shape[-1] == 3:
-        return image.astype(np.float32) / 255
-    else:
-        raise ValueError('Unsupported format of image!')
-
-
-class MeanOfAbsoluteDifference(PerImageEvaluationMetric):
-    __provider__ = 'mean_of_absolute_difference'
-    annotation_types = (BackgroundMattingAnnotation, )
-    prediction_types = (BackgroundMattingPrediction, )
-
-    def update(self, annotation, prediction):
-        pred = prepare_pha(self.get_prediction(prediction))
-        gt = prepare_pha(annotation.value)
-        value = np.mean(abs(pred - gt)) * 1e3
-        self.results.append(value)
-        return value
+    def get_prediction(self, prediction):
+        return getattr(self, f'prepare_{self.prediction_source}')(prediction.value[self.prediction_source])
 
     def evaluate(self, annotations, predictions):
         return sum(self.results) / len(self.results)
-
-    def get_prediction(self, prediction):
-        if self.name.startswith('alpha'):
-            return prediction.value['pha']
-        else:
-            return prediction.value['fgr']
 
     def reset(self):
         self.results = []
@@ -87,12 +71,23 @@ class MeanOfAbsoluteDifference(PerImageEvaluationMetric):
         return {'target': 'higher-worse'}
 
 
-class SpatialGradient(MeanOfAbsoluteDifference):
+class MeanOfAbsoluteDifference(BaseBackgroundMattingMetrics):
+    __provider__ = 'mean_of_absolute_difference'
+
+    def update(self, annotation, prediction):
+        pred = self.get_prediction(prediction)
+        gt = self.get_annotation(annotation)
+        value = np.mean(abs(pred - gt)) * 1e3
+        self.results.append(value)
+        return value
+
+
+class SpatialGradient(BaseBackgroundMattingMetrics):
     __provider__ = 'spatial_gradient'
 
     def update(self, annotation, prediction):
-        pred = prepare_pha(self.get_prediction(prediction))
-        gt = prepare_pha(annotation.value)
+        pred = self.get_prediction(prediction)
+        gt = self.get_annotation(annotation)
         gt_grad = self.gauss_gradient(gt)
         pred_grad = self.gauss_gradient(pred)
         value = np.sum((gt_grad - pred_grad) ** 2) / 1000
@@ -131,12 +126,30 @@ class SpatialGradient(MeanOfAbsoluteDifference):
         self.reset()
 
 
-class MeanSquaredError(MeanOfAbsoluteDifference):
+class MeanSquaredError(BaseBackgroundMattingMetrics):
     __provider__ = 'mean_squared_error'
 
     def update(self, annotation, prediction):
-        pred = prepare_pha(self.get_prediction(prediction))
-        gt = prepare_pha(annotation.value)
+        pred = self.get_prediction(prediction)
+        gt = self.get_annotation(annotation)
+        if self.use_mask:
+            mask = self.prepare_pha(annotation.value) > 0
+            pred = pred[mask]
+            gt = gt[mask]
         value = np.mean((pred - gt) ** 2) * 1e3
         self.results.append(value)
         return value
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'use_mask': BoolField(
+                optional=True, default=False, description="Apply alpha mask to foreground."
+            )
+        })
+        return parameters
+
+    def configure(self):
+        super().configure()
+        self.use_mask = self.get_value_from_config('use_mask')
