@@ -331,6 +331,7 @@ class OpenVINOLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if self.infer_request is not None:
+            del self.infer_request
             self.infer_request = None
         partial_shapes = {}
         for name, shape in shapes.items():
@@ -344,6 +345,7 @@ class OpenVINOLauncher(Launcher):
         if self.dyn_input_layers and make_dynamic:
             return
         self.exec_network = self.ie_core.compile_model(self.network, self.device)
+        self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def reshape_network(network, shapes):
@@ -622,6 +624,7 @@ class OpenVINOLauncher(Launcher):
             self.exec_network = self.ie_core.compile_model(
                 self.network, self._device
             )
+            self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def get_dynamic_inputs(network):
