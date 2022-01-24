@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
-        model->SetInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
+        model->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;

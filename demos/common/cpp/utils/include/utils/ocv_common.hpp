@@ -82,6 +82,19 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
 }
 
 /**
+* @brief Resize src image to given (width, height) and write it to dst
+* @param src - given cv::Mat object with an image.
+* @param dst - cv::Mat object for result.
+* @param width - desired image width.
+* @param height- desired image height.
+*/
+static UNUSED void resize(const cv::Mat& src, cv::Mat& dst, size_t width, size_t height) {
+    if (static_cast<int>(width) != src.size().width || static_cast<int>(height) != src.size().height) {
+        cv::resize(src, dst, cv::Size(width, height));
+    }
+}
+
+/**
 * @brief Sets image data stored in cv::Mat object to a given Blob object.
 * @param mat - given cv::Mat object with an image data.
 * @param blob - Blob object which to be filled by an image data.
@@ -129,6 +142,7 @@ inline void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob
 }
 
 /**
+>>>>>>> b9dd0603c (use shared tensor allocator in wrapMat2Tensor; apply NHWC layout for tensors)
  * @brief Wraps data stored inside of a passed cv::Mat object by new Blob pointer.
  * @note: No memory allocation is happened. The blob just points to already existing
  *        cv::Mat data.
@@ -181,8 +195,8 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
 
     const bool is_dense = strideW == channels && strideH == channels * width;
     OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
-
-    return ov::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, mat.data);
+    auto allocator = std::make_shared<SharedTensorAllocator>(mat);
+    return ov::runtime::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, ov::Allocator(allocator));
 }
 
 static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {

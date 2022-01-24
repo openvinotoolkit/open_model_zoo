@@ -94,16 +94,16 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
 
         ppp.input().preprocess().
             convert_element_type(ov::element::f32).
-            convert_layout("NCHW").
+            //convert_layout("NHWC").
             resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
-
-        ppp.input().model().set_layout("NCHW");
     }
     else {
         ppp.input().tensor().
             set_element_type(ov::element::u8).
-            set_layout({ "NCHW" });
+            set_layout({ "NHWC" });
     }
+
+    ppp.input().model().set_layout("NCHW");
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
@@ -132,6 +132,8 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
 
+    // // set batch only after we determine layout
+    // ov::set_batch(model, 1);
     // --------------------------- Adding softmax and topK output blobs ---------------------------
     auto nodes = model->get_ops();
     auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
