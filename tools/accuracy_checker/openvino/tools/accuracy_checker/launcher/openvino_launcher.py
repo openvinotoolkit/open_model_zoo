@@ -585,6 +585,7 @@ class OpenVINOLauncher(Launcher):
             del self.exec_network
         if hasattr(self, 'infer_request'):
             del self.infer_request
+            self.infer_request = None
         if network is None:
             self._create_network()
         else:
