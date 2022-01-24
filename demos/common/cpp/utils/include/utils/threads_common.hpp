@@ -126,7 +126,7 @@ private:
 void tryPush(const std::weak_ptr<Worker>& worker, std::shared_ptr<Task>&& task) {
     try {
         std::shared_ptr<Worker>(worker)->push(task);
-    } catch (const std::bad_weak_ptr& e) {}
+    } catch (const std::bad_weak_ptr&) {}
 }
 
 template <class C> class ConcurrentContainer {
