@@ -116,7 +116,7 @@ Notice: In the accuracy report, feature extraction network is i3d-rgb, you can g
 ## Inputs
 The inputs to the network are feature vectors at each video frame, which should be the output of feature extraction network, such as [i3d-rgb](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/i3d-rgb-tf) and [resnet-50](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/resnet-50-tf), and feature outputs of the previous frame.
 
-You can check the i3d-rgb and smartlab-sequence-modelling-0001 usage in [smartlab demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/smartlab_demo/python/README.md).
+You can check the i3d-rgb and smartlab-sequence-modelling-0001 usage in demos/smartlab_demo/
 
 1. Input feature, name: `input`, shape: `1, 2048, 24`, format: `B, W, H`, where:
 
@@ -130,25 +130,25 @@ You can check the i3d-rgb and smartlab-sequence-modelling-0001 usage in [smartla
 5. History feature 4, name: `fhis_in_3`, shape: `11, 64, 2048`, format: `C, H', W`, where:
 
    - `C` - the channel number of feature vector
-   - `H'`- feature map height
+   - `H`- feature map height
    - `W` - feature map width
 
 ## Outputs
 
 The outputs also include two parts: predictions and four feature outputs. Predictions is the action classification and prediction results. Four Feature maps are the model layer features in past frames.
-1. Prediction, name: `output`, shape: `4, 1, 64, 24`, format: `C, B, H', W`,
+1. Prediction, name: `output`, shape: `4, 1, 64, 24`, format: `C, B, H, W`,
    - `C` - the channel number of feature vector
    - `B` - batch size
-   - `H'`- feature map height
+   - `H`- feature map height
    - `W` - feature map width
 After post-process with argmx() function, the prediction result can be used to decide the action type of the current frame.
-2. History feature 1, name: `fhis_out_0`, shape: `12, 64, 2048`, format: `C, H', W`,
-3. History feature 2, name: `fhis_out_1`, shape: `11, 64, 2048`, format: `C, H', W`,
-4. History feature 3, name: `fhis_out_2`, shape: `11, 64, 2048`, format: `C, H', W`,
-5. History feature 4, name: `fhis_out_3`, shape: `11, 64, 2048`, format: `C, H', W`, where:
+2. History feature 1, name: `fhis_out_0`, shape: `12, 64, 2048`, format: `C, H, W`,
+3. History feature 2, name: `fhis_out_1`, shape: `11, 64, 2048`, format: `C, H, W`,
+4. History feature 3, name: `fhis_out_2`, shape: `11, 64, 2048`, format: `C, H, W`,
+5. History feature 4, name: `fhis_out_3`, shape: `11, 64, 2048`, format: `C, H, W`, where:
 
    - `C` - the channel number of feature vector
-   - `H'`- feature map height
+   - `H`- feature map height
    - `W` - feature map width
 
 ## Legal Information
