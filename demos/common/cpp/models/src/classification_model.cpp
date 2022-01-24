@@ -132,8 +132,6 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
 
-    // // set batch only after we determine layout
-    // ov::set_batch(model, 1);
     // --------------------------- Adding softmax and topK output blobs ---------------------------
     auto nodes = model->get_ops();
     auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),

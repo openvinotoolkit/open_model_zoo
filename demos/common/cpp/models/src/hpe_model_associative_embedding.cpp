@@ -113,6 +113,7 @@ void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model)
     inputShape[2] = height;
     inputShape[3] = width;
     inputLayerSize = cv::Size(inputShape[3], inputShape[2]);
+
     std::map<std::string, ov::PartialShape> shapes;
     shapes[inTensorName] = ov::PartialShape(inputShape);
     model->reshape(shapes);
