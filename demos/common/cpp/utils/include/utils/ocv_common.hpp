@@ -14,7 +14,7 @@
 #include "openvino/openvino.hpp"
 
 #include "utils/common.hpp"
-#include "utils/shared_blob_allocator.h"
+#include "utils/shared_tensor_allocator.hpp"
 
 
 /**
