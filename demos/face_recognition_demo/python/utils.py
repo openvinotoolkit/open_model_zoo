@@ -31,9 +31,13 @@ def cut_rois(frame, rois):
     return [crop(frame, roi) for roi in rois]
 
 
-def resize_input(image, target_shape):
-    _, _, h, w = target_shape
+def resize_input(image, target_shape, nchw_layout):
+    if nchw_layout:
+        _, _, h, w = target_shape
+    else:
+        _, h, w, _ = target_shape
     resized_image = resize_image(image, (w, h))
-    resized_image = resized_image.transpose((2, 0, 1)) # HWC->CHW
+    if nchw_layout:
+        resized_image = resized_image.transpose((2, 0, 1)) # HWC->CHW
     resized_image = resized_image.reshape(target_shape)
     return resized_image
