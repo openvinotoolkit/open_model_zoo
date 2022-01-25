@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018-2021 Intel Corporation
+ Copyright (c) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,26 +23,29 @@ from ie_module import Module
 class LandmarksDetector(Module):
     POINTS_NUMBER = 5
 
-    def __init__(self, ie, model):
-        super(LandmarksDetector, self).__init__(ie, model, 'Landmarks Detection')
+    def __init__(self, core, model):
+        super(LandmarksDetector, self).__init__(core, model, 'Landmarks Detection')
 
-        assert len(self.model.input_info) == 1, 'Expected 1 input blob'
-        assert len(self.model.outputs) == 1, 'Expected 1 output blob'
-        self.input_blob = next(iter(self.model.input_info))
-        self.output_blob = next(iter(self.model.outputs))
-        self.input_shape = self.model.input_info[self.input_blob].input_data.shape
-        output_shape = self.model.outputs[self.output_blob].shape
+        if len(self.model.inputs) != 1:
+            raise RuntimeError("The model expects 1 input layer")
+        if len(self.model.outputs) != 1:
+            raise RuntimeError("The model expects 1 output layer")
 
-        assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1], output_shape), \
-            'Expected model output shape {}, got {}'.format([1, self.POINTS_NUMBER * 2, 1, 1], output_shape)
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+        self.input_shape = self.model.inputs[0].shape
+        self.nchw_layout = self.input_shape[1] == 3
+        output_shape = self.model.outputs[0].shape
+        if not np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1], output_shape):
+            raise RuntimeError("The model expects output shape {}, got {}".format(
+                [1, self.POINTS_NUMBER * 2, 1, 1], output_shape))
 
     def preprocess(self, frame, rois):
         inputs = cut_rois(frame, rois)
-        inputs = [resize_input(input, self.input_shape) for input in inputs]
+        inputs = [resize_input(input, self.input_shape, self.nchw_layout) for input in inputs]
         return inputs
 
     def enqueue(self, input):
-        return super(LandmarksDetector, self).enqueue({self.input_blob: input})
+        return super(LandmarksDetector, self).enqueue({self.input_tensor_name: input})
 
     def start_async(self, frame, rois):
         inputs = self.preprocess(frame, rois)
@@ -50,6 +53,5 @@ class LandmarksDetector(Module):
             self.enqueue(input)
 
     def postprocess(self):
-        outputs = self.get_outputs()
-        results = [out[self.output_blob].buffer.reshape((-1, 2)).astype(np.float64) for out in outputs]
+        results = [out.reshape((-1, 2)).astype(np.float64) for out in self.get_outputs()]
         return results
