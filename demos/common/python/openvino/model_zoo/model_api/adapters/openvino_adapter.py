@@ -99,7 +99,8 @@ class OpenvinoAdapter(ModelAdapter):
     def get_output_layers(self):
         outputs = {}
         for output in self.model.outputs:
-            outputs[output.get_any_name()] = Metadata(list(output.shape), output.get_element_type().get_type_name())
+            output_shape = output.shape if output.partial_shape.is_static else output.partial_shape.get_min_shape()
+            outputs[output.get_any_name()] = Metadata(list(output_shape), output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
