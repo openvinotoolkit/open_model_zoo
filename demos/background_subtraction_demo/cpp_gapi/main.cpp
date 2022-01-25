@@ -21,6 +21,8 @@
 #include "background_subtraction_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 
+#include <openvino/openvino.hpp>
+
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     /** ---------- Parsing and validating input arguments ----------**/
