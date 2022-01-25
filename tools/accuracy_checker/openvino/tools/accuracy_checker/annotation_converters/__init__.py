@@ -255,5 +255,5 @@ __all__ = [
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
-    'GANAnnotationConverter',
+    'GANAnnotationConverter'
 ]
