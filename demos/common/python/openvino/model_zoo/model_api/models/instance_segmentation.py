@@ -26,8 +26,8 @@ from .utils import nms
 class MaskRCNNModel(ImageModel):
     __model__ = 'MaskRCNN'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number((1, 2), (3, 4, 5, 8))
         self.is_segmentoly = len(self.inputs) == 2
         self.output_blob_name = self._get_outputs()
@@ -36,8 +36,8 @@ class MaskRCNNModel(ImageModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'prob_threshold': NumericalValue(
-                default_value=None,
+            'confidence_threshold': NumericalValue(
+                default_value=0.5,
                 description='Probability threshold for detections filtering'
             ),
         })
@@ -106,7 +106,7 @@ class MaskRCNNModel(ImageModel):
             raw_cls_mask = raw_mask[cls, ...] if self.is_segmentoly else raw_mask
             masks.append(self._segm_postprocess(box, raw_cls_mask, *meta['original_shape'][:-1]))
         # Filter out detections with low confidence.
-        detections_filter = scores > self.prob_threshold
+        detections_filter = scores > self.confidence_threshold
         scores = scores[detections_filter]
         classes = classes[detections_filter]
         boxes = boxes[detections_filter]
@@ -148,8 +148,8 @@ class MaskRCNNModel(ImageModel):
 class YolactModel(ImageModel):
     __model__ = 'Yolact'
 
-    def __init__(self, model_adapter, configuration):
-        super().__init__(model_adapter, configuration)
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 4)
         self.output_blob_name = self._get_outputs()
 
@@ -157,8 +157,8 @@ class YolactModel(ImageModel):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'prob_threshold': NumericalValue(
-                default_value=None,
+            'confidence_threshold': NumericalValue(
+                default_value=0.5,
                 description='Probability threshold for detections filtering'
             ),
         })
@@ -198,7 +198,7 @@ class YolactModel(ImageModel):
         for cls in range(1, num_classes):
             cls_scores = conf[cls, :]
             idx = np.arange(cls_scores.shape[0])
-            conf_mask = cls_scores > self.prob_threshold
+            conf_mask = cls_scores > self.confidence_threshold
 
             cls_scores = cls_scores[conf_mask]
             idx = idx[conf_mask]
@@ -234,8 +234,8 @@ class YolactModel(ImageModel):
         return scores, classes, boxes, masks
 
     def _segm_postprocess(self, boxes, masks, score, classes, proto_data, w, h, shift_x=0, shift_y=0):
-        if self.prob_threshold > 0:
-            keep = score > self.prob_threshold
+        if self.confidence_threshold > 0:
+            keep = score > self.confidence_threshold
             score = score[keep]
             boxes = boxes[keep]
             masks = masks[keep]
