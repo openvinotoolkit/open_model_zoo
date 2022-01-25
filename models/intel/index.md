@@ -253,7 +253,6 @@ that predict an actual labels are called *decoder*.
 | [smartlab-action-recognition-0001](./smartlab-action-recognition-0001/README.md)       |       |        |
 |   smartlab-action-recognition-encoder-0001                                             | 0.611 | 3.387  |
 |   smartlab-action-recognition-decoder-0001                                             | 0.008 | 4.099  |
-| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md)       | 0.048 | 1.0181 |
 
 ## Image Retrieval
 
