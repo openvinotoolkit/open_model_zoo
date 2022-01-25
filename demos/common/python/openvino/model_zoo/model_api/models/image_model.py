@@ -51,8 +51,8 @@ class ImageModel(Model):
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         self.ov_processor = PrePostProcessor(self.model_adapter.model)
         if self.image_blob_name:
-            self.ov_processor.input(self.image_blob_name).tensor().set_layout(Layout('NHWC'))
             self.input_layout = get_layout_from_shape(self.inputs[self.image_blob_name].shape)
+            self.ov_processor.input(self.image_blob_name).tensor().set_layout(Layout(self.input_layout))
             self.ov_processor.input(self.image_blob_name).model().set_layout(Layout(self.input_layout))
             if self.input_layout == 'NCHW':
                 self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
@@ -127,6 +127,14 @@ class ImageModel(Model):
         if self.resize_type == 'fit_to_window':
             resized_image = pad_image(resized_image, (self.w, self.h))
         resized_image = self.input_transform(resized_image)
-        resized_image = np.expand_dims(resized_image, 0)
+        resized_image = self._change_layout(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
+
+    def _change_layout(self, image):
+        if self.input_layout == 'NCHW':
+            image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            image = image.reshape((1, self.c, self.h, self.w))
+        else:
+            image = image.reshape((1, self.h, self.w, self.c))
+        return image

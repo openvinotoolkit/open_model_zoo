@@ -54,8 +54,8 @@ class CTPN(DetectionModel):
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, self.input_size[1], self.input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         default_input_shape = self.inputs[self.image_blob_name].shape
-        channels = default_input_shape[1] if self.input_layout == 'NCHW' else default_input_shape[3]
-        input_shape = {self.image_blob_name: ([default_input_shape[0]] + [self.h2, self.w2] + [channels])}
+        new_shape = [self.n, self.c, self.h2, self.w2] if self.input_layout == 'NCHW' else [self.n, self.h2, self.w2, self.c]
+        input_shape = {self.image_blob_name: (new_shape)}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.reshape(input_shape)
         if preload:
