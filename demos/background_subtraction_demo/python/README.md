@@ -69,7 +69,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: background_subtraction_demo.py [-h] -m MODEL
-                                      [--adapter {openvino,remote}] -i INPUT
+                                      [--adapter {openvino,ovms}] -i INPUT
                                       [-d DEVICE] [-t PROB_THRESHOLD]
                                       [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
                                       [--labels LABELS]
