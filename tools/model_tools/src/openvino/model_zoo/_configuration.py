@@ -364,10 +364,6 @@ def load_models_from_args(parser, args, models_root):
         models = collections.OrderedDict() # deduplicate models while preserving order
 
         for pattern in patterns:
-            for model in EXCLUDED_MODELS:
-                if fnmatch.fnmatchcase(model, pattern):
-                    continue
-
             matching_models = []
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
@@ -377,10 +373,11 @@ def load_models_from_args(parser, args, models_root):
                         if fnmatch.fnmatchcase(model_stage.name, pattern):
                             matching_models.append(model_stage)
 
-            if not matching_models:
+            if matching_models:
+                for model in matching_models:
+                    if model.name not in EXCLUDED_MODELS:
+                        models[model.name] = model
+            else:
                 sys.exit('No matching models: "{}"'.format(pattern))
-
-            for model in matching_models:
-                models[model.name] = model
 
         return list(models.values())
