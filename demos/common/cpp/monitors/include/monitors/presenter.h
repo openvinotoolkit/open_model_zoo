@@ -28,7 +28,7 @@ public:
         std::size_t historySize = 20);
     void addRemoveMonitor(MonitorType monitor);
     void handleKey(int key); // handles c, d, m, h keys
-    void drawGraphs(cv::Mat& frame);
+    void drawGraphs(const cv::Mat& frame);
     std::vector<std::string> reportMeans() const;
 
     const int yPos;
