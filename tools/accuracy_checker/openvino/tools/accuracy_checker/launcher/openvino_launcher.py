@@ -81,13 +81,11 @@ class OpenVINOLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update(DLSDK_LAUNCHER_PARAMETERS)
-
         return parameters
 
     def __init__(self, config_entry, model_name='', delayed_model_loading=False,
                  preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
-
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
         self.ie_core = Core()
@@ -331,6 +329,7 @@ class OpenVINOLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if self.infer_request is not None:
+            del self.infer_request
             self.infer_request = None
         partial_shapes = {}
         for name, shape in shapes.items():
@@ -344,6 +343,7 @@ class OpenVINOLauncher(Launcher):
         if self.dyn_input_layers and make_dynamic:
             return
         self.exec_network = self.ie_core.compile_model(self.network, self.device)
+        self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def reshape_network(network, shapes):
@@ -583,6 +583,9 @@ class OpenVINOLauncher(Launcher):
     def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
+        if hasattr(self, 'infer_request'):
+            del self.infer_request
+            self.infer_request = None
         if network is None:
             self._create_network()
         else:
@@ -601,9 +604,8 @@ class OpenVINOLauncher(Launcher):
             if preprocessing:
                 self._set_preprocess(preprocessing)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
-                self.exec_network = self.ie_core.compile_model(
-                    self.network, self._device
-                )
+                self.exec_network = self.ie_core.compile_model(self.network, self._device)
+                self.infer_request = self.exec_network.create_infer_request()
 
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
@@ -619,6 +621,7 @@ class OpenVINOLauncher(Launcher):
             self.exec_network = self.ie_core.compile_model(
                 self.network, self._device
             )
+            self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def get_dynamic_inputs(network):
@@ -638,7 +641,6 @@ class OpenVINOLauncher(Launcher):
             if is_dynamic(input_shape):
                 inputs_with_undefined_shapes.append(input_node.friendly_name)
                 partial_shapes[input_node.friendly_name] = input_shape
-
         return inputs_with_undefined_shapes, partial_shapes
 
     @staticmethod
