@@ -24,7 +24,7 @@ from openvino.model_zoo import _common
 from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
-EXCLUDED_MODELS = ['detr-resnet50', 'ocrnet-hrnet-w48-paddle']
+EXCLUDED_MODELS = ['detr-resnet50']
 
 class ModelFile:
     def __init__(self, name, size, checksum, source):
@@ -376,7 +376,6 @@ def load_models_from_args(parser, args, models_root):
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:
-                if model.name not in EXCLUDED_MODELS:
-                    models[model.name] = model
+                models[model.name] = model
 
         return list(models.values())
