@@ -57,13 +57,13 @@ void FaceDetection::submitRequest() {
 
 void FaceDetection::enqueue(const cv::Mat &frame) {
     if (request == nullptr) {
-        request = std::make_shared<ov::runtime::InferRequest>(model_.create_infer_request());
+        request = std::make_shared<ov::InferRequest>(model_.create_infer_request());
     }
 
     width_ = static_cast<float>(frame.cols);
     height_ = static_cast<float>(frame.rows);
 
-    ov::runtime::Tensor inputTensor = request->get_tensor(input_name_);
+    ov::Tensor inputTensor = request->get_tensor(input_name_);
 
     matToTensor(frame, inputTensor);
 

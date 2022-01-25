@@ -55,8 +55,8 @@ void CnnDLSDKBase::Load() {
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
-        const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& fetch_results) const {
-    ov::runtime::Tensor input = infer_request_.get_tensor(input_blob_name_);
+        const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
+    ov::Tensor input = infer_request_.get_tensor(input_blob_name_);
     const size_t batch_size = input.get_shape()[0];
 
     size_t num_imgs = frames.size();
@@ -67,7 +67,7 @@ void CnnDLSDKBase::InferBatch(
         }
 
         infer_request_.infer();
-        std::map<std::string, ov::runtime::Tensor> tensors;
+        std::map<std::string, ov::Tensor> tensors;
 
         for (const auto& name : output_blobs_names_)  {
             tensors[name] = infer_request_.get_tensor(name);
@@ -77,7 +77,7 @@ void CnnDLSDKBase::InferBatch(
 }
 
 void CnnDLSDKBase::Infer(const cv::Mat& frame,
-                         const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& fetch_results) const {
+                         const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
     InferBatch({frame}, fetch_results);
 }
 
@@ -102,9 +102,9 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         return;
     }
     vectors->clear();
-    auto results_fetcher = [vectors, outp_shape](const std::map<std::string, ov::runtime::Tensor>& outputs, size_t batch_size) {
+    auto results_fetcher = [vectors, outp_shape](const std::map<std::string, ov::Tensor>& outputs, size_t batch_size) {
         for (auto&& item : outputs) {
-            ov::runtime::Tensor tensor = item.second;
+            ov::Tensor tensor = item.second;
             ov::Shape ie_output_dims = tensor.get_shape();
             std::vector<int> tensor_sizes(ie_output_dims.size(), 0);
             for (size_t i = 0; i < tensor_sizes.size(); ++i) {

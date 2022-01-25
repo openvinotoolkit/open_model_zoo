@@ -122,9 +122,9 @@ public:
 
 private:
     ActionDetectorConfig config_;
-    ov::runtime::CompiledModel model_;
+    ov::CompiledModel model_;
     std::string input_name_;
-    std::map<std::string, ov::runtime::Tensor> outputs_;
+    std::map<std::string, ov::Tensor> outputs_;
 
     int enqueued_frames_ = 0;
     float width_ = 0;

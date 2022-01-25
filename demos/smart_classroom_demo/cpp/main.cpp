@@ -392,7 +392,7 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     }
     return face_track_id_to_label;
 }
-bool checkDynamicBatchSupport(const ov::runtime::Core& core, const std::string& device)  {
+bool checkDynamicBatchSupport(const ov::Core& core, const std::string& device)  {
     try  {
         if (core.get_config(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
             return false;
@@ -545,7 +545,7 @@ int main(int argc, char* argv[]) {
         }
 
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};

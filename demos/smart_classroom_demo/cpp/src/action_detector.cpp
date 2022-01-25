@@ -32,13 +32,13 @@ void ActionDetection::submitRequest() {
 
 void ActionDetection::enqueue(const cv::Mat &frame) {
     if (request == nullptr) {
-        request = std::make_shared<ov::runtime::InferRequest>(model_.create_infer_request());
+        request = std::make_shared<ov::InferRequest>(model_.create_infer_request());
     }
 
     width_ = static_cast<float>(frame.cols);
     height_ = static_cast<float>(frame.rows);
 
-    ov::runtime::Tensor input_tensor = request->get_tensor(input_name_);
+    ov::Tensor input_tensor = request->get_tensor(input_name_);
 
     matToTensor(frame, input_tensor);
 

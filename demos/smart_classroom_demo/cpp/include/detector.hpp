@@ -41,7 +41,7 @@ struct DetectorConfig : public CnnConfig {
 class FaceDetection : public AsyncDetection<DetectedObject>, public BaseCnnDetection {
 private:
     DetectorConfig config_;
-    ov::runtime::CompiledModel model_;
+    ov::CompiledModel model_;
     std::string input_name_;
     std::string output_name_;
     int max_detections_count_ = 0;

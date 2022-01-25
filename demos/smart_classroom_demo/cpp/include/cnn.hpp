@@ -31,7 +31,7 @@ struct CnnConfig {
     int max_batch_size{1};
 
     /** @brief Inference Engine */
-    ov::runtime::Core ie;
+    ov::Core ie;
     /** @brief Device name */
     std::string deviceName;
 };
@@ -66,7 +66,7 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void Infer(const cv::Mat& frame,
-               const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& results_fetcher) const;
+               const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher) const;
 
     /**
    * @brief Run network in batch mode
@@ -75,7 +75,7 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    const std::function<void(const std::map<std::string, ov::runtime::Tensor>&, size_t)>& results_fetcher) const;
+                    const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
     Config config_;
@@ -84,9 +84,9 @@ protected:
     /** @brief Net outputs info */
     ov::OutputVector outInfo_;
     /** @brief IE network */
-    ov::runtime::CompiledModel compiled_model_;
+    ov::CompiledModel compiled_model_;
     /** @brief IE InferRequest */
-    mutable ov::runtime::InferRequest infer_request_;
+    mutable ov::InferRequest infer_request_;
     /** @brief Name of the input blob input blob */
     std::string input_blob_name_;
     /** @brief Names of output blobs */
@@ -128,7 +128,7 @@ public:
 
 class BaseCnnDetection : public AsyncAlgorithm {
 protected:
-    std::shared_ptr<ov::runtime::InferRequest> request;
+    std::shared_ptr<ov::InferRequest> request;
     const bool isAsync;
     std::string topoName;
 
