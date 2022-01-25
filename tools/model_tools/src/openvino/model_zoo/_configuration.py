@@ -305,7 +305,10 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                 for bad_key in ['name', 'subdirectory']:
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
-                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+
+                if subdirectory.name not in EXCLUDED_MODELS:
+                    models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                    continue
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
@@ -361,6 +364,10 @@ def load_models_from_args(parser, args, models_root):
         models = collections.OrderedDict() # deduplicate models while preserving order
 
         for pattern in patterns:
+            for model in EXCLUDED_MODELS:
+                if fnmatch.fnmatchcase(model, pattern):
+                    continue
+
             matching_models = []
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
@@ -374,7 +381,6 @@ def load_models_from_args(parser, args, models_root):
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:
-                if model.name not in EXCLUDED_MODELS:
-                    models[model.name] = model
+                models[model.name] = model
 
         return list(models.values())
