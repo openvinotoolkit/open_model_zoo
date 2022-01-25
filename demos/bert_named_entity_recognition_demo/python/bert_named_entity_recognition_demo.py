@@ -24,14 +24,13 @@ from pathlib import Path
 from time import perf_counter
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
 
-from model_api.models import BertNamedEntityRecognition
-from model_api.models.tokens_bert import text_to_tokens, load_vocab_file
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import BertNamedEntityRecognition
+from openvino.model_zoo.model_api.models.tokens_bert import text_to_tokens, load_vocab_file
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
