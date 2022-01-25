@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         PerformanceMetrics metrics;
 
         /** Print info about Inference Engine **/
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
