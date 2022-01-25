@@ -144,11 +144,12 @@ The Open Model Zoo includes the following demos:
 - [Speech Recognition Wav2Vec Python\* Demo](./speech_recognition_wav2vec_demo/python/README.md) - Speech recognition demo for Wav2Vec: takes a whole audio file with an English phrase on input and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
-- [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-PI version.
+- [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-API version.
 - [Smartlab Python\* Demo](./smartlab_demo/python/README.md) - action recognition and object detection for smartlab.
 - [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
+- [Text Detection C++ G-API Demo](./text_detection_demo/cpp_gapi/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area. G-API version.
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 - [Time Series Forecasting Python\* Demo](./time_series_forecasting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to time series forecasting.

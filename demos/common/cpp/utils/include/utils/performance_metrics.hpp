@@ -62,6 +62,8 @@ public:
     Metrics getTotal() const;
     void logTotal() const;
 
+    uint32_t getFrameCount() const;
+
 private:
     struct Statistic {
         Duration latency;

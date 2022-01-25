@@ -83,7 +83,7 @@ PerformanceMetrics::Metrics PerformanceMetrics::getLast() const {
 PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
     Metrics metrics;
 
-    int frameCount = totalStatistic.frameCount + currentMovingStatistic.frameCount;
+    int frameCount = getFrameCount();
     if (frameCount != 0) {
         metrics.latency = std::chrono::duration_cast<Ms>(
             totalStatistic.latency + currentMovingStatistic.latency).count() / frameCount;
@@ -103,6 +103,11 @@ void PerformanceMetrics::logTotal() const {
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;
     slog::info << "\tFPS: " << metrics.fps << slog::endl;
 }
+
+uint32_t PerformanceMetrics::getFrameCount() const {
+    return totalStatistic.frameCount + currentMovingStatistic.frameCount;
+}
+
 
 void logLatencyPerStage(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
     slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(1) <<
