@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,18 +10,18 @@
 namespace gaze_estimation {
 
 LandmarksEstimator::LandmarksEstimator(
-    InferenceEngine::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
         ieWrapper(ie, modelPath, modelType, deviceName)
 {
-    inputBlobName = ieWrapper.expectSingleInput();
-    ieWrapper.expectImageInput(inputBlobName);
+    inputTensorName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputTensorName);
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
 
-    outputBlobName = ieWrapper.expectSingleOutput();
-    const auto& outputBlobDims = outputInfo.at(outputBlobName);
+    outputTensorName = ieWrapper.expectSingleOutput();
+    const auto& outputTensorDims = outputInfo.at(outputTensorName);
 
-    if (outputBlobDims.size() != 4 && outputBlobDims.size() != 2) {
+    if (outputTensorDims.size() != 4 && outputTensorDims.size() != 2) {
         throw std::runtime_error(modelPath + " network output layer should have 2 or 4 dimensions");
     }
 }
@@ -30,13 +30,14 @@ void LandmarksEstimator::estimate(const cv::Mat& image, FaceInferenceResults& ou
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
-    ieWrapper.setInputBlob(inputBlobName, faceCrop);
+    ieWrapper.setInputTensor(inputTensorName, faceCrop);
     ieWrapper.infer();
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
-    const auto& outputBlobDims = outputInfo.at(outputBlobName);
-    if (outputBlobDims.size() == 2) {
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
+    const auto& outputTensorDims = outputInfo.at(outputTensorName);
+    if (outputTensorDims.size() == 2) {
         outputResults.faceLandmarks=simplePostprocess(faceBoundingBox, faceCrop);
+
     } else {
         outputResults.faceLandmarks = heatMapPostprocess(faceBoundingBox, faceCrop);
     }
@@ -44,7 +45,7 @@ void LandmarksEstimator::estimate(const cv::Mat& image, FaceInferenceResults& ou
 
 std::vector<cv::Point2i> LandmarksEstimator::simplePostprocess(cv::Rect faceBoundingBox, cv::Mat faceCrop) {
     std::vector<float> rawLandmarks;
-    ieWrapper.getOutputBlob(outputBlobName, rawLandmarks);
+    ieWrapper.getOutputTensor(outputTensorName, rawLandmarks);
     std::vector<cv::Point2i> normedLandmarks;
     for (unsigned long i = 0; i < rawLandmarks.size() / 2; ++i) {
         int x = static_cast<int>(rawLandmarks[2 * i] * faceCrop.cols + faceBoundingBox.tl().x);
@@ -56,9 +57,9 @@ std::vector<cv::Point2i> LandmarksEstimator::simplePostprocess(cv::Rect faceBoun
 
 std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBoundingBox, cv::Mat faceCrop) {
     std::vector<float> rawLandmarks;
-    ieWrapper.getOutputBlob(outputBlobName, rawLandmarks);
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
-    const auto& heatMapsDims = outputInfo.at(outputBlobName);
+    ieWrapper.getOutputTensor(outputTensorName, rawLandmarks);
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
+    const auto& heatMapsDims = outputInfo.at(outputTensorName);
     numberLandmarks = heatMapsDims[1];
     std::vector<cv::Mat> heatMaps = split(rawLandmarks, heatMapsDims);
     float w = static_cast<float>(faceBoundingBox.width), h = static_cast<float>(faceBoundingBox.height);
@@ -97,14 +98,17 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
     return landmarks;
 }
 
-std::vector<cv::Mat> LandmarksEstimator::split(std::vector<float>& data, const std::vector<unsigned long>& shape) {
+std::vector<cv::Mat> LandmarksEstimator::split(std::vector<float>& data, const ov::Shape& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
-    float* output = new float[data.size()];
-    for (size_t i = 0; i < data.size(); i++) {
-        output[i] = data[i];
-    }
+    size_t itData = 0;
     for (size_t i = 0; i < flattenData.size(); i++) {
-        flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, output + i * shape[2] * shape[3]);
+        flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1);
+        for (size_t row = 0; row < shape[2]; row++) {
+            for (size_t col = 0; col < shape[3]; col++) {
+                flattenData[i].at<float>(row, col) = data[itData];
+                itData++;
+            }
+        }
     }
     return flattenData;
 }
