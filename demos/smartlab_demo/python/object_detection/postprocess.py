@@ -1,6 +1,4 @@
 import numpy as np
-import torch
-import torchvision
 
 def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agnostic=False):
     # original source: https://github.com/Megvii-BaseDetection/YOLOX

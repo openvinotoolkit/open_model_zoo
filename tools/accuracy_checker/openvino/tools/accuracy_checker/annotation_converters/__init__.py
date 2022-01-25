@@ -256,5 +256,4 @@ __all__ = [
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
     'GANAnnotationConverter',
-    'SmartlabActionConverter'
 ]
