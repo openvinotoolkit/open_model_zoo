@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from pathlib import Path
+import numpy as np
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ._nlp_common import WordPieceTokenizer
 from ..config import BoolField, PathField, NumberField
@@ -38,7 +40,10 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
             'include_special_token_labels': BoolField(
                 optional=True, default=False, description='Should special tokens be included to labels or not'
             ),
-            'labels_file': PathField(optional=True, description='Path to file with custom labels in json format')
+            'labels_file': PathField(optional=True, description='Path to file with custom labels in json format'),
+            'dump_inputs': BoolField(optional=True, default=False, description='dump inputs'),
+            'num_samples': NumberField(optional=True, value_type=int, min_value=1, description='number of samples for dump'),
+            'output_dir': PathField(optional=True, is_directory=True, description='directory for inputs dumping')
         })
         return params
 
@@ -55,6 +60,14 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
         if self.include_spec:
             self.label_list.extend(['[CLS]', '[SEP]'])
         self.pad = self.get_value_from_config('pad_input')
+        self.dump_inputs = self.get_value_from_config('dump_inputs')
+        self.num_samples = self.get_value_from_config('num_samples')
+        self.output_dir = self.get_value_from_config('output_dir')
+        if self.dump_inputs:
+            if self.output_dir is None:
+                self.output_dir = Path('conll_inputs')
+            if not self.output_dir.exists():
+                self.output_dir.mkdir(parents=True)
 
     def convert(self, check_content=False, **kwargs):
         sents, labels = self.read_annotation()
@@ -91,6 +104,7 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
 
         features = []
         max_seq_length = self.tokenizer.max_len
+        num_dumped = 0
 
         for ex_index, (text, label) in enumerate(zip(sentences, labels)):
             tokens = []
@@ -143,6 +157,12 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
                 'input_mask_{}'.format(ex_index),
                 'segment_ids_{}'.format(ex_index),
             ]
+            if self.dump_inputs:
+                if self.num_samples is None or num_dumped < self.num_samples:
+                    np.array(input_ids).tofile(self.output_dir / f'{identifier[0]}.bin')
+                    np.array(input_mask).tofile(self.output_dir / f'{identifier[1]}.bin')
+                    np.array(segment_ids).tofile(self.output_dir / f'{identifier[2]}.bin')
+                    num_dumped += 1
             features.append(
                 BERTNamedEntityRecognitionAnnotation(
                     identifier, input_ids, input_mask, segment_ids, label_ids, valid, label_mask

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from pathlib import Path
 import numpy as np
-
 from ..representation import QuestionAnsweringAnnotation
 from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
@@ -129,7 +129,10 @@ class SQUADConverter(BaseFormatConverter):
                 optional=True, default=128, value_type=int
             ),
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
-            'enable_padding': BoolField(optional=True, default=True, description='enable padding for max sequence len')
+            'enable_padding': BoolField(optional=True, default=True, description='enable padding for max sequence len'),
+            'dump_inputs': BoolField(optional=True, default=False, description='dump inputs'),
+            'num_samples': NumberField(optional=True, value_type=int, min_value=1, description='number of samples for dump'),
+            'output_dir': PathField(optional=True, is_directory=True, description='directory for inputs dumping')
         })
 
         return configuration_parameters
@@ -144,6 +147,14 @@ class SQUADConverter(BaseFormatConverter):
             self.get_value_from_config('vocab_file'), self.lower_case, max_len=512
         )
         self.enable_padding = self.get_value_from_config('enable_padding')
+        self.dump_inputs = self.get_value_from_config('dump_inputs')
+        self.num_samples = self.get_value_from_config('num_samples')
+        self.output_dir = self.get_value_from_config('output_dir')
+        if self.dump_inputs:
+            if self.output_dir is None:
+                self.output_dir = Path('squad_inputs')
+            if not self.output_dir.exists():
+                self.output_dir.mkdir(parents=True)
 
     @staticmethod
     def _load_examples(file):
@@ -187,6 +198,7 @@ class SQUADConverter(BaseFormatConverter):
         examples = self._load_examples(self.testing_file)
         annotations = []
         unique_id = 1000000000
+        num_dumped = 0
 
         for (example_index, example) in enumerate(examples):
             all_doc_tokens, tok_to_orig_index, _ = self.get_all_doc_tokens(example.doc_tokens)
@@ -262,6 +274,13 @@ class SQUADConverter(BaseFormatConverter):
                               'input_mask_{}_{}'.format(idx, sp_id),
                               'segment_ids_{}_{}'.format(idx, sp_id),
                               'position_ids_{}_{}'.format(idx, sp_id)]
+                if self.dump_inputs:
+                    if self.num_samples is None or num_dumped < self.num_samples:
+                        np.array(span["input_ids"]).tofile(self.output_dir / f'{identifier[0]}.bin')
+                        np.array(span["attention_mask"]).tofile(self.output_dir / f'{identifier[1]}.bin')
+                        np.array(span["token_type_ids"]).tofile(self.output_dir / f'{identifier[2]}.bin')
+                        num_dumped += 1
+
                 annotation = QuestionAnsweringAnnotation(
                     identifier=identifier,
                     question_id=example.qas_id,
