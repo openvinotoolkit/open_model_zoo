@@ -15,17 +15,12 @@
 """
 
 import argparse
-import contextlib
 import json
-import requests
 import sys
-import threading
 
 from pathlib import Path
 
-from openvino.model_zoo import (
-    _configuration, _common, _concurrency, _reporting,
-)
+from openvino.model_zoo import _configuration, _common
 from openvino.model_zoo.download_engine.downloader import Downloader
 
 
@@ -35,6 +30,7 @@ class DownloaderArgumentParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
+
 def positive_int_arg(value_str):
     try:
         value = int(value_str)
@@ -43,25 +39,6 @@ def positive_int_arg(value_str):
         pass
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
-
-
-# There is no evidence that the requests.Session class is thread-safe,
-# so for safety, we use one Session per thread. This class ensures that
-# each thread gets its own Session.
-class ThreadSessionFactory:
-    def __init__(self, exit_stack):
-        self._lock = threading.Lock()
-        self._thread_local = threading.local()
-        self._exit_stack = exit_stack
-
-    def __call__(self):
-        try:
-            session = self._thread_local.session
-        except AttributeError:
-            with self._lock: # ExitStack might not be thread-safe either
-                session = self._exit_stack.enter_context(requests.Session())
-            self._thread_local.session = session
-        return session
 
 
 def main():
@@ -90,12 +67,7 @@ def main():
 
     args = parser.parse_args()
 
-    def make_reporter(context):
-        return _reporting.Reporter(context,
-            enable_human_output=args.progress_format == 'text',
-            enable_json_output=args.progress_format == 'json')
-
-    reporter = make_reporter(_reporting.DirectOutputContext())
+    reporter = Downloader.make_reporter(args.progress_format)
 
     with _common.telemetry_session('Model Downloader', 'downloader') as telemetry:
         models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
@@ -104,13 +76,12 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'downloader_selection_mode', mode)
 
-        if args.precisions is None:
-            requested_precisions = _common.KNOWN_PRECISIONS
-        else:
-            requested_precisions = set(args.precisions.split(','))
+        failed_models = set()
+
+        downloader = Downloader(args.precisions, args.output_dir, args.cache_dir, args.num_attempts)
 
         for model in models:
-            precisions_to_send = requested_precisions if args.precisions else requested_precisions & model.precisions
+            precisions_to_send = downloader.requested_precisions if args.precisions else downloader.requested_precisions & model.precisions
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
@@ -118,35 +89,7 @@ def main():
             }
             telemetry.send_event('md', 'downloader_model', json.dumps(model_information))
 
-        failed_models = set()
-
-        unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
-        if unknown_precisions:
-            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
-
-        downloader = Downloader(args.output_dir, args.cache_dir, args.num_attempts)
-
-        def download_model(model, reporter, session):
-            if model.model_stages:
-                results = []
-                for model_stage in model.model_stages:
-                    results.append(downloader.download_model(
-                        reporter, session, requested_precisions, model_stage, _common.KNOWN_PRECISIONS))
-                return sum(results) == len(model.model_stages)
-            else:
-                return downloader.download_model(
-                    reporter, session, requested_precisions, model, _common.KNOWN_PRECISIONS)
-
-        with contextlib.ExitStack() as exit_stack:
-            session_factory = ThreadSessionFactory(exit_stack)
-            if args.jobs == 1:
-                results = [download_model(model, reporter, session_factory) for model in models]
-            else:
-                results = _concurrency.run_in_parallel(args.jobs,
-                    lambda context, model: download_model(model, make_reporter(context), session_factory),
-                    models)
-
-        failed_models = {model.name for model, successful in zip(models, results) if not successful}
+        failed_models = downloader.bulk_download_model(models, reporter, args.jobs, args.progress_format)
 
         if failed_models:
             reporter.print('FAILED:')
@@ -154,6 +97,7 @@ def main():
                 reporter.print(failed_model_name)
                 telemetry.send_event('md', 'downloader_failed_models', failed_model_name)
             sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

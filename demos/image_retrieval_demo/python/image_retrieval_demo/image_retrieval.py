@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from image_retrieval_demo.common import from_list, crop_resize
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
@@ -32,15 +32,16 @@ class IEModel(): # pylint: disable=too-few-public-methods
     def __init__(self, model_path, device, cpu_extension):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
+        core = Core()
         if cpu_extension and device == 'CPU':
-            ie.add_extension(cpu_extension, 'CPU')
+            core.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
         log.info('Reading model {}'.format(model_path))
-        self.net = ie.read_network(path + '.xml', path + '.bin')
-        self.output_name = list(self.net.outputs.keys())[0]
-        self.exec_net = ie.load_network(network=self.net, device_name=device)
+        self.model = core.read_model(path + '.xml', path + '.bin')
+        self.input_tensor_name = "Placeholder"
+        compiled_model = core.compile_model(self.model, device)
+        self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
@@ -48,7 +49,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={'Placeholder': image})[self.output_name]
+        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
         return out
 
 

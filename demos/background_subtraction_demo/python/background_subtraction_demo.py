@@ -180,7 +180,7 @@ def main():
     labels = ['__background__', 'person'] if args.labels is None else args.labels
 
     configuration = {
-        'prob_threshold': args.prob_threshold,
+        'confidence_threshold': args.prob_threshold,
         'resize_type': args.resize_type
     }
 

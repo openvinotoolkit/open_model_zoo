@@ -68,6 +68,12 @@ For models from TensorFlow:
 python -mpip install --user -r ./requirements-tensorflow.in
 ```
 
+For models from PaddlePaddle:
+
+```sh
+python -mpip install --user -r ./requirements-paddle.in
+```
+
 ## Model downloader usage
 
 The basic usage is to run the script like this:

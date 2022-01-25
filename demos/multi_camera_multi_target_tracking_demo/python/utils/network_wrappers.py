@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019-2020 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -19,7 +19,7 @@ from types import SimpleNamespace as namespace
 import cv2
 import numpy as np
 
-from utils.ie_tools import load_ie_model
+from utils.ie_tools import IEModel
 from .segm_postprocess import postprocess
 
 
@@ -33,13 +33,13 @@ class DetectorInterface(ABC):
         pass
 
 
-class Detector(DetectorInterface):
+class Detector(IEModel, DetectorInterface):
     """Wrapper class for detector"""
 
-    def __init__(self, ie, model_path, trg_classes, conf=.6,
+    def __init__(self, core, model_path, trg_classes, conf=.6,
                  device='CPU', ext_path='', max_num_frames=1):
-        self.net = load_ie_model(ie, model_path, device, None, 'Object Detection',
-                                 ext_path, num_reqs=max_num_frames)
+        super().__init__(core, model_path, device, 'Object Detection', max_num_frames, ext_path)
+
         self.trg_classes = trg_classes
         self.confidence = conf
         self.expand_ratio = (1., 1.)
@@ -50,11 +50,11 @@ class Detector(DetectorInterface):
         self.shapes = []
         for i in range(len(frames)):
             self.shapes.append(frames[i].shape)
-            self.net.forward_async(frames[i])
+            self.forward_async(frames[i])
 
     def wait_and_grab(self, only_target_class=True):
         all_detections = []
-        outputs = self.net.grab_all_async()
+        outputs = self.grab_all_async()
         for i, out in enumerate(outputs):
             detections = self.__decode_detections(out, self.shapes[i], only_target_class)
             all_detections.append(detections)
@@ -99,66 +99,63 @@ class Detector(DetectorInterface):
         return detections
 
 
-class VectorCNN:
+class VectorCNN(IEModel):
     """Wrapper class for a network returning a vector"""
 
-    def __init__(self, ie, model_path, device='CPU', ext_path='', max_reqs=100):
+    def __init__(self, core, model_path, device='CPU', ext_path='', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(ie, model_path, device, None, 'Object Reidentification',
-                                 ext_path, num_reqs=self.max_reqs)
+        super().__init__(core, model_path, device, 'Object Reidentification', self.max_reqs, ext_path)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
         assert len(batch) <= self.max_reqs
         for frame in batch:
-            self.net.forward_async(frame)
-        outputs = self.net.grab_all_async()
+            super().forward_async(frame)
+        outputs = self.grab_all_async()
         return outputs
 
     def forward_async(self, batch):
         """Performs async forward of the underlying network on a given batch"""
         assert len(batch) <= self.max_reqs
         for frame in batch:
-            self.net.forward_async(frame)
+            super().forward_async(frame)
 
     def wait_and_grab(self):
-        outputs = self.net.grab_all_async()
+        outputs = self.grab_all_async()
         return outputs
 
 
 class MaskRCNN(DetectorInterface):
     """Wrapper class for a network returning masks of objects"""
 
-    def __init__(self, ie, model_path, trg_classes, conf=.6,
+    def __init__(self, core, model_path, trg_classes, conf=.6,
                  device='CPU', ext_path='', max_reqs=100):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, 'Instance Segmentation',
-                                 ext_path, num_reqs=self.max_reqs)
+        super().__init__(core, model_path, device, 'Instance Segmentation', self.max_reqs, ext_path)
 
-        required_input_keys = {'image'}
-        required_output_keys = {'boxes', 'labels', 'masks'}
-
-        required_input_keys_segmentoly = {'im_info', 'im_data'}
-        required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
-
-        current_input_keys = self.net.inputs_info.keys()
-
-        assert (current_input_keys == required_input_keys and
-                required_output_keys.issubset(self.net.net.outputs)) or \
-               (current_input_keys == required_input_keys_segmentoly and
-                required_output_keys_segmentoly.issubset(self.net.net.outputs))
+        self.input_keys = {'image'}
+        self.output_keys = {'boxes', 'labels', 'masks'}
+        self.input_keys_segmentoly = {'im_info', 'im_data'}
+        self.output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
 
         self.segmentoly_type = self.check_segmentoly_type()
-        input_name = 'im_data' if self.segmentoly_type else 'image'
-        self.n, self.c, self.h, self.w = self.net.inputs_info[input_name].input_data.shape
-        assert self.n == 1, 'Only batch 1 is supported.'
+        self.input_tensor_name = 'im_data' if self.segmentoly_type else 'image'
+        self.n, self.c, self.h, self.w = self.model.input(self.input_tensor_name).shape
 
     def check_segmentoly_type(self):
-        required_inputs = {'im_info', 'im_data'}
-        required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
-        return self.net.inputs_info.keys() == required_inputs and required_outputs.issubset(self.net.net.outputs)
+        for input_tensor_name in self.input_keys_segmentoly:
+            try:
+                self.model.input(input_tensor_name)
+            except RuntimeError:
+                return False
+        for output_tensor_name in self.output_keys_segmentoly:
+            try:
+                self.model.output(output_tensor_name)
+            except RuntimeError:
+                return False
+        return True
 
     def preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
@@ -177,7 +174,6 @@ class MaskRCNN(DetectorInterface):
         )
 
     def forward(self, im_data, im_info):
-        input_name = 'im_data' if self.segmentoly_type else 'image'
         if (self.h - im_data.shape[1] < 0) or (self.w - im_data.shape[2] < 0):
             raise ValueError('Input image should resolution of {}x{} or less, '
                              'got {}x{}.'.format(self.w, self.h, im_data.shape[2], im_data.shape[1]))
@@ -185,19 +181,20 @@ class MaskRCNN(DetectorInterface):
                                    (0, self.h - im_data.shape[1]),
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
-        feed_dict = {input_name: im_data}
+        feed_dict = {self.input_tensor_name: im_data}
         if im_info is not None:
             im_info = im_info.reshape(1, *im_info.shape)
             feed_dict['im_info'] = im_info
-        output = self.net.net.infer(feed_dict)
-
+        self.infer_request.infer(feed_dict)
         if self.segmentoly_type:
+            output = {name: self.infer_request.get_tensor(name).data[:] for name in self.output_keys_segmentoly}
             valid_detections_mask = output['classes'] > 0
             classes = output['classes'][valid_detections_mask]
             boxes = output['boxes'][valid_detections_mask]
             scores = output['scores'][valid_detections_mask]
             masks = output['raw_masks'][valid_detections_mask]
         else:
+            output = {name: self.infer_request.get_tensor(name).data[:] for name in self.output_keys}
             valid_detections_mask = np.sum(output['boxes'], axis=1) > 0
             classes = output['labels'][valid_detections_mask] + 1
             boxes = output['boxes'][valid_detections_mask][:, :4]

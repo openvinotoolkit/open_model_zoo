@@ -367,7 +367,9 @@ class InputFeeder:
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
-                layout = input_.get('layout', layouts_info.get(name, default_layout))
+                layout = layouts_info.get(name, input_.get('layout', default_layout))
+                if name in layouts_info:
+                    input_['layout'] = layout
                 if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
                     layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
@@ -466,9 +468,18 @@ class InputFeeder:
             return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
+            layout = self.layouts_mapping.get(layer_name)
+            if 'data_layout' in meta[0]:
+                data_layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT.get(meta[0]['data_layout'])
+                if layout is None and len(self.default_layout) == len(data_layout):
+                    layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
+                if layout is not None and data_layout == layout:
+                    layout = []
+            if layout is None:
+                layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
             layer_data_preprocessed = self.input_transform_func(
                 layer_data, layer_name,
-                self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
+                layout,
                 self.precision_mapping.get(layer_name), template
             )
             if isinstance(layer_data_preprocessed, tuple):
