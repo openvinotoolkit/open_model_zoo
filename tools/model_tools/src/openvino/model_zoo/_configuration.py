@@ -305,9 +305,7 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                 for bad_key in ['name', 'subdirectory']:
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
-                if subdirectory.name not in EXCLUDED_MODELS:
-                    models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
-                    continue
+                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
@@ -376,6 +374,7 @@ def load_models_from_args(parser, args, models_root):
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:
-                models[model.name] = model
+                if model.name not in EXCLUDED_MODELS:
+                    models[model.name] = model
 
         return list(models.values())
