@@ -182,7 +182,7 @@ def main():
     for new_length in [max_len_question, max_len_context]:
         model_emb.reshape(new_length)
         if new_length == max_len_question:
-            emb_exec_net = core.compile_model(model_emb_adapter.model, args.device)
+            emb_request = core.compile_model(model_emb_adapter.model, args.device).create_infer_request()
         else:
             emb_pipeline = AsyncPipeline(model_emb)
 
@@ -217,7 +217,9 @@ def main():
     def calc_question_embedding(tokens_id):
         num = min(max_len_question - 2, len(tokens_id))
         inputs, _ = model_emb.preprocess((tokens_id[:num], max_len_question))
-        raw_result = emb_exec_net.infer(inputs)
+        emb_request.infer(inputs)
+        raw_result = {output.get_any_name(): emb_request.get_tensor(output.get_any_name()).data[:]
+                      for output in model_emb_adapter.model.outputs}
         return model_emb.postprocess(raw_result, None)
 
     source = ContextSource(paragraphs, vocab, c_window_len)
