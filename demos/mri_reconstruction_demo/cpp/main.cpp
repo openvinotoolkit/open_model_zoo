@@ -46,8 +46,9 @@ int main(int argc, char** argv) {
     logBasicModelInfo(model);
 
     std::string outputTensorName = "";
+    ov::Layout outputLayout("NHWC");
     for (const auto& output : model->outputs()) {
-        if (output.get_any_name().find("89") != std::string::npos) {
+        if (output.get_shape()[ov::layout::channels_idx(outputLayout)] == 1) {
             outputTensorName = output.get_any_name();
         }
     }
