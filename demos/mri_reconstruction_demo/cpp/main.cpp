@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
             outputTensorName = output.get_any_name();
         }
     }
-    if (outputTensorName == "") {
+    if (outputTensorName.empty()) {
         throw std::logic_error("Not found suitable output!");
     }
 
