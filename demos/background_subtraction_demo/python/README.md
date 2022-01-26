@@ -69,7 +69,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: background_subtraction_demo.py [-h] -m MODEL
-                                      [--adapter {openvino,remote}] -i INPUT
+                                      [--adapter {openvino,ovms}] -i INPUT
                                       [-d DEVICE] [-t PROB_THRESHOLD]
                                       [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
                                       [--labels LABELS]
@@ -86,8 +86,9 @@ usage: background_subtraction_demo.py [-h] -m MODEL
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  --adapter {openvino,remote}
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
+  --adapter {openvino,ovms}
                         Optional. Specify the model adapter. Default is
                         openvino.
   -i INPUT, --input INPUT
@@ -167,6 +168,19 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 background_subtraction_demo/python/background_subtraction_demo.py \
+    -m localhost:9000/models/background_subtraction \
+    -i 0 \
+    --adapter ovms
+```
 
 ## Demo Output
 
