@@ -92,7 +92,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     ov::Layout outputTensorLayout("NCHW");
     auto outWidth = outShape[ov::layout::width_idx(outputTensorLayout)];
     auto inWidth = lrShape[ov::layout::width_idx(origInputTensorLayout)];
-    changeInputSize(model, newInputTensorLayout, outWidth / inWidth);
+    changeInputSize(model, newInputTensorLayout, static_cast<int>(outWidth / inWidth));
 }
 
 void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, const ov::Layout& layout, int coeff) {
@@ -148,8 +148,8 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 
     if (inputsNames.size() == 2) {
         ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
-        int h = bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
-        int w = bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
+        int h = (int)bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
+        int w = (int)bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
         request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
