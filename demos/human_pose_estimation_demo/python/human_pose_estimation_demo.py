@@ -179,7 +179,7 @@ def main():
     config = {
         'target_size': args.tsize,
         'aspect_ratio': frame.shape[1] / frame.shape[0],
-        'prob_threshold': args.prob_threshold,
+        'confidence_threshold': args.prob_threshold,
         'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
         'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
     }
