@@ -29,6 +29,10 @@ SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, con
 void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
+    ov::Layout origInputTensorLayout("NCHW");
+    auto channelsId = ov::layout::channels_idx(origInputTensorLayout);
+    auto heightId = ov::layout::height_idx(origInputTensorLayout);
+    auto widthId = ov::layout::width_idx(origInputTensorLayout);
 
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1 && inputsInfo.size() != 2) {
@@ -36,11 +40,11 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
     std::string lrInputTensorName = inputsInfo.begin()->get_any_name();
     inputsNames.push_back(lrInputTensorName);
-    const ov::Shape& lrShape = inputsInfo.begin()->get_shape();
+    ov::Shape lrShape = inputsInfo.begin()->get_shape();
     if (lrShape.size() != 4) {
         throw std::runtime_error("Number of dimensions for an input must be 4");
     }
-    if (lrShape[1] != 1 && lrShape[1] != 3) {
+    if (lrShape[channelsId] != 1 && lrShape[channelsId] != 3) {
         throw std::runtime_error("Input layer is expected to have 1 or 3 channels");
     }
 
@@ -50,26 +54,29 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     if (inputsInfo.size() == 2) {
         bicInputTensorName = (++inputsInfo.begin())->get_any_name();
         inputsNames.push_back(bicInputTensorName);
-        const ov::Shape& bicShape = (++inputsInfo.begin())->get_shape();
+        ov::Shape bicShape = (++inputsInfo.begin())->get_shape();
         if (bicShape.size() != 4) {
             throw std::runtime_error("Number of dimensions for both inputs must be 4");
         }
-        if (lrShape[2] >= bicShape[2] && lrShape[3] >= bicShape[3]) {
+        if (lrShape[widthId] >= bicShape[widthId] && lrShape[heightId] >= bicShape[heightId]) {
+            std::swap(bicShape, lrShape);
             inputsNames[0].swap(inputsNames[1]);
-        } else if (!(lrShape[2] <= bicShape[2] && lrShape[3] <= bicShape[3])) {
+        } else if (!(lrShape[widthId] <= bicShape[widthId] && lrShape[heightId] <= bicShape[heightId])) {
             throw std::runtime_error("Each spatial dimension of one input must surpass or be equal to a spatial"
                 "dimension of another input");
         }
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::f32).
-        set_layout({ "NHWC" });
+    ov::Layout newInputTensorLayout("NHWC");
+    for (const auto& input : inputsInfo) {
+        ppp.input(input.get_any_name()).tensor().
+            set_element_type(ov::element::u8).
+            set_layout(newInputTensorLayout);
 
-    ppp.input().model().set_layout("NCHW");
+        ppp.input(input.get_any_name()).model().set_layout("NCHW");
+    }
 
-    //inputInfo.setPrecision(InferenceEngine::Precision::FP32);
     // --------------------------- Prepare output -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
@@ -81,28 +88,40 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     model = ppp.build();
 
     const ov::Shape& outShape = model->output().get_shape();
-    changeInputSize(model, outShape[2] / lrShape[2]);
+
+    ov::Layout outputTensorLayout("NCHW");
+    auto outWidth = outShape[ov::layout::width_idx(outputTensorLayout)];
+    auto inWidth = lrShape[ov::layout::width_idx(origInputTensorLayout)];
+    changeInputSize(model, newInputTensorLayout, outWidth / inWidth);
 }
 
-void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, int coeff) {
+void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, const ov::Layout& layout, int coeff) {
     std::map<std::string, ov::PartialShape> shapes;
+    auto batchId = ov::layout::batch_idx(layout);
+    auto heightId = ov::layout::height_idx(layout);
+    auto widthId = ov::layout::width_idx(layout);
+
     const ov::OutputVector& inputsInfo = model->inputs();
     std::string lrInputTensorName = inputsInfo.begin()->get_any_name();
     ov::Shape lrShape = inputsInfo.begin()->get_shape();
 
-    lrShape[0] = 1;
-    lrShape[2] = netInputHeight;
-    lrShape[3] = netInputWidth;
-    shapes[lrInputTensorName] = ov::PartialShape(lrShape);
-
     if (inputsInfo.size() == 2) {
-        std::string bicInputTensorName = inputsInfo.begin()->get_any_name();
+        std::string bicInputTensorName = (++inputsInfo.begin())->get_any_name();
         ov::Shape bicShape = (++inputsInfo.begin())->get_shape();
-        bicShape[0] = 1;
-        bicShape[2] = coeff * netInputHeight;
-        bicShape[3] = coeff * netInputWidth;
+        if (lrShape[heightId] >= bicShape[heightId] && lrShape[widthId] >= bicShape[widthId]) {
+            std::swap(bicShape, lrShape);
+            std::swap(bicInputTensorName, lrInputTensorName);
+        }
+        bicShape[batchId] = 1;
+        bicShape[heightId] = coeff * netInputHeight;
+        bicShape[widthId] = coeff * netInputWidth;
         shapes[bicInputTensorName] = ov::PartialShape(bicShape);
     }
+
+    lrShape[batchId] = 1;
+    lrShape[heightId] = netInputHeight;
+    lrShape[widthId] = netInputWidth;
+    shapes[lrInputTensorName] = ov::PartialShape(lrShape);
 
     model->reshape(shapes);
 }
@@ -113,23 +132,27 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 
     /* Resize and copy data from the image to the input Tensor */
     ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
-    if (img.channels() != (int)lrInputTensor.get_shape()[1]) {
+    ov::Layout layout("NHWC");
+
+    if (img.channels() != (int)lrInputTensor.get_shape()[ov::layout::channels_idx(layout)]) {
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
     }
 
     if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight) {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
-    matToTensor(img, lrInputTensor);
+    const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
+    const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
+    resize(img, img, width, height);
+    request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
 
     if (inputsNames.size() == 2) {
         ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
-
-        int w = bicInputTensor.get_shape()[3];
-        int h = bicInputTensor.get_shape()[2];
+        int h = bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
+        int w = bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
-        matToTensor(resized, bicInputTensor);
+        request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
     }
 
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);

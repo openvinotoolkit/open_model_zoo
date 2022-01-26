@@ -29,6 +29,6 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void changeInputSize(std::shared_ptr<ov::Model>& model, int coeff);
+    void changeInputSize(std::shared_ptr<ov::Model>& model, const ov::Layout&  layout, int coeff);
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };
