@@ -178,7 +178,7 @@ def main():
             feed_dict[image_info_input] = input_image_info
 
         infer_request.infer(feed_dict)
-        outputs = {name: infer_request.get_tensor(name).data for name in output_names}
+        outputs = {name: infer_request.get_tensor(name).data[:] for name in output_names}
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
