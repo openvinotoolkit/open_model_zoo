@@ -1,4 +1,3 @@
 openvino-telemetry>=2022.1.0
-pyrx==0.3.0
 pyyaml>=5.4.1
 requests>=2.25.1

@@ -242,8 +242,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
     composite_models = []
     composite_model_names = set()
 
-    schema = _common.get_schema()
-
     if mode in (ModelLoadingMode.all, ModelLoadingMode.composite_only):
 
         for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
@@ -263,8 +261,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                         with stage.open('rb') as stage_config_file, \
                             validation.deserialization_context('In config "{}"'.format(stage_config_file)):
                             model = yaml.safe_load(stage_config_file)
-                            if not schema.check(model):
-                                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                             stage_subdirectory = stage.parent.relative_to(models_root)
                             model_stages[stage_subdirectory] = model
@@ -298,8 +294,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     validation.deserialization_context('In config "{}"'.format(config_path)):
 
                 model = yaml.safe_load(config_file)
-                if not schema.check(model):
-                    raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                 for bad_key in ['name', 'subdirectory']:
                     if bad_key in model:

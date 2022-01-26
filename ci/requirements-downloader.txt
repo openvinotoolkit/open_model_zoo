@@ -8,8 +8,6 @@ idna==3.2
     # via requests
 openvino-telemetry==2022.1.0
     # via -r tools/model_tools/requirements.in
-pyrx==0.3.0
-    # via -r tools/model_tools/requirements.in
 pyyaml==5.4.1
     # via -r tools/model_tools/requirements.in
 requests==2.26.0
