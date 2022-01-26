@@ -365,6 +365,7 @@ def load_models_from_args(parser, args, models_root):
 
         for pattern in patterns:
             matching_models = []
+            is_excluded = False
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
                     matching_models.append(model)
@@ -373,14 +374,14 @@ def load_models_from_args(parser, args, models_root):
                         if fnmatch.fnmatchcase(model_stage.name, pattern):
                             matching_models.append(model_stage)
 
-            if matching_models:
-                for model in matching_models:
-                    models[model.name] = model
-            else:
-                for model in EXCLUDED_MODELS:
-                    if fnmatch.fnmatchcase(model, pattern):
-                        continue
+            for model in EXCLUDED_MODELS:
+                if fnmatch.fnmatchcase(model, pattern):
+                    is_excluded = True
 
+            if not matching_models and not is_excluded:
                 sys.exit('No matching models: "{}"'.format(pattern))
+
+            for model in matching_models:
+                models[model.name] = model
 
         return list(models.values())
