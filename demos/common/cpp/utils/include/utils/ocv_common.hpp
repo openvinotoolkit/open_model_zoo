@@ -84,7 +84,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
 * @param tensor - Tensor object which to be filled by an image data.
 * @param batchIndex - batch index of an image inside of the blob.
 */
-static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& tensor, int batchIndex = 0) {
+static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
     ov::Layout layout("NCHW");
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
@@ -169,7 +169,7 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     return blob;
 }
 
-static UNUSED ov::runtime::Tensor wrapMat2Tensor(const cv::Mat& mat) {
+static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     const size_t channels = mat.channels();
     const size_t height = mat.size().height;
     const size_t width = mat.size().width;
@@ -180,7 +180,7 @@ static UNUSED ov::runtime::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     const bool is_dense = strideW == channels && strideH == channels * width;
     OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
 
-    return ov::runtime::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, mat.data);
+    return ov::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, mat.data);
 }
 
 /**

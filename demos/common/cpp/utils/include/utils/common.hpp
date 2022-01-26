@@ -253,7 +253,7 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
 
 inline
 void logCompiledModelInfo(
-    const ov::runtime::CompiledModel& compiledModel,
+    const ov::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
     const std::string& modelType = "")
