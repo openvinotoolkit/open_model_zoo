@@ -16,7 +16,7 @@
 namespace gaze_estimation {
 class IEWrapper {
 public:
-    IEWrapper(ov::runtime::Core& core,
+    IEWrapper(ov::Core& core,
               const std::string& modelPath,
               const std::string& modelType,
               const std::string& deviceName);
@@ -44,10 +44,10 @@ private:
     std::string modelPath;
     std::string modelType;
     std::string deviceName;
-    ov::runtime::Core core;
+    ov::Core core;
     std::shared_ptr<ov::Model> model;
-    ov::runtime::CompiledModel compiled_model;
-    ov::runtime::InferRequest infer_request;
+    ov::CompiledModel compiled_model;
+    ov::InferRequest infer_request;
     std::map<std::string, ov::Shape> input_tensors_dims_info;
     std::map<std::string, ov::Shape> output_tensors_dims_info;
 
