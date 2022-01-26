@@ -24,6 +24,7 @@ from openvino.model_zoo import _common
 from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
+EXCLUDED_MODELS = ['detr-resnet50', 'hybrid-cs-model-mri']
 
 class ModelFile:
     def __init__(self, name, size, checksum, source):
@@ -305,7 +306,9 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                if subdirectory.name not in EXCLUDED_MODELS:
+                    models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                    continue
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
@@ -362,6 +365,7 @@ def load_models_from_args(parser, args, models_root):
 
         for pattern in patterns:
             matching_models = []
+            is_excluded = False
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
                     matching_models.append(model)
@@ -370,7 +374,11 @@ def load_models_from_args(parser, args, models_root):
                         if fnmatch.fnmatchcase(model_stage.name, pattern):
                             matching_models.append(model_stage)
 
-            if not matching_models:
+            for model in EXCLUDED_MODELS:
+                if fnmatch.fnmatchcase(model, pattern):
+                    is_excluded = True
+
+            if not matching_models and not is_excluded:
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:
