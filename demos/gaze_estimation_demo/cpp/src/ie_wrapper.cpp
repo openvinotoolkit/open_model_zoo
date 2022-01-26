@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 
 IEWrapper::IEWrapper(
-    ov::runtime::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
+    ov::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
         modelPath(modelPath), modelType(modelType), deviceName(deviceName), core(core)
 {
     slog::info << "Reading model: " << modelPath << slog::endl;
@@ -73,7 +73,7 @@ void IEWrapper::setInputTensor(const std::string& tensorName, const cv::Mat& ima
     cv::Mat resizedImage;
     cv::resize(image, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC);
 
-    ov::runtime::Tensor input_tensor = infer_request.get_tensor(tensorName);
+    ov::Tensor input_tensor = infer_request.get_tensor(tensorName);
     matToTensor(resizedImage, input_tensor);
 }
 

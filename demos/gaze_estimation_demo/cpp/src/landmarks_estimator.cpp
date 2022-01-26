@@ -10,7 +10,7 @@
 namespace gaze_estimation {
 
 LandmarksEstimator::LandmarksEstimator(
-    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+    ov::Core& ie, const std::string& modelPath, const std::string& deviceName) :
         ieWrapper(ie, modelPath, modelType, deviceName)
 {
     inputTensorName = ieWrapper.expectSingleInput();
