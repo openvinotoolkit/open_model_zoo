@@ -375,9 +375,12 @@ def load_models_from_args(parser, args, models_root):
 
             if matching_models:
                 for model in matching_models:
-                    if model.name not in EXCLUDED_MODELS:
-                        models[model.name] = model
+                    models[model.name] = model
             else:
+                for model in EXCLUDED_MODELS:
+                    if fnmatch.fnmatchcase(model, pattern):
+                        continue
+
                 sys.exit('No matching models: "{}"'.format(pattern))
 
         return list(models.values())
