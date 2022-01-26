@@ -274,6 +274,49 @@ DEMOS = [
         ],
     )),
 
+    CppDemo(name='text_detection_demo', implementation='cpp_gapi',
+            model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('text-detection')}),
+        single_option_cases('-m_td',
+            ModelArg('text-detection-0003'),
+            ModelArg('text-detection-0004'),
+            ModelArg('horizontal-text-detection-0001')),
+        [
+            *combine_cases(
+                TestCase(options={'-dt': 'ctc'}),
+                [
+                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0014'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits'}),
+                ]),
+            *combine_cases(
+                TestCase(options={'-dt': 'simple'}),
+                [
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0015-encoder'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits',
+                                      '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'},
+                             extra_models=[ModelArg('text-recognition-0015-decoder')]),
+                    # TestCase(options={'-m_tr': ModelArg('text-recognition-0016-encoder'), #TODO
+                    #                    '-tr_pt_first': None, #TODO
+                    #                    '-tr_o_blb_nm': 'logits', #TODO
+                    #                    '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyz'}, #TODO
+                    #           extra_models=[ModelArg('text-recognition-0016-decoder')]), #TODO
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
+                                      '-tr_pt_first': None}),
+                    TestCase(options={'-m_tr': ModelArg('vitstr-small-patch16-224'),
+                                      '-tr_pt_first': None,
+                                      '-m_tr_ss': str(OMZ_DIR / 'models/public/vitstr-small-patch16-224/vocab.txt'),
+                                      '-start_index': '1',
+                                      '-pad': " "}),
+                ]),
+        ]
+    )),
+
     CppDemo(name='classification_benchmark_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
