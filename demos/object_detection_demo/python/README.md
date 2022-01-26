@@ -150,7 +150,8 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
                                 {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
-                                -i INPUT [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
+                                -i INPUT [--adapter {openvino,ovms}]
+                                [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
                                 [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
                                 [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
                                 [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
@@ -162,11 +163,15 @@ usage: object_detection_demo.py [-h] -m MODEL -at
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -273,6 +278,21 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 object_detection_demo.py \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m localhost:9000/models/object_detection \
+  -at ssd \
+  --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt \
+  --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
@@ -287,3 +307,4 @@ You can use both of these metrics to measure application-level performance.
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
+* [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server)
