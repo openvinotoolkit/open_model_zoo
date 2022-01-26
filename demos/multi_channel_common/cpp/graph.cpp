@@ -13,7 +13,7 @@
 #include "threading.hpp"
 
 namespace {
-void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::runtime::Tensor tensor) {
+void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::Tensor tensor) {
     static const ov::Layout layout{"NHWC"};
     static const ov::Shape shape = tensor.get_shape();
     static const size_t batchSize = shape[ov::layout::batch_idx(layout)];
@@ -53,7 +53,7 @@ void IEGraph::start(size_t batchSize, GetterFunc getterFunc, PostprocessingFunc 
                 }
             }
 
-            ov::runtime::InferRequest req;
+            ov::InferRequest req;
             {
                 std::unique_lock<std::mutex> lock(mtxAvalableRequests);
                 condVarAvailableRequests.wait(lock, [&]() {
@@ -95,7 +95,7 @@ bool IEGraph::isRunning() {
 
 std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSize) {
     std::vector<std::shared_ptr<VideoFrame>> vframes;
-    ov::runtime::InferRequest req;
+    ov::InferRequest req;
     std::chrono::high_resolution_clock::time_point startTime;
     {
         std::unique_lock<std::mutex> lock(mtxBusyRequests);

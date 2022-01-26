@@ -183,13 +183,21 @@ int main(int argc, char* argv[]) {
         const std::vector<std::string>& inputs = split(FLAGS_i, ',');
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
-        ov::runtime::Core core;
-        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
-            setBatch(core.read_model(FLAGS_m), FLAGS_bs),
-            FLAGS_m,
-            FLAGS_d,
-            roundUp(params.count, FLAGS_bs),
-            core);
+        ov::Core core;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        if (model->get_parameters().size() != 1) {
+            throw std::logic_error("Face Detection model must have only one input");
+        }
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
+        ppp.input().preprocess().convert_layout("NCHW");
+        for (const ov::Output<ov::Node>& out : model->outputs()) {
+            ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
+        }
+        model = ppp.build();
+        ov::set_batch(model, FLAGS_bs);
+        std::queue<ov::InferRequest> reqQueue = setConfig(std::move(model), FLAGS_m, FLAGS_d,
+            roundUp(params.count, FLAGS_bs), core);
         ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
@@ -214,7 +222,7 @@ int main(int argc, char* argv[]) {
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [](ov::runtime::InferRequest req, cv::Size frameSize) {
+        }, [](ov::InferRequest req, cv::Size frameSize) {
             auto output = req.get_output_tensor();
             float* dataPtr = output.data<float>();
 

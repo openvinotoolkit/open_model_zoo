@@ -93,11 +93,11 @@ public:
 
     YoloParams() {}
 
-    YoloParams(const std::shared_ptr<ov::op::v0::RegionYolo> regionYolo) {
-        coords = regionYolo->get_num_coords();
-        classes = regionYolo->get_num_classes();
-        const std::vector<float>& initialAnchors = regionYolo->get_anchors();
-        const std::vector<int64_t>& mask = regionYolo->get_mask();
+    YoloParams(const ov::op::v0::RegionYolo& regionYolo) {
+        coords = regionYolo.get_num_coords();
+        classes = regionYolo.get_num_classes();
+        const std::vector<float>& initialAnchors = regionYolo.get_anchors();
+        const std::vector<int64_t>& mask = regionYolo.get_mask();
         num = mask.size();
 
         computeAnchors(initialAnchors, mask);
@@ -138,7 +138,7 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void parseYOLOOutput(ov::runtime::Tensor tensor,
+void parseYOLOOutput(ov::Tensor tensor,
                     const YoloParams &yoloParams, const unsigned long resized_im_h,
                     const unsigned long resized_im_w, const unsigned long original_im_h,
                     const unsigned long original_im_w,
@@ -299,23 +299,33 @@ int main(int argc, char* argv[]) {
         const std::vector<std::string>& inputs = split(FLAGS_i, ',');
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
-        ov::runtime::Core core;
-        std::shared_ptr<ov::Model> model = setBatch(core.read_model(FLAGS_m), FLAGS_bs);
-
-        std::vector<std::pair<size_t, YoloParams>> yoloParams;
+        ov::Core core;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        if (model->get_parameters().size() != 1) {
+            throw std::logic_error("Face Detection model must have only one input");
+        }
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
         for (const ov::Output<ov::Node>& out : model->outputs()) {
-            const auto& regionYolo = std::static_pointer_cast<ov::op::v0::RegionYolo>(model->get_output_op(out.get_index()));
+            ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
+        }
+        model = ppp.build();
+        ov::set_batch(model, FLAGS_bs);
+
+        std::vector<std::pair<ov::Output<ov::Node>, YoloParams>> yoloParams;
+        for (const ov::Output<ov::Node>& out : model->outputs()) {
+            const ov::op::v0::RegionYolo* regionYolo = dynamic_cast<ov::op::v0::RegionYolo*>(out.get_node()->get_input_node_ptr(0));
             if (!regionYolo) {
                 throw std::runtime_error("Invalid output type: " + std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
             }
-            yoloParams.emplace_back(out.get_index(), regionYolo);
+            yoloParams.emplace_back(out, *regionYolo);
         }
         std::vector<cv::Scalar> colors;
         if (yoloParams.size() > 0)
             for (int i = 0; i < static_cast<int>(yoloParams.front().second.classes); ++i)
                 colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
 
-        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
+        std::queue<ov::InferRequest> reqQueue = setConfig(
             std::move(model),
             FLAGS_m,
             FLAGS_d,
@@ -345,7 +355,7 @@ int main(int argc, char* argv[]) {
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [&yoloParams](ov::runtime::InferRequest req,
+        }, [&yoloParams](ov::InferRequest req,
                 cv::Size frameSize
                 ) {
             unsigned long resized_im_h = 416;
@@ -353,8 +363,8 @@ int main(int argc, char* argv[]) {
 
             std::vector<DetectionObject> objects;
             // Parsing outputs
-            for (const std::pair<size_t, YoloParams>& idxParams : yoloParams) {
-                parseYOLOOutput(req.get_output_tensor(idxParams.first), idxParams.second, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
+            for (const std::pair<ov::Output<ov::Node>, YoloParams>& idxParams : yoloParams) {
+                parseYOLOOutput(req.get_tensor(idxParams.first), idxParams.second, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());

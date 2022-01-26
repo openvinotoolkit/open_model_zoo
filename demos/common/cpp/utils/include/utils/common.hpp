@@ -233,39 +233,6 @@ inline std::string fileNameNoExt(const std::string& filepath) {
     return filepath.substr(0, pos);
 }
 
-inline std::string getConfig(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& name) {
-    return execNetwork.GetConfig(name).as<std::string>();
-}
-
-inline std::string getConfig(const ov::runtime::CompiledModel& compiled, const std::string& name) {
-    return compiled.get_config(name).as<std::string>();
-}
-
-template <typename CompiledModel>
-inline void logExecNetworkInfo(const CompiledModel& compiled, const std::string& modelName,
-        const std::string& deviceName, const std::string& modelType = "") {
-    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
-    std::set<std::string> devices;
-    for (const std::string& device : parseDevices(deviceName)) {
-        devices.insert(device);
-    }
-
-    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
-        for (const auto& device : devices) {
-            try {
-                slog::info << "\tDevice: " << device << slog::endl;
-                std::string nstreams = getConfig(compiled, device + "_THROUGHPUT_STREAMS");
-                slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
-                if (device == "CPU") {
-                    std::string nthreads = getConfig(compiled, "CPU_THREADS_NUM");
-                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
-                }
-            }
-            catch (const InferenceEngine::Exception&) {}
-        }
-    }
-}
-
 inline
 void logCompiledModelInfo(
     const ov::runtime::CompiledModel& compiledModel,

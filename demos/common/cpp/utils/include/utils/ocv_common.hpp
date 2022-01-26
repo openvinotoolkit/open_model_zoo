@@ -205,8 +205,6 @@ inline void putHighlightedText(const cv::Mat& frame,
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
-}  // namespace
-
 
 class OutputTransform {
 public:

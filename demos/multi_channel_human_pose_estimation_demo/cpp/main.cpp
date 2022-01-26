@@ -180,20 +180,27 @@ int main(int argc, char* argv[]) {
         const std::vector<std::string>& inputs = split(FLAGS_i, ',');
         DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
-        ov::runtime::Core core;
-        std::shared_ptr<ov::Model> model = setBatch(core.read_model(FLAGS_m), FLAGS_bs);
+        ov::Core core;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        if (model->get_parameters().size() != 1) {
+            throw std::logic_error("Face Detection model must have only one input");
+        }
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
+        ppp.input().preprocess().convert_layout("NCHW");
+        for (const ov::Output<ov::Node>& out : model->outputs()) {
+            ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
+        }
+        model = ppp.build();
+        ov::set_batch(model, FLAGS_bs);
 
         struct {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        postParams.pafsOut = model->outputs()[0];
-        postParams.heatMapsOut = model->outputs()[1];
+        postParams.pafsOut = model->outputs()[1];
+        postParams.heatMapsOut = model->outputs()[0];
         const ov::Layout outLayout{"NCHW"};
-        ov::preprocess::PrePostProcessor ppp(model);
-        ppp.output(postParams.pafsOut.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout(outLayout);
-        ppp.output(postParams.heatMapsOut.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout(outLayout);
-        model = ppp.build();
         postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
         postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
         postParams.pafsChannels = postParams.pafsOut.get_shape()[ov::layout::channels_idx(outLayout)];
@@ -201,7 +208,7 @@ int main(int argc, char* argv[]) {
         postParams.heatMapsHeight = postParams.heatMapsOut.get_shape()[ov::layout::height_idx(outLayout)];
         postParams.heatMapsChannels = postParams.heatMapsOut.get_shape()[ov::layout::channels_idx(outLayout)];
 
-        std::queue<ov::runtime::InferRequest> reqQueue = setConfig(
+        std::queue<ov::InferRequest> reqQueue = setConfig(
             std::move(model),
             FLAGS_m,
             FLAGS_d,
@@ -231,7 +238,7 @@ int main(int argc, char* argv[]) {
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [&postParams](ov::runtime::InferRequest req, cv::Size frameSize) {
+        }, [&postParams](ov::InferRequest req, cv::Size frameSize) {
             std::vector<Detections> detections(FLAGS_bs);
             float* heatMapsData = req.get_tensor(postParams.heatMapsOut).data<float>();
             float* pafsData = req.get_tensor(postParams.pafsOut).data<float>();
