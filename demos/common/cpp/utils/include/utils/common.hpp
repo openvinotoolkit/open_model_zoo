@@ -268,10 +268,10 @@ void logCompiledModelInfo(
         for (const auto& device : devices) {
             try {
                 slog::info << "\tDevice: " << device << slog::endl;
-                std::string nstreams = compiledModel.get_config(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                std::string nstreams = compiledModel.get_property(device + "_THROUGHPUT_STREAMS").as<std::string>();
                 slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
                 if (device == "CPU") {
-                    std::string nthreads = compiledModel.get_config("CPU_THREADS_NUM").as<std::string>();
+                    std::string nthreads = compiledModel.get_property("CPU_THREADS_NUM").as<std::string>();
                     slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
                 }
             }
