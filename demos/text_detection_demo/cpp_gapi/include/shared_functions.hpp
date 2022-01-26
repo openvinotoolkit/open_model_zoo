@@ -9,5 +9,4 @@
 
 namespace custom {
 size_t getTopLeftPointIdx(const std::vector<cv::Point2f>& points);
-std::string getWeightsPath(const std::string& modelPath);
 }

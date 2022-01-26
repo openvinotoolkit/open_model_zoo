@@ -31,12 +31,3 @@ size_t custom::getTopLeftPointIdx(const std::vector<cv::Point2f>& points) {
     }
     return mostLeftIdx;
 }
-std::string custom::getWeightsPath(const std::string &modelPath) {
-    const auto EXT_LEN = 4u;
-    const auto sz = modelPath.size();
-    CV_Assert(sz > EXT_LEN);
-
-    const auto ext = modelPath.substr(sz - EXT_LEN);
-    CV_Assert(cv::toLowerCase(ext) == ".xml");
-    return modelPath.substr(0u, sz - EXT_LEN) + ".bin";
-}

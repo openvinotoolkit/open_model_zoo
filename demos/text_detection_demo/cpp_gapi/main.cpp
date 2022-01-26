@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
         cv::gapi::GNetPackage decNetwork;
         if (tdRequired) {
             auto tdNet = cv::gapi::ie::Params<nets::TextDetection> {
-                tdModelPath, custom::getWeightsPath(tdModelPath), tdDevice
+                tdModelPath, fileNameNoExt(tdModelPath) + ".bin", tdDevice
             }.cfgOutputLayers(tdOutputNames);
             if (tdReshape) {
                 tdInputDims[2] = tdNewInputHeight;
@@ -296,17 +296,17 @@ int main(int argc, char *argv[]) {
         if (trRequired) {
             if (trComposite) {
                 static auto trEncNet = cv::gapi::ie::Params<nets::TextRecognitionEncoding> {
-                    trModelPath, custom::getWeightsPath(trModelPath), trDevice
+                    trModelPath, fileNameNoExt(trModelPath) + ".bin", trDevice
                 }.cfgOutputLayers({trOutputNames});
                 networks += cv::gapi::networks(trEncNet);
 
                 static auto trDecNet = cv::gapi::ie::Params<nets::TextRecognitionDecoding> {
-                    decoderModelPath, custom::getWeightsPath(decoderModelPath), trDevice
+                    decoderModelPath, fileNameNoExt(decoderModelPath) + ".bin", trDevice
                 }.cfgInputLayers({decoderInputNames}).cfgOutputLayers({decoderOutputNames});
                 decNetwork += cv::gapi::networks(trDecNet);
             } else {
                 auto trNet = cv::gapi::ie::Params<nets::TextRecognition> {
-                    trModelPath, custom::getWeightsPath(trModelPath), trDevice
+                    trModelPath, fileNameNoExt(trModelPath) + ".bin", trDevice
                 }.cfgOutputLayers({trOutputNames[0]});
                 networks += cv::gapi::networks(trNet);
             }
