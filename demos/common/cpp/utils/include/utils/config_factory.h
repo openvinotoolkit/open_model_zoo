@@ -27,7 +27,7 @@ struct CnnConfig {
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
-    std::map<std::string, std::string> compiledModelConfig;
+    ov::AnyMap compiledModelConfig;
 
     std::set<std::string> getDevices();
 
