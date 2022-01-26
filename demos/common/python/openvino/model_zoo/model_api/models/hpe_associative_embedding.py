@@ -118,7 +118,11 @@ class HpeAssociativeEmbedding(ImageModel):
 
 
 def find_layer_by_name(name, layers):
-    suitable_layers = [layer_name for layer_name in layers if layer_name.startswith(name)]
+    suitable_layers = []
+    for layer, metadata in layers.items():
+        count_names = len([layer_name for layer_name in metadata.names if layer_name.startswith(name)])
+        if count_names > 0:
+            suitable_layers.append(layer)
     if not suitable_layers:
         raise ValueError('Suitable layer for "{}" output is not found'.format(name))
 

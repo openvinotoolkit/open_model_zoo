@@ -16,11 +16,12 @@
 
 import abc
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Set
 
 
 @dataclass
 class Metadata:
+    names: Set[str]
     shape: List[int] = field(default_factory=list)
     precision: str = ''
     type: str = ''

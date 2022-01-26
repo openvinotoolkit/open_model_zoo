@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import numpy as np
 from openvino.preprocess import PrePostProcessor
 from openvino.runtime import Layout
 

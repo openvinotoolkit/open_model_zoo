@@ -92,7 +92,7 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for input in self.model.inputs:
-            inputs[input.get_any_name()] = Metadata(list(input.shape), input.get_element_type().get_type_name())
+            inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
@@ -100,7 +100,7 @@ class OpenvinoAdapter(ModelAdapter):
         outputs = {}
         for output in self.model.outputs:
             output_shape = output.partial_shape.get_min_shape() if self.model.is_dynamic() else output.shape
-            outputs[output.get_any_name()] = Metadata(list(output_shape), output.get_element_type().get_type_name())
+            outputs[output.get_any_name()] = Metadata(output.get_names(), list(output_shape), output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
