@@ -17,6 +17,7 @@
 """
 import logging as log
 import sys
+import copy
 from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -24,7 +25,7 @@ from pathlib import Path
 import numpy as np
 import wave
 
-from openvino.inference_engine import IECore, Blob, get_version
+from openvino.runtime import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -73,27 +74,40 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     # read IR
     log.info("Reading model {}".format(args.model))
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
-    ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
+    ov_encoder = core.read_model(args.model)
 
     # check input and output names
-    input_shapes = {k: v.input_data.shape for k, v in ie_encoder.input_info.items()}
-    input_names = list(ie_encoder.input_info.keys())
-    output_names = list(ie_encoder.outputs.keys())
+    if len(ov_encoder.inputs) == len(ov_encoder.outputs):
+        input_shapes = {}
 
-    assert "input" in input_names, "'input' is not presented in model"
-    assert "output" in output_names, "'output' is not presented in model"
-    state_inp_names = [n for n in input_names if "state" in n]
+        for const_obj in ov_encoder.inputs:
+            for name in const_obj.get_names():
+                if ("state" in name) or ("input" in name):
+                    input_shapes[name] = const_obj.shape
+                else:
+                    raise RuntimeError("The model expected input tensor with name 'input' or 'inp_state_*'")
+
+        for const_obj in ov_encoder.outputs:
+            for name in const_obj.get_names():
+                if ("state" not in name) and ("output" not in name):
+                    raise RuntimeError("The model expected output tensor with names 'output' and 'out_state_*'")
+
+    else:
+        raise RuntimeError("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
+
+    state_inp_names = [n for n in input_shapes.keys() if "state" in n]
     state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
     log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
     # load model to the device
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    compiled_model = core.compile_model(ov_encoder, args.device)
+
+    infer_request = compiled_model.create_infer_request()
+
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     start_time = perf_counter()
@@ -117,27 +131,18 @@ def main():
         #add states to input
         for n in state_inp_names:
             if res:
-                inputs[n] = res[n.replace('inp', 'out')].buffer
+                inputs[n] = infer_request.get_tensor(n.replace('inp', 'out')).data
             else:
                 #on the first iteration fill states by zeros
                 inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
 
-        # Set inputs manually through InferRequest functionality to speedup
-        infer_request_ptr = ie_encoder_exec.requests[0]
-        for n, data in inputs.items():
-            info_ptr = ie_encoder.input_info[n]
-            blob = Blob(info_ptr.tensor_desc, data)
-            infer_request_ptr.set_blob(n, blob, info_ptr.preprocess_info)
-
-        # infer by IE
-        infer_request_ptr.infer()
-        res = infer_request_ptr.output_blobs
-
-        samples_out.append(res["output"].buffer.squeeze(0))
-
+        infer_request.infer(inputs)
+        res = infer_request.get_tensor("output")
+        samples_out.append(copy.deepcopy(res.data).squeeze(0))
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size/16.0))
     sample_out = np.concatenate(samples_out, 0)
     wav_write(args.output, sample_out)
 

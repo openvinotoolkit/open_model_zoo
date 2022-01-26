@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,26 +13,27 @@
 # limitations under the License.
 
 description: >-
-  QuartzNet model performs automatic speech recognition. QuartzNet's design is based on
-  the Jasper architecture, which is a convolutional model trained with Connectionist
-  Temporal Classification (CTC) loss. This particular model has 15 Jasper blocks each repeated 5 times.
-  The model was trained in NeMo on multiple datasets: LibriSpeech, Mozilla Common Voice,
-  WSJ, Fisher, Switchboard, and NSC Singapore English. For details see repository <https://github.com/NVIDIA/NeMo>,
-  paper <https://arxiv.org/pdf/1910.10261.pdf>.
+  QuartzNet model performs automatic speech recognition. QuartzNet's design is based
+  on the Jasper architecture, which is a convolutional model trained with Connectionist
+  Temporal Classification (CTC) loss. This particular model has 15 Jasper blocks each
+  repeated 5 times. The model was trained in NeMo on multiple datasets: LibriSpeech,
+  Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English. For details
+  see repository <https://github.com/NVIDIA/NeMo>, paper <https://arxiv.org/pdf/1910.10261.pdf>.
 task_type: speech_recognition
 files:
   - name: models/ruamel.yaml-0.17.2-py3-none-any.whl
     size: 101631
-    sha384: 1f0f8622be5cb6018836ebba71b1eb137a088ff5617f5f1013c1fa0503af0c1933410915e85c76b4a1468ae22a63a115
+    checksum: 1f0f8622be5cb6018836ebba71b1eb137a088ff5617f5f1013c1fa0503af0c1933410915e85c76b4a1468ae22a63a115
     source: https://files.pythonhosted.org/packages/82/b8/d5bc68c849d0a60b1acb3ad20fec5d23534733701f5db6b2cc029076bf72/ruamel.yaml-0.17.2-py3-none-any.whl
   - name: models/nemo_toolkit-0.11.0-py3-none-any.whl
     size: 622593
-    sha384: da6f83fce1342dac73b05b09c2590bc48ba5aa8242c9cca723f5baf19441b6052eb7b5d3c4e5c02b869d5fc097ebb4cd
+    checksum: da6f83fce1342dac73b05b09c2590bc48ba5aa8242c9cca723f5baf19441b6052eb7b5d3c4e5c02b869d5fc097ebb4cd
     source: https://files.pythonhosted.org/packages/70/68/7392874cb5fcb8a0317671a03a7b7f51cf7f2648614ef2546fc0f00726bc/nemo_toolkit-0.11.0-py3-none-any.whl
   - name: models/QuartzNet15x5-En-Base.nemo
     size: 71083664
-    sha384: 74e8284e77098906afb7a15a861ef60ec14db1a4acb206fa719492fa43050ad69a91c245652c05c5f0ded38b5903ed55
-    source: https://api.ngc.nvidia.com/v2/models/nvidia/multidataset_quartznet15x5/versions/2/files/QuartzNet15x5-En-Base.nemo
+    checksum: 74e8284e77098906afb7a15a861ef60ec14db1a4acb206fa719492fa43050ad69a91c245652c05c5f0ded38b5903ed55
+    original_source: https://api.ngc.nvidia.com/v2/models/nvidia/multidataset_quartznet15x5/versions/2/files/QuartzNet15x5-En-Base.nemo
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/quartznet-15x5-en/QuartzNet15x5-En-Base.nemo
 postprocessing:
   - $type: unpack_archive
     format: zip

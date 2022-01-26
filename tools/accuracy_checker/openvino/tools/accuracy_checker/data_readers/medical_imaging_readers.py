@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ class NiftiImageReader(BaseReader):
         self.frame_separator = self.get_value_from_config('frame_separator')
         self.multi_frame = self.get_value_from_config('multi_frame')
         self.to_4D = self.get_value_from_config('to_4D')
+        self.data_layout = self.get_value_from_config('data_layout')
 
         if not self.data_source:
             if not self._postpone_data_source:

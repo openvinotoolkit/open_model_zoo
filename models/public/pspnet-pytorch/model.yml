@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,39 +23,40 @@ task_type: semantic_segmentation
 files:
   - name: pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
     size: 196212259
-    sha384: be24b179a6b45e794a03dc153dcfa854cc9f3ee5beefad70072b47902d720d9d1d0ed6dfefb1a43412ed356e2f44fa98
-    source: https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x512_20k_voc12aug/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+    checksum: be24b179a6b45e794a03dc153dcfa854cc9f3ee5beefad70072b47902d720d9d1d0ed6dfefb1a43412ed356e2f44fa98
+    original_source: https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x512_20k_voc12aug/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/pspnet-pytorch/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
   - name: models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
     size: 263
-    sha384: 08bf47369c9070d3f8685a587801335ee894a73de38e4c71f913813ad0d4b7584528d0640e06efcf904f1b3f2cd7d223
+    checksum: 08bf47369c9070d3f8685a587801335ee894a73de38e4c71f913813ad0d4b7584528d0640e06efcf904f1b3f2cd7d223
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
   - name: models/configs/_base_/models/pspnet_r50-d8.py
     size: 1261
-    sha384: ed36f85e10894f27cd6df46fb9242467e712ecc8f3f877da55e7d145660f896588b7dcedcb88be195501cae3ea5f45d8
+    checksum: ed36f85e10894f27cd6df46fb9242467e712ecc8f3f877da55e7d145660f896588b7dcedcb88be195501cae3ea5f45d8
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/models/pspnet_r50-d8.py
   - name: models/configs/_base_/datasets/pascal_voc12_aug.py
     size: 261
-    sha384: 722791c001f6c9f4e0ce124e7903fa69bf32ceed81f6966ecf4e50506e414f39455192e412b7489048b32ba95663a485
+    checksum: 722791c001f6c9f4e0ce124e7903fa69bf32ceed81f6966ecf4e50506e414f39455192e412b7489048b32ba95663a485
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/datasets/pascal_voc12_aug.py
   - name: models/configs/_base_/datasets/pascal_voc12.py
     size: 1930
-    sha384: e90c60f80e0893f8362ab2ee5ec0cfe69d7e9d40475fa9c52f533990778614a8661c64777e2b213886aeea37aaf847cc
+    checksum: e90c60f80e0893f8362ab2ee5ec0cfe69d7e9d40475fa9c52f533990778614a8661c64777e2b213886aeea37aaf847cc
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/datasets/pascal_voc12.py
   - name: models/configs/_base_/default_runtime.py
     size: 321
-    sha384: 76c434ea40497b787f1aa2cc8f2ece8da3fedd17d30e26f61baf16b8b464506c7d0e7a3d9b96a5ad16acb34749f6fd6a
+    checksum: 76c434ea40497b787f1aa2cc8f2ece8da3fedd17d30e26f61baf16b8b464506c7d0e7a3d9b96a5ad16acb34749f6fd6a
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/default_runtime.py
   - name: models/mmsegmentation-0.11.0-py3-none-any.whl
     size: 147357
-    sha384: beddc80a37db7be119e1dc94a79c7a824ffcc01c7c5ca19712ddc3b07bc217868d97bd97c4de457ea518078a0b87774c
+    checksum: beddc80a37db7be119e1dc94a79c7a824ffcc01c7c5ca19712ddc3b07bc217868d97bd97c4de457ea518078a0b87774c
     source: https://files.pythonhosted.org/packages/b4/f9/4722a9dfc9bf2d6d6f5cabb90cd61d549ae316ccbe226fc6e245b586d5f9/mmsegmentation-0.11.0-py3-none-any.whl
   - name: models/addict-2.4.0-py3-none-any.whl
     size: 3832
-    sha384: 0b3d7c226551078ffcd70e4d512194f2cb67c6c06dc8c7a7b8001752b842b934990817f9236f73fb7c38cba5573205ab
+    checksum: 0b3d7c226551078ffcd70e4d512194f2cb67c6c06dc8c7a7b8001752b842b934990817f9236f73fb7c38cba5573205ab
     source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
   - name: models/mmcv-1.2.0.tar.gz
     size: 241987
-    sha384: 23b888f6b727372b2f61047bb5b068bd1a06cef9884b7c9a5e3976e6a1b542eef4d3f37cbbbad2e0bf657f320d18a529
+    checksum: 23b888f6b727372b2f61047bb5b068bd1a06cef9884b7c9a5e3976e6a1b542eef4d3f37cbbbad2e0bf657f320d18a529
     source: https://files.pythonhosted.org/packages/d4/a0/01de45397c6222a29cf088bf54d4fb5038a4a524340eef0f923335a23116/mmcv-1.2.0.tar.gz
 postprocessing:
   - $type: unpack_archive
@@ -67,7 +68,6 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: models/mmsegmentation-0.11.0-py3-none-any.whl
-
   - $type: regex_replace
     pattern: '''../_base_/schedules/schedule_20k.py'''
     replacement: '# \g<0>'
@@ -108,7 +108,6 @@ postprocessing:
     pattern: 'import regex as re'
     replacement: 'import re'
     file: models/mmcv-1.2.0/mmcv/utils/config.py
-
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models

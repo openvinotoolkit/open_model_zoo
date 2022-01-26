@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,12 +19,7 @@ from ..representation import (
     CharacterRecognitionPrediction,
 )
 from .metric import PerImageEvaluationMetric
-from ..utils import UnsupportedPackage
-
-try:
-    import editdistance
-except ImportError as import_error:
-    editdistance = UnsupportedPackage("editdistance", import_error.msg)
+from .distance import editdistance_eval
 
 
 class SpeechRecognitionWER(PerImageEvaluationMetric):
@@ -33,14 +28,11 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
         self.words = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
-        cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
+        cur_score = editdistance_eval(annotation.label.split(), prediction.label.split())
         cur_words = len(annotation.label.split())
         self.score += cur_score
         self.words += cur_words
@@ -52,6 +44,12 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     def reset(self):
         self.words, self.score = 0, 0
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta
+
 
 class SpeechRecognitionCER(PerImageEvaluationMetric):
     __provider__ = 'cer'
@@ -59,14 +57,11 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
-        cur_score = editdistance.eval(annotation.label, prediction.label)
+        cur_score = editdistance_eval(annotation.label, prediction.label)
         cur_length = len(annotation.label)
         self.score += cur_score
         self.length += cur_length
@@ -78,6 +73,12 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
     def reset(self):
         self.length, self.score = 0, 0
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta
+
 
 class SpeechRecognitionSER(PerImageEvaluationMetric):
     __provider__ = 'ser'
@@ -88,7 +89,6 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
     def configure(self):
         self.length = 0
         self.score = 0
-        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         # remove extra whitespaces
@@ -104,3 +104,9 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
 
     def reset(self):
         self.length, self.score = 0, 0
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-worse'
+        return meta

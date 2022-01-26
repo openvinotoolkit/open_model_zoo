@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -64,8 +64,10 @@ class mrlEyes_2018_01_Converter(BaseFormatConverter):
             if i % 10 == 0:
                 annotations.append(ClassificationAnnotation(file, int(eye_state)))
 
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
         # convert label list to label map
         label_map = {0: 'closed', 1: 'open'}
         metadata = {'label_map': label_map}
-
-        return ConverterReturn(annotations, metadata, None)
+        return metadata

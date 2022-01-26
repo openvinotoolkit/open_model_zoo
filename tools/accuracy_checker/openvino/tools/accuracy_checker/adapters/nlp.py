@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,14 +76,12 @@ class NonAutoregressiveMachineTranslationAdapter(Adapter):
         for s in ['sos', 'eos', 'pad']:
             self.idx[s] = str(self.get_value_from_config(s + '_symbol'))
         self.output_name = self.get_value_from_config('output_name')
-        if self.output_name is None:
-            self.output_name = self.output_blob
+        self.output_checked = False
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if self.output_name is None:
+        if not self.output_checked:
             self.select_output_blob(raw_outputs)
-            self.output_name = self.output_blob
         translation = raw_outputs[self.output_name]
         results = []
         for identifier, tokens in zip(identifiers, translation):
@@ -93,6 +91,13 @@ class NonAutoregressiveMachineTranslationAdapter(Adapter):
                     sentence = sentence.replace(s, '')
             results.append(MachineTranslationPrediction(identifier, sentence.lstrip().split(' ')))
         return results
+
+    def select_output_blob(self, outputs):
+        if self.output_name is None:
+            super().select_output_blob(outputs)
+            self.output_name = self.output_blob
+        else:
+            self.output_name = self.check_output_name(self.output_name, outputs)
 
 
 class MachineTranslationAdapter(Adapter):
@@ -165,9 +170,12 @@ class QuestionAnsweringAdapter(Adapter):
     def configure(self):
         self.start_token_logit_out = self.get_value_from_config('start_token_logits_output')
         self.end_token_logit_out = self.get_value_from_config('end_token_logits_output')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_checked:
+            self.select_output_blob(raw_output)
         result = []
         for identifier, start_token_logits, end_token_logits in zip(
                 identifiers, raw_output[self.start_token_logit_out], raw_output[self.end_token_logit_out]
@@ -178,6 +186,11 @@ class QuestionAnsweringAdapter(Adapter):
 
         return result
 
+    def select_output_blob(self, outputs):
+        self.start_token_logit_out = self.check_output_name(self.start_token_logit_out, outputs)
+        self.end_token_logit_out = self.check_output_name(self.end_token_logit_out, outputs)
+        self.outputs_checked = True
+
 
 class QuestionAnsweringEmbeddingAdapter(Adapter):
     __provider__ = 'bert_question_answering_embedding'
@@ -187,15 +200,18 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'embedding': StringField(description="Output layer name for embedding vector."),
+            'embedding': StringField(description="Output layer name for embedding vector.", optional=True),
         })
         return parameters
 
     def configure(self):
         self.embedding = self.get_value_from_config('embedding')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_checked:
+            self.select_output_blob(raw_output)
         result = []
         for identifier, embedding in zip(identifiers, raw_output[self.embedding]):
             result.append(
@@ -203,6 +219,14 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
             )
 
         return result
+
+    def select_output_blob(self, outputs):
+        if self.embedding:
+            self.embedding = self.check_output_name(self.embedding, outputs)
+        else:
+            super().select_output_blob(outputs)
+            self.embedding = self.output_blob
+        self.outputs_checked = True
 
 
 class QuestionAnsweringBiDAFAdapter(Adapter):
@@ -221,9 +245,12 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
     def configure(self):
         self.start_pos = self.get_value_from_config('start_pos_output')
         self.end_pos = self.get_value_from_config('end_pos_output')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_checked:
+            self.select_output_blob(raw_output)
         result = []
         for identifier, start, end in zip(
                 identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
@@ -234,6 +261,11 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
 
         return result
 
+    def select_output_blob(self, outputs):
+        self.start_pos = self.check_output_name(self.start_pos, outputs)
+        self.end_pos = self.check_output_name(self.end_pos, outputs)
+        self.outputs_checked = True
+
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'
@@ -243,22 +275,34 @@ class LanguageModelingAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'logits_output': StringField(description="Output layer name for language modeling token logits."),
+            'logits_output': StringField(
+                description="Output layer name for language modeling token logits.", optional=True),
         })
         return parameters
 
     def configure(self):
         self.logits_out = self.get_value_from_config('logits_output')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_checked:
+            self.select_output_blob(raw_output)
         result = []
         for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
             if len(token_output.shape) == 3:
                 token_output = np.squeeze(token_output, axis=0)
             result.append(LanguageModelingPrediction(identifier, token_output))
-
         return result
+
+    def select_output_blob(self, outputs):
+        self.outputs_checked = True
+        if not self.logits_out:
+            super().select_output_blob(outputs)
+            self.logits_out = self.output_blob
+            return
+        self.logits_out = self.check_output_name(self.logits_out, outputs)
+        return
 
 
 class BertTextClassification(Adapter):
@@ -285,14 +329,18 @@ class BertTextClassification(Adapter):
         self.num_classes = self.get_value_from_config('num_classes')
         self.classification_out = self.get_value_from_config('classification_out')
         self.single_score = self.get_value_from_config('single_score')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outputs = self._extract_predictions(raw, frame_meta)
-        if self.classification_out is None:
+        if not self.outputs_checked:
             self.select_output_blob(outputs)
-            self.classification_out = self.output_blob
         outputs = outputs[self.classification_out]
-        if not self.single_score and outputs.shape[1] != self.num_classes:
+        if outputs.ndim >= 3:
+            outputs = np.squeeze(outputs)
+        if outputs.ndim == 1 and len(identifiers) == 1:
+            outputs = np.expand_dims(outputs, 0)
+        if not self.single_score and outputs.shape[-1] != self.num_classes:
             _, hidden_size = outputs.shape
             output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
             output_bias = np.zeros(self.num_classes)
@@ -310,6 +358,15 @@ class BertTextClassification(Adapter):
             result.append(pred)
 
         return result
+
+    def select_output_blob(self, outputs):
+        self.outputs_checked = True
+        if not self.classification_out:
+            super().select_output_blob(outputs)
+            self.classification_out = self.output_blob
+            return
+        self.classification_out = self.check_output_name(self.classification_out, outputs)
+        return
 
 
 class BERTNamedEntityRecognition(Adapter):
@@ -329,14 +386,23 @@ class BERTNamedEntityRecognition(Adapter):
 
     def configure(self):
         self.classification_out = self.get_value_from_config('classification_out')
+        self.outputs_checked = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outputs = self._extract_predictions(raw, frame_meta)
-        if self.classification_out is None:
+        if not self.outputs_checked:
             self.select_output_blob(outputs)
-            self.classification_out = self.output_blob
         outputs = outputs[self.classification_out]
         results = []
         for identifier, out in zip(identifiers, outputs):
             results.append(SequenceClassificationPrediction(identifier, out))
         return results
+
+    def select_output_blob(self, outputs):
+        self.outputs_checked = True
+        if not self.classification_out:
+            super().select_output_blob(outputs)
+            self.classification_out = self.output_blob
+            return
+        self.classification_out = self.check_output_name(self.classification_out, outputs)
+        return

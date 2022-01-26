@@ -52,6 +52,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                       [--adapter {openvino,ovms}]
                                        [--questions QUESTION [QUESTION ...]]
                                        [--input_names INPUT_NAMES]
                                        [--output_names OUTPUT_NAMES]
@@ -65,9 +66,13 @@ Options:
   -v VOCAB, --vocab VOCAB
                         Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. URL to a page with context
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   --questions QUESTION [QUESTION ...]
                         Optional. Prepared questions
   --input_names INPUT_NAMES
@@ -118,6 +123,23 @@ Options:
 
 The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 bert_question_answering_demo.py
+            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt
+            --model=localhost:9000/models/bert
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --output_names="output_s,output_e"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            --adapter ovms
+            -c
+```
+
 ## Demo Inputs
 
 The application reads text from the HTML page at the given url and then answers questions typed from the console.
@@ -129,7 +151,7 @@ length of the context plus length of the question (both in tokens), if the resul
 sequence length that the network expects. This is performance (speed) and memory footprint saving option.
 Since some networks are not-reshapable (due to limitations of the internal layers) the reshaping might fail,
 so you will need to run the demo without it.
-Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
+Please see general [reshape intro and limitations](https://docs.openvino.ai/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
 
@@ -147,6 +169,6 @@ Thus, for the long texts, the network is called multiple times. The results are 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
-* [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
+* [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)

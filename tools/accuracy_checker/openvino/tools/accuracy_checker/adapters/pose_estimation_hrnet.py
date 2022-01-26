@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField, ConfigError
+from ..config import ConfigValidator, StringField
 from ..representation import PoseEstimationPrediction
-from ..utils import contains_all
 
 from .pose_estimation_associative_embedding import AssociativeEmbeddingDecoder
 
@@ -34,15 +33,12 @@ class HumanPoseHRNetAdapter(Adapter):
         parameters.update({
             'embeddings_out': StringField(
                 description="Name of output layer with associative embeddings.",
-                optional=True
             ),
             'heatmaps_out': StringField(
                 description="Name of output layer with keypoints heatmaps.",
-                optional=True
             ),
             'nms_heatmaps_out': StringField(
                 description="Name of output layer with keypoints heatmaps after NMS.",
-                optional=True
             ),
         })
 
@@ -58,6 +54,7 @@ class HumanPoseHRNetAdapter(Adapter):
         self.embeddings = self.get_value_from_config('embeddings_out')
         self.heatmaps = self.get_value_from_config('heatmaps_out')
         self.nms_heatmaps = self.get_value_from_config('nms_heatmaps_out')
+        self.outputs_verified = False
 
         self.num_joints = 17
         self.decoder = AssociativeEmbeddingDecoder(
@@ -72,11 +69,17 @@ class HumanPoseHRNetAdapter(Adapter):
             use_detection_val=True,
             ignore_too_much=False)
 
+    def select_output_blob(self, outputs):
+        self.heatmaps = self.check_output_name(self.heatmaps, outputs)
+        self.nms_heatmaps = self.check_output_name(self.nms_heatmaps, outputs)
+        self.embeddings = self.check_output_name(self.embeddings, outputs)
+        self.outputs_verified = True
+
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not contains_all(raw_outputs, (self.embeddings, self.heatmaps, self.nms_heatmaps)):
-            raise ConfigError('Some of the outputs are not found')
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         raw_output = zip(identifiers, raw_outputs[self.heatmaps][None],
                          raw_outputs[self.nms_heatmaps][None],

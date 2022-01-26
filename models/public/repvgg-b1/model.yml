@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ task_type: classification
 files:
   - name: repvgg.py
     size: 12745
-    sha384: 3d41d82d256eb4bb8b0216e177bcf84458cf4cb0dcd15809fee1e4c30d304bce7f3136caedc717e863c7e67b97c0d87d
+    checksum: 3d41d82d256eb4bb8b0216e177bcf84458cf4cb0dcd15809fee1e4c30d304bce7f3136caedc717e863c7e67b97c0d87d
     source: https://raw.githubusercontent.com/DingXiaoH/RepVGG/faba6fb5cbc27a3956e2e0522e27e065b824c757/repvgg.py
   - name: RepVGG-B1-train.pth
     size: 230009223
-    sha384: 23d9bea60e7bf0c184e0ec273ac228cda6ee8afcd4abe734cd1b02ca48253143000b41e299124601252a4498fe6ba379
-    source:
+    checksum: 23d9bea60e7bf0c184e0ec273ac228cda6ee8afcd4abe734cd1b02ca48253143000b41e299124601252a4498fe6ba379
+    original_source:
       $type: google_drive
       id: 1VlCfXXiaJjNjzQBy3q7C3H2JcxoL0fms
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-b1/RepVGG-B1-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG

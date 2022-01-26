@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ task_type: classification
 files:
   - name: weights_mobilenet_v3_small_224_1.0_float.h5
     size: 10734624
-    sha384: d342c446ceecbcf76edf94f7a51bb94d26296fea8d91e0b28287143eff569118c98a950df3258f37a94c06f0adc4d31b
-    source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_small_224_1.0_float.h5
+    checksum: d342c446ceecbcf76edf94f7a51bb94d26296fea8d91e0b28287143eff569118c98a950df3258f37a94c06f0adc4d31b
+    original_source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_small_224_1.0_float.h5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-v3-small-1.0-224-tf/weights_mobilenet_v3_small_224_1.0_float.h5
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
@@ -30,5 +31,5 @@ model_optimizer_args:
   - --output=StatefulPartitionedCall/MobilenetV3small/Predictions/Softmax
   - --saved_model_dir=$dl_dir/mobilenet_v3_small_224_1.0_float.savedmodel
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

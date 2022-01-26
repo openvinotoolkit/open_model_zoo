@@ -24,55 +24,60 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
 class RetinaFace(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'RetinaFace'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, (6, 9, 12))
 
-        self.detect_masks = len(self.net.outputs) == 12
-        self.process_landmarks = len(self.net.outputs) > 6
+        self.detect_masks = len(self.outputs) == 12
+        self.process_landmarks = len(self.outputs) > 6
         self.mask_threshold = 0.5
         self.postprocessor = RetinaFacePostprocessor(detect_attributes=self.detect_masks,
                                                      process_landmarks=self.process_landmarks)
 
         self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
 
-        self._output_layer_names = self.net.outputs
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['confidence_threshold'].update_default_value(0.5)
+        return parameters
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold, self.mask_threshold)
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.confidence_threshold, self.mask_threshold)
         return clip_detections(outputs, meta['original_shape'])
 
 
 class RetinaFacePyTorch(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(ie, model_path,  resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'RetinaFace-PyTorch'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter,  configuration, preload)
         self._check_io_number(1, (2, 3))
 
-        self.process_landmarks = len(self.net.outputs) == 3
+        self.process_landmarks = len(self.outputs) == 3
         self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
 
-        self.labels = ['Face']
 
-        self._output_layer_names = self.net.outputs
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['confidence_threshold'].update_default_value(0.5)
+        parameters['labels'].update_default_value(['Face'])
+        return parameters
 
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.confidence_threshold,
                                                     meta['resized_shape'][:2])
         return clip_detections(outputs, meta['original_shape'])
 

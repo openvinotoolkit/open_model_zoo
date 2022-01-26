@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -995,13 +995,6 @@ class TestPostprocessor:
         postprocess_data(PostprocessingExecutor(config), annotation, prediction)
         assert np.array_equal(prediction[0].mask, expected_prediction_mask)
         assert np.array_equal(annotation[0].mask, expected_annotation_mask)
-
-    def test_extend_segmentation_mask_raise_config_error_if_prediction_less_annotation(self):
-        config = [{'type': 'extend_segmentation_mask'}]
-        annotation = make_segmentation_representation(np.zeros((5, 5)), ground_truth=True)
-        prediction = make_segmentation_representation(np.zeros((4, 4)), ground_truth=False)
-        with pytest.raises(ConfigError):
-            postprocess_data(PostprocessingExecutor(config), annotation, prediction)
 
     def test_extend_segmentation_mask_with_filling_label(self):
         config = [{'type': 'extend_segmentation_mask', 'filling_label': 1}]

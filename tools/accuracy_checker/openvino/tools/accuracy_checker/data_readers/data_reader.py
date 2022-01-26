@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ class DataRepresentation:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
 
+class AnnotationDataIdentifier:
+    def __init__(self, ann_id, data_id):
+        self.annotation_id = ann_id
+        self.data_id = data_id
+
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
@@ -64,6 +69,10 @@ IdentifierSerializationOptions = namedtuple(
 )
 
 identifier_serialization = {
+    'AnnotationDataIdentifier': IdentifierSerializationOptions(
+        'annotation_data_identifier', ['annotation_id', 'data_id'],
+        AnnotationDataIdentifier, [False, True], [False, True]
+    ),
     'ClipIdentifier': IdentifierSerializationOptions(
         'clip_identifier', ['video', 'clip_id', 'frames'], ClipIdentifier, [False, False, False], [False, False, True]),
     'MultiFramesInputIdentifier': IdentifierSerializationOptions(
@@ -120,15 +129,31 @@ def deserialize_identifier(identifier):
     return identifier
 
 
-def create_identifier_key(identifier):
+def create_ann_identifier_key(identifier):
     if isinstance(identifier, list):
-        return ListIdentifier(tuple(identifier))
+        return ListIdentifier(tuple(create_ann_identifier_key(elem) for elem in identifier))
     if isinstance(identifier, ClipIdentifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
         return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
     if isinstance(identifier, ParametricImageIdentifier):
         return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
+    if isinstance(identifier, AnnotationDataIdentifier):
+        return identifier.annotation_id
+    return identifier
+
+
+def create_identifier_key(identifier):
+    if isinstance(identifier, list):
+        return ListIdentifier(tuple(create_ann_identifier_key(elem) for elem in identifier))
+    if isinstance(identifier, ClipIdentifier):
+        return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
+    if isinstance(identifier, ParametricImageIdentifier):
+        return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
+    if isinstance(identifier, AnnotationDataIdentifier):
+        return AnnotationDataIdentifier(identifier.annotation_id, tuple(identifier.data_id))
     return identifier
 
 
@@ -202,6 +227,7 @@ class BaseReader(ClassProvider):
             'multi_infer': BoolField(
                 default=False, optional=True, description='Allows multi infer.'
             ),
+            'data_layout': StringField(optional=True, description='data layout after reading')
         }
 
     def get_value_from_config(self, key):
@@ -215,6 +241,7 @@ class BaseReader(ClassProvider):
         else:
             self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     @classmethod
     def validate_config(
@@ -297,6 +324,8 @@ class BaseReader(ClassProvider):
         )
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
+        if self.data_layout:
+            data_rep.metadata['data_layout'] = self.data_layout
         return data_rep
 
     def _read_pair(self, data_id):
@@ -346,6 +375,7 @@ class ReaderCombiner(BaseReader):
 
         self.reading_scheme = reading_scheme
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():

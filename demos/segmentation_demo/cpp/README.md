@@ -40,6 +40,7 @@ omz_converter --list models.lst
 * icnet-camvid-ava-0001
 * icnet-camvid-ava-sparse-30-0001
 * icnet-camvid-ava-sparse-60-0001
+* ocrnet-hrnet-w48-paddle
 * pspnet-pytorch
 * road-segmentation-adas-0001
 * semantic-segmentation-adas-0001
@@ -117,5 +118,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

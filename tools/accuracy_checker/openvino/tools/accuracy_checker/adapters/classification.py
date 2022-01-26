@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import BoolField, StringField, NumberField
 from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
+from ..utils import softmax
 
 
 class ClassificationAdapter(Adapter):
@@ -47,7 +48,12 @@ class ClassificationAdapter(Adapter):
             'label_as_array': BoolField(
                 optional=True, default=False, description="produce ClassificationPrediction's label as array"
             ),
-            'classification_output': StringField(optional=True, description='target output layer name')
+            'classification_output': StringField(optional=True, description='target output layer name'),
+            'multi_label_threshold': NumberField(
+                optional=True, value_type=float,
+                description='threshold for treating classification as multi label problem'),
+            'do_softmax': BoolField(
+                optional=True, description='apply softmax on probabilities in logits format', default=False)
         })
 
         return parameters
@@ -59,6 +65,18 @@ class ClassificationAdapter(Adapter):
         self.fixed_output = self.get_value_from_config('fixed_output')
         self.fixed_output_index = int(self.get_value_from_config('fixed_output_index'))
         self.label_as_array = self.get_value_from_config('label_as_array')
+        self.do_softmax = self.get_value_from_config('do_softmax')
+        self.multilabel_thresh = self.get_value_from_config('multi_label_threshold')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.classification_out:
+            self.classification_out = self.check_output_name(self.classification_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.classification_out = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -69,11 +87,10 @@ class ClassificationAdapter(Adapter):
         Returns:
             list of ClassificationPrediction objects
         """
-        if self.classification_out is not None:
-            self.output_blob = self.classification_out
+        if not self.output_verified:
+            self.select_output_blob(raw)
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
         raw_prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_prediction)
         prediction = raw_prediction[self.output_blob]
         if multi_infer:
             prediction = np.mean(prediction, axis=0)
@@ -83,27 +100,26 @@ class ClassificationAdapter(Adapter):
 
         result = []
         if self.block:
-            if self.argmax_output:
-                single_prediction = ArgMaxClassificationPrediction(identifiers[0], prediction)
-            elif self.fixed_output:
-                single_prediction = ArgMaxClassificationPrediction(identifiers[0],
-                                                                   prediction[:, self.fixed_output_index])
-            else:
-                single_prediction = ClassificationPrediction(identifiers[0], prediction, self.label_as_array)
-
-            result.append(single_prediction)
+            result.append(self.prepare_representation(identifiers[0], prediction))
         else:
             for identifier, output in zip(identifiers, prediction):
-                if self.argmax_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifier, [output[0], ])
-                elif self.fixed_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifiers[0],
-                                                                       output[self.fixed_output_index])
-                else:
-                    single_prediction = ClassificationPrediction(identifier, output)
-                result.append(single_prediction)
+                result.append(self.prepare_representation(identifier, output))
 
         return result
+
+    def prepare_representation(self, identifier, prediction):
+        if self.argmax_output:
+            single_prediction = ArgMaxClassificationPrediction(identifier, prediction)
+        elif self.fixed_output:
+            single_prediction = ArgMaxClassificationPrediction(identifier,
+                                                               prediction[:, self.fixed_output_index])
+        else:
+            if self.do_softmax:
+                prediction = softmax(prediction)
+            single_prediction = ClassificationPrediction(
+                identifier, prediction, self.label_as_array,
+                multilabel_threshold=self.multilabel_thresh)
+        return single_prediction
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):

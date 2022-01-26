@@ -17,65 +17,69 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from .model import Model
+
+
+from .image_model import ImageModel
+from .types import NumericalValue, StringValue
 from .utils import resize_image
 
 
-class HpeAssociativeEmbedding(Model):
-    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, delta=0.0, size_divisor=32, padding_mode='right_bottom'):
-        super().__init__(ie, model_path)
-        self.image_blob_name = self._get_inputs(self.net)
-        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
+class HpeAssociativeEmbedding(ImageModel):
+    __model__ = 'HPE-assosiative-embedding'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload=False)
+        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.outputs)
         try:
-            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.outputs)
         except ValueError:
             self.nms_heatmaps_blob_name = self.heatmaps_blob_name
-        self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
-        self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-1] / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+        self.embeddings_blob_name = find_layer_by_name('embeddings', self.outputs)
+        self.output_scale = self.w / self.outputs[self.heatmaps_blob_name].shape[-1]
 
-        if target_size is None:
-            h, w = self.net.input_info[self.image_blob_name].input_data.shape[-2:]
-            target_size = min(h, w)
+        if self.target_size is None:
+            self.target_size = min(self.h, self.w)
         self.index_of_max_dimension = 0
-        if aspect_ratio >= 1.0:  # img width >= height
-            input_height, input_width = target_size, round(target_size * aspect_ratio)
+        if self.aspect_ratio >= 1.0:  # img width >= height
+            input_height, input_width = self.target_size, round(self.target_size * self.aspect_ratio)
             self.index_of_max_dimension = 1
         else:
-            input_height, input_width = round(target_size / aspect_ratio), target_size
-        self.h = (input_height + size_divisor - 1) // size_divisor * size_divisor
-        self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
-        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
-        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
+            input_height, input_width = round(self.target_size / self.aspect_ratio), self.target_size
+        self.h = (input_height + self.size_divisor - 1) // self.size_divisor * self.size_divisor
+        self.w = (input_width + self.size_divisor - 1) // self.size_divisor * self.size_divisor
+        default_input_shape = self.inputs[self.image_blob_name].shape
+        input_shape = {self.image_blob_name: [self.n, self.c, self.h, self.w]}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
-        self.net.reshape(input_shape)
+        super().reshape(input_shape)
+
+        if preload:
+            self.load()
 
         self.decoder = AssociativeEmbeddingDecoder(
-            num_joints=self.net.outputs[self.heatmaps_blob_name].shape[1],
+            num_joints=self.outputs[self.heatmaps_blob_name].shape[1],
             adjust=True,
             refine=True,
-            delta=delta,
+            delta=self.delta,
             max_num_people=30,
             detection_threshold=0.1,
             tag_threshold=1,
-            pose_threshold=prob_threshold,
+            pose_threshold=self.prob_threshold,
             use_detection_val=True,
             ignore_too_much=False,
             dist_reweight=True)
-        self.size_divisor = size_divisor
-        self.padding_mode = padding_mode
 
-    @staticmethod
-    def _get_inputs(net):
-        image_blob_name = None
-        for blob_name, blob in net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_name = blob_name
-            else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 4D input layers are supported'
-                                   .format(len(blob.shape), blob_name))
-        if image_blob_name is None:
-            raise RuntimeError('Failed to identify the input for the image.')
-        return image_blob_name
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'target_size': NumericalValue(value_type=int, min=1),
+            'aspect_ratio': NumericalValue(),
+            'prob_threshold': NumericalValue(),
+            'delta': NumericalValue(default_value=0.0),
+            'size_divisor': NumericalValue(default_value=32, value_type=int),
+            'padding_mode': StringValue(default_value='right_bottom', choices=('center', 'right_bottom')),
+        })
+        return parameters
 
     def preprocess(self, inputs):
         img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)

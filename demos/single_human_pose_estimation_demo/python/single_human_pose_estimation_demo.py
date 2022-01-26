@@ -7,25 +7,24 @@ import logging as log
 from time import perf_counter
 import cv2
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from detector import Detector
 from estimator import HumanPoseEstimator
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 def build_argparser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m_od", "--model_od", type=str, required=True,
+    parser.add_argument("-m_od", "--model_od", type=Path, required=True,
                         help="Required. Path to model of object detector in .xml format.")
-    parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
+    parser.add_argument("-m_hpe", "--model_hpe", type=Path, required=True,
                         help="Required. Path to model of human pose estimator in .xml format.")
     parser.add_argument("-i", "--input", required=True,
                         help="Required. An input to process. The input must be a single image, "
@@ -51,16 +50,16 @@ def run_demo(args):
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     log.info('Reading Object Detection model {}'.format(args.model_od))
-    detector_person = Detector(ie, args.model_od,
+    detector_person = Detector(core, args.model_od,
                                device=args.device,
                                label_class=args.person_label)
     log.info('The Object Detection model {} is loaded to {}'.format(args.model_od, args.device))
 
     log.info('Reading Human Pose Estimation model {}'.format(args.model_hpe))
-    single_human_pose_estimator = HumanPoseEstimator(ie, args.model_hpe,
+    single_human_pose_estimator = HumanPoseEstimator(core, args.model_hpe,
                                                      device=args.device)
     log.info('The Human Pose Estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
 
@@ -120,4 +119,4 @@ def run_demo(args):
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
-    run_demo(args)
+    sys.exit(run_demo(args) or 0)

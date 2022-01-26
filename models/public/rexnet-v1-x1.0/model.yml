@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ task_type: classification
 files:
   - name: rexnetv1_1.0x.pth
     size: 19428695
-    sha384: 5ffbf929993b597825907077194d24f9bac496d0e652d6f11a8ef75ae8e1a583c66acedf67767085dcafc437355e63be
-    source:
+    checksum: 5ffbf929993b597825907077194d24f9bac496d0e652d6f11a8ef75ae8e1a583c66acedf67767085dcafc437355e63be
+    original_source:
       $type: google_drive
       id: 1xeIJ3wb83uOowU008ykYj6wDX2dsncA9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/rexnet-v1-x1.0/rexnetv1_1.0x.pth
   - name: rexnetv1.py
     size: 6335
-    sha384: e53d67fae9ac700e0d8ff412f0e2397fb9f63fd49cb6e34233f11596dee25e6911965c2988784b40f7c2ea97fd7a098c
+    checksum: e53d67fae9ac700e0d8ff412f0e2397fb9f63fd49cb6e34233f11596dee25e6911965c2988784b40f7c2ea97fd7a098c
     source: https://raw.githubusercontent.com/clovaai/rexnet/104f2184754d97b8050f24bdf39f650b3e80cad8/rexnetv1.py
 postprocessing:
   - $type: regex_replace

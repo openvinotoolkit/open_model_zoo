@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,60 +23,61 @@ task_type: classification
 files:
   - name: configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
     size: 362
-    sha384: 63516817df084ebde1d6014e60f8aa108ce6cc83254ef8984413d15d2a100de89ec1e39b09b5a67f19ea664ebdc48004
+    checksum: 63516817df084ebde1d6014e60f8aa108ce6cc83254ef8984413d15d2a100de89ec1e39b09b5a67f19ea664ebdc48004
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
   - name: pycls/__init__.py
     size: 0
-    sha384: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
+    checksum: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/__init__.py
   - name: pycls/core/__init__.py
     size: 0
-    sha384: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
+    checksum: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/__init__.py
   - name: pycls/core/checkpoint.py
     size: 3497
-    sha384: 8187a1e75ec52dabdfc0d8cb823fe59e4f865e9feaf3b69975a119d72a1ea651fc3fa22fab8304c1ec6c953845595dbe
+    checksum: 8187a1e75ec52dabdfc0d8cb823fe59e4f865e9feaf3b69975a119d72a1ea651fc3fa22fab8304c1ec6c953845595dbe
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/checkpoint.py
   - name: pycls/core/net.py
     size: 3924
-    sha384: f78a59516a98467783b879601f8eec777d4f01621e5acc6b7e03c02f437b598d490df7cbe25738fe40a2ab7289ac8d56
+    checksum: f78a59516a98467783b879601f8eec777d4f01621e5acc6b7e03c02f437b598d490df7cbe25738fe40a2ab7289ac8d56
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/net.py
   - name: pycls/core/distributed.py
     size: 5410
-    sha384: cec9732ace81ccc16deca956fd5ea0eb490c32b3582ff30aa0c8a6d91ffb1167de571a375124b086ac192b28ad586aec
+    checksum: cec9732ace81ccc16deca956fd5ea0eb490c32b3582ff30aa0c8a6d91ffb1167de571a375124b086ac192b28ad586aec
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/distributed.py
   - name: pycls/core/config.py
     size: 10502
-    sha384: c1eab6f5e3bd91d38b0264cb6da2ef78f3ba0213d0716cc85982b5438f4768eb14a9bc42bfe27b255813b61957eaad2d
+    checksum: c1eab6f5e3bd91d38b0264cb6da2ef78f3ba0213d0716cc85982b5438f4768eb14a9bc42bfe27b255813b61957eaad2d
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/config.py
   - name: pycls/core/io.py
     size: 2603
-    sha384: 4a854e5a9a7e3b2bdbd84172d3a5d46c58df0a1459936997b7a49d95782d3be8afe6517b82ed1b3703200ee4e255b4df
+    checksum: 4a854e5a9a7e3b2bdbd84172d3a5d46c58df0a1459936997b7a49d95782d3be8afe6517b82ed1b3703200ee4e255b4df
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/core/io.py
   - name: pycls/models/__init__.py
     size: 317
-    sha384: ebac105e1fb95d363ea917090295ac833e46cf1a4fabb30fe9009dd569990dd40695cc4d708ea1ca56e446980bc3f5f8
+    checksum: ebac105e1fb95d363ea917090295ac833e46cf1a4fabb30fe9009dd569990dd40695cc4d708ea1ca56e446980bc3f5f8
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/__init__.py
   - name: pycls/models/blocks.py
     size: 6752
-    sha384: fbf2f518dde241316e3920a289a6b8a1f7796e25544342981dd2f63ef1f4217f5f93a1525e7882792ffbfb7bae317594
+    checksum: fbf2f518dde241316e3920a289a6b8a1f7796e25544342981dd2f63ef1f4217f5f93a1525e7882792ffbfb7bae317594
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/blocks.py
   - name: pycls/models/anynet.py
     size: 11457
-    sha384: 3be01cc1376256b9795356aa7e484b8e06673ef6ec323e7c68d9b5ca41e9ed625c549fe3b9f11af232877b86fea48e32
+    checksum: 3be01cc1376256b9795356aa7e484b8e06673ef6ec323e7c68d9b5ca41e9ed625c549fe3b9f11af232877b86fea48e32
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/anynet.py
   - name: pycls/models/regnet.py
     size: 2602
-    sha384: 2ffbd0689ba2efabd906f1c4685055db70e83f6f777fc3e41e2610ee625b94d99973f21a9bb865d6ef0ebb77a00ce880
+    checksum: 2ffbd0689ba2efabd906f1c4685055db70e83f6f777fc3e41e2610ee625b94d99973f21a9bb865d6ef0ebb77a00ce880
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/regnet.py
   - name: pycls/models/model_zoo.py
     size: 8982
-    sha384: a4529d529aeed36a2f90bb91e3e5d8ba820ba5ca6078f0188dd4c454b55e667e1fd586e4819ff8194cb2134c916d05dc
+    checksum: a4529d529aeed36a2f90bb91e3e5d8ba820ba5ca6078f0188dd4c454b55e667e1fd586e4819ff8194cb2134c916d05dc
     source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/pycls/models/model_zoo.py
   - name: ckpt/regnetx-3.2gf.pyth
     size: 122749825
-    sha384: 5757be265470b77fa83a26b256d7ee0f49dea765f97b1e6254e87951a2d77079f34b750a5bc4df1f156cf658bc07c6fe
-    source: https://dl.fbaipublicfiles.com/pycls/dds_baselines/160906139/RegNetX-3.2GF_dds_8gpu.pyth
+    checksum: 5757be265470b77fa83a26b256d7ee0f49dea765f97b1e6254e87951a2d77079f34b750a5bc4df1f156cf658bc07c6fe
+    original_source: https://dl.fbaipublicfiles.com/pycls/dds_baselines/160906139/RegNetX-3.2GF_dds_8gpu.pyth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/regnetx-3.2gf/RegNetX-3.2GF_dds_8gpu.pyth
 postprocessing:
   - $type: regex_replace
     file: pycls/models/model_zoo.py
@@ -109,5 +110,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/regnetx-3.2gf.onnx
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/facebookresearch/pycls/master/LICENSE

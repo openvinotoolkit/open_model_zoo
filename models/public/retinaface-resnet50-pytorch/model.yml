@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,30 +13,31 @@
 # limitations under the License.
 
 description: >-
-  The "retinaface-resnet50-pytorch" model is a PyTorch* implementation of medium size RetinaFace
-  model with ResNet50 backbone for Face Localization. It can output face bounding
-  boxes and five facial landmarks in a single forward pass. More details provided
-  in the paper <https://arxiv.org/abs/1905.00641> and repository <https://github.com/biubug6/Pytorch_Retinaface>
+  The "retinaface-resnet50-pytorch" model is a PyTorch* implementation of medium size
+  RetinaFace model with ResNet50 backbone for Face Localization. It can output face
+  bounding boxes and five facial landmarks in a single forward pass. More details
+  provided in the paper <https://arxiv.org/abs/1905.00641> and repository <https://github.com/biubug6/Pytorch_Retinaface>
 task_type: detection
 files:
   - name: models/retinaface.py
     size: 4865
-    sha384: def46f34640a3f597838f48a6defe1a08e2eb624251dde189cac46a3148bf9f1159bf259308fb74b0ba8a8a4f24a02e4
+    checksum: def46f34640a3f597838f48a6defe1a08e2eb624251dde189cac46a3148bf9f1159bf259308fb74b0ba8a8a4f24a02e4
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/models/retinaface.py
   - name: models/net.py
     size: 4598
-    sha384: 6d7791ce8526ddc9068552dff37023a048ef39b25c491e67ee91b0ef780ddba86d895cf88cae5ffc4a181e4849e8383a
+    checksum: 6d7791ce8526ddc9068552dff37023a048ef39b25c491e67ee91b0ef780ddba86d895cf88cae5ffc4a181e4849e8383a
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/models/net.py
   - name: data/config.py
     size: 928
-    sha384: 2c139b1b41adf97f09437959fdc24490c7febfa886d4eeb017e63b8f08bda0407735e54de4c8c1ce14be12a18304cd3d
+    checksum: 2c139b1b41adf97f09437959fdc24490c7febfa886d4eeb017e63b8f08bda0407735e54de4c8c1ce14be12a18304cd3d
     source: https://raw.githubusercontent.com/biubug6/Pytorch_Retinaface/b984b4b775b2c4dced95c1eadd195a5c7d32a60b/data/config.py
   - name: Resnet50_Final.pth
     size: 109497761
-    sha384: 80453e582f22ff7786b1392fb0ffb54e0e220ffb71a1381ca05de77673b0da3afeae70540076776a448b0972976c7a3c
-    source:
+    checksum: 80453e582f22ff7786b1392fb0ffb54e0e220ffb71a1381ca05de77673b0da3afeae70540076776a448b0972976c7a3c
+    original_source:
       $type: google_drive
       id: 14KX6VqF69MdSPk3Tr9PlDYbq7ArpdNUW
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/retinaface-resnet50-pytorch/Resnet50_Final.pth
 postprocessing:
   # disable unnecessary downloads of pretrained ResNet50 weights
   - $type: regex_replace

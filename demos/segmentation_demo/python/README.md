@@ -41,6 +41,7 @@ omz_converter --list models.lst
   - icnet-camvid-ava-0001
   - icnet-camvid-ava-sparse-30-0001
   - icnet-camvid-ava-sparse-60-0001
+  - ocrnet-hrnet-w48-paddle
   - pspnet-pytorch
   - road-segmentation-adas-0001
   - semantic-segmentation-adas-0001
@@ -57,7 +58,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-at {segmentation,salient_object_detection}
-                            [-d DEVICE] [-c COLORS]
+                            [--adapter {openvino,ovms}] [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
@@ -68,12 +69,16 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
                         Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -144,6 +149,16 @@ The color palette is used to visualize predicted classes. By default, the colors
 
 Available colors files located in the `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 segmentation_demo.py -i 0 -m localhost:9000/models/image_segmentation --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting images with blended segmentation mask by default. By setting `--only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
@@ -159,5 +174,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

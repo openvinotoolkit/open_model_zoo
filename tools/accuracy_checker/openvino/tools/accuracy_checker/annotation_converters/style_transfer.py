@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,5 +49,4 @@ class StyleTransferConverter(BaseFormatConverter):
             annotation = StyleTransferAnnotation(identifiers, image.name)
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, None,
-                               content_check_errors)
+        return ConverterReturn(annotations, None, content_check_errors)

@@ -1,3 +1,20 @@
+"""
+Copyright (c) 2018-2022 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+from collections import OrderedDict
 import cv2
 import numpy as np
 
@@ -5,7 +22,10 @@ from ...adapters import MTCNNPAdapter
 
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
-    score = out[0][outputs_mapping['probability_out']][:, 1]
+    prob_out = outputs_mapping['probability_out']
+    if prob_out not in out[0]:
+        prob_out = prob_out + '/sink_port_0' if '/sink_port_0' not in prob_out else prob_out.replace('/sink_port_0', '')
+    score = out[0][prob_out][:, 1]
     pass_t = np.where(score > 0.7)[0]
     removed_boxes = [i for i in range(previous_stage_predictions[0].size) if i not in pass_t]
     previous_stage_predictions[0].remove(removed_boxes)
@@ -15,7 +35,12 @@ def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_ma
         previous_stage_predictions[0].x_maxs, previous_stage_predictions[0].y_maxs,
         previous_stage_predictions[0].scores
     ]
-    mv = out[0][outputs_mapping['region_out']][pass_t]
+    region_out = outputs_mapping['region_out']
+    if region_out not in out[0]:
+        region_out = (
+            region_out + '/sink_port_0' if '/sink_port_0' not in region_out else region_out.replace('/sink_port_0', '')
+        )
+    mv = out[0][region_out][pass_t]
     if iou_type:
         previous_stage_predictions[0], peek = nms(previous_stage_predictions[0], threshold, iou_type)
         bboxes = np.c_[
@@ -133,3 +158,24 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
         tempimg[k, :, :, :] = cv2.resize(tmp, (dst_size, dst_size))
     image.data = tempimg
     return image
+
+
+def transform_for_callback(batch_size, raw_outputs):
+    output_per_box = []
+    fq_weights = []
+    for i in range(batch_size):
+        box_outs = OrderedDict()
+        for layer_node, data in raw_outputs[0].items():
+            if layer_node in fq_weights:
+                continue
+            if layer_node.get_node().friendly_name.endswith('fq_weights_1'):
+                fq_weights.append(layer_node)
+                box_outs[layer_node] = data
+            elif data.ndim == 0:
+                box_outs[layer_node] = np.array([data])
+            elif data.shape[0] <= i:
+                box_outs[layer_node] = data
+            else:
+                box_outs[layer_node] = np.expand_dims(data[i], axis=0)
+        output_per_box.append(box_outs)
+    return output_per_box

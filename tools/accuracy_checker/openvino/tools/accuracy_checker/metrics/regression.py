@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -77,10 +77,8 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.max_error = self.get_value_from_config('max_error')
         self.meta.update({
             'names': ['mean', 'std'] if not self.max_error else ['mean', 'std', 'max_error'],
-            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
         })
         self.magnitude = []
-
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
@@ -156,7 +154,7 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             for key, values in self.magnitude.items():
                 names.extend(
                     ['{}@mean'.format(key), '{}@std'.format(key)]
-                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_errir'.format(key)]
+                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_error'.format(key)]
                 )
                 result.extend([np.mean(values), np.std(values)])
                 if self.max_error:
@@ -172,6 +170,15 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.magnitude = []
         if self.profiler:
             self.profiler.reset()
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse',
+            'names': ['mean', 'std']
+        })
+        return meta
 
 
 class BaseRegressionOnIntervals(PerImageEvaluationMetric):
@@ -207,8 +214,15 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         super().__init__(*args, **kwargs)
         self.value_differ = value_differ
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse',
+        })
+        return meta
+
     def configure(self):
-        self.meta.update({'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'})
         self.ignore_out_of_range = self.get_value_from_config('ignore_values_not_in_interval')
 
         self.intervals = self.get_value_from_config('intervals')
@@ -387,9 +401,6 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapAnnotation)
 
     def configure(self):
-        self.meta.update({
-            'scale': 1, 'postfix': ' ', 'calculate_mean': True, 'data_format': '{:.4f}', 'target': 'higher-worse'
-        })
         self.magnitude = []
 
     def update(self, annotation, prediction):
@@ -425,6 +436,14 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         if self.profiler:
             self.profiler.reset()
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': True, 'data_format': '{:.4f}', 'target': 'higher-worse'
+        })
+        return meta
+
 
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
@@ -450,13 +469,6 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
     def configure(self):
         self.calculate_std = self.get_value_from_config('calculate_std')
         self.percentile = self.get_value_from_config('percentile')
-        self.meta.update({
-            'scale': 1,
-            'postfix': ' ',
-            'calculate_mean': not self.calculate_std or not self.percentile,
-            'data_format': '{:.4f}',
-            'target': 'higher-worse'
-        })
         self.magnitude = []
         self.meta['names'] = ['mean']
         if self.calculate_std:
@@ -503,6 +515,18 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         if self.profiler:
             self.profiler.reset()
 
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1,
+            'postfix': ' ',
+            'calculate_mean': False,
+            'data_format': '{:.4f}',
+            'target': 'higher-worse'
+        })
+        return meta
+
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
@@ -521,12 +545,7 @@ class NormalizedMeanError(PerImageEvaluationMetric):
         return parameters
 
     def configure(self):
-        self.meta.update({
-            'scale': 1,
-            'postfix': ' ',
-            'data_format': '{:.4f}',
-            'target': 'higher-worse'
-        })
+        self.meta.update()
         self.only_2d = self.get_value_from_config('only_2d')
         self.magnitude = []
 
@@ -546,11 +565,22 @@ class NormalizedMeanError(PerImageEvaluationMetric):
         return np.mean(normalized_result)
 
     def evaluate(self, annotations, predictions):
-        self.meta['names'] = ['mean']
         return np.mean(self.magnitude)
 
     def reset(self):
         self.magnitude = []
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1,
+            'postfix': ' ',
+            'data_format': '{:.4f}',
+            'target': 'higher-worse',
+            'names': ['mean']
+        })
+        return meta
 
 
 def calculate_distance(x_coords, y_coords, selected_points):
@@ -632,10 +662,6 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         self.pck = np.zeros(self.num_joints)
         self.threshold = self.get_value_from_config('threshold')
         self.score_bias = self.get_value_from_config('score_bias')
-        self.meta.update({
-            'names': ['mean', 'head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
-            'calculate_mean': False
-        })
         if not contains_all(
                 self.joints, ['head', 'lsho', 'rsho', 'lwri', 'rwri', 'lhip', 'rhip', 'lkne', 'rkne', 'lank', 'rank']
         ):
@@ -682,6 +708,15 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)
         self.pck = np.zeros(self.num_joints)
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'names': ['mean', 'head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'calculate_mean': False
+        })
+        return meta
 
 
 class EndPointError(BaseRegressionMetric):

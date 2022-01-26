@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,18 +65,11 @@ ANNOTATION_CONVERSION_PATHS = {
 }
 
 LIST_ENTRIES_PATHS = {
-        'model': 'models',
-        'weights': 'models',
-        'color_coeff': ['model_attributes', 'models'],
-        'caffe_model': 'models',
-        'caffe_weights': 'models',
-        'tf_model': 'models',
-        'tf_meta': 'models',
-        'mxnet_weights': 'models',
-        'onnx_model': 'models',
-        'kaldi_model': 'models',
-        'saved_model_dir': 'models',
-        'params': 'models'
+    'model': 'models',
+    'weights': 'models',
+    'color_coeff': ['model_attributes', 'models'],
+    'saved_model_dir': 'models',
+    'params': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -90,15 +83,11 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = []
 ACCEPTABLE_MODEL = [
-    'caffe_model', 'caffe_weights',
-    'tf_model', 'tf_meta',
-    'mxnet_weights',
-    'onnx_model',
-    'kaldi_model',
     'model',
     'saved_model_dir',
     'params'
 ]
+ALLOW_FILE_OR_DIR = ['models']
 
 
 class ConfigReader:
@@ -145,7 +134,9 @@ class ConfigReader:
         definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
-        global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
+        global_config = (
+            read_yaml(arguments.definitions) if 'definitions' in arguments and arguments.definitions else definitions
+        )
 
         return global_config, local_config
 
@@ -190,7 +181,7 @@ class ConfigReader:
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
             raise ConfigError(
-                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'. format(
+                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'.format(
                     eval_mode))
         config_checker_func(config)
 
@@ -347,33 +338,11 @@ class ConfigReader:
         profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
 
         def merge_models(config, arguments, update_launcher_entry):
-            def provide_models(launchers):
-                if input_precisions:
-                    for launcher in launchers:
-                        launcher['_input_precision'] = input_precisions
-                if 'models' not in arguments or not arguments.models:
-                    return launchers
-                model_paths = arguments.models
-                updated_launchers = []
-                model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
-                for launcher in launchers:
-                    if contains_any(launcher, ACCEPTABLE_MODEL):
-                        updated_launchers.append(launcher)
-                        continue
-                    for model_path in model_paths:
-                        copy_launcher = copy.deepcopy(launcher)
-                        copy_launcher['model'] = model_path
-                        if launcher['framework'] in ['dlsdk', 'g-api'] and 'model_is_blob' in arguments:
-                            copy_launcher['_model_is_blob'] = arguments.model_is_blob
-                        updated_launchers.append(copy_launcher)
-                return updated_launchers
-
-            input_precisions = arguments.input_precision if 'input_precision' in arguments else None
 
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
-                model['launchers'] = provide_models(model['launchers'])
+                model['launchers'] = provide_models(model['launchers'], arguments)
 
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry, arguments)
@@ -412,9 +381,6 @@ class ConfigReader:
         }
 
         additional_keys = [
-            'model_optimizer', 'tf_custom_op_config_dir',
-            'tf_obj_detection_api_pipeline_config_path',
-            'transformations_config_dir',
             'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
@@ -618,12 +584,18 @@ def create_command_line_mapping(config, default_value, value_map=None):
 def filtered(launcher, targets, args):
     target_tags = args.get('target_tags') or []
     target_backends = args.get('target_backends')
+    use_new_api = args.get('use_new_api', False)
+    target_framework = args.get('target_framework', '')
+    if target_framework and target_framework == 'dlsdk' and use_new_api:
+        target_framework = 'openvino'
     if target_tags:
         if not contains_any(target_tags, launcher.get('tags', [])):
             return True
 
     config_framework = launcher['framework'].lower()
-    target_framework = (args.get('target_framework') or config_framework).lower()
+    if not target_framework:
+        target_framework = config_framework
+    target_framework = target_framework.lower()
     if config_framework != target_framework:
         return True
 
@@ -635,11 +607,39 @@ def filtered(launcher, targets, args):
     return targets and launcher.get('device', '').lower() not in targets
 
 
+def complete_openvino_launchers(launchers, use_new_api):
+    if use_new_api is None:
+        return launchers
+    orig_ov_launchers = []
+    updated_ov_launchers = []
+
+    for idx, launcher in enumerate(launchers):
+        fwk = launcher.get('framework')
+        if fwk not in ['openvino', 'dlsdk']:
+            continue
+        if use_new_api:
+            if fwk == 'openvino':
+                orig_ov_launchers.append(idx)
+            else:
+                updated_ov_launchers.append(idx)
+        else:
+            if fwk == 'openvino':
+                updated_ov_launchers.append(idx)
+            else:
+                orig_ov_launchers.append(idx)
+    if not orig_ov_launchers:
+        for idx in updated_ov_launchers:
+            launchers[idx]['framework'] = 'openvino' if use_new_api else 'dlsdk'
+    return launchers
+
+
 def filter_models(config, target_devices, args):
     models_after_filtration = []
     for model in config['models']:
         launchers_after_filtration = []
         launchers = model['launchers']
+        if 'use_new_api' in args:
+            launchers = complete_openvino_launchers(launchers, args['use_new_api'])
         for launcher in launchers:
             if 'device' not in launcher and target_devices:
                 for device in target_devices:
@@ -674,6 +674,8 @@ def filter_modules(config, target_devices, args):
             continue
         module_config = evaluation['module_config']
         launchers = module_config['launchers']
+        if 'use_new_api' in args:
+            launchers = complete_openvino_launchers(launchers, args['use_new_api'])
         if target_devices:
             launchers_without_device = [launcher for launcher in launchers if 'device' not in launcher]
             for launcher in launchers_without_device:
@@ -692,8 +694,8 @@ def filter_modules(config, target_devices, args):
 
 
 def process_config(
-        config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
+    config_item, entries_paths, args, dataset_identifier='datasets',
+    launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         for datasets_config in datasets_configs:
@@ -804,10 +806,14 @@ def merge_entry_paths(keys, value, args, value_id=0):
                 continue
 
             selected_argument = select_arg_path(args[arg_candidate], value_id, argument)
+            prefix_path = selected_argument
             if not selected_argument.is_dir():
-                raise ConfigError('argument: {} should be a directory'.format(argument))
+                if arg_candidate in ALLOW_FILE_OR_DIR:
+                    prefix_path = selected_argument.parent
+                else:
+                    raise ConfigError('argument: {} should be a directory'.format(argument))
 
-            if (selected_argument / config_path).exists():
+            if (prefix_path / config_path).exists():
                 break
         value[field] = selected_argument / config_path if selected_argument is not None else config_path
 
@@ -822,32 +828,7 @@ def get_mode(config):
     return next(iter(evaluation_keys))
 
 
-def merge_converted_model_path(converted_models_dir, mo_output_dir):
-    if mo_output_dir:
-        mo_output_dir = Path(mo_output_dir)
-        if mo_output_dir.is_absolute():
-            return mo_output_dir
-        return converted_models_dir / mo_output_dir
-    return converted_models_dir
-
-
 def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
-    def _convert_models_args(launcher_entry):
-        if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
-            mo_flags = launcher_entry.get('mo_flags', [])
-            mo_flags.append('generate_deprecated_IR_V7')
-            launcher_entry['mo_flags'] = mo_flags
-        if 'converted_models' in arguments and arguments.converted_models:
-            mo_params = launcher_entry.get('mo_params', {})
-            mo_params.update({
-                'output_dir': merge_converted_model_path(arguments.converted_models,
-                                                         mo_params.get('output_dir'))
-            })
-
-            launcher_entry['mo_params'] = mo_params
-
-        return launcher_entry
-
     def _async_evaluation_args(launcher_entry):
         if 'async_mode' in arguments:
             launcher_entry['async_mode'] = arguments.async_mode
@@ -863,11 +844,10 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
         launcher_entry['_kaldi_log_file'] = kaldi_logs
 
-    if launcher_entry['framework'].lower() != 'dlsdk':
+    if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
 
     launcher_entry.update(update_launcher_entry)
-    _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
 
     if 'device_config' in arguments and arguments.device_config:
@@ -923,8 +903,8 @@ def merge_device_configs(launcher_entry, device_config_file):
     if not embedded_device_config:
         embedded_device_config = external_device_config
     elif (
-            not isinstance(next(iter(external_device_config.values())), dict)
-            and not isinstance(next(iter(embedded_device_config.values())), dict)
+        not isinstance(next(iter(external_device_config.values())), dict)
+        and not isinstance(next(iter(embedded_device_config.values())), dict)
     ):
         embedded_device_config.update(external_device_config)
     else:
@@ -934,3 +914,41 @@ def merge_device_configs(launcher_entry, device_config_file):
             embedded_device_config[key].update(value)
     launcher_entry['device_config'] = embedded_device_config
     return launcher_entry
+
+
+def provide_precision_and_layout(launchers, input_precisions, input_layouts):
+    for launcher in launchers:
+        if input_precisions:
+            launcher['_input_precision'] = input_precisions
+        if input_layouts:
+            launcher['_input_layout'] = input_layouts
+
+
+def provide_model_type(launcher, arguments):
+    if 'model_type' in arguments:
+        launcher['_model_type'] = arguments.model_type
+    if launcher['framework'] in ['dlsdk', 'openvino', 'g-api'] and 'model_is_blob' in arguments:
+        launcher['_model_is_blob'] = arguments.model_is_blob
+        if arguments.model_is_blob:
+            launcher['_model_type'] = 'blob'
+
+
+def provide_models(launchers, arguments):
+    input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+    input_layout = arguments.layout if 'layout' in arguments else None
+    provide_precision_and_layout(launchers, input_precisions, input_layout)
+    if 'models' not in arguments or not arguments.models:
+        return launchers
+    model_paths = arguments.models
+    updated_launchers = []
+    model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
+    for launcher in launchers:
+        if contains_any(launcher, ACCEPTABLE_MODEL):
+            updated_launchers.append(launcher)
+            continue
+        for model_path in model_paths:
+            copy_launcher = copy.deepcopy(launcher)
+            copy_launcher['model'] = model_path
+            provide_model_type(copy_launcher, arguments)
+            updated_launchers.append(copy_launcher)
+    return updated_launchers

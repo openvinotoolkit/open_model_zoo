@@ -17,19 +17,17 @@ import itertools
 import math
 import numpy as np
 
+from .types import NumericalValue
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection, nms
 
 
 class FaceBoxes(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.3):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-        if not self.labels:
-            self.labels = ['Face']
+    __model__ = 'FaceBoxes'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
         self.min_sizes = [[32, 64, 128], [256], [512]]
         self.steps = [32, 64, 128]
@@ -37,21 +35,23 @@ class FaceBoxes(DetectionModel):
         self.keep_top_k = 750
 
     def _get_outputs(self):
-        bboxes_blob_name = None
-        scores_blob_name = None
-        for name, layer in self.net.outputs.items():
-            if layer.shape[2] == 4:
-                bboxes_blob_name = name
-            elif layer.shape[2] == 2:
-                scores_blob_name = name
-            else:
-                raise RuntimeError("Expected shapes [:,:,4] and [:,:2] for outputs, but got {} and {}"
-                                   .format(*[output.shape for output in self.net.outputs]))
-        if self.net.outputs[bboxes_blob_name].shape[1] != self.net.outputs[scores_blob_name].shape[1]:
-            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
-                               .format(self.net.outputs[bboxes_blob_name].shape,
-                                       self.net.outputs[scores_blob_name].shape))
-        return bboxes_blob_name, scores_blob_name
+        (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
+
+        if bboxes_layer.shape[1] != scores_layer.shape[1]:
+            raise WrapperError(self.__model__, "Expected the same second dimension for boxes and scores, but got {} and {}"
+                               .format(bboxes_layer.shape, scores_layer.shape))
+
+        if bboxes_layer.shape[2] == 4:
+            return bboxes_blob_name, scores_blob_name
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.3, description="Threshold for NMS filtering")
+        })
+        parameters['labels'].update_default_value(['Face'])
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)
@@ -75,7 +75,7 @@ class FaceBoxes(DetectionModel):
 
         score = np.transpose(scores)[1]
 
-        mask = score > self.threshold
+        mask = score > self.confidence_threshold
         filtered_boxes, filtered_score = boxes[mask, :], score[mask]
         if filtered_score.size != 0:
             x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])

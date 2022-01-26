@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ class PyTorchSSDDecoder(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
+        self.outputs_verified = False
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
@@ -114,6 +115,11 @@ class PyTorchSSDDecoder(Adapter):
         self.strides = [3, 3, 2, 2, 2, 2]
         self.scale_xy = 0.1
         self.scale_wh = 0.2
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
 
     @staticmethod
     def softmax(x, axis=0):
@@ -155,6 +161,8 @@ class PyTorchSSDDecoder(Adapter):
         """
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         batch_scores = raw_outputs[self.scores_out]
         batch_boxes = raw_outputs[self.boxes_out]
@@ -372,3 +380,89 @@ class SSDONNXAdapter(Adapter):
         self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
 
         self.outputs_verified = True
+
+
+class SSDMultiLabelAdapter(Adapter):
+    __provider__ = 'ssd_multilabel'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'scores_out': StringField(description='scores output'),
+            'boxes_out': StringField(description='boxes output'),
+            'confidence_threshold': NumberField(optional=True, default=0.01, description="confidence threshold"),
+            'nms_threshold': NumberField(optional=True, default=0.45, description="NMS threshold"),
+            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="keep top K during NMS"),
+            'diff_coord_order': BoolField(optional=True, default=False,
+                                          description='Ordering convention of coordinates differs from standard'),
+            'max_detections': NumberField(optional=True, value_type=int, description="maximal number of detections")
+        })
+        return params
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.confidence_threshold = self.get_value_from_config('confidence_threshold')
+        self.iou_threshold = self.get_value_from_config('nms_threshold')
+        self.keep_top_k = self.get_value_from_config('keep_top_k')
+        self.diff_coord_order = self.get_value_from_config('diff_coord_order')
+        self.max_detections = self.get_value_from_config('max_detections')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
+
+        for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            for class_index in range(1, logits.shape[-1]):
+                probs = logits[:, class_index]
+                mask = probs > self.confidence_threshold
+                probs = probs[mask]
+                if probs.size == 0:
+                    continue
+                subset_boxes = boxes[mask, :]
+
+                if self.diff_coord_order:
+                    y_mins, x_mins, y_maxs, x_maxs = subset_boxes.T
+                else:
+                    x_mins, y_mins, x_maxs, y_maxs = subset_boxes.T
+
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, probs, self.iou_threshold, include_boundaries=False,
+                               keep_top_k=self.keep_top_k)
+
+                filtered_probs = probs[keep]
+                x_mins = x_mins[keep]
+                y_mins = y_mins[keep]
+                x_maxs = x_maxs[keep]
+                y_maxs = y_maxs[keep]
+
+                labels = [class_index] * filtered_probs.size
+                detections['labels'].extend(labels)
+                detections['scores'].extend(filtered_probs)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            if self.max_detections:
+                max_ids = np.argsort(-np.array(detections['scores']))[:self.max_detections]
+                detections['labels'] = np.array(detections['labels'])[max_ids]
+                detections['scores'] = np.array(detections['scores'])[max_ids]
+                detections['x_mins'] = np.array(detections['x_mins'])[max_ids]
+                detections['y_mins'] = np.array(detections['y_mins'])[max_ids]
+                detections['x_maxs'] = np.array(detections['x_maxs'])[max_ids]
+                detections['y_maxs'] = np.array(detections['y_maxs'])[max_ids]
+
+            result.append(DetectionPrediction(identifier, detections['labels'], detections['scores'],
+                                              detections['x_mins'], detections['y_mins'], detections['x_maxs'],
+                                              detections['y_maxs']))
+        return result

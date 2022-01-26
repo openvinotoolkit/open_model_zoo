@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ task_type: image_inpainting
 files:
   - name: gmcnn-places2-tf.zip
     size: 46187310
-    sha384: 35fbd27cfab9f23fe0e5cf87cce3bb6b200af657f3a21054f0d430b1a2b430a004a128a9acd19e0ee3bb6983d48cbbba
-    source: https://download.01.org/opencv/public_models/092020/gmcnn-places2-tf/gmcnn-places2-tf.zip
+    checksum: 35fbd27cfab9f23fe0e5cf87cce3bb6b200af657f3a21054f0d430b1a2b430a004a128a9acd19e0ee3bb6983d48cbbba
+    original_source: https://download.01.org/opencv/public_models/092020/gmcnn-places2-tf/gmcnn-places2-tf.zip
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/gmcnn-places2-tf/gmcnn-places2-tf.zip
 postprocessing:
   - $type: unpack_archive
     format: zip
     file: gmcnn-places2-tf.zip
-
 model_optimizer_args:
   - --input_model=$dl_dir/gmcnn-places2-tf/frozen_model.pb
   - --input_shape=[1,512,680,3],[1,512,680,1]

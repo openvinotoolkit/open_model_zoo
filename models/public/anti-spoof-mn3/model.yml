@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ task_type: classification
 files:
   - name: anti-spoof-mn3.onnx
     size: 12270179
-    sha384: 6de4534964b723397b3e8c995cadcf43bc007cc2f9930b95ae25f76adccece5d1d4d058d0b15117b9e4a9f758424f92a
-    source:
+    checksum: 6de4534964b723397b3e8c995cadcf43bc007cc2f9930b95ae25f76adccece5d1d4d058d0b15117b9e4a9f758424f92a
+    original_source:
       $type: google_drive
       id: 1KmM2vwGBuKxy7RE9hz1m5D0yyh2N9Amo
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/anti-spoof-mn3/anti-spoof-mn3.onnx
 model_optimizer_args:
   - --input_shape=[1,3,128,128]
   - --input=actual_input_1

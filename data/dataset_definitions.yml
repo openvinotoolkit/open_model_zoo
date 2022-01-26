@@ -155,6 +155,16 @@ datasets:
       - name: AP
         type: coco_orig_keypoints_precision
 
+  - name: COCO2017_mask_rcnn_person
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_persons.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_person.pickle
+    dataset_meta: mscoco_mask_rcnn_person.json
+    data_source: val2017
+
   - name: imagenet_1000_classes
     annotation_conversion:
       converter: imagenet
@@ -1199,6 +1209,15 @@ datasets:
       annotation_file: SCUT_EPT/test_img_id_gt.txt
     annotation: scut_ept_recognition.pickle
     dataset_meta: scut_ept_recognition.json
+
+  - name: GNHK
+    data_source: gnhk
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: gnhk_char_list.txt
+      annotation_file: test_img_id_gt.txt
+    annotation: gnhk_recognition.pickle
+    dataset_meta: gnhk_recognition.json
 
   - name: ADEChallengeData2016
     annotation_conversion:

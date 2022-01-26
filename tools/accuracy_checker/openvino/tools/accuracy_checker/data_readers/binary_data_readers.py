@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,12 @@ class PickleReader(BaseReader):
         return data, {}
 
     def read_item(self, data_id):
-        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+        data = DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+        if self.multi_infer:
+            data.metadata['multi_infer'] = self.multi_infer
+        if self.data_layout:
+            data.metadata['data_layout'] = self.data_layout
+        return data
 
 
 class ByteFileReader(BaseReader):

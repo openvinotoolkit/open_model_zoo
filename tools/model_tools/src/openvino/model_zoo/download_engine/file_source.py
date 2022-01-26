@@ -15,18 +15,10 @@
 import re
 import requests
 
-from openvino.model_zoo.download_engine import validation
+from openvino.model_zoo.download_engine import base, validation
 
 
-class TaggedBase:
-    @classmethod
-    def deserialize(cls, value):
-        try:
-            return cls.types[value['$type']].deserialize(value)
-        except KeyError:
-            raise validation.DeserializationError('Unknown "$type": "{}"'.format(value['$type']))
-
-class FileSource(TaggedBase):
+class FileSource(base.TaggedBase):
     RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
 
     types = {}
@@ -75,7 +67,7 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size, offset, timeout):
+    def start_download(self, session, chunk_size, offset, timeout, **kwargs):
         response = session.get(self.url, stream=True, timeout=timeout,
             headers=self.http_range_headers(offset))
         response.raise_for_status()
@@ -92,7 +84,7 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size, offset, timeout):
+    def start_download(self, session, chunk_size, offset, timeout, **kwargs):
         range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id': self.id}, headers=range_headers,

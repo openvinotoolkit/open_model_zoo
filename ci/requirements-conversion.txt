@@ -4,6 +4,8 @@ absl-py==0.13.0
     # via
     #   tensorboard
     #   tensorflow
+astor==0.8.1
+    # via paddlepaddle
 astunparse==1.6.3
     # via tensorflow
 cachetools==4.2.2
@@ -26,8 +28,6 @@ defusedxml==0.7.1
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
 flatbuffers==1.12
     # via tensorflow
-future==0.18.2
-    # via -r tools/model_tools/requirements-caffe2.in
 gast==0.3.3
     # via tensorflow
 google-auth==1.35.0
@@ -84,10 +84,12 @@ oauthlib==3.1.1
 onnx==1.10.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r tools/model_tools/requirements-caffe2.in
     #   -r tools/model_tools/requirements-pytorch.in
 opt-einsum==3.3.0
     # via tensorflow
+paddlepaddle==2.2.0
+    # via
+    #   -r tools/model_tools/requirements-paddle.in
 pillow==8.3.2
     # via torchvision
 protobuf==3.17.3
@@ -126,7 +128,6 @@ six==1.15.0
     #   google-auth
     #   google-pasta
     #   grpcio
-    #   h5py
     #   keras-preprocessing
     #   onnx
     #   protobuf
@@ -147,7 +148,6 @@ termcolor==1.1.0
     # via tensorflow
 torch==1.8.1
     # via
-    #   -r tools/model_tools/requirements-caffe2.in
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
 torchvision==0.9.1

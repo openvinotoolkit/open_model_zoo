@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -174,3 +174,8 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         meta['label_map'] = label_map
 
         return class_to_ind, meta
+
+    def get_meta(self):
+        root = read_xml(self.annotation_file)
+        _, meta = self.generate_meta(root)
+        return meta

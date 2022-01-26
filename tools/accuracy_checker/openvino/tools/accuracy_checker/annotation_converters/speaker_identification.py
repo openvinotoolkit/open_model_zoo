@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -59,4 +59,7 @@ class SpeakerReIdentificationDatasetConverter(FileBasedAnnotationConverter):
                     audio_negative = audio_negative[:self.max_pairs]
             annotations.append(ReIdentificationClassificationAnnotation(
                 audio, audio_positive, audio_negative))
-        return ConverterReturn(annotations, {'no_recursion': True}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
+        return {'no_recursion': True}

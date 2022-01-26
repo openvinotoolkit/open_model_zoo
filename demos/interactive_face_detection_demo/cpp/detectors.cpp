@@ -339,7 +339,7 @@ InferenceEngine::CNNNetwork AntispoofingClassifier::read(const InferenceEngine::
     // ---------------------------Check outputs ------------------------------------------------------------
     InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        throw std::logic_error("Antispoofing Classifier network should have one output layers");
+        throw std::logic_error("Antispoofing Classifier network should have one output layer");
     }
     auto it = outputInfo.begin();
 

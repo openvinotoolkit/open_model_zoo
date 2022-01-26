@@ -17,14 +17,17 @@
 import cv2
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
+from .types import ListValue, NumericalValue
 from .utils import Detection, nms, clip_detections
 
 
 class CTPN(DetectionModel):
-    def __init__(self, ie, model_path, input_size, threshold=0.9, iou_threshold=0.5):
-        super().__init__(ie, model_path, labels=['Text'],
-                         threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'CTPN'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, False)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
@@ -48,24 +51,37 @@ class CTPN(DetectionModel):
             [0, -134, 15, 149]
         ])
 
-        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
+        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, self.input_size[1], self.input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        default_input_shape = self.inputs[self.image_blob_name].shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
-        self.net.reshape(input_shape)
+        self.reshape(input_shape)
+        if preload:
+            self.load()
 
     def _get_outputs(self):
-        (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.net.outputs.items()
+        (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.outputs.items()
 
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
-            raise RuntimeError("Unexpected output blob shape. Only 4D output blobs are supported")
+            raise WrapperError(self.__model__, "Unexpected output blob shape. Only 4D output blobs are supported")
 
         if scores_data_repr.shape[1] == boxes_data_repr.shape[1] * 2:
             return scores_name, boxes_name
         if boxes_data_repr.shape[1] == scores_data_repr.shape[1] * 2:
             return boxes_name, scores_name
-        raise RuntimeError("One of outputs must be two times larger than another for the CTPN topology")
+        raise WrapperError(self.__model__, "One of outputs must be two times larger than another")
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'iou_threshold': NumericalValue(default_value=0.5, description="Threshold for NMS filtering"),
+            'input_size': ListValue()
+        })
+        parameters['confidence_threshold'].update_default_value(0.9)
+        parameters['labels'].update_default_value(['Text'])
+        return parameters
 
     def preprocess(self, inputs):
         meta = {'original_shape': inputs.shape}
@@ -191,7 +207,7 @@ class CTPN(DetectionModel):
         heights = (abs(text_recs[:, 5] - text_recs[:, 1]) + abs(text_recs[:, 7] - text_recs[:, 3])) / 2.0 + 1
         widths = (abs(text_recs[:, 2] - text_recs[:, 0]) + abs(text_recs[:, 6] - text_recs[:, 4])) / 2.0 + 1
         scores = text_recs[:, 8]
-        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.threshold) &
+        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.confidence_threshold) &
                              (widths > self.min_width))[0]
 
         return text_recs[keep_inds]

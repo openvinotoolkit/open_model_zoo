@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -210,12 +210,13 @@ class TestModelEvaluatorAsync:
         self.preprocessor.has_multi_infer_transformations = False
         self.launcher.dyn_input_layers = False
 
+
         self.evaluator.process_dataset(None, None)
 
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.get_async_requests.called
+        assert self.launcher.get_infer_queue.called
 
     def test_process_dataset_with_storing_predictions_and_without_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
@@ -228,7 +229,7 @@ class TestModelEvaluatorAsync:
 
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.get_async_requests.called
+        assert self.launcher.get_infer_queue.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('openvino.tools.accuracy_checker.evaluators.model_evaluator.get_path')

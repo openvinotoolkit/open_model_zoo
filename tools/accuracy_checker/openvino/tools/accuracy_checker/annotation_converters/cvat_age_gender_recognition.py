@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,11 +44,8 @@ class CVATAgeGenderRecognitionConverter(FileBasedAnnotationConverter):
         meta = annotation.find('meta')
         size = int(meta.find('task').find('size').text)
         target_label = self.select_label(meta).find('name').text
-        gender_classes_mapping = {'female': 0, 'male': 1}
-        meta = {
-            'age_label_map': {0: 'child', 1: 'young', 2: 'middle', 3: 'old'},
-            'gender_label_map': {0: 'female', 1: 'male'}
-        }
+        meta = self.get_meta()
+        gender_classes_mapping = meta['gender_label_map']
 
         annotations = []
         content_errors = None if not check_content else []
@@ -108,3 +105,9 @@ class CVATAgeGenderRecognitionConverter(FileBasedAnnotationConverter):
             raise ConfigError('annotation does not contains label with age and gender attributes')
 
         return label[0]
+
+    def get_meta(self):
+        return {
+            'age_label_map': {0: 'child', 1: 'young', 2: 'middle', 3: 'old'},
+            'gender_label_map': {0: 'female', 1: 'male'}
+        }

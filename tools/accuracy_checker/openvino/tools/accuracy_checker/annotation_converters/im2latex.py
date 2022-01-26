@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
         split_file = read_txt(self.split_path)
         formulas_file = read_txt(self.formula_path)
         num_iterations = len(split_file)
-        vocab = read_vocab(self.vocab_path)
+
 
         for line_id, line in enumerate(split_file):
             img_name, formula_idx = line.split('\t')
@@ -111,6 +111,9 @@ class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
             if progress_callback is not None and line_id % progress_interval == 0:
                 progress_callback(line_id / num_iterations * 100)
 
-        meta = {'vocab': vocab}
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
-        return ConverterReturn(annotations, meta, content_errors)
+    def get_meta(self):
+        vocab = read_vocab(self.vocab_path)
+        meta = {'vocab': vocab}
+        return meta

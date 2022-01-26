@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -66,6 +66,14 @@ class TFObjectDetectionAPIAdapter(Adapter):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.num_detections_out = self.get_value_from_config('num_detections_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.classes_out = self.check_output_name(self.classes_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.num_detections_out = self.check_output_name(self.num_detections_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -76,6 +84,8 @@ class TFObjectDetectionAPIAdapter(Adapter):
             list of DetectionPrediction objects
         """
         prediction_batch = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(prediction_batch)
         classes_batch = prediction_batch[self.classes_out]
         scores_batch = prediction_batch[self.scores_out]
         boxes_batch = prediction_batch[self.boxes_out]
@@ -92,140 +102,6 @@ class TFObjectDetectionAPIAdapter(Adapter):
             result.append(DetectionPrediction(identifier, valid_classes, valid_scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
-
-
-class MTCNNPAdapter(Adapter):
-    __provider__ = 'mtcnn_p'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update(
-            {
-                'probability_out': StringField(description='Name of Output layer with detection boxes probabilities'),
-                'region_out': StringField(description='Name of output layer with detected regions'),
-                'regions_format': StringField(
-                    optional=True, choices=['hw', 'wh'], default='wh',
-                    description='determination of coordinates order in regions, wh uses order x1y1x2y2, hw - y1x1y2x2'
-                )
-            }
-        )
-
-        return parameters
-
-    def configure(self):
-        self.probability_out = self.get_value_from_config('probability_out')
-        self.region_out = self.get_value_from_config('region_out')
-        self.regions_format = self.get_value_from_config('regions_format')
-
-    @staticmethod
-    def nms(boxes, threshold, overlap_type):
-        """
-        Args:
-          boxes: [:,0:5]
-          threshold: 0.5 like
-          overlap_type: 'Min' or 'Union'
-        Returns:
-            indexes of passed boxes
-        """
-        if boxes.shape[0] == 0:
-            return np.array([])
-        x1 = boxes[:, 0]
-        y1 = boxes[:, 1]
-        x2 = boxes[:, 2]
-        y2 = boxes[:, 3]
-        scores = boxes[:, 4]
-        area = np.multiply(x2 - x1 + 1, y2 - y1 + 1)
-        inds = np.array(scores.argsort())
-
-        pick = []
-        while np.size(inds) > 0:
-            xx1 = np.maximum(x1[inds[-1]], x1[inds[0:-1]])
-            yy1 = np.maximum(y1[inds[-1]], y1[inds[0:-1]])
-            xx2 = np.minimum(x2[inds[-1]], x2[inds[0:-1]])
-            yy2 = np.minimum(y2[inds[-1]], y2[inds[0:-1]])
-            width = np.maximum(0.0, xx2 - xx1 + 1)
-            height = np.maximum(0.0, yy2 - yy1 + 1)
-            inter = width * height
-            if overlap_type == 'Min':
-                overlap = inter / np.minimum(area[inds[-1]], area[inds[0:-1]])
-            else:
-                overlap = inter / (area[inds[-1]] + area[inds[0:-1]] - inter)
-            pick.append(inds[-1])
-            inds = inds[np.where(overlap <= threshold)[0]]
-
-        return pick
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        total_boxes_batch = self._extract_predictions(raw, frame_meta)
-        results = []
-        for total_boxes, identifier in zip(total_boxes_batch, identifiers):
-            if np.size(total_boxes) == 0:
-                results.append(DetectionPrediction(identifier, [], [], [], [], [], []))
-                continue
-            pick = self.nms(total_boxes, 0.7, 'Union')
-            total_boxes = total_boxes[pick]
-            regh = total_boxes[:, 3] - total_boxes[:, 1]
-            regw = total_boxes[:, 2] - total_boxes[:, 0]
-            x_mins = total_boxes[:, 0] + total_boxes[:, 5] * regw
-            y_mins = total_boxes[:, 1] + total_boxes[:, 6] * regh
-            x_maxs = total_boxes[:, 2] + total_boxes[:, 7] * regw
-            y_maxs = total_boxes[:, 3] + total_boxes[:, 8] * regh
-            scores = total_boxes[:, 4]
-            results.append(
-                DetectionPrediction(identifier, np.full_like(scores, 1), scores, x_mins, y_mins, x_maxs, y_maxs)
-            )
-
-        return results
-
-    @staticmethod
-    def generate_bounding_box(mapping, reg, scale, t, r_format):
-        stride = 2
-        cellsize = 12
-        mapping = mapping.T
-        indexes = [0, 1, 2, 3] if r_format == 'wh' else [1, 0, 3, 2]
-        dx1 = reg[indexes[0], :, :].T
-        dy1 = reg[indexes[1], :, :].T
-        dx2 = reg[indexes[2], :, :].T
-        dy2 = reg[indexes[3], :, :].T
-        (x, y) = np.where(mapping >= t)
-
-        yy = y
-        xx = x
-
-        score = mapping[x, y]
-        reg = np.array([dx1[x, y], dy1[x, y], dx2[x, y], dy2[x, y]])
-
-        if reg.shape[0] == 0:
-            pass
-        bounding_box = np.array([yy, xx]).T
-
-        bb1 = np.fix((stride * bounding_box + 1) / scale).T  # matlab index from 1, so with "boundingbox-1"
-        bb2 = np.fix((stride * bounding_box + cellsize - 1 + 1) / scale).T  # while python don't have to
-        score = np.array([score])
-
-        bounding_box_out = np.concatenate((bb1, bb2, score, reg), axis=0)
-
-        return bounding_box_out.T
-
-    def _extract_predictions(self, outputs_list, meta):
-        scales = [1] if not meta[0] or 'scales' not in meta[0] else meta[0]['scales']
-        total_boxes = np.zeros((0, 9), float)
-        for idx, outputs in enumerate(outputs_list):
-            scale = scales[idx]
-            mapping = outputs[self.probability_out][0, 1, :, :]
-            regions = outputs[self.region_out][0]
-            boxes = self.generate_bounding_box(mapping, regions, scale, 0.6, self.regions_format)
-            if boxes.shape[0] != 0:
-                pick = self.nms(boxes, 0.5, 'Union')
-
-                if np.size(pick) > 0:
-                    boxes = np.array(boxes)[pick, :]
-
-            if boxes.shape[0] != 0:
-                total_boxes = np.concatenate((total_boxes, boxes), axis=0)
-
-        return [total_boxes]
 
 
 class ClassAgnosticDetectionAdapter(Adapter):
@@ -255,8 +131,17 @@ class ClassAgnosticDetectionAdapter(Adapter):
     def configure(self):
         self.out_blob_name = self.get_value_from_config('output_blob')
         self.scale = get_or_parse_value(self.get_value_from_config('scale'))
+        self.output_verified = False
         if isinstance(self.scale, list):
             self.scale = self.scale * 2
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.out_blob_name:
+            self.out_blob_name = self.check_output_name(self.out_blob_name, outputs)
+            return
+        self.out_blob_name = self._find_output(outputs)
+        return
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -268,8 +153,8 @@ class ClassAgnosticDetectionAdapter(Adapter):
             list of DetectionPrediction objects
         """
         predictions = self._extract_predictions(raw, frame_meta)
-        if self.out_blob_name is None:
-            self.out_blob_name = self._find_output(predictions)
+        if not self.output_verified:
+            self.select_output_blob(predictions)
         prediction_batch = predictions[self.out_blob_name]
 
         result = []
@@ -322,6 +207,13 @@ class RFCNCaffe(Adapter):
         self.cls_out = self.get_value_from_config('cls_out')
         self.bbox_out = self.get_value_from_config('bbox_out')
         self.rois_out = self.get_value_from_config('rois_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.cls_out = self.check_output_name(self.cls_out, outputs)
+        self.bbox_out = self.check_output_name(self.bbox_out, outputs)
+        self.rois_out = self.check_output_name(self.rois_out, outputs)
+        self.outputs_verified = True
 
     def get_proposals(self, raw_out):
         predicted_proposals = raw_out.get(self.rois_out)
@@ -354,6 +246,8 @@ class RFCNCaffe(Adapter):
     def process(self, raw, identifiers, frame_meta):
         assert len(identifiers) == 1, '{} adapter support only batch size 1'.format(self.__provider__)
         raw_out = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_out)
         predicted_classes = raw_out[self.cls_out]
         predicted_deltas = raw_out[self.bbox_out]
         predicted_proposals = self.get_proposals(raw_out)
@@ -444,6 +338,7 @@ class FaceBoxesAdapter(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
+        self.outputs_verified = False
         self._anchors_cache = {}
 
         # Set default values
@@ -453,6 +348,11 @@ class FaceBoxesAdapter(Adapter):
         self.confidence_threshold = 0.05
         self.nms_threshold = 0.3
         self.keep_top_k = 750
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
 
     @staticmethod
     def calculate_anchors(list_x, list_y, min_size, image_size, step):
@@ -622,6 +522,7 @@ class FaceDetectionAdapter(Adapter):
             'window_scales': self.get_value_from_config('window_scales'),
             'window_lengths': self.get_value_from_config('window_lengths')
         }
+        self.outputs_verified = False
         if len({len(x) for x in self.layer_info.values()}) != 1:
             raise ConfigError('There must be equal number of layer names, anchor sizes, '
                               'window scales, and window sizes')
@@ -661,8 +562,16 @@ class FaceDetectionAdapter(Adapter):
                     k += 1
         return output_layers
 
+    def select_output_blob(self, outputs):
+        updated_outputs = []
+        for out_name in self.output_layers:
+            updated_outputs.append(self.check_output_name(out_name, outputs))
+        self.output_layers = updated_outputs
+
     def process(self, raw, identifiers, frame_meta):
         result = []
+        if not self.outputs_verified:
+            self.select_output_blob(raw)
         for batch_index, identifier in enumerate(identifiers):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             scale_factor = frame_meta[batch_index]['scales'][0]
@@ -822,9 +731,20 @@ class FasterRCNNONNX(Adapter):
         self.scores_out = self.get_value_from_config('scores_out')
         if self.scores_out and not self.labels_out:
             raise ConfigError('all three outputs or bixrs_out and labels_out or only boxes_out should be provided')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        if self.scores_out:
+            self.scores_out = self.check_output_name(self.scores_out, outputs)
+        if self.labels_out:
+            self.labels_out = self.check_output_name(self.labels_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         identifier = identifiers[0]
         boxes = raw_outputs[self.boxes_out][:, :4]
         scores = raw_outputs[self.scores_out] if self.scores_out is not None else raw_outputs[self.boxes_out][:, 4]
@@ -886,10 +806,18 @@ class DETRAdapter(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_output)
 
         def box_cxcywh_to_xyxy(x):
             x_c, y_c, w, h = x.T
@@ -940,9 +868,17 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.score_threshold = self.get_value_from_config('score_threshold')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.scores_out = self.check_output_name(self.scores_out, outputs)
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         batch_scores = raw_outputs[self.scores_out]
         batch_boxes = raw_outputs[self.boxes_out]
@@ -977,9 +913,17 @@ class PPDetectionAdapter(Adapter):
     def configure(self):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.num_boxes_out = self.get_value_from_config('num_boxes_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        self.num_boxes_out = self.check_output_name(self.num_boxes_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         predictions = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(predictions)
         results = []
         boxes_start = 0
         for identifier, num_boxes in zip(identifiers, predictions[self.num_boxes_out]):

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ task_type: detection
 files:
   - name: yolo-v2.pb
     size: 203970473
-    sha384: d97d0e4736a210879c1e3db84e19a7b9cf8dd138350d66ef65715514a1ce361ec822133789020b6adca9bd25f0d73817
+    checksum: d97d0e4736a210879c1e3db84e19a7b9cf8dd138350d66ef65715514a1ce361ec822133789020b6adca9bd25f0d73817
     source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
 model_optimizer_args:
   - --input_shape=[1,608,608,3]
   - --input=image_input
   - --scale_values=image_input[255]
   - --reverse_input_channels
-  - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2.json
+  - --transformations_config=$mo_ext_dir/front/tf/yolo_v2.json
   - --input_model=$dl_dir/yolo-v2.pb
-quantizable: yes
+quantizable: true
 framework: tf
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

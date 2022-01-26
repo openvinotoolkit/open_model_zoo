@@ -25,18 +25,17 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api import models
-from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from openvino.model_zoo.model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
-from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
+from helpers import resolution, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -45,13 +44,14 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using ovms adapter.')
+    available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov3-onnx', 'yolov4', 'yolof', 'yolox',
-                                                        'faceboxes', 'centernet', 'ctpn',
-                                                        'retinaface', 'ultra_lightweight_face_detection',
-                                                        'retinaface-pytorch', 'detr'))
+                      type=str, required=True, choices=available_model_wrappers)
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -64,7 +64,7 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--resize_type', default=None, choices=models.RESIZE_TYPES.keys(),
+    common_model_args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
                                    help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
     common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
                                    help='Optional. The first image size used for CTPN model reshaping. '
@@ -163,42 +163,6 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(ie, args):
-    if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-                          threshold=args.prob_threshold)
-    elif args.architecture_type == 'ctpn':
-        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolo':
-        return models.YOLO(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-                           threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolov3-onnx':
-        return models.YoloV3ONNX(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-                                 threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolov4':
-        return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, resize_type=args.resize_type,
-                             anchors=args.anchors, masks=args.masks)
-    elif args.architecture_type == 'yolof':
-        return models.YOLOF(ie, args.model, labels=args.labels, resize_type=args.resize_type,
-                            threshold=args.prob_threshold)
-    elif args.architecture_type == 'yolox':
-        return models.YOLOX(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-    elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
-    elif args.architecture_type == 'centernet':
-        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-    elif args.architecture_type == 'retinaface':
-        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
-    elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
-    elif args.architecture_type == 'retinaface-pytorch':
-        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
-    elif args.architecture_type == 'detr':
-        return models.DETR(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-    else:
-        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-
 
 def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
@@ -211,7 +175,7 @@ def draw_detections(frame, detections, palette, labels, output_transform):
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
         cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                     (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-        if isinstance(detection, models.DetectionWithLandmarks):
+        if isinstance(detection, DetectionWithLandmarks):
             for landmark in detection.landmarks:
                 landmark = output_transform.scale(landmark)
                 cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
@@ -238,22 +202,26 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    configuration = {
+        'resize_type': args.resize_type,
+        'mean_values': args.mean_values,
+        'scale_values': args.scale_values,
+        'reverse_input_channels': args.reverse_input_channels,
+        'path_to_labels': args.labels,
+        'confidence_threshold': args.prob_threshold,
+        'input_size': args.input_size, # The CTPN specific
+    }
+    model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)
+    model.log_layers_info()
 
-    log.info('Reading model {}'.format(args.model))
-    model = get_model(ie, args)
-    model.set_inputs_preprocessing(args.reverse_input_channels, args.mean_values, args.scale_values)
-    log_blobs_info(model)
-
-    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
-                                      device=args.device, max_num_requests=args.num_infer_requests)
-
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(detector_pipeline.exec_net, set(parse_devices(args.device)))
+    detector_pipeline = AsyncPipeline(model)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -308,7 +276,7 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
                 if args.output_resolution:
                     output_resolution = output_transform.new_resolution
                 else:

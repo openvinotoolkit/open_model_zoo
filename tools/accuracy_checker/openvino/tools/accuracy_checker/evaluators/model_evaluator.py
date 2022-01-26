@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ class ModelEvaluator(BaseEvaluator):
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         input_precision = launcher_config.get('_input_precision', [])
+        input_layouts = launcher_config.get('_input_layout', '')
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
@@ -93,11 +94,13 @@ class ModelEvaluator(BaseEvaluator):
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher_inputs, launcher.input_shape, launcher.fit_to_input,
-            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
+            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision,
+            input_layouts
         )
         if not postpone_model_loading:
-            if input_precision:
+            if input_precision or input_layouts:
                 launcher.update_input_configuration(input_feeder.inputs_config)
+            input_feeder.update_layout_configuration(launcher.layout_mapping)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
         metric_dispatcher = None
@@ -249,12 +252,6 @@ class ModelEvaluator(BaseEvaluator):
         return filled_inputs, batch_meta, inputs_template
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
-        def completion_callback(status_code, request_id):
-            if status_code:
-                warning('Request {} failed with status code {}'.format(request_id, status_code))
-            queued_irs.remove(request_id)
-            ready_irs.append(request_id)
-
         def prepare_dataset(store_only_mode):
             if self.dataset is None:
                 raise ConfigError('dataset entry is not assigned for execution')
@@ -278,9 +275,34 @@ class ModelEvaluator(BaseEvaluator):
 
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
+        dataset_iterator = iter(enumerate(self.dataset))
+        if hasattr(self.launcher, 'get_infer_queue'):
+            return self.process_dataset_async_infer_queue(
+                dataset_iterator, metric_config, progress_reporter, stored_predictions,
+                **kwargs
+            )
+        return self.process_dataset_async_requests(
+                dataset_iterator, metric_config, progress_reporter, stored_predictions,
+                **kwargs
+            )
+
+    def process_dataset_async_requests(
+        self, dataset_iterator, metric_config, progress_reporter, stored_predictions, **kwargs):
+        if self.launcher.config['framework'] == 'openvino':
+            def completion_callback(request_id):
+                queued_irs.remove(request_id)
+                ready_irs.append(request_id)
+        else:
+            def completion_callback(status_code, request_id):
+                if status_code:
+                    warning('Request {} failed with status code {}'.format(request_id, status_code))
+                queued_irs.remove(request_id)
+                ready_irs.append(request_id)
+
         (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
-        dataset_iterator = iter(enumerate(self.dataset))
+        store_only = kwargs.get('store_only', False)
+        output_callback = kwargs.get('output_callback')
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
         queued_irs, ready_irs = [], []
@@ -317,6 +339,49 @@ class ModelEvaluator(BaseEvaluator):
                             self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
                                                       metric_interval)
 
+        if progress_reporter:
+            progress_reporter.finish()
+
+        if stored_predictions:
+            print_info("prediction objects are save to {}".format(stored_predictions))
+
+    def process_dataset_async_infer_queue(
+        self, dataset_iterator, metric_config, progress_reporter, stored_predictions, **kwargs):
+
+        def completion_callback(request, user_data):
+            batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta = user_data
+            batch_raw_predictions = self.launcher.get_result_from_request(request)
+            if stored_predictions:
+                self.prepare_prediction_to_store(
+                    batch_raw_predictions, batch_identifiers, batch_meta, stored_predictions
+                )
+            if not store_only:
+                self._process_batch_results(
+                    batch_raw_predictions, batch_annotation, batch_identifiers,
+                    batch_input_ids, batch_meta, False, output_callback)
+
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_identifiers))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting,
+                        ignore_metric_reference=ignore_metric_reference
+                    )
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
+                                              metric_interval)
+
+        (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
+        store_only = kwargs.get('store_only', False)
+        output_callback = kwargs.get('output_callback')
+        infer_queue = self.launcher.get_infer_queue()
+        infer_queue.set_callback(completion_callback)
+        for batch_id, dataset_item in dataset_iterator:
+            batch_input_ids, batch_annotation, batch_input, batch_identifiers = dataset_item
+            filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
+            infer_queue.start_async(*self.launcher.prepare_data_for_request(
+                filled_inputs, batch_meta, batch_id, batch_input_ids, batch_annotation, batch_identifiers))
+        infer_queue.wait_all()
         if progress_reporter:
             progress_reporter.finish()
 
@@ -697,31 +762,21 @@ class ModelEvaluator(BaseEvaluator):
             self.adapter.release()
 
     @classmethod
-    def provide_metric_references(cls, conf, subset, return_header=True):
+    def provide_metric_references(cls, conf, return_header=True):
         processing_info = cls.get_processing_info(conf)
         dataset_config = conf['datasets'][0]
-        dataset = Dataset(dataset_config, log=False)
-        dataset_size = len(dataset)
-        ignore_config_refs = False
-        if subset is not None:
-            dataset_config['subsample_size'] = subset
-            new_dataset = Dataset(dataset_config, log=False)
-            if len(new_dataset) != len(dataset):
-                ignore_config_refs = True
-                warning('Subset is not matched with configuration. Reference values will be ignored')
-                dataset_size = len(new_dataset)
-                dataset = new_dataset
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), postpone_metrics=True)
         extracted_results, extracted_meta = [], []
-        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(ignore_config_refs):
-            result, metadata = result_presenter.extract_result(metric_result)
+        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(
+            dataset_config.get('metrics', []), False):
+            result, metadata = result_presenter.extract_result(metric_result, names_from_refs=True)
             if isinstance(result, list):
                 extracted_results.extend(result)
                 extracted_meta.extend(metadata)
             else:
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
-        header, report = generate_csv_report(processing_info, extracted_results, dataset_size, extracted_meta)
+        header, report = generate_csv_report(processing_info, extracted_results, 0, extracted_meta)
         if not return_header:
             return report
         return header, report

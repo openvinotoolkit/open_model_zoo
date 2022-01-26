@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -69,13 +69,22 @@ class ImageProcessingAdapter(Adapter):
         self.std = self.get_value_from_config('std')
         self.target_out = self.get_value_from_config('target_out')
         self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if not self.target_out:
+            super().select_output_blob(outputs)
+            self.target_out = self.output_blob
+            return
+        self.target_out = self.check_output_name(self.target_out, outputs)
+        return
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.target_out:
+        if not self.output_verified:
             self.select_output_blob(raw_outputs)
-            self.target_out = self.output_blob
 
         for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
             out_img = self._basic_postprocess(out_img)
@@ -105,9 +114,8 @@ class SuperResolutionAdapter(ImageProcessingAdapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.target_out:
+        if not self.output_verified:
             self.select_output_blob(raw_outputs)
-            self.target_out = self.output_blob
 
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
             img_sr = self._basic_postprocess(img_sr)
@@ -227,9 +235,8 @@ class TrimapAdapter(ImageProcessingAdapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.target_out:
+        if not self.output_verified:
             self.select_output_blob(raw_outputs)
-            self.target_out = self.output_blob
 
         for identifier, out_img, out_meta in zip(identifiers, raw_outputs[self.target_out], frame_meta):
             tmap = np.expand_dims(out_meta['tmap'], axis=0)

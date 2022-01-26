@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ from ..utils import (
 )
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..logging import exception
+from ..logging import exception, init_logging
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -255,6 +255,7 @@ def make_subset_kaldi(annotation, size, shuffle=True, **kwargs):
 
 
 def main():
+    init_logging()
     main_argparser = build_argparser()
     tm = start_telemetry()
     send_telemetry_event(tm, 'annotation_conversion_status', 'started')

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,23 +31,26 @@ task_type: named_entity_recognition
 files:
   - name: transformers-4.5.1-py3-none-any.whl
     size: 2060589
-    sha384: e9cb161eef172deac1068d491ed9f7918f5aaa087c9170f8d6356924ade6fd3f2be580c47cef37aa419a2be64db42a28
+    checksum: e9cb161eef172deac1068d491ed9f7918f5aaa087c9170f8d6356924ade6fd3f2be580c47cef37aa419a2be64db42a28
     source: https://files.pythonhosted.org/packages/d8/b2/57495b5309f09fa501866e225c84532d1fd89536ea62406b2181933fb418/transformers-4.5.1-py3-none-any.whl
   - name: bert-base-ner/pytorch_model.bin
     size: 433316646
-    sha384: 59e6fefd0f29534cab9681891a15e9762b1d2dd8d047f55a792b39243631a008ac91a0e354f2ca2aa942be443540a8cb
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+    checksum: 59e6fefd0f29534cab9681891a15e9762b1d2dd8d047f55a792b39243631a008ac91a0e354f2ca2aa942be443540a8cb
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/pytorch_model.bin
   - name: bert-base-ner/config.json
     size: 829
-    sha384: 66d217d33ba89085a56afc3b485b4e997d278d5253519e6a536c234fce3e065fb80ef39d27894df176148cb457c1cfcb
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/config.json
+    checksum: 66d217d33ba89085a56afc3b485b4e997d278d5253519e6a536c234fce3e065fb80ef39d27894df176148cb457c1cfcb
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/config.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/config.json
   - name: bert-base-ner/vocab.txt
     size: 213450
-    sha384: b13bb7bd69958cf6d486a291894d90a8693adcea0cb177d1fbe652000def2b169dc82b292ef51736d1f6f15fee1ab486
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/vocab.txt
+    checksum: b13bb7bd69958cf6d486a291894d90a8693adcea0cb177d1fbe652000def2b169dc82b292ef51736d1f6f15fee1ab486
+    original_source: https://huggingface.co/dslim/bert-base-NER/resolve/main/vocab.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/bert-base-ner/vocab.txt
   - name: packaging-20.9-py2.py3-none-any.whl
     size: 40870
-    sha384: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
+    checksum: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
     source: https://files.pythonhosted.org/packages/3e/89/7ea760b4daa42653ece2380531c90f64788d979110a2ab51049d92f408af/packaging-20.9-py2.py3-none-any.whl
 postprocessing:
   - $type: unpack_archive
@@ -89,5 +92,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/bert-base-ner.onnx
   - --output=output
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE

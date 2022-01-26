@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ task_type: classification
 files:
   - name: hbonet.py
     size: 12548
-    sha384: 7b069ad80839ed050c9ce5a10d389db1bd529a74b77858648ca168976bc9736fc30715d946e54e55445a5cb23edc4342
+    checksum: 7b069ad80839ed050c9ce5a10d389db1bd529a74b77858648ca168976bc9736fc30715d946e54e55445a5cb23edc4342
     source: https://raw.githubusercontent.com/d-li14/HBONet/e9a76c15e3847b0f032a7000fe0c8138d6f2eb10/models/imagenet/hbonet.py
   - name: hbonet_1_0.pth
-    sha384: 27ea1715505128c6dd1cf22cc57e629b0f8c2acf7f9246894c5c003091b415e3f494cee156c7dbd330f5d6affce700ab
+    checksum: 27ea1715505128c6dd1cf22cc57e629b0f8c2acf7f9246894c5c003091b415e3f494cee156c7dbd330f5d6affce700ab
     size: 18467748
     source: https://raw.githubusercontent.com/d-li14/HBONet/master/pretrained/hbonet_1_0.pth
 framework: pytorch
@@ -43,5 +43,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/hbonet_1_0.onnx
-quantizable: yes
+quantizable: true
 license: https://github.com/d-li14/HBONet/blob/master/LICENSE

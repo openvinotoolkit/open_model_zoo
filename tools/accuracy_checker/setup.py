@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -129,5 +129,5 @@ setup(
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
     extras_require={'extra': ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips',
-                              'kenlm @ git+https://github.com/kpu/kenlm.git#egg=kenlm']}
+                              'kenlm @ git+https://github.com/kpu/kenlm.git@f01e12d83c7fd03ebe6656e0ad6d73a3e022bd50#egg=kenlm']}
 )

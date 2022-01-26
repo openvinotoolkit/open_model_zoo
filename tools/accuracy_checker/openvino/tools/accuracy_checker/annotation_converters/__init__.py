@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -125,6 +125,8 @@ from .sentence_similarity import SentenceSimilarityConverter
 from .common_text_recognition import CommonTextRecognition
 from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .speaker_identification import SpeakerReIdentificationDatasetConverter
+from .mvtec import MVTecDatasetConverter
+from .gan_annotation_converter import GANAnnotationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -250,4 +252,6 @@ __all__ = [
     'CommonTextRecognition',
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
+    'MVTecDatasetConverter',
+    'GANAnnotationConverter'
 ]

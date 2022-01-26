@@ -34,6 +34,7 @@
 | formula-recognition-polynomials-handwritten-0001-decoder | YES | YES |    |
 | formula-recognition-polynomials-handwritten-0001-encoder | YES | YES |    |
 | gaze-estimation-adas-0002 | YES | YES | YES |
+| handwritten-english-recognition-0001 | YES | YES | YES |
 | handwritten-japanese-recognition-0001 | YES | YES | YES |
 | handwritten-score-recognition-0003 | YES | YES | YES |
 | handwritten-simplified-chinese-recognition-0001 | YES | YES | YES |
@@ -52,12 +53,14 @@
 | instance-segmentation-security-0228 | YES |    |    |
 | instance-segmentation-security-1039 | YES |    |    |
 | instance-segmentation-security-1040 | YES |    |    |
+| instance-segmentation-person-0007 | YES |    |    |
 | landmarks-regression-retail-0009 | YES | YES | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
 | machine-translation-nar-de-en-0002 | YES | YES |    |
 | machine-translation-nar-en-de-0002 | YES | YES |    |
 | machine-translation-nar-en-ru-0001 | YES | YES |    |
 | machine-translation-nar-ru-en-0001 | YES | YES |    |
+| noise-suppression-denseunet-ll-0001 | YES |    |    |
 | noise-suppression-poconetlike-0001 | YES |    |    |
 | pedestrian-and-vehicle-detector-adas-0001 | YES | YES | YES |
 | pedestrian-detection-adas-0002 | YES | YES | YES |

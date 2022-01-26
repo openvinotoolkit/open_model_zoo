@@ -11,10 +11,13 @@ The Open Model Zoo includes the following demos:
 - [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
 - [3D Segmentation Python\* Demo](./3d_segmentation_demo/python/README.md) - Segmentation demo segments 3D images using 3D convolutional networks.
 - [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [Background Subtraction Python\* Demo](./background_subtraction_demo/python/README.md) - Background subtraction using instance segmentation based models.
+- [Background Subtraction C++ G-API\* Demo](./background_subtraction_demo/cpp_gapi/README.md) - Background subtraction G-API version.
 - [BERT Named Entity Recognition Python\* Demo](./bert_named_entity_recognition_demo/python/README.md) - NER Demo application that uses a CONLL2003-tuned BERT model for inference.
 - [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
-- [Classification C++ Demo](./classification_demo/cpp/README.md) - Shows an example of using neural networks for image classification.
+- [Classification Python\* Demo](./classification_demo/python/README.md) - Shows an example of using neural networks for image classification.
+- [Classification Benchmark C++ Demo](./classification_benchmark_demo/cpp/README.md) - Visualizes OpenVINO performance on inference of neural networks for image classification.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
@@ -23,10 +26,11 @@ The Open Model Zoo includes the following demos:
 - [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
-- [Gaze Estimation C++ G-API Demo](./gaze_estimation_demo/cpp_gapi/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression. G-API version.
+- [Gaze Estimation C++ G-API\* Demo](./gaze_estimation_demo/cpp_gapi/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression. G-API version.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
+- [Gesture Recognition C++ G-API\* Demo](./gesture_recognition_demo/cpp_gapi/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video. G-API version.
 - [GPT-2 Text Prediction Python\* Demo](./gpt2_text_prediction_demo/python/README.md) - GPT-2 text prediction demo.
-- [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
+- [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md) - The demo demonstrates how to run Handwritten Text Recognition models for Japanese, Simplified Chinese and English.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
 - [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
 - [Image Inpainting Python\* Demo](./image_inpainting_demo/python/README.md) - Demo application for GMCNN inpainting network.
@@ -37,7 +41,7 @@ The Open Model Zoo includes the following demos:
 - [Image Translation Python\* Demo](./image_translation_demo/python/README.md) - Demo application to synthesize a photo-realistic image based on exemplar image.
 - [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/cpp/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
-- [Interactive Face Detection G-API Demo](./interactive_face_detection_demo/cpp_gapi/README.md) - G-API based Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
+- [Interactive Face Detection G-API\* Demo](./interactive_face_detection_demo/cpp_gapi/README.md) - G-API based Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Machine Translation Python\* Demo](./machine_translation_demo/python/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
 - [Mask R-CNN C++ Demo for TensorFlow\* Object Detection API](./mask_rcnn_demo/cpp/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
 - [Monodepth Python\* Demo](./monodepth_demo/python/README.md) - The demo demonstrates how to run monocular depth estimation models.
@@ -48,6 +52,7 @@ The Open Model Zoo includes the following demos:
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
 - [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
 - [Noise Suppression Python\* Demo](./noise_suppression_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
+- [Noise Suppression C++\* Demo](./noise_suppression_demo/cpp/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
 - [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
 - [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
@@ -348,7 +353,7 @@ list above.
 
 ## See Also
 
-* [Intel OpenVINO Documentation](https://docs.openvinotoolkit.org/latest/documentation.html)
+* [Intel OpenVINO Documentation](https://docs.openvino.ai/latest/documentation.html)
 * [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../models/intel/index.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../models/public/index.md)
 

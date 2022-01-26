@@ -50,7 +50,7 @@ Expected color order: `BGR`.
 Object classifier according to ImageNet classes, shape: `1, 1000` in `B, C` format, where:
 
 - `B` - batch size
-- `C` - vector of probabilities for all dataset classes.
+- `C` - vector of probabilities for all dataset classes in logits format.
 
 ## Download a Model and Convert it into Inference Engine Format
 

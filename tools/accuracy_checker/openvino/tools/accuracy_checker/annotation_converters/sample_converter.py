@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -60,15 +60,12 @@ class SampleConverter(BaseFormatConverter):
         """
 
         dataset_directory = get_path(self.data_dir, is_directory=True)
+        # create dataset metadata
+        metadata = self.get_meta()
 
         # read and convert annotation
-        labels = self._read_labels(dataset_directory / 'labels.txt')
         images_dir = dataset_directory / 'test'
-        annotations = self._convert_annotations(images_dir, labels, progress_callback, progress_interval)
-
-        # convert label list to label map
-        label_map = {i: labels[i] for i in range(len(labels))}
-        metadata = {'label_map': label_map}
+        annotations = self._convert_annotations(images_dir, metadata, progress_callback, progress_interval)
 
         return ConverterReturn(annotations, metadata, None)
 
@@ -80,8 +77,20 @@ class SampleConverter(BaseFormatConverter):
 
         return read_txt(labels_file)
 
+    def get_meta(self):
+        '''
+        Generate dataset metadata
+
+        '''
+        # read labels list
+        labels = self._read_labels(get_path(self.data_dir, is_directory=True) / 'labels.txt')
+        # create label map
+        label_map = dict(enumerate(labels))
+        return {'label_map': label_map}
+
+
     @staticmethod
-    def _convert_annotations(test_dir, labels, progress_callback, progress_interval):
+    def _convert_annotations(test_dir, metadata, progress_callback, progress_interval):
         """
         Create annotation representations list.
         """
@@ -89,7 +98,7 @@ class SampleConverter(BaseFormatConverter):
         # test directory contains files with names XXXX_class.png
         # we use regular expression to extract class names
         file_pattern_regex = re.compile(r'\d+_(\w+)\.png')
-
+        labels = list(metadata['label_map'].values())
         annotations = []
         num_iterations = len(test_dir.glob('*.png'))
         # iterate over all png images in test directory

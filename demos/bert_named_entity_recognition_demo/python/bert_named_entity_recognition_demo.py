@@ -23,17 +23,14 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
-from openvino.inference_engine import IECore, get_version
-
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
-from helpers import log_runtime_settings
 
-from model_api.models import BertNamedEntityRecognition
-from model_api.models.tokens_bert import text_to_tokens, load_vocab_file
-from model_api.pipelines import get_user_config, parse_devices, AsyncPipeline
+from openvino.model_zoo.model_api.models import BertNamedEntityRecognition
+from openvino.model_zoo.model_api.models.tokens_bert import text_to_tokens, load_vocab_file
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -47,11 +44,14 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=Path)
+    args.add_argument("-m", "--model", required=True,
+                      help="Required. Path to an .xml file with a trained model "
+                           "or address of model inference service if using OVMS adapter.")
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
@@ -105,21 +105,19 @@ def main():
     preprocessing_total_time = (perf_counter() - preprocessing_start_time) * 1e3
     source = tuple(zip(sentences, preprocessed_sentences))
 
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    log.info('Reading model {}'.format(args.model))
-    model = BertNamedEntityRecognition(ie, args.model, vocab, args.input_names)
+    model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names})
     if max_sentence_length > model.max_length:
         model.reshape(max_sentence_length)
+    model.log_layers_info()
 
-    pipeline = AsyncPipeline(ie, model, plugin_config,
-                             device=args.device, max_num_requests=args.num_infer_requests)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
+    pipeline = AsyncPipeline(model)
 
     next_sentence_id = 0
     next_sentence_id_to_show = 0

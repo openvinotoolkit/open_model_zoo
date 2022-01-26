@@ -1,9 +1,12 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,6 +62,14 @@ class MultiOutRetinaNet(Adapter):
         self.post_nms_top_k = self.get_value_from_config('post_nms_top_k')
         self.min_conf = self.get_value_from_config('min_conf')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        def generate_out_names(list_names, outputs):
+            return [self.check_output_name(out, outputs) for out in list_names]
+        self.boxes_outs = generate_out_names(self.boxes_outs, outputs)
+        self.class_outs = generate_out_names(self.class_outs, outputs)
+        self.outputs_verified = True
 
     def decode_boxes(self, raw_outputs, input_shape):
         def generate_anchors(stride, ratio_vals, scales_vals):
@@ -212,6 +223,8 @@ class MultiOutRetinaNet(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         input_shape_dict = frame_meta[0].get('input_shape', {'data': (1, 3, 480, 640)})
         input_shape = next(iter(input_shape_dict.values()))
         out_scores, out_boxes, out_classes = self.decode_boxes(raw_outputs, input_shape)
@@ -243,9 +256,17 @@ class RetinaNetAdapter(Adapter):
         self.ratios = np.array([0.5, 1, 2])
         self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
         self.std = np.array([0.1, 0.1, 0.2, 0.2])
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.loc_out = self.check_output_name(self.loc_out, outputs)
+        self.cls_out = self.check_output_name(self.cls_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         results = []
         for identifier, loc_pred, cls_pred, meta in zip(
                 identifiers, raw_outputs[self.loc_out], raw_outputs[self.cls_out], frame_meta
@@ -382,6 +403,14 @@ class RetinaNetTF2(Adapter):
         self.nms_iou_threshold = self.get_value_from_config('nms_threshold')
         self.score_threshold = self.get_value_from_config('score_threshold')
         self.pre_nms_num_boxes = self.get_value_from_config('pre_nms_top_k')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        def generate_out_names(list_names, outputs):
+            return [self.check_output_name(out, outputs) for out in list_names]
+        self.boxes_outs = generate_out_names(self.boxes_outs, outputs)
+        self.class_outs = generate_out_names(self.class_outs, outputs)
+        self.outputs_verified = True
 
     def _generate_anchor_boxes(self, image_size):
         boxes_all = []
@@ -433,6 +462,8 @@ class RetinaNetTF2(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         result = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
             boxes_out, classes_out = self.prepare_boxes_and_classes(raw_outputs, batch_id)

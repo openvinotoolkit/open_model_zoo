@@ -47,17 +47,22 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+                         [--adapter {openvino,ovms}] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                          [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                          [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image, a folder of images, video
                         file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The
                         demo will look for a suitable plugin for device specified. Default value is CPU.
@@ -120,6 +125,19 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 monodepth_demo.py \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m localhost:9000/models/monodepth \
+  --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with colored depth map.
@@ -132,5 +150,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

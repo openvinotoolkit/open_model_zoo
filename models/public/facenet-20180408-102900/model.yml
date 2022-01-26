@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ task_type: face_recognition
 files:
   - name: 20180408-102900.zip
     size: 195479980
-    sha384: f394011bacf7b191bdc7fd0157a0f6cb5a34c46d1cae2074ff3e8e9917f3eef79a6eeaed5d25395cf2dcad9854b7f8ee
-    source:
+    checksum: f394011bacf7b191bdc7fd0157a0f6cb5a34c46d1cae2074ff3e8e9917f3eef79a6eeaed5d25395cf2dcad9854b7f8ee
+    original_source:
       $type: google_drive
       id: 1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/facenet-20180408-102900/20180408-102900.zip
 postprocessing:
   - $type: unpack_archive
     format: zip

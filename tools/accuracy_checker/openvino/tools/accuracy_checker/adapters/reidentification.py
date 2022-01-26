@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,6 +96,6 @@ class ReidAdapter(Adapter):
 
     def select_output_blob(self, outputs):
         if self.target_out:
-            self.output_blob = self.target_out
+            self.output_blob = self.check_output_name(self.target_out, outputs)
         if self.output_blob is None:
             self.output_blob = next(iter(outputs))

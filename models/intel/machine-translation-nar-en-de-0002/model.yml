@@ -19,19 +19,19 @@ task_type: machine_translation
 files:
   - name: FP32/machine-translation-nar-en-de-0002.xml
     size: 912660
-    sha384: be85eaecee672829462e7edb18f36edbfe3edd8550b93a21a3b7042047fd5046957e59e73682add53f9ee31d77516681
+    checksum: be85eaecee672829462e7edb18f36edbfe3edd8550b93a21a3b7042047fd5046957e59e73682add53f9ee31d77516681
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP32/machine-translation-nar-en-de-0002.xml
   - name: FP32/machine-translation-nar-en-de-0002.bin
     size: 284547188
-    sha384: 83f91dbbd894f3379f156682c59a64a903e7571d481c61805115f6ac26755388215328b93bece260a49989fa0963e1c7
+    checksum: 83f91dbbd894f3379f156682c59a64a903e7571d481c61805115f6ac26755388215328b93bece260a49989fa0963e1c7
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP32/machine-translation-nar-en-de-0002.bin
   - name: FP16/machine-translation-nar-en-de-0002.xml
     size: 912717
-    sha384: 15bdea70ebc32a539a76a7567cf65e37d56c09c137550e62c682ab9265d4fb5459b634a46e0ffd501aff31910aa78758
+    checksum: 15bdea70ebc32a539a76a7567cf65e37d56c09c137550e62c682ab9265d4fb5459b634a46e0ffd501aff31910aa78758
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP16/machine-translation-nar-en-de-0002.xml
   - name: FP16/machine-translation-nar-en-de-0002.bin
     size: 142274522
-    sha384: 30485018446f624f3236a1c64d0faf3e7c8c6b4d985343f08941c24f2416a6a71df3d3cc65e21441b3df4ecb0f11ca15
+    checksum: 30485018446f624f3236a1c64d0faf3e7c8c6b4d985343f08941c24f2416a6a71df3d3cc65e21441b3df4ecb0f11ca15
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP16/machine-translation-nar-en-de-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

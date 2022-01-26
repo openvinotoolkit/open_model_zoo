@@ -13,15 +13,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+
 from .model import Model
+from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform
 
 
 class ImageModel(Model):
-    '''An abstract wrapper for image-based model
+    '''An abstract wrapper for an image-based model
 
-    An image-based model is model which has one or more inputs with image - 4D tensors with NWHC or NCHW layout.
-    Also it may have support additional inputs - 2D tensor.
+    An image-based model is a model which has one or more inputs with image - 4D tensors with NHWC or NCHW layout.
+    Also it may support additional inputs - 2D tensor.
     Implements basic preprocessing for image: resizing and aligning to model input.
 
     Attributes:
@@ -31,37 +33,52 @@ class ImageModel(Model):
         image_blob_name(str): name of image input (None, if they are many)
     '''
 
-    def __init__(self, ie, model_path, resize_type=None):
+    def __init__(self, model_adapter, configuration=None, preload=False):
         '''Image model constructor
 
         Calls the `Model` constructor first
 
         Args:
+            model_adapter(ModelAdapter): allows working with the specified executor
             resize_type(str): sets the type for image resizing (see ``RESIZE_TYPE`` for info)
         '''
-        super().__init__(ie, model_path)
+        super().__init__(model_adapter, configuration, preload)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
         if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        self.image_layout = 'NCHW'
-        if not resize_type:
-            self.logger.warning('The resizer isn\'t set. The "standard" will be used')
-            resize_type = 'standard'
-        self.resize_type = resize_type
-        self.resize = RESIZE_TYPES[self.resize_type]
-        self.input_transform = InputTransform()
+            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
 
-    def set_inputs_preprocessing(self, reverse_input_channels, mean_values, scale_values):
-        self.input_transform = InputTransform(reverse_input_channels, mean_values, scale_values)
+        self.image_layout = 'NCHW'
+        self.resize = RESIZE_TYPES[self.resize_type]
+        self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'mean_values': ListValue(
+                default_value=None,
+                description='Normalization values, which will be subtracted from image channels for image-input layer during preprocessing'
+            ),
+            'scale_values': ListValue(
+                default_value=None,
+                description='Normalization values, which will divide the image channels for image-input layer'
+            ),
+            'reverse_input_channels': BooleanValue(default_value=False, description='Reverse the channel order'),
+            'resize_type': StringValue(
+                default_value='standard', choices=tuple(RESIZE_TYPES.keys()),
+                description="Type of input image resizing"
+            ),
+        })
+        return parameters
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []
-        for blob_name, blob in self.net.input_info.items():
-            if len(blob.input_data.shape) == 4:
-                image_blob_names.append(blob_name)
-            elif len(blob.input_data.shape) == 2:
-                image_info_blob_names.append(blob_name)
+        for name, metadata in self.inputs.items():
+            if len(metadata.shape) == 4:
+                image_blob_names.append(name)
+            elif len(metadata.shape) == 2:
+                image_info_blob_names.append(name)
             else:
                 raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
         if not image_blob_names:
@@ -87,7 +104,7 @@ class ImageModel(Model):
             inputs: single image as 3D array in HWC layout
 
         Returns:
-            - The dict with processed image data
+            - the dict with preprocessed image data
             - The dict with metadata
         '''
         image = inputs

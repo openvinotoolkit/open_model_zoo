@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,20 +28,21 @@ description: >-
 task_type: classification
 files:
   - name: resnest50-528c19ca.pth
-    sha384: c08c80b6c826ea76eda8f638b1c06535aed947cf8ccc26c027dbda917fb1afad72191f753a7a6029d6126360973f0a06
+    checksum: c08c80b6c826ea76eda8f638b1c06535aed947cf8ccc26c027dbda917fb1afad72191f753a7a6029d6126360973f0a06
     size: 110273258
-    source: https://github.com/zhanghang1989/ResNeSt/releases/download/weights_step1/resnest50-528c19ca.pth
+    original_source: https://github.com/zhanghang1989/ResNeSt/releases/download/weights_step1/resnest50-528c19ca.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnest-50-pytorch/resnest50-528c19ca.pth
   - name: model/resnest.py
     size: 2908
-    sha384: 00a948bbe8a8aeb671724cc2ddca21de34ede1d9908b5f22ac05681518b7f929eb89eddcd23694aaea7999a0e9808477
+    checksum: 00a948bbe8a8aeb671724cc2ddca21de34ede1d9908b5f22ac05681518b7f929eb89eddcd23694aaea7999a0e9808477
     source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/resnest.py
   - name: model/resnet.py
     size: 13205
-    sha384: 1191368d697bb05970ace761740bfe4e3c8b3d15ab487260f56169db7321ea8b505f33779817eb96bdb51f9c07548f0d
+    checksum: 1191368d697bb05970ace761740bfe4e3c8b3d15ab487260f56169db7321ea8b505f33779817eb96bdb51f9c07548f0d
     source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/resnet.py
   - name: model/splat.py
     size: 3620
-    sha384: f3fdd36cab53e2f3ff1819391246ab9738426758ee5f6af01d5e8c22a8f662a49164e738be6574a4cae03fac76d47259
+    checksum: f3fdd36cab53e2f3ff1819391246ab9738426758ee5f6af01d5e8c22a8f662a49164e738be6574a4cae03fac76d47259
     source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/splat.py
 framework: pytorch
 conversion_to_onnx_args:

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,16 +49,10 @@ class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
         parameters = super().parameters()
         return parameters
 
-    def configure(self):
-        self.meta.update({
-            'scale': 1, 'postfix': ' ', 'target': 'higher-worse'
-        })
-        super().configure()
-
     def evaluate(self, annotations, predictions):
         quantiles = list(predictions[0].preds.keys())
         quantiles.sort()
-        self.meta.update({"names": quantiles, "calculate_mean": False})
+        self.meta.update({"names": quantiles})
         gt = [annotation.outputs for annotation in annotations]
         gt = np.concatenate(gt, axis=0)
         values = []
@@ -68,3 +62,12 @@ class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
             loss = normalised_quantile_loss(gt, preds, q)
             values.append(loss)
         return values
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'scale': 1, 'postfix': ' ', 'target': 'higher-worse',
+            "calculate_mean": False
+        })
+        return meta

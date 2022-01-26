@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,6 +107,10 @@ class BaseFormatConverter(ClassProvider):
                 full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
             return full_scheme
         return cls.parameters()
+
+    @staticmethod
+    def get_meta():
+        return None
 
 
 class FileBasedAnnotationConverter(BaseFormatConverter):

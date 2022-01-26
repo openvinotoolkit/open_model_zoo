@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class BasePresenter(ClassProvider):
     def write_result(self, evaluation_result, ignore_results_formatting=False, ignore_metric_reference=False):
         raise NotImplementedError
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         raise NotImplementedError
 
 
@@ -47,7 +47,7 @@ class ScalarPrintPresenter(BasePresenter):
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
                      ignore_metric_reference=False):
         value, reference, name, _, abs_threshold, rel_threshold, meta, _ = evaluation_result
-        value = np.mean(value)
+        value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
         if reference and not ignore_metric_reference:
@@ -57,13 +57,13 @@ class ScalarPrintPresenter(BasePresenter):
             postfix=postfix, scale=scale, result_format=result_format
         )
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         value, ref, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         if isinstance(ref, dict):
             ref = ref.get(name)
         result_dict = {
             'name': name,
-            'value': np.mean(value),
+            'value': '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value)),
             'type': metric_type,
             'ref': ref or '',
             'abs_threshold': abs_threshold or 0,
@@ -121,7 +121,7 @@ class VectorPrintPresenter(BasePresenter):
             )
 
         if len(value) > 1 and meta.get('calculate_mean', True):
-            mean_value = np.mean(value)
+            mean_value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
             value_scale = scale[0] if not np.isscalar(scale) else scale
             difference = None
             if reference and not ignore_metric_reference:
@@ -132,10 +132,15 @@ class VectorPrintPresenter(BasePresenter):
                 result_format=result_format
             )
 
-    def extract_result(self, evaluation_result):
+    def extract_result(self, evaluation_result, names_from_refs=False):
         value, reference, name, metric_type, abs_threshold, rel_threshold, meta, profiling_file = evaluation_result
         len_value = len(value) if not np.isscalar(value) and np.ndim(value) > 0 else 1
         value_names_orig = meta.get('names', list(range(0, len_value)))
+        if names_from_refs and isinstance(reference, dict):
+            calculate_mean = meta.get('calculate_mean', True)
+            value_names_orig = (
+                [name for name in reference if name != 'mean'] if calculate_mean else list(reference.keys())
+            )
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]
         if np.isscalar(value) or np.size(value) <= 1:
             value_name = value_names[0] if value_names and 'names' in meta else name
@@ -163,7 +168,7 @@ class VectorPrintPresenter(BasePresenter):
         if meta.get('calculate_mean', True):
             value_names_orig.append('mean')
             value_names.append('{}@mean'.format(name))
-            mean_value = np.mean(value)
+            mean_value = '' if not np.isscalar(value) and (value is None or None in value) else float(np.mean(value))
             value = np.append(value, mean_value)
         per_value_meta = []
         target_per_value = meta.pop('target_per_value', {})
@@ -218,11 +223,15 @@ def write_scalar_result(
 def compare_with_ref(reference, res_value, name=None):
     if isinstance(reference, dict):
         if name is None:
-            reference = next(iter(reference.values()))
-        reference = reference.get(name)
-    if reference is None:
+            ref = next(iter(reference.values()))
+        else:
+            ref = reference.get(name)
+    else:
+        ref = reference
+    ref = ref if ref is None else float(ref)
+    if ref is None:
         return None
-    return abs(reference - res_value), abs(reference - res_value) / reference
+    return abs(ref - res_value), abs(ref - res_value) / ref
 
 
 def get_result_format_parameters(meta, use_default_formatting):

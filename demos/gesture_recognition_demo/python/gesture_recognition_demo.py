@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 
-from gesture_recognition_demo.common import load_ie_core
+from gesture_recognition_demo.common import load_core
 from gesture_recognition_demo.video_stream import VideoStream
 from gesture_recognition_demo.video_library import VideoLibrary
 from gesture_recognition_demo.person_detector import PersonDetector
@@ -36,10 +36,9 @@ from gesture_recognition_demo.action_recognizer import ActionRecognizer
 from gesture_recognition_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -117,13 +116,14 @@ def main():
     args = build_argparser().parse_args()
 
     class_map = load_class_map(args.class_map)
-    assert class_map is not None
+    if class_map is None:
+        raise RuntimeError("Can't read {}".format(args.class_map))
 
-    ie = load_ie_core(args.device, args.cpu_extension)
+    core = load_core(args.device, args.cpu_extension)
 
-    person_detector = PersonDetector(args.detection_model, args.device, ie,
+    person_detector = PersonDetector(args.detection_model, args.device, core,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
-    action_recognizer = ActionRecognizer(args.action_model, args.device, ie,
+    action_recognizer = ActionRecognizer(args.action_model, args.device, core,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=len(class_map))
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 from ..config import BaseField, ConfigValidator, StringField, ConfigError
 from ..dependency import ClassProvider, UnregisteredProviderException
-from ..utils import get_parameter_value_from_config
+from ..utils import get_parameter_value_from_config, postprocess_output_name
 
 
 class Adapter(ClassProvider):
@@ -50,6 +50,10 @@ class Adapter(ClassProvider):
 
     def configure(self):
         pass
+
+    @staticmethod
+    def check_output_name(output_name, outputs, suffix=('/sink_port_0', ':0')):
+        return postprocess_output_name(output_name, outputs, suffix, raise_error=False)
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix='', **kwargs):
@@ -87,7 +91,7 @@ class Adapter(ClassProvider):
 
     def select_output_blob(self, outputs):
         if self.output_blob is None:
-            self.output_blob = next(iter(outputs))
+            self.output_blob = next(iter(outputs)) if isinstance(outputs, dict) else next(iter(outputs[0]))
 
     @classmethod
     def validation_scheme(cls, provider=None):
@@ -105,6 +109,7 @@ class Adapter(ClassProvider):
 
     def release(self):
         pass
+
 
 class AdapterField(BaseField):
     def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):

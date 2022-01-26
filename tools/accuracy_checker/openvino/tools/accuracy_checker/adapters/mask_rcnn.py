@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -109,9 +109,29 @@ class MaskRCNNAdapter(Adapter):
                 return
 
             self.realisation = self._process_pytorch_outputs
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        if self.raw_masks_out:
+            self.raw_masks_out = self.check_output_name(self.raw_masks_out, outputs)
+        if hasattr(self, 'detection_out'):
+            self.detection_out = self.check_output_name(self.detection_out, outputs)
+            self.outputs_verified = True
+            return
+        if self.classes_out:
+            self.classes_out = self.check_output_name(self.classes_out, outputs)
+        if self.scores_out:
+            self.scores_out = self.check_output_name(self.scores_out, outputs)
+        if self.boxes_out:
+            self.boxes_out = self.check_output_name(self.boxes_out, outputs)
+        if self.num_detections_out:
+            self.num_detections_out = self.check_output_name(self.num_detections_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         return self.realisation(raw_outputs, identifiers, frame_meta)
 
     def _process_tf_obj_detection_api_outputs(self, raw_outputs, identifiers, frame_meta):

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ task_type: detection
 files:
   - name: ultra-lightweight-face-detection-slim-320.onnx
     size: 1195330
-    sha384: c6d986113c002b0b8758ba717cff298f7731220e142dd7301bc2349028820fb8dd8942386ab70668b0999bf17d8b818c
+    checksum: c6d986113c002b0b8758ba717cff298f7731220e142dd7301bc2349028820fb8dd8942386ab70668b0999bf17d8b818c
     source: https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/3cb8d7f9a9e418ab594b5b0bb349756a49699517/models/onnx/version-slim-320.onnx
 model_optimizer_args:
   - --input_shape=[1,3,240,320]

@@ -81,8 +81,16 @@ class TextProposalsDetectionAdapter(Adapter):
             [0, -91, 15, 106],
             [0, -134, 15, 149]
         ])
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.cls_prob_out = self.check_output_name(self.cls_prob_out, outputs)
+        self.bbox_pred_out = self.check_output_name(self.bbox_pred_out, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
+        if not self.outputs_verified:
+            self.select_output_blob(raw)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
         data = zip(raw_outputs[self.bbox_pred_out], raw_outputs[self.cls_prob_out], frame_meta, identifiers)

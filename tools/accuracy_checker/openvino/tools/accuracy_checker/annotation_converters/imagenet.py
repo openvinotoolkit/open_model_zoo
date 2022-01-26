@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,9 +76,7 @@ class ImageNetFormatConverter(BaseFormatConverter):
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
-        meta = self._create_meta(self.labels_file, self.dataset_meta, self.has_background) or None
-
-        return ConverterReturn(annotation, meta, content_errors)
+        return ConverterReturn(annotation, self.get_meta(), content_errors)
 
     @staticmethod
     def _create_meta(labels_file, dataset_meta, has_background=False):
@@ -109,4 +107,8 @@ class ImageNetFormatConverter(BaseFormatConverter):
             label_map[0] = 'background'
             meta['background_label'] = 0
 
+        return meta
+
+    def get_meta(self):
+        meta = self._create_meta(self.labels_file, self.dataset_meta, self.has_background) or None
         return meta

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -112,3 +112,9 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
         meta['label_map'] = {value: key for key, value in label_to_id.items()}
 
         return label_to_id, meta
+
+    def get_meta(self):
+        annotation = read_xml(self.annotation_file)
+        annotation_meta = annotation.find('meta')
+        _, meta = self.generate_labels_mapping(annotation_meta)
+        return meta

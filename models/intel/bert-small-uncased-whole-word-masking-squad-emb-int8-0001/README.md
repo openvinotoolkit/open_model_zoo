@@ -28,7 +28,7 @@ bert-large-uncased-whole-word-masking provided by the [Transformers](https://git
 | MParams           | 41.1                  |
 | Source framework  | PyTorch\*             |
 
-GOps is calculated for for `1, 384` input size that is suitable for long context
+GOps is calculated for `1, 384` input size that is suitable for long context
 
 ## Accuracy
 

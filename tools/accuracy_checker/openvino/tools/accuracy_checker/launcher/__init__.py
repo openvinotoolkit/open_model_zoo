@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,6 +75,13 @@ try:
 except ImportError as import_error:
     ONNXLauncher = unsupported_launcher(
         'onnx_runtime', "ONNX Runtime isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
+try:
+    from .openvino_launcher import OpenVINOLauncher #pylint:disable=package-absolute-imports
+except ImportError as import_error:
+    OpenVINOLauncher = unsupported_launcher(
+        'openvino', "OpenVINO isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
 try:

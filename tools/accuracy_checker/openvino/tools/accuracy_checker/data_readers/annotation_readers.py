@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import ListField, ConfigError
-from .data_reader import BaseReader, create_identifier_key
+from .data_reader import BaseReader, create_ann_identifier_key, AnnotationDataIdentifier
 from ..utils import contains_all
 
 
@@ -23,7 +23,8 @@ class NCFDataReader(BaseReader):
     __provider__ = 'ncf_data_reader'
 
     def configure(self):
-        pass
+        self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         if not isinstance(data_id, str):
@@ -45,9 +46,13 @@ class AnnotationFeaturesReader(BaseReader):
         self.feature_list = self.get_value_from_config('features')
         self.single = len(self.feature_list) == 1
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
-        relevant_annotation = self.data_source[create_identifier_key(data_id)]
+        if isinstance(data_id, AnnotationDataIdentifier):
+            ordered_data_id = ['{}_{}'.format(feat, data_id.annotation_id) for feat in self.feature_list]
+            data_id.data_id = ordered_data_id if not self.single else ordered_data_id[0]
+        relevant_annotation = self.data_source[create_ann_identifier_key(data_id)]
         if not contains_all(relevant_annotation.__dict__, self.feature_list):
             raise ConfigError(
                 'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))

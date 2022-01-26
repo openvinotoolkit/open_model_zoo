@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,14 +15,14 @@ const std::pair<const char*, float cv::Point3f::*> OUTPUTS[] = {
     {"angle_r_fc", &cv::Point3f::z},
 };
 
-HeadPoseEstimator::HeadPoseEstimator(InferenceEngine::Core& ie,
-                                     const std::string& modelPath,
-                                     const std::string& deviceName):
-                   ieWrapper(ie, modelPath, modelType, deviceName) {
-    inputBlobName = ieWrapper.expectSingleInput();
-    ieWrapper.expectImageInput(inputBlobName);
+HeadPoseEstimator::HeadPoseEstimator(
+    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+        ieWrapper(ie, modelPath, modelType, deviceName)
+{
+    inputTensorName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputTensorName);
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
 
     for (const auto& output: OUTPUTS) {
         auto it = outputInfo.find(output.first);
@@ -39,18 +39,17 @@ HeadPoseEstimator::HeadPoseEstimator(InferenceEngine::Core& ie,
     }
 }
 
-void HeadPoseEstimator::estimate(const cv::Mat& image,
-                                 FaceInferenceResults& outputResults) {
+void HeadPoseEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
-    ieWrapper.setInputBlob(inputBlobName, faceCrop);
+    ieWrapper.setInputTensor(inputTensorName, faceCrop);
     ieWrapper.infer();
 
     std::vector<float> outputValue;
 
     for (const auto &output: OUTPUTS) {
-        ieWrapper.getOutputBlob(output.first, outputValue);
+        ieWrapper.getOutputTensor(output.first, outputValue);
         outputResults.headPoseAngles.*output.second = outputValue[0];
     }
 }

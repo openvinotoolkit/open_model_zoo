@@ -9,8 +9,8 @@
 #include "query_wrapper.h"
 #include <string>
 #include <system_error>
-#include <pdhmsg.h>
-#include <windows.h>
+#include <PdhMsg.h>
+#include <Windows.h>
 
 namespace {
 const std::size_t nCores = []() {
@@ -168,7 +168,7 @@ void CpuMonitor::setHistorySize(std::size_t size) {
         performanceCounter.reset();
     }
     historySize = size;
-    std::size_t newSize = std::min(size, cpuLoadHistory.size());
+    std::ptrdiff_t newSize = static_cast<std::ptrdiff_t>(std::min(size, cpuLoadHistory.size()));
     cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 

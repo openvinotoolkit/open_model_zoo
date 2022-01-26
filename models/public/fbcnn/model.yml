@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ task_type: image_processing
 files:
   - name: net.py
     size: 14063
-    sha384: 993649cebed4f249b35f92a64d797916bba297e6ff58c1f0081402d6c61cf63b661a3388f67c74eafc6ca9e587bd5b5b
+    checksum: 993649cebed4f249b35f92a64d797916bba297e6ff58c1f0081402d6c61cf63b661a3388f67c74eafc6ca9e587bd5b5b
     source: https://raw.githubusercontent.com/jiaxi-jiang/FBCNN/f599bc58e1e2ebe1ab473350ce3c887f491143e1/models/network_fbcnn.py
   - name: ckpt/fbcnn_color.pth
     size: 287755111
-    sha384: 11610eb602aa0b3f53568d572fadff03be04854dbc952d49a9b24d4edcba1eb42475b31c1496d669e0b549c431379128
-    source: https://github.com/jiaxi-jiang/FBCNN/releases/download/v1.0/fbcnn_color.pth
+    checksum: 11610eb602aa0b3f53568d572fadff03be04854dbc952d49a9b24d4edcba1eb42475b31c1496d669e0b549c431379128
+    original_source: https://github.com/jiaxi-jiang/FBCNN/releases/download/v1.0/fbcnn_color.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fbcnn/fbcnn_color.pth
 postprocessing:
   - $type: regex_replace
     file: net.py

@@ -8,7 +8,7 @@ The demo also relies on the following auxiliary networks:
 
 * `face-detection-retail-0004` or `face-detection-adas-0001` detection networks for finding faces
 * `head-pose-estimation-adas-0001`, which estimates head pose in Tait-Bryan angles, serving as an input for gaze estimation model
-* `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
+* `facial-landmarks-35-adas-0002` or `facial-landmarks-98-detection-0001`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
 * `open-closed-eye-0001`, which estimates eyes state of detected faces.
 
 Other demo objectives are:
@@ -47,6 +47,7 @@ omz_converter --list models.lst
 ### Supported Models
 
 * facial-landmarks-35-adas-0002
+* facial-landmarks-98-detection-0001
 * face-detection-adas-0001
 * face-detection-retail-0004
 * face-detection-retail-0005
@@ -146,5 +147,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -150,6 +150,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | [instance-segmentation-security-0228](./instance-segmentation-security-0228/README.md) | 147.2352 | 49.8328 |
 | [instance-segmentation-security-1039](./instance-segmentation-security-1039/README.md) | 13.9672  | 10.5674 |
 | [instance-segmentation-security-1040](./instance-segmentation-security-1040/README.md) | 29.334   | 13.5673 |
+| [instance-segmentation-person-0007](./instance-segmentation-person-0007/README.md)     | 4.8492   | 7.2996  |
 
 ## Human Pose Estimation Models
 
@@ -201,9 +202,13 @@ Deep Learning models for text recognition in various applications.
 | [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
 | encoder | 12.4 | 398 |
 | decoder | 0.03 | 4.33 |
+| [text-recognition-0016](./text-recognition-0016/README.md)                                 |         |       |
+| encoder | 9.27 | 88.1 |
+| decoder | 0.08 | 4.28 |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)       | 0.792   | 5.555 |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md) | 117.136 | 15.31 |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md) | 134.513 | 17.270 |
+| [handwritten-english-recognition-0001](./handwritten-english-recognition-0001/README.md) | 1.3182 | 0.1413 |
 | [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) |    |    |
 |   encoder | 16.56 | 1.86 |
 |   decoder | 1.69  | 2.56 |
@@ -300,11 +305,14 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
 
+## Speech Noise Suppression
+
 Deep Learning models for noise suppression.
 
 | Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------|--------------------- |----------- |
 | [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+| [noise-suppression-denseunet-ll-0001](./noise-suppression-denseunet-ll-0001/README.md)| 0.2                  | 4.2       |
 
 ## Time Series Forecasting
 

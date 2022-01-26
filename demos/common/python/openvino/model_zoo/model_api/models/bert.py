@@ -13,20 +13,32 @@
 
 import numpy as np
 
-from .model import Model
+from .model import Model, WrapperError
+from .types import DictValue, NumericalValue, StringValue
 
 
 class Bert(Model):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path)
-        self.token_cls = [vocab['[CLS]']]
-        self.token_sep = [vocab['[SEP]']]
-        self.token_pad = [vocab['[PAD]']]
-        self.input_names = [i.strip() for i in input_names.split(',')]
-        if self.net.input_info.keys() != set(self.input_names):
-            raise RuntimeError('The Bert model expects input names: {}, actual network input names: {}'.format(
-                self.input_names, list(self.net.input_info.keys())))
-        self.max_length = self.net.input_info[self.input_names[0]].input_data.shape[1]
+    __model__ = 'bert'
+
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+        self.token_cls = [self.vocab['[CLS]']]
+        self.token_sep = [self.vocab['[SEP]']]
+        self.token_pad = [self.vocab['[PAD]']]
+        self.input_names = [i.strip() for i in self.input_names.split(',')]
+        if self.inputs.keys() != set(self.input_names):
+            raise WrapperError(self.__model__, 'The Wrapper expects input names: {}, actual network input names: {}'.format(
+                self.input_names, list(self.inputs.keys())))
+        self.max_length = self.inputs[self.input_names[0]].shape[1]
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'vocab': DictValue(),
+            'input_names': StringValue(description='Comma-separated names of input layers'),
+        })
+        return parameters
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
@@ -62,21 +74,22 @@ class Bert(Model):
 
     def reshape(self, new_length):
         new_shapes = {}
-        for input_name, input_info in self.net.input_info.items():
+        for input_name, input_info in self.inputs.items():
             new_shapes[input_name] = [1, new_length]
-        default_input_shape = input_info.input_data.shape
-        self.net.reshape(new_shapes)
+        default_input_shape = input_info.shape
+        super().reshape(new_shapes)
         self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
         self.max_length = new_length
 
 
 class BertNamedEntityRecognition(Bert):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab, input_names)
+    __model__ = 'bert-named-entity-recognition'
 
-        self.output_names = list(self.net.outputs)
-        if len(self.output_names) != 1:
-            raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only 1 output")
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+
+        self.output_names = list(self.outputs)
+        self._check_io_number(-1, 1)
 
     def form_request(self, inputs):
         c_tokens_id = inputs
@@ -99,12 +112,13 @@ class BertNamedEntityRecognition(Bert):
 
 
 class BertEmbedding(Bert):
-    def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab, input_names)
+    __model__ = 'bert-embedding'
 
-        self.output_names = list(self.net.outputs)
-        if len(self.output_names) != 1:
-            raise RuntimeError("The BertEmbedding model wrapper supports only 1 output")
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+
+        self.output_names = list(self.outputs)
+        self._check_io_number(-1, 1)
 
     def form_request(self, inputs):
         tokens_id, self.max_length = inputs
@@ -119,16 +133,25 @@ class BertEmbedding(Bert):
 
 
 class BertQuestionAnswering(Bert):
-    def __init__(self, ie, model_path, vocab, input_names, output_names,
-                 max_answer_token_num, squad_ver):
-        super().__init__(ie, model_path, vocab, input_names)
+    __model__ = 'bert-question-answering'
 
-        self.max_answer_token_num = max_answer_token_num
-        self.squad_ver = squad_ver
-        self.output_names = [o.strip() for o in output_names.split(',')]
-        if self.net.outputs.keys() != set(self.output_names):
-            raise RuntimeError('The BertQuestionAnswering model output names: {}, actual network output names: {}'.format(
-                self.output_names, list(self.net.outputs.keys())))
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+
+        self.output_names = [o.strip() for o in self.output_names.split(',')]
+        if self.outputs.keys() != set(self.output_names):
+            raise WrapperError(self.__model__, 'The Wrapper output names: {}, actual network output names: {}'.format(
+                self.output_names, list(self.outputs.keys())))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'output_names': StringValue(description='Comma-separated names of output layers'),
+            'max_answer_token_num': NumericalValue(value_type=int),
+            'squad_ver': StringValue(),
+        })
+        return parameters
 
     def form_request(self, inputs):
         c_data, q_tokens_id = inputs

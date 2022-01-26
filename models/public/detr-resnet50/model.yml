@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,27 +28,28 @@ task_type: detection
 files:
   - name: detr-r50-e632da11.pth
     size: 166618694
-    sha384: cba2c4acb7c6ec60e0d56dbd7bfb0dab73aef5ac86bf9819bc4e176fd943114fb1e5567e5046dc6d6a18b7e490dce680
-    source: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+    checksum: cba2c4acb7c6ec60e0d56dbd7bfb0dab73aef5ac86bf9819bc4e176fd943114fb1e5567e5046dc6d6a18b7e490dce680
+    original_source: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/detr-resnet50/detr-r50-e632da11.pth
   - name: models/detr.py
     size: 17089
-    sha384: ae1d9cc2b2b483dbd8fd095137e27bf1ec1d596ede1be55e842f771f02725a958763358631e7c8e69fecfe34059fb393
+    checksum: ae1d9cc2b2b483dbd8fd095137e27bf1ec1d596ede1be55e842f771f02725a958763358631e7c8e69fecfe34059fb393
     source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/detr.py
   - name: models/backbone.py
     size: 4437
-    sha384: 2935015de1399c9b2037da55de0e8d90fa6c1d19739821df3aa9d986fdcb1c861a6b8d494165bfdb68ff52ab87494ad6
+    checksum: 2935015de1399c9b2037da55de0e8d90fa6c1d19739821df3aa9d986fdcb1c861a6b8d494165bfdb68ff52ab87494ad6
     source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/backbone.py
   - name: models/transformer.py
     size: 12162
-    sha384: ae5bd31653d7b0a5809e71adec72b5e002a63ec95af8660c4c73310f040b01e0920816ce3ef8078131a4f1f35c406077
+    checksum: ae5bd31653d7b0a5809e71adec72b5e002a63ec95af8660c4c73310f040b01e0920816ce3ef8078131a4f1f35c406077
     source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/transformer.py
   - name: models/position_encoding.py
     size: 3336
-    sha384: 9729adf8750340fcb730e26b688a925abbf934d2f0200a7aded338f512090f77be2327441f3b97da6cab5def77b8f767
+    checksum: 9729adf8750340fcb730e26b688a925abbf934d2f0200a7aded338f512090f77be2327441f3b97da6cab5def77b8f767
     source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/position_encoding.py
   - name: util/misc.py
     size: 15284
-    sha384: 257e7a29d01882b709542bae492ef187796f08691cfaec3c141efedd77597eeca2ec9f549b0fc2794b260a19f3196098
+    checksum: 257e7a29d01882b709542bae492ef187796f08691cfaec3c141efedd77597eeca2ec9f549b0fc2794b260a19f3196098
     source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/util/misc.py
 postprocessing:
   - $type: regex_replace

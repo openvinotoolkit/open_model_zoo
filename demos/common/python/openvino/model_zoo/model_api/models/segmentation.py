@@ -18,34 +18,43 @@ import cv2
 import numpy as np
 
 from .image_model import ImageModel
+from .types import ListValue, StringValue
 from .utils import load_labels
 
 
 class SegmentationModel(ImageModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None):
-        super().__init__(ie, model_path, resize_type=resize_type)
+    __model__ = 'Segmentation'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 1)
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
 
         self.output_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        blob_name = next(iter(self.net.outputs))
-        blob = self.net.outputs[blob_name]
+        layer_name = next(iter(self.outputs))
+        layer_shape = self.outputs[layer_name].shape
 
-        out_size = blob.shape
-        if len(out_size) == 3:
+        if len(layer_shape) == 3:
             self.out_channels = 0
-        elif len(out_size) == 4:
-            self.out_channels = out_size[1]
+        elif len(layer_shape) == 4:
+            self.out_channels = layer_shape[1]
         else:
-            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size))
+            raise Exception("Unexpected output layer shape {}. Only 4D and 3D output layers are supported".format(layer_shape))
 
-        return blob_name
+        return layer_name
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter")
+        })
+
+        return parameters
 
     def postprocess(self, outputs, meta):
         predictions = outputs[self.output_blob_name].squeeze()
@@ -62,6 +71,7 @@ class SegmentationModel(ImageModel):
 
 
 class SalientObjectDetectionModel(SegmentationModel):
+    __model__ = 'Salient_Object_Detection'
 
     def postprocess(self, outputs, meta):
         input_image_height = meta['original_shape'][0]

@@ -56,7 +56,7 @@ Channel order is `BGR`
 Object classifier according to ImageNet classes, name - `output`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ### Converted model
 

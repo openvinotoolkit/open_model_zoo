@@ -20,6 +20,8 @@ from .segmentation import SegmentationModel
 
 
 class MonoDepthModel(SegmentationModel):
+    __model__ = 'MonoDepth'
+
     def postprocess(self, outputs, meta):
         result = outputs[self.output_blob_name].squeeze()
         input_image_height = meta['original_shape'][0]

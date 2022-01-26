@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from ..representation import TextDetectionPrediction, TextDetectionAnnotation, D
 from ..utils import polygon_from_points
 
 
-def calculte_recall_precision_matrix(gt_rects, prediction_rects):
+def calculate_recall_precision_matrix(gt_rects, prediction_rects):
     num_gt = len(gt_rects)
     num_det = len(prediction_rects)
     output_shape = [num_gt, num_det]
@@ -185,7 +185,7 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
         if num_det > 0:
             gt_rect_mat = np.zeros(num_gt, np.int8)
             det_rect_mat = np.zeros(num_det, np.int8)
-            recall_mat, precision_mat = calculte_recall_precision_matrix(gt_rects, prediction_rects)
+            recall_mat, precision_mat = calculate_recall_precision_matrix(gt_rects, prediction_rects)
             one_to_one_recall, one_to_ona_precision, det_rect_mat, gt_rect_mat = self._one_to_one_match(
                 gt_rects, prediction_rects,
                 gt_difficult_mask, prediction_difficult_mask,

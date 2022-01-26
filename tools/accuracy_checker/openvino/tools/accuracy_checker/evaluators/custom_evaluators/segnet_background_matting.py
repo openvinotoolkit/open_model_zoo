@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,34 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
-from collections import OrderedDict
 import numpy as np
 from .sr_evaluator import SuperResolutionFeedbackEvaluator
+from .base_models import BaseCascadeModel, create_model, BaseDLSDKModel, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
-from ...logging import print_info
-from ...utils import contains_any, contains_all, generate_layer_name, get_path, extract_image_representations
+from ...utils import contains_all, generate_layer_name, extract_image_representations, postprocess_output_name
 from ...config import ConfigError
 
 
-def create_model(model_config, launcher, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': OpenVINOFeedbackModel,
-        'onnx_runtime': ONNXFeedbackModel,
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
-
-
 class FeedbackModel:
-    def __init__(self, network_info, launcher):
-        self.feedback = None
-        self._feedback_shape = None
-        self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
-
     def set_feedback(self, feedback):
         if np.ndim(feedback) == 2:
             feedback = np.expand_dims(feedback, -1)
@@ -58,28 +39,16 @@ class FeedbackModel:
         else:
             self.feedback = np.zeros(self._feedback_shape)
 
-    def predict(self, input_data, identifiers):
-        return self.infer(input_data, identifiers)
 
-    def infer(self, data, identifiers):
-        raise NotImplementedError
+class ONNXFeedbackModel(FeedbackModel, BaseONNXModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.feedback = None
+        self._feedback_shape = None
+        self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
-    def release(self):
-        pass
-
-
-class ONNXFeedbackModel(FeedbackModel):
-    default_model_suffix = 'segnet_model'
-
-    def __init__(self, network_info, launcher, *args, **kwargs):
-        super().__init__(network_info, launcher)
-        model = self.automatic_model_search(network_info)
-        self.inference_session = launcher.create_inference_session(str(model))
-        self.input_blob = next(iter(self.inference_session.get_inputs()))
-        self.output_blob = next(iter(self.inference_session.get_outputs()))
-
-    def infer(self, data, identifiers):
-        raw_results = self.inference_session.run((self.output_blob.name,), self.fit_to_input(data))
+    def predict(self, identifiers, input_data):
+        raw_results = self.inference_session.run((self.output_blob.name,), self.fit_to_input(input_data))
         results = self.adapter.process([{self.output_blob.name: raw_results[0]}], identifiers, [{}])
 
         return {self.output_blob: raw_results[0]}, results[0]
@@ -94,46 +63,19 @@ class ONNXFeedbackModel(FeedbackModel):
             ).astype(np.float32)
         }
 
-    def release(self):
-        del self.inference_session
 
-    def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        if model.is_dir():
-            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
-            if not model_list:
-                model_list = list(model.glob('*.onnx'))
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.onnx']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        return model
+class DLSDKFeedbackModel(FeedbackModel, BaseDLSDKModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.feedback = None
+        self._feedback_shape = None
+        self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
-
-class OpenVINOFeedbackModel(FeedbackModel):
-    default_model_suffix = 'segnet_model'
-
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher)
-        self.input_blob, self.output_blob = None, None
-        self.with_prefix = None
-        self.launcher = launcher
-        self.is_dynamic = False
-
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
-            self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
-
-    def infer(self, data, identifiers):
-        input_data = self.fit_to_input(data)
+    def predict(self, identifiers, input_data):
+        data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
-            self.reshape_net({key: in_data.shape for key, in_data in input_data.items()})
-        raw_result = self.exec_network.infer(input_data)
+            self._reshape_input({key: in_data.shape for key, in_data in data.items()})
+        raw_result = self.exec_network.infer(data)
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result[0]
 
@@ -145,11 +87,7 @@ class OpenVINOFeedbackModel(FeedbackModel):
             np.transpose(np.concatenate([input_data, self.feedback], -1), (2, 0, 1)), 0
         )}
 
-    def release(self):
-        del self.exec_network
-        del self.launcher
-
-    def update_inputs_outputs_info(self):
+    def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         input_blob = next(iter(input_info))
@@ -159,114 +97,54 @@ class OpenVINOFeedbackModel(FeedbackModel):
             self.output_blob = next(iter(self.exec_network.outputs))
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
-            self.output_blob = generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix)
-            self.adapter.output_blob = self.output_blob
 
         self.with_prefix = with_prefix
 
-    def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.default_model_suffix))
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
-        if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
-        else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape: {}\n'.format(
-                input_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
-        print_info('{} - Output info'.format(self.default_model_suffix))
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(
-                output_info.shape if name not in self.partial_shapes else self.partial_shapes[name]))
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.set_input_and_output()
 
-    def automatic_model_search(self, network_info):
-        model = Path(network_info.get('segnet_model', network_info.get('model')))
-        if model.is_dir():
-            is_blob = network_info.get('_model_is_blob')
-            if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list:
-                    model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        if model.suffix == '.blob':
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
 
-        return model, weights
+class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.feedback = None
+        self._feedback_shape = None
+        self.adapter = create_adapter(network_info.get('adapter', 'background_matting'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data):
+        data = self.fit_to_input(input_data)
+        if not self.is_dynamic and self.dynamic_inputs:
+            self._reshape_input({key: in_data.shape for key, in_data in data.items()})
+        raw_result = self.infer(data, raw_results=True)
+        if isinstance(raw_result, tuple):
+            return raw_result[1], self.adapter.process([raw_result[0]], identifiers, [{}])[0]
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result[0]
+
+    def fit_to_input(self, input_data):
+        if self.feedback is None:
+            h, w = input_data.shape[:2]
+            self.feedback = np.zeros((h, w, 1), dtype=np.float32)
+        return {self.input_blob: np.expand_dims(
+            np.transpose(np.concatenate([input_data, self.feedback], -1), (2, 0, 1)), 0
+        )}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if self.input_blob is None:
+            self.input_blob = input_blob
+            self.output_blob = next(iter(self.outputs)).get_any_name()
+        if with_prefix != self.with_prefix:
+            self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
+        self.output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
+
+        self.with_prefix = with_prefix
 
     def load_network(self, network, launcher):
-        self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
-        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
-            try:
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-                self.is_dynamic = True
-            except RuntimeError as e:
-                if launcher.dynamic_shapes_policy == 'dynamic':
-                    raise e
-                self.is_dynamic = False
-                self.exec_network = None
-        if not self.dynamic_inputs:
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.update_inputs_outputs_info()
-
-    def load_model(self, network_info, launcher, log=False):
-        model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, self.launcher)
-        else:
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        self.update_inputs_outputs_info()
-        if log:
-            self.print_input_output_info()
-
-    def reshape_net(self, shape):
-        if self.is_dynamic:
-            return
-        if hasattr(self, 'exec_network') and self.exec_network is not None:
-            del self.exec_network
-        self.network.reshape(shape)
-        self.dynamic_inputs, self.partial_shapes = self.launcher.get_dynamic_inputs(self.network)
-        if not self.is_dynamic and self.dynamic_inputs:
-            return
-        self.exec_network = self.launcher.load_network(self.network, self.launcher.device)
+        super().load_network(network, launcher)
+        self.set_input_and_output()
 
 
 class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
@@ -299,50 +177,32 @@ class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
             self._update_progress(progress_reporter, metric_config, batch_id, len(prediction), csv_file)
 
 
-class SegnetModel:
+class SegnetModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
-        if models_args and not delayed_model_loading:
-            model = network_info.get('segnet_model', {})
-            if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['segnet_model'] = models_args[0]
-                model['_model_is_blob'] = is_blob
-            network_info.update({'sr_model': model})
-        if not contains_all(network_info, ['segnet_model']) and not delayed_model_loading:
+        super().__init__(network_info, launcher)
+        parts = ['segnet_model']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain segnet_model field')
-        self.model = create_model(network_info['segnet_model'], launcher, delayed_model_loading)
+        self._model_mapping = {
+            'dlsdk': DLSDKFeedbackModel,
+            'openvino': OpenVINOFeedbackModel,
+            'onnx_runtime': ONNXFeedbackModel,
+        }
+        self.model = create_model(network_info['segnet_model'], launcher, self._model_mapping, 'segnet_model',
+                                  delayed_model_loading)
         self._part_by_name = {'segnet_model': self.model}
 
     def predict(self, identifiers, input_data):
         predictions, raw_outputs = [], []
         for data in input_data:
-            output, prediction = self.model.predict(data, identifiers)
+            output, prediction = self.model.predict(identifiers, data)
             raw_outputs.append(output)
             predictions.append(prediction)
         return raw_outputs, predictions
 
     def reset(self):
         self.model.reset_state()
-
-    def release(self):
-        self.model.release()
-
-    def load_network(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(
-                network_dict.get('segnet_model', network_dict.get('model')), launcher)
-        self.update_inputs_outputs_info()
-
-    def load_model(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict.get('name', 'segnet_model')].load_model(network_dict, launcher)
-        self.update_inputs_outputs_info()
-
-    def get_network(self):
-        return [{'name': 'segnet_model', 'model': self.model.network}]
-
-    def update_inputs_outputs_info(self):
-        if hasattr(self.model, 'update_inputs_outputs_info'):
-            self.model.update_inputs_outputs_info()
 
     def set_feedback(self, feedback):
         self.model.set_feedback(feedback)

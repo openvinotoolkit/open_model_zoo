@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,11 @@ import numpy as np
 from ..config import ConfigError
 from ..utils import extract_image_representations
 from ..data_readers import (
-    MultiFramesInputIdentifier, KaldiFrameIdentifier, KaldiMatrixIdentifier, ParametricImageIdentifier
+    MultiFramesInputIdentifier,
+    KaldiFrameIdentifier,
+    KaldiMatrixIdentifier,
+    ParametricImageIdentifier,
+    AnnotationDataIdentifier
 )
 
 LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
@@ -34,6 +38,8 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NDHWC': [0, 1, 2, 3, 4],
     'NDCWH': [0, 1, 4, 3, 2],
     'NCHWD': [0, 2, 3, 4, 1],
+    'NHWDC': [0, 2, 3, 1, 4],
+    'NHWCD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
     'CN': [1, 0],
     'CNH': [1, 0, 2],
@@ -60,7 +66,18 @@ PRECISION_TO_DTYPE = {
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
-    'STR': str,  # string
+    'STR': str,  # string'
+    'BOOL': bool,
+    'f32': np.float32,
+    'i32': np.int32,
+    'i64': np.int64,
+    'fp16': np.float16,
+    'f16': np.float16,
+    'i16': np.int16,
+    'u16': np.uint16,
+    'i8': np.int8,
+    'u8': np.uint8,
+    'boolean': np.uint8
 }
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT', 'SCALE_FACTOR']
@@ -69,7 +86,7 @@ INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'L
 class InputFeeder:
     def __init__(
             self, inputs_config, network_inputs, shape_checker, prepare_input_data=None, default_layout='NCHW',
-            dummy=False, input_precisions_list=None
+            dummy=False, input_precisions_list=None, input_layouts=None
     ):
         def fit_to_input(data, input_layer_name, layout, precision, template=None):
             layout_used = False
@@ -93,11 +110,11 @@ class InputFeeder:
         self.default_layout = default_layout
         self.dummy = dummy
         self.ordered_inputs = False
-        self.configure(inputs_config, input_precisions_list)
+        self.configure(inputs_config, input_precisions_list, input_layouts)
 
-    def configure(self, inputs_config, precisions_list):
+    def configure(self, inputs_config, precisions_list, layouts):
         if not self.dummy:
-            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list)
+            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list, layouts)
             self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
             self.image_info_inputs, self.orig_image_info_inputs, self.scale_factor_inputs = parsing_results[3:6]
             self.lstm_inputs = parsing_results[6]
@@ -179,6 +196,9 @@ class InputFeeder:
             for data_representation in data_representation_batch:
                 identifiers = data_representation.identifier
                 data = data_representation.data
+                if isinstance(identifiers, AnnotationDataIdentifier):
+                    identifiers = identifiers.data_id
+
                 if isinstance(identifiers, ParametricImageIdentifier):
                     input_batch.append(data[idx])
                     continue
@@ -309,8 +329,9 @@ class InputFeeder:
             infer_inputs.update(self.const_inputs)
         return inputs, templates
 
-    def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None):
+    def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None, layouts=None):
         precision_info = self.validate_input_precision(precisions_list)
+        layouts_info = self.validate_input_layouts(layouts, self.network_inputs)
         constant_inputs = {}
         non_constant_inputs_mapping = {}
         config_non_constant_inputs = []
@@ -346,8 +367,11 @@ class InputFeeder:
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
-                layout = input_.get('layout', default_layout)
-                layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                layout = layouts_info.get(name, input_.get('layout', default_layout))
+                if name in layouts_info:
+                    input_['layout'] = layout
+                if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                    layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 self.get_layer_precision(input_, name, precision_info, precisions)
 
         all_config_inputs = (
@@ -358,10 +382,11 @@ class InputFeeder:
         if config_non_constant_inputs and not_config_inputs:
             raise ConfigError('input value for {} are not presented in config.'.format(','.join(not_config_inputs)))
         non_constant_inputs = not_config_inputs + config_non_constant_inputs
-        if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)):
+        if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)) or layouts_info:
             inputs_entry = self.provide_input_config_for_not_config(
-                inputs_entry, precision_info, not_config_inputs, precisions
+                inputs_entry, precision_info, not_config_inputs, precisions, layouts_info, layouts
             )
+
 
         return (
             constant_inputs,
@@ -443,9 +468,18 @@ class InputFeeder:
             return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
+            layout = self.layouts_mapping.get(layer_name)
+            if 'data_layout' in meta[0]:
+                data_layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT.get(meta[0]['data_layout'])
+                if layout is None and len(self.default_layout) == len(data_layout):
+                    layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
+                if layout is not None and data_layout == layout:
+                    layout = []
+            if layout is None:
+                layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]
             layer_data_preprocessed = self.input_transform_func(
                 layer_data, layer_name,
-                self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout]),
+                layout,
                 self.precision_mapping.get(layer_name), template
             )
             if isinstance(layer_data_preprocessed, tuple):
@@ -456,6 +490,24 @@ class InputFeeder:
             batch_data[layer_name] = layer_data_preprocessed
 
         return [batch_data], template_for_shapes
+
+    @staticmethod
+    def validate_input_layouts(parameter_string, input_names):
+        # Parse parameter string like "input0[value0],input1[value1]" or "[value]" (applied to all inputs)
+        return_value = {}
+        if parameter_string:
+            matches = re.findall(r'(.*?)\[(.*?)\],?', parameter_string)
+            if matches:
+                for match in matches:
+                    input_name, value = match
+                    if input_name != '':
+                        return_value[input_name] = value
+                    else:
+                        return_value = {k: value for k in input_names}
+                        break
+            else:
+                raise ConfigError(f"Can't parse input parameter: {parameter_string}")
+        return return_value
 
     def validate_input_precision(self, precisions_list):
         if not precisions_list:
@@ -491,13 +543,30 @@ class InputFeeder:
         precisions[input_name] = input_precision
         return input_precision
 
-    def provide_input_config_for_not_config(self, inputs_entry, precision_info, not_config_inputs, precisions):
+    def provide_input_config_for_not_config(
+        self, inputs_entry, precision_info, not_config_inputs, precisions, layouts, layouts_mapping):
         for input_name in not_config_inputs:
             input_config = {'name': input_name, 'type': 'INPUT'}
             precision = self.get_layer_precision(input_config, input_name, precision_info, precisions)
-            if precision is not None:
+            layout = layouts.get(input_name)
+            if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                layouts_mapping[input_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+            input_config['layout'] = layout
+            if precision is not None or layout is not None:
                 inputs_entry.append(input_config)
         return inputs_entry
+
+    def update_layout_configuration(self, layout_mapping, override=False):
+        for layer_name, layout in layout_mapping.items():
+            if layer_name in self.layouts_mapping:
+                if not override:
+                    continue
+                if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                    self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                else:
+                    del self.layouts_mapping[layer_name]
+            elif layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
+                self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
 
     def release(self):
         del self.network_inputs

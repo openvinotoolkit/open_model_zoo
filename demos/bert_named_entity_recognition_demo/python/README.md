@@ -37,6 +37,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                             [--adapter {openvino,ovms}]
                                              [--input_names INPUT_NAMES]
                                              [-d DEVICE]
 
@@ -45,9 +46,13 @@ Options:
   -v VOCAB, --vocab VOCAB
                         Required. Path to the vocabulary file with tokens
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. URL to a page with context
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   --input_names INPUT_NAMES
                         Optional. Inputs names for the network. Default values
                         are "input_ids,attention_mask,token_type_ids"
@@ -94,6 +99,22 @@ You can use the following command to try the demo (assuming the model from the O
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
 ```
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 bert_named_entity_recognition_demo.py.py
+            --vocab=<models_dir>/models/public/bert-base-ner/vocab.txt
+            --model=localhost:9000/models/bert
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            --adapter ovms
+```
+
+
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (text from the url) do not fit the model input
@@ -102,6 +123,6 @@ Notice that when the original "context" (text from the url) do not fit the model
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
-* [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
+* [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)

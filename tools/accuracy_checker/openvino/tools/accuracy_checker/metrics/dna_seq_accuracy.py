@@ -36,10 +36,6 @@ class DNASequenceAccuracy(PerImageEvaluationMetric):
         self.balanced = self.get_value_from_config('balanced')
         self.min_coverage = self.get_value_from_config('min_coverage')
         self.accuracy = []
-        self.meta.update({
-            'names': ['mean', 'median'],
-            'calculate_mean': False
-        })
 
     def update(self, annotation, prediction):
         alignment = parasail.sw_trace_striped_32(prediction.label, annotation.label, 8, 4, parasail.dnafull)
@@ -94,3 +90,12 @@ class DNASequenceAccuracy(PerImageEvaluationMetric):
 
     def reset(self):
         self.accuracy = []
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta.update({
+            'names': ['mean', 'median'],
+            'calculate_mean': False
+        })
+        return meta

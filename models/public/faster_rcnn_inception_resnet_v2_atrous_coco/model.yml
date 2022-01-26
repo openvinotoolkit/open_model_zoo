@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ task_type: detection
 files:
   - name: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
     size: 672221478
-    sha384: 4b44a30cd9b989bc1c0d2f247977389a7daab590a0154b333d80a23fafa9570de6a4bc38226ee67c5cdd5549d8ea96d5
-    source: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    checksum: 4b44a30cd9b989bc1c0d2f247977389a7daab590a0154b333d80a23fafa9570de6a4bc38226ee67c5cdd5549d8ea96d5
+    original_source: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -29,7 +30,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,600,1024,3]
   - --input=image_tensor
-  - --transformations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
+  - --transformations_config=$mo_ext_dir/front/tf/faster_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/pipeline.config
   - --output=detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/frozen_inference_graph.pb

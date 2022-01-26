@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 from collections import namedtuple
 import cv2
 import numpy as np
-from model_api.models.utils import nms
+from openvino.model_zoo.model_api.models.utils import nms
 
 ModelAttributes = namedtuple('ModelAttributes', ['required_outputs', 'postprocessor'])
 
@@ -202,30 +202,40 @@ MODEL_ATTRIBUTES = {
 }
 
 
-def check_model(net):
-    num_inputs = len(net.input_info)
-    assert num_inputs <= 2, 'Demo supports only topologies with 1 or 2 inputs.'
-    image_input = [input_name for input_name, in_info in net.input_info.items() if len(in_info.input_data.shape) == 4]
-    assert len(image_input) == 1, 'Demo supports only model with single input for images'
+def check_model(model):
+    if len(model.inputs) not in (1, 2):
+        raise RuntimeError("Demo supports only models with 1 or 2 input layers")
+
+    image_input = [input_tensor.get_any_name() for input_tensor in model.inputs if len(input_tensor.shape) == 4]
+    if len(image_input) != 1:
+        raise RuntimeError("Demo supports only models with single input for images")
     image_input = image_input[0]
     image_info_input = None
-    if num_inputs == 2:
+    if len(model.inputs) == 2:
         image_info_input = [
-            input_name for input_name, in_info in net.input_info.items()
-            if len(in_info.input_data.shape) == 2 and in_info.input_data.shape[-1] == 3
+            input_tensor.get_any_name() for input_tensor in model.inputs
+            if len(input_tensor.shape) == 2 and input_tensor.shape[-1] == 3
         ]
-        assert len(image_info_input) == 1, 'Demo supports only model with single im_info input'
+        if len(image_info_input) != 1:
+            raise RuntimeError("Demo supports only model with single image_info input")
         image_info_input = image_info_input[0]
-    if image_info_input:
         model_type = 'mask_rcnn_segmentoly'
+    elif len(model.inputs) == 1 and len(model.outputs) in (3, 5):
+        model_type = 'mask_rcnn'
     else:
-        model_type = 'mask_rcnn' if len(net.input_info) == 1 and len(net.outputs) in [3, 5] else 'yolact'
+        model_type = 'yolact'
+
     model_attributes = MODEL_ATTRIBUTES[model_type]
-    assert set(model_attributes.required_outputs) <= net.outputs.keys(), \
-        'Demo supports only topologies with the following output keys: {}'.format(
-            ', '.join(model_attributes.required_outputs))
+    for output_tensor_name in set(model_attributes.required_outputs):
+        try:
+            model.output(output_tensor_name)
+        except RuntimeError:
+            raise RuntimeError("Demo supports only topologies with the following output keys: {}".format(
+                ', '.join(model_attributes.required_outputs)))
 
-    input_shape = net.input_info[image_input].input_data.shape
-    assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
+    input_shape = model.input(image_input).shape
+    if input_shape[0] != 1:
+        raise RuntimeError("Only batch 1 is supported by the demo")
 
-    return image_input, image_info_input, input_shape, model_type, model_attributes.postprocessor
+    return (image_input, image_info_input, input_shape, model_type,
+            model_attributes.required_outputs, model_attributes.postprocessor)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ class SegmentationPrediction(SegmentationRepresentation):
 
         mask = self.mask
 
-        if len(mask.shape) == 3:
+        if mask.ndim == 3:
             if 1 not in mask.shape:
                 mask = np.argmax(mask, axis=0)
             else:
@@ -397,3 +397,38 @@ class BackgroundMattingPrediction(SegmentationPrediction):
     @property
     def value(self):
         return self.mask
+
+
+class AnomalySegmentationAnnotation(SegmentationAnnotation):
+    def __init__(self, identifier, path_to_mask, label=None, binarize_mask=True):
+        super().__init__(identifier, path_to_mask, GTMaskLoader.OPENCV_GRAY)
+        self.binarize_mask = binarize_mask
+        self._label = label
+
+    def _load_mask(self):
+        mask = super()._load_mask()
+        if self.binarize_mask:
+            mask = mask.astype(float) / 255
+        return mask.astype(np.uint8)
+
+    @property
+    def label(self):
+        if self._label is not None:
+            return self._label
+        return self.mask.max()
+
+
+class AnomalySegmentationPrediction(SegmentationPrediction):
+    def __init__(self, identifier, mask, label=None):
+        super().__init__(identifier, mask)
+        self._label = label
+
+    @property
+    def label(self):
+        if self._label is not None:
+            return self._label
+        mask = self.mask
+        if mask.ndim == 3:
+            if 1 not in mask.shape:
+                mask = np.argmax(mask, axis=0)
+        return mask.max()

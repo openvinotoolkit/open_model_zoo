@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,34 +28,35 @@ task_type: human_pose_estimation
 files:
   - name: models/__init__.py
     size: 412
-    sha384: fe099091a8545442577baf0886860846c2485fb991ce358e8632eeb10cc6a3827c54a64b1f0150c1fcb12ebeb103f625
+    checksum: fe099091a8545442577baf0886860846c2485fb991ce358e8632eeb10cc6a3827c54a64b1f0150c1fcb12ebeb103f625
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/models/__init__.py
   - name: models/pose_higher_hrnet.py
     size: 21313
-    sha384: 2772ce487f9c3407b814e67c6b017ea107caafc23a1cb64f9b8f855239d16dbd2ad3030825e04c29ba81b8a31f80e034
+    checksum: 2772ce487f9c3407b814e67c6b017ea107caafc23a1cb64f9b8f855239d16dbd2ad3030825e04c29ba81b8a31f80e034
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/models/pose_higher_hrnet.py
   - name: config/__init__.py
     size: 370
-    sha384: b1c2faece903938d66f5969981daee79fb2322c9e9998189ab92ede8e3a2c08a9b2d2c0e257e118938e5bf1c4cf7bffd
+    checksum: b1c2faece903938d66f5969981daee79fb2322c9e9998189ab92ede8e3a2c08a9b2d2c0e257e118938e5bf1c4cf7bffd
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/__init__.py
   - name: config/default.py
     size: 6075
-    sha384: ad03d7165998982d22b8d7cdc3604f3b0bbbcebe8de4f1ff8d6897e8e297c3bffa0b83099c3ff1290407da5f29434220
+    checksum: ad03d7165998982d22b8d7cdc3604f3b0bbbcebe8de4f1ff8d6897e8e297c3bffa0b83099c3ff1290407da5f29434220
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/default.py
   - name: config/models.py
     size: 2518
-    sha384: 2ae3fc62047e9838e8d1fbc59d2d127979f55a0672a5a2f43088447dabaa5f3d4039eb2f196c59f7f38d4e0d853ff58d
+    checksum: 2ae3fc62047e9838e8d1fbc59d2d127979f55a0672a5a2f43088447dabaa5f3d4039eb2f196c59f7f38d4e0d853ff58d
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/models.py
   - name: experiments/higher_hrnet.yaml
     size: 2326
-    sha384: 1a8c79097c602a777ec1182a081258562844bfe98f9b4aadecbcb56e25f2f3ffed9db285121f9d819514eee4319228d4
+    checksum: 1a8c79097c602a777ec1182a081258562844bfe98f9b4aadecbcb56e25f2f3ffed9db285121f9d819514eee4319228d4
     source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/experiments/coco/higher_hrnet/w32_512_adam_lr1e-3.yaml
   - name: ckpt/pose_higher_hrnet_w32_512.pth
     size: 115172215
-    sha384: d344fcc4e426308139397bd708be1c59500e038a540ea0979b6a10556b5f3530701d86c0cab276fc5710419f91879e3d
-    source:
+    checksum: d344fcc4e426308139397bd708be1c59500e038a540ea0979b6a10556b5f3530701d86c0cab276fc5710419f91879e3d
+    original_source:
       $type: google_drive
       id: 1V9Iz0ZYy9m8VeaspfKECDW0NKlGsYmO1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/higher-hrnet-w32-human-pose-estimation/ckpt/pose_higher_hrnet_w32_512.pth
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

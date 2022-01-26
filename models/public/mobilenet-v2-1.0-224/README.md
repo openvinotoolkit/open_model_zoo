@@ -50,12 +50,12 @@ Expected color order: `BGR`.
 ### Original Model
 
 Name: `MobilenetV2/Predictions/Reshape_1`.
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+Probabilities for all dataset classes in [0, 1] range (0 class is background).
 
 ### Converted Model
 
 Name: `MobilenetV2/Predictions/Softmax`.
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+Probabilities for all dataset classes in [0, 1] range (0 class is background).
 Shape: `1, 1001`, format: `B, C`, where:
 
 - `B` - batch size

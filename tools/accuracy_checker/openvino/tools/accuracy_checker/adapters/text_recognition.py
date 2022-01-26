@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ class BeamSearchDecoder(Adapter):
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
         self.logits_output = self.get_value_from_config("logits_output")
+        self.output_verified = False
         self.custom_label_map = self.get_value_from_config("custom_label_map")
         vocabulary_file = self.get_value_from_config('vocabulary_file')
         if vocabulary_file:
@@ -66,6 +67,15 @@ class BeamSearchDecoder(Adapter):
             labels = {int(k): v for k, v in self.custom_label_map.items()}
             self.custom_label_map = labels
 
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.logits_output:
+            self.logits_output = self.check_output_name(self.logits_output, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.logits_output = self.output_blob
+        return
+
     def process(self, raw, identifiers, frame_meta):
         if self.custom_label_map:
             self.label_map = self.custom_label_map
@@ -73,11 +83,11 @@ class BeamSearchDecoder(Adapter):
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
-        if self.logits_output:
-            self.output_blob = self.logits_output
+        if not self.output_verified:
+            self.select_output_blob(raw)
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
-        output = raw_output[self.output_blob]
+        output = raw_output[self.logits_output]
         # TBC -> BTC
         if output.shape[1] == len(identifiers):
             output = np.swapaxes(output, 0, 1)
@@ -190,6 +200,7 @@ class CTCGreedySearchDecoder(Adapter):
         self.blank_label = self.get_value_from_config('blank_label')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        self.output_verified = False
         vocabulary_file = self.get_value_from_config('vocabulary_file')
         if vocabulary_file:
             self.custom_label_map = dict(enumerate(read_txt(vocabulary_file)))
@@ -198,6 +209,15 @@ class CTCGreedySearchDecoder(Adapter):
             self.custom_label_map = labels
         self.shift = int(self.get_value_from_config('shift_labels'))
 
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.logits_output:
+            self.logits_output = self.check_output_name(self.logits_output, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.logits_output = self.output_blob
+        return
+
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
             self.label_map = self.custom_label_map
@@ -205,11 +225,11 @@ class CTCGreedySearchDecoder(Adapter):
             raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = 0
-        if self.logits_output:
-            self.output_blob = self.logits_output
+        if not self.output_verified:
+            self.select_output_blob(raw)
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
-        output = raw_output[self.output_blob]
+        output = raw_output[self.logits_output]
         preds_index = np.argmax(output, 2)
         preds_index = preds_index.transpose(1, 0)
 

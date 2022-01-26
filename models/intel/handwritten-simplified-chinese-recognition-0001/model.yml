@@ -19,27 +19,27 @@ task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-simplified-chinese-recognition-0001.xml
     size: 119599
-    sha384: 7a2361a9987fbe314a9b89b68243f707a94d96834a137f2c03260501af8aa7dbd9e0e5bbbd3e93505c3cdf4f40877e80
+    checksum: 7a2361a9987fbe314a9b89b68243f707a94d96834a137f2c03260501af8aa7dbd9e0e5bbbd3e93505c3cdf4f40877e80
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP32/handwritten-simplified-chinese-recognition-0001.bin
     size: 69071580
-    sha384: 45c6e0ecc24730069e423402791f71b83f0e9d3d71bc58a6d8a8a2811d1e034a927fc10dd0de0bcb77c81c1af6a88726
+    checksum: 45c6e0ecc24730069e423402791f71b83f0e9d3d71bc58a6d8a8a2811d1e034a927fc10dd0de0bcb77c81c1af6a88726
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16/handwritten-simplified-chinese-recognition-0001.xml
     size: 119523
-    sha384: ebd52fc51fd94df9ea927e8dd5120392e7ef09da158754cb4e3179ced187d2cfa1f0d5cebc64aa2ddaf98e0ae0cad4b6
+    checksum: ebd52fc51fd94df9ea927e8dd5120392e7ef09da158754cb4e3179ced187d2cfa1f0d5cebc64aa2ddaf98e0ae0cad4b6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16/handwritten-simplified-chinese-recognition-0001.bin
     size: 34535842
-    sha384: b572b3097d4fcb172660527d314973a17b4e1fa8176dbcb25e82706363ba3e6f03a7cfc85891a1ca3afbae56594a1da8
+    checksum: b572b3097d4fcb172660527d314973a17b4e1fa8176dbcb25e82706363ba3e6f03a7cfc85891a1ca3afbae56594a1da8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
     size: 240459
-    sha384: 5d9409003a20badb3152b6644c10dd0cb29e7969e1e5fc32a2d7b45b796d0737ceb7ed8f85d6039d182c5a13fad98b77
+    checksum: 5d9409003a20badb3152b6644c10dd0cb29e7969e1e5fc32a2d7b45b796d0737ceb7ed8f85d6039d182c5a13fad98b77
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
     size: 17320954
-    sha384: 91444adddff42c68d10aff669202f0072131df34500a1e4d33159de43de5ef9bdc9edf13a9dc81ce80c31906fa59fe2f
+    checksum: 91444adddff42c68d10aff669202f0072131df34500a1e4d33159de43de5ef9bdc9edf13a9dc81ce80c31906fa59fe2f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

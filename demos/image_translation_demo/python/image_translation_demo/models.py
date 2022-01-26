@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -12,17 +12,20 @@
 """
 
 class CocosnetModel:
-    def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
-        self.network = ie_core.read_network(model_xml, model_bin)
-        assert len(self.network.input_info) == 3, "Three inputs are expected"
-        assert len(self.network.outputs) == 1, "One output is expected"
-        self.inputs = list(self.network.input_info.keys())
-        self.output_name = next(iter(self.network.outputs.keys()))
-        self.input_semantics, self.reference_image, self.reference_semantics = self.inputs
+    def __init__(self, core, model_xml, device='CPU'):
+        model = core.read_model(model_xml)
+        if len(model.inputs) != 3:
+            raise RuntimeError("The CocosnetModel expects 3 input layers")
+        if len(model.outputs) != 1:
+            raise RuntimeError("The CocosnetModel expects 1 output layer")
 
-        self.exec_net = ie_core.load_network(network=self.network, device_name=device)
-        self.input_semantic_size = self.network.input_info[self.input_semantics].input_data.shape
-        self.input_image_size = self.network.input_info[self.reference_image].input_data.shape
+        inputs = [node.get_any_name() for node in model.inputs]
+        self.input_semantics, self.reference_image, self.reference_semantics = inputs
+        self.input_semantic_size = model.input(self.input_semantics).shape
+        self.input_image_size = model.input(self.reference_image).shape
+
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
 
     def infer(self, input_semantics, reference_image, reference_semantics):
         input_data = {
@@ -30,22 +33,25 @@ class CocosnetModel:
             self.reference_image: reference_image,
             self.reference_semantics: reference_semantics
         }
-        result = self.exec_net.infer(input_data)
-        return result[self.output_name]
+        result = self.infer_request.infer(input_data)
+        return next(iter(result.values()))
 
 
 class SegmentationModel:
-    def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
-        self.network = ie_core.read_network(model_xml, model_bin)
-        assert len(self.network.input_info) == 1, "One input is expected"
-        assert len(self.network.outputs) == 1, "One output is expected"
-        self.input_name = next(iter(self.network.input_info))
-        self.output_name = next(iter(self.network.outputs))
+    def __init__(self, core, model_xml, device='CPU'):
+        model = core.read_model(model_xml)
+        if len(model.inputs) != 1:
+            raise RuntimeError("The SegmentationModel expects 1 input layer")
+        if len(model.outputs) != 1:
+            raise RuntimeError("The SegmentationModel expects 1 output layer")
 
-        self.exec_net = ie_core.load_network(network=self.network, device_name=device)
-        self.input_size = self.network.input_info[self.input_name].input_data.shape
+        self.input_tensor_name = model.inputs[0].get_any_name()
+        self.input_size = model.inputs[0].shape
+
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
 
     def infer(self, input):
-        input_data = {self.input_name: input}
-        result = self.exec_net.infer(input_data)
-        return result[self.output_name]
+        input_data = {self.input_tensor_name: input}
+        result = self.infer_request.infer(input_data)
+        return next(iter(result.values()))

@@ -1,1 +1,9 @@
+description: >-
+  The composite "mtcnn" model is mtcnn <https://arxiv.org/abs/1604.02878>
+  group of models designed to perform face detection. Short for "Multi-task Cascaded
+  Convolutional Neural Network", it is implemented using the Caffe* framework.
+  For details about this family of models, check out the repository
+  <https://github.com/DuinoDu/mtcnn>.
 task_type: detection
+framework: caffe
+license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE

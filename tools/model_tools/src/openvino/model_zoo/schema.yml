@@ -23,8 +23,24 @@ required:
       required:
         name: "//str"
         size: "//int"
-        sha384: "//str"
+        checksum:
+          type: "//any"
+          of:
+            - "//str"
+            - type: "//rec"
+              required:
+                $type: "//str"
+                value: "//str"
         source:
+          type: "//any"
+          of:
+            - "//str"
+            - type: "//rec"
+              required:
+                $type: "//str"
+                id: "//str"
+      optional:
+        original_source:
           type: "//any"
           of:
             - "//str"

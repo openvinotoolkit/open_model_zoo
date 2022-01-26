@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ task_type: classification
 files:
   - name: alexnet.prototxt
     size: 3629
-    sha384: 6d620598b210369b6d33c0575b5ec2bd2dc7bce522591d80631b75f854a0324b8f30c4bb7f53dd3346aaf229510e9f2e
+    checksum: 6d620598b210369b6d33c0575b5ec2bd2dc7bce522591d80631b75f854a0324b8f30c4bb7f53dd3346aaf229510e9f2e
     source: https://raw.githubusercontent.com/BVLC/caffe/88c96189bcbf3853b93e2b65c7b5e4948f9d5f67/models/bvlc_alexnet/deploy.prototxt
   - name: alexnet.caffemodel
     size: 243862414
-    sha384: f102235bc9d8f422a04d5254a21fd1862986eae91c7337714fd5d78dcf37f835d05ed7943e80056ae19ca9e9c054c181
-    source: http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel
+    checksum: f102235bc9d8f422a04d5254a21fd1862986eae91c7337714fd5d78dcf37f835d05ed7943e80056ae19ca9e9c054c181
+    original_source: http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/alexnet/bvlc_alexnet.caffemodel
 postprocessing:
   - $type: regex_replace
     file: alexnet.prototxt
@@ -46,5 +47,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/alexnet.caffemodel
   - --input_proto=$dl_dir/alexnet.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md

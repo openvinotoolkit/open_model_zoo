@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,235 +15,63 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle # nosec - disable B403:import-pickle check
+import pickle  # nosec - disable B403:import-pickle check
 from collections import OrderedDict
 import numpy as np
 
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, contains_any, read_pickle, get_path
-from ...logging import print_info
+from ...utils import contains_all, read_pickle, parse_partial_shape, postprocess_output_name
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
+from .base_models import (
+    BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, BaseONNXModel, create_model, create_encoder
+)
 
 
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config.get('adapter', 'dumb_decoder')
         model = ASRModel(
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
-            delayed_model_loading
+            adapter_info, delayed_model_loading
         )
         return cls(dataset_config, launcher, model, orig_config)
 
 
-class BaseModel:
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.network_info = network_info
-        self.launcher = launcher
-
-    def predict(self, identifiers, input_data):
-        raise NotImplementedError
-
-    def release(self):
-        pass
-
-
-# pylint: disable=E0203
-class BaseDLSDKModel:
-    def _reshape_input(self, input_shapes):
-        del self.exec_network
-        self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
-
-    def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.default_model_suffix))
-        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
-        if self.network:
-            if has_info:
-                network_inputs = OrderedDict(
-                    [(name, data.input_data) for name, data in self.network.input_info.items()]
-                )
-            else:
-                network_inputs = self.network.inputs
-            network_outputs = self.network.outputs
-        else:
-            if has_info:
-                network_inputs = OrderedDict([
-                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
-                ])
-            else:
-                network_inputs = self.exec_network.inputs
-            network_outputs = self.exec_network.outputs
-        for name, input_info in network_inputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape: {}\n'.format(input_info.shape))
-        print_info('{} - Output info'.format(self.default_model_suffix))
-        for name, output_info in network_outputs.items():
-            print_info('\tLayer name: {}'.format(name))
-            print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape: {}\n'.format(output_info.shape))
-
-    def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        if model.is_dir():
-            is_blob = network_info.get('_model_is_blob')
-            if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list:
-                    model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-        if model.suffix == '.blob':
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
-        return model, weights
-
-    def load_network(self, network, launcher):
-        self.network = network
-        self.dynamic_inputs, self.partial_shapes = launcher.get_dynamic_inputs(self.network)
-        if self.dynamic_inputs and launcher.dynamic_shapes_policy in ['dynamic', 'default']:
-            try:
-                self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-                self.is_dynamic = True
-            except RuntimeError as e:
-                if launcher.dynamic_shapes_policy == 'dynamic':
-                    raise e
-                self.is_dynamic = False
-                self.exec_network = None
-        if not self.dynamic_inputs:
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-
-    def set_input_and_output(self):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_blob = next(iter(input_info))
-        with_prefix = input_blob.startswith(self.default_model_suffix)
-        if self.input_blob is None or with_prefix != self.with_prefix:
-            if self.output_blob is None:
-                output_blob = next(iter(self.exec_network.outputs))
-            else:
-                output_blob = (
-                    '_'.join([self.default_model_suffix, self.output_blob])
-                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
-                )
-            self.input_blob = input_blob
-            self.output_blob = output_blob
-            self.with_prefix = with_prefix
-            for idx, inp in enumerate(self.input_layers):
-                self.input_layers[idx] = (
-                    '_'.join([self.default_model_suffix, inp])
-                    if with_prefix else inp.split(self.default_model_suffix)[-1]
-                )
-            for idx, out in enumerate(self.output_layers):
-                self.output_layers[idx] = (
-                    '_'.join([self.default_model_suffix, out])
-                    if with_prefix else out.split(self.default_model_suffix)[-1]
-                )
-
-    def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.load_network(self.network, launcher)
-        else:
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        self.set_input_and_output()
-        if log:
-            self.print_input_output_info()
-
-
-def create_encoder(model_config, launcher, delayed_model_loading=False):
-    launcher_model_mapping = {
-        'dlsdk': EncoderDLSDKModel,
-        'onnx_runtime': EncoderONNXModel,
-        'dummy': DummyEncoder
-    }
-    framework = launcher.config['framework']
-    if 'predictions' in model_config and not model_config.get('store_predictions', False):
-        framework = 'dummy'
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
-
-
-def create_prediction(model_config, launcher, delayed_model_loading):
-    launcher_model_mapping = {
-        'dlsdk': PredictionDLSDKModel,
-        'onnx_runtime': PredictionONNXModel
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
-
-
-def create_joint(model_config, launcher, delayed_model_loading):
-    launcher_model_mapping = {
-        'dlsdk': JointDLSDKModel,
-        'onnx_runtime': JointONNXModel
-    }
-    framework = launcher.config['framework']
-    model_class = launcher_model_mapping.get(framework)
-    if not model_class:
-        raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
-
-
-class ASRModel(BaseModel):
-    def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
+class ASRModel(BaseCascadeModel):
+    def __init__(self, network_info, launcher, models_args, is_blob, adapter_info, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args and not delayed_model_loading:
-            encoder = network_info.get('encoder', {})
-            prediction = network_info.get('prediction', {})
-            joint = network_info.get('joint', {})
-            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
-                encoder['model'] = models_args[0]
-                encoder['_model_is_blob'] = is_blob
-            if not contains_any(prediction, ['model', 'onnx_model']) and models_args:
-                prediction['model'] = models_args[1 if len(models_args) > 1 else 0]
-                prediction['_model_is_blob'] = is_blob
-            if not contains_any(joint, ['model', 'onnx_model']) and models_args:
-                joint['model'] = models_args[2 if len(models_args) > 2 else 0]
-                joint['_model_is_blob'] = is_blob
-            network_info.update({'encoder': encoder, 'prediction': prediction, 'joint': joint})
-        if not contains_all(network_info, ['encoder', 'prediction', 'joint']) and not delayed_model_loading:
+        parts = ['encoder', 'prediction', 'joint']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder, prediction and joint fields')
-        self.encoder = create_encoder(network_info['encoder'], launcher, delayed_model_loading)
-        self.prediction = create_prediction(network_info['prediction'], launcher, delayed_model_loading)
-        self.joint = create_joint(network_info['joint'], launcher, delayed_model_loading)
+        self._encoder_mapping = {
+            'dlsdk': EncoderDLSDKModel,
+            'openvino': EncoderOVMOdel,
+            'onnx_runtime': EncoderONNXModel,
+            'dummy': DummyEncoder
+        }
+        self._prediction_mapping = {
+            'dlsdk': PredictionDLSDKModel,
+            'openvino': PredictionOVModel,
+            'onnx_runtime': PredictionONNXModel
+        }
+        self._joint_mapping = {
+            'dlsdk': JointDLSDKModel,
+            'openvino': JointOVModel,
+            'onnx_runtime': JointONNXModel
+        }
+        self.encoder = create_encoder(network_info['encoder'], launcher, self._encoder_mapping, delayed_model_loading)
+        self.prediction = create_model(network_info['prediction'], launcher, self._prediction_mapping, 'prediction',
+                                       delayed_model_loading)
+        self.joint = create_model(network_info['joint'], launcher, self._joint_mapping, 'joint', delayed_model_loading)
         self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
         self._encoder_predictions = [] if self.store_encoder_predictions else None
         self._part_by_name = {'encoder': self.encoder, 'prediction': self.prediction, 'joint': self.joint}
         self._raw_outs = OrderedDict()
-        self.adapter = create_adapter(network_info.get('adapter', 'dumb_decoder'))
-
+        self.adapter = create_adapter(adapter_info)
         self._blank_id = 28
         self._sos = -1
         self._max_symbols_per_step = 30
@@ -252,8 +80,12 @@ class ASRModel(BaseModel):
         predictions, raw_outputs = [], []
         for data in input_data:
             encoder_prediction, decoder_inputs = self.encoder.predict(identifiers, data)
+            if isinstance(encoder_prediction, tuple):
+                encoder_prediction, raw_encoder_prediction = encoder_prediction
+            else:
+                raw_encoder_prediction = encoder_prediction
             if encoder_callback:
-                encoder_callback(encoder_prediction)
+                encoder_callback(raw_encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
             raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
@@ -266,29 +98,11 @@ class ASRModel(BaseModel):
         if self._encoder_predictions is not None:
             self._encoder_predictions = []
 
-    def release(self):
-        self.encoder.release()
-        self.prediction.release()
-        self.joint.release()
-
     def save_encoder_predictions(self):
         if self._encoder_predictions is not None:
             prediction_file = Path(self.network_info['encoder'].get('predictions', 'encoder_predictions.pickle'))
             with prediction_file.open('wb') as file:
                 pickle.dump(self._encoder_predictions, file)
-
-    def load_network(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
-
-    def load_model(self, network_list, launcher):
-        for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
-
-    def get_network(self):
-        return [{'name': 'encoder', 'model': self.encoder.network},
-                {'name': 'prediction', 'model': self.prediction.network},
-                {'name': 'joint', 'model': self.joint.network}]
 
     def decoder(self, identifiers, logits, callback=None):
         output = []
@@ -319,8 +133,12 @@ class ASRModel(BaseModel):
                     self._get_last_symb(label),
                     hidden
                 )
+                if isinstance(g, tuple):
+                    g, raw_g = g
+                else:
+                    raw_g = g
                 if callback:
-                    callback(g)
+                    callback(raw_g)
                 hidden_prime = (g[self.prediction.output_layers[0]], g[self.prediction.output_layers[1]])
                 g = g[self.prediction.output_layers[2]]
                 logp = self._joint_step(f, g, log_normalize=False, callback=callback)[0, :]
@@ -351,8 +169,12 @@ class ASRModel(BaseModel):
     def _joint_step(self, enc, pred, log_normalize=False, callback=None):
         inputs = {self.joint.input_layers[0]: enc, self.joint.input_layers[1]: pred}
         logits, logits_blob = self.joint.predict(None, inputs)
+        if isinstance(logits, tuple):
+            logits, raw_logits = logits
+        else:
+            raw_logits = logits
         if callback:
-            callback(logits)
+            callback(raw_logits)
         logits = logits_blob[:, 0, 0, :]
         if not log_normalize:
             return logits
@@ -364,34 +186,20 @@ class ASRModel(BaseModel):
         return self._sos if len(labels) == 0 else labels[-1]
 
 
-class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
-    default_model_suffix = 'encoder'
-    default_input_layers = []
-    default_output_layers = []
-
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher)
+class CommonDLSDKModel(BaseDLSDKModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.input_layers = network_info.get('inputs', self.default_input_layers)
         self.output_layers = network_info.get('outputs', self.default_output_layers)
         if len(self.input_layers) == 1:
             self.input_blob = self.input_layers[0]
         if len(self.output_layers) == 1:
             self.output_blob = self.output_layers[0]
-        self.with_prefix = None
-        if not hasattr(self, 'output_blob'):
-            self.output_blob = None
-        self.input_blob = None
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
         results = self.exec_network.infer(input_data)
         return results, results[self.output_blob]
-
-    def release(self):
-        del self.exec_network
-        del self.launcher
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
@@ -418,88 +226,153 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
         return {input_blob: np.array(input_data)}
 
+    def set_input_and_output(self):
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            for idx, inp in enumerate(self.input_layers):
+                self.input_layers[idx] = (
+                    '_'.join([self.default_model_suffix, inp])
+                    if with_prefix else inp.split(self.default_model_suffix)[-1]
+                )
+            for idx, out in enumerate(self.output_layers):
+                self.output_layers[idx] = (
+                    '_'.join([self.default_model_suffix, out])
+                    if with_prefix else out.split(self.default_model_suffix)[-1]
+                )
+
+
+class CommonOVModel(BaseOpenVINOModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.input_layers = network_info.get('inputs', self.default_input_layers)
+        self.output_layers = network_info.get('outputs', self.default_output_layers)
+        if len(self.input_layers) == 1:
+            self.input_blob = self.input_layers[0]
+        if len(self.output_layers) == 1:
+            self.output_blob = self.output_layers[0]
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+    def predict(self, identifiers, input_data, callback=None):
+        input_data = self.fit_to_input(input_data)
+        results = self.infer(input_data, raw_results=True)
+        return results, results[self.output_blob] if not isinstance(results, tuple) else results[0][self.output_blob]
+
+    def fit_to_input(self, input_data):
+        if isinstance(input_data, dict):
+            fitted = {}
+            for input_blob in self.inputs.keys():
+                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+        else:
+            fitted = self.fit_one_input(self.input_blob, input_data)
+        return fitted
+
+    def fit_one_input(self, input_blob, input_data):
+        if (input_blob in self.dynamic_inputs or parse_partial_shape(
+            self.inputs[input_blob].get_partial_shape()) != np.shape(input_data)):
+            self._reshape_input({input_blob: np.shape(input_data)})
+
+        return {input_blob: np.array(input_data)}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.output_blob is None:
+                output_blob = next(iter(self.outputs))
+            else:
+                output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
+
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            for idx, inp in enumerate(self.input_layers):
+                self.input_layers[idx] = (
+                    '_'.join([self.default_model_suffix, inp])
+                    if with_prefix else inp.split(self.default_model_suffix)[-1]
+                )
+        for idx, out in enumerate(self.output_layers):
+            self.output_layers[idx] = postprocess_output_name(out, self.outputs, raise_error=False)
+
 
 class EncoderDLSDKModel(CommonDLSDKModel):
-    default_model_suffix = 'encoder'
-    default_output_layers = ['472']
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = []
+        self.default_output_layers = ['472']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class EncoderOVMOdel(CommonOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = []
+        self.default_output_layers = ['472/sink_port_0']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class PredictionDLSDKModel(CommonDLSDKModel):
-    default_model_suffix = 'prediction'
-    default_input_layers = ['input.1', '1', '2']
-    default_output_layers = ['151', '152', '153']
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['input.1', '1', '2']
+        self.default_output_layers = ['151', '152', '153']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
+
+class PredictionOVModel(CommonOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['input.1', '1', '2']
+        self.default_output_layers = ['151/sink_port_0', '152/sink_port_0', '153/sink_port_0']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class JointDLSDKModel(CommonDLSDKModel):
-    default_model_suffix = 'joint'
-    default_input_layers = ['0', '1']
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['0', '1']
+        self.default_output_layers = []
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
-class CommonONNXModel(BaseModel):
-    default_model_suffix = 'encoder'
+class JointOVModel(CommonOVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.default_input_layers = ['0', '1']
+        self.default_output_layers = []
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
-    def __init__(self, network_info, launcher, *args, **kwargs):
-        super().__init__(network_info, launcher)
-        model = self.automatic_model_search(network_info)
-        self.inference_session = launcher.create_inference_session(str(model))
-        self.input_blob = next(iter(self.inference_session.get_inputs()))
-        self.output_blob = next(iter(self.inference_session.get_outputs()))
 
+class CommonONNXModel(BaseONNXModel):
     def predict(self, identifiers, input_data, callback=None):
         fitted = self.fit_to_input(input_data)
         results = self.inference_session.run((self.output_blob.name, ), fitted)
         return results, results[0]
 
-    def fit_to_input(self, input_data):
-        return {self.input_blob.name: input_data[0]}
-
-    def release(self):
-        del self.inference_session
-
-    def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        if model.is_dir():
-            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
-            if not model_list:
-                model_list = list(model.glob('*.onnx'))
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-            model = model_list[0]
-        accepted_suffixes = ['.onnx']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
-
-        return model
-
 
 class EncoderONNXModel(CommonONNXModel):
-    default_model_suffix = 'encoder'
-    default_input_layers = []
-    default_output_layers = []
-
     def fit_to_input(self, input_data):
         frames, _, _ = input_data.shape
         return {self.input_blob.name: input_data, '1': np.array([frames], dtype=np.int64)}
 
 
 class PredictionONNXModel(CommonONNXModel):
-    default_model_suffix = 'prediction'
-    default_input_layers = ['input.1', '1', '2']
-    deafult_output_layers = ['151', '152', '153']
+    pass
 
 
 class JointONNXModel(CommonONNXModel):
-    default_model_suffix = 'joint'
-    default_input_layers = ['0', '1']
-    default_output_layers = []
+    pass
 
 
-class DummyEncoder(BaseModel):
+class DummyEncoder:
     def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
+        self.network_info = network_info
+        self.launcher = launcher
         if 'predictions' not in network_info:
             raise ConfigError('predictions_file is not found')
         self._predictions = read_pickle(network_info['predictions'])
@@ -509,3 +382,6 @@ class DummyEncoder(BaseModel):
         result = self._predictions[self.iterator]
         self.iterator += 1
         return None, result
+
+    def release(self):
+        pass

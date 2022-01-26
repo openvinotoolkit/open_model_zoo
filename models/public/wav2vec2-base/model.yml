@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,23 +28,26 @@ task_type: named_entity_recognition
 files:
   - name: transformers-4.8.2-py3-none-any.whl
     size: 2499371
-    sha384: 91713fbb6bf46b5a216c3336260cc03e7d2c7cbd031e810d22feeed0865f9e0f5d7a87c45f7d60669587cbc9548c30c1
+    checksum: 91713fbb6bf46b5a216c3336260cc03e7d2c7cbd031e810d22feeed0865f9e0f5d7a87c45f7d60669587cbc9548c30c1
     source: https://files.pythonhosted.org/packages/fd/1a/41c644c963249fd7f3836d926afa1e3f1cc234a1c40d80c5f03ad8f6f1b2/transformers-4.8.2-py3-none-any.whl
   - name: wav2vec2-base-960h/pytorch_model.bin
     size: 377667514
-    sha384: 647658a0fc4376ddccb8430207fd50f22a59f607f821ddb6e7dfec7bf2f41d3bbe4d6e62c2779530f1a2e20ec75acf9b
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/pytorch_model.bin
+    checksum: 647658a0fc4376ddccb8430207fd50f22a59f607f821ddb6e7dfec7bf2f41d3bbe4d6e62c2779530f1a2e20ec75acf9b
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/pytorch_model.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/pytorch_model.bin
   - name: wav2vec2-base-960h/config.json
     size: 1596
-    sha384: 1c28d7ba60f46b0212c73afde1ff9a77a0bc2801c3dc6bcac77835ed147e0df49a28bc627c0a76b1f6b8959170e7627b
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/config.json
+    checksum: 1c28d7ba60f46b0212c73afde1ff9a77a0bc2801c3dc6bcac77835ed147e0df49a28bc627c0a76b1f6b8959170e7627b
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/config.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/config.json
   - name: wav2vec2-base-960h/vocab.json
     size: 291
-    sha384: 87dc62dd416ca1d37674e5169d701d443b0644f23c0584d52b5813d025ebb5cecf9ea64850c4c09fe10766e7b2e8435c
-    source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/vocab.json
+    checksum: 87dc62dd416ca1d37674e5169d701d443b0644f23c0584d52b5813d025ebb5cecf9ea64850c4c09fe10766e7b2e8435c
+    original_source: https://huggingface.co/facebook/wav2vec2-base-960h/resolve/main/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/wav2vec2-base/vocab.json
   - name: packaging-20.9-py2.py3-none-any.whl
     size: 40870
-    sha384: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
+    checksum: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
     source: https://files.pythonhosted.org/packages/3e/89/7ea760b4daa42653ece2380531c90f64788d979110a2ab51049d92f408af/packaging-20.9-py2.py3-none-any.whl
 postprocessing:
   - $type: unpack_archive
@@ -109,5 +112,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/wav2vec2-base.onnx
   - --output=logits
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  limitations under the License.
 """
 
-import os
 import sys
 from time import perf_counter
 import logging as log
@@ -23,7 +22,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 from utils.codec import CTCCodec
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -48,6 +47,7 @@ def build_argparser():
                       help="Path to the decoding char list file. Default is for Japanese")
     args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
     args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
+    args.add_argument("-ob", "--output_blob", type=str, default=None, help="Optional. Name of the output layer of the model. Default is None, in which case the demo will read the output name from the model, assuming there is only 1 output layer")
     return parser
 
 
@@ -76,40 +76,50 @@ def main():
     # Plugin initialization
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
+    core.set_config(config={"GPU_ENABLE_LOOP_UNROLLING": "NO", "CACHE_DIR": "./"}, device_name="GPU")
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
-    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
+    model = core.read_model(args.model)
 
-    assert len(net.input_info) == 1, "Demo supports only single input topologies"
-    assert len(net.outputs) == 1, "Demo supports only single output topologies"
+    if len(model.inputs) != 1:
+        raise RuntimeError("Demo supports only single input topologies")
+    input_tensor_name = model.inputs[0].get_any_name()
 
-    input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
+    if args.output_blob is not None:
+        output_tensor_name = args.output_blob
+    else:
+        if len(model.outputs) != 1:
+            raise RuntimeError("Demo supports only single output topologies")
+        output_tensor_name = model.outputs[0].get_any_name()
 
     characters = get_characters(args)
     codec = CTCCodec(characters, args.designated_characters, args.top_k)
-    assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
+    if len(codec.characters) != model.output(output_tensor_name).shape[2]:
+        raise RuntimeError("The text recognition model does not correspond to decoding character list")
 
-    input_batch_size, input_channel, input_height, input_width= net.input_info[input_blob].input_data.shape
+    input_batch_size, input_channel, input_height, input_width = model.inputs[0].shape
 
     # Read and pre-process input image (NOTE: one image only)
     preprocessing_start_time = perf_counter()
     input_image = preprocess_input(args.input, height=input_height, width=input_width)[None, :, :, :]
     preprocessing_total_time = perf_counter() - preprocessing_start_time
-    assert input_batch_size == input_image.shape[0], "The net's input batch size should equal the input image's batch size "
-    assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
+    if input_batch_size != input_image.shape[0]:
+        raise RuntimeError("The model's input batch size should equal the input image's batch size")
+    if input_channel != input_image.shape[1]:
+        raise RuntimeError("The model's input channel should equal the input image's channel")
 
     # Loading model to the plugin
-    exec_net = ie.load_network(network=net, device_name=args.device)
+    compiled_model = core.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
     start_time = perf_counter()
-    for i in range(args.number_iter):
-        preds = exec_net.infer(inputs={input_blob: input_image})
-        preds = preds[out_blob]
+    for _ in range(args.number_iter):
+        infer_request.infer(inputs={input_tensor_name: input_image})
+        preds = infer_request.get_tensor(output_tensor_name).data[:]
         result = codec.decode(preds)
         print(result)
     total_latency = ((perf_counter() - start_time) / args.number_iter + preprocessing_total_time) * 1e3

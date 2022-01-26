@@ -125,7 +125,7 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
     -m <path_to_model>/instance-segmentation-security-0228.xml \
-    --label <omz_dir>/data/dataset_classes/coco_80cl.txt \
+    --label <omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt \
     --no_keep_aspect_ratio \
     -i 0 \
     --delay 1
@@ -153,5 +153,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

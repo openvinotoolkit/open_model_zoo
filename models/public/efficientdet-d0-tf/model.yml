@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,67 +22,68 @@ task_type: detection
 files:
   - name: efficientdet-d0.tar.gz
     size: 28828936
-    sha384: 4107802535b036f846d856e55d0035f871bf900f28b25874874bcb72631f666d9f3a0ff8239c73e28a5fe9a0f816ac9f
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d0.tar.gz
+    checksum: 4107802535b036f846d856e55d0035f871bf900f28b25874874bcb72631f666d9f3a0ff8239c73e28a5fe9a0f816ac9f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientdet-d0-tf/efficientdet-d0.tar.gz
+    original_source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d0.tar.gz
   - name: model/model_inspect.py
     size: 20388
-    sha384: d67e6eb34695a2ed0ab0c7444ecc763ff111834b4e7bb7183ec5bd66bc8b95443c5538b7322da2ffe589db8c4d4091f3
+    checksum: d67e6eb34695a2ed0ab0c7444ecc763ff111834b4e7bb7183ec5bd66bc8b95443c5538b7322da2ffe589db8c4d4091f3
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/model_inspect.py
   - name: model/hparams_config.py
     size: 13750
-    sha384: 39b00fda7c2355fcb2849f440738a987b34e969d93961e6551e8e7092a8e08425cf4122c2af38173469ad3058f37f54b
+    checksum: 39b00fda7c2355fcb2849f440738a987b34e969d93961e6551e8e7092a8e08425cf4122c2af38173469ad3058f37f54b
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/hparams_config.py
   - name: model/inference.py
     size: 25076
-    sha384: 19aa8af0aacb45c3fee226a010b567358d08637ef7775fc93676046fcc0a3e133219475e6e5bfa198269eae0679435ce
+    checksum: 19aa8af0aacb45c3fee226a010b567358d08637ef7775fc93676046fcc0a3e133219475e6e5bfa198269eae0679435ce
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/inference.py
   - name: model/dataloader.py
     size: 19251
-    sha384: f764232d17c4c7c3289bcf846fe63b922194c7e89f33a5fbdc599bbe350afa534ff420477a3097af6773264a100f58f3
+    checksum: f764232d17c4c7c3289bcf846fe63b922194c7e89f33a5fbdc599bbe350afa534ff420477a3097af6773264a100f58f3
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/dataloader.py
   - name: model/nms_np.py
     size: 11404
-    sha384: 20daf2a0a40df70441cd6cffbcffa7fabfaa8ddce617191311a5c7f27c4328d46516403ce0efb4f6945edd3942ebaef0
+    checksum: 20daf2a0a40df70441cd6cffbcffa7fabfaa8ddce617191311a5c7f27c4328d46516403ce0efb4f6945edd3942ebaef0
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/nms_np.py
   - name: model/utils.py
     size: 25677
-    sha384: 2cca479ebab14f9b2974076649d09e4069cab4870609eb47f7ec7a18d993be2bb44cd61f61e423dc70a4407b65a8dce5
+    checksum: 2cca479ebab14f9b2974076649d09e4069cab4870609eb47f7ec7a18d993be2bb44cd61f61e423dc70a4407b65a8dce5
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/utils.py
   - name: model/keras/__init__.py
     size: 0
-    sha384: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
+    checksum: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/__init__.py
   - name: model/keras/efficientdet_keras.py
     size: 32414
-    sha384: 50b8d1fd9500da82158f8edeec7b4e909c7c4910e1e59f2f4c92db516edea62acb7444c779ec722fd6eaefac460d4bde
+    checksum: 50b8d1fd9500da82158f8edeec7b4e909c7c4910e1e59f2f4c92db516edea62acb7444c779ec722fd6eaefac460d4bde
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/efficientdet_keras.py
   - name: model/backbone/efficientnet_builder.py
     size: 11609
-    sha384: fc75ab0fa3969111211958d06549afcb61ba4d4393b360ceaf05f225efa0190371b056aa2062645658445a0fae96d8d3
+    checksum: fc75ab0fa3969111211958d06549afcb61ba4d4393b360ceaf05f225efa0190371b056aa2062645658445a0fae96d8d3
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/backbone/efficientnet_builder.py
   - name: model/backbone/efficientnet_model.py
     size: 27419
-    sha384: b4f23f043c5d84bf6770087c89ec82b5e09f55e18f7a280b47b34ce831bef48444f42c840ad3a2c471536e4ab810e072
+    checksum: b4f23f043c5d84bf6770087c89ec82b5e09f55e18f7a280b47b34ce831bef48444f42c840ad3a2c471536e4ab810e072
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/backbone/efficientnet_model.py
   - name: model/backbone/backbone_factory.py
     size: 2963
-    sha384: 8a19848f09bfa0ffe955eaecb4076e6c7158bb7b72eca61f6c850d53e4b9f2ea4407bd2e000d0618e746528cbd07a00f
+    checksum: 8a19848f09bfa0ffe955eaecb4076e6c7158bb7b72eca61f6c850d53e4b9f2ea4407bd2e000d0618e746528cbd07a00f
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/backbone/backbone_factory.py
   - name: model/keras/anchors.py
     size: 9175
-    sha384: 4163b87f2b41e9bedcd82fe023af7eb1d5a9129c4ce4f71929ee87695c15ec3ae92123649614828e120f417fce203fa8
+    checksum: 4163b87f2b41e9bedcd82fe023af7eb1d5a9129c4ce4f71929ee87695c15ec3ae92123649614828e120f417fce203fa8
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/anchors.py
   - name: model/keras/util_keras.py
     size: 2198
-    sha384: 333b8e217b327ca853bb55e5b470486a19aa0fc3a5707b425873eee2eac3e7acc434af1cf485efb2824600864dce884a
+    checksum: 333b8e217b327ca853bb55e5b470486a19aa0fc3a5707b425873eee2eac3e7acc434af1cf485efb2824600864dce884a
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/util_keras.py
   - name: model/keras/fpn_configs.py
     size: 6120
-    sha384: edd2e1d3d139bda797bad1a7403c88397b9f355c1e809b089ffe83931629844a68c613e31f35ab9ba2c333b5bc29917e
+    checksum: edd2e1d3d139bda797bad1a7403c88397b9f355c1e809b089ffe83931629844a68c613e31f35ab9ba2c333b5bc29917e
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/fpn_configs.py
   - name: model/keras/postprocess.py
     size: 17677
-    sha384: 0ed3354ce9f09281ac3ab176a629fdb95109bf1c0c18b1fff3439f488069a56a9f73776d6cf5ccde489d6bbc57566cd8
+    checksum: 0ed3354ce9f09281ac3ab176a629fdb95109bf1c0c18b1fff3439f488069a56a9f73776d6cf5ccde489d6bbc57566cd8
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/postprocess.py
 postprocessing:
   # disable imports that aren't needed for this model and code that uses them
@@ -110,7 +111,6 @@ postprocessing:
     file: model/keras/anchors.py
     pattern: 'from object_detection'
     replacement: '# \g<0>'
-
   - $type: unpack_archive
     format: gztar
     file: efficientdet-d0.tar.gz
@@ -119,6 +119,6 @@ model_optimizer_args:
   - --input=image_arrays
   - --reverse_input_channels
   - --input_model=$conv_dir/efficientdet-d0_saved_model/efficientdet-d0_frozen.pb
-  - --transformations_config=$mo_dir/extensions/front/tf/automl_efficientdet.json
+  - --transformations_config=$mo_ext_dir/front/tf/automl_efficientdet.json
 framework: tf
 license: https://raw.githubusercontent.com/google/automl/master/LICENSE

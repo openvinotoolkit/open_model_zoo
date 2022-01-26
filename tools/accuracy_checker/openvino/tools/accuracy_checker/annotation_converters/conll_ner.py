@@ -1,5 +1,5 @@
 """"
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ._nlp_common import WordPieceTokenizer
 from ..config import BoolField, PathField, NumberField
 from ..representation import BERTNamedEntityRecognitionAnnotation
+from ..utils import read_json
 
 
 class CONLLDatasetConverter(FileBasedAnnotationConverter):
@@ -36,7 +37,8 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
             ),
             'include_special_token_labels': BoolField(
                 optional=True, default=False, description='Should special tokens be included to labels or not'
-            )
+            ),
+            'labels_file': PathField(optional=True, description='Path to file with custom labels in json format')
         })
         return params
 
@@ -47,6 +49,9 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
             self.get_value_from_config('vocab_file'),
             lower_case=self.get_value_from_config('lower_case'), max_len=self.get_value_from_config('max_len')
         )
+        labels_file = self.get_value_from_config('labels_file')
+        if labels_file:
+            self.label_list = read_json(labels_file)['labels']
         if self.include_spec:
             self.label_list.extend(['[CLS]', '[SEP]'])
         self.pad = self.get_value_from_config('pad_input')
@@ -54,8 +59,11 @@ class CONLLDatasetConverter(FileBasedAnnotationConverter):
     def convert(self, check_content=False, **kwargs):
         sents, labels = self.read_annotation()
         annotations = self.convert_examples_to_features(sents, labels)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
         label_map = dict(enumerate(self.label_list, int(self.include_spec)))
-        return ConverterReturn(annotations, {'label_map': label_map}, None)
+        return {'label_map': label_map}
 
     def read_annotation(self):
         with self.annotation_file.open(mode='r') as lines:

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,12 +33,21 @@ class PWCNetAdapter(Adapter):
 
     def configure(self):
         self.flow_out = self.get_value_from_config('flow_out')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.flow_out:
+            self.flow_out = self.check_output_name(self.flow_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.flow_out = self.output_blob
+        return
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if self.flow_out is None:
+        if not self.output_verified:
             self.select_output_blob(raw_outputs)
-            self.flow_out = self.output_blob
         result = []
         for identifier, flow in zip(identifiers, raw_outputs[self.flow_out]):
             if flow.shape[0] == 2:

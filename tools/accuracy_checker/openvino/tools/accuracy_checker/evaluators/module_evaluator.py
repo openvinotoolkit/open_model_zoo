@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import sys
 import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
-from ..logging import warning
-from ..dataset import Dataset
 from ..presenters import generate_csv_report
 from ..metrics import MetricsExecutor
 
@@ -42,7 +40,7 @@ class ModuleEvaluator(BaseEvaluator):
 
         return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+    def process_dataset(self, *args, stored_predictions=None, progress_reporter=None, **kwargs):
         self._internal_module.process_dataset(
             *args, stored_predictions=stored_predictions, progress_reporter=progress_reporter, **kwargs
         )
@@ -147,31 +145,21 @@ class ModuleEvaluator(BaseEvaluator):
         return self._internal_module.dataset_size
 
     @classmethod
-    def provide_metric_references(cls, conf, subset, return_header=True):
+    def provide_metric_references(cls, conf, return_header=True):
         processing_info = cls.get_processing_info(conf)
         dataset_config = conf['module_config']['datasets'][0]
-        dataset = Dataset(dataset_config)
-        dataset_size = len(dataset)
-        ignore_config_refs = False
-        if subset is not None:
-            dataset_config['subsample_size'] = subset
-            new_dataset = Dataset(dataset_config)
-            if len(new_dataset) != len(dataset):
-                ignore_config_refs = True
-                warning('Subset is not matched with configuration. Reference values will be ignored')
-                dataset_size = len(new_dataset)
-                dataset = new_dataset
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), postpone_metrics=True)
         extracted_results, extracted_meta = [], []
-        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(ignore_config_refs):
-            result, metadata = result_presenter.extract_result(metric_result)
+        for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(
+            dataset_config.get('metrics', []), False):
+            result, metadata = result_presenter.extract_result(metric_result, names_from_refs=True)
             if isinstance(result, list):
                 extracted_results.extend(result)
                 extracted_meta.extend(metadata)
             else:
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
-        header, report = generate_csv_report(processing_info, extracted_results, dataset_size, extracted_meta)
+        header, report = generate_csv_report(processing_info, extracted_results, 0, extracted_meta)
         if not return_header:
             return report
         return header, report

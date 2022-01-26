@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -204,3 +204,12 @@ class CifarFormatConverter(BaseFormatConverter):
             meta['background_label'] = 0
 
         return meta, labels, labels_id
+
+    def get_meta(self):
+        annotation_dict = read_pickle(self.data_batch_file, encoding='latin1')
+        labels_offset = 0 if not self.has_background else 1
+        # crete metadata for dataset. Provided additional information is task specific and can includes, for example
+        # label_map, information about background, used class color representation (for semantic segmentation task)
+        # If your dataset does not have additional meta, you can to not provide it.
+        meta, _, _ = self.generate_meta(labels_offset, annotation_dict)
+        return meta

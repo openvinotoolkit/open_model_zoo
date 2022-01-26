@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,6 +75,9 @@ class LMDBConverter(DirectoryBasedAnnotationConverter):
                         content_errors.append(f'label-{index:09d}: does not exist')
                 annotations.append(CharacterRecognitionAnnotation(index, text))
 
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
         meta = {'label_map': label_map, 'blank_label': len(label_map)}
-        return ConverterReturn(annotations, meta, content_errors)
+        return meta

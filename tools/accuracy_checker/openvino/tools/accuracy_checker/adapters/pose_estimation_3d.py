@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -72,10 +72,20 @@ class HumanPose3dAdapter(Adapter):
         self.features_3d = self.get_value_from_config('features_3d_out')
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.features_3d = self.check_output_name(self.features_3d, outputs)
+        self.part_affinity_fields = self.check_output_name(self.part_affinity_fields, outputs)
+        self.keypoints_heatmap = self.check_output_name(self.keypoints_heatmap, outputs)
+        self.pose_adapter.select_output_blob(outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         raw_output = zip(
             identifiers, raw_outputs[self.features_3d], raw_outputs[self.keypoints_heatmap],
             raw_outputs[self.part_affinity_fields], frame_meta

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import onnxruntime as onnx_rt
 from ..logging import warning
 from ..config import PathField, StringField, ListField, ConfigError
 from .launcher import Launcher
-from ..utils import contains_all
 from ..logging import print_info
 
 
@@ -54,7 +53,7 @@ class ONNXLauncher(Launcher):
         parameters = super().parameters()
         parameters.update({
             'model': PathField(description="Path to model.", file_or_directory=True),
-            'device': StringField(regex=DEVICE_REGEX, description="Device name.", optional=True, default='CPU'),
+            'device': StringField(description="Device name.", optional=True, default=''),
             'execution_providers': ListField(
                 value_type=StringField(description="Execution provider name.", ),
                 default=['CPUExecutionProvider'], optional=True
@@ -106,17 +105,23 @@ class ONNXLauncher(Launcher):
         return self._create_session_via_backend_api(model)
 
     def _create_session_via_execution_providers_api(self, model):
-        session_options = onnx_rt.SessionOptions()
-        session = onnx_rt.InferenceSession(model, sess_options=session_options)
         self.execution_providers = self.get_value_from_config('execution_providers')
-        available_providers = session.get_providers()
-        contains_all(available_providers, self.execution_providers)
-        session.set_providers(self.execution_providers)
+        device = self.get_value_from_config('device')
+        self.device = device or 'CPU'
+        kwargs = {}
+        if device:
+            kwargs['provider_options'] = {[{'device_type': self.device}]}
+        session = onnx_rt.InferenceSession(
+            model, providers=self.execution_providers, **kwargs)
 
         return session
 
     def _create_session_via_backend_api(self, model):
-        self.device = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower()).group('device')
+        device = self.get_value_from_config('device') or 'cpu'
+        device_match = re.match(DEVICE_REGEX, device.lower())
+        if not device_match:
+            raise ConfigError('unknown device: {}'.format(device))
+        self.device = device_match.group('device')
         beckend_rep = backend.prepare(model=str(model), device=self.device.upper())
         return beckend_rep._session  # pylint: disable=W0212
 

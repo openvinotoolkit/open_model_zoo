@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ description: >-
 task_type: classification
 files:
   - name: resnet18-5c106cde.pth
-    sha384: 5d513c0e73ad03072938d37c0f973ef96719db2ceee80d827b89b74a30a499b1b86f0e0e47d20f3965889577c1d854dd
+    checksum: 5d513c0e73ad03072938d37c0f973ef96719db2ceee80d827b89b74a30a499b1b86f0e0e47d20f3965889577c1d854dd
     size: 46827520
-    source: https://download.pytorch.org/models/resnet18-5c106cde.pth
+    original_source: https://download.pytorch.org/models/resnet18-5c106cde.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-18-pytorch/resnet18-5c106cde.pth
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=resnet18
@@ -45,5 +46,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/resnet-18-pytorch.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

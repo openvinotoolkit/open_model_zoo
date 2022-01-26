@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,17 +101,25 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 warnings.warn("image_subpath is provided. "
                               "Make sure that data_source is {}".format(self.data_dir / self.image_subdir))
 
-    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
-        data_ext, data_dir = self.get_ext_and_dir()
-        label_map = dict(enumerate(full_annotation['labels']))
+    def get_meta(self):
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
             if 'label_map' in dataset_meta:
                 label_map = dataset_meta['label_map']
                 label_map = verify_label_map(label_map)
-            elif 'labels' in dataset_meta:
+                return {'label_map': label_map}
+            if 'labels' in dataset_meta:
                 label_map = dict(enumerate(dataset_meta['labels']))
+                return {'label_map': label_map}
+        full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
+        label_map = dict(enumerate(full_annotation['labels']))
+        return {'label_map': label_map}
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
+        meta = self.get_meta()
+        label_map = meta['label_map']
+        data_ext, data_dir = self.get_ext_and_dir()
         video_names, annotations = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 
@@ -143,7 +151,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
             annotations.append(ClassificationAnnotation(identifier, clip['label']))
 
-        return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
+        return ConverterReturn(annotations, meta, content_errors)
 
     def get_ext_and_dir(self):
         if self.two_stream_input:

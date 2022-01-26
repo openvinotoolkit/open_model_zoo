@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,15 +76,23 @@ class MultiOutputRegression(Adapter):
         return params
 
     def configure(self):
-        self.output_list = self.get_value_from_config('outputs')
+        self.output_list_keys = self.get_value_from_config('outputs')
+        self.output_list_values = self.get_value_from_config('outputs')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        upd_output_list_velues = []
+        for out_name in self.output_list_keys:
+            upd_output_list_velues.append(self.check_output_name(out_name, outputs))
+        self.output_list_values = upd_output_list_velues
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
         for batch_id, identfier in enumerate(identifiers):
             res_dict = {}
-            for output_name in self.output_list:
-                res_dict.update({output_name: raw_outputs[output_name][batch_id]})
+            for output_name_k, output_name_v in zip(self.output_list_keys, self.output_list_values):
+                res_dict.update({output_name_k: raw_outputs[output_name_v][batch_id]})
             result.append(RegressionPrediction(identfier, res_dict))
         return result
 
@@ -148,6 +156,6 @@ class KaldiFeatsRegression(Adapter):
 
     def select_output_blob(self, outputs):
         if self.target_out:
-            self.output_blob = self.target_out
+            self.output_blob = self.check_output_name(self.target_out, outputs)
         if self.output_blob is None:
             self.output_blob = next(iter(outputs))

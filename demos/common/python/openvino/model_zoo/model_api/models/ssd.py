@@ -15,19 +15,25 @@
 """
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection
 
 
 class SSD(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'SSD'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self.image_info_blob_name = self.image_info_blob_names[0] if len(self.image_info_blob_names) == 1 else None
-        self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
+        self.output_parser = self._get_output_parser(self.image_blob_name)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['confidence_threshold'].update_default_value(0.5)
+        return parameters
 
     def preprocess(self, inputs):
         dict_inputs, meta = super().preprocess(inputs)
@@ -40,33 +46,33 @@ class SSD(DetectionModel):
         detections = self._resize_detections(detections, meta)
         return detections
 
-    def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
+    def _get_output_parser(self, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
-            parser = SingleOutputParser(net.outputs)
+            parser = SingleOutputParser(self.outputs)
             self.logger.debug('\tUsing SSD model with single output parser')
             return parser
         except ValueError:
             pass
 
         try:
-            parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
+            parser = MultipleOutputParser(self.outputs, bboxes, scores, labels)
             self.logger.debug('\tUsing SSD model with multiple output parser')
             return parser
         except ValueError:
             pass
 
         try:
-            parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
+            parser = BoxesLabelsParser(self.outputs, self.inputs[image_blob_name].shape[2:][::-1])
             self.logger.debug('\tUsing SSD model with "boxes-labels" output parser')
             return parser
         except ValueError:
             pass
-        raise RuntimeError('Unsupported model outputs')
+        raise WrapperError(self.__model__, 'Unsupported model outputs')
 
     def _parse_outputs(self, outputs, meta):
         detections = self.output_parser(outputs)
 
-        detections = [d for d in detections if d.score > self.threshold]
+        detections = [d for d in detections if d.score > self.confidence_threshold]
 
         return detections
 
@@ -87,7 +93,7 @@ class SingleOutputParser:
         if len(all_outputs) != 1:
             raise ValueError('Network must have only one output.')
         self.output_name, output_data = next(iter(all_outputs.items()))
-        last_dim = np.shape(output_data)[-1]
+        last_dim = output_data.shape[-1]
         if last_dim != 7:
             raise ValueError('The last dimension of the output blob must be equal to 7, '
                              'got {} instead.'.format(last_dim))
@@ -123,7 +129,7 @@ class BoxesLabelsParser:
 
     @staticmethod
     def find_layer_bboxes_output(layers):
-        filter_outputs = [name for name, data in layers.items() if len(np.shape(data)) == 2 and np.shape(data)[-1] == 5]
+        filter_outputs = [name for name, data in layers.items() if len(data.shape) == 2 and data.shape[-1] == 5]
         if not filter_outputs:
             raise ValueError('Suitable output with bounding boxes is not found')
         if len(filter_outputs) > 1:

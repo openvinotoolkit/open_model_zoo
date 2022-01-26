@@ -4,16 +4,18 @@
 This script updates all of the requirements-*.txt files in this directory
 with the most recent package versions.
 
-It uses pip-compile (https://github.com/jazzband/pip-tools), so install that
-before running it.
+It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo,
+so install these dependencies before running it.
 """
 
 import argparse
 import os
+import re
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
 
 from pathlib import Path
+from pkginfo import Wheel
 
 # Package dependencies can vary depending on the Python version.
 # We thus have to run pip-compile with the lowest Python version that
@@ -46,6 +48,18 @@ def pip_compile(target, *sources, upgrade=False):
             '--no-header', '--quiet', '-o', target, '--', *map(str, sources)],
         check=True, cwd=str(repo_root))
 
+def update_openvino_dev_reqs():
+    package_downloading_stdout = subprocess.run(
+        [sys.executable, '-m', 'pip', 'download', 'openvino-dev', '--no-deps'],
+        check=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
+
+    wheel_name = re.search(r'openvino\S*\.whl', package_downloading_stdout).group(0)
+    wheel = Wheel(wheel_name)
+    reqs_list = sorted(wheel.requires_dist)
+
+    with open("requirements-openvino-dev.in", "w", encoding="UTF-8") as f:
+        f.write("\n".join(reqs_list) + "\n")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--upgrade', action='store_true', help='Bump package versions')
@@ -59,6 +73,8 @@ def main():
 
     openvino_dir = Path(os.environ['INTEL_OPENVINO_DIR'])
 
+    update_openvino_dev_reqs()
+
     def pc(target, *sources):
         pip_compile(target, *sources, upgrade=args.upgrade)
         fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
@@ -71,7 +87,7 @@ def main():
     pc('ci/requirements-check-basics.txt',
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
-        *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
+        *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['paddle', 'pytorch', 'tensorflow']),
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
@@ -82,6 +98,7 @@ def main():
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
         openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
         openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
+    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
 
 if __name__ == '__main__':
     main()

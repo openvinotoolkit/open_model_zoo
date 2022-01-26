@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -62,8 +62,13 @@ class StructuralSimilarity(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
-        self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-better'
+        meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
+        return meta
 
 
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
@@ -92,8 +97,6 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
-        self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
 
     def configure(self):
         super().configure()
@@ -103,7 +106,6 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             'BGR': [2, 1, 0],
             'RGB': [0, 1, 2],
         }
-        self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[self.color_order]
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
@@ -136,6 +138,14 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             mse = np.mean(image_difference ** 2)
 
         return -10 * math.log10(mse)
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-better'
+        meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
+        meta['postfix'] = 'Db'
+        return meta
 
 
 class PeakSignalToNoiseRatioWithBlockingEffectFactor(PeakSignalToNoiseRatio):
@@ -280,8 +290,6 @@ class VisionInformationFidelity(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self._vif_diff, *args, **kwargs)
-        self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
         if isinstance(convolve2d, UnsupportedPackage):
             convolve2d.raise_error(self.__provider__)
 
@@ -334,6 +342,13 @@ class VisionInformationFidelity(BaseRegressionMetric):
             den += np.sum(np.log10(1.0 + sigmagt_sq / sigma_nsq))
 
         return num / den
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-better'
+        meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
+        return meta
 
 
 def gaussian_filter(ws, sigma):

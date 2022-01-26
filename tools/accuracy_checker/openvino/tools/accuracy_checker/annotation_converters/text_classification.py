@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import numpy as np
 
 
 from ..config import PathField, StringField, NumberField, BoolField, ListField, ConfigError
+from ..data_readers import AnnotationDataIdentifier
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list, UnsupportedPackage, read_json
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
@@ -99,7 +100,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
     def read_annotation(self):
         lines = []
         with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
-            reader = csv.reader(ann_file, delimiter=self.column_separator, quotechar=None)
+            reader = csv.reader(ann_file, delimiter=self.column_separator)
             for idx, line in enumerate(reader):
                 if idx == 0:
                     continue
@@ -112,11 +113,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         return lines
 
     def convert_single_example(self, example): # pylint:disable=R0912
-        identifier = [
-            'input_ids_{}'.format(example.guid),
-            'input_mask_{}'.format(example.guid),
-            'segment_ids_{}'.format(example.guid)
-        ]
+        identifier = AnnotationDataIdentifier(example.guid, [])
         if not self.external_tok:
             tokens_a = self.tokenizer.tokenize(example.text_a)
             tokens_b = None
@@ -165,6 +162,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
             if len(tokens) > self.max_seq_length:
                 tokens = tokens[:self.max_seq_length]
+                segment_ids = segment_ids[:self.max_seq_length]
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab or self.external_tok else tokens
         input_mask = [0 if not self.class_token_first else 1] * len(input_ids)
@@ -190,7 +188,10 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             if progress_callback and example_id % progress_interval == 0:
                 progress_callback(example_id * 100 / num_iter)
 
-        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
+
+    def get_meta(self):
+        return {'label_map': self.label_map}
 
 
 class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
@@ -318,7 +319,10 @@ class BertXNLITFRecordConverter(BertTextClassificationTFRecordConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations, _, errors = super().convert(check_content, progress_callback, progress_interval, **kwargs)
 
-        return ConverterReturn(annotations, {'label_map': dict(enumerate(labels['xnli']))}, errors)
+        return ConverterReturn(annotations, self.get_meta(), errors)
+
+    def get_meta(self):
+        return {'label_map': dict(enumerate(labels['xnli']))}
 
 
 class MRPCConverter(BaseGLUETextClassificationConverter):
@@ -454,7 +458,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
             if progress_callback and example_id % progress_interval == 0:
                 progress_callback(example_id * 100 / num_iter)
 
-        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+        return ConverterReturn(annotations, self.get_meta(), None)
 
 
 class ColumnDataset(BaseGLUETextClassificationConverter):
@@ -484,7 +488,7 @@ class ColumnDataset(BaseGLUETextClassificationConverter):
     def select_label_map(self):
         label_map = {}
         if 'labels_list' in self.config:
-            label_map = dict(enumerate(self.get_value_from_config('label_list')))
+            label_map = dict(enumerate(self.get_value_from_config('labels_list')))
         if 'dataset_meta_file' in self.config:
             meta = read_json(self.get_value_from_config('dataset_meta_file'))
             if 'label_map' in meta:

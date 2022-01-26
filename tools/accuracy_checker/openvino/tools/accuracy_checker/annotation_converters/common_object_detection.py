@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ class CommonDetectionConverter(BaseFormatConverter):
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
 
-        return ConverterReturn(annotations, self.generate_meta(), content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
     def parse_annotation(self, annotation_file):
         labels, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], []
@@ -89,7 +89,7 @@ class CommonDetectionConverter(BaseFormatConverter):
             y_maxs.append(float(y_max))
         return np.array(labels), np.array(x_mins), np.array(y_mins), np.array(x_maxs), np.array(y_maxs)
 
-    def generate_meta(self):
+    def get_meta(self):
         labels = read_txt(self.labels_file)
         label_map = {}
         for idx, label_name in enumerate(labels):

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -81,7 +81,6 @@ class FashionMnistConverter(BaseFormatConverter):
         """
         annotations = []
         check_images = check_content and not self.convert_images
-        meta = self.generate_meta()
         content_errors = None
         if check_content:
             self.converted_images_dir = self.converted_images_dir or self.test_anno_file.parent / 'converted_images'
@@ -115,9 +114,9 @@ class FashionMnistConverter(BaseFormatConverter):
             if progress_callback is not None and index % progress_interval == 0:
                 progress_callback(index / num_iterations * 100)
 
-        return ConverterReturn(annotations, meta, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
-    def generate_meta(self):
+    def get_meta(self):
         default_labels = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker',
                           'Bag', 'Ankle boot']
         if not self.dataset_meta:

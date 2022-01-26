@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -139,8 +139,10 @@ def get_index_filtering(data, id_col, target_col, lookback):
                       data[id_col],
                       df_total_count], axis=1).reset_index(drop=True)
 
+
 def get_time_steps():
     return get_fixed_params()['total_time_steps']
+
 
 def get_num_encoder_steps():
     return get_fixed_params()['num_encoder_steps']

@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -18,7 +18,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
 from image_translation_demo.preprocessing import (
@@ -83,17 +83,14 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     log.info('Reading Translation model {}'.format(args.translation_model))
-    gan_model = CocosnetModel(ie, args.translation_model,
-                              args.translation_model.replace(".xml", ".bin"),
-                              args.device)
+    gan_model = CocosnetModel(core, args.translation_model, args.device)
     log.info('The Translation model {} is loaded to {}'.format(args.translation_model, args.device))
 
     log.info('Reading Semantic Segmentation model {}'.format(args.segmentation_model))
-    seg_model = SegmentationModel(ie, args.segmentation_model,
-                                  args.segmentation_model.replace(".xml", ".bin"),
+    seg_model = SegmentationModel(core, args.segmentation_model,
                                   args.device) if args.segmentation_model else None
     log.info('The Semantic Segmentation model {} is loaded to {}'.format(args.segmentation_model, args.device))
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class JSONReader(BaseReader):
     def configure(self):
         self.key = self.get_value_from_config('key')
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
         if not self.data_source:
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -164,7 +164,11 @@ class Launcher(ClassProvider):
             '_kaldi_bin_dir': PathField(is_directory=True, optional=True, description='directory with Kaldi binaries'),
             '_kaldi_log_file': PathField(
                 optional=True, description='File for saving Kaldi tools logs', check_exists=False
-            )
+            ),
+            '_model_type': StringField(optional=True, description='hint for launcher for model search'),
+            '_input_layout': StringField(optional=True,
+                                         description='input layout in format input1[layout],input2[layout] or [layout]'
+                                         )
         }
 
     @classmethod
@@ -290,6 +294,10 @@ class Launcher(ClassProvider):
     @property
     def name(self):
         return self.__provider__
+
+    @property
+    def layout_mapping(self):
+        return {}
 
 
 def unsupported_launcher(name, error_message=None):

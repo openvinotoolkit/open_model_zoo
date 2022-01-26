@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,18 +19,19 @@ task_type: salient_object_detection
 files:
   - name: f3net/net.py
     size: 8656
-    sha384: 17947bb60281d99ed16a5f646d0476a1fb439e21c70a8efbdd12151aad271599e4951bff546a89ac5fddf5058af7d6cb
+    checksum: 17947bb60281d99ed16a5f646d0476a1fb439e21c70a8efbdd12151aad271599e4951bff546a89ac5fddf5058af7d6cb
     source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/net.py
   - name: f3net/dataset.py
     size: 4497
-    sha384: 0a741a171f3faf065af323de147165bee85f627e572aad00529cfcddcf26c34b212e223c0da3d8d45ffa760c79ba4712
+    checksum: 0a741a171f3faf065af323de147165bee85f627e572aad00529cfcddcf26c34b212e223c0da3d8d45ffa760c79ba4712
     source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/dataset.py
   - name: f3net/model-32
     size: 102506472
-    sha384: 6476078ef447502af76f214b96161f6295662ccef6d412aec90d0aca03fc5d7759fdd880c9ddec146e656114805acfc2
-    source:
+    checksum: 6476078ef447502af76f214b96161f6295662ccef6d412aec90d0aca03fc5d7759fdd880c9ddec146e656114805acfc2
+    original_source:
       $type: google_drive
       id: 1jcsmxZHL6DGwDplLp93H4VeN2ZjqBsOF
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/f3net/f3net/model-32
 postprocessing:
   - $type: regex_replace
     file: f3net/net.py
@@ -49,7 +50,6 @@ postprocessing:
     file: f3net/dataset.py
     pattern: 'import cv2'
     replacement: ''
-
 conversion_to_onnx_args:
   - --model-name=f3net
   - --model-path=$config_dir
@@ -69,5 +69,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output="saliency_map"
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://github.com/weijun88/F3Net/blob/master/LICENSE

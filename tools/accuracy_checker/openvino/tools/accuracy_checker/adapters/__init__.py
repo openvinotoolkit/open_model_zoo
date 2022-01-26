@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ from .attributes_recognition import (
 from .reidentification import ReidAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
-    MTCNNPAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter,
     FaceDetectionAdapter,
@@ -62,12 +61,13 @@ from .detection import (
     UltraLightweightFaceDetectionAdapter,
     PPDetectionAdapter
 )
+from .mtcnn import MTCNNPAdapter
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
     PersonVehicleDetectionRefinementAdapter
 )
 from .detection_head import HeadDetectionAdapter
-from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
+from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter, SSDMultiLabelAdapter
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import (
@@ -75,7 +75,11 @@ from .yolo import (
 )
 from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
-    SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
+    SegmentationAdapter,
+    BrainTumorSegmentationAdapter,
+    DUCSegmentationAdapter,
+    BackgroundMattingAdapter,
+    AnomalySegmentationAdapter
 )
 from .facial_landmarks_98_detection import FacialLandmarksAdapter
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
@@ -133,7 +137,6 @@ __all__ = [
     'ClassificationAdapter',
 
     'TFObjectDetectionAPIAdapter',
-    'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
     'RetinaNetTF2',
@@ -152,6 +155,7 @@ __all__ = [
     'UltraLightweightFaceDetectionAdapter',
     'PPDetectionAdapter',
     'FacialLandmarksAdapter',
+    'MTCNNPAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
@@ -167,6 +171,7 @@ __all__ = [
     'SSDONNXAdapter',
     'PyTorchSSDDecoder',
     'FacePersonAdapter',
+    'SSDMultiLabelAdapter',
 
     'RetinaNetAdapter',
     'MultiOutRetinaNet',
@@ -176,6 +181,7 @@ __all__ = [
     'DUCSegmentationAdapter',
     'SalientObjectDetection',
     'BackgroundMattingAdapter',
+    'AnomalySegmentationAdapter',
 
     'ReidAdapter',
 

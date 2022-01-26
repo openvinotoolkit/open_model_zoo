@@ -15,25 +15,24 @@
 """
 import numpy as np
 
+from .model import WrapperError
 from .detection_model import DetectionModel
-from .utils import Detection
+from .utils import Detection, softmax
 
 
 class DETR(DetectionModel):
-    def __init__(self, ie, model_path, resize_type='standard',
-                 labels=None, threshold=0.5, iou_threshold=0.5):
-        if not resize_type:
-            resize_type = 'standard'
-        super().__init__(ie, model_path, resize_type=resize_type,
-                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+    __model__ = 'DETR'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 2)
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
     def _get_outputs(self):
-        (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.net.outputs.items()
+        (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise RuntimeError("Expected the same second dimension for boxes and scores, but got {} and {}"
+            raise WrapperError(self.__model__, "Expected the same second dimension for boxes and scores, but got {} and {}"
                                .format(bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
@@ -41,8 +40,15 @@ class DETR(DetectionModel):
         elif scores_layer.shape[2] == 4:
             return scores_blob_name, bboxes_blob_name
         else:
-            raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
-                               .format(*[output.shape for output in self.net.outputs]))
+            raise WrapperError(self.__model__, "Expected shape [:,:,4] for bboxes output, but got {} and {}"
+                               .format(bboxes_layer.shape, scores_layer.shape))
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['resize_type'].update_default_value('standard')
+        parameters['confidence_threshold'].update_default_value(0.5)
+        return parameters
 
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs)
@@ -55,11 +61,11 @@ class DETR(DetectionModel):
 
         x_mins, y_mins, x_maxs, y_maxs = self.box_cxcywh_to_xyxy(boxes)
 
-        scores = self.softmax(scores)
+        scores = np.array([softmax(logit) for logit in scores])
         labels = np.argmax(scores[:, :-1], axis=-1)
         det_scores = np.max(scores[:, :-1], axis=-1)
 
-        keep = det_scores > self.threshold
+        keep = det_scores > self.confidence_threshold
 
         detections = [Detection(*det) for det in zip(x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep],
                                                      det_scores[keep], labels[keep])]
@@ -71,8 +77,3 @@ class DETR(DetectionModel):
         b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
              (x_c + 0.5 * w), (y_c + 0.5 * h)]
         return b
-
-    @staticmethod
-    def softmax(logits):
-        res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
-        return np.array(res)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -91,10 +91,11 @@ class CTCBeamSearchDecoder(Adapter):
         self.classification_out = self.get_value_from_config('classification_out')
         self.alphabet = ' ' + string.ascii_lowercase + '\'-'
         self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+        self.output_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        if self.classification_out is not None:
-            self.output_blob = self.classification_out
+        if not self.output_verified:
+            self.select_output_blob(raw)
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
@@ -195,6 +196,15 @@ class CTCBeamSearchDecoder(Adapter):
 
         return res
 
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.classification_out:
+            self.classification_out = self.check_output_name(self.classification_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.classification_out = self.output_blob
+        return
+
 
 class CTCGreedyDecoder(Adapter):
     __provider__ = 'ctc_greedy_decoder'
@@ -217,6 +227,16 @@ class CTCGreedyDecoder(Adapter):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
         self.classification_out = self.get_value_from_config('classification_out')
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.classification_out:
+            self.classification_out = self.check_output_name(self.classification_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.classification_out = self.output_blob
+        return
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
@@ -232,8 +252,8 @@ class CTCGreedyDecoder(Adapter):
         return output_map
 
     def process(self, raw, identifiers, frame_meta):
-        if self.classification_out is not None:
-            self.output_blob = self.classification_out
+        if not self.output_verified:
+            self.select_output_blob(raw)
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
@@ -357,6 +377,16 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         if self.sep not in self.alphabet  and  self.sep != '':
             raise ValueError("\"sep\" must be in alphabet or be an empty string")
         self.init_lm(lm_file, lm_vocabulary_offset, lm_vocabulary_length)
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.probability_out:
+            self.probability_out = self.check_output_name(self.probability_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.probability_out = self.output_blob
+        return
 
     @staticmethod
     def load_python_modules():
@@ -377,6 +407,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
                 raise ValueError("Need lm_alpha and lm_beta to use lm_file")
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if not self.output_verified:
+            self.select_output_blob(raw)
         log_prob = self._extract_predictions(raw, frame_meta)
         log_prob = np.concatenate(list(log_prob))
         if not self.logarithmic_prob:
@@ -713,7 +745,8 @@ class DumbDecoder(Adapter):
         if 'vocabulary_file' in self.launcher_config:
             self.alphabet = read_txt(self.get_value_from_config('vocabulary_file'), ignore_space=True)
         else:
-            self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+            self.alphabet = (''.join(self.get_value_from_config('alphabet')) if self.get_value_from_config('alphabet')
+                             else ' ' + string.ascii_lowercase + '\'')
             self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
 
     def process(self, raw, identifiers=None, frame_meta=None):

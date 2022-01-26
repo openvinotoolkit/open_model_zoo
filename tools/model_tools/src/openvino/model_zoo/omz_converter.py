@@ -90,12 +90,16 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         return False
 
     model_format = model.framework
+    mo_extension_dir = mo_props.base_dir / 'extensions'
+    if not mo_extension_dir.exists():
+        mo_extension_dir = mo_props.base_dir
 
     template_variables = {
         'config_dir': _common.MODEL_ROOT / model.subdirectory,
         'conv_dir': output_dir / model.subdirectory,
         'dl_dir': args.download_dir / model.subdirectory,
         'mo_dir': mo_props.base_dir,
+        'mo_ext_dir':  mo_extension_dir,
     }
 
     if model.conversion_to_onnx_args:
@@ -211,22 +215,29 @@ def main():
             mo_executable = shutil.which('mo')
 
             if mo_executable:
-                mo_cmd_prefix = [str(args.python), '--', mo_executable]
-                mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
-                if mo_package_path is None:
-                    sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
-                mo_dir = mo_package_path.parent
+                mo_path = Path(mo_executable)
             else:
                 try:
-                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
+                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/mo/openvino/tools/mo/mo.py'
+                    if not mo_path.exists():
+                        mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
                 except KeyError:
                     sys.exit('Unable to locate Model Optimizer. '
                         + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
         if mo_path is not None:
-            # run MO as a script
+            mo_path = mo_path.resolve()
             mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
-            mo_dir = mo_path.parent
+            if str(mo_path).lower().endswith('.py'):
+                mo_dir = mo_path.parent
+            else:
+                mo_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.mo')
+                mo_dir = mo_package_path
+                if mo_package_path is None:
+                    mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
+                    mo_dir = mo_package_path.parent
+                    if mo_package_path is None:
+                        sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
@@ -238,12 +249,21 @@ def main():
         )
         shared_convert_args = (output_dir, args, mo_props, requested_precisions)
 
+        def convert_model(model, reporter):
+            if model.model_stages:
+                results = []
+                for model_stage in model.model_stages:
+                    results.append(convert(reporter, model_stage, *shared_convert_args))
+                return sum(results) == len(model.model_stages)
+            else:
+                return convert(reporter, model, *shared_convert_args)
+
         if args.jobs == 1 or args.dry_run:
-            results = [convert(reporter, model, *shared_convert_args) for model in models]
+            results = [convert_model(model, reporter) for model in models]
         else:
             results = _concurrency.run_in_parallel(args.jobs,
                 lambda context, model:
-                    convert(_reporting.Reporter(context), model, *shared_convert_args),
+                    convert_model(model, _reporting.Reporter(context)),
                 models)
 
         failed_models = [model.name for model, successful in zip(models, results) if not successful]

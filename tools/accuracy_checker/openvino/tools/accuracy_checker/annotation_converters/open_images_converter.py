@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -91,3 +91,10 @@ class OpenImagesDetectionConverter(BaseFormatConverter):
             label_map[idx] = real_name
             reversed_annotation_label_map[label_name] = idx
         return label_map, reversed_annotation_label_map
+
+    def get_meta(self):
+        labels = read_csv(self.labels_file, is_dict=False)
+        label_map = {}
+        for idx, (_, real_name) in enumerate(labels, start=self.label_start):
+            label_map[idx] = real_name
+        return {'label_map': label_map}

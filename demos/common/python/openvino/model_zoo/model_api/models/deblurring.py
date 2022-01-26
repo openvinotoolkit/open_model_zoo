@@ -15,30 +15,38 @@ import cv2
 import math
 import numpy as np
 
+from .model import WrapperError
 from .image_model import ImageModel
 
 
 class Deblurring(ImageModel):
-    def __init__(self, ie, model_path, input_image_shape):
-        super().__init__(ie, model_path)
+    __model__ = 'Deblurring'
+
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
         self._check_io_number(1, 1)
         self.block_size = 32
-        self.reshape(input_image_shape)
         self.output_blob_name = self._get_outputs()
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        return parameters
 
     def reshape(self, base_shape):
         h, w, _ = base_shape
         new_height = math.ceil(h / self.block_size) * self.block_size
         new_width = math.ceil(w / self.block_size) * self.block_size
         self.h, self.w = new_height, new_width
-        self.net.reshape({self.image_blob_name: [self.n, self.c, self.h, self.w]})
+        self.logger.debug("\tReshape model from {} to {}".format(
+            [self.n, self.c, h, w], [self.n, self.c, self.h, self.w]))
+        super().reshape({self.image_blob_name: [self.n, self.c, self.h, self.w]})
 
     def _get_outputs(self):
-        output_blob_name = next(iter(self.net.outputs))
-        output_blob = self.net.outputs[output_blob_name]
-        output_size = output_blob.shape
+        output_blob_name = next(iter(self.outputs))
+        output_size = self.outputs[output_blob_name].shape
         if len(output_size) != 4:
-            raise RuntimeError("Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
+            raise WrapperError(self.__model__, "Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
 
         return output_blob_name
 
@@ -57,7 +65,6 @@ class Deblurring(ImageModel):
 
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
-
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, image.shape[1::-1]
 

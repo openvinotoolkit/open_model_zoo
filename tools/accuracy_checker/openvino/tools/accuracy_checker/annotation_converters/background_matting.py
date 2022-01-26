@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,8 +83,11 @@ class BackgroundMattingConverter(BaseFormatConverter):
                 progress_callback(idx / num_iterations * 100)
 
         return ConverterReturn(
-            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+            annotations, self.get_meta(), content_errors
         )
+
+    def get_meta(self):
+        return {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}
 
 
 class VideoBackgroundMatting(BackgroundMattingConverter):
@@ -125,5 +128,5 @@ class VideoBackgroundMatting(BackgroundMattingConverter):
                 progress_callback(idx / num_iterations * 100)
 
         return ConverterReturn(
-            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+            annotations, self.get_meta(), content_errors
         )
