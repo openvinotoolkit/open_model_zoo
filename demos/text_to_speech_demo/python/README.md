@@ -63,7 +63,7 @@ Options:
                         Required. Path to ForwardTacotron`s mel-spectrogram
                         regression part (*.xml format).
   -i INPUT, --input INPUT
-                        Required. Text file with text.
+                        Required. Text or path to the input .txt file..
   -o OUT, --out OUT     Optional. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
