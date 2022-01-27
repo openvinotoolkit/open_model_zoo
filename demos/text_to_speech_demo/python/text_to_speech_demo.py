@@ -53,8 +53,8 @@ def build_argparser():
     args.add_argument("-m_forward", "--model_forward",
                       help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Required. Text file with text.", required=True,
-                      type=str)
+    args.add_argument("-i", "--input", help="Required.  Text or path to the input .txt file.", required=True,
+                      type=str, nargs='*')
     args.add_argument("-o", "--out", help="Optional. Path to an output .wav file", default='out.wav',
                       type=str)
 
@@ -110,6 +110,21 @@ def is_correct_args(args):
 
     return True
 
+def parse_input(input):
+    if not input:
+        return
+    sentences = []
+    for text in input:
+        if text.endswith('.txt'):
+            try:
+                with open(text, 'r', encoding='utf8') as f:
+                    sentences += f.readlines()
+                continue
+            except OSError:
+                pass
+        sentences.append(text)
+    return sentences
+
 
 def main():
     args = build_argparser().parse_args()
@@ -143,38 +158,53 @@ def main():
 
     len_th = 512
 
+    input_data = parse_input(args.input)
+
+    def sentences():
+        if input_data:
+            for sentence in input_data:
+                sentence = sentence.strip()
+                print(sentence)
+                if sentence:
+                    yield sentence
+        else:
+            while True:
+                yield input("> ")
+
     time_forward = 0
     time_wavernn = 0
 
     time_s_all = perf_counter()
-    with open(args.input, 'r') as f:
-        count = 0
-        for line in f:
-            count += 1
-            line = line.rstrip()
-            log.info("Process line {0} with length {1}.".format(count, len(line)))
+    count = 0
+    for line in sentences():
+        if not line.strip():
+            break
+        
+        count += 1
+        line = line.rstrip()
+        log.info("Process line {0} with length {1}.".format(count, len(line)))
 
-            if len(line) > len_th:
-                texts = []
-                prev_begin = 0
-                delimiters = '.!?;:'
-                for i, c in enumerate(line):
-                    if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
-                        texts.append(line[prev_begin:i + 1])
-                        prev_begin = i + 1
-            else:
-                texts = [line]
+        if len(line) > len_th:
+            texts = []
+            prev_begin = 0
+            delimiters = '.!?;:'
+            for i, c in enumerate(line):
+                if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
+                    texts.append(line[prev_begin:i + 1])
+                    prev_begin = i + 1
+        else:
+            texts = [line]
 
-            for text in tqdm(texts):
-                time_s = perf_counter()
-                mel = forward_tacotron.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
-                time_forward += perf_counter() - time_s
+        for text in tqdm(texts):
+            time_s = perf_counter()
+            mel = forward_tacotron.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
+            time_forward += perf_counter() - time_s
 
-                time_s = perf_counter()
-                audio = vocoder.forward(mel)
-                time_wavernn += perf_counter() - time_s
+            time_s = perf_counter()
+            audio = vocoder.forward(mel)
+            time_wavernn += perf_counter() - time_s
 
-                audio_res = np.append(audio_res, audio)
+            audio_res = np.append(audio_res, audio)
 
     total_latency = (perf_counter() - time_s_all) * 1e3
     log.info("Metrics report:")
