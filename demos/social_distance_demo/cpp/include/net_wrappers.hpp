@@ -10,9 +10,10 @@
 #include <vector>
 #include <map>
 
-#include <openvino/openvino.hpp>
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
+#include "openvino/openvino.hpp"
+
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
 
 class PersonDetector {
 public:
@@ -26,8 +27,8 @@ public:
     static constexpr int objectSize = 7;  // Output should have 7 as a last dimension"
 
     PersonDetector() = default;
-    PersonDetector(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
+    PersonDetector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
+            const bool autoResize, const ov::AnyMap& pluginConfig) :
         autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
         slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
@@ -78,16 +79,16 @@ public:
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
     }
 
-    ov::runtime::InferRequest createInferRequest() {
+    ov::InferRequest createInferRequest() {
         return compiledModel.create_infer_request();
     }
 
-    void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img) {
-        ov::runtime::Tensor input = inferRequest.get_input_tensor();
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img) {
+        ov::Tensor input = inferRequest.get_input_tensor();
         if (autoResize) {
             if (!img.isSubmatrix()) {
                 // just wrap Mat object with Blob::Ptr without additional memory allocation
-                ov::runtime::Tensor frameTensor = wrapMat2Tensor(img);
+                ov::Tensor frameTensor = wrapMat2Tensor(img);
                 inferRequest.set_input_tensor(frameTensor);
             } else {
                 throw std::logic_error("Sparse matrix are not supported");
@@ -97,7 +98,7 @@ public:
         }
     }
 
-    std::list<Result> getResults(ov::runtime::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
+    std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         const float* const detections = inferRequest.get_output_tensor().data<float>();
@@ -131,15 +132,15 @@ public:
 private:
     bool autoResize;
     std::vector<float> detectionTresholds;
-    ov::runtime::Core core_;  // The only reason to store a plugin as to assure that it lives at least as long as CompiledModel
-    ov::runtime::CompiledModel compiledModel;
+    ov::Core core_;  // The only reason to store a plugin as to assure that it lives at least as long as CompiledModel
+    ov::CompiledModel compiledModel;
 };
 
 class ReId {
 public:
     ReId() = default;
-    ReId(ov::runtime::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
-        const std::map<std::string, std::string>& pluginConfig) :
+    ReId(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
+        const ov::AnyMap& pluginConfig) :
         autoResize {autoResize},
         core_{core} {
         slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
@@ -183,26 +184,26 @@ public:
             throw std::logic_error("Incorrect output dimensions for Re-ID");
         }
 
-        reidLen = outputShape[1];
+        reidLen = (int)outputShape[1];
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
         compiledModel = core_.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-ID");
     }
 
-    ov::runtime::InferRequest createInferRequest() {
+    ov::InferRequest createInferRequest() {
         return compiledModel.create_infer_request();
     }
 
-    void setImage(ov::runtime::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
-        ov::runtime::Tensor input = inferRequest.get_input_tensor();
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
+        ov::Tensor input = inferRequest.get_input_tensor();
         if (autoResize) {
-            ov::runtime::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Tensor frameTensor = wrapMat2Tensor(img);
             ov::Shape tensorShape = frameTensor.get_shape();
             ov::Layout layout("NHWC");
             const size_t batch = tensorShape[ov::layout::batch_idx(layout)];
             const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
-            ov::runtime::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
+            ov::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
                 {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height),
                 static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
             inferRequest.set_input_tensor(roiTensor);
@@ -212,7 +213,7 @@ public:
         }
     }
 
-    std::vector<float> getResults(ov::runtime::InferRequest& inferRequest) {
+    std::vector<float> getResults(ov::InferRequest& inferRequest) {
         std::vector<float> result;
         const float* const reids = inferRequest.get_output_tensor().data<float>();
         for (int i = 0; i < reidLen; i++) {
@@ -224,6 +225,6 @@ public:
 private:
     bool autoResize;
     int reidLen;
-    ov::runtime::Core core_;  // The only reason to store a device as to assure that it lives at least as long as  CompiledModel
-    ov::runtime::CompiledModel compiledModel;
+    ov::Core core_;  // The only reason to store a device as to assure that it lives at least as long as  CompiledModel
+    ov::CompiledModel compiledModel;
 };

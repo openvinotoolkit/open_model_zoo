@@ -6,8 +6,9 @@
 
 #include <string>
 #include <vector>
-#include <gflags/gflags.h>
 #include <iostream>
+
+#include "gflags/gflags.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required for video or image files input. Path to video or image files.";

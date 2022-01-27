@@ -14,16 +14,17 @@
 #include <stdexcept>
 #include <string>
 
-#include <gpu/gpu_config.hpp>
-#include <openvino/openvino.hpp>
-#include <monitors/presenter.h>
-#include <vpu/hddl_config.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/grid_mat.hpp>
-#include <utils/input_wrappers.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include <utils/threads_common.hpp>
+#include "openvino/openvino.hpp"
+
+#include "gpu/gpu_config.hpp"
+#include "vpu/hddl_config.hpp"
+#include "monitors/presenter.h"
+#include "utils/args_helper.hpp"
+#include "utils/grid_mat.hpp"
+#include "utils/input_wrappers.hpp"
+#include "utils/ocv_common.hpp"
+#include "utils/slog.hpp"
+#include "utils/threads_common.hpp"
 
 #include "geodist.hpp"
 #include "net_wrappers.hpp"
@@ -32,7 +33,7 @@
 
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -61,7 +62,7 @@ struct InferRequestsContainer {
     InferRequestsContainer(const InferRequestsContainer&) = delete;
     InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
 
-    void assign(const std::vector<ov::runtime::InferRequest>& inferRequests) {
+    void assign(const std::vector<ov::InferRequest>& inferRequests) {
         actualInferRequests = inferRequests;
         this->inferRequests.container.clear();
 
@@ -70,13 +71,13 @@ struct InferRequestsContainer {
         }
     }
 
-    std::vector<ov::runtime::InferRequest> getActualInferRequests() {
+    std::vector<ov::InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
-    ConcurrentContainer<std::vector<std::reference_wrapper<ov::runtime::InferRequest>>> inferRequests;
+    ConcurrentContainer<std::vector<std::reference_wrapper<ov::InferRequest>>> inferRequests;
 
 private:
-    std::vector<ov::runtime::InferRequest> actualInferRequests;
+    std::vector<ov::InferRequest> actualInferRequests;
 };
 
 struct Context {  // stores all global data for tasks
@@ -102,8 +103,8 @@ struct Context {  // stores all global data for tasks
         frameCounter{0}
     {
         assert(inputChannels.size() == gridParam.size());
-        std::vector<ov::runtime::InferRequest> detectorInferRequests;
-        std::vector<ov::runtime::InferRequest> reidInferRequests;
+        std::vector<ov::InferRequest> detectorInferRequests;
+        std::vector<ov::InferRequest> reidInferRequests;
         detectorInferRequests.reserve(nireq);
         reidInferRequests.reserve(nreidireq);
         std::generate_n(std::back_inserter(detectorInferRequests), nireq, [&]{
@@ -175,7 +176,7 @@ struct Context {  // stores all global data for tasks
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    std::atomic<std::vector<ov::runtime::InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<std::vector<ov::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, reidInfers;
     PerformanceMetrics metrics;
@@ -183,18 +184,18 @@ struct Context {  // stores all global data for tasks
 
 class ReborningVideoFrame : public VideoFrame {
 public:
-    ReborningVideoFrame(Context &context, const unsigned sourceID, const int64_t frameId, const cv::Mat &frame = cv::Mat())
+    ReborningVideoFrame(Context& context, const unsigned sourceID, const int64_t frameId, const cv::Mat& frame = cv::Mat())
             : VideoFrame{sourceID, frameId, frame}, context(context) {} // can not write context{context} because of CentOS 7.4 compiler bug
 
     virtual ~ReborningVideoFrame();
-    Context &context;
+    Context& context;
 };
 
 // accumulates and shows processed frames
 class Drawer : public Task {
 public:
-    explicit Drawer(VideoFrame::Ptr sharedVideoFrame)
-        : Task{sharedVideoFrame, 1.0} {}
+    explicit Drawer(VideoFrame::Ptr sharedVideoFrame) :
+        Task{sharedVideoFrame, 1.0} {}
     bool isReady() override;
     void process() override;
 
@@ -226,25 +227,25 @@ private:
 // waits for all reid results accumulating results
 class ClassifiersAggregator {
 public:
-    explicit ClassifiersAggregator(const VideoFrame::Ptr &sharedVideoFrame) : sharedVideoFrame{sharedVideoFrame} {}
+    explicit ClassifiersAggregator(const VideoFrame::Ptr& sharedVideoFrame) : sharedVideoFrame{sharedVideoFrame} {}
 
     ~ClassifiersAggregator() {
-        std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
+        std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (FLAGS_r && !rawDetections.empty()) {
             slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
             slog::debug << rawDetections;
         }
         printMutex.unlock();
-        tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,
+        tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxes), std::move(trackables)));
     }
 
-    void push(cv::Rect &&bbox) {
+    void push(cv::Rect&& bbox) {
         boxes.lockedPushBack(std::move(bbox));
     }
 
-    void push(TrackableObject &&trackable) {
+    void push(TrackableObject&& trackable) {
         trackables.lockedPushBack(std::move(trackable));
     }
 
@@ -259,14 +260,14 @@ private:
 // extracts detections from blob InferRequests and runs Re-Id
 class DetectionsProcessor : public Task {
 public:
-    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, ov::runtime::InferRequest *inferRequest)
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, ov::InferRequest* inferRequest)
             : Task{sharedVideoFrame, 1.0},
               inferRequest{inferRequest},
               requireGettingNumberOfDetections{true} {}
 
     DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame,
-                        std::shared_ptr<ClassifiersAggregator> &&classifiersAggregator,
-                        std::list<cv::Rect> &&personRects)
+                        std::shared_ptr<ClassifiersAggregator>&& classifiersAggregator,
+                        std::list<cv::Rect>&& personRects)
             : Task{sharedVideoFrame, 1.0},
               classifiersAggregator{std::move(classifiersAggregator)},
               inferRequest{nullptr},
@@ -278,10 +279,10 @@ public:
 
 private:
     std::shared_ptr<ClassifiersAggregator> classifiersAggregator; // when no one stores this object we will draw
-    ov::runtime::InferRequest *inferRequest;
+    ov::InferRequest* inferRequest;
     std::list<cv::Rect> personRects;
     std::vector<TrackableObject> personTrackers;
-    std::vector<std::reference_wrapper<ov::runtime::InferRequest>> reservedReIdRequests;
+    std::vector<std::reference_wrapper<ov::InferRequest>> reservedReIdRequests;
     bool requireGettingNumberOfDetections;
 };
 
@@ -504,12 +505,12 @@ void DetectionsProcessor::process() {
 
             for (auto reidRequestsIt = reservedReIdRequests.begin(); reidRequestsIt != reservedReIdRequests.end(); personRectsIt++, reidRequestsIt++) {
                 const cv::Rect personRect = *personRectsIt;
-                ov::runtime::InferRequest& reidRequest = *reidRequestsIt;
+                ov::InferRequest& reidRequest = *reidRequestsIt;
                 context.detectionsProcessorsContext.reid.setImage(reidRequest, sharedVideoFrame->frame, personRect);
 
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                        ov::runtime::InferRequest &reidRequest, cv::Rect rect, Context &context) {
+                        ov::InferRequest& reidRequest, cv::Rect rect, Context& context) {
                                     reidRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
@@ -556,7 +557,7 @@ bool InferTask::isReady() {
 void InferTask::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
-    std::reference_wrapper<ov::runtime::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
@@ -565,7 +566,7 @@ void InferTask::process() {
     inferRequest.get().set_callback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
-                ov::runtime::InferRequest& inferRequest,
+                ov::InferRequest& inferRequest,
                 Context& context) {
                     inferRequest.set_callback([](const std::exception_ptr& e) {});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
@@ -677,7 +678,7 @@ int main(int argc, char* argv[]) {
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         std::set<std::string> devices;
         for (const std::string& netDevices : {FLAGS_d_det, FLAGS_d_reid}) {
@@ -693,31 +694,31 @@ int main(int argc, char* argv[]) {
         for (const std::string& device : devices) {
             if ("CPU" == device) {
                 if (FLAGS_nthreads != 0) {
-                    core.set_config({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
+                    core.set_property("CPU", { { CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }});
                 }
-                core.set_config({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
-                core.set_config({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
+                core.set_property("CPU", { { CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }});
+                core.set_property("CPU", { { CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (deviceNStreams.count("CPU") > 0 ? std::to_string(deviceNStreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, "CPU");
-                deviceNStreams["CPU"] = std::stoi(core.get_config("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
+                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }});
+                deviceNStreams["CPU"] = std::stoi(core.get_property("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             }
 
             if ("GPU" == device) {
-                core.set_config({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+                core.set_property("GPU", { { CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (deviceNStreams.count("GPU") > 0 ? std::to_string(deviceNStreams.at("GPU")) :
-                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
-                deviceNStreams["GPU"] = std::stoi(core.get_config("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }});
+                deviceNStreams["GPU"] = std::stoi(core.get_property("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    core.set_config({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                    core.set_property("GPU", { { GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }});
                 }
             }
         }
 
         /** Graph tagging via config options**/
-        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
-            std::map<std::string, std::string> config;
+        auto makeTagConfig = [&](const std::string& deviceName, const std::string& suffix) {
+            ov::AnyMap config;
             if (FLAGS_tag && deviceName == "HDDL") {
                 config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
             }
