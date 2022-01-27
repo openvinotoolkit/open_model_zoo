@@ -78,6 +78,7 @@ omz_converter --list models.lst
 * squeezenet1.0
 * squeezenet1.1
 * swin-tiny-patch4-window7-224
+* t2t-vit-14
 * vgg16
 * vgg19
 
