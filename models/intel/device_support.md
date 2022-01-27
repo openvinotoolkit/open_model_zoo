@@ -131,3 +131,4 @@
 | yolo-v2-tiny-ava-sparse-30-0001 | YES | YES | YES |
 | yolo-v2-tiny-ava-sparse-60-0001 | YES | YES | YES |
 | yolo-v2-tiny-vehicle-detection-0001 | YES | YES | YES |
+| smartlab-sequence-modelling-0001 | YES | YES |  |
