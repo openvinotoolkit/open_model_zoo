@@ -29,10 +29,13 @@ SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, con
 void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
-    ov::Layout origInputTensorLayout("NCHW");
-    auto channelsId = ov::layout::channels_idx(origInputTensorLayout);
-    auto heightId = ov::layout::height_idx(origInputTensorLayout);
-    auto widthId = ov::layout::width_idx(origInputTensorLayout);
+    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
+    auto channelsId = ov::layout::channels_idx(inputLayout);
+    auto heightId = ov::layout::height_idx(inputLayout);
+    auto widthId = ov::layout::width_idx(inputLayout);
 
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1 && inputsInfo.size() != 2) {
@@ -68,11 +71,10 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ov::Layout newInputTensorLayout("NHWC");
     for (const auto& input : inputsInfo) {
         ppp.input(input.get_any_name()).tensor().
             set_element_type(ov::element::u8).
-            set_layout(newInputTensorLayout);
+            set_layout("NHWC");
 
         ppp.input(input.get_any_name()).model().set_layout("NCHW");
     }
@@ -89,14 +91,15 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     const ov::Shape& outShape = model->output().get_shape();
 
-    ov::Layout outputTensorLayout("NCHW");
-    auto outWidth = outShape[ov::layout::width_idx(outputTensorLayout)];
-    auto inWidth = lrShape[ov::layout::width_idx(origInputTensorLayout)];
-    changeInputSize(model, newInputTensorLayout, static_cast<int>(outWidth / inWidth));
+    ov::Layout outputLayout("NCHW");
+    auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
+    changeInputSize(model, static_cast<int>(outWidth / inWidth));
 }
 
-void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, const ov::Layout& layout, int coeff) {
+void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, int coeff) {
     std::map<std::string, ov::PartialShape> shapes;
+    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
     auto batchId = ov::layout::batch_idx(layout);
     auto heightId = ov::layout::height_idx(layout);
     auto widthId = ov::layout::width_idx(layout);
