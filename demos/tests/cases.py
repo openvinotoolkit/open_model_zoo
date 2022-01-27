@@ -723,7 +723,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('text-detection')}),
+            '-i': DataPatternArg('text-detection-gapi')}),
         single_option_cases('-m_td',
             ModelArg('text-detection-0003'),
             ModelArg('text-detection-0004'),
