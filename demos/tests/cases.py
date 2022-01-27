@@ -1294,7 +1294,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m_duration': ModelArg('forward-tacotron-duration-prediction'),
                 '-m_forward': ModelArg('forward-tacotron-regression'),
-                '-m_upsample': ModelArg('wavernn-upsample'),
+                '-m_upsample': ModelArg('wavernn-upsampler'),
                 '-m_rnn': ModelArg('wavernn-rnn')
             }),
             TestCase(options={
