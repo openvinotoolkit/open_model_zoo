@@ -297,8 +297,8 @@ void cropImage(const cv::Mat& image, const std::vector<cv::Point2f>& points,
     cv::Point2f point2 = points[(topLeftPointIdx + 2) % 4];
     std::vector<cv::Point2f> from { point0, point1, point2 };
 
-    const float targetWidth  = targetSize.width  - 1;
-    const float targetHeight = targetSize.height - 1;
+    const float targetWidth  = static_cast<float>(targetSize.width  - 1);
+    const float targetHeight = static_cast<float>(targetSize.height - 1);
     std::vector<cv::Point2f> to { cv::Point2f(0.0f,        0.0f),
                                   cv::Point2f(targetWidth, 0.0f),
                                   cv::Point2f(targetWidth, targetHeight) };
@@ -355,7 +355,7 @@ GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
                     const size_t                 numClasses,
                     const size_t                 endToken,
                           std::vector<cv::Mat>&  res) {
-        constexpr size_t maxDecodedSymbols = 20;
+        constexpr int maxDecodedSymbols = 20;
         GAPI_DbgAssert(hiddens_.size() == features.size());
         const size_t numDetectedLabels = features.size();
 
@@ -366,7 +366,7 @@ GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
 
         res.reserve(numDetectedLabels);
         for (auto i = 0U; i < numDetectedLabels; i++) {
-            res.emplace_back(cv::Mat({maxDecodedSymbols, 1, static_cast<int>(numClasses)},
+            res.emplace_back(cv::Mat({ maxDecodedSymbols, 1, static_cast<int>(numClasses) },
                                      CV_32FC1));
         }
 
@@ -380,7 +380,7 @@ GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
 
         cv::Mat hidden, out;
         for (size_t nLabel = 0; nLabel < numDetectedLabels; nLabel++) {
-            for (size_t nSymbol = 0; nSymbol < maxDecodedSymbols; nSymbol++) {
+            for (int nSymbol = 0; nSymbol < maxDecodedSymbols; nSymbol++) {
                 pipeline(cv::gin(states[nLabel], hiddens[nLabel], features[nLabel]),
                          cv::gout(hidden, out));
 

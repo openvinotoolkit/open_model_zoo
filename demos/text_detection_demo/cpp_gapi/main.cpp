@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
         const bool tdReshape          = cv::Size() != tdNewInputSize;
         const size_t tdMaxRectsNum    = FLAGS_max_rect_num;
         const bool centralCrop        = FLAGS_cc;
-        const float segmConfThreshold = FLAGS_cls_pixel_thr;
-        const float linkConfThreshold = FLAGS_link_pixel_thr;
+        const float segmConfThreshold = static_cast<float>(FLAGS_cls_pixel_thr);
+        const float linkConfThreshold = static_cast<float>(FLAGS_link_pixel_thr);
         const double trMinConfidence  = FLAGS_thr;
               bool trPadSymbolFirst   = FLAGS_tr_pt_first;
 
