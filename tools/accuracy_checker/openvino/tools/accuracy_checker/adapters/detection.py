@@ -24,7 +24,7 @@ from ..adapters import Adapter
 from ..config import ConfigValidator, BaseField, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
-from ..utils import get_or_parse_value
+from ..utils import get_or_parse_value, softmax
 
 FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'prob_name',
@@ -933,3 +933,100 @@ class PPDetectionAdapter(Adapter):
             results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return results
+
+
+class NanoDetAdapter(Adapter):
+    __provider__ = 'nanodet'
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'num_classes': NumberField(
+                description="Number of classes.", value_type=int, min_value=0, default=80, optional=True),
+            'confidence_threshold': NumberField(optional=True, default=0.05, description="confidence threshold"),
+            'nms_threshold': NumberField(optional=True, default=0.6, description="NMS threshold"),
+            'max_detections': NumberField(optional=True, value_type=int, default=100,
+                                          description="maximal number of detections")
+        })
+        return parameters
+
+    def configure(self):
+        self.num_classes = self.get_value_from_config('num_classes')
+        self.confidence_threshold = self.get_value_from_config('confidence_threshold')
+        self.nms_threshold = self.get_value_from_config('nms_threshold')
+        self.max_detections = self.get_value_from_config('max_detections')
+        # Set default values
+        self.strides = [8, 16, 32]
+        self.reg_max = 7
+
+    @staticmethod
+    def distance2bbox(points, distance, max_shape):
+        x1 = np.expand_dims(points[:, 0] - distance[:, 0], -1).clip(0, max_shape[1])
+        y1 = np.expand_dims(points[:, 1] - distance[:, 1], -1).clip(0, max_shape[0])
+        x2 = np.expand_dims(points[:, 0] + distance[:, 2], -1).clip(0, max_shape[1])
+        y2 = np.expand_dims(points[:, 1] + distance[:, 3], -1).clip(0, max_shape[0])
+        return np.concatenate((x1, y1, x2, y2), axis=-1)
+
+    def get_single_level_center_point(self, featmap_size, stride):
+        h, w = featmap_size
+        x_range, y_range = (np.arange(w) + 0.5) * stride, (np.arange(h) + 0.5) * stride
+        y, x = np.meshgrid(y_range, x_range, indexing='ij')
+        return y.flatten(), x.flatten()
+
+    def get_bboxes(self, reg_preds, input_height, input_width):
+        featmap_sizes = [(math.ceil(input_height / stride), math.ceil(input_width) / stride) for stride in self.strides]
+        list_center_priors = []
+        for i, stride in enumerate(self.strides):
+            y, x = self.get_single_level_center_point(featmap_sizes[i], stride)
+            strides = np.full_like(x, stride)
+            list_center_priors.append(np.stack([x, y, strides, strides], axis=-1))
+        center_priors = np.concatenate(list_center_priors, axis=0)
+        dist_project = np.linspace(0, self.reg_max, self.reg_max + 1)
+        x = np.dot(softmax(np.reshape(reg_preds, (*reg_preds.shape[:-1], 4, self.reg_max + 1)), -1), dist_project)
+        dis_preds = x * np.expand_dims(center_priors[:, 2], -1)
+        return self.distance2bbox(center_priors[:, :2], dis_preds, (input_height, input_width))
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
+        raw_output = raw_output[self.output_blob]
+
+        result = []
+        for identifier, output, meta in zip(identifiers, raw_output, frame_meta):
+            cls_scores = output[:, :self.num_classes]
+            bbox_preds = output[:, self.num_classes:]
+            input_height, input_width = meta['preferable_height'], meta['preferable_width']
+
+            bboxes = self.get_bboxes(bbox_preds, input_height, input_width)
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            for label, score in enumerate(np.transpose(cls_scores)):
+                mask = score > self.confidence_threshold
+                filtered_boxes, score = bboxes[mask, :], score[mask]
+                if score.size == 0:
+                    continue
+                x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, score, self.nms_threshold, include_boundaries=True)
+                score = score[keep]
+                x_mins, y_mins, x_maxs, y_maxs = x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep]
+                labels = np.full_like(score, label, dtype=int)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(score)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+            if len(detections['scores']) > self.max_detections:
+                sort_idx = np.argsort(detections['scores'])[::-1][:self.max_detections]
+                for key, value in detections.items():
+                    detections[key] = np.array(value)[sort_idx]
+            result.append(
+                DetectionPrediction(identifier, detections['labels'], detections['scores'], detections['x_mins'],
+                                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']))
+        return result
