@@ -33,7 +33,7 @@ class ImageInpainting:
             _, _, input_height, input_width = model.input(self.image_input_layer).shape
             _, mask_channels, mask_height, mask_width = model.input(self.mask_input_layer).shape
         else:
-            _, input_height, input_width, = model.input(self.image_input_layer).shape
+            _, input_height, input_width, _ = model.input(self.image_input_layer).shape
             _, mask_height, mask_width, mask_channels = model.input(self.mask_input_layer).shape
 
         if mask_channels != 1:
