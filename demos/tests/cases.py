@@ -1285,7 +1285,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
-               model_keys=['-m_duration', '-m_forward', '-m_upsample','-m_rnn','-m_melgan'], test_cases=combine_cases(
+               model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
         TestCase(options={'-i': [
                     'The quick brown fox jumps over the lazy dog.',
                     'The five boxing wizards jump quickly.'

@@ -53,7 +53,7 @@ def build_argparser():
     args.add_argument("-m_forward", "--model_forward",
                       help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Required.  Text or path to the input .txt file.", required=True,
+    args.add_argument("-i", "--input", help="Required. Text or path to the input .txt file.", required=True,
                       type=str, nargs='*')
     args.add_argument("-o", "--out", help="Optional. Path to an output .wav file", default='out.wav',
                       type=str)
