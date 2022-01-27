@@ -1293,9 +1293,9 @@ PYTHON_DEMOS = [
         [
             TestCase(options={
                 '-m_duration': ModelArg('forward-tacotron-duration-prediction'),
-                '-m_forward': ModelArg('forward_tacotron_regression'),
-                '-m_upsample': ModelArg('wavernn_upsampler'),
-                '-m_rnn': ModelArg('wavernn_rnn')
+                '-m_forward': ModelArg('forward-tacotron-regression'),
+                '-m_upsample': ModelArg('wavernn-upsample'),
+                '-m_rnn': ModelArg('wavernn-rnn')
             }),
             TestCase(options={
                 '-m_duration': ModelArg('text-to-speech-en-0001-duration-prediction'),
