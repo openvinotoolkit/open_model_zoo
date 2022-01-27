@@ -11,12 +11,12 @@ backbone with VFNet head for 1344x800 resolution.
 
 ## Specification
 
-| Metric                 | Value                    |
-| ---------------------- | ------------------------ |
-| AP @ [ IoU=0.50:0.95 ] | 0.45 (internal test set) |
-| GFlops                 | 79318.2158               |
-| MParams                | 55.5570                  |
-| Source framework       | PyTorch\*                |
+| Metric                 | Value                     |
+| ---------------------- | ------------------------- |
+| AP @ [ IoU=0.50:0.95 ] | 0.439 (internal test set) |
+| GFlops                 | 79318.2158                |
+| MParams                | 55.5570                   |
+| Source framework       | PyTorch\*                 |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
