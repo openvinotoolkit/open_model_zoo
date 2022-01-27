@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
 
         // Loading Inference Engine
-        ov::runtime::Core core;
+        ov::Core core;
 
         slog::info << "Reading model: " << FLAGS_m << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
@@ -179,10 +179,10 @@ int main(int argc, char* argv[]) {
 
         slog::info << "State_param_num = " << state_size << " (" << std::setprecision(4) << state_size * sizeof(float) * 1e-6f << "Mb)" << slog::endl;
 
-        ov::runtime::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
+        ov::CompiledModel compiled_model = core.compile_model(model, FLAGS_d);
         logCompiledModelInfo(compiled_model, FLAGS_m, FLAGS_d);
 
-        ov::runtime::InferRequest infer_request = compiled_model.create_infer_request();
+        ov::InferRequest infer_request = compiled_model.create_infer_request();
 
         // Prepare input
         // get size of network input (patch_size)
@@ -214,20 +214,20 @@ int main(int argc, char* argv[]) {
 
         auto start_time = Time::now();
         for(size_t i = 0; i < iter; ++i) {
-            ov::runtime::Tensor input_tensor(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
+            ov::Tensor input_tensor(ov::element::f32, inp_shape, &inp_wave_fp32[i * patch_size]);
             infer_request.set_tensor(input_name, input_tensor);
 
             for (auto& state_name: state_names) {
                 const std::string& inp_state_name = state_name.first;
                 const std::string& out_state_name = state_name.second;
-                ov::runtime::Tensor state_tensor;
+                ov::Tensor state_tensor;
                 if (i > 0) {
                     // set input state by coresponding output state from prev infer
                     state_tensor = infer_request.get_tensor(out_state_name);
                 } else {
                     // first iteration. set input state to zero tensor.
                     ov::Shape state_shape = model->input(inp_state_name).get_shape();
-                    state_tensor = ov::runtime::Tensor(ov::element::f32, state_shape);
+                    state_tensor = ov::Tensor(ov::element::f32, state_shape);
                     memset(state_tensor.data<float>(), 0, state_tensor.get_byte_size());
                 }
                 infer_request.set_tensor(inp_state_name, state_tensor);

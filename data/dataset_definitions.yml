@@ -1437,3 +1437,12 @@ datasets:
       data_dir: LIVE_1
       input_suffix: .bmp
       target_suffix: .bmp
+
+  - name: online_mstcn_plus_dataset
+    data_source: annotation
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: annotation
+      input_suffix: in
+      reference_suffix: out
