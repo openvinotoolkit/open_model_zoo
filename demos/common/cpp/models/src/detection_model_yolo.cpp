@@ -70,11 +70,11 @@
 //    presetMasks(masks) {
 //}
 //
-//void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+//void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
 //    // --------------------------- Prepare input blobs ------------------------------------------------------
 //    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-//    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+//    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //    if (inputInfo.size() != 1) {
 //        throw std::logic_error("This demo accepts networks that have only one input");
 //    }
@@ -97,7 +97,7 @@
 //
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
 //    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-//    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+//    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    for (auto& output : outputInfo) {
 //        output.second->setPrecision(InferenceEngine::Precision::FP32);
 //        if (output.second->getDims().size() == 4) {
@@ -108,7 +108,7 @@
 //
 //    yoloVersion = YOLO_V3;
 //    bool isRegionFound = false;
-//    if (auto ngraphFunction = (cnnNetwork).getFunction()) {
+//    if (auto ngraphFunction = (model).getFunction()) {
 //        for (const auto op : ngraphFunction->get_ops()) {
 //            auto outputLayer = outputInfo.find(op->get_friendly_name());
 //            if (outputLayer != outputInfo.end()) {

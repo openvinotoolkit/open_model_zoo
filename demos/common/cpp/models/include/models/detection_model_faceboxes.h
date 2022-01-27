@@ -43,7 +43,7 @@
 //    const std::vector<int> steps;
 //    const std::vector<std::vector<int>> minSizes;
 //    std::vector<Anchor> anchors;
-//    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+//    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 //    void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 //
 //};

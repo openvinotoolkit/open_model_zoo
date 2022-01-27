@@ -22,7 +22,7 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     useAutoResize(useAutoResize) {
 }
 
-std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
+std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     auto img = inputTransform(origImg);
 
@@ -32,9 +32,9 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
     }
     else {
         // /* Resize and copy data from the image to the input tensor */
-        // ov::runtime::Tensor frameTensor = request.get_input_tensor();
+        // ov::Tensor frameTensor = request.get_input_tensor();
         // matToTensor(img, frameTensor);
-        ov::runtime::Tensor frameTensor = request.get_input_tensor();
+        ov::Tensor frameTensor = request.get_input_tensor();
         ov::Shape tensorShape = frameTensor.get_shape();
         ov::Layout layout("NHWC");
         const size_t width = tensorShape[ov::layout::width_idx(layout)];

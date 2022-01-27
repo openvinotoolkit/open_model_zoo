@@ -1,134 +1,155 @@
-///*
-//// Copyright (C) 2021 Intel Corporation
-////
-//// Licensed under the Apache License, Version 2.0 (the "License");
-//// you may not use this file except in compliance with the License.
-//// You may obtain a copy of the License at
-////
-////      http://www.apache.org/licenses/LICENSE-2.0
-////
-//// Unless required by applicable law or agreed to in writing, software
-//// distributed under the License is distributed on an "AS IS" BASIS,
-//// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//// See the License for the specific language governing permissions and
-//// limitations under the License.
-//*/
+/*
+// Copyright (C) 2021 Intel Corporation
 //
-//#include "models/jpeg_restoration_model.h"
-//#include "utils/ocv_common.hpp"
-//#include <utils/slog.hpp>
-//#include <inference_engine.hpp>
-//#include <iostream>
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize, bool _jpegCompression) :
-//    ImageModel(modelFileName, false) {
-//        netInputHeight = inputImgSize.height;
-//        netInputWidth = inputImgSize.width;
-//        jpegCompression = _jpegCompression;
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//}
-//
-//void JPEGRestorationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-//    // --------------------------- Configure input & output -------------------------------------------------
-//    // --------------------------- Prepare input blobs ------------------------------------------------------
-//
-//    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-//    if (inputShapes.size() != 1)
-//        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
-//    inputsNames.push_back(inputShapes.begin()->first);
-//    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
-//    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
-//        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-//
-//    // --------------------------- Prepare output blobs -----------------------------------------------------
-//    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-//    if (outputInfo.size() != 1)
-//        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
-//
-//    outputsNames.push_back(outputInfo.begin()->first);
-//    InferenceEngine::Data& data = *outputInfo.begin()->second;
-//    data.setPrecision(InferenceEngine::Precision::FP32);
-//    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
-//    if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
-//        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
-//
-//    changeInputSize(cnnNetwork);
-//}
-//
-//void JPEGRestorationModel::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
-//    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-//    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
-//
-//    if (inputDims[2] % stride || inputDims[3] % stride)
-//        throw std::runtime_error("The shape of the model input must be divisible by stride");
-//
-//    netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
-//    netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
-//
-//    inputDims[0] = 1;
-//    inputDims[2] = netInputHeight;
-//    inputDims[3] = netInputWidth;
-//
-//    cnnNetwork.reshape(inputShapes);
-//}
-//
-//std::shared_ptr<InternalModelData> JPEGRestorationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-//    cv::Mat image = inputData.asRef<ImageInputData>().inputImage;
-//    size_t h = image.rows;
-//    size_t w = image.cols;
-//    cv::Mat resizedImage;
-//    if (jpegCompression) {
-//        std::vector<uchar> encimg;
-//        std::vector<int> params{cv::IMWRITE_JPEG_QUALITY, 40};
-//        cv::imencode(".jpg", image, encimg, params);
-//        image = cv::imdecode(cv::Mat(encimg), 3);
-//    }
-//
-//    if (netInputHeight - stride < h && h <= netInputHeight
-//        && netInputWidth - stride < w && w <= netInputWidth) {
-//        int bottom = netInputHeight - h;
-//        int right = netInputWidth - w;
-//        cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right,
-//                           cv::BORDER_CONSTANT, 0);
-//    } else {
-//        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
-//        cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
-//    }
-//    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-//    matToBlob(resizedImage, frameBlob);
-//
-//    return std::make_shared<InternalImageModelData>(image.cols, image.rows);
-//}
-//
-//std::unique_ptr<ResultBase> JPEGRestorationModel::postprocess(InferenceResult& infResult) {
-//    ImageResult* result = new ImageResult;
-//    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
-//
-//    const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
-//
-//    InferenceEngine::LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-//    const auto outputData = outMapped.as<float*>();
-//
-//    std::vector<cv::Mat> imgPlanes;
-//    const InferenceEngine::SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
-//    size_t outHeight = (int)(outSizeVector[2]);
-//    size_t outWidth = (int)(outSizeVector[3]);
-//    size_t numOfPixels = outWidth * outHeight;
-//    imgPlanes = std::vector<cv::Mat>{
-//          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
-//          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
-//          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
-//    cv::Mat resultImg;
-//    cv::merge(imgPlanes, resultImg);
-//
-//    if (netInputHeight - stride < static_cast<size_t>(inputImgSize.inputImgHeight) && static_cast<size_t>(inputImgSize.inputImgHeight) <= netInputHeight
-//        && netInputWidth - stride < static_cast<size_t>(inputImgSize.inputImgWidth) && static_cast<size_t>(inputImgSize.inputImgWidth) <= netInputWidth) {
-//        result->resultImage = resultImg(cv::Rect(0, 0, inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
-//    } else {
-//        cv::resize(resultImg, result->resultImage, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
-//    }
-//
-//    result->resultImage.convertTo(result->resultImage, CV_8UC3, 255);
-//
-//    return std::unique_ptr<ResultBase>(result);
-//}
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
+
+#include <iostream>
+#include <openvino/openvino.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+#include "models/jpeg_restoration_model.h"
+
+JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize, bool _jpegCompression) :
+    ImageModel(modelFileName, false) {
+        netInputHeight = inputImgSize.height;
+        netInputWidth = inputImgSize.width;
+        jpegCompression = _jpegCompression;
+
+}
+
+void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
+    // --------------------------- Configure input & output -------------------------------------------------
+    // --------------------------- Prepare input blobs ------------------------------------------------------
+    const ov::OutputVector& inputsInfo = model->inputs();
+    if (inputsInfo.size() != 1) {
+        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
+    }
+    inputsNames.push_back(model->input().get_any_name());
+
+    const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
+
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
+        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout("NHWC");
+
+    ppp.input().model().set_layout(inputLayout);
+
+    // --------------------------- Prepare output blobs -----------------------------------------------------
+    const ov::OutputVector& outputsInfo = model->outputs();
+    if (outputsInfo.size() != 1) {
+        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
+    }
+    const ov::Shape& outputShape = model->output().get_shape();
+    ov::Layout outputLayout{ "NCHW" };
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+    }
+
+    outputsNames.push_back(model->output().get_any_name());
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
+
+    changeInputSize(model);
+}
+
+void JPEGRestorationModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
+    auto inTensorName = model->input().get_any_name();
+    ov::Shape inputShape = model->input().get_shape();
+    ov::Layout layout = ov::layout::get_layout(model->input());
+
+    auto batchId = ov::layout::batch_idx(layout);
+    auto heightId = ov::layout::height_idx(layout);
+    auto widthId = ov::layout::width_idx(layout);
+
+    if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
+        throw std::runtime_error("The shape of the model input must be divisible by stride");
+    }
+
+    netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
+    netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
+
+    inputShape[batchId] = 1;
+    inputShape[heightId] = netInputHeight;
+    inputShape[widthId] = netInputWidth;
+
+    std::map<std::string, ov::PartialShape> shapes;
+    shapes[inTensorName] = ov::PartialShape(inputShape);
+    model->reshape(shapes);
+}
+
+std::shared_ptr<InternalModelData> JPEGRestorationModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
+    cv::Mat image = inputData.asRef<ImageInputData>().inputImage;
+    size_t h = image.rows;
+    size_t w = image.cols;
+    cv::Mat resizedImage;
+    if (jpegCompression) {
+        std::vector<uchar> encimg;
+        std::vector<int> params{cv::IMWRITE_JPEG_QUALITY, 40};
+        cv::imencode(".jpg", image, encimg, params);
+        image = cv::imdecode(cv::Mat(encimg), 3);
+    }
+
+    if (netInputHeight - stride < h && h <= netInputHeight
+        && netInputWidth - stride < w && w <= netInputWidth) {
+        int bottom = netInputHeight - h;
+        int right = netInputWidth - w;
+        cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right,
+                           cv::BORDER_CONSTANT, 0);
+    } else {
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+        cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
+    }
+    request.set_input_tensor(wrapMat2Tensor(resizedImage));
+
+    return std::make_shared<InternalImageModelData>(image.cols, image.rows);
+}
+
+std::unique_ptr<ResultBase> JPEGRestorationModel::postprocess(InferenceResult& infResult) {
+    ImageResult* result = new ImageResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+
+    const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
+    const auto outputData = infResult.getFirstOutputTensor().data<float>();
+
+    std::vector<cv::Mat> imgPlanes;
+    const ov::Shape& outputShape = infResult.getFirstOutputTensor().get_shape();
+    size_t outHeight = (int)(outputShape[2]);
+    size_t outWidth = (int)(outputShape[3]);
+    size_t numOfPixels = outWidth * outHeight;
+    imgPlanes = std::vector<cv::Mat>{
+          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
+          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
+          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
+    cv::Mat resultImg;
+    cv::merge(imgPlanes, resultImg);
+
+    if (netInputHeight - stride < static_cast<size_t>(inputImgSize.inputImgHeight) && static_cast<size_t>(inputImgSize.inputImgHeight) <= netInputHeight
+        && netInputWidth - stride < static_cast<size_t>(inputImgSize.inputImgWidth) && static_cast<size_t>(inputImgSize.inputImgWidth) <= netInputWidth) {
+        result->resultImage = resultImg(cv::Rect(0, 0, inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
+    } else {
+        cv::resize(resultImg, result->resultImage, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
+    }
+
+    result->resultImage.convertTo(result->resultImage, CV_8UC3, 255);
+
+    return std::unique_ptr<ResultBase>(result);
+}

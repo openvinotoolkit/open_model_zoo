@@ -30,13 +30,13 @@ public:
 
     virtual ~ModelBase() {}
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::runtime::InferRequest& request) = 0;
+    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
-    virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::runtime::InferRequest>>& requests) {}
+    virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::InferRequest>>& requests) {}
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
-    virtual ov::runtime::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::runtime::Core& core);
+    virtual ov::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::Core& core);
 
     std::string getModelFileName() { return modelFileName; }
 
@@ -45,13 +45,13 @@ public:
     }
 
 protected:
-    std::shared_ptr<ov::Model> prepareModel(ov::runtime::Core& core);
+    std::shared_ptr<ov::Model> prepareModel(ov::Core& core);
     virtual void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) = 0;
 
     InputTransform inputTransform = InputTransform();
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
-    ov::runtime::CompiledModel compiledModel;
+    ov::CompiledModel compiledModel;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
 };

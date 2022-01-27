@@ -73,5 +73,5 @@
 //    std::vector<std::vector<Anchor>> anchors;
 //
 //    void generateAnchorsFpn();
-//    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+//    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 //};

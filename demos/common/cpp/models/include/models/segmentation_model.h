@@ -30,7 +30,7 @@
 //    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 //
 //protected:
-//    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+//    void prepareInputsOutputs(std::shared_ptr<ov::Model> & model) override;
 //
 //    int outHeight = 0;
 //    int outWidth = 0;

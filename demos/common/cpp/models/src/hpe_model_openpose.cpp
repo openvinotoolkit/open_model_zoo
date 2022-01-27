@@ -113,7 +113,7 @@ void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
     model->reshape(shapes);
 }
 
-std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
+std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);

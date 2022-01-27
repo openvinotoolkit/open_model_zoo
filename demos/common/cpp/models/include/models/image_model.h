@@ -24,7 +24,7 @@ public:
     /// @param useAutoResize - if true, image is resized by IE.
     ImageModel(const std::string& modelFileName, bool useAutoResize);
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::runtime::InferRequest& request) override;
+    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
 protected:
     bool useAutoResize;

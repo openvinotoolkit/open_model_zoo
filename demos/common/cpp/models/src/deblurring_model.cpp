@@ -98,7 +98,7 @@ void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     model->reshape(shapes);
 }
 
-std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
+std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     size_t h = image.rows;
     size_t w = image.cols;

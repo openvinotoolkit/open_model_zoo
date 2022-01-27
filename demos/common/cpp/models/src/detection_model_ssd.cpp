@@ -24,7 +24,7 @@
 //    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 //}
 //
-//std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+//std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
 //    if (inputsNames.size() > 1) {
 //        auto blob = request->GetBlob(inputsNames[1]);
 //        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
@@ -131,10 +131,10 @@
 //    return retVal;
 //}
 //
-//void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+//void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
 //    // --------------------------- Prepare input blobs ------------------------------------------------------
-//    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+//    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //
 //    for (const auto& inputInfoItem : inputInfo) {
 //        if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
@@ -170,7 +170,7 @@
 //    }
 //
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
-//    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+//    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    if (outputInfo.size() == 1) {
 //        prepareSingleOutput(outputInfo);
 //    }

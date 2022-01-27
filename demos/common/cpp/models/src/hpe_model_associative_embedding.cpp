@@ -119,7 +119,7 @@ void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model)
     model->reshape(shapes);
 }
 
-std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
+std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);

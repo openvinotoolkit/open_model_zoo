@@ -33,9 +33,9 @@
 //    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
 //        const std::vector<std::string>& labels = std::vector<std::string>());
 //    std::shared_ptr<InternalModelData> preprocess(
-//        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+//        const InputData& inputData, ov::InferRequest& request) override;
 //    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 //
 //protected:
-//    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+//    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 //};

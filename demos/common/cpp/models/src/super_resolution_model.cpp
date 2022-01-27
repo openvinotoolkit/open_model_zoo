@@ -29,13 +29,6 @@ SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, con
 void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
-    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
-    }
-    auto channelsId = ov::layout::channels_idx(inputLayout);
-    auto heightId = ov::layout::height_idx(inputLayout);
-    auto widthId = ov::layout::width_idx(inputLayout);
 
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1 && inputsInfo.size() != 2) {
@@ -47,6 +40,15 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     if (lrShape.size() != 4) {
         throw std::runtime_error("Number of dimensions for an input must be 4");
     }
+
+    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
+    auto channelsId = ov::layout::channels_idx(inputLayout);
+    auto heightId = ov::layout::height_idx(inputLayout);
+    auto widthId = ov::layout::width_idx(inputLayout);
+
     if (lrShape[channelsId] != 1 && lrShape[channelsId] != 3) {
         throw std::runtime_error("Input layer is expected to have 1 or 3 channels");
     }
@@ -129,7 +131,7 @@ void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, in
     model->reshape(shapes);
 }
 
-std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, ov::runtime::InferRequest& request) {
+std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
