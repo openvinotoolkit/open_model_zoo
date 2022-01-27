@@ -125,7 +125,6 @@ class ClassAgnosticDetectionAdapter(Adapter):
             'output_blob': StringField(optional=True, default=None, description="Output blob name."),
             'scale': BaseField(optional=True, default=1.0, description="Scale factor for bboxes."),
         })
-
         return parameters
 
     def configure(self):
@@ -192,15 +191,11 @@ class RFCNCaffe(Adapter):
     @classmethod
     def parameters(cls):
         params = super().parameters()
-        params.update(
-            {
-                'cls_out': StringField(description='bboxes predicted classes score out'),
-                'bbox_out': StringField(
-                    description='bboxes output with shape [N, 8]'
-                ),
-                'rois_out': StringField(description='rois features output')
-            }
-        )
+        params.update({
+            'cls_out': StringField(description='bboxes predicted classes score out'),
+            'bbox_out': StringField(description='bboxes output with shape [N, 8]'),
+            'rois_out': StringField(description='rois features output')
+        })
         return params
 
     def configure(self):
@@ -270,10 +265,7 @@ class RFCNCaffe(Adapter):
             cls_scores = predicted_classes[:, cls_id + 1]
             keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
             filtered_score = cls_scores[keep]
-            x_cls_mins = x_mins[keep]
-            y_cls_mins = y_mins[keep]
-            x_cls_maxs = x_maxs[keep]
-            y_cls_maxs = y_maxs[keep]
+            x_cls_mins, y_cls_mins, x_cls_maxs, y_cls_maxs = x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep]
             # Save detections
             labels = np.full_like(filtered_score, cls_id + 1)
             detections['labels'].extend(labels)
@@ -332,7 +324,6 @@ class FaceBoxesAdapter(Adapter):
             'scores_out': StringField(description="Scores output layer name."),
             'boxes_out': StringField(description="Boxes output layer name."),
         })
-
         return parameters
 
     def configure(self):
@@ -403,7 +394,6 @@ class FaceBoxesAdapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
         batch_scores = raw_outputs[self.scores_out]
@@ -430,17 +420,14 @@ class FaceBoxesAdapter(Adapter):
             boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
 
             for label, score in enumerate(np.transpose(scores)):
-
                 # Skip background label
                 if label == 0:
                     continue
-
                 # Filter out detections with score < confidence_threshold
                 mask = score > self.confidence_threshold
                 filtered_boxes, filtered_score = boxes[mask, :], score[mask]
                 if filtered_score.size == 0:
                     continue
-
                 # Transform to format (x_min, y_min, x_max, y_max)
                 x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
                 y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
@@ -452,10 +439,7 @@ class FaceBoxesAdapter(Adapter):
                                include_boundaries=False, keep_top_k=self.keep_top_k)
 
                 filtered_score = filtered_score[keep]
-                x_mins = x_mins[keep]
-                y_mins = y_mins[keep]
-                x_maxs = x_maxs[keep]
-                y_maxs = y_maxs[keep]
+                x_mins, y_mins, x_maxs, y_maxs = x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep]
 
                 # Keep topK
                 # Applied just after NMS - no additional sorting is required for filtered_score array
@@ -496,21 +480,15 @@ class FaceDetectionAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'score_threshold': NumberField(
-                value_type=float, min_value=0, max_value=1, default=0.35, optional=True,
-                description='Score threshold value used to discern whether a face is valid'),
-            'layer_names': ListField(
-                value_type=str, optional=False,
-                description='Target output layer base names'),
-            'anchor_sizes': ListField(
-                value_type=int, optional=False,
-                description='Anchor sizes for each base output layer'),
-            'window_scales': ListField(
-                value_type=int, optional=False,
-                description='Window scales for each base output layer'),
-            'window_lengths': ListField(
-                value_type=int, optional=False,
-                description='Window lengths for each base output layer'),
+            'score_threshold': NumberField(value_type=float, min_value=0, max_value=1, default=0.35, optional=True,
+                                           description='Score threshold value used to discern whether a face is valid'),
+            'layer_names': ListField(value_type=str, optional=False, description='Target output layer base names'),
+            'anchor_sizes': ListField(value_type=int, optional=False,
+                                      description='Anchor sizes for each base output layer'),
+            'window_scales': ListField(value_type=int, optional=False,
+                                       description='Window scales for each base output layer'),
+            'window_lengths': ListField(value_type=int, optional=False,
+                                        description='Window lengths for each base output layer'),
         })
         return parameters
 
@@ -617,15 +595,10 @@ class FaceDetectionAdapter(Adapter):
                             detections['scores'].append(score)
 
             result.append(
-                DetectionPrediction(
-                    identifier=identifier,
-                    labels=np.zeros_like(detections['scores']),
-                    x_mins=detections['x_mins'],
-                    y_mins=detections['y_mins'],
-                    x_maxs=detections['x_maxs'],
-                    y_maxs=detections['y_maxs'],
-                    scores=detections['scores']
-                )
+                DetectionPrediction(identifier=identifier, labels=np.zeros_like(detections['scores']),
+                                    x_mins=detections['x_mins'], y_mins=detections['y_mins'],
+                                    x_maxs=detections['x_maxs'], y_maxs=detections['y_maxs'],
+                                    scores=detections['scores'])
             )
 
         return result
@@ -639,10 +612,8 @@ class FaceDetectionRefinementAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'threshold': NumberField(
-                value_type=float, min_value=0, default=0.5, optional=False,
-                description='Score threshold to determine as valid face candidate'
-            )
+            'threshold': NumberField(value_type=float, min_value=0, default=0.5, optional=False,
+                                     description='Score threshold to determine as valid face candidate')
         })
         return parameters
 
@@ -699,14 +670,8 @@ class FaceDetectionRefinementAdapter(Adapter):
             detections['y_maxs'].append(y + height)
 
         return [
-            DetectionPrediction(
-                identifier=identifier,
-                x_mins=detections['x_mins'],
-                y_mins=detections['y_mins'],
-                x_maxs=detections['x_maxs'],
-                y_maxs=detections['y_maxs'],
-                scores=detections['scores']
-            )
+            DetectionPrediction(identifier=identifier, x_mins=detections['x_mins'], y_mins=detections['y_mins'],
+                                x_maxs=detections['x_maxs'], y_maxs=detections['y_maxs'], scores=detections['scores'])
         ]
 
 
@@ -716,13 +681,11 @@ class FasterRCNNONNX(Adapter):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update(
-            {
-                'labels_out': StringField(description='name of output layer with labels', optional=True),
-                'scores_out': StringField(description='name of output layer with scores', optional=True),
-                'boxes_out': StringField(description='name of output layer with bboxes')
-            }
-        )
+        parameters.update({
+            'labels_out': StringField(description='name of output layer with labels', optional=True),
+            'scores_out': StringField(description='name of output layer with scores', optional=True),
+            'boxes_out': StringField(description='name of output layer with bboxes')
+        })
         return parameters
 
     def configure(self):
@@ -825,13 +788,13 @@ class DETRAdapter(Adapter):
                  (x_c + 0.5 * w), (y_c + 0.5 * h)]
             return b
 
-        def softmax(logits):
+        def softmax_logits(logits):
             res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
             return np.array(res)
 
         for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
             x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
-            scores = softmax(logits)
+            scores = softmax_logits(logits)
             labels = np.argmax(scores[:, :-1], axis=-1)
             det_scores = np.max(scores[:, :-1], axis=-1)
             result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
@@ -857,9 +820,8 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
         parameters.update({
             'scores_out': StringField(description="Scores output layer name."),
             'boxes_out': StringField(description="Boxes output layer name."),
-            'score_threshold': NumberField(
-                value_type=float, min_value=0, max_value=1, default=0.7, optional=True,
-                description='Minimal accepted score for valid boxes'),
+            'score_threshold': NumberField(value_type=float, min_value=0, max_value=1, default=0.7, optional=True,
+                                           description='Minimal accepted score for valid boxes'),
         })
 
         return parameters
@@ -974,7 +936,8 @@ class NanoDetAdapter(Adapter):
         y2 = np.expand_dims(points[:, 1] + distance[:, 3], -1).clip(0, max_shape[0])
         return np.concatenate((x1, y1, x2, y2), axis=-1)
 
-    def get_single_level_center_point(self, featmap_size, stride):
+    @staticmethod
+    def get_single_level_center_point(featmap_size, stride):
         h, w = featmap_size
         x_range, y_range = (np.arange(w) + 0.5) * stride, (np.arange(h) + 0.5) * stride
         y, x = np.meshgrid(y_range, x_range, indexing='ij')
