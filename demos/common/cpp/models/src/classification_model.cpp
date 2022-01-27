@@ -28,9 +28,9 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName, size_
 }
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
-    ov::runtime::Tensor scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
+    ov::Tensor scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
     const float* scoresPtr = scoresTensor.data<float>();
-    ov::runtime::Tensor indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
+    ov::Tensor indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
     const int* indicesPtr = indicesTensor.data<int>();
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);

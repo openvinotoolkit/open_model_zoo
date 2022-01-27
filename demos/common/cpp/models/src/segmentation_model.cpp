@@ -40,22 +40,22 @@
 //    return labelsList;
 //}
 //
-//void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork)
+//void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 //{
 //    // --------------------------- Configure input & output ---------------------------------------------
 //    // --------------------------- Prepare input blobs -----------------------------------------------------
-//    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+//    const ov::OutputVector& inputsInfo = model->inputs();
 //    if (inputShapes.size() != 1) {
 //        throw std::runtime_error("Demo supports topologies only with 1 input");
 //    }
 //
 //    inputsNames.push_back(inputShapes.begin()->first);
 //
-//    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
+//    const ov::Shape& inputShape = model->input().get_shape();
 //    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
 //        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 //
-//    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+//    InferenceEngine::InputInfo& inputInfo = *model.getInputsInfo().begin()->second;
 //    inputInfo.setPrecision(InferenceEngine::Precision::U8);
 //
 //    if (useAutoResize) {
@@ -65,7 +65,7 @@
 //        inputInfo.setLayout(InferenceEngine::Layout::NCHW);
 //    }
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
-//    const InferenceEngine::OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
+//    const InferenceEngine::OutputsDataMap& outputsDataMap = model.getOutputsInfo();
 //    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 //
 //    outputsNames.push_back(outputsDataMap.begin()->first);

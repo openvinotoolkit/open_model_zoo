@@ -27,10 +27,10 @@
 //    generateAnchorsFpn();
 //}
 //
-//void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+//void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
 //    // --------------------------- Prepare input blobs ------------------------------------------------------
-//    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+//    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //    if (inputInfo.size() != 1) {
 //        throw std::logic_error("This demo accepts networks that have only one input");
 //    }
@@ -54,7 +54,7 @@
 //
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
 //
-//    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+//    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //
 //    std::vector<size_t> outputsSizes[OT_MAX];
 //    for (auto& output : outputInfo) {

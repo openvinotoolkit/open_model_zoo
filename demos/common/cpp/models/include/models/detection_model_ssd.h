@@ -32,13 +32,13 @@
 //        const std::vector<std::string>& labels = std::vector<std::string>());
 //
 //    std::shared_ptr<InternalModelData> preprocess(
-//        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+//        const InputData& inputData, ov::InferRequest& request) override;
 //    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 //
 //protected:
 //    std::unique_ptr<ResultBase> postprocessSingleOutput(InferenceResult& infResult);
 //    std::unique_ptr<ResultBase> postprocessMultipleOutputs(InferenceResult& infResult);
-//    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+//    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 //    void prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo);
 //    void prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo);
 //    size_t maxProposalCount = 0;

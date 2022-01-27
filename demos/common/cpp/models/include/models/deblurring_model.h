@@ -26,7 +26,7 @@ public:
     DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize);
 
     std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::runtime::InferRequest& request) override;
+        const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

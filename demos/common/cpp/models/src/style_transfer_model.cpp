@@ -29,22 +29,22 @@
 //    ImageModel(modelFileName, false) {
 //}
 //
-//void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+//void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output ---------------------------------------------
 //    // --------------------------- Prepare input blobs --------------------------------------------------
 //
-//    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+//    Imodel::InputShapes inputShapes = model.getInputShapes();
 //    if (inputShapes.size() != 1)
 //        throw std::runtime_error("Demo supports topologies only with 1 input");
 //    inputsNames.push_back(inputShapes.begin()->first);
 //    SizeVector& inSizeVector = inputShapes.begin()->second;
 //    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
 //        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-//    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+//    InputInfo& inputInfo = *model.getInputsInfo().begin()->second;
 //    inputInfo.setPrecision(Precision::FP32);
 //
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
-//    const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
+//    const OutputsDataMap& outputInfo = model.getOutputsInfo();
 //    if (outputInfo.size() != 1)
 //        throw std::runtime_error("Demo supports topologies only with 1 output");
 //
@@ -57,7 +57,7 @@
 //
 //}
 //
-//std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+//std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
 //    auto imgData = inputData.asRef<ImageInputData>();
 //    auto& img = imgData.inputImage;
 //

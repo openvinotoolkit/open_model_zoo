@@ -28,10 +28,10 @@
 //    : DetectionModel(modelFileName, confidenceThreshold, false , labels) {
 //}
 //
-//void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+//void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
 //    // --------------------------- Prepare input blobs ------------------------------------------------------
-//    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+//    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //    if (inputInfo.size() != 1) {
 //        throw std::logic_error("This demo accepts networks that have only one input");
 //    }
@@ -52,7 +52,7 @@
 //    netInputWidth = getTensorWidth(inputDesc);
 //
 //    // --------------------------- Prepare output blobs -----------------------------------------------------
-//    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+//    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    if (outputInfo.size() != 3) {
 //        throw std::logic_error("This demo expect networks that have 3 outputs blobs");
 //    }
@@ -106,7 +106,7 @@
 //    return trans;
 //}
 //
-//std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+//std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, ov::InferRequest& request) {
 //    auto& img = inputData.asRef<ImageInputData>().inputImage;
 //    const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
 //
