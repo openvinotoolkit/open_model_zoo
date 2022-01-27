@@ -48,9 +48,9 @@ class Detector(IEModel, DetectorInterface):
     def run_async(self, frames, index):
         assert len(frames) <= self.max_num_frames
         self.shapes = []
-        for i in range(len(frames)):
-            self.shapes.append(frames[i].shape)
-            self.forward_async(frames[i])
+        for id, frame in enumerate(frames):
+            self.shapes.append(frame.shape)
+            self.forward_async(frame, id)
 
     def wait_and_grab(self, only_target_class=True):
         all_detections = []
@@ -109,8 +109,8 @@ class VectorCNN(IEModel):
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
         assert len(batch) <= self.max_reqs
-        for frame in batch:
-            super().forward_async(frame)
+        for id, frame in enumerate(batch):
+            super().forward_async(frame, id)
         outputs = self.grab_all_async()
         return outputs
 
