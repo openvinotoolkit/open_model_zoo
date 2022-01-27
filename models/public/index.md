@@ -53,6 +53,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*| [squeezenet1.1](./squeezenet1.1/README.md)| 58.382%/81% | 0.785 | 1.236 |
 | Swin Transformer Tiny, window size=7| PyTorch\*                  | [swin-tiny-patch4-window7-224](./swin-tiny-patch4-window7-224/README.md) | 81.38%/95.51% | 9.0280 | 28.8173 |
+| T2T-ViT, transformer layers number=14| PyTorch\*                 | [t2t-vit-14](./t2t-vit-14/README.md) | 81.44%/95.66% | 9.5451 | 21.5498 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*              | [vgg19](./vgg19/README.md) | 71.062%/89.832% | 39.3 | 143.667  |
 
