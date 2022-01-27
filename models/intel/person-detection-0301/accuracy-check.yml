@@ -19,7 +19,7 @@ models:
           - type: resize_prediction_boxes
           - type: cast_to_int
           - type: nms
-            overlap: 0.5
+            overlap: 0.6
           - type: clip_boxes
             apply_to: prediction
 
