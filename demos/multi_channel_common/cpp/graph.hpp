@@ -21,14 +21,13 @@
 #include "perf_timer.hpp"
 #include "input.hpp"
 
-namespace {
-constexpr size_t roundUp(size_t enumerator, size_t denominator) {
+static inline size_t roundUp(size_t enumerator, size_t denominator) {
     assert(enumerator > 0);
     assert(denominator > 0);
     return 1 + (enumerator - 1) / denominator;
 }
 
-std::queue<ov::InferRequest> setConfig(std::shared_ptr<ov::Model>&& model, const std::string& modelPath,
+static inline std::queue<ov::InferRequest> compile(std::shared_ptr<ov::Model>&& model, const std::string& modelPath,
         const std::string& device, size_t performanceHintNumRequests, ov::Core& core) {
     core.set_property("CPU", {{"CPU_BIND_THREAD", "NO"}});
     ov::CompiledModel compiled = core.compile_model(model, device, {
@@ -43,7 +42,6 @@ std::queue<ov::InferRequest> setConfig(std::shared_ptr<ov::Model>&& model, const
     }
     return reqQueue;
 }
-}  // namespace
 
 class IEGraph{
 private:
@@ -72,7 +70,7 @@ private:
     PostprocessingFunc postprocessing;
     std::thread getterThread;
 public:
-    IEGraph::IEGraph(std::queue<ov::InferRequest>&& availableRequests, bool collectStats):
+    IEGraph(std::queue<ov::InferRequest>&& availableRequests, bool collectStats):
         availableRequests(std::move(availableRequests)),
         maxRequests(this->availableRequests.size()),
         perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),

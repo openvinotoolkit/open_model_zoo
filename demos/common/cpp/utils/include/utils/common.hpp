@@ -233,6 +233,30 @@ inline std::string fileNameNoExt(const std::string& filepath) {
     return filepath.substr(0, pos);
 }
 
+inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
+    const std::string& deviceName, const std::string& modelType = "") {
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+        for (const auto& device : devices) {
+            try {
+                slog::info << "\tDevice: " << device << slog::endl;
+                std::string nstreams = execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
+                if (device == "CPU") {
+                    std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
+                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
+                }
+            }
+            catch (const InferenceEngine::Exception&) {}
+        }
+    }
+}
+
 inline
 void logCompiledModelInfo(
     const ov::CompiledModel& compiledModel,

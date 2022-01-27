@@ -144,6 +144,7 @@ endmacro()
 
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
+# TODO: remove InferenceEngine and ngraph after 2022.1
 find_package(InferenceEngine REQUIRED)
 find_package(ngraph REQUIRED)
 

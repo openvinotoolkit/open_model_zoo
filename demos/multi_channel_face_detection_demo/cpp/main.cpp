@@ -196,8 +196,8 @@ int main(int argc, char* argv[]) {
         }
         model = ppp.build();
         ov::set_batch(model, FLAGS_bs);
-        std::queue<ov::InferRequest> reqQueue = setConfig(std::move(model), FLAGS_m, FLAGS_d,
-            roundUp(params.count, FLAGS_bs), core);
+        std::queue<ov::InferRequest> reqQueue = compile(std::move(model),
+            FLAGS_m, FLAGS_d, roundUp(params.count, FLAGS_bs), core);
         ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");

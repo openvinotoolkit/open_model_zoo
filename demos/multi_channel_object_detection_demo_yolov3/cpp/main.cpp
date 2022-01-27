@@ -325,12 +325,8 @@ int main(int argc, char* argv[]) {
             for (int i = 0; i < static_cast<int>(yoloParams.front().second.classes); ++i)
                 colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
 
-        std::queue<ov::InferRequest> reqQueue = setConfig(
-            std::move(model),
-            FLAGS_m,
-            FLAGS_d,
-            roundUp(params.count, FLAGS_bs),
-            core);
+        std::queue<ov::InferRequest> reqQueue = compile(std::move(model),
+            FLAGS_m, FLAGS_d, roundUp(params.count, FLAGS_bs), core);
         ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
         if (4 != inputShape.size()) {
             throw std::runtime_error("Invalid model input dimensions");
