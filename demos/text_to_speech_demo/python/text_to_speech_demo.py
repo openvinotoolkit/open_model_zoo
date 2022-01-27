@@ -179,7 +179,6 @@ def main():
     for line in sentences():
         if not line.strip():
             break
-        
         count += 1
         line = line.rstrip()
         log.info("Process line {0} with length {1}.".format(count, len(line)))
