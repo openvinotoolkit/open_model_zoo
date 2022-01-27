@@ -99,6 +99,9 @@ omz_converter --list models.lst
   - person-detection-0201
   - person-detection-0202
   - person-detection-0203
+  - person-detection-0301
+  - person-detection-0302
+  - person-detection-0303
   - person-detection-retail-0013
   - person-vehicle-bike-detection-2000
   - person-vehicle-bike-detection-2001

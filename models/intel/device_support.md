@@ -72,6 +72,9 @@
 | person-detection-0201 | YES | YES | YES |
 | person-detection-0202 | YES | YES | YES |
 | person-detection-0203 | YES | YES | YES |
+| person-detection-0301 | YES |  |  |
+| person-detection-0302 | YES |  |  |
+| person-detection-0303 | YES |  |  |
 | person-detection-action-recognition-0005 | YES | YES | YES |
 | person-detection-action-recognition-0006 | YES | YES | YES |
 | person-detection-action-recognition-teacher-0002 | YES | YES | YES |
