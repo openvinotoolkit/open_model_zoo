@@ -119,7 +119,7 @@ std::vector<FaceDetection::Result> FaceDetection::fetchResults() {
                 continue;
             }
 
-            r.location.x = static_cast<int>(detections[i * objectSize + 0] / model_input_width * width);
+            r.location.x = static_cast<int>(detections[i * objectSize] / model_input_width * width);
             r.location.y = static_cast<int>(detections[i * objectSize + 1] / model_input_height * height);
             r.location.width = static_cast<int>(detections[i * objectSize + 2] / model_input_width * width - r.location.x);
             r.location.height = static_cast<int>(detections[i * objectSize + 3] / model_input_height * height - r.location.y);
@@ -155,7 +155,7 @@ std::vector<FaceDetection::Result> FaceDetection::fetchResults() {
     }
 
     for (int i = 0; i < ndetections; i++) {
-        float image_id = detections[i * objectSize + 0];
+        float image_id = detections[i * objectSize];
         if (image_id < 0) {
             break;
         }
