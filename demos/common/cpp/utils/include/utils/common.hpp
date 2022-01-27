@@ -211,7 +211,7 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
 
 inline void showAvailableDevices() {
 #if defined(OV_NEW_API)
-    ov::runtime::Core core;
+    ov::Core core;
     std::vector<std::string> devices = core.get_available_devices();
 #else
     InferenceEngine::Core ie;
@@ -258,7 +258,7 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
 
 inline
 void logCompiledModelInfo(
-    const ov::runtime::CompiledModel& compiledModel,
+    const ov::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
     const std::string& modelType = "")

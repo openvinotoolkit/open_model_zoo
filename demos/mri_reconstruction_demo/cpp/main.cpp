@@ -12,7 +12,7 @@
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]);
 
-static cv::Mat tensorToMat(const ov::runtime::Tensor& tensor);
+static cv::Mat tensorToMat(const ov::Tensor& tensor);
 
 struct MRIData {
     cv::Mat data;
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     }
 
     slog::info << ov::get_openvino_version() << slog::endl;
-    ov::runtime::Core core;
+    ov::Core core;
 
     slog::info << "Reading model " << FLAGS_m << slog::endl;
     std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
@@ -60,10 +60,10 @@ int main(int argc, char** argv) {
     ppp.input().model().set_layout("NHWC");
     model = ppp.build();
 
-    ov::runtime::CompiledModel compiledModel = core.compile_model(model, FLAGS_d);
+    ov::CompiledModel compiledModel = core.compile_model(model, FLAGS_d);
     logCompiledModelInfo(compiledModel, FLAGS_m, FLAGS_d);
 
-    ov::runtime::InferRequest infReq = compiledModel.create_infer_request();
+    ov::InferRequest infReq = compiledModel.create_infer_request();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-cv::Mat tensorToMat(const ov::runtime::Tensor& tensor) {
+cv::Mat tensorToMat(const ov::Tensor& tensor) {
     // NOTE: Inference Engine sizes are reversed.
     ov::Shape tensorShape = tensor.get_shape();
     std::vector<int> size(tensorShape.begin(), tensorShape.end());
