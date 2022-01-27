@@ -37,16 +37,21 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    if (inputShape.size() != 4 || inputShape[0] != 1 || inputShape[1] != 3) {
+    ov::Layout inputLayout = ov::layout::get_layout(model->input());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
+
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
         set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+        set_layout("NHWC");
 
-    ppp.input().model().set_layout("NCHW");
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
@@ -57,7 +62,8 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
-    if (outputShape.size() != 4 || outputShape[0] != 1 || outputShape[1] != 3) {
+    ov::Layout outputLayout{ "NCHW" };
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::runtime_error("3-channel 4-dimensional model's output is expected");
     }
 
@@ -70,17 +76,22 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
+    ov::Layout layout = ov::layout::get_layout(model->input());
 
-    if (inputShape[2] % stride || inputShape[3] % stride) {
+    auto batchId = ov::layout::batch_idx(layout);
+    auto heightId = ov::layout::height_idx(layout);
+    auto widthId = ov::layout::width_idx(layout);
+
+    if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
         throw std::runtime_error("Model input shape must be divisible by stride");
     }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
     netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
 
-    inputShape[0] = 1;
-    inputShape[2] = netInputHeight;
-    inputShape[3] = netInputWidth;
+    inputShape[batchId] = 1;
+    inputShape[heightId] = netInputHeight;
+    inputShape[widthId] = netInputWidth;
 
     std::map<std::string, ov::PartialShape> shapes;
     shapes[inTensorName] = ov::PartialShape(inputShape);

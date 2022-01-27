@@ -137,9 +137,9 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     if (type == "deblur") {
         return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize));
     }
-    // if (type == "jr") {
-    //     return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
-    // }
+     if (type == "jr") {
+         return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
+     }
 	// if (type == "style") {
     //     return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m));
     // }
