@@ -210,8 +210,13 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
 }
 
 inline void showAvailableDevices() {
+#if defined(OV_NEW_API)
+    ov::Core core;
+    std::vector<std::string> devices = core.get_available_devices();
+#else
     InferenceEngine::Core ie;
     std::vector<std::string> devices = ie.GetAvailableDevices();
+#endif
 
     std::cout << std::endl;
     std::cout << "Available target devices:";
