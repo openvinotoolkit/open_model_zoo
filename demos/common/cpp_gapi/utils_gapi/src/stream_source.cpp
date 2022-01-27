@@ -16,14 +16,14 @@ void CommonCapSrc::preparation() {
     if (!tmp.data) {
         GAPI_Assert(false && "Couldn't grab the first frame");
     }
-    first = tmp.clone();
+    first = tmp;
 }
 
 bool CommonCapSrc::pull(cv::gapi::wip::Data &data) {
     if (!first_pulled) {
         GAPI_Assert(!first.empty());
         first_pulled = true;
-        data = first;
+        data = first.clone();
         return true;
     }
     cv::Mat current_frame = cap->read();

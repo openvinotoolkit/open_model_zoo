@@ -386,7 +386,6 @@ int main(int argc, char *argv[]) {
         pipeline.start();
         std::chrono::steady_clock::time_point beginFrame = std::chrono::steady_clock::now();
         while (pipeline.pull(std::move(outVector))) {
-            cv::Mat demoImage = image.clone();
             const auto numFound = outPts.size();
             int numRecognized = trRequired ? 0 : numFound;
             for (std::size_t l = 0; l < numFound; l++) {
@@ -442,30 +441,30 @@ int main(int argc, char *argv[]) {
                 // Displaying the results
                 if (!noShow && (!res.empty() || !trRequired || centralCrop)) {
                     for (size_t i = 0; i < points.size() ; i++) {
-                        cv::line(demoImage, points[i], points[(i + 1) % points.size()],
+                        cv::line(image, points[i], points[(i + 1) % points.size()],
                                  cv::Scalar(50, 205, 50), 2);
                     }
                     if (!points.empty() && !res.empty()) {
-                        setLabel(demoImage, res, points[custom::getTopLeftPointIdx(points)]);
+                        setLabel(image, res, points[custom::getTopLeftPointIdx(points)]);
                     }
                 }
             }
 
             // Displaying system parameters and FPS
-            putHighlightedText(demoImage, "Found: " + std::to_string(numRecognized),
+            putHighlightedText(image, "Found: " + std::to_string(numRecognized),
                                cv::Point(10, 80), cv::FONT_HERSHEY_COMPLEX, 0.65,
                                cv::Scalar(0, 0, 255), 2);
 
-            presenter.drawGraphs(demoImage);
-            metrics.update(beginFrame, demoImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            presenter.drawGraphs(image);
+            metrics.update(beginFrame, image, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             if (videoWriter.isOpened() &&
                 (outputFramesLimit == 0 || metrics.getFrameCount() <= outputFramesLimit)) {
-                videoWriter.write(demoImage);
+                videoWriter.write(image);
             }
 
             if (!noShow) {
-                cv::imshow("Press ESC or Q to exit", demoImage);
+                cv::imshow("Press ESC or Q to exit", image);
                 int key = cv::waitKey(1);
                 if ('q' == key || 'Q' == key || key == 27) break;
                 presenter.handleKey(key);
