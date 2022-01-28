@@ -131,9 +131,3 @@
 | yolo-v2-tiny-ava-sparse-30-0001 | YES | YES | YES |
 | yolo-v2-tiny-ava-sparse-60-0001 | YES | YES | YES |
 | yolo-v2-tiny-vehicle-detection-0001 | YES | YES | YES |
-| smartlab-object-detection-0001 | YES | YES | YES |
-| smartlab-object-detection-0002 | YES | YES | YES |
-| smartlab-object-detection-0003 | YES | YES | YES |
-| smartlab-object-detection-0004 | YES | YES | YES |
-| smartlab-action-recognition-encoder-0001 | YES | YES | YES |
-| smartlab-action-recognition-decoder-0001 | YES | YES | YES |
