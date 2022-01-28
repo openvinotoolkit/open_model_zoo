@@ -1,24 +1,9 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <memory>
-#include <chrono>
-#include <vector>
-#include <string>
-#include <utility>
-#include <algorithm>
-#include <iterator>
-#include <map>
-
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-
 #include "detectors.hpp"
+#include <utils/ocv_common.hpp>
 
 namespace {
 constexpr size_t ndetections = 200;
@@ -110,7 +95,7 @@ std::vector<FaceDetection::Result> FaceDetection::fetchResults() {
     float *detections = request.get_tensor(output).data<float>();
     if (!labels_output.empty()) {
         const int32_t *labels = request.get_tensor(labels_output).data<int32_t>();
-        for (int i = 0; i < ndetections; i++) {
+        for (size_t i = 0; i < ndetections; i++) {
             Result r;
             r.label = labels[i];
             r.confidence = detections[i * objectSize + 4];
@@ -154,7 +139,7 @@ std::vector<FaceDetection::Result> FaceDetection::fetchResults() {
         }
     }
 
-    for (int i = 0; i < ndetections; i++) {
+    for (size_t i = 0; i < ndetections; i++) {
         float image_id = detections[i * objectSize];
         if (image_id < 0) {
             break;
@@ -250,7 +235,7 @@ std::shared_ptr<ov::Model> AntispoofingClassifier::read(const ov::Core& core) {
     model = ppp.build();
     inShape = model->input().get_shape();
     inShape[0] = ndetections;
-    ov::set_batch(model, {1, ndetections});
+    ov::set_batch(model, {1, int64_t(ndetections)});
     return model;
 }
 
@@ -308,7 +293,7 @@ std::shared_ptr<ov::Model> AgeGenderDetection::read(const ov::Core& core) {
     model = ppp.build();
     inShape = model->input().get_shape();
     inShape[0] = ndetections;
-    ov::set_batch(model, {1, ndetections});
+    ov::set_batch(model, {1, int64_t(ndetections)});
     return model;
 }
 
@@ -366,7 +351,7 @@ std::shared_ptr<ov::Model> HeadPoseDetection::read(const ov::Core& core) {
     model = ppp.build();
     inShape = model->input().get_shape();
     inShape[0] = ndetections;
-    ov::set_batch(model, {1, ndetections});
+    ov::set_batch(model, {1, int64_t(ndetections)});
     return model;
 }
 
@@ -395,7 +380,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
 
 std::map<std::string, float> EmotionsDetection::operator[](int idx) {
     request.wait();
-    ov::Tensor& tensor = request.get_output_tensor();
+    const ov::Tensor& tensor = request.get_output_tensor();
     auto emotionsVecSize = emotionsVec.size();
     /* emotions vector must have the same size as number of channels
      * in model output. Default output format is NCHW, so index 1 is checked */
@@ -444,7 +429,7 @@ std::shared_ptr<ov::Model> EmotionsDetection::read(const ov::Core& core) {
     model = ppp.build();
     inShape = model->input().get_shape();
     inShape[0] = ndetections;
-    ov::set_batch(model, {1, ndetections});
+    ov::set_batch(model, {1, int64_t(ndetections)});
     return model;
 }
 
@@ -519,7 +504,7 @@ std::shared_ptr<ov::Model> FacialLandmarksDetection::read(const ov::Core& core) 
     model = ppp.build();
     inShape = model->input().get_shape();
     inShape[0] = ndetections;
-    ov::set_batch(model, {1, ndetections});
+    ov::set_batch(model, {1, int64_t(ndetections)});
     return model;
 }
 
@@ -530,7 +515,7 @@ Load::Load(BaseDetection& detector) : detector(detector) {
 void Load::into(ov::Core& core, const std::string & deviceName) const {
     if (!detector.pathToModel.empty()) {
         ov::runtime::CompiledModel cml = core.compile_model(detector.read(core), deviceName);
-        logCompiledModelInfo(cml, detector.pathToModel, deviceName, detector.pathToModel);
+        logCompiledModelInfo(cml, detector.pathToModel, deviceName);
         detector.request = cml.create_infer_request();
     }
 }

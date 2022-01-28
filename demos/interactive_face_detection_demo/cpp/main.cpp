@@ -2,37 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/**
-* \brief The entry point for the Inference Engine interactive_face_detection demo application
-* \file interactive_face_detection_demo/main.cpp
-* \example interactive_face_detection_demo/main.cpp
-*/
-#include <gflags/gflags.h>
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <memory>
-#include <vector>
-#include <string>
-#include <utility>
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <list>
-#include <set>
-
-#include "openvino/openvino.hpp"
-
-#include <monitors/presenter.h>
-#include <utils/images_capture.h>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-
 #include "interactive_face_detection.hpp"
 #include "detectors.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
+#include <monitors/presenter.h>
+#include <utils/images_capture.h>
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating input arguments--------------------------------------
@@ -83,9 +58,6 @@ int main(int argc, char *argv[]) {
         Load(facialLandmarksDetector).into(core, FLAGS_d);
         Load(antispoofingClassifier).into(core, FLAGS_d);
         // ----------------------------------------------------------------------------------------------------
-
-        bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
-                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled() || antispoofingClassifier.enabled();
 
         Timer timer;
         std::ostringstream out;
@@ -143,12 +115,12 @@ int main(int argc, char *argv[]) {
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prevFrame.size());
-                cv::Mat face = prevFrame(clippedRect);
-                ageGenderDetector.enqueue(face);
-                headPoseDetector.enqueue(face);
-                emotionsDetector.enqueue(face);
-                facialLandmarksDetector.enqueue(face);
-                antispoofingClassifier.enqueue(face);
+                const cv::Mat& crop = prevFrame(clippedRect);
+                ageGenderDetector.enqueue(crop);
+                headPoseDetector.enqueue(crop);
+                emotionsDetector.enqueue(crop);
+                facialLandmarksDetector.enqueue(crop);
+                antispoofingClassifier.enqueue(crop);
             }
 
             // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Estimation and Antispoofing Classifier networks simultaneously

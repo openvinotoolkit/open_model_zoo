@@ -1,28 +1,12 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 # pragma once
 
-#include <gflags/gflags.h>
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <memory>
-#include <chrono>
-#include <vector>
-#include <string>
-#include <utility>
-#include <algorithm>
-#include <iterator>
-#include <map>
-
-#include "openvino/openvino.hpp"
-
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 
+#include <openvino/openvino.hpp>
 #include <opencv2/opencv.hpp>
 
 struct BaseDetection {
@@ -83,7 +67,7 @@ struct AgeGenderDetection : BaseDetection {
     void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    Result operator[] (int idx);
+    Result operator[](int idx);
 };
 
 struct HeadPoseDetection : BaseDetection {
@@ -106,7 +90,7 @@ struct HeadPoseDetection : BaseDetection {
     void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    Results operator[] (int idx);
+    Results operator[](int idx);
 };
 
 struct EmotionsDetection : BaseDetection {
@@ -119,7 +103,7 @@ struct EmotionsDetection : BaseDetection {
     void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    std::map<std::string, float> operator[] (int idx);
+    std::map<std::string, float> operator[](int idx);
 
     const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
 };
@@ -136,7 +120,7 @@ struct FacialLandmarksDetection : BaseDetection {
     void submitRequest();
 
     void enqueue(const cv::Mat &face);
-    std::vector<float> operator[] (int idx);
+    std::vector<float> operator[](int idx);
 };
 
 struct AntispoofingClassifier : BaseDetection {
@@ -149,7 +133,7 @@ struct AntispoofingClassifier : BaseDetection {
     void submitRequest();
 
     void enqueue(const cv::Mat& frame);
-    float operator[] (int idx);
+    float operator[](int idx);
 };
 
 struct Load {
