@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,9 +10,10 @@
 #include <vector>
 #include <map>
 
-#include <inference_engine.hpp>
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
+#include "openvino/openvino.hpp"
+
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
 
 class PersonDetector {
 public:
@@ -26,73 +27,82 @@ public:
     static constexpr int objectSize = 7;  // Output should have 7 as a last dimension"
 
     PersonDetector() = default;
-    PersonDetector(InferenceEngine::Core& ie, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
-        detectionTresholds{detectionTresholds}, ie_{ie} {
-        auto network = ie.ReadNetwork(xmlPath);
-        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
+    PersonDetector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
+            const bool autoResize, const ov::AnyMap& pluginConfig) :
+        autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
+        slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
+        auto model = core.read_model(xmlPath);
+        logBasicModelInfo(model);
+        ov::OutputVector inputInfo = model->inputs();
         if (inputInfo.size() != 1) {
-            throw std::logic_error("Detector should have only one input");
-        }
-        InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
-        if (autoResize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->setLayout(InferenceEngine::Layout::NHWC);
-        } else {
-            inputInfoFirst->setLayout(InferenceEngine::Layout::NCHW);
+            throw std::logic_error("Person Detection model should have only one input");
         }
 
-        detectorInputBlobName = inputInfo.begin()->first;
+        ov::preprocess::PrePostProcessor ppp(model);
+        if (autoResize) {
+            ppp.input().tensor().
+                set_element_type(ov::element::u8).
+                set_spatial_dynamic_shape().
+                set_layout({ "NHWC" });
+
+            ppp.input().preprocess().
+                convert_element_type(ov::element::f32).
+                convert_layout("NCHW").
+                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+
+            ppp.input().model().set_layout("NCHW");
+        } else {
+            ppp.input().tensor().
+                set_element_type(ov::element::u8).
+                set_layout({ "NCHW" });
+        }
 
         // ---------------------------Check outputs ------------------------------------------------------
-        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
+        ov::OutputVector outputInfo = model->outputs();
         if (outputInfo.size() != 1) {
-            throw std::logic_error("Person Detection network should have only one output");
+            throw std::logic_error("Person Detection model should have only one output");
         }
-        InferenceEngine::DataPtr& _output = outputInfo.begin()->second;
-        const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
-        detectorOutputBlobName = outputInfo.begin()->first;
-        if (maxProposalCount != outputDims[2]) {
+        const ov::Shape outputShape = model->output().get_shape();
+        if (maxProposalCount != outputShape[2]) {
             throw std::logic_error("unexpected ProposalCount");
         }
-        if (objectSize != outputDims[3]) {
+        if (objectSize != outputShape[3]) {
             throw std::logic_error("Output should have 7 as a last dimension");
         }
-        if (outputDims.size() != 4) {
+        if (outputShape.size() != 4) {
             throw std::logic_error("Incorrect output dimensions for SSD");
         }
-        _output->setPrecision(InferenceEngine::Precision::FP32);
 
-        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        logExecNetworkInfo(net, xmlPath, deviceName, "Person Detection");
+        ppp.output().tensor().set_element_type(ov::element::f32);
+        model = ppp.build();
+        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
     }
 
-    InferenceEngine::InferRequest createInferRequest() {
-        return net.CreateInferRequest();
+    ov::InferRequest createInferRequest() {
+        return compiledModel.create_infer_request();
     }
 
-    void setImage(InferenceEngine::InferRequest& inferRequest, const cv::Mat& img) {
-        InferenceEngine::Blob::Ptr input = inferRequest.GetBlob(detectorInputBlobName);
-        if (InferenceEngine::Layout::NHWC == input->getTensorDesc().getLayout()) {  // autoResize is set
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img) {
+        ov::Tensor input = inferRequest.get_input_tensor();
+        if (autoResize) {
             if (!img.isSubmatrix()) {
                 // just wrap Mat object with Blob::Ptr without additional memory allocation
-                InferenceEngine::Blob::Ptr frameBlob = wrapMat2Blob(img);
-                inferRequest.SetBlob(detectorInputBlobName, frameBlob);
+                ov::Tensor frameTensor = wrapMat2Tensor(img);
+                inferRequest.set_input_tensor(frameTensor);
             } else {
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
-            matToBlob(img, input);
+            matToTensor(img, input);
         }
     }
 
-    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
+    std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
-        InferenceEngine::LockedMemory<const void> detectorOutputBlobMapped = InferenceEngine::as<
-            InferenceEngine::MemoryBlob>(inferRequest.GetBlob(detectorOutputBlobName))->rmap();
-        const float * const detections = detectorOutputBlobMapped.as<float *>();
+        const float* const detections = inferRequest.get_output_tensor().data<float>();
+
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
@@ -120,89 +130,101 @@ public:
     }
 
 private:
+    bool autoResize;
     std::vector<float> detectionTresholds;
-    std::string detectorInputBlobName;
-    std::string detectorOutputBlobName;
-    InferenceEngine::Core ie_;  // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
-    InferenceEngine::ExecutableNetwork net;
+    ov::Core core_;  // The only reason to store a plugin as to assure that it lives at least as long as CompiledModel
+    ov::CompiledModel compiledModel;
 };
 
 class ReId {
 public:
     ReId() = default;
-    ReId(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize,
-        const std::map<std::string, std::string> &pluginConfig) :
-        ie_{ie} {
-        auto network = ie.ReadNetwork(xmlPath);
-
-        /** Re-ID network should have only one input and one output **/
+    ReId(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
+        const ov::AnyMap& pluginConfig) :
+        autoResize {autoResize},
+        core_{core} {
+        slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
+        auto model = core.read_model(xmlPath);
+        logBasicModelInfo(model);
+        /** Re-ID model should have only one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        InferenceEngine::InputsDataMap ReIdInputInfo(network.getInputsInfo());
-        if (ReIdInputInfo.size() != 1) {
-            throw std::logic_error("Re-ID network should have only one input");
+        ov::OutputVector inputInfo = model->inputs();
+        if (inputInfo.size() != 1) {
+            throw std::logic_error("Re-ID model should have only one input");
         }
-        InferenceEngine::InputInfo::Ptr& ReIdInputInfoFirst = ReIdInputInfo.begin()->second;
-        ReIdInputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
+
+        ov::preprocess::PrePostProcessor ppp(model);
         if (autoResize) {
-            ReIdInputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-            ReIdInputInfoFirst->setLayout(InferenceEngine::Layout::NHWC);
-        } else {
-            ReIdInputInfoFirst->setLayout(InferenceEngine::Layout::NCHW);
+            ppp.input().tensor().
+                set_element_type(ov::element::u8).
+                set_spatial_dynamic_shape().
+                set_layout({ "NHWC" });
+
+            ppp.input().preprocess().
+                convert_element_type(ov::element::f32).
+                convert_layout("NCHW").
+                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+
+            ppp.input().model().set_layout("NCHW");
         }
-        reIdInputName = ReIdInputInfo.begin()->first;
+        else {
+            ppp.input().tensor().
+                set_element_type(ov::element::u8).
+                set_layout({ "NCHW" });
+        }
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        InferenceEngine::OutputsDataMap ReIdOutputInfo(network.getOutputsInfo());
-        if (ReIdOutputInfo.size() != 1) {
-            throw std::logic_error("Re-ID should have 1 output");
+        ov::OutputVector outputInfo = model->outputs();
+        if (outputInfo.size() != 1) {
+            throw std::logic_error("Re-ID model should have 1 output");
         }
-        reIdOutputName = ReIdOutputInfo.begin()->first;
-        InferenceEngine::DataPtr& _output = ReIdOutputInfo.begin()->second;
-        const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
-        if (outputDims.size() != 2) {
+        const ov::Shape outputShape = model->output().get_shape();
+        if (outputShape.size() != 2) {
             throw std::logic_error("Incorrect output dimensions for Re-ID");
         }
-        reidLen = outputDims[1];
-        _output->setPrecision(InferenceEngine::Precision::FP32);
 
-        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        logExecNetworkInfo(net, xmlPath, deviceName, "Person Re-Identification");
+        reidLen = (int)outputShape[1];
+        ppp.output().tensor().set_element_type(ov::element::f32);
+        model = ppp.build();
+        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-ID");
     }
 
-    InferenceEngine::InferRequest createInferRequest() {
-        return net.CreateInferRequest();
+    ov::InferRequest createInferRequest() {
+        return compiledModel.create_infer_request();
     }
 
-    void setImage(InferenceEngine::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
-        InferenceEngine::Blob::Ptr roiBlob = inferRequest.GetBlob(reIdInputName);
-        if (InferenceEngine::Layout::NHWC == roiBlob->getTensorDesc().getLayout()) {  // autoResize is set
-            InferenceEngine::ROI cropRoi{0, static_cast<size_t>(personRect.x), static_cast<size_t>(personRect.y), static_cast<size_t>(personRect.width),
-                static_cast<size_t>(personRect.height)};
-            InferenceEngine::Blob::Ptr frameBlob = wrapMat2Blob(img);
-            InferenceEngine::Blob::Ptr roiBlob = make_shared_blob(frameBlob, cropRoi);
-            inferRequest.SetBlob(reIdInputName, roiBlob);
+    void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
+        ov::Tensor input = inferRequest.get_input_tensor();
+        if (autoResize) {
+            ov::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Shape tensorShape = frameTensor.get_shape();
+            ov::Layout layout("NHWC");
+            const size_t batch = tensorShape[ov::layout::batch_idx(layout)];
+            const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
+            ov::Tensor roiTensor(frameTensor, {0, static_cast<size_t>(personRect.y),  static_cast<size_t>(personRect.x), 0},
+                {batch, static_cast<size_t>(personRect.y) + static_cast<size_t>(personRect.height),
+                static_cast<size_t>(personRect.x) + static_cast<size_t>(personRect.width), channels});
+            inferRequest.set_input_tensor(roiTensor);
         } else {
             const cv::Mat& personImage = img(personRect);
-            matToBlob(personImage, roiBlob);
+            matToTensor(personImage, input);
         }
     }
 
-    std::vector<float> getResults(InferenceEngine::InferRequest& inferRequest) {
+    std::vector<float> getResults(ov::InferRequest& inferRequest) {
         std::vector<float> result;
-        InferenceEngine::LockedMemory<const void> reIdOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(reIdOutputName))->rmap();
-        const auto data = reIdOutputMapped.as<float*>();
+        const float* const reids = inferRequest.get_output_tensor().data<float>();
         for (int i = 0; i < reidLen; i++) {
-            result.push_back(data[i]);
+            result.push_back(reids[i]);
         }
         return result;
     }
 
 private:
+    bool autoResize;
     int reidLen;
-    std::string reIdInputName;
-    std::string reIdOutputName;
-    InferenceEngine::Core ie_;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
-    InferenceEngine::ExecutableNetwork net;
+    ov::Core core_;  // The only reason to store a device as to assure that it lives at least as long as  CompiledModel
+    ov::CompiledModel compiledModel;
 };
