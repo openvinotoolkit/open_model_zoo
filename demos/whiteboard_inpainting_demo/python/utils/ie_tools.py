@@ -53,13 +53,13 @@ class IEModel:
     def get_allowed_outputs_len(self):
         return (1, )
 
-    def load_model(self, core, model_xml, device, cpu_extension=''):
+    def load_model(self, core, model_path, device, cpu_extension=''):
         """Loads a model in the Inference Engine format"""
         # Plugin initialization for specified device and load extensions library if specified
         if cpu_extension and 'CPU' in device:
             core.add_extension(cpu_extension, 'CPU')
         # Read IR
-        self.model = core.read_model(model_xml)
+        self.model = core.read_model(model_path)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():
             raise RuntimeError("Supports topologies with only {} inputs, but got {}"

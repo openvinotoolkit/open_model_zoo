@@ -19,12 +19,12 @@ from openvino.runtime import AsyncInferQueue
 
 
 class Module:
-    def __init__(self, core, model, model_type):
+    def __init__(self, core, model_path, model_type):
         self.core = core
         self.model_type = model_type
-        log.info('Reading {} model {}'.format(model_type, model))
-        self.model = core.read_model(model)
-        self.model_path = model
+        log.info('Reading {} model {}'.format(model_type, model_path))
+        self.model = core.read_model(model_path)
+        self.model_path = model_path
         self.active_requests = 0
         self.clear()
 

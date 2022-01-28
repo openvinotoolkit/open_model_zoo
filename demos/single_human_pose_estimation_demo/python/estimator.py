@@ -82,8 +82,8 @@ class TransformedCrop:
 
 
 class HumanPoseEstimator:
-    def __init__(self, core, path_to_model_xml, device='CPU'):
-        self.model = core.read_model(path_to_model_xml)
+    def __init__(self, core, model_path, device='CPU'):
+        self.model = core.read_model(model_path)
         if len(self.model.inputs) != 1:
             raise RuntimeError("HumanPoseEstimator supports only models with 1 input layer")
         if len(self.model.outputs) != 1:
