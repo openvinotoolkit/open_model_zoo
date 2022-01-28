@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,30 +10,27 @@
 #include <vector>
 #include <functional>
 
-#include <utils/ocv_common.hpp>
-
-#include <inference_engine.hpp>
-
-#include "openvino/core/layout.hpp"
 #include "openvino/openvino.hpp"
+
+#include "utils/ocv_common.hpp"
 
 /**
 * @brief Base class of config for network
 */
 struct CnnConfig {
-    explicit CnnConfig(const std::string& path_to_model, const std::string& model_type = "")
-        : path_to_model(path_to_model), model_type(model_type) {}
+    explicit CnnConfig(const std::string& path_to_model, const std::string& model_type = "") :
+        m_path_to_model(path_to_model), m_model_type(model_type) {}
     /** @brief Path to model description */
-    std::string path_to_model;
+    std::string m_path_to_model;
     /** @brief Model type*/
-    std::string model_type;
+    std::string m_model_type;
     /** @brief Maximal size of batch */
-    int max_batch_size{1};
+    int m_max_batch_size{1};
 
     /** @brief Inference Engine */
-    ov::Core ie;
+    ov::Core m_core;
     /** @brief Device name */
-    std::string deviceName;
+    std::string m_deviceName;
 };
 
 /**
@@ -78,19 +75,19 @@ protected:
                     const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
-    Config config_;
+    Config m_config;
     /** @brief Net inputs info */
-    ov::OutputVector inInfo_;
+    ov::OutputVector m_inInfo;
     /** @brief Net outputs info */
-    ov::OutputVector outInfo_;
+    ov::OutputVector m_outInfo_;
     /** @brief IE network */
-    ov::CompiledModel compiled_model_;
+    ov::CompiledModel m_compiled_model;
     /** @brief IE InferRequest */
-    mutable ov::InferRequest infer_request_;
+    mutable ov::InferRequest m_infer_request;
     /** @brief Name of the input blob input blob */
-    std::string input_blob_name_;
+    std::string m_input_blob_name;
     /** @brief Names of output blobs */
-    std::vector<std::string> output_blobs_names_;
+    std::vector<std::string> m_output_blobs_names;
 };
 
 class VectorCNN : public CnnDLSDKBase {
@@ -106,7 +103,7 @@ public:
 class AsyncAlgorithm {
 public:
     virtual ~AsyncAlgorithm() {}
-    virtual void enqueue(const cv::Mat &frame) = 0;
+    virtual void enqueue(const cv::Mat& frame) = 0;
     virtual void submitRequest() = 0;
     virtual void wait() = 0;
 };
@@ -120,7 +117,7 @@ public:
 template <typename T>
 class NullDetection : public AsyncDetection<T> {
 public:
-    void enqueue(const cv::Mat &) override {}
+    void enqueue(const cv::Mat&) override {}
     void submitRequest() override {}
     void wait() override {}
     std::vector<T> fetchResults() override { return {}; }

@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -12,7 +12,6 @@
 
 #include "cnn.hpp"
 
-#include "openvino/core/layout.hpp"
 #include "openvino/openvino.hpp"
 
 /**
@@ -116,29 +115,29 @@ public:
     explicit ActionDetection(const ActionDetectorConfig& config);
 
     void submitRequest() override;
-    void enqueue(const cv::Mat &frame) override;
+    void enqueue(const cv::Mat& frame) override;
     void wait() override { BaseCnnDetection::wait(); }
     DetectedActions fetchResults() override;
 
 private:
-    ActionDetectorConfig config_;
-    ov::CompiledModel model_;
-    std::string input_name_;
-    std::map<std::string, ov::Tensor> outputs_;
+    ActionDetectorConfig m_config;
+    ov::CompiledModel m_model;
+    std::string m_input_name;
+    std::map<std::string, ov::Tensor> m_outputs;
 
-    int enqueued_frames_ = 0;
-    float width_ = 0;
-    float height_ = 0;
-    bool new_network_ = false;
-    std::vector<int> head_ranges_;
-    std::vector<int> head_step_sizes_;
-    std::vector<cv::Size> head_blob_sizes_;
-    std::vector<std::vector<int>> glob_anchor_map_;
-    std::vector<std::string> glob_anchor_names_;
-    int num_glob_anchors_ = 0;
-    cv::Size network_input_size_;
-    int num_candidates_;
-    bool binary_task_;
+    int m_enqueued_frames = 0;
+    float m_width = 0;
+    float m_height = 0;
+    bool m_new_model = false;
+    std::vector<int> m_head_ranges;
+    std::vector<int> m_head_step_sizes;
+    std::vector<cv::Size> m_head_blob_sizes;
+    std::vector<std::vector<int>> m_glob_anchor_map;
+    std::vector<std::string> m_glob_anchor_names;
+    int m_num_glob_anchors = 0;
+    cv::Size m_network_input_size;
+    int m_num_candidates;
+    bool m_binary_task;
 
     /**
     * @brief BBox in normalized form (each coordinate is in range [0;1]).

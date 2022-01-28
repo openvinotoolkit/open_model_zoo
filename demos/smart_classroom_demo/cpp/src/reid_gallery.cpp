@@ -1,9 +1,6 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-
-#include "face_reid.hpp"
-#include "tracker.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -12,6 +9,9 @@
 #include <limits>
 
 #include <opencv2/opencv.hpp>
+
+#include "face_reid.hpp"
+#include "tracker.hpp"
 
 namespace {
     float ComputeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
@@ -82,11 +82,11 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
-                                     bool crop_gallery, const detection::DetectorConfig &detector_config,
+                                     bool crop_gallery, const detection::DetectorConfig& detector_config,
                                      const VectorCNN& landmarks_det,
                                      const VectorCNN& image_reid,
-                                     bool use_greedy_matcher)
-    : reid_threshold(threshold), use_greedy_matcher(use_greedy_matcher) {
+                                     bool use_greedy_matcher) :
+    reid_threshold(threshold), use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
         return;
     }

@@ -1,17 +1,18 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "action_detector.hpp"
 #include <algorithm>
-#include <utility>
-#include <vector>
 #include <limits>
 #include <numeric>
+#include <utility>
+#include <vector>
+
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "openvino/core/layout.hpp"
 #include "openvino/openvino.hpp"
+
+#include "action_detector.hpp"
 
 #define SSD_LOCATION_RECORD_SIZE 4
 #define SSD_PRIORBOX_RECORD_SIZE 4
@@ -25,78 +26,80 @@ bool SortScorePairDescend(const std::pair<float, T>& pair1,
 }
 
 void ActionDetection::submitRequest() {
-    if (!enqueued_frames_) return;
-    enqueued_frames_ = 0;
+    if (!m_enqueued_frames)
+        return;
+    m_enqueued_frames = 0;
+
     BaseCnnDetection::submitRequest();
 }
 
-void ActionDetection::enqueue(const cv::Mat &frame) {
+void ActionDetection::enqueue(const cv::Mat& frame) {
     if (request == nullptr) {
-        request = std::make_shared<ov::InferRequest>(model_.create_infer_request());
+        request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
     }
 
-    width_ = static_cast<float>(frame.cols);
-    height_ = static_cast<float>(frame.rows);
+    m_width = static_cast<float>(frame.cols);
+    m_height = static_cast<float>(frame.rows);
 
-    ov::Tensor input_tensor = request->get_tensor(input_name_);
+    ov::Tensor input_tensor = request->get_tensor(m_input_name);
 
     matToTensor(frame, input_tensor);
 
-    enqueued_frames_ = 1;
+    m_enqueued_frames = 1;
 }
 
-ActionDetection::ActionDetection(const ActionDetectorConfig& config)
-        : BaseCnnDetection(config.is_async), config_(config) {
+ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
+    BaseCnnDetection(config.is_async), m_config(config) {
     topoName = "action detector";
-    auto network = config.ie.read_model(config.path_to_model);
-    network->get_parameters()[0]->set_layout("NCHW");
-    ov::set_batch(network, config_.max_batch_size);
+    auto model = m_config.m_core.read_model(m_config.m_path_to_model);
+    model->get_parameters()[0]->set_layout("NCHW");
+    ov::set_batch(model, m_config.m_max_batch_size);
 
-    ov::OutputVector inputInfo = network->inputs();
+    ov::OutputVector inputInfo = model->inputs();
     if (inputInfo.size() != 1) {
         throw std::runtime_error("Action Detection network should have only one input");
     }
 
-    input_name_ = network->input().get_any_name();
-    ov::OutputVector outputs = network->outputs();
-    network_input_size_.height = network->input().get_shape()[2];
-    network_input_size_.width = network->input().get_shape()[3];
+    m_input_name = model->input().get_any_name();
+    ov::OutputVector outputs = model->outputs();
+    m_network_input_size.height = model->input().get_shape()[2];
+    m_network_input_size.width = model->input().get_shape()[3];
 
-    new_network_ = false;
+    m_new_model = false;
 
-    ov::preprocess::PrePostProcessor ppp(network);
+    ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
       set_element_type(ov::element::u8).
       set_layout({"NCHW"});
 
     for (auto&& item : outputs) {
         ppp.output(item.get_any_name()).tensor().set_element_type(ov::element::f32);
-        new_network_ = item.get_any_name() == config_.new_loc_blob_name;
+        m_new_model = item.get_any_name() == m_config.new_loc_blob_name;
     }
-    network = ppp.build();
-    model_ = config_.ie.compile_model(network, config_.deviceName);
-    logExecNetworkInfo(model_, config_.path_to_model, config_.deviceName, config_.model_type);
-    const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
+    model = ppp.build();
+    m_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
+    logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
+    const auto& head_anchors = m_new_model ? m_config.new_anchors : m_config.old_anchors;
     const int num_heads = head_anchors.size();
-    head_ranges_.resize(num_heads + 1);
-    glob_anchor_map_.resize(num_heads);
-    head_step_sizes_.resize(num_heads);
-    head_ranges_[0] = 0;
+    m_head_ranges.resize(num_heads + 1);
+    m_glob_anchor_map.resize(num_heads);
+    m_head_step_sizes.resize(num_heads);
+    m_head_ranges[0] = 0;
     int head_shift = 0;
     for (int head_id = 0; head_id < num_heads; ++head_id) {
-        glob_anchor_map_[head_id].resize(head_anchors[head_id]);
+        m_glob_anchor_map[head_id].resize(head_anchors[head_id]);
         int anchor_height, anchor_width;
         for (int anchor_id = 0; anchor_id < head_anchors[head_id]; ++anchor_id) {
-            const auto glob_anchor_name = new_network_
-                  ? config_.new_action_conf_blob_name_prefix + std::to_string(head_id + 1) +
-                    config_.new_action_conf_blob_name_suffix + std::to_string(anchor_id + 1)
-                  : config_.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
-            glob_anchor_names_.push_back(glob_anchor_name);
-            const auto anchor_dims = model_.output(glob_anchor_name).get_shape();
-            anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
-            anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
-            std::size_t action_dimension_idx = new_network_ ? 1 : 3;
-            if (anchor_dims[action_dimension_idx] != config_.num_action_classes) {
+            const auto glob_anchor_name = m_new_model ?
+                m_config.new_action_conf_blob_name_prefix + std::to_string(head_id + 1) +
+                    m_config.new_action_conf_blob_name_suffix + std::to_string(anchor_id + 1) :
+                m_config.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
+            m_glob_anchor_names.push_back(glob_anchor_name);
+            const auto anchor_dims = m_model.output(glob_anchor_name).get_shape();
+            anchor_height = m_new_model ? anchor_dims[2] : anchor_dims[1];
+            anchor_width = m_new_model ? anchor_dims[3] : anchor_dims[2];
+            std::size_t action_dimension_idx = m_new_model ? 1 : 3;
+            if (anchor_dims[action_dimension_idx] != m_config.num_action_classes) {
                 throw std::logic_error("The number of specified actions and the number of actions predicted by "
                     "the Person/Action Detection Retail model must match");
             }
@@ -104,17 +107,17 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
             const int anchor_size = anchor_height * anchor_width;
             head_shift += anchor_size;
 
-            head_step_sizes_[head_id] = new_network_ ? anchor_size : 1;
-            glob_anchor_map_[head_id][anchor_id] = num_glob_anchors_++;
+            m_head_step_sizes[head_id] = m_new_model ? anchor_size : 1;
+            m_glob_anchor_map[head_id][anchor_id] = m_num_glob_anchors++;
         }
 
-        head_ranges_[head_id + 1] = head_shift;
-        head_blob_sizes_.emplace_back(anchor_width, anchor_height);
+        m_head_ranges[head_id + 1] = head_shift;
+        m_head_blob_sizes.emplace_back(anchor_width, anchor_height);
     }
 
-    num_candidates_ = head_shift;
+    m_num_candidates = head_shift;
 
-    binary_task_ = config_.num_action_classes == 2;
+    m_binary_task = m_config.num_action_classes == 2;
 }
 
 std::vector<int> ieSizeToVector(const ov::Shape& ie_output_dims) {
@@ -126,42 +129,42 @@ std::vector<int> ieSizeToVector(const ov::Shape& ie_output_dims) {
 }
 
 DetectedActions ActionDetection::fetchResults() {
-    const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
-    const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
+    const auto loc_blob_name = m_new_model ? m_config.new_loc_blob_name : m_config.old_loc_blob_name;
+    const auto det_conf_blob_name = m_new_model ? m_config.new_det_conf_blob_name : m_config.old_det_conf_blob_name;
 
-    auto loc_out_size = ieSizeToVector(model_.output(loc_blob_name).get_shape());
+    auto loc_out_size = ieSizeToVector(m_model.output(loc_blob_name).get_shape());
     const cv::Mat loc_out(loc_out_size[0],
                           loc_out_size[1],
                           CV_32F,
                           request->get_tensor(loc_blob_name).data<float>());
 
-    auto main_conf_out_size = ieSizeToVector(model_.output(det_conf_blob_name).get_shape());
+    auto main_conf_out_size = ieSizeToVector(m_model.output(det_conf_blob_name).get_shape());
     const cv::Mat main_conf_out(main_conf_out_size[0],
                                 main_conf_out_size[1],
                                 CV_32F,
                                 request->get_tensor(det_conf_blob_name).data<float>());
 
     std::vector<cv::Mat> add_conf_out;
-    for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
-        const auto& blob_name = glob_anchor_names_[glob_anchor_id];
+    for (int glob_anchor_id = 0; glob_anchor_id < m_num_glob_anchors; ++glob_anchor_id) {
+        const auto& blob_name = m_glob_anchor_names[glob_anchor_id];
         add_conf_out.emplace_back(request->get_tensor(blob_name).get_shape()[2],
                                   request->get_tensor(blob_name).get_shape()[3],
                                   CV_32F,
                                   request->get_tensor(blob_name).data());
     }
 
-    /** Parse detections **/
-    if (new_network_) {
+    // Parse detections
+    if (m_new_model) {
         const cv::Mat priorbox_out;
         return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
-                             cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
+                             cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
     }
 
-    const cv::Mat priorbox_out(ieSizeToVector(model_.output(config_.old_priorbox_blob_name).get_shape()),
+    const cv::Mat priorbox_out(ieSizeToVector(m_model.output(m_config.old_priorbox_blob_name).get_shape()),
                           CV_32F,
-                          request->get_tensor(config_.old_priorbox_blob_name).data());
+                          request->get_tensor(m_config.old_priorbox_blob_name).data());
     return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
-                         cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
+                         cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
 }
 
 inline ActionDetection::NormalizedBBox
@@ -184,10 +187,10 @@ ActionDetection::GeneratePriorBox(int pos, int step, const cv::Size2f& anchor,
     const float center_y = (row + 0.5f) * static_cast<float>(step);
 
     NormalizedBBox bbox;
-    bbox.xmin = (center_x - 0.5f * anchor.width) / static_cast<float>(network_input_size_.width);
-    bbox.ymin = (center_y - 0.5f * anchor.height) / static_cast<float>(network_input_size_.height);
-    bbox.xmax = (center_x + 0.5f * anchor.width) / static_cast<float>(network_input_size_.width);
-    bbox.ymax = (center_y + 0.5f * anchor.height) / static_cast<float>(network_input_size_.height);
+    bbox.xmin = (center_x - 0.5f * anchor.width) / static_cast<float>(m_network_input_size.width);
+    bbox.ymin = (center_y - 0.5f * anchor.height) / static_cast<float>(m_network_input_size.height);
+    bbox.xmax = (center_x + 0.5f * anchor.width) / static_cast<float>(m_network_input_size.width);
+    bbox.ymax = (center_y + 0.5f * anchor.height) / static_cast<float>(m_network_input_size.height);
 
     return bbox;
 }
@@ -195,13 +198,13 @@ ActionDetection::GeneratePriorBox(int pos, int step, const cv::Size2f& anchor,
 cv::Rect ActionDetection::ConvertToRect(
         const NormalizedBBox& prior_bbox, const NormalizedBBox& variances,
         const NormalizedBBox& encoded_bbox, const cv::Size& frame_size) const {
-    /** Convert prior bbox to CV_Rect **/
+    // Convert prior bbox to CV_Rect
     const float prior_width = prior_bbox.xmax - prior_bbox.xmin;
     const float prior_height = prior_bbox.ymax - prior_bbox.ymin;
     const float prior_center_x = 0.5f * (prior_bbox.xmin + prior_bbox.xmax);
     const float prior_center_y = 0.5f * (prior_bbox.ymin + prior_bbox.ymax);
 
-    /** Decode bbox coordinates from the SSD format **/
+    // Decode bbox coordinates from the SSD format
     const float decoded_bbox_center_x =
             variances.xmin * encoded_bbox.xmin * prior_width + prior_center_x;
     const float decoded_bbox_center_y =
@@ -211,13 +214,13 @@ cv::Rect ActionDetection::ConvertToRect(
     const float decoded_bbox_height =
             static_cast<float>(exp(static_cast<float>(variances.ymax * encoded_bbox.ymax))) * prior_height;
 
-    /** Create decoded bbox **/
+    // Create decoded bbox
     const float decoded_bbox_xmin = decoded_bbox_center_x - 0.5f * decoded_bbox_width;
     const float decoded_bbox_ymin = decoded_bbox_center_y - 0.5f * decoded_bbox_height;
     const float decoded_bbox_xmax = decoded_bbox_center_x + 0.5f * decoded_bbox_width;
     const float decoded_bbox_ymax = decoded_bbox_center_y + 0.5f * decoded_bbox_height;
 
-    /** Convert decoded bbox to CV_Rect **/
+    // Convert decoded bbox to CV_Rect
     return cv::Rect(static_cast<int>(decoded_bbox_xmin * frame_size.width),
                     static_cast<int>(decoded_bbox_ymin * frame_size.height),
                     static_cast<int>((decoded_bbox_xmax - decoded_bbox_xmin) * frame_size.width),
@@ -227,10 +230,10 @@ cv::Rect ActionDetection::ConvertToRect(
 DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf,
         const cv::Mat& priorboxes, const std::vector<cv::Mat>& add_conf,
         const cv::Size& frame_size) const {
-    /** Prepare input data buffers **/
+    // Prepare input data buffers
     const float* loc_data = reinterpret_cast<float*>(loc.data);
     const float* det_conf_data = reinterpret_cast<float*>(main_conf.data);
-    const float* prior_data = new_network_ ? NULL : reinterpret_cast<float*>(priorboxes.data);
+    const float* prior_data = m_new_model ? NULL : reinterpret_cast<float*>(priorboxes.data);
 
     const int total_num_anchors = add_conf.size();
     std::vector<float*> action_conf_data(total_num_anchors);
@@ -238,48 +241,48 @@ DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat
         action_conf_data[i] = reinterpret_cast<float*>(add_conf[i].data);
     }
 
-    /** Variable to store all detection candidates**/
+    // Variable to store all detection candidates
     DetectedActions valid_detections;
 
-    /** Iterate over all candidate bboxes**/
-    for (int p = 0; p < num_candidates_; ++p) {
-        /** Parse detection confidence from the SSD Detection output **/
+    // Iterate over all candidate bboxes
+    for (int p = 0; p < m_num_candidates; ++p) {
+        // Parse detection confidence from the SSD Detection output
         const float detection_conf =
                 det_conf_data[p * NUM_DETECTION_CLASSES + POSITIVE_DETECTION_IDX];
 
-        /** Skip low-confidence detections **/
-        if (detection_conf < config_.detection_confidence_threshold) {
+        // Skip low-confidence detections
+        if (detection_conf < m_config.detection_confidence_threshold) {
             continue;
         }
 
-        /** Estimate the action head ID **/
+        // Estimate the action head ID
         int head_id = 0;
-        while (p >= head_ranges_[head_id + 1]) {
+        while (p >= m_head_ranges[head_id + 1]) {
             ++head_id;
         }
-        const int head_p = p - head_ranges_[head_id];
+        const int head_p = p - m_head_ranges[head_id];
 
-        /** Estimate the action anchor ID **/
+        // Estimate the action anchor ID
         const int head_num_anchors =
-            new_network_ ? config_.new_anchors[head_id] : config_.old_anchors[head_id];
+            m_new_model ? m_config.new_anchors[head_id] : m_config.old_anchors[head_id];
         const int anchor_id = head_p % head_num_anchors;
 
-        /** Estimate the action label **/
-        const int glob_anchor_id = glob_anchor_map_[head_id][anchor_id];
+        // Estimate the action label
+        const int glob_anchor_id = m_glob_anchor_map[head_id][anchor_id];
         const float* anchor_conf_data = action_conf_data[glob_anchor_id];
-        const int action_conf_idx_shift = new_network_
-                                            ? head_p / head_num_anchors
-                                            : head_p / head_num_anchors * config_.num_action_classes;
-        const int action_conf_step = head_step_sizes_[head_id];
-        const float scale = new_network_ ? config_.new_action_scale : config_.old_action_scale;
+        const int action_conf_idx_shift = m_new_model ?
+            head_p / head_num_anchors :
+            head_p / head_num_anchors * m_config.num_action_classes;
+        const int action_conf_step = m_head_step_sizes[head_id];
+        const float scale = m_new_model ? m_config.new_action_scale : m_config.old_action_scale;
         int action_label = -1;
         float action_max_exp_value = 0.f;
         float action_sum_exp_values = 0.f;
-        for (size_t c = 0; c < config_.num_action_classes; ++c) {
+        for (size_t c = 0; c < m_config.num_action_classes; ++c) {
             float action_exp_value =
                 std::exp(scale * anchor_conf_data[action_conf_idx_shift + c * action_conf_step]);
             action_sum_exp_values += action_exp_value;
-            if (action_exp_value > action_max_exp_value && ((c > 0 && binary_task_) || !binary_task_)) {
+            if (action_exp_value > action_max_exp_value && ((c > 0 && m_binary_task) || !m_binary_task)) {
                 action_max_exp_value = action_exp_value;
                 action_label = c;
             }
@@ -288,41 +291,39 @@ DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat
         if (std::fabs(action_sum_exp_values) < std::numeric_limits<float>::epsilon()) {
             throw std::logic_error("action_sum_exp_values can't be equal to 0");
         }
-        /** Estimate the action confidence **/
+        // Estimate the action confidence
         float action_conf = action_max_exp_value / action_sum_exp_values;
 
-        /** Skip low-confidence actions **/
-        if (action_label < 0 || action_conf < config_.action_confidence_threshold) {
-            action_label = config_.default_action_id;
+        // Skip low-confidence actions
+        if (action_label < 0 || action_conf < m_config.action_confidence_threshold) {
+            action_label = m_config.default_action_id;
             action_conf = 0.f;
         }
 
-        /** Parse bbox from the SSD Detection output **/
-        const auto priorbox = new_network_
-                                ? GeneratePriorBox(head_p / head_num_anchors,
-                                                   config_.new_det_heads[head_id].step,
-                                                   config_.new_det_heads[head_id].anchors[anchor_id],
-                                                   head_blob_sizes_[head_id])
-                                : ParseBBoxRecord(prior_data + p * SSD_PRIORBOX_RECORD_SIZE, false);
+        // Parse bbox from the SSD Detection output
+        const auto priorbox = m_new_model ?
+            GeneratePriorBox(head_p / head_num_anchors,
+                m_config.new_det_heads[head_id].step,
+                m_config.new_det_heads[head_id].anchors[anchor_id],
+                m_head_blob_sizes[head_id]) :
+            ParseBBoxRecord(prior_data + p * SSD_PRIORBOX_RECORD_SIZE, false);
         const auto variance =
-                ParseBBoxRecord(new_network_
-                                    ? config_.variances
-                                    : prior_data + (num_candidates_ + p) * SSD_PRIORBOX_RECORD_SIZE,
-                                false);
+                ParseBBoxRecord(m_new_model ?
+                    m_config.variances :
+                    prior_data + (m_num_candidates + p) * SSD_PRIORBOX_RECORD_SIZE, false);
         const auto encoded_bbox =
-                ParseBBoxRecord(loc_data + p * SSD_LOCATION_RECORD_SIZE, new_network_);
+                ParseBBoxRecord(loc_data + p * SSD_LOCATION_RECORD_SIZE, m_new_model);
 
         const auto det_rect = ConvertToRect(priorbox, variance, encoded_bbox, frame_size);
 
-        /** Store detected action **/
+        // Store detected action
         valid_detections.emplace_back(det_rect, action_label, detection_conf, action_conf);
     }
 
-    /** Merge most overlapped detections **/
+    // Merge most overlapped detections
     std::vector<int> out_det_indices;
-    SoftNonMaxSuppression(valid_detections, config_.nms_sigma, config_.keep_top_k,
-                          config_.detection_confidence_threshold,
-                          &out_det_indices);
+    SoftNonMaxSuppression(valid_detections, m_config.nms_sigma, m_config.keep_top_k,
+                          m_config.detection_confidence_threshold, &out_det_indices);
 
     DetectedActions detections;
     for (size_t i = 0; i < out_det_indices.size(); ++i) {
@@ -334,7 +335,7 @@ DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat
 void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
         const float sigma, size_t top_k, const float min_det_conf,
         std::vector<int>* out_indices) const {
-    /** Store input bbox scores **/
+    // Store input bbox scores
     std::vector<float> scores(detections.size());
     for (size_t i = 0; i < detections.size(); ++i) {
         scores[i] = detections[i].detection_conf;
@@ -342,19 +343,19 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
 
     top_k = std::min(top_k, scores.size());
 
-    /** Select top-k score indices **/
+    // Select top-k score indices
     std::vector<size_t> score_idx(scores.size());
     std::iota(score_idx.begin(), score_idx.end(), 0);
     std::nth_element(score_idx.begin(), score_idx.begin() + top_k, score_idx.end(),
         [&scores](size_t i1, size_t i2) {return scores[i1] > scores[i2];});
 
-    /** Extract top-k score values **/
+    // Extract top-k score values
     std::vector<float> top_scores(top_k);
     for (size_t i = 0; i < top_scores.size(); ++i) {
         top_scores[i] = scores[score_idx[i]];
     }
 
-    /** Carry out Soft Non-Maximum Suppression algorithm **/
+    // Carry out Soft Non-Maximum Suppression algorithm
     out_indices->clear();
     for (size_t step = 0; step < top_scores.size(); ++step) {
         auto best_score_itr = std::max_element(top_scores.begin(), top_scores.end());
@@ -362,20 +363,20 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
             break;
         }
 
-        /** Add current bbox to output list **/
+        // Add current bbox to output list
         const size_t local_anchor_idx = std::distance(top_scores.begin(), best_score_itr);
         const int anchor_idx = score_idx[local_anchor_idx];
         out_indices->emplace_back(anchor_idx);
         *best_score_itr = 0.f;
 
-        /** Update top_scores of the rest bboxes **/
+        // Update top_scores of the rest bboxes
         for (size_t local_reference_idx = 0; local_reference_idx < top_scores.size(); ++local_reference_idx) {
-            /** Skip updating step for the low-confidence bbox **/
+            // Skip updating step for the low-confidence bbox
             if (top_scores[local_reference_idx] < min_det_conf) {
                 continue;
             }
 
-            /** Calculate the Intersection over Union metric between two bboxes**/
+            // Calculate the Intersection over Union metric between two bboxes
             const size_t reference_idx = score_idx[local_reference_idx];
             const auto& rect1 = detections[anchor_idx].rect;
             const auto& rect2 = detections[reference_idx].rect;
@@ -386,7 +387,7 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
                 overlap = static_cast<float>(intersection_area) / static_cast<float>(rect1.area() + rect2.area() - intersection_area);
             }
 
-            /** Scale bbox score using the exponential rule **/
+            // Scale bbox score using the exponential rule
             top_scores[local_reference_idx] *= std::exp(-overlap * overlap / sigma);
         }
     }
