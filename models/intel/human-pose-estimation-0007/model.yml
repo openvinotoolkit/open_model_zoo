@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ description: >-
 task_type: human_pose_estimation
 files:
   - name: FP32/human-pose-estimation-0007.xml
-    size: 1084057
-    checksum: d27b276d3e04488e21dc1149f89df6680db1ba418550c7342ecfa21c069ee1587f838d5f1e4ea98b82d8680804de65e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP32/human-pose-estimation-0007.xml
+    size: 1462738
+    checksum: fb781dfd72cf89e00fbc9ef4c13d74ee2780ff74cce9a71b9d5444af194b30aaa5c83a8c35df1af86dd578ed96a5155e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/human-pose-estimation-0007/FP32/human-pose-estimation-0007.xml
   - name: FP32/human-pose-estimation-0007.bin
-    size: 32601740
-    checksum: 5e5d7e1c1c456d1c6a40b723524f0c1171a2510680a3cdd724cda61f1ffadfc8b0a22635139ea8781ad9ccfdb26d0189
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP32/human-pose-estimation-0007.bin
+    size: 32780636
+    checksum: d8d3edfbd129d20bf7045746b2f3858a349bc9c85b2a69e252217616f70cd24c4b95f65f199298263fee6c382254b856
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/human-pose-estimation-0007/FP32/human-pose-estimation-0007.bin
   - name: FP16/human-pose-estimation-0007.xml
-    size: 1083800
-    checksum: 8f45396367bb48d4e071e729849bd62f39bb4fa08c1e3f9d7a9e1ca43f6aada9f56976703ea0e97478dd7e3ae827de4e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP16/human-pose-estimation-0007.xml
+    size: 1917960
+    checksum: f94c370642996892ccdfaca56fcfe1281d8f023ee3ef19bc96d926033115cac239efca0c253fba236a2a9b37082ead44
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/human-pose-estimation-0007/FP16/human-pose-estimation-0007.xml
   - name: FP16/human-pose-estimation-0007.bin
-    size: 16300908
-    checksum: da51ed5b8f5ce38155523ede9907ca8231b3b23cba0669304c7895a5f5e94c8de9f1b19568e8ce21698739bc89633451
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP16/human-pose-estimation-0007.bin
+    size: 16389034
+    checksum: 0faee3c20cfeec5af03d138f5f0405920bb43a31ce53adf12fbe7f6f7d361ef9e1620fb0dd75cff73f300f4f983a875a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/human-pose-estimation-0007/FP16/human-pose-estimation-0007.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

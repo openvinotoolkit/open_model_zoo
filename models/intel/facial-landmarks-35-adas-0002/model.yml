@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml
-    size: 253710
-    checksum: 2623123fbf26e4674edcdf48d5c02408a227743c1e53b20739d227af3267c3de82755cfc22247ea9e7cf0c9dcaa5de65
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+    size: 305014
+    checksum: 2b51bf308c6cec7f3d10abfa39ef0222812e67827a480fb984379ba09f47ad9201f3bba5c846c5ddb47a34a36bff9f1e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
   - name: FP32/facial-landmarks-35-adas-0002.bin
     size: 18381152
-    checksum: e06715dd84385b0446815afb60cc4bc0dabbcef38deef7ff9cd932c1ca7c39f13d56edeec43ec35c74ca362157101d05
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+    checksum: bb4f63ff4a2a6e5873481a75d6335eff52ae059ba46ffe79a17c532f00b7777d7528c46be081f3c9cda13563a0c0edc8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
   - name: FP16/facial-landmarks-35-adas-0002.xml
-    size: 253573
-    checksum: 6a830e86933ec0c2c6f4dad6f617f8ea1471a04aa8eb622c3059cc964c9f5ba17bb6e414ea5db53889ef849555167ffe
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+    size: 406002
+    checksum: 5a1759c0b07c4d3928f72487a889b6dbdd843888de32620784f58ab5ef5d36c5371c5b6e126034c82f6c5fe98023949d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
   - name: FP16/facial-landmarks-35-adas-0002.bin
     size: 9190584
-    checksum: 4cca57a4f6ccf8d3b2a7eb6f20ddb14848c21a7e1a264ccae5f17720d29aed3445c8752d00e9bd9a8d8b27979e010727
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+    checksum: 0fa627392d3a73a98f20185feef1b32ff483fb016bb585b2b48d460af19973dae1fccc0565bcfa3577e910bbebeb2ca4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
   - name: FP16-INT8/facial-landmarks-35-adas-0002.xml
-    size: 628613
-    checksum: 12f52a898c0c7614c37205fc67186b8831704945ae28c00174545e42f94048725df2f7cd0c263f92929c869ad89443d7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
+    size: 711671
+    checksum: afe08b65b803d7c00eb58d2acb900ac6c4c79d0aed96fb8063e816a85e7438f827e0fcc6b7b3aec8a18a3c48027fec8a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
   - name: FP16-INT8/facial-landmarks-35-adas-0002.bin
-    size: 4634172
-    checksum: 8a8e5e1c97fbeaa4bb635ca549ce82491e1780e5ce92c55762e630f72b816535d5e5ef0139c453da9aa32fdb5881eebc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
+    size: 4664432
+    checksum: dcc75d626142efadaa68a1c28447a60af64feede31aed26dba7b70f9c6bcb5aa526198157ccfa1b5e78c0ef8860ee95e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

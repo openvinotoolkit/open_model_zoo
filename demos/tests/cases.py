@@ -266,6 +266,7 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
+            #TODO
             #TestCase(options={'-at': 'jr',
             #    '-m': ModelArg('fbcnn')}
             #)
@@ -679,10 +680,8 @@ NATIVE_DEMOS = [
     CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('noise-suppression-poconetlike-0001')}),
-# TODO: add new model when it will be ready
-#        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-#                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
-
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
     )),
 
     CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
@@ -691,7 +690,7 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-        #       ModelArg('instance-segmentation-person-0007'),
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
     ))
 
@@ -711,6 +710,7 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
+            #TODO
             #*combine_cases(
             #    TestCase(options={'--architecture_type': 'en-de'}),
             #    [
@@ -733,7 +733,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-    #       ModelArg('instance-segmentation-person-0007'),
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -880,7 +880,7 @@ PYTHON_DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('Sphereface'),
             ModelArg('face-reidentification-retail-0095'),
-            # ModelArg('face-recognition-resnet100-arcface-onnx'),
+            # ModelArg('face-recognition-resnet100-arcface-onnx'), TODO
             ModelArg('facenet-20180408-102900')),
     )),
 
@@ -943,6 +943,7 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    #TODO
     #PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
     #                      **MONITORS,
@@ -1044,10 +1045,8 @@ PYTHON_DEMOS = [
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('noise-suppression-poconetlike-0001')}),
-# TODO: add new model when it will be ready
-#        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-#                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
-
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
     )),
 
     PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -1182,7 +1181,7 @@ PYTHON_DEMOS = [
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'detr'}), # detr-resnet50 model fails to convert on 2022.1 package
+                TestCase(options={'--architecture_type': 'detr'}), # TODO detr-resnet50 model fails to convert on 2022.1 package
                 [
                     #TestCase(options={'-m': ModelArg('detr-resnet50')}),
                     #TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
@@ -1238,6 +1237,7 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    #TODO
     #PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
     #           model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None, **MONITORS,

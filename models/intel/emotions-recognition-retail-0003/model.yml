@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
-    size: 40242
-    checksum: 09292370295354e17507f4e718b235a626680c39ee6be525656e3874d58a5e22f1a7acee55929515e5b98fcf3f8c2e08
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    size: 48432
+    checksum: 889ffdd47bed4898a39a4720060e0c3775169d81e402833f3709600ac75e11d0c1a294f0f0c73dee162a1f5e1a307e1c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
-    checksum: 56a7e92575a3f9fede0f18f9ebc6f1fe479a7b7f826b50917eb0bbfd484b3e65693be27f61e36e3459ffeff6a6a81d16
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    checksum: b763e002e1084a792e99c755c457a2d64848967cfaa2bb851ef09e3d5d756a335b77cf08a1b770d60ccfbb87329b3f62
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
-    size: 40225
-    checksum: af03286b3cd2faf978f7e69f65a9a4fe4004d517156c493334d3cf5e68be82d2a252c734b8f07d42f1a2c8a4c5358389
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    size: 64023
+    checksum: a814286648150329650a48c1869451d0f192604074cd5079058b4f3b4d06019925959c257d0956fef650e070301e7e92
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
-    checksum: 1fda2fff394cc6be6901465c793c93133faff98b1cbccd3f86869202961c9988ecb92a2fb7cef5a1ef6dd275808b65fa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    checksum: 707923353b0e5bec597a3f6b0372d4c400f2c0dddad6994e041967c883d28d8dbae99f69bb7b2a835edbc0f3c5d43fc1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
   - name: FP16-INT8/emotions-recognition-retail-0003.xml
-    size: 113682
-    checksum: a66c2bd579ba8fa1d7c0608eff6f1cd565baab794e847f15e23a4f5b72d2bc7cc36e9ff8c3559ee17469859be4be86a8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
+    size: 130439
+    checksum: 651dec3eac37832b2b450abe068003adefc1c4d1558350aa2d619ddf98d9552014b8978f98bfdf0185abcc798a0c2105
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
   - name: FP16-INT8/emotions-recognition-retail-0003.bin
-    size: 2494126
-    checksum: 2cb63a32656e6af79b829e59142090fd47e4a9e6000fc2f6af2f3efdea372ffe2dbdbe54a044ec4adb66b52a806279c6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
+    size: 2502662
+    checksum: 0df460ff7cee98e566956923d86b7fb8ec93d0b3cc014f54eb699205a2259b5e152674918d6b2980f394080a9f93b1a8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
