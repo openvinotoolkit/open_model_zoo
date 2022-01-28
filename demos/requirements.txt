@@ -7,6 +7,6 @@ numpy>=1.16.6,<=1.21; python_version > "3.6"
 scikit-learn~=0.24.1
 scipy~=1.5.4
 sympy>=1.8
-tokenizers>=0.10.1
+tokenizers~=0.10.1
 tensorboardX>=2.1
 tqdm>=4.54.1
