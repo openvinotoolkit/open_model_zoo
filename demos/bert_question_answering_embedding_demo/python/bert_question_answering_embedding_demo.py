@@ -217,8 +217,7 @@ def main():
         num = min(max_len_question - 2, len(tokens_id))
         inputs, _ = model_emb.preprocess((tokens_id[:num], max_len_question))
         emb_request.infer(inputs)
-        raw_result = {output.get_any_name(): emb_request.get_tensor(output.get_any_name()).data[:]
-                      for output in model_emb_adapter.model.outputs}
+        raw_result = model_emb_adapter.get_raw_result(emb_request)
         return model_emb.postprocess(raw_result, None)
 
     source = ContextSource(paragraphs, vocab, c_window_len)

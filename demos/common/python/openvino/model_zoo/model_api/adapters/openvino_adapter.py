@@ -18,12 +18,12 @@ import logging as log
 from pathlib import Path
 
 try:
-    from openvino.runtime import AsyncInferQueue, Core, PartialShape, get_version
+    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version
     openvino_absent = False
 except ImportError:
     openvino_absent = True
 
-from .model_adapter import ModelAdapter, Metadata
+from .model_adapter import ModelAdapter, LayerMetadata
 from ..pipelines import parse_devices
 
 
@@ -34,6 +34,13 @@ def create_core():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     return Core()
+
+def get_layout_from_shape(shape):
+    if len(shape) != 4:
+        raise RuntimeError('Get_layout supports only 4D input shape')
+
+    layout = 'NCHW' if shape[1] == 3 else 'NHWC'
+    return layout
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -92,7 +99,11 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for input in self.model.inputs:
-            inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input.get_element_type().get_type_name())
+            if layout_helpers.get_layout(input).empty and len(input.shape) == 4:
+                input_layout = get_layout_from_shape(input.shape)
+            else:
+                input_layout = layout_helpers.get_layout(input).to_string().strip('[]').replace(',', '')
+            inputs[input.get_any_name()] = LayerMetadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
@@ -100,7 +111,7 @@ class OpenvinoAdapter(ModelAdapter):
         outputs = {}
         for output in self.model.outputs:
             output_shape = output.partial_shape.get_min_shape() if self.model.is_dynamic() else output.shape
-            outputs[output.get_any_name()] = Metadata(output.get_names(), list(output_shape), output.get_element_type().get_type_name())
+            outputs[output.get_any_name()] = LayerMetadata(output.get_names(), list(output_shape), output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
@@ -136,4 +147,12 @@ class OpenvinoAdapter(ModelAdapter):
                 continue
             layers_info[layer_name].meta = node.get_attributes()
             layers_info[layer_name].type = node.get_type_name()
+        return layers_info
+
+    def operations_by_type(self, operation_type):
+        layers_info = {}
+        for node in self.model.get_ordered_ops():
+            if node.get_type_name() == operation_type:
+                layer_name = node.get_friendly_name()
+                layers_info[layer_name] = LayerMetadata(type=node.get_type_name(), meta=node.get_attributes())
         return layers_info

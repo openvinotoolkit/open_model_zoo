@@ -34,13 +34,11 @@ ANCHORS = {
                128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
 }
 
-def permute_to_N_HWA_K(tensor, K, layout='NCHW'):
+def permute_to_N_HWA_K(tensor, K):
     """
     Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
     """
     assert tensor.ndim == 4, tensor.shape
-    if layout == 'NHWC':
-        tensor = tensor.transpose(0, 3, 1, 2)
     N, _, H, W = tensor.shape
     tensor = tensor.reshape(N, -1, K, H, W)
     tensor = tensor.transpose(0, 3, 4, 1, 2)
@@ -87,6 +85,7 @@ class YOLO(DetectionModel):
 
     def _get_output_info(self):
         output_info = {}
+        yolo_regions = self.model_adapter.operations_by_type('RegionYolo')
         for name, info in self.outputs.items():
             shape = info.shape
             if len(shape) == 2:
@@ -98,7 +97,12 @@ class YOLO(DetectionModel):
                 if self.w % 32 != 0 or self.h % 32 !=0 or shape[1] % (cx*cy) != 0:
                     raise WrapperError(self.__model__, 'The cannot reshape 2D output tensor into 4D')
                 shape = (shape[0], bboxes, cy, cx)
-            params = self.Params(info.meta, shape[2:4])
+            meta = info.meta
+            if info.type != 'RegionYolo' and yolo_regions:
+                for region_name in yolo_regions:
+                    if region_name in name:
+                        meta = yolo_regions[region_name].meta
+            params = self.Params(meta, shape[2:4])
             output_info[name] = (shape, params)
         return output_info
 
@@ -121,7 +125,7 @@ class YOLO(DetectionModel):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
         size_normalizer = input_size if params.use_input_size else params.sides
-        predictions = permute_to_N_HWA_K(predictions, params.bbox_size, self.input_layout)
+        predictions = permute_to_N_HWA_K(predictions, params.bbox_size)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
         for prediction in predictions:
             # Getting probabilities from raw outputs
@@ -252,14 +256,10 @@ class YoloV4(YOLO):
         num = 3
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
-            if self.input_layout == 'NCHW':
-                channels, h, w = shape[1:]
-            else:
-                h, w, channels = shape[1:]
-            classes = channels // num - 5
-            if channels % num != 0:
+            classes = shape[1] // num - 5
+            if shape[1] % num != 0:
                 raise WrapperError(self.__model__, "The output blob {} has wrong 2nd dimension".format(name))
-            yolo_params = self.Params(classes, num, (h, w), self.anchors, self.masks[i*num : (i+1)*num])
+            yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
             output_info[name] = (shape, yolo_params)
         return output_info
 
@@ -310,12 +310,8 @@ class YOLOF(YOLO):
         num = 6
         for name, layer in self.outputs.items():
             shape = layer.shape
-            if self.input_layout == 'NCHW':
-                channels, h, w = shape[1:]
-            else:
-                h, w, channels = shape[1:]
-            classes = channels // num - 4
-            yolo_params = self.Params(classes, num, (h, w), anchors)
+            classes = shape[1] // num - 4
+            yolo_params = self.Params(classes, num, shape[2:4], anchors)
             output_info[name] = (shape, yolo_params)
         return output_info
 

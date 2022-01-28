@@ -20,9 +20,10 @@ from typing import Dict, List, Set
 
 
 @dataclass
-class Metadata:
-    names: Set[str]
+class LayerMetadata:
+    names: Set[str] = field(default_factory=set)
     shape: List[int] = field(default_factory=list)
+    layout: str = ''
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)

@@ -14,9 +14,6 @@
  limitations under the License.
 """
 
-from openvino.preprocess import PrePostProcessor
-from openvino.runtime import Layout, layout_helpers
-
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform, get_layout_from_shape
@@ -49,10 +46,12 @@ class ImageModel(Model):
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0]
 
-        # set the layout for the model if it is not defined
-        self.set_layout(self.image_blob_name)
-        if self.model_loaded:
-            self.load(force=True)
+        self.input_layout = self.inputs[self.image_blob_name].layout
+        self.nchw_layout = self.input_layout == 'NCHW'
+        if self.nchw_layout:
+            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
+        else:
+            self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
         self.resize = RESIZE_TYPES[self.resize_type]
         self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
 
@@ -89,21 +88,6 @@ class ImageModel(Model):
             raise RuntimeError('Failed to identify the input for the image: no 4D input layer found')
         return image_blob_names, image_info_blob_names
 
-    def set_layout(self, layer_name):
-        self.ov_processor = PrePostProcessor(self.model_adapter.model)
-        self.input_layout = get_layout_from_shape(self.inputs[layer_name].shape)
-        if layout_helpers.get_layout(self.model_adapter.model.input(layer_name)).empty:
-            self.ov_processor.input(layer_name).tensor().set_layout(Layout(self.input_layout))
-            self.ov_processor.input(layer_name).model().set_layout(Layout(self.input_layout))
-        else:
-            self.input_layout = layout_helpers.get_layout(self.model_adapter.model.input(layer_name)).to_string().strip('[]').replace(',', '')
-        if self.input_layout == 'NCHW':
-            self.n, self.c, self.h, self.w = self.inputs[layer_name].shape
-        else:
-            self.n, self.h, self.w, self.c = self.inputs[layer_name].shape
-
-        self.model_adapter.model = self.ov_processor.build()
-
     def preprocess(self, inputs):
         '''Data preprocess method
 
@@ -138,7 +122,7 @@ class ImageModel(Model):
         return dict_inputs, meta
 
     def _change_layout(self, image):
-        if self.input_layout == Layout('NCHW'):
+        if self.nchw_layout:
             image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             image = image.reshape((1, self.c, self.h, self.w))
         else:
