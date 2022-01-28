@@ -15,7 +15,7 @@ const char TENSOR_LEFT_EYE_IMAGE[] = "left_eye_image";
 const char TENSOR_RIGHT_EYE_IMAGE[] = "right_eye_image";
 
 GazeEstimator::GazeEstimator(
-    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
+    ov::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
         ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign)
 {
     const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();

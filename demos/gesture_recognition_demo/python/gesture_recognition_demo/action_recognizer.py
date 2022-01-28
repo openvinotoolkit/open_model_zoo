@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ from gesture_recognition_demo.common import IEModel
 class ActionRecognizer(IEModel):
     """ Class that is used to work with action recognition model. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, img_scale, num_classes):
+    def __init__(self, model_path, device, core, num_requests, img_scale, num_classes):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests, 'Action Recognition')
+        super().__init__(model_path, device, core, num_requests, 'Action Recognition')
 
         _, _, t, h, w = self.input_size
         self.input_height = h

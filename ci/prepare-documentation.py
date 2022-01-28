@@ -377,6 +377,11 @@ def main():
 
     add_demos_pages(output_root, navindex_element)
 
+    ovms_adapter_element = add_page(output_root, navindex_element, id='omz_model_api_ovms_adapter',
+        path='demos/common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md',
+        title='OMZ Model API OVMS adapter')
+    ovms_adapter_element.attrib[XML_ID_ATTRIBUTE] = 'omz_model_api_ovms_adapter'
+
     for md_path in all_md_paths:
         if md_path not in documentation_md_paths:
             raise RuntimeError(f'{all_md_paths[md_path]}: '

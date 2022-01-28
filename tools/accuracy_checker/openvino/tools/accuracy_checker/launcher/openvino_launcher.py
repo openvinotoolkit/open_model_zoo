@@ -26,7 +26,8 @@ from .dlsdk_launcher_config import (
     get_cpu_extension,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
-    automatic_model_search
+    automatic_model_search,
+    ov_set_config
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
 
@@ -71,28 +72,22 @@ PRECISION_STR_TO_TYPE = {
 
 # pylint:disable=R0904
 class OpenVINOLauncher(Launcher):
-    """
-    Class for infer model using DLSDK framework.
-    """
-
     __provider__ = 'openvino'
 
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update(DLSDK_LAUNCHER_PARAMETERS)
-
         return parameters
 
     def __init__(self, config_entry, model_name='', delayed_model_loading=False,
                  preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
-
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
         self.ie_core = Core()
         if self.ie_config:
-            self.ie_core.set_config(self.ie_config)
+            ov_set_config(self.ie_core, self.ie_config)
         self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
             'OpenVINO_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
@@ -188,7 +183,6 @@ class OpenVINOLauncher(Launcher):
     def predict(self, inputs, metadata=None, return_raw=False, **kwargs):
         if self._lstm_inputs:
             return self._predict_sequential(inputs, metadata, return_raw)
-
         results = []
         raw_results = []
         for infer_inputs in inputs:
@@ -213,7 +207,6 @@ class OpenVINOLauncher(Launcher):
         if metadata is not None:
             self._fill_meta(metadata)
         self._do_reshape = False
-
         if return_raw:
             return results, raw_results
         return results
@@ -318,7 +311,8 @@ class OpenVINOLauncher(Launcher):
     @async_mode.setter
     def async_mode(self, flag):
         for device in self._devices_list():
-            self.ie_core.set_config({'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device.upper())
+            ov_set_config(
+                self.ie_core, {'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device.upper())
         self._async_mode = flag
 
     def get_async_requests(self):
@@ -331,6 +325,7 @@ class OpenVINOLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if self.infer_request is not None:
+            del self.infer_request
             self.infer_request = None
         partial_shapes = {}
         for name, shape in shapes.items():
@@ -338,12 +333,12 @@ class OpenVINOLauncher(Launcher):
                 [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
             )
             partial_shapes[self.input_to_index[name]] = p_shape
-
         self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         if self.dyn_input_layers and make_dynamic:
             return
         self.exec_network = self.ie_core.compile_model(self.network, self.device)
+        self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def reshape_network(network, shapes):
@@ -362,8 +357,7 @@ class OpenVINOLauncher(Launcher):
         input_batch_size = input_shape[0]
         if data_batch_size < input_batch_size:
             warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
-                data_batch_size, input_batch_size
-            )
+                data_batch_size, input_batch_size)
             warning(warning_message)
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
@@ -388,7 +382,8 @@ class OpenVINOLauncher(Launcher):
                 selection_mode = self.config.get('_cpu_extensions_mode')
                 cpu_extensions = get_cpu_extension(cpu_extensions, selection_mode)
                 self.ie_core.add_extension(str(cpu_extensions), 'CPU')
-            self.ie_core.set_config({'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
+            ov_set_config(
+                self.ie_core, {'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
         if 'GPU' in self._devices_list():
             config = {}
@@ -397,14 +392,14 @@ class OpenVINOLauncher(Launcher):
             if self._is_multi() and 'CPU' in self._devices_list():
                 config['CLDNN_PLUGIN_THROTTLE'] = '1'
             if config:
-                self.ie_core.set_config(config, 'GPU')
+                ov_set_config(self.ie_core, config, 'GPU')
         if self._is_vpu():
             device_list = map(lambda device: device.split('.')[0], self._devices_list())
             devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:
                 for device in devices:
-                    self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
+                    ov_set_config(self.ie_core, {'LOG_LEVEL': log_level}, device)
         device_config = self.config.get('device_config')
         if device_config:
             self._set_device_config(device_config)
@@ -431,7 +426,10 @@ class OpenVINOLauncher(Launcher):
         platform_list = self._devices_list()
         concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4}
         if hasattr(self, 'exec_network') and self.exec_network is not None:
-            num_requests = self.exec_network.get_metric('OPTIMAL_NUMBER_OF_INFER_REQUESTS')
+            if hasattr(self.exec_network, 'get_metric'):
+                num_requests = self.exec_network.get_metric('OPTIMAL_NUMBER_OF_INFER_REQUESTS')
+            else:
+                num_requests = self.exec_network.get_property('OPTIMAL_NUMBER_OF_INFER_REQUESTS')
             return num_requests
         if 'CPU' in platform_list and len(platform_list) == 1:
             min_requests = [4, 5, 3]
@@ -480,14 +478,14 @@ class OpenVINOLauncher(Launcher):
         if not isinstance(device_config, dict):
             raise ConfigError('device configuration should be a dict-like')
         if all(not isinstance(value, dict) for value in device_config.values()):
-            self.ie_core.set_config(dict(device_config), self.device)
+            ov_set_config(self.ie_core, dict(device_config), self.device)
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
                     if key in self._devices_list():
                         if key not in self.ie_core.available_devices:
                             warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                        self.ie_core.set_config(dict(value), key)
+                        ov_set_config(self.ie_core, dict(value), key)
                     else:
                         warnings.warn(
                             f'Configuration for {key} will be skipped as device is not listed in evaluation device'
@@ -583,6 +581,9 @@ class OpenVINOLauncher(Launcher):
     def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
+        if hasattr(self, 'infer_request'):
+            del self.infer_request
+            self.infer_request = None
         if network is None:
             self._create_network()
         else:
@@ -601,9 +602,8 @@ class OpenVINOLauncher(Launcher):
             if preprocessing:
                 self._set_preprocess(preprocessing)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
-                self.exec_network = self.ie_core.compile_model(
-                    self.network, self._device
-                )
+                self.exec_network = self.ie_core.compile_model(self.network, self._device)
+                self.infer_request = self.exec_network.create_infer_request()
 
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
@@ -619,6 +619,7 @@ class OpenVINOLauncher(Launcher):
             self.exec_network = self.ie_core.compile_model(
                 self.network, self._device
             )
+            self.infer_request = self.exec_network.create_infer_request()
 
     @staticmethod
     def get_dynamic_inputs(network):
@@ -638,7 +639,6 @@ class OpenVINOLauncher(Launcher):
             if is_dynamic(input_shape):
                 inputs_with_undefined_shapes.append(input_node.friendly_name)
                 partial_shapes[input_node.friendly_name] = input_shape
-
         return inputs_with_undefined_shapes, partial_shapes
 
     @staticmethod

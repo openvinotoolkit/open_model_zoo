@@ -1,14 +1,12 @@
 import os
 import sys
-from pathlib import Path
 import copy
 from time import perf_counter
 
 import cv2
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 
 class InvalidInput(Exception):

@@ -16,7 +16,7 @@
 namespace gaze_estimation {
 class FaceDetector {
 public:
-    FaceDetector(ov::runtime::Core& ie,
+    FaceDetector(ov::Core& core,
                  const std::string& modelPath,
                  const std::string& deviceName,
                  double detectionConfidenceThreshold,

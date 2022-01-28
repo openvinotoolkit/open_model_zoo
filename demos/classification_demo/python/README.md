@@ -78,6 +78,7 @@ omz_converter --list models.lst
 * squeezenet1.0
 * squeezenet1.1
 * swin-tiny-patch4-window7-224
+* t2t-vit-14
 * vgg16
 * vgg19
 
@@ -101,7 +102,7 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INPUT
+usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT
                               [-d DEVICE] [--labels LABELS]
                               [-topk {1,2,3,4,5,6,7,8,9,10}]
                               [-nireq NUM_INFER_REQUESTS]
@@ -118,8 +119,9 @@ usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INP
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  --adapter {openvino,remote}
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
+  --adapter {openvino,ovms}
                         Optional. Specify the model adapter. Default is
                         openvino.
   -i INPUT, --input INPUT
@@ -191,6 +193,19 @@ For example, use the following command-line command to run the application:
 python3 classification_demo.py -m <path_to_classification_model> \
                                -i <path_to_folder_with_images> \
                                 --labels <path_to_file_with_list_of_labels>
+```
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 classification_demo.py -m localhost:9000/models/classification \
+                               -i <path_to_folder_with_images> \
+                                --labels <path_to_file_with_list_of_labels> \
+                                --adapter ovms
 ```
 
 ## Demo Output

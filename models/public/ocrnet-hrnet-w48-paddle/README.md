@@ -50,7 +50,7 @@ Expected color order: `BGR`.
 
 ### Original Model
 
-Integer values in a range [0, 18], which represent an index of a predicted class for each image pixel. Name: `save_infer_model/scale_0.tmp_1`, shape: `1, 1024, 2048` in `B, H, W` format, where:
+Integer values in a range [0, 18], which represent an index of a predicted class for each image pixel. Name: `argmax_0.tmp_0`, shape: `1, 1024, 2048` in `B, H, W` format, where:
 
 - `B` - batch size
 - `H` - image height
@@ -58,7 +58,7 @@ Integer values in a range [0, 18], which represent an index of a predicted class
 
 ### Converted Model
 
-Integer values in a range [0, 18], which represent an index of a predicted class for each image pixel. Name: `save_infer_model/scale_0.tmp_1`, shape: `1, 1024, 2048` in `B, H, W` format, where:
+Integer values in a range [0, 18], which represent an index of a predicted class for each image pixel. Name: `argmax_0.tmp_0`, shape: `1, 1024, 2048` in `B, H, W` format, where:
 
 - `B` - batch size
 - `H` - image height
