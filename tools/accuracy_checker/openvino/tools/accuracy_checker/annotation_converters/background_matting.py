@@ -69,7 +69,7 @@ class BackgroundMattingConverter(BaseFormatConverter):
         mask_name = '{prefix}{base}{postfix}'.format(
             prefix=self.mask_prefix, base='{base}', postfix=self.mask_postfix
         )
-        image_pattern = '*'
+        image_pattern = '**/*'
         if self.images_prefix:
             image_pattern = self.images_prefix + image_pattern
         if self.images_postfix:
@@ -155,3 +155,75 @@ class VideoBackgroundMatting(BackgroundMattingConverter):
         return ConverterReturn(
             annotations, self.get_meta(), content_errors
         )
+
+
+class BackgroundMattingSequential(BackgroundMattingConverter):
+    __provider__ = 'background_matting_sequential'
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        annotations = []
+        image_name = '{prefix}{clip}/{base}{postfix}'.format(
+            prefix=self.images_prefix, clip='{clip}', base='{base}', postfix=self.images_postfix
+        )
+        mask_name = '{prefix}{clip}/{base}{postfix}'.format(
+            prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
+        )
+        image_pattern = self.get_image_pattern('**/*')
+        images_list = sorted(list(self.images_dir.glob(image_pattern)))
+        clips_list = self.get_clips_names(images_list)
+        num_iterations = len(images_list)
+        content_errors = None if not check_content else []
+        idx = 0
+        for clip_name in clips_list:
+            clip_dir = self.images_dir / self.images_prefix / clip_name
+            image_pattern = self.get_image_pattern('*', with_prefix=False)
+            clip_images = sorted(list(clip_dir.glob(image_pattern)))
+
+            for image in clip_images:
+                base_name = image.name
+                if self.images_prefix:
+                    base_name = base_name.split(self.images_prefix)[-1]
+                if self.images_postfix:
+                    base_name = base_name.split(self.images_postfix)[0]
+
+                mask_file = self.masks_dir / mask_name.format(base=base_name, clip=clip_name)
+                image_file = self.images_dir / image_name.format(base=base_name, clip=clip_name)
+                if not (mask_file.exists() and image_file.exists()):
+                    continue
+                identifier = image_name.format(base=base_name, clip=clip_name)
+                mask = mask_name.format(base=base_name, clip=clip_name)
+
+                if self.with_background:
+                    bgr_name = '{prefix}{clip}/{base}{postfix}'.format(
+                        prefix=self.background_prefix, clip=clip_name, base=base_name, postfix=self.background_postfix
+                    )
+                    bgr_file = self.images_dir / bgr_name
+                    if not bgr_file.exists():
+                        continue
+                    identifier = [identifier, bgr_name]
+
+                annotations.append(
+                    BackgroundMattingAnnotation(identifier, mask, self.mask_to_gray, self.with_alpha, video_id=clip_name)
+                )
+                if progress_callback is not None and idx % progress_interval == 0:
+                    progress_callback(idx / num_iterations * 100)
+                idx += 1
+
+        return ConverterReturn(
+            annotations, self.get_meta(), content_errors
+        )
+
+    @staticmethod
+    def get_clips_names(images_list):
+        result = []
+        for idx, image in enumerate(images_list):
+            clip_path = image.parent
+            result.append(clip_path.name)
+        return sorted(list(set(result)))
+
+    def get_image_pattern(self, image_pattern='*', with_prefix=True, with_postfix=True):
+        if with_prefix and self.images_prefix:
+            image_pattern = self.images_prefix + image_pattern
+        if with_postfix and self.images_postfix:
+            image_pattern = image_pattern + self.images_postfix
+        return image_pattern

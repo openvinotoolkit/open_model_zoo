@@ -376,12 +376,13 @@ class SalientRegionPrediction(SegmentationPrediction):
 
 
 class BackgroundMattingAnnotation(SegmentationAnnotation):
-    def __init__(self, identifier, path_to_mask, mask_to_gray=False, load_alpha=False):
+    def __init__(self, identifier, path_to_mask, mask_to_gray=False, load_alpha=False, video_id=None):
         super().__init__(
             identifier, path_to_mask,
             GTMaskLoader.OPENCV_UNCHANGED if not mask_to_gray else GTMaskLoader.OPENCV_GRAY
         )
         self.load_alpha = load_alpha
+        self.video_id = video_id
 
     def _load_mask(self):
         mask = super()._load_mask()
