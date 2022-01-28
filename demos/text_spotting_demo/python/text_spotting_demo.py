@@ -30,11 +30,10 @@ from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -263,7 +262,7 @@ def main():
 
         # Run the MaskRCNN model.
         mask_rcnn_infer_request.infer({input_tensor_name: input_image})
-        outputs = {name: mask_rcnn_infer_request.get_tensor(name).data for name in required_output_names}
+        outputs = {name: mask_rcnn_infer_request.get_tensor(name).data[:] for name in required_output_names}
 
         # Parse detection results of the current request
         boxes = outputs['boxes'][:, :4]
@@ -303,7 +302,7 @@ def main():
                     args.trd_input_prev_symbol: np.reshape(prev_symbol_index, (1,)),
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
-                decoder_output = {name: text_dec_infer_request.get_tensor(name).data for name in text_dec_output_names}
+                decoder_output = {name: text_dec_infer_request.get_tensor(name).data[:] for name in text_dec_output_names}
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
                 symbols_distr_softmaxed = softmax(symbols_distr, axis=1)[0]
                 prev_symbol_index = int(np.argmax(symbols_distr, axis=1))

@@ -45,6 +45,9 @@ network to detect objects of the same type better.
 | [person-detection-0201](./person-detection-0201/README.md) | 1.768   | 1.817  |
 | [person-detection-0202](./person-detection-0202/README.md) | 3.143   | 1.817  |
 | [person-detection-0203](./person-detection-0203/README.md) | 6.519   | 2.394  |
+| [person-detection-0301](./person-detection-0301/README.md) | 79318.2158   | 55.557  |
+| [person-detection-0302](./person-detection-0302/README.md) | 370.208   | 51.164  |
+| [person-detection-0303](./person-detection-0303/README.md) | 24.758   | 3.630  |
 | [person-detection-0106](./person-detection-0106/README.md) | 404.264 | 71.565 |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/README.md) | 2.836 | 1.165 |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/README.md) | 3.974 | 1.650 |
@@ -321,6 +324,14 @@ Deep Learning models for time series forecasting.
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
+
+## Action Sequence Modeling
+
+Deep Learning models for online sequence modeling.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
 
 ## See Also
 

@@ -666,7 +666,7 @@ class DataProvider:
             yaml.safe_dump(identifiers, sf)
 
     def __getitem__(self, item):
-        if self.batch is None:
+        if self.batch is None or self._batch <= 0:
             self.batch = 1
         if self.size <= item * self.batch:
             raise IndexError

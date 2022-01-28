@@ -685,6 +685,16 @@ NATIVE_DEMOS = [
 
     )),
 
+    CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '-at': 'maskrcnn',
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+        }),
+        single_option_cases('-m',
+        #       ModelArg('instance-segmentation-person-0007'),
+            ModelArg('instance-segmentation-security-0091')),
+    ))
+
 ]
 
 PYTHON_DEMOS = [
@@ -701,19 +711,19 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'en-de'}),
-                [
-                    TestCase(options={
-                        '-m_en': ModelArg('action-recognition-0001-encoder'),
-                        '-m_de': ModelArg('action-recognition-0001-decoder'),
-                    }),
-                    TestCase(options={
-                        '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
-                        '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
-                    }),
-                ]
-            ),
+            #*combine_cases(
+            #    TestCase(options={'--architecture_type': 'en-de'}),
+            #    [
+            #        TestCase(options={
+            #            '-m_en': ModelArg('action-recognition-0001-encoder'),
+            #            '-m_de': ModelArg('action-recognition-0001-decoder'),
+            #        }),
+            #        TestCase(options={
+            #            '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+            #            '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+            #        }),
+            #    ]
+            #),
         ],
     )),
 
@@ -870,7 +880,7 @@ PYTHON_DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('Sphereface'),
             ModelArg('face-reidentification-retail-0095'),
-            ModelArg('face-recognition-resnet100-arcface-onnx'),
+            # ModelArg('face-recognition-resnet100-arcface-onnx'),
             ModelArg('facenet-20180408-102900')),
     )),
 
@@ -933,12 +943,12 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          **MONITORS,
-                          '-i': DataPatternArg('human-pose-estimation')}),
-        TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    )),
+    #PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-i': DataPatternArg('human-pose-estimation')}),
+    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    #)),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1017,20 +1027,19 @@ PYTHON_DEMOS = [
                           '-m': ModelArg('midasnet')})
     )),
 
-    # commented because the demo is hanging with OV2.0
-    #PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
-    #           model_keys=['-m', '--m_reid'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #        **MONITORS,
-    #        '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
-    #            DataPatternArg('multi-camera-multi-target-tracking/repeated')],
-    #        '-m': ModelArg('person-detection-retail-0013')}),
-    #    single_option_cases('--m_reid',
-    #        ModelArg('person-reidentification-retail-0277'),
-    #        ModelArg('person-reidentification-retail-0286'),
-    #        ModelArg('person-reidentification-retail-0287'),
-    #        ModelArg('person-reidentification-retail-0288')),
-    #)),
+    PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
+               model_keys=['-m', '--m_reid'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
+                DataPatternArg('multi-camera-multi-target-tracking/repeated')],
+            '-m': ModelArg('person-detection-retail-0013')}),
+        single_option_cases('--m_reid',
+            ModelArg('person-reidentification-retail-0277'),
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')),
+    )),
 
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
@@ -1229,20 +1238,20 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
-               model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, **MONITORS,
-                           '-i': DataPatternArg('human-pose-estimation'),
-                           '--person_label': '1'}),
-        [
-            *combine_cases(
-                TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
-                single_option_cases('-m_od',
-                    ModelArg('mobilenet-ssd'),
-                    ModelArg('person-detection-retail-0013'),
-                    ModelArg('ssd_mobilenet_v1_coco'))),
-        ]
-    )),
+    #PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
+    #           model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None, **MONITORS,
+    #                       '-i': DataPatternArg('human-pose-estimation'),
+    #                       '--person_label': '1'}),
+    #    [
+    #        *combine_cases(
+    #            TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
+    #            single_option_cases('-m_od',
+    #                ModelArg('mobilenet-ssd'),
+    #                ModelArg('person-detection-retail-0013'),
+    #                ModelArg('ssd_mobilenet_v1_coco'))),
+    #    ]
+    #)),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),

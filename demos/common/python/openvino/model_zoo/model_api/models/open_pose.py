@@ -85,7 +85,7 @@ class OpenPose(ImageModel):
             self.load()
 
         num_joints = self.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
-        self.decoder = OpenPoseDecoder(num_joints, score_threshold=self.prob_threshold)
+        self.decoder = OpenPoseDecoder(num_joints, score_threshold=self.confidence_threshold)
 
     @classmethod
     def parameters(cls):
@@ -93,7 +93,7 @@ class OpenPose(ImageModel):
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
-            'prob_threshold': NumericalValue(),
+            'confidence_threshold': NumericalValue(),
             'upsample_ratio': NumericalValue(default_value=1, value_type=int),
             'size_divisor': NumericalValue(default_value=8, value_type=int),
         })

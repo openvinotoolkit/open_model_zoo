@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class GazeEstimator: public BaseEstimator {
 public:
-    GazeEstimator(ov::runtime::Core& ie,
+    GazeEstimator(ov::Core& core,
                   const std::string& modelPath,
                   const std::string& deviceName,
                   bool doRollAlign = true);

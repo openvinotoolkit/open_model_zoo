@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class LandmarksEstimator: public BaseEstimator {
 public:
-    LandmarksEstimator(ov::runtime::Core& ie,
+    LandmarksEstimator(ov::Core& core,
                        const std::string& modelPath,
                        const std::string& deviceName);
     void estimate(const cv::Mat& image,
