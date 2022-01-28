@@ -121,10 +121,8 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
 
 
 def read_net(model_xml, ie, model_type):
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
     log.info('Reading {} model {}'.format(model_type, model_xml))
-    return ie.read_model(model_xml, model_bin)
+    return ie.read_model(model_xml)
 
 
 def change_layout(model_input):

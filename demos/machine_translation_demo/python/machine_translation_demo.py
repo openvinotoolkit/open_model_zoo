@@ -35,8 +35,8 @@ class Translator:
         tokenizer_src (str): path to src tokenizer.
         tokenizer_tgt (str): path to tgt tokenizer.
     """
-    def __init__(self, model_xml, model_bin, device, tokenizer_src, tokenizer_tgt, output_name):
-        self.engine = TranslationEngine(model_xml, model_bin, device, output_name)
+    def __init__(self, model_xml, device, tokenizer_src, tokenizer_tgt, output_name):
+        self.engine = TranslationEngine(model_xml, device, output_name)
         self.max_tokens = self.engine.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
         log.debug('Loaded src tokenizer, max tokens: {}'.format(self.max_tokens))
@@ -66,16 +66,15 @@ class TranslationEngine:
 
     Arguments:
         model_xml (str): path to model's .xml file.
-        model_bin (str): path to model's .bin file.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, model_bin, device, output_name):
+    def __init__(self, model_xml, device, output_name):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
 
         log.info('Reading model {}'.format(model_xml))
-        self.model = core.read_model(model_xml, model_bin)
+        self.model = core.read_model(model_xml)
         compiled_model = core.compile_model(self.model, args.device)
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_xml, device))
@@ -218,7 +217,6 @@ def parse_input(input):
 def main(args):
     model = Translator(
         model_xml=args.model,
-        model_bin=args.model.with_suffix(".bin"),
         device=args.device,
         tokenizer_src=args.tokenizer_src,
         tokenizer_tgt=args.tokenizer_tgt,

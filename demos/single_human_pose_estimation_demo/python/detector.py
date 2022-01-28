@@ -6,7 +6,7 @@ class Detector:
         self.thr = thr
         self.label_class = label_class
 
-        self.model = core.read_model(path_to_model_xml, path_to_model_xml.with_suffix(".bin"))
+        self.model = core.read_model(path_to_model_xml)
         if len(self.model.inputs) != 1:
             raise RuntimeError("Detector supports only models with 1 input layer")
         if len(self.model.outputs) != 1:

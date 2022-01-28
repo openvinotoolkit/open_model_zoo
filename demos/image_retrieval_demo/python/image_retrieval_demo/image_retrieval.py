@@ -36,9 +36,8 @@ class IEModel(): # pylint: disable=too-few-public-methods
         if cpu_extension and device == 'CPU':
             core.add_extension(cpu_extension, 'CPU')
 
-        path = '.'.join(model_path.split('.')[:-1])
         log.info('Reading model {}'.format(model_path))
-        self.model = core.read_model(path + '.xml', path + '.bin')
+        self.model = core.read_model(model_path)
         self.input_tensor_name = "Placeholder"
         compiled_model = core.compile_model(self.model, device)
         self.infer_request = compiled_model.create_infer_request()
