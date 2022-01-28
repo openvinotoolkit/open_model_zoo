@@ -21,7 +21,7 @@ from collections import namedtuple
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, BaseField, NumberField, StringField, ListField, ConfigError
+from ..config import ConfigValidator, BaseField, NumberField, StringField, ListField, ConfigError, BoolField
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
 from ..utils import get_or_parse_value, softmax
@@ -915,7 +915,12 @@ class NanoDetAdapter(Adapter):
             'confidence_threshold': NumberField(optional=True, default=0.05, description="confidence threshold"),
             'nms_threshold': NumberField(optional=True, default=0.6, description="NMS threshold"),
             'max_detections': NumberField(optional=True, value_type=int, default=100,
-                                          description="maximal number of detections")
+                                          description="maximal number of detections"),
+            'reg_max': NumberField(description="max value of integral set", value_type=int, min_value=0, default=7,
+                                   optional=True),
+            'strides': ListField(value_type=int, optional=True, default=[8, 16, 32],
+                                 description='strides of input multi-level feature maps'),
+            'is_legacy': BoolField(optional=True, default=False, description='using a legacy NanoDet model')
         })
         return parameters
 
@@ -924,9 +929,9 @@ class NanoDetAdapter(Adapter):
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.max_detections = self.get_value_from_config('max_detections')
-        # Set default values
-        self.strides = [8, 16, 32]
-        self.reg_max = 7
+        self.reg_max = self.get_value_from_config('reg_max')
+        self.strides = self.get_value_from_config('strides')
+        self.is_legacy = self.get_value_from_config('is_legacy')
 
     @staticmethod
     def distance2bbox(points, distance, max_shape):
@@ -936,18 +941,18 @@ class NanoDetAdapter(Adapter):
         y2 = np.expand_dims(points[:, 1] + distance[:, 3], -1).clip(0, max_shape[0])
         return np.concatenate((x1, y1, x2, y2), axis=-1)
 
-    @staticmethod
-    def get_single_level_center_point(featmap_size, stride):
+    def get_single_level_center_point(self, featmap_size, stride):
         h, w = featmap_size
-        x_range, y_range = (np.arange(w) + 0.5) * stride, (np.arange(h) + 0.5) * stride
+        ad = 0.5 if self.is_legacy else 0
+        x_range, y_range = (np.arange(w) + ad) * stride, (np.arange(h) + ad) * stride
         y, x = np.meshgrid(y_range, x_range, indexing='ij')
         return y.flatten(), x.flatten()
 
     def get_bboxes(self, reg_preds, input_height, input_width):
         featmap_sizes = [(math.ceil(input_height / stride), math.ceil(input_width) / stride) for stride in self.strides]
         list_center_priors = []
-        for i, stride in enumerate(self.strides):
-            y, x = self.get_single_level_center_point(featmap_sizes[i], stride)
+        for stride, featmap_size in zip(self.strides, featmap_sizes):
+            y, x = self.get_single_level_center_point(featmap_size, stride)
             strides = np.full_like(x, stride)
             list_center_priors.append(np.stack([x, y, strides, strides], axis=-1))
         center_priors = np.concatenate(list_center_priors, axis=0)

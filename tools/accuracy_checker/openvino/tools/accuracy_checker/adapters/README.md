@@ -497,3 +497,6 @@ AccuracyChecker supports following set of adapters:
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.6).
   * `max_detections` - maximal number of boxes which should be kept (optional, default 100).
+  * `reg_max` - maximal value of integral set (optional, default 7).
+  * `strides` - strides of input multi-level feature maps (optional, default [8, 16, 32]).
+  * `is_legacy` - using a legacy NanoDet model (optional, default False).
