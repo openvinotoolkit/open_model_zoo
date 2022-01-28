@@ -73,6 +73,10 @@ network to detect objects of the same type better.
 | [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/README.md)          | 6.975 | 15.12  |
 | [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/README.md)          | 6.975 | 15.12  |
 | [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/README.md)  | 5.424 | 11.229 |
+| [smartlab-object-detection-0001](./smartlab-object-detection-0001/README.md)            | 1.077 | 0.8908 |
+| [smartlab-object-detection-0002](./smartlab-object-detection-0002/README.md)            | 1.073 | 0.8894 |
+| [smartlab-object-detection-0003](./smartlab-object-detection-0003/README.md)            | 1.077 | 0.8908 |
+| [smartlab-object-detection-0004](./smartlab-object-detection-0004/README.md)            | 1.073 | 0.8894 |
 
 ## Object Recognition Models
 
@@ -332,6 +336,9 @@ Deep Learning models for online sequence modeling.
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
+| [smartlab-action-recognition-0001](./smartlab-action-recognition-0001/README.md) |         |         |
+|   smartlab-action-recognition-encoder-0001                                       | 0.611   | 3.387   |
+|   smartlab-action-recognition-decoder-0001                                       | 0.008   | 4.099   |
 
 ## See Also
 
