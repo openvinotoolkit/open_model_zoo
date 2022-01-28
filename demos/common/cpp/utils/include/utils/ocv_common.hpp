@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -12,15 +12,16 @@
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "openvino/openvino.hpp"
+
 #include "utils/common.hpp"
 #include "utils/shared_blob_allocator.h"
 
-#include "openvino/openvino.hpp"
 
 
- /**
- * @brief Get cv::Mat value in the correct format.
- */
+/**
+* @brief Get cv::Mat value in the correct format.
+*/
 template <typename T>
 const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     switch (mat.type()) {
@@ -92,7 +93,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
     if (static_cast<size_t>(mat.channels()) != channels) {
-        throw std::runtime_error("The number of channels for net input and image must match");
+        throw std::runtime_error("The number of channels for model input and image must match");
     }
     if (channels != 1 && channels != 3) {
         throw std::runtime_error("Unsupported number of channels");
@@ -113,8 +114,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
                 for (size_t w = 0; w < width; w++)
                     tensorData[batchOffset + c * width * height + h * width + w] =
                         getMatValue<float_t>(resizedMat, h, w, c);
-    }
-    else {
+    } else {
         uint8_t* tensorData = tensor.data<uint8_t>();
         if (resizedMat.depth() == CV_32F) {
             throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
@@ -156,8 +156,8 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     InferenceEngine::Precision precision = isMatFloat ?
         InferenceEngine::Precision::FP32 : InferenceEngine::Precision::U8;
     InferenceEngine::TensorDesc tDesc(precision,
-        { 1, channels, height, width },
-        InferenceEngine::Layout::NHWC);
+                                      {1, channels, height, width},
+                                      InferenceEngine::Layout::NHWC);
 
     InferenceEngine::Blob::Ptr blob;
     if (isMatFloat) {
@@ -196,12 +196,12 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
  * @param thickness - thickness of the lines used to draw a text.
  */
 inline void putHighlightedText(const cv::Mat& frame,
-    const std::string& message,
-    cv::Point position,
-    int fontFace,
-    double fontScale,
-    cv::Scalar color,
-    int thickness) {
+                               const std::string& message,
+                               cv::Point position,
+                               int fontFace,
+                               double fontScale,
+                               cv::Scalar color,
+                               int thickness) {
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
@@ -217,7 +217,7 @@ public:
         float inputWidth = static_cast<float>(inputSize.width);
         float inputHeight = static_cast<float>(inputSize.height);
         scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
-        newResolution = cv::Size{ static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor) };
+        newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
         return newResolution;
     }
 
