@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -12,7 +12,7 @@
 #include <opencv2/core.hpp>
 
 struct TrackableObject {
-    TrackableObject(cv::Rect2i bb, const std::vector<float> &r, cv::Point centroid)
+    TrackableObject(cv::Rect2i bb, const std::vector<float>& r, cv::Point centroid)
             : bbox{bb}, reid{r}, updated{false}, disappeared(0) {
         centroids.push_back(centroid);
     }
@@ -28,10 +28,10 @@ class PersonTrackers {
 public:
     PersonTrackers() : trackIdGenerator{0}, similarityThreshold{0.7f}, maxDisappeared{10} {}
 
-    void similarity(std::list<TrackableObject> &tos) {
+    void similarity(std::list<TrackableObject>& tos) {
         for (const auto& to : tos) {
             std::deque<std::pair<int, float>> sim;
-            for (auto &tracker : trackables) {
+            for (auto& tracker : trackables) {
                 if (!tracker.second.updated) {
                     float cosine = cosineSimilarity(to.reid, tracker.second.reid);
                     if (cosine > similarityThreshold) {
@@ -68,7 +68,7 @@ public:
         }
     }
 
-    float cosineSimilarity(const std::vector<float> &a, const std::vector<float> &b) {
+    float cosineSimilarity(const std::vector<float>& a, const std::vector<float>& b) {
         if (a.size() != b.size()) {
             throw "Vector sizes don't match!";
         }

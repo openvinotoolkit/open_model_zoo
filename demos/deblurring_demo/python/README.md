@@ -46,7 +46,7 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+usage: deblurring_demo.py [-h] -m MODEL -i INPUT [--adapter {openvino,ovms}] [-d DEVICE]
                           [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                           [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                           [-limit OUTPUT_LIMIT] [--no_show]
@@ -55,11 +55,15 @@ usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images or anything that
                         cv2.VideoCapture can process.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo will
@@ -109,6 +113,16 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 deblurring_demo.py -i 0 -m localhost:9000/models/deblurring --adapter ovms
+```
 
 ## Demo Output
 

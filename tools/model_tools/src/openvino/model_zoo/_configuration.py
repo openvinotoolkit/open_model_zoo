@@ -24,6 +24,7 @@ from openvino.model_zoo import _common
 from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
+EXCLUDED_MODELS = ['detr-resnet50', 'hybrid-cs-model-mri']
 
 class ModelFile:
     def __init__(self, name, size, checksum, source):
@@ -242,8 +243,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
     composite_models = []
     composite_model_names = set()
 
-    schema = _common.get_schema()
-
     if mode in (ModelLoadingMode.all, ModelLoadingMode.composite_only):
 
         for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
@@ -263,8 +262,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                         with stage.open('rb') as stage_config_file, \
                             validation.deserialization_context('In config "{}"'.format(stage_config_file)):
                             model = yaml.safe_load(stage_config_file)
-                            if not schema.check(model):
-                                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                             stage_subdirectory = stage.parent.relative_to(models_root)
                             model_stages[stage_subdirectory] = model
@@ -298,14 +295,14 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     validation.deserialization_context('In config "{}"'.format(config_path)):
 
                 model = yaml.safe_load(config_file)
-                if not schema.check(model):
-                    raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                 for bad_key in ['name', 'subdirectory']:
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                if subdirectory.name not in EXCLUDED_MODELS:
+                    models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                    continue
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
@@ -362,6 +359,7 @@ def load_models_from_args(parser, args, models_root):
 
         for pattern in patterns:
             matching_models = []
+            is_excluded = False
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
                     matching_models.append(model)
@@ -370,7 +368,11 @@ def load_models_from_args(parser, args, models_root):
                         if fnmatch.fnmatchcase(model_stage.name, pattern):
                             matching_models.append(model_stage)
 
-            if not matching_models:
+            for model in EXCLUDED_MODELS:
+                if fnmatch.fnmatchcase(model, pattern):
+                    is_excluded = True
+
+            if not matching_models and not is_excluded:
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:

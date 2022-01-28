@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2018-2021 Intel Corporation
+ Copyright (c) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from utils import crop
 from landmarks_detector import LandmarksDetector
@@ -38,8 +37,8 @@ import monitors
 from helpers import resolution
 from images_capture import open_images_capture
 
-from model_api.models import OutputTransform
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.models import OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -132,16 +131,16 @@ class FrameProcessor:
 
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
+        core = Core()
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
-            ie.add_extension(args.cpu_lib, 'CPU')
+            core.add_extension(args.cpu_lib, 'CPU')
 
-        self.face_detector = FaceDetector(ie, args.m_fd,
+        self.face_detector = FaceDetector(core, args.m_fd,
                                           args.fd_input_size,
                                           confidence_threshold=args.t_fd,
                                           roi_scale_factor=args.exp_r_fd)
-        self.landmarks_detector = LandmarksDetector(ie, args.m_lm)
-        self.face_identifier = FaceIdentifier(ie, args.m_reid,
+        self.landmarks_detector = LandmarksDetector(core, args.m_lm)
+        self.face_identifier = FaceIdentifier(core, args.m_reid,
                                               match_threshold=args.t_id,
                                               match_algo=args.match_algo)
 

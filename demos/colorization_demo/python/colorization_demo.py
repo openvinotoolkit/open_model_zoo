@@ -25,11 +25,10 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

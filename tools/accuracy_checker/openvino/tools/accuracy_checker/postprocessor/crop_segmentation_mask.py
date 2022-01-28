@@ -121,7 +121,7 @@ class CropOrPadSegmentationMask(Postprocessor):
     def process_image(self, annotation, prediction):
         if not self.deprocessing_mode:
             for ann in annotation:
-                if annotation is None:
+                if ann is None:
                     continue
                 ann.mask = self.process_mask(ann.mask)
         return annotation, prediction

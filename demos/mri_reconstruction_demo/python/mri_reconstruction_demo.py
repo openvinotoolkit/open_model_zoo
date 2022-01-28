@@ -40,6 +40,13 @@ def main():
 
     core = Core()
     model = core.read_model(args.model)
+
+    input_tensor_name = 'input_1:0'
+    output_candidates = [node.get_any_name() for node in model.outputs if node.shape[3] == 1]
+    if len(output_candidates) != 1:
+        raise RuntimeError("The model expects output tensor with 1 channel")
+    output_tensor_name = output_candidates[0]
+
     compiled_model = core.compile_model(model, args.device)
     infer_request = compiled_model.create_infer_request()
 
@@ -65,8 +72,8 @@ def main():
 
         # Forward through network
         input = np.expand_dims(kspace.transpose(2, 0, 1), axis=0)
-        outputs = infer_request.infer(inputs={'input_1': input})
-        output = next(iter(outputs.values()))
+        infer_request.infer(inputs={input_tensor_name: input})
+        output = infer_request.get_tensor(output_tensor_name).data[:]
         output = output.reshape(height, width)
 
         # Save predictions

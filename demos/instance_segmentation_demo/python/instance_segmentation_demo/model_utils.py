@@ -17,7 +17,7 @@
 from collections import namedtuple
 import cv2
 import numpy as np
-from model_api.models.utils import nms
+from openvino.model_zoo.model_api.models.utils import nms
 
 ModelAttributes = namedtuple('ModelAttributes', ['required_outputs', 'postprocessor'])
 

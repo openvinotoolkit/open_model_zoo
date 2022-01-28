@@ -119,6 +119,7 @@
 | ssd_mobilenet_v1_fpn_coco | YES | YES | YES |
 | ssdlite_mobilenet_v2 | YES | YES | YES |
 | swin-tiny-patch4-window7-224 | YES | YES | YES |
+| t2t-vit-14 | YES | | |
 | text-recognition-resnet-fc | YES | YES | YES |
 | ultra-lightweight-face-detection-rfb-320 | YES | YES | YES |
 | ultra-lightweight-face-detection-slim-320 | YES | YES | YES |
