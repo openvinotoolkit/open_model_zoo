@@ -12,6 +12,7 @@ The Open Model Zoo includes the following demos:
 - [3D Segmentation Python\* Demo](./3d_segmentation_demo/python/README.md) - Segmentation demo segments 3D images using 3D convolutional networks.
 - [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [Background Subtraction Python\* Demo](./background_subtraction_demo/python/README.md) - Background subtraction using instance segmentation based models.
+- [Background Subtraction C++ G-API\* Demo](./background_subtraction_demo/cpp_gapi/README.md) - Background subtraction G-API version.
 - [BERT Named Entity Recognition Python\* Demo](./bert_named_entity_recognition_demo/python/README.md) - NER Demo application that uses a CONLL2003-tuned BERT model for inference.
 - [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.

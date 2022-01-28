@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 
         // Loading Inference Engine
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         // Set up face detector and estimators
         FaceDetector faceDetector(core, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);

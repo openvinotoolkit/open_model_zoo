@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from model_api.models.utils import resize_image
+from openvino.model_zoo.model_api.models.utils import resize_image
 
 
 def crop(frame, roi):

@@ -16,7 +16,7 @@ const std::pair<const char*, float cv::Point3f::*> OUTPUTS[] = {
 };
 
 HeadPoseEstimator::HeadPoseEstimator(
-    ov::runtime::Core& ie, const std::string& modelPath, const std::string& deviceName) :
+    ov::Core& ie, const std::string& modelPath, const std::string& deviceName) :
         ieWrapper(ie, modelPath, modelType, deviceName)
 {
     inputTensorName = ieWrapper.expectSingleInput();
