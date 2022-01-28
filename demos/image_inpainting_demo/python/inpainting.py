@@ -50,12 +50,14 @@ class ImageInpainting:
         return next(iter(output.values()))
 
 
-    def process(self, src_image, mask):
-        image = np.transpose(src_image, (2, 0, 1))
-        mask = np.transpose(mask, (2, 0, 1))
+    def process(self, image, mask):
+        if self.nchw_layout:
+            image = np.transpose(image, (2, 0, 1))
+            mask = np.transpose(mask, (2, 0, 1))
         image = np.expand_dims(image, axis=0)
         mask = np.expand_dims(mask, axis=0)
         output = self.infer(image, mask)
 
-        output = np.transpose(output, (0, 2, 3, 1)).astype(np.uint8)
-        return output[0]
+        if self.nchw_layout:
+            output = np.transpose(output, (0, 2, 3, 1))
+        return output.astype(np.uint8)[0]
