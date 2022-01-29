@@ -6,10 +6,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
-#include <vector>
-#include <limits>
-#include <stdexcept>
 #include <numeric>
 #include <fstream>
 
@@ -38,28 +34,6 @@ bool tryReadVocabFile(const std::string& filename, std::string& alphabet) {
     } else {
         return false;
     }
-}
-
-void ThrowNameNotFound(const std::string &name) {
-    throw std::runtime_error("Name '" + name + "' does not exist in the network");
-}
-template<class NamesArray>
-void checkIONames(const std::vector<std::string>& layers, const NamesArray& names) {
-    for (auto name : names) {
-        if (std::find(layers.begin(), layers.end(), name) == layers.end()) {
-            ThrowNameNotFound(name);
-        }
-    }
-}
-void checkCompositeNetNames(const std::vector<std::string>&  encOutputLayers,
-                            const std::array<std::string,2>& encOutputNames,
-                            const std::vector<std::string>&  decInputLayers,
-                            const std::array<std::string,3>& decInputNames,
-                            const std::vector<std::string>&  decOutputLayers,
-                            const std::array<std::string,2>& decOutputNames) {
-    checkIONames(encOutputLayers, encOutputNames);
-    checkIONames(decInputLayers, decInputNames);
-    checkIONames(decOutputLayers, decOutputNames);
 }
 
 void softmaxAndChoose(const std::vector<float>::const_iterator& begin,

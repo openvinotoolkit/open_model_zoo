@@ -4,10 +4,9 @@
 
 #include "custom_kernels.hpp"
 #include "shared_functions.hpp"
+#include "custom_nets.hpp"
 
 #include <opencv2/imgproc.hpp>
-
-#include <opencv2/gapi/infer/ie.hpp>
 
 void softmax(std::vector<float>& rdata) {
     const size_t lastDim = 2;

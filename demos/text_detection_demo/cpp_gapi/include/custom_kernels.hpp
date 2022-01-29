@@ -9,7 +9,6 @@
 #include <opencv2/gapi/infer.hpp>
 
 namespace custom {
-using GMat2 = std::tuple<cv::GMat,cv::GMat>;
 using GSize = cv::GOpaque<cv::Size>;
 using GRRects = cv::GArray<cv::RotatedRect>;
 using GMats = cv::GArray<cv::GMat>;
@@ -49,11 +48,3 @@ G_API_OP(CompositeTRDecode, <GMats(GMats,GMats,cv::gapi::GNetPackage,size_t,size
 
 cv::gapi::GKernelPackage kernels();
 } // namespace custom
-
-namespace nets {
-G_API_NET(TextDetection,           <custom::GMat2(cv::GMat)>, "textDetect");
-G_API_NET(TextRecognition,         <cv::GMat(cv::GMat)>,      "textRecogn");
-G_API_NET(TextRecognitionEncoding, <custom::GMat2(cv::GMat)>, "textRecognEncoding");
-G_API_NET(TextRecognitionDecoding, <custom::GMat2(cv::GMat,cv::GMat,cv::GMat)>,
-          "textRecognDecoding");
-} // namespace nets
