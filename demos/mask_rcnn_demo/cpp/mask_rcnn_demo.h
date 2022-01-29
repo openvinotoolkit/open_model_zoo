@@ -1,13 +1,13 @@
-// Copyright (C) 2018-2022 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <vector>
-#include "gflags/gflags.h"
+#include <gflags/gflags.h>
+#include <iostream>
 
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a .bmp image.";
