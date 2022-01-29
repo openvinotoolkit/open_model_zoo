@@ -91,7 +91,7 @@ void Presenter::addRemoveMonitor(MonitorType monitor) {
     }
 }
 
-void Presenter::handleKey(int key) {
+void Presenter::handle(int key) {
     key = std::toupper(key);
     if ('H' == key) {
         if (0 == cpuMonitor.getHistorySize() && memoryMonitor.getHistorySize() <= 1) {

@@ -1,3 +1,9 @@
+// Copyright (C) 2022 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+//
+
+#pragma once
+
 #include <models/model_base.h>
 #include <models/results.h>
 #include <pipelines/metadata.h>
@@ -12,15 +18,15 @@
 using Processor = ModelBase;
 
 static inline void catcher() {
-    std::exception_ptr ptr = std::current_exception();
-    if (ptr) {
+    if (std::current_exception()) {
         try {
-            std::rethrow_exception(ptr);
-        } catch (const std::exception& exception) {
-            slog::err << exception.what() << slog::endl;
+            std::rethrow_exception(std::current_exception());
+        } catch (const std::exception& current) {
+            slog::err << current.what() << slog::endl;
         } catch (...) {
             slog::err << "Non exception object thrown" << slog::endl;
         }
+        std::exit(1);
     }
     std::abort();
 }
@@ -67,17 +73,15 @@ public:
 
         bool operator!=(const Iter&) {return true;}
         Iter& operator++() {
-            // Returns end_sentinel if empty submit was done and everithing was infered
-            return *this;
-        }
-        std::shared_ptr<State> operator*() {
             // Blocks and does the pipeline job.
             // Implementation of the job can be multithreaded.
             // Returns if it has predictions or SingleProcessorInferer can take a new mat.
             // Stops returning State::StateEnum::has_free_input after fist empty submit to SingleProcessorInferer
             // and throws if non empty submited after.
-            return {};
+            // Returns end_sentinel if empty submit was done and everithing was infered
+            return *this;
         }
+        std::shared_ptr<State> operator*() {return {};}
     };
     Iter begin() {return *this;}
     Iter end() {return *this;}

@@ -27,7 +27,7 @@ public:
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);
     void addRemoveMonitor(MonitorType monitor);
-    void handleKey(int key); // handles c, d, m, h keys
+    void handle(int key); // handles C, D, M, H keys
     void drawGraphs(const cv::Mat& frame);
     std::vector<std::string> reportMeans() const;
 
