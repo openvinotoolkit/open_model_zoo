@@ -7,19 +7,17 @@ models:
       - name: VOC2012_Segmentation
         preprocessing:
           - type: resize
-            aspect_ratio_scale: frcnn_keep_aspect_ratio
-            dst_height: 512
-            dst_width: 2048
-          - type: crop
+            aspect_ratio_scale: fit_to_window
             size: 512
+          - type: padding
+            size: 512
+            pad_type: right_bottom
+            pad_value: '123.675,116.28,103.53'
         postprocessing:
+          - type: crop_padding
           - type: resize_segmentation_mask
-            apply_to: annotation
-            to_dst_image_size: True
+            apply_to: prediction
           - type: encode_segmentation_mask
-            apply_to: annotation
-          - type: crop_segmentation_mask
-            size: 512
             apply_to: annotation
         metrics:
           - type: mean_iou

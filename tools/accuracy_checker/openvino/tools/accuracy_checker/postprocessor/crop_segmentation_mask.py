@@ -145,3 +145,25 @@ class CropOrPadSegmentationMask(Postprocessor):
             cropped, offset_pad_height, offset_pad_width, self.dst_height, self.dst_width
         )
         return resized
+
+
+class CropPaddingSegmentationMask(Postprocessor):
+    __provider__ = 'crop_padding'
+
+    annotation_types = (SegmentationAnnotation, )
+    prediction_types = (SegmentationPrediction, )
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        top, left, bottom, right = image_metadata['padding']
+        for pred in prediction:
+            mask = pred.mask
+            if mask.ndim == 2:
+                h, w = mask.shape
+                mask = mask[top:(h - bottom), left:(w - right)]
+                pred.mask = mask
+                continue
+            _, h, w = mask.shape
+            mask = mask[:, top:(h - bottom), left:(w - right)]
+            pred.mask = mask
+
+        return annotation, prediction
