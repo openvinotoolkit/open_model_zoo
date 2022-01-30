@@ -185,7 +185,7 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
 static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
     static const ov::Layout layout{"NHWC"};
     const ov::Shape& shape = tensor.get_shape();
-    cv::Size size{int(shape[ov::layout::height_idx(layout)]), int(shape[ov::layout::width_idx(layout)])};
+    cv::Size size{int(shape[ov::layout::width_idx(layout)]), int(shape[ov::layout::height_idx(layout)])};
     assert(tensor.get_element_type() == ov::element::u8);
     assert(shape.size() == 4);
     assert(shape[ov::layout::batch_idx(layout)] == 1);
