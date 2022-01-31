@@ -120,7 +120,7 @@ class OpenVINOLauncher(Launcher):
                     self.get_value_from_config('weights'),
                     self.get_value_from_config('_model_type')
             )
-            self.load_network(log=postpone_inputs_configuration, preprocessing=preprocessor)
+            self.load_network(log=not postpone_inputs_configuration, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
             if postpone_inputs_configuration:
                 self.try_to_set_default_layout()

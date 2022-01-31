@@ -297,6 +297,7 @@ class ActionDetection(Adapter):
 
         self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
         self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
+        self.priorbox_out = self.check_output_name(self.priorbox_out, raw_outputs)
         self.outputs_verified = True
         if contains_all(raw_outputs, self.add_conf_outs):
             return
