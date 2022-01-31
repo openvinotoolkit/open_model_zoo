@@ -246,7 +246,7 @@ python formula_recognition_demo.py \
     -i sample.png \
     -m_encoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-encoder.xml \
     -m_decoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-decoder.xml \
-    --vocab_path <omz_dir>/models/intel/formula-recognition-medium-scan-0001/vocab.json \
+    --vocab_path <models_dir>/models/intel/formula-recognition-medium-scan-0001/vocab.json \
     --preprocessing resize
 ```
 
@@ -256,7 +256,7 @@ python formula_recognition_demo.py \
     -i sample2.png \
     -m_encoder <path_to_models>/formula-recognition-polynomials-handwritten-0001-encoder.xml \
     -m_decoder <path_to_models>/formula-recognition-polynomials-handwritten-0001-decoder.xml \
-    --vocab_path <omz_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json \
+    --vocab_path <models_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json \
     --preprocessing crop
 ```
 
