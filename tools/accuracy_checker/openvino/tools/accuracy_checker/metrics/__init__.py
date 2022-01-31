@@ -20,7 +20,7 @@ from .metric import Metric, PerImageMetricResult
 from .background_matting import (
     MeanOfAbsoluteDifference,
     SpatialGradient,
-    MeanSquaredError,
+    MeanSquaredErrorWithMask,
 )
 from .classification import (
     ClassificationAccuracy,
@@ -259,5 +259,5 @@ __all__ = [
 
     'MeanOfAbsoluteDifference',
     'SpatialGradient',
-    'MeanSquaredError',
+    'MeanSquaredErrorWithMask',
 ]

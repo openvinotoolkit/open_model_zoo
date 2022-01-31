@@ -144,7 +144,7 @@ class SpatialGradient(BaseBackgroundMattingMetrics):
         self.reset()
 
 
-class MeanSquaredError(BaseBackgroundMattingMetrics):
+class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
     __provider__ = 'mean_squared_error'
 
     def update(self, annotation, prediction):
