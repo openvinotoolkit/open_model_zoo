@@ -293,6 +293,11 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
   * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
   * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
+  * `backgrounds_dir` - path to gt backgrounds directory.
+  * `background_prefix` - prefix for gt backgrounds.
+  * `background_postfix` - postfix for gt backgrounds.
+  * `with_background` - load backgrounds.
+  * `with_alpha` - load images with mask including alpha channel.
 * `background_matting` - converts a general format of datasets, where frames extracted from video for background matting task to `BackgroundMattingAnnotation`. Belonging image to video should be reflected into its name `<video_name>.mp4.<image_name>.jpg`. The converter expects following dataset structure:
   1. images and GT masks are located in separated directories (e.g. `<dataset_root>/images` for images and `<dataset_root>/masks` for masks respectively).
   2. images and GT masks has common part in names and can have difference in prefix and postfix (e.g. image name is image0001.jpeg, mask for it is gt0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png)

@@ -30,18 +30,18 @@ class BackgroundMattingConverter(BaseFormatConverter):
             {
                 'images_dir': PathField(description='path to input images directory', is_directory=True),
                 'masks_dir': PathField(description='path to gt masks directory', is_directory=True),
-                'backgrounds_dir': PathField(optional=True, description='path to gt masks directory', is_directory=True),
+                'backgrounds_dir': PathField(optional=True, description='path to gt backgrounds directory', is_directory=True),
                 'image_prefix': StringField(optional=True, default='', description='prefix for images'),
                 'mask_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
-                'background_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
+                'background_prefix': StringField(optional=True, default='', description='prefix for gt backgrounds'),
                 'image_postfix': StringField(optional=True, default='.png', description='prefix for images'),
                 'mask_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
-                'background_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
+                'background_postfix': StringField(optional=True, default='.png', description='postfix for gt backgrounds'),
                 'mask_to_gray': BoolField(
                     optional=True, default=False, description='allow converting mask to grayscale'
                 ),
                 'with_background': BoolField(
-                    optional=True, default=False, description='allow converting mask to grayscale'
+                    optional=True, default=False, description='load backgrounds'
                 ),
                 'with_alpha': BoolField(
                     optional=True, default=False, description='load image with mask including alpha channel'

@@ -364,3 +364,7 @@ Supported for profiling metrics:
 * GAN:
   * `inception_score`
   * `fid`
+* Background matting:
+  * `mean_of_absolute_difference`
+  * `spatial_gradient`
+  * `mean_squared_error`
