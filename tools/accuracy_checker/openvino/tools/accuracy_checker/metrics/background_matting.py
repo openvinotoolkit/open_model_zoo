@@ -23,13 +23,28 @@ from ..representation import (
     BackgroundMattingPrediction
 )
 
-from ..config import BoolField
+from ..config import BoolField, StringField
 from .metric import PerImageEvaluationMetric
 
 
 class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
     annotation_types = (BackgroundMattingAnnotation,)
     prediction_types = (BackgroundMattingPrediction,)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'process_type': StringField(
+                choices=cls.all_provided_process_types(), optional=True, default='',
+                description="Specifies method of processing that will be used."
+            )
+        })
+        return parameters
+
+    @staticmethod
+    def all_provided_process_types():
+        return ['alpha', 'image']
 
     @staticmethod
     def prepare_pha(image):
@@ -52,10 +67,10 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
             raise ValueError('Unsupported format of image!')
 
     def get_annotation(self, annotation):
-        return getattr(self, f'prepare_{self.prediction_source}')(annotation.value)
+        return self.process_func(annotation.value)
 
     def get_prediction(self, prediction):
-        return getattr(self, f'prepare_{self.prediction_source}')(prediction.value[self.prediction_source])
+        return prediction.value[self.prediction_source]
 
     def evaluate(self, annotations, predictions):
         return sum(self.results) / len(self.results)
@@ -64,6 +79,8 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
         self.results = []
 
     def configure(self):
+        process_type = self.get_value_from_config('process_type')
+        self.process_func = self.prepare_pha if process_type == 'alpha' else self.prepare_fgr
         self.reset()
 
     @classmethod
@@ -122,6 +139,7 @@ class SpatialGradient(BaseBackgroundMattingMetrics):
         return -x * self.gaussian(x, sigma) / sigma ** 2
 
     def configure(self, sigma=1.4):
+        super().configure()
         self.filter_x, self.filter_y = self.gauss_filter(sigma)
         self.reset()
 

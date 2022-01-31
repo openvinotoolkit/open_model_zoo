@@ -36,8 +36,8 @@ class ImageBackgroundMattingAdapter(Adapter):
             result.append(
                 BackgroundMattingPrediction(identifiers,
                     {
-                        'pha': self.to_image(pha[i], frame_meta[i]),
-                        'fgr': self.to_image(fgr[i], frame_meta[i])
+                        self.pha: self.to_image(pha[i], frame_meta[i]),
+                        self.fgr: self.to_image(fgr[i], frame_meta[i])
                     }
                 )
             )
@@ -45,11 +45,11 @@ class ImageBackgroundMattingAdapter(Adapter):
 
     def to_image(self, tensor, meta):
         out = cv2.resize(
-            np.transpose((tensor * 255).astype(np.uint8), (1, 2, 0)),
+            np.transpose(tensor, (1, 2, 0)),
             (meta['original_width'], meta['original_height'])
         )
         if len(out.shape) == 3 and out.shape[-1] == 3:
-            out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
+            out = out[:, :, ::-1]
         return out
 
     @classmethod

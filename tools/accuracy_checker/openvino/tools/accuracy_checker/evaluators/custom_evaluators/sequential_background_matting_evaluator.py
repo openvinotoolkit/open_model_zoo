@@ -66,7 +66,7 @@ class SequentialBackgroundMatting(BaseCustomEvaluator):
         input_precision = launcher_config.get('_input_precision', [])
         input_layouts = launcher_config.get('_input_layout', '')
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), model.model.network.inputs, cls.input_shape, launcher.fit_to_input,
+            launcher.config.get('inputs', []), model.model.launcher.inputs, cls.input_shape, launcher.fit_to_input,
             launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision,
             input_layouts
         )
@@ -108,7 +108,7 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         output = []
         for _ in range(batch_size):
             zeros_lstm_inputs = {}
-            for lstm_input_name, _ in self.launcher._lstm_inputs.items():
+            for lstm_input_name in self.launcher._lstm_inputs.keys():
                 shape = self.model.network.input_info[lstm_input_name].input_data.shape
                 zeros_lstm_inputs[lstm_input_name] = np.zeros(shape, dtype=np.float32)
             output.append(zeros_lstm_inputs)
