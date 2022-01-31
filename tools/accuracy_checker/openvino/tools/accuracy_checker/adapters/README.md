@@ -493,3 +493,11 @@ AccuracyChecker supports following set of adapters:
   * `keep_top_k` - maximal number of boxes which should be kept during NMS (optional, default 200).
   * `diff_coord_order` - ordering convention of coordinates differs from the commonly used format [x0, y0, x1, y1]. If value is True, the format of coordinates is [y0, x0, y1, x1] (optional, default False).
   * `max_detections` - maximal number of boxes which should be kept (optional).
+* `nanodet` - converting output of NanoDet models family to `DetectionPrediction` representation.
+  * `num_classes` - number of predicted classes (optional, default 80).
+  * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
+  * `nms_threshold` - overlap threshold for NMS (optional, default 0.6).
+  * `max_detections` - maximal number of boxes which should be kept (optional, default 100).
+  * `reg_max` - maximal value of integral set (optional, default 7).
+  * `strides` - strides of input multi-level feature maps (optional, default [8, 16, 32]).
+  * `is_legacy` - using a legacy NanoDet model (optional, default False).
