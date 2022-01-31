@@ -26,16 +26,8 @@ from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
 from ..utils import get_or_parse_value
 
-FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
-    'prob_name',
-    'reg_name',
-    'anchor_index',
-    'anchor_size',
-    'win_scale',
-    'win_length',
-    'win_trans_x',
-    'win_trans_y'
-])
+FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', ['prob_name', 'reg_name', 'anchor_index',
+    'anchor_size', 'win_scale', 'win_length', 'win_trans_x', 'win_trans_y'])
 
 
 class TFObjectDetectionAPIAdapter(Adapter):
