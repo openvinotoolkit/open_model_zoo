@@ -12,7 +12,7 @@ models:
           - type: padding
             size: 512
             pad_type: right_bottom
-            pad_value: '123.675,116.28,103.53'
+            pad_value: '123.675, 116.28, 103.53'
         postprocessing:
           - type: crop_padding
           - type: resize_segmentation_mask
@@ -23,4 +23,4 @@ models:
           - type: mean_iou
             use_argmax: false
             presenter: print_scalar
-            reference: 0.706
+            reference: 0.701

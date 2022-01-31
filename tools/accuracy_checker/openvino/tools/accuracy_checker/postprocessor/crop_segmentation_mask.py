@@ -154,7 +154,7 @@ class CropPaddingSegmentationMask(Postprocessor):
     prediction_types = (SegmentationPrediction, )
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
-        top, left, bottom, right = image_metadata['padding']
+        top, left, bottom, right = image_metadata.get('padding', (0, 0, 0, 0))
         for pred in prediction:
             mask = pred.mask
             if mask.ndim == 2:
