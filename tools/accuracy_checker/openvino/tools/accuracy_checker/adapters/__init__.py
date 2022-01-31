@@ -59,7 +59,8 @@ from .detection import (
     TwoStageDetector,
     DETRAdapter,
     UltraLightweightFaceDetectionAdapter,
-    PPDetectionAdapter
+    PPDetectionAdapter,
+    NanoDetAdapter
 )
 from .mtcnn import MTCNNPAdapter
 from .detection_person_vehicle import (
@@ -154,6 +155,7 @@ __all__ = [
     'DETRAdapter',
     'UltraLightweightFaceDetectionAdapter',
     'PPDetectionAdapter',
+    'NanoDetAdapter',
     'FacialLandmarksAdapter',
     'MTCNNPAdapter',
 
