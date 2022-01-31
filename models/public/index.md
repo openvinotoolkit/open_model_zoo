@@ -323,8 +323,8 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| background-matting-v2 | PyTorch\* | [background-matting-v2](./background-matting-v2/README.md) | 1.26/0.41/3.35/1.62 | 6.7419 | 5.052 |
-| robust-video-matting | PyTorch\* | [robust-video-matting](./robust-video-matting/README.md) | 6.39/1.82/10.06/1.86/93.66 | 9.3892 | 3.7363 |
+| background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| robust-video-matting | PyTorch\* | [robust-video-matting](./robust-video-matting/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also
 

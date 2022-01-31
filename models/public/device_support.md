@@ -6,7 +6,7 @@
 | aclnet-int8 | YES | YES |    |
 | alexnet | YES | YES | YES |
 | anti-spoof-mn3 | YES | YES | YES |
-| background-matting-v2 | YES |    |    |
+| background-matting-mobilenetv2 | YES |    |    |
 | bert-base-ner | YES | YES |    |
 | brain-tumor-segmentation-0001 | YES |    |    |
 | brain-tumor-segmentation-0002 | YES |    |    |
