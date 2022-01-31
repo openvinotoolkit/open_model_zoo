@@ -318,7 +318,7 @@ class OpenVINOLauncher(Launcher):
     def async_mode(self, flag):
         for device in self._devices_list():
             ov_set_config(
-                self.ie_core, {'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device.upper())
+                self.ie_core, {'PERFORMANCE_HINT': 'THROUGHPUT' if flag else 'LATENCY'}, device=device.upper())
         self._async_mode = flag
 
     def get_async_requests(self):
@@ -388,7 +388,7 @@ class OpenVINOLauncher(Launcher):
                 cpu_extensions = get_cpu_extension(cpu_extensions, selection_mode)
                 self.ie_core.add_extension(str(cpu_extensions), 'CPU')
             ov_set_config(
-                self.ie_core, {'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
+                self.ie_core, {'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, device='CPU')
         gpu_extensions = self.config.get('gpu_extensions')
         if 'GPU' in self._devices_list():
             config = {}
@@ -397,14 +397,14 @@ class OpenVINOLauncher(Launcher):
             if self._is_multi() and 'CPU' in self._devices_list():
                 config['CLDNN_PLUGIN_THROTTLE'] = '1'
             if config:
-                ov_set_config(self.ie_core, config, 'GPU')
+                ov_set_config(self.ie_core, config, device='GPU')
         if self._is_vpu():
             device_list = map(lambda device: device.split('.')[0], self._devices_list())
             devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:
                 for device in devices:
-                    ov_set_config(self.ie_core, {'LOG_LEVEL': log_level}, device)
+                    ov_set_config(self.ie_core, {'LOG_LEVEL': log_level}, device=device)
         device_config = self.config.get('device_config')
         if device_config:
             self._set_device_config(device_config)
@@ -483,14 +483,14 @@ class OpenVINOLauncher(Launcher):
         if not isinstance(device_config, dict):
             raise ConfigError('device configuration should be a dict-like')
         if all(not isinstance(value, dict) for value in device_config.values()):
-            ov_set_config(self.ie_core, dict(device_config), self.device)
+            ov_set_config(self.ie_core, dict(device_config), device=self.device)
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
                     if key in self._devices_list():
                         if key not in self.ie_core.available_devices:
                             warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                        ov_set_config(self.ie_core, dict(value), key)
+                        ov_set_config(self.ie_core, dict(value), device=key)
                     else:
                         warnings.warn(
                             f'Configuration for {key} will be skipped as device is not listed in evaluation device'
