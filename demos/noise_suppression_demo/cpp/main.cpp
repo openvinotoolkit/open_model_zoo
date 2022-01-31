@@ -33,7 +33,7 @@ void parse(int argc, char *argv[]) {
         cout <<   "\t[-h]                                  " << h_msg
              << "\n\t[--help]                              print [HELP] on all arguments"
              << "\n\t -m <[M]odel file>                    " << m_msg
-             << "\n\t[-i] <[I]nput file>                   " << i_msg
+             << "\n\t -i  <[I]nput file>                   " << i_msg
              << "\n\t[-d] <CPU>                            " << d_msg
              << "\n\t[-o] <noise_suppression_demo_out.wav> " << o_msg;
         showAvailableDevices();

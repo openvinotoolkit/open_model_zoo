@@ -47,7 +47,7 @@ static inline void catcher() {
         } catch (const std::exception& error) {
             slog::err << error.what() << slog::endl;
         } catch (...) {
-            slog::err << "Non exception object thrown" << slog::endl;
+            slog::err << "Non-exception object thrown" << slog::endl;
         }
         std::exit(1);
     }
