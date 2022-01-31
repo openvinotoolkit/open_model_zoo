@@ -310,8 +310,14 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
     return model, weights
 
 
-def ov_set_config(ov_obj, config, *args, **kwargs):
+def ov_set_config(ov_obj, config, *args, device=None, **kwargs):
     if hasattr(ov_obj, 'set_property'):
-        ov_obj.set_property(config, *args, **kwargs)
+        if device is not None:
+            ov_obj.set_property(device, config, *args, **kwargs)
+        else:
+            ov_obj.set_property(config, *args, **kwargs)
         return
-    ov_obj.set_config(config, *args, **kwargs)
+    if device is not None:
+        ov_obj.set_config(config, device, *args, **kwargs)
+    else:
+        ov_obj.set_config(config, *args, **kwargs)
