@@ -897,7 +897,7 @@ PYTHON_DEMOS = [
                                     'assets/formula-recognition-medium-scan-0001.png'),
                 '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
                 '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001/vocab.json'),
+                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001', 'vocab.json'),
             }),
             TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
