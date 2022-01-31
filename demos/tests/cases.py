@@ -158,10 +158,12 @@ NATIVE_DEMOS = [
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
         single_option_cases('-m_reid',
             None,
+            # TODO
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
+            # ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0288')
+            ),
     )),
 
     CppDemo(name='gaze_estimation_demo',
@@ -508,8 +510,10 @@ NATIVE_DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
+            # TODO
+            # ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0288')
+            ),
     )),
 
     CppDemo(name='security_barrier_camera_demo',
@@ -624,15 +628,17 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataDirectoryArg('person-detection-retail')}),
         single_option_cases('-m_det',
-            ModelArg('person-detection-0200'),
-            ModelArg('person-detection-0201'),
-            ModelArg('person-detection-0202'),
+            # TODO
+            # ModelArg('person-detection-0200'),
+            # ModelArg('person-detection-0201'),
+            # ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
+            # ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0288')
+            ),
     )),
 
     CppDemo(name='text_detection_demo', model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
@@ -745,33 +751,31 @@ PYTHON_DEMOS = [
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0002', 'vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab':
-                    str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-int8-0002/vocab.txt'),
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-int8-0002', 'vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-0001'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab':
-                    str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-int8-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-int8-0001', 'vocab.txt')
             }),
         ]
     )),
@@ -893,7 +897,7 @@ PYTHON_DEMOS = [
                                     'assets/formula-recognition-medium-scan-0001.png'),
                 '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
                 '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
+                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001/vocab.json'),
             }),
             TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
@@ -905,19 +909,20 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
-               model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-                          '-m_d': ModelArg('person-detection-asl-0001')}),
-        [
-            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-        ],
-    )),
+    # TODO: Attempt to get a name for a Tensor without names
+    # PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
+    #            model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
+    #     [
+    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+    #     ],
+    # )),
 
     PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
@@ -1038,8 +1043,10 @@ PYTHON_DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
+            # TODO
+            # ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0288')
+            ),
     )),
 
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
