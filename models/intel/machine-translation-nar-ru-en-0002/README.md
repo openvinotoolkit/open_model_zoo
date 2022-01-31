@@ -20,7 +20,7 @@ The quality metrics were calculated on the wmt19-ru-en dataset ("test" split in 
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| BLEU                      |        22.8 % |
+| BLEU                      |        23.1 % |
 
 ## Input
 
