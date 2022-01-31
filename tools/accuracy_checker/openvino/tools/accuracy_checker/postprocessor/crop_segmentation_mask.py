@@ -153,7 +153,13 @@ class CropPaddingSegmentationMask(Postprocessor):
     annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
 
+    def process_image(self, annotation, prediction):
+        raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
+
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        assert image_metadata and 'padding' in image_metadata, (
+            "Postprocessing step `crop_padding` cannot work without metadata with `padding` field")
+
         top, left, bottom, right = image_metadata.get('padding', (0, 0, 0, 0))
         for pred in prediction:
             mask = pred.mask
