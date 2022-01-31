@@ -16,7 +16,7 @@
 
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
-from .utils import RESIZE_TYPES, pad_image, InputTransform, get_layout_from_shape
+from .utils import RESIZE_TYPES, pad_image, InputTransform
 
 
 class ImageModel(Model):

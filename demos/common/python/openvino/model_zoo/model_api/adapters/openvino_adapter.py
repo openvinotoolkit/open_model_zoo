@@ -67,19 +67,16 @@ class OpenvinoAdapter(ModelAdapter):
 
     def load_model(self):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
+        # create infer_request fot sync inference
+        self.sync_infer_request = self.compiled_model.create_infer_request()
+
+        self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
+        if self.max_num_requests == 0:
+            # +1 to use it as a buffer of the pipeline
+            self.async_queue = AsyncInferQueue(self.compiled_model, len(self.async_queue) + 1)
 
         log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
-        if self.max_num_requests == 0:
-            self.max_num_requests = self.get_optimal_number_of_requests()
-        self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
         self.log_runtime_settings()
-
-    def get_optimal_number_of_requests(self):
-        metrics = self.compiled_model.get_metric('SUPPORTED_METRICS')
-        key = 'OPTIMAL_NUMBER_OF_INFER_REQUESTS'
-        if key in metrics:
-            return self.compiled_model.get_metric(key) + 1
-        return 1
 
     def log_runtime_settings(self):
         devices = set(parse_devices(self.device))
@@ -111,7 +108,7 @@ class OpenvinoAdapter(ModelAdapter):
         outputs = {}
         for output in self.model.outputs:
             output_shape = output.partial_shape.get_min_shape() if self.model.is_dynamic() else output.shape
-            outputs[output.get_any_name()] = LayerMetadata(output.get_names(), list(output_shape), output.get_element_type().get_type_name())
+            outputs[output.get_any_name()] = LayerMetadata(output.get_names(), list(output_shape), precision=output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
@@ -124,9 +121,8 @@ class OpenvinoAdapter(ModelAdapter):
         return raw_result
 
     def infer_sync(self, dict_data):
-        request = self.compiled_model.create_infer_request()
-        request.infer(dict_data)
-        return self.get_raw_result(request)
+        self.sync_infer_request.infer(dict_data)
+        return self.get_raw_result(self.sync_infer_request)
 
     def infer_async(self, dict_data, callback_data):
         self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))

@@ -34,11 +34,13 @@ ANCHORS = {
                128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
 }
 
-def permute_to_N_HWA_K(tensor, K):
+def permute_to_N_HWA_K(tensor, K, output_layout):
     """
     Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
     """
     assert tensor.ndim == 4, tensor.shape
+    if output_layout == 'NHWC':
+        tensor = tensor.transpose(0, 3, 1, 2)
     N, _, H, W = tensor.shape
     tensor = tensor.reshape(N, -1, K, H, W)
     tensor = tensor.transpose(0, 3, 4, 1, 2)
@@ -63,6 +65,7 @@ class YOLO(DetectionModel):
             self.anchors = param.get('anchors', ANCHORS['YOLOV3'])
 
             self.use_input_size = False
+            self.output_layout = 'NCHW'
 
             mask = param.get('mask', None)
             if mask:
@@ -125,7 +128,7 @@ class YOLO(DetectionModel):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
         objects = []
         size_normalizer = input_size if params.use_input_size else params.sides
-        predictions = permute_to_N_HWA_K(predictions, params.bbox_size)
+        predictions = permute_to_N_HWA_K(predictions, params.bbox_size, params.output_layout)
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
         for prediction in predictions:
             # Getting probabilities from raw outputs
@@ -229,12 +232,13 @@ class YoloV4(YOLO):
     __model__ = 'YOLOV4'
 
     class Params:
-        def __init__(self, classes, num, sides, anchors, mask):
+        def __init__(self, classes, num, sides, anchors, mask, layout):
             self.num = num
             self.coords = 4
             self.classes = classes
             self.bbox_size = self.coords + self.classes + 1
             self.sides = sides
+            self.output_layout = layout
             masked_anchors = []
             for idx in mask:
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
@@ -256,10 +260,14 @@ class YoloV4(YOLO):
         num = 3
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
-            classes = shape[1] // num - 5
-            if shape[1] % num != 0:
+            if shape[2] == shape[3]:
+                channels, sides, layout = shape[1], shape[2:4], 'NCHW'
+            else:
+                channels, sides, layout = shape[3], shape[1:3], 'NHWC'
+            classes = channels // num - 5
+            if channels % num != 0:
                 raise WrapperError(self.__model__, "The output blob {} has wrong 2nd dimension".format(name))
-            yolo_params = self.Params(classes, num, shape[2:4], self.anchors, self.masks[i*num : (i+1)*num])
+            yolo_params = self.Params(classes, num, sides, self.anchors, self.masks[i*num : (i+1)*num], layout)
             output_info[name] = (shape, yolo_params)
         return output_info
 
@@ -298,6 +306,7 @@ class YOLOF(YOLO):
             self.bbox_size = self.coords + self.classes
             self.sides = sides
             self.anchors = anchors
+            self.output_layout = 'NCHW'
             self.use_input_size = True
 
     def __init__(self, model_adapter, configuration=None, preload=False):
