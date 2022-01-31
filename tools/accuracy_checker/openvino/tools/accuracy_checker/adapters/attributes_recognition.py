@@ -137,8 +137,8 @@ class VehicleAttributesRecognitionAdapter(Adapter):
         return res
 
     def select_output_blob(self, outputs):
-        self.check_output_name(self.color_out, outputs)
-        self.check_output_name(self.type_out, outputs)
+        self.color_out = self.check_output_name(self.color_out, outputs)
+        self.type_out = self.check_output_name(self.type_out, outputs)
         self.outputs_verified = True
 
 

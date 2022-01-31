@@ -89,9 +89,12 @@ class MultiOutputRegression(Adapter):
         for out_name in self.output_list_keys:
             upd_output_list_velues.append(self.check_output_name(out_name, outputs))
         self.output_list_values = upd_output_list_velues
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
         result = []
         for batch_id, identfier in enumerate(identifiers):
             res_dict = {}
