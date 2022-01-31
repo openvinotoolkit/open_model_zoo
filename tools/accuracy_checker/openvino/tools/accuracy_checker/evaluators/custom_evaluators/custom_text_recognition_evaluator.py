@@ -241,6 +241,7 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
             'output': 'output',
             'logit': 'logit'
         }
+        self.update_inputs_outputs_info()
 
     def get_phrase(self, indices):
         res = ''
