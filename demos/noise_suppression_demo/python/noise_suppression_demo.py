@@ -1,25 +1,14 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021 Intel Corporation
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0
 """
 import logging as log
 import sys
 import copy
 from time import perf_counter
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 from pathlib import Path
 
 import numpy as np
@@ -30,20 +19,19 @@ from openvino.runtime import Core, get_version
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
-def build_argparser():
-    parser = ArgumentParser(add_help=False)
-    args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=Path)
-    args.add_argument("-i", "--input", help="Required. Path to a 16kHz wav file with speech+noise",
-                      required=True, type=str)
-    args.add_argument("-o", "--output", help="Optional. Path to output wav file for cleaned speech",
-                      required=False, type=str, default="noise_suppression_demo_out.wav")
-    args.add_argument("-d", "--device",
-                      help="Optional. Target device to perform inference on. "
-                           "Default value is CPU",
-                      default="CPU", type=str)
+def build():
+    parser = ArgumentParser()
+    parser.add_argument("-model", required=True, type=Path, metavar="<[M]odel file>",
+        help="path to an .xml file with a trained [M]odel")
+
+    parser.add_argument("-input", required=True, type=Path, metavar="<[I]nput file>",
+        help="path to an [I]nput 16kHz WAV file")
+
+    parser.add_argument("-device", default="CPU", metavar="<CPU>",
+        help="specify a [D]evice to infer on (the list of available devices is shown below)")
+
+    parser.add_argument("-output", default="noise_suppression_demo_out.wav", metavar="<noise_suppression_demo_out.wav>",
+        help="path to an [O]utput WAV file")
     return parser
 
 def wav_read(wav_name):
@@ -70,7 +58,7 @@ def wav_write(wav_name, x):
         wav.writeframes(x.tobytes())
 
 def main():
-    args = build_argparser().parse_args()
+    args = build().parse_args()
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
@@ -111,7 +99,7 @@ def main():
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     start_time = perf_counter()
-    sample_inp = wav_read(args.input)
+    sample_inp = wav_read(str(args.input))
 
     input_size = input_shapes["input"][1]
     res = None
@@ -148,4 +136,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main() or 0)
+    main()
