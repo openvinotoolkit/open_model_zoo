@@ -788,7 +788,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
                 '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
                 '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
                 '--output_names_qa': 'output_s,output_e',
@@ -796,13 +796,12 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
             }),
             TestCase(options={
                 '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-                '--vocab':
-                    str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/vocab.txt'),
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', 'vocab.txt'),
             }),
         ]
     )),
@@ -897,14 +896,14 @@ PYTHON_DEMOS = [
                                     'assets/formula-recognition-medium-scan-0001.png'),
                 '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
                 '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001', 'vocab.json'),
+                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001-im2latex-decoder', 'vocab.json'),
             }),
             TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
                                     'assets/formula-recognition-polynomials-handwritten-0001.png'),
                 '-m_encoder': ModelArg('formula-recognition-polynomials-handwritten-0001-encoder'),
                 '-m_decoder': ModelArg('formula-recognition-polynomials-handwritten-0001-decoder'),
-                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json'),
+                '--vocab': ModelFileArg('formula-recognition-polynomials-handwritten-0001-decoder', 'vocab.json'),
             })
         ],
     )),
