@@ -4,7 +4,7 @@
 
 This is a English-Russian machine translation model based on non-autoregressive Transformer topology.
 
-Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for implementation details) and the enclosed tokenizer_src and tokenizer_tgt folders.
+Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for implementation details) and is enclosed in tokenizer_src and tokenizer_tgt folders.
 
 ## Specification
 
