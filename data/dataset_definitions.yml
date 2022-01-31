@@ -15,8 +15,8 @@ datasets:
       annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80.json
+    annotation: mscoco_mask_rcnn_80.pickle
+    dataset_meta: mscoco_mask_rcnn_80.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_80_classes_without_background
@@ -25,8 +25,8 @@ datasets:
       annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80_without_bkgr.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80_without_bkgr.json
+    annotation: mscoco_mask_rcnn_80_without_bkgr.pickle
+    dataset_meta: mscoco_mask_rcnn_80_without_bkgr.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_91_classes
@@ -36,8 +36,8 @@ datasets:
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: mscoco_mask_rcnn_short_91.pickle
-    dataset_meta: mscoco_mask_rcnn_short_91.json
+    annotation: mscoco_mask_rcnn_91.pickle
+    dataset_meta: mscoco_mask_rcnn_91.json
     data_source: val2017
     preprocessing:
       - type: resize
