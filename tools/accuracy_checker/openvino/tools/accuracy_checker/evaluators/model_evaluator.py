@@ -438,6 +438,7 @@ class ModelEvaluator(BaseEvaluator):
             enable_profiling=False, output_callback=None):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
         copy_annotations, copy_predictions = None, None
@@ -524,6 +525,7 @@ class ModelEvaluator(BaseEvaluator):
 
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
             batch_predictions = self.adapter.process(batch_predictions, [image], batch_meta)
 
         _, predictions = self.postprocessor.process_batch(
