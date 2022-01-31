@@ -166,25 +166,25 @@ NATIVE_DEMOS = [
         ),
     )),
 
-    CppDemo(name='gaze_estimation_demo',
-            model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
-            device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('gaze-estimation-adas')}),
-        TestCase(options={
-            '-m': ModelArg('gaze-estimation-adas-0002'),
-            # TODO: FP16-INT8 expected to have output named "angle_y_fc"
-            # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-            '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-            '-m_es': ModelArg('open-closed-eye-0001'),
-        }),
-        single_option_cases(
-            '-m_fd',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004')),
-    )),
+    # TODO: FP16-INT8 expected to have output named "angle_y_fc"
+    # CppDemo(name='gaze_estimation_demo',
+    #         model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
+    #         device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
+    #         test_cases=combine_cases(
+    #     TestCase(options={'-no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('gaze-estimation-adas')}),
+    #     TestCase(options={
+    #         '-m': ModelArg('gaze-estimation-adas-0002'),
+    #         '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+    #         '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+    #         '-m_es': ModelArg('open-closed-eye-0001'),
+    #     }),
+    #     single_option_cases(
+    #         '-m_fd',
+    #         ModelArg('face-detection-adas-0001'),
+    #         ModelArg('face-detection-retail-0004')),
+    # )),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
             model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
