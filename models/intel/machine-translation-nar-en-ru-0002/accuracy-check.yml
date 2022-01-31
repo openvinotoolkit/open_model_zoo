@@ -21,4 +21,4 @@ models:
         metrics:
           - type: bleu
             smooth: True
-            reference: 0.216
+            reference: 0.227
