@@ -1,3 +1,4 @@
 sympy>=1.7.1
 tqdm>=4.54.1
-numpy>=1.16.6,<1.20
+numpy>=1.16.6,<1.20; python_version <= "3.6"
+numpy>=1.16.6,<=1.21; python_version > "3.6"
