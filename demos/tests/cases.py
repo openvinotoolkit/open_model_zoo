@@ -163,7 +163,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
-            ),
+        ),
     )),
 
     CppDemo(name='gaze_estimation_demo',
@@ -513,7 +513,7 @@ NATIVE_DEMOS = [
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
-            ),
+        ),
     )),
 
     CppDemo(name='security_barrier_camera_demo',
@@ -638,7 +638,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
-            ),
+        ),
     )),
 
     CppDemo(name='text_detection_demo', model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
@@ -1046,7 +1046,7 @@ PYTHON_DEMOS = [
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
-            ),
+        ),
     )),
 
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
