@@ -12,7 +12,7 @@ datasets:
   - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: annotations/instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
     annotation: mscoco_mask_rcnn_short_80.pickle
@@ -32,7 +32,7 @@ datasets:
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: annotations/instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
