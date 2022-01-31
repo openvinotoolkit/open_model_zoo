@@ -299,6 +299,10 @@ class Launcher(ClassProvider):
     def layout_mapping(self):
         return {}
 
+    @property
+    def additional_output_mapping(self):
+        return {}
+
 
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
