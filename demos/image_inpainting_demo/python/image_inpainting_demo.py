@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019-2020 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from time import perf_counter
 
 import numpy as np
 import cv2
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
@@ -132,10 +132,10 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     log.info('Reading model {}'.format(args.model))
-    inpainting_processor = ImageInpainting(ie, args.model, args.device)
+    inpainting_processor = ImageInpainting(core, args.model, args.device)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.auto_mask_color or args.auto_mask_random:
