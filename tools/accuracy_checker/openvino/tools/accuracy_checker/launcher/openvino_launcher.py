@@ -959,7 +959,7 @@ class OpenVINOLauncher(Launcher):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':
             num_requests = self.auto_num_requests()
         else:
-            num_requests = selfnum_requests or 0
+            num_requests = self.num_requests or 0
         queue = AsyncInferQueue(self.exec_network, num_requests)
         if log:
             print_info('Prepared async infer queue with {} requests'.format(len(queue)))
