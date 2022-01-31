@@ -1,4 +1,11 @@
 datasets:
+  - name: HumanMattingClips120
+    annotation_conversion:
+      converter: background_matting_sequential
+    annotation: human_matting_120.pickle
+    dataset_meta: human_matting_120_meta.json
+    data_source: HumanMattingClips120
+
   - name: ms_coco_mask_rcnn
     annotation_conversion:
       converter: mscoco_mask_rcnn

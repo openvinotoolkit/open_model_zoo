@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "background-matting-v2" model is a high-resolution background replacement technique based on
+  The "background-matting-mobilenetv2" model is a high-resolution background replacement technique based on
   background matting (with MobileNetV2 backbone), where an additional frame of the background is
   captured and used in recovering the alpha matte and the foreground layer. This model is
   pre-trained in PyTorch* framework and converted to ONNX* format. More details provided in

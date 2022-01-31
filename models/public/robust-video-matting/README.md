@@ -20,15 +20,14 @@ For details see the [repository](https://github.com/DmitriySidnev/RobustVideoMat
 
 ## Accuracy
 
-Accuracy measured on the test subset of `VideoMatte240K` dataset with input resolution 1280x720.
+Accuracy measured on a dataset composed with foregrounds from the HumanMatting dataset and backgrounds from the OpenImagesV5 one with input resolution 1280x720.
 
 | Metric         | Original model | Converted model |
 | -------------- | -------------- | --------------- |
-| Alpha MAD      | 6.39           | 6.39            |
-| Alpha MSE      | 1.82           | 1.82            |
-| Alpha GRAD     | 10.06          | 10.06           |
-| Alpha dtSSD    | 1.86           | 1.86            |
-| Foreground MSE | 93.66          | 93.66           |
+| Alpha MAD      | 20.8           | 24.83           |
+| Alpha MSE      | 15.1           | 17.85           |
+| Alpha GRAD     | 4.42           | 5.57            |
+| Foreground MSE | 4.05           | 4.21            |
 
 * Alpha MAD - mean of absolute difference for alpha.
 * Alpha MSE - mean squared error for alpha.

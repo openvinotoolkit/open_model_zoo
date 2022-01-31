@@ -1,0 +1,65 @@
+evaluations:
+  - name: robust-video-matting
+    module: custom_evaluators.sequential_background_matting_evaluator.SequentialBackgroundMatting
+    module_config:
+
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: background_matting_with_pha_and_fgr
+            alpha_out: pha
+            foreground_out: fgr
+          inputs:
+            - name: src
+              type: INPUT
+              value: com*
+            - name: r1
+              type: LSTM_INPUT
+              value: rr1
+            - name: r2
+              type: LSTM_INPUT
+              value: rr2
+            - name: r3
+              type: LSTM_INPUT
+              value: rr3
+            - name: r4
+              type: LSTM_INPUT
+              value: rr4
+
+      datasets:
+        - name: HumanMattingClips120
+          reader: pillow_imread
+
+          preprocessing:
+            - type: rgb_to_bgr
+            - type: resize
+              dst_width: 1280
+              dst_height: 720
+              use_pillow: True
+
+          metrics:
+            - name: alpha_MAD
+              type: mean_of_absolute_difference
+              prediction_source: pha
+              process_type: alpha
+              reference: 20.8
+
+            - name: alpha_GRAD
+              type: spatial_gradient
+              prediction_source: pha
+              process_type: alpha
+              reference: 4.42
+
+            - name: alpha_MSE
+              type: mean_squared_error
+              prediction_source: pha
+              process_type: alpha
+              use_mask: False
+              reference: 15.1
+
+            - name: foreground_MSE
+              type: mean_squared_error
+              prediction_source: fgr
+              process_type: image
+              use_mask: True
+              reference: 4.05

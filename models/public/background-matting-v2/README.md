@@ -1,8 +1,8 @@
-# background-matting-v2
+# background-matting-mobilenetv2
 
 ## Use Case and High-Level Description
 
-The `background-matting-v2` model is a high-resolution background replacement technique based on
+The `background-matting-mobilenetv2` model is a high-resolution background replacement technique based on
 background matting (with MobileNetV2 backbone), where an additional frame of the background is
 captured and used in recovering the alpha matte and the foreground layer. This model is
 pre-trained in PyTorch\* framework and converted to ONNX\* format. More details provided in
@@ -20,14 +20,14 @@ For details see the [repository](https://github.com/DmitriySidnev/BackgroundMatt
 
 ## Accuracy
 
-Accuracy measured on the `PhotoMatte85` dataset with input resolution 1280x720.
+Accuracy measured on a dataset composed with foregrounds from the HumanMatting dataset and backgrounds from the OpenImagesV5 one with input resolution 1280x720.
 
 | Metric         | Original model | Converted model |
 | -------------- | -------------- | --------------- |
-| Alpha MAD      | 1.26           | 1.26            |
-| Alpha MSE      | 0.41           | 0.41            |
-| Alpha GRAD     | 3.35           | 3.35            |
-| Foreground MSE | 1.62           | 1.62            |
+| Alpha MAD      | 4.32           | 4.35            |
+| Alpha MSE      | 1.0            | 1.0             |
+| Alpha GRAD     | 2.48           | 2.49            |
+| Foreground MSE | 2.7            | 2.69            |
 
 * Alpha MAD - mean of absolute difference for alpha.
 * Alpha MSE - mean squared error for alpha.
