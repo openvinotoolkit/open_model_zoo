@@ -48,6 +48,10 @@ An example of using the Model Converter:
 omz_converter --list models.lst
 ```
 
+### Supported Models
+
+* instance-segmentation-person-????
+
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
