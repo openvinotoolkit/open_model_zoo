@@ -1008,31 +1008,30 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-1040')),
     )),
 
-    # TODO: Error while reading vocab & merges files: No such file or directory (os error 2)
-    # PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
-    #     [
-    #         TestCase(options={
-    #             '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-    #             '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-    #             '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
-    #             '-i': [
-    #                 'The quick brown fox jumps over the lazy dog.',
-    #                 'The five boxing wizards jump quickly.',
-    #                 'Jackdaws love my big sphinx of quartz.'
-    #             ],
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-    #             '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-    #             '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
-    #             '-i': [
-    #                 'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
-    #                 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
-    #                 'Съешь же ещё этих мягких французских булок да выпей чаю.'
-    #             ],
-    #         }),
-    #     ]
-    # )),
+    PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
+        [
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
+                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
+                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.',
+                    'Jackdaws love my big sphinx of quartz.'
+                ],
+            }),
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
+                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
+                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-i': [
+                    'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
+                    'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
+                    'Съешь же ещё этих мягких французских булок да выпей чаю.'
+                ],
+            }),
+        ]
+    )),
 
     PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS,

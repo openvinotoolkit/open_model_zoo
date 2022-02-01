@@ -27,6 +27,7 @@ omz_converter --list models.lst
 
 ### Supported Models
 
+* noise-suppression-denseunet-ll-0001
 * noise-suppression-poconetlike-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.

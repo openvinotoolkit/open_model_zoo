@@ -131,7 +131,7 @@ class Model:
                 files_per_precision = {}
 
                 for file in files:
-                    if file.name.parts[0].startswith('FP'):
+                    if len(file.name.parts) == 2 and file.name.parts[0].startswith('FP'):
                         p = file.name.parts[0]
                         if p not in _common.KNOWN_PRECISIONS:
                             raise validation.DeserializationError(
