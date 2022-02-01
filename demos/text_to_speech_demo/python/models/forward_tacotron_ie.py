@@ -130,7 +130,7 @@ class ForwardTacotronIE:
                       "input_mask": input_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = speaker_embedding
+                inputs["speaker_embedding"] = np.array([speaker_embedding])
             self.duration_predictor_request.infer(inputs)
         else:
             self.duration_predictor_request.infer(inputs={"input_seq": sequence})
