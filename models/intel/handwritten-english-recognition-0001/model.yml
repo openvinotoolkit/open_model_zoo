@@ -1,0 +1,45 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Recognizes handwritten English text. Architecture is CNN for feature extraction
+  followed by RNN for sequence modeling.
+task_type: optical_character_recognition
+files:
+  - name: FP32/handwritten-english-recognition-0001.xml
+    size: 105702
+    checksum: 602fca34a9274becf740f0a71ec64e0f565880999ab5c742388bf347219f49a0d79fe6a3ad259144fc723be65b1a9db8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.xml
+  - name: FP32/handwritten-english-recognition-0001.bin
+    size: 22225016
+    checksum: 76c8c89f25e9b2779f139ef092791723955cc4d92be08eba55be7ce802cdd68dee48c7bf1f1dff0d93b6e886d35f4465
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.bin
+  - name: FP16/handwritten-english-recognition-0001.xml
+    size: 122418
+    checksum: edb5d2326855446a21eeecad38a59b053568e63fb1676ff01f523647ef0d89fdff4f0e501e90c323dad8102ca7be7538
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.xml
+  - name: FP16/handwritten-english-recognition-0001.bin
+    size: 11112606
+    checksum: baaa502d45216cb5fb74a9deca8bf71891b7dea80efb8749124dd74fada345e8d304e824c138d593e7948913269f6fea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.bin
+  - name: FP16-INT8/handwritten-english-recognition-0001.xml
+    size: 260034
+    checksum: 4d55d3495c0e732dfd2666f57ece6d0c36983e3aada8dc7621cffaea0ad629fc90df52595cd19f9d7f585f3c9a4887de
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP16-INT8/handwritten-english-recognition-0001.xml
+  - name: FP16-INT8/handwritten-english-recognition-0001.bin
+    size: 10974532
+    checksum: 9c191ba797d0010c50be6ed756186abe021812f0cee7399f4afc8de1c2cca5d05a57c151f3903f2708878bd2f3f9a812
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-english-recognition-0001/FP16-INT8/handwritten-english-recognition-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
