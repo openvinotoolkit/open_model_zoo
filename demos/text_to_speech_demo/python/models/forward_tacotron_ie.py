@@ -158,7 +158,7 @@ class ForwardTacotronIE:
                       "data_mask": data_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = speaker_embedding
+                inputs["speaker_embedding"] = np.array([speaker_embedding])
             self.forward_request.infer(inputs)
         else:
             self.forward_request.infer(inputs={"data": aligned_emb})
