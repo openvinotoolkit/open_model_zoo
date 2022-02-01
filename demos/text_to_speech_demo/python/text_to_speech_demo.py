@@ -53,7 +53,7 @@ def build_argparser():
     args.add_argument("-m_forward", "--model_forward",
                       help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Optional. Text file with text. Replaces console input.", required=False,
+    args.add_argument("-i", "--input", help="Required. Text or path to the input file.", required=True,
                       type=str, nargs='*')
     args.add_argument("-o", "--out", help="Optional. Path to an output .wav file", default='out.wav',
                       type=str)
@@ -160,25 +160,12 @@ def main():
 
     input_data = parse_input(args.input)
 
-    def sentences():
-        if input_data:
-            for sentence in input_data:
-                sentence = sentence.strip()
-                print(sentence)
-                if sentence:
-                    yield sentence
-        else:
-            while True:
-                yield input("> ")
-
     time_forward = 0
     time_wavernn = 0
 
     time_s_all = perf_counter()
     count = 0
-    for line in sentences():
-        if not line.strip():
-            break
+    for line in input_data:
         count += 1
         line = line.rstrip()
         log.info("Process line {0} with length {1}.".format(count, len(line)))
