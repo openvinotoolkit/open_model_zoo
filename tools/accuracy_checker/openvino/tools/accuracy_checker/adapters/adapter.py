@@ -26,11 +26,11 @@ class Adapter(ClassProvider):
 
     __provider_type__ = 'adapter'
 
-    def __init__(self, launcher_config, label_map=None, output_blob=None):
+    def __init__(self, launcher_config, label_map=None, output_blob=None, additional_output_mapping=None):
         self.launcher_config = launcher_config
         self.output_blob = output_blob
         self.label_map = label_map
-
+        self.additional_output_mapping = additional_output_mapping
         self.validate_config(launcher_config)
         self.configure()
 
@@ -51,9 +51,9 @@ class Adapter(ClassProvider):
     def configure(self):
         pass
 
-    @staticmethod
-    def check_output_name(output_name, outputs, suffix=('/sink_port_0', ':0')):
-        return postprocess_output_name(output_name, outputs, suffix, raise_error=False)
+    def check_output_name(self, output_name, outputs, suffix=('/sink_port_0', ':0')):
+        return postprocess_output_name(
+            output_name, outputs, suffix, self.additional_output_mapping, raise_error=False)
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix='', **kwargs):

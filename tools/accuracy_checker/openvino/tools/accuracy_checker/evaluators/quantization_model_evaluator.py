@@ -271,6 +271,7 @@ class ModelEvaluator:
                 filled_inputs, batch_meta, return_raw=True, **kwargs)
             if self.adapter and (calculate_metrics or dump_prediction_to_annotation):
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+                self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
                 batch_predictions = self.adapter.process(batch_processed_predictions, batch_identifiers, batch_meta)
             else:
                 batch_predictions = batch_processed_predictions
@@ -495,6 +496,7 @@ class ModelEvaluator:
         self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
 
     def load_network_from_ir(self, models_list):
         model_paths = next(iter(models_list))
@@ -507,6 +509,7 @@ class ModelEvaluator:
         self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
 
     def get_network(self):
         return [{'model': self.launcher.network}]
