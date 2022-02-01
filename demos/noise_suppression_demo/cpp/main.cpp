@@ -11,39 +11,39 @@
 using namespace std;
 
 namespace {
-constexpr char h_msg[] = "show the [H]elp message and exit";
+constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
 
-constexpr char m_msg[] = "path to an .xml file with a trained [M]odel";
+constexpr char m_msg[] = "path to an .xml file with a trained model";
 DEFINE_string(m, "", m_msg);
 
-constexpr char i_msg[] = "path to an [I]nput 16kHz WAV file";
+constexpr char i_msg[] = "path to an input 16kHz WAV file";
 DEFINE_string(i, "", i_msg);
 
-constexpr char d_msg[] = "specify a [D]evice to infer on (the list of available devices is shown below)";
+constexpr char d_msg[] = "specify a device to infer on (the list of available devices is shown below). Default is CPU";
 DEFINE_string(d, "CPU", d_msg);
 
-constexpr char o_msg[] = "path to an [O]utput WAV file";
+constexpr char o_msg[] = "path to an output WAV file. Default is noise_suppression_demo_out.wav";
 DEFINE_string(o, "noise_suppression_demo_out.wav", o_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     slog::info << ov::get_openvino_version() << slog::endl;
     if (FLAGS_h || 1 == argc) {
-        cout <<   "\t[-h]                                  " << h_msg
-             << "\n\t[--help]                              print [HELP] on all arguments"
-             << "\n\t -m <[M]odel file>                    " << m_msg
-             << "\n\t -i  <[I]nput file>                   " << i_msg
-             << "\n\t[-d] <CPU>                            " << d_msg
-             << "\n\t[-o] <noise_suppression_demo_out.wav> " << o_msg;
+        cout <<   "\t[-h]               " << h_msg
+             << "\n\t[--help]           print help on all arguments"
+             << "\n\t -m <MODEL FILE>   " << m_msg
+             << "\n\t -i <WAV>          " << i_msg
+             << "\n\t[-d] <DEVICE>      " << d_msg
+             << "\n\t[-o] <WAV>         " << o_msg;
         showAvailableDevices();
         exit(0);
     } if (FLAGS_m.empty()) {
-        throw invalid_argument{"-m <[M]odel file> can't be empty"};
+        throw invalid_argument{"-m <MODEL FILE> can't be empty"};
     } if (FLAGS_i.empty()) {
-        throw invalid_argument{"-i <[I]nput file> can't be empty"};
+        throw invalid_argument{"-i <INPUT WAV> can't be empty"};
     } if (FLAGS_o.empty()) {
-        throw invalid_argument{"-o <[O]utput file> can't be empty"};
+        throw invalid_argument{"-o <OOUTPUT WAV FILE> can't be empty"};
     }
 }
 

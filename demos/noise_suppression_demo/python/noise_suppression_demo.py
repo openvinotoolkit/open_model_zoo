@@ -21,17 +21,19 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 def build():
     parser = ArgumentParser()
-    parser.add_argument("-model", required=True, type=Path, metavar="<[M]odel file>",
-        help="path to an .xml file with a trained [M]odel")
+    parser.add_argument("-m", "--model", required=True, type=Path, metavar="<MODEL FILE>",
+        help="path to an .xml file with a trained model")
 
-    parser.add_argument("-input", required=True, type=Path, metavar="<[I]nput file>",
-        help="path to an [I]nput 16kHz WAV file")
+    parser.add_argument("-i", "--input", required=True, type=Path, metavar="<WAV>",
+        help="path to an input 16kHz WAV file")
 
-    parser.add_argument("-device", default="CPU", metavar="<CPU>",
-        help="specify a [D]evice to infer on (the list of available devices is shown below)")
+    parser.add_argument("-d", "--device", default="CPU", metavar="<DEVICE>",
+        help="specify a device to infer on (the list of available devices is shown below). Default is CPU")
 
-    parser.add_argument("-output", default="noise_suppression_demo_out.wav", metavar="<noise_suppression_demo_out.wav>",
-        help="path to an [O]utput WAV file")
+    parser.add_argument("-o", "-output", default="noise_suppression_demo_out.wav", metavar="<WAV>",
+        help="path to an output WAV file. Default is noise_suppression_demo_out.wav")
+    log.info('OpenVINO Runtime')
+    log.info('\tbuild: {}'.format(get_version()))
     return parser
 
 def wav_read(wav_name):
