@@ -30,10 +30,8 @@ def build():
     parser.add_argument("-d", "--device", default="CPU", metavar="<DEVICE>",
         help="specify a device to infer on (the list of available devices is shown below). Default is CPU")
 
-    parser.add_argument("-o", "-output", default="noise_suppression_demo_out.wav", metavar="<WAV>",
+    parser.add_argument("-o", "--output", default="noise_suppression_demo_out.wav", metavar="<WAV>",
         help="path to an output WAV file. Default is noise_suppression_demo_out.wav")
-    log.info('OpenVINO Runtime')
-    log.info('\tbuild: {}'.format(get_version()))
     return parser
 
 def wav_read(wav_name):
@@ -61,12 +59,9 @@ def wav_write(wav_name, x):
 
 def main():
     args = build().parse_args()
-
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
-
-    # read IR
     log.info("Reading model {}".format(args.model))
     ov_encoder = core.read_model(args.model)
 
