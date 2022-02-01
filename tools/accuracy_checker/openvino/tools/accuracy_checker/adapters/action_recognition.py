@@ -313,7 +313,8 @@ class ActionDetection(Adapter):
             self.add_conf_outs = add_conf_outs
             return
 
-        add_conf_with_bias = [self.check_output_name(layer_name + '/add_', raw_outputs) for layer_name in self.add_conf_outs]
+        add_conf_with_bias = [self.check_output_name(layer_name + '/add_', raw_outputs)
+                              for layer_name in self.add_conf_outs]
         if contains_all(raw_outputs, add_conf_with_bias):
             self.add_conf_outs = add_conf_with_bias
             return
