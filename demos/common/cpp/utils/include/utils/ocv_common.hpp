@@ -84,8 +84,9 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
 * @param tensor - Tensor object which to be filled by an image data.
 * @param batchIndex - batch index of an image inside of the blob.
 */
-static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, const ov::Layout& layout = {"NCHW"}, int batchIndex = 0) {
+static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
+    const ov::Layout& layout = { "NCHW" };
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
