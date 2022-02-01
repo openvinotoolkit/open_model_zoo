@@ -687,12 +687,13 @@ NATIVE_DEMOS = [
         ]
     )),
 
-    CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-                          '-m': ModelArg('noise-suppression-poconetlike-0001')}),
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-                          '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
-    )),
+    # TODO: fix
+    # CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+    #     single_option_cases('-m',
+    #         ModelArg('noise-suppression-denseunet-ll-0001'),
+    #         ModelArg('noise-suppression-poconetlike-0001')),
+    # )),
 
     CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-at': 'maskrcnn',
@@ -1055,13 +1056,13 @@ PYTHON_DEMOS = [
         ),
     )),
 
-    # TODO: Number of inputs of the model (40) is not equal to number of outputs(42)
-    # PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-    #                       '-m': ModelArg('noise-suppression-poconetlike-0001')}),
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-    #                       '-m': ModelArg('noise-suppression-denseunet-ll-0001')}),
-    # )),
+    PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            # TODO: Number of inputs of the model (40) is not equal to number of outputs(42)
+            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-poconetlike-0001'))
+    )),
 
     PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
