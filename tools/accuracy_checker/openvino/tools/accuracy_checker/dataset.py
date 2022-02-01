@@ -666,13 +666,16 @@ class DataProvider:
             yaml.safe_dump(identifiers, sf)
 
     def __getitem__(self, item):
-        if self.batch is None or self._batch <= 0:
+        if self._batch <= 0:
             self.batch = 1
-        if self.size <= item * self.batch:
+        batch_size = self.batch
+        if batch_size is None:
+            batch_size = 1
+        if self.size <= item * batch_size:
             raise IndexError
         batch_annotation = []
-        batch_start = item * self.batch
-        batch_end = min(self.size, batch_start + self.batch)
+        batch_start = item * batch_size
+        batch_end = min(self.size, batch_start + batch_size)
         batch_input_ids = self.subset[batch_start:batch_end] if self.subset else range(batch_start, batch_end)
         batch_identifiers = [self._data_list[idx] for idx in batch_input_ids]
         batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]

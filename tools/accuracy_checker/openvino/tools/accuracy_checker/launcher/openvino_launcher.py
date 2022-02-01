@@ -463,8 +463,7 @@ class OpenVINOLauncher(Launcher):
             if 'num_requests' in self.config:
                 warning(
                     "number requests already provided in device name specification. "
-                    "'num_requests' option will be ignored."
-                )
+                    "'num_requests' option will be ignored.")
         elif 'num_requests' in self.config and self.config['num_requests'] != 'AUTO':
             num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
         else:
@@ -493,8 +492,7 @@ class OpenVINOLauncher(Launcher):
                         ov_set_config(self.ie_core, dict(value), device=key)
                     else:
                         warnings.warn(
-                            f'Configuration for {key} will be skipped as device is not listed in evaluation device'
-                        )
+                            f'Configuration for {key} will be skipped as device is not listed in evaluation device')
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
@@ -586,7 +584,7 @@ class OpenVINOLauncher(Launcher):
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]
-        return None
+        return parse_partial_shape(input_info.partial_shape)[0]
 
     def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
@@ -602,7 +600,6 @@ class OpenVINOLauncher(Launcher):
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
         self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
-
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
@@ -611,6 +608,10 @@ class OpenVINOLauncher(Launcher):
                 self.print_input_output_info(self.network if self.network is not None else self.exec_network)
             if preprocessing:
                 self._set_preprocess(preprocessing)
+            model_batch = self._get_model_batch_size()
+            model_batch = 1 if model_batch is None else model_batch
+            self._batch = self.config.get('batch', model_batch)
+            self._set_batch_size(self._batch)
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
                 self.exec_network = self.ie_core.compile_model(self.network, self._device)
                 self.infer_request = self.exec_network.create_infer_request()
@@ -849,8 +850,7 @@ class OpenVINOLauncher(Launcher):
             if 'precision' in input_config:
                 if self.network:
                     self.inputs[input_config['name']].set_element_type(
-                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()]
-                    )
+                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()])
 
     def _set_input_shape(self):
         if not self.network:
@@ -886,8 +886,7 @@ class OpenVINOLauncher(Launcher):
             if infer_outputs:
                 output_layer = postprocess_output_name(output_layer, infer_outputs)
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
-                layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()]
-            )
+                layer_shape, dtype=format_map[self.inputs[lstm_var].element_type.get_type_name()])
             feed_dict[lstm_var] = input_data
         return feed_dict
 
