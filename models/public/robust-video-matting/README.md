@@ -24,10 +24,10 @@ Accuracy measured on a dataset composed with foregrounds from the HumanMatting d
 
 | Metric         | Original model | Converted model |
 | -------------- | -------------- | --------------- |
-| Alpha MAD      | 20.8           | 24.83           |
-| Alpha MSE      | 15.1           | 17.85           |
-| Alpha GRAD     | 4.42           | 5.57            |
-| Foreground MSE | 4.05           | 4.21            |
+| Alpha MAD      | 20.79          | 20.82           |
+| Alpha MSE      | 15.1           | 15.11           |
+| Alpha GRAD     | 4.44           | 4.47            |
+| Foreground MSE | 4.05           | 4.06            |
 
 * Alpha MAD - mean of absolute difference for alpha.
 * Alpha MSE - mean squared error for alpha.

@@ -42,13 +42,13 @@ evaluations:
               type: mean_of_absolute_difference
               prediction_source: pha
               process_type: alpha
-              reference: 20.8
+              reference: 20.79
 
             - name: alpha_GRAD
               type: spatial_gradient
               prediction_source: pha
               process_type: alpha
-              reference: 4.42
+              reference: 4.44
 
             - name: alpha_MSE
               type: mean_squared_error
