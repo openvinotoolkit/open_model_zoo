@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/gaze-estimation-adas-0002.xml
-    size: 75302
-    checksum: baea08beb304fa7ca5d6ffb58ec0128ec270fdd4de50502c668f030b147dcec21167998419321e03fdf4f69ca8b4caf2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+    size: 94135
+    checksum: 92e362bf2f3779888111aa59ad0e3891c46814d6f821a5a7ec152216a8eb13f31801998b762c17a0c1c8643e20da8971
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
   - name: FP32/gaze-estimation-adas-0002.bin
-    size: 7529480
-    checksum: 377c30aeb2b86a07dc316691f2e730015cd553c012856e1aa898fe5605d62ef96341d3db8bf9c26c51fb67ecc6ed73b2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+    size: 7536380
+    checksum: 8460f07abc0498fdcd1f384c19cba261a98c8b010b6862a03eebcef800209c9234463c94a3c0d44fb59b0fc4876916b5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
   - name: FP16/gaze-estimation-adas-0002.xml
-    size: 75261
-    checksum: d8c4a20143dea665e57d0e70a6856c18cb040094f99ca61ef7c020e479d6d8f203a3e0337b12fe5e2b86c9082889f94c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+    size: 131242
+    checksum: 4e5c1968d1ea10a0620c8c7f129ee893a2d742e252296df90504c2ad35d29bccfdf155185e8d74d5493a92b3dec3cf8b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
   - name: FP16/gaze-estimation-adas-0002.bin
-    size: 3764842
-    checksum: ebc47d52fc4db9ef59e5f076776ac2660fd95d0df0c4a82babdb482a1b477892aa4916115f25474c6c88ee8785a93d3f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+    size: 3768242
+    checksum: 0e363fdf788d4706e47ace68013fb74fb8d76145922fa912a098f4f30f9ea93a98768afa9cb94604086fbaaecf40960e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
   - name: FP16-INT8/gaze-estimation-adas-0002.xml
-    size: 147906
-    checksum: 0769733d2ddca497f62e8fd18c9276d22723826c4c6b9b18bb030552e8e7633b0f47fb99de839b6c473b071e245a5865
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
+    size: 170706
+    checksum: d07e71af95d3cd2a9506f348a7073dff2ee91453ee2bba3ae6653a4cd0c8273f1b83f48437688ccbafe7eb507b92f556
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
   - name: FP16-INT8/gaze-estimation-adas-0002.bin
-    size: 1893394
-    checksum: 32be63595a71ac0383ad08c3d7a5ebc23954276ea9ebcc50d909b85d18816d5c6091db4095d874400ae08799bfa5322e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
+    size: 1900830
+    checksum: ad41e95a666e72048a8f3854caf751242203c599e21dd8df6e3ff75900f5d894dd1577ba011a9b931ca0c86e601e6e6b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0013.xml
-    size: 382996
-    checksum: cf011606b06e5f293ab572715225d6f536077c32c35296c54d8d0bcb9f6a92695a7960a6cd8deb15b89641ef71045406
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+    size: 470274
+    checksum: 5bbd79b49a7f710b46e9dfb7eef56c8657fdf6d91905e034000e500cd57b39a06811b8e16164f006febf7310d9d28de8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
   - name: FP32/person-detection-retail-0013.bin
     size: 2891364
-    checksum: e26fbd0ec879ea7de5338e7cb4b3607128a4b9c690e07c17c9ee89d3a5c686e0e9d1d05b8654f08ff227435d8c6e8169
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+    checksum: 9e0fb51e3b9064657b14ddd8c190f7088fd561a184acd38ba7a7d4c491879e56a5a6d4619810cbbaef36a9653810486a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
   - name: FP16/person-detection-retail-0013.xml
-    size: 382841
-    checksum: ac4e5f267cd91b7254487d7e7effde4bbbc56f69bd66fabd017c55fe8a7675009255bae12315caef61e0e33cc78fbb29
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+    size: 647879
+    checksum: 5f6170e0589596b512c28a1f7c0e68f5f08a171ea79b6386b526199c9c529cebcf98ecdeffcb3b41b2a0fb61ce22117e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
   - name: FP16/person-detection-retail-0013.bin
-    size: 1445736
-    checksum: c6c66dcb8e24b5d87c553477ecd006dc679ece3ec03137b079e0fe3084b4acda2fc570330d6dbc6844dbbc03f289106e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+    size: 1445734
+    checksum: 89cb1d9735d508b6d047fbafbed06babc3373d4da21cdb67873fed828aefdcf297b3594ef8219bf54b22af912b20f2d1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
   - name: FP16-INT8/person-detection-retail-0013.xml
-    size: 971255
-    checksum: 1f05b6971a5e742e39beacc1dd5a51fe68c6675cf26c2204351e3346a014f16b0b42c6540082b7da2cc49c7458e5c03d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.xml
+    size: 1123779
+    checksum: 6147eb6ca167f009cc70e1c0c12e727900c8b1400191d10e689812f4dc440f2f6fa488209cbf7e895944972844589b48
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.xml
   - name: FP16-INT8/person-detection-retail-0013.bin
-    size: 770360
-    checksum: d022f70657a423618edc9998b48c77f4fb88d85dc2c1d0ec6ac88ec17af738217076549286fe424afdf1af81e1e4c767
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.bin
+    size: 809310
+    checksum: 356385dbe28ef3a22a3c81aea93523e47a7ae5790a845af38eeff6bc9bbb361e9561fb203837677ad7d96ab3ac985856
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

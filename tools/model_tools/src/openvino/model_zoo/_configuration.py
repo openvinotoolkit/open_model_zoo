@@ -131,15 +131,13 @@ class Model:
                 files_per_precision = {}
 
                 for file in files:
-                    if len(file.name.parts) != 2:
-                        raise validation.DeserializationError(
-                            'Can\'t derive precision from file name {!r}'.format(file.name))
-                    p = file.name.parts[0]
-                    if p not in _common.KNOWN_PRECISIONS:
-                        raise validation.DeserializationError(
-                            'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
-                                p, file.name, _common.KNOWN_PRECISIONS))
-                    files_per_precision.setdefault(p, set()).add(file.name.parts[1])
+                    if len(file.name.parts) == 2 and file.name.parts[0].startswith('FP'):
+                        p = file.name.parts[0]
+                        if p not in _common.KNOWN_PRECISIONS:
+                            raise validation.DeserializationError(
+                                'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
+                                    p, file.name, _common.KNOWN_PRECISIONS))
+                        files_per_precision.setdefault(p, set()).add(file.name.parts[1])
 
                 for precision, precision_files in files_per_precision.items():
                     for ext in ['xml', 'bin']:

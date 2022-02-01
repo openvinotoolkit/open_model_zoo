@@ -26,16 +26,8 @@ from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
 from ..utils import get_or_parse_value, softmax
 
-FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
-    'prob_name',
-    'reg_name',
-    'anchor_index',
-    'anchor_size',
-    'win_scale',
-    'win_length',
-    'win_trans_x',
-    'win_trans_y'
-])
+FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', ['prob_name', 'reg_name', 'anchor_index',
+    'anchor_size', 'win_scale', 'win_length', 'win_trans_x', 'win_trans_y'])
 
 
 class TFObjectDetectionAPIAdapter(Adapter):
@@ -395,6 +387,8 @@ class FaceBoxesAdapter(Adapter):
             list of DetectionPrediction objects
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_outputs)
 
         batch_scores = raw_outputs[self.scores_out]
         batch_boxes = raw_outputs[self.boxes_out]

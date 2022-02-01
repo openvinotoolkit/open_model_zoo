@@ -58,7 +58,7 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* instance-segmentation-person-0007
+* instance-segmentation-person-????
 * yolact-resnet50-fpn-pytorch
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.

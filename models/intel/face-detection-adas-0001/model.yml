@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-adas-0001.xml
-    size: 237086
-    checksum: 92a8608d18260929ca070a6d27cb0b8c606e22d9b9baff002efad778ff7a65a5996679b6699fe88816d237003e6146bc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+    size: 286525
+    checksum: 8e3adf6205f92d689c854b0cf44aaa28ba532c8255543726c06a95af4ff221c64ae007bea41b3f3de2f1fb5582f4ce0b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
   - name: FP32/face-detection-adas-0001.bin
     size: 4212072
-    checksum: cfdfcc6163881b3b18dc1c4b5cbcbb4cf3f2f224502972fd8c409f13bb7c6c193bdd8c01fe8fcba92305e4e2c84e39c6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+    checksum: 54e7c09ac5e8ebce2a16b2de512d295139f26b1b1ededee24550de0dd4fdd7f1e0b1be6ca5f97618d6cd66237b424bf4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
   - name: FP16/face-detection-adas-0001.xml
-    size: 237050
-    checksum: 417a5a690ddf1ced27dbec6e7005ff365ff5ad77f4c92511a17bee20ee9ffef737640e3c3ee267e4c5ab2344c09c8662
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+    size: 360397
+    checksum: 54e14980180f2fa0875d1d92e626d50e2db715e2fe8509a80bd00b19287ca1eb94ad12f991ccdf21d76ad0921259228c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
   - name: FP16/face-detection-adas-0001.bin
     size: 2106088
-    checksum: e5948d9a9df622432eefcc41ed2fb59bf9fcb7067f17857030ae1a542ad7e8cab270e14ab808f943ea9cdb14c2cd8b47
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+    checksum: 83ea86ae5d1f138876cf4bbe3827e8086fd4ef26bf1af41615dc4cebe9d54dd209df036596093f9cbbedefbc6367bffb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
   - name: FP16-INT8/face-detection-adas-0001.xml
-    size: 510708
-    checksum: 8f8adb032cf4063e9bfc273e3247a2efc4c0c0e62537338eeeccee7314c3e28e93da071172f842a73edcb47d8bfb6094
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.xml
+    size: 581726
+    checksum: 1128f9a69dd19bf2dfd96d954738594be0adf6d6530ce33429690d01bcbf3a0e776534e647f3c020d6b7e4987813b9cf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.xml
   - name: FP16-INT8/face-detection-adas-0001.bin
-    size: 1100294
-    checksum: 4ca7ffd713eb41a6c2ec00f35546f0531becde569f00da8ffae322a686a6d7033210b24e8ae364fabc8476c601ed3dc2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.bin
+    size: 1139668
+    checksum: 6de517cec5a7f242a6d279257b759db0666b31fafd712eb3b0d43b1f1dc980d0fd32c3dffe6b1690cec3c6d307b29e12
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,20 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-spotting-0005-recognizer-encoder.xml
-    size: 10223
-    checksum: f3a7415851daf8651b605c854afe237963e8baecd4b33eed8388ec172cb2b6139568206c360c8c3f24e448aaef5a1f2c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.xml
+    size: 11862
+    checksum: 2ffe75f6040a248f4c5cfa3a7db602e15fe58aba4267110716d8cb6b89c0345b1b56010db405521955d7b64cb2582072
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.xml
   - name: FP32/text-spotting-0005-recognizer-encoder.bin
     size: 5311488
     checksum: c39b30d4c4ab709a183104daff4d033d003be3f71f33404ef66b948cb5a60b19d1e1028909f4bf197ab48d68ccc48bc0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.bin
   - name: FP16/text-spotting-0005-recognizer-encoder.xml
-    size: 10220
-    checksum: 745566b3e17ccddb291aeb005b9180a257dbb4f8c672640f3214d294e8691ed5f078fef9703d2bf2f9d43d7745b55b19
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.xml
+    size: 15179
+    checksum: 58002c82cdfe184ad922e4da845b1106b6bc7936ecef7924b6a8f6267d73e57f28632a7d3887b285406bae23f766d718
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.xml
   - name: FP16/text-spotting-0005-recognizer-encoder.bin
     size: 2655744
-    checksum: cbd2231d9080903deccd16711eb79d30add22f60f314f0a5c37f4207d12f7260b67a335cacd92c95aa682128c2697065
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.bin
-  - name: FP16-INT8/text-spotting-0005-recognizer-encoder.xml
-    size: 25295
-    checksum: b7651fc064862c3b24de8e529c16058d9f5babf82d7ca9de9091b9c017823447a41639c9ebd4729e7f58ef30ebf3d73b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16-INT8/text-spotting-0005-recognizer-encoder.xml
-  - name: FP16-INT8/text-spotting-0005-recognizer-encoder.bin
-    size: 1317880
-    checksum: 6b88c969521742dfb47fe18a241d3b1092d69f3f5887be0831e768050b0052b0ed2c061ea8e0d487607441b0a9ab14e5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16-INT8/text-spotting-0005-recognizer-encoder.bin
+    checksum: 814811b3b95e8da8b95bf3aaf8db7061faa356023130e125eed7fa942f8cca2e752c30d401a96e6e9ce006ef29d17e4f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
