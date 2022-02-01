@@ -1307,6 +1307,32 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
+               model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
+        TestCase(options={'-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.'
+                ]}),
+        [
+            TestCase(options={
+                '-m_duration': ModelArg('forward-tacotron-duration-prediction'),
+                '-m_forward': ModelArg('forward-tacotron-regression'),
+                '-m_upsample': ModelArg('wavernn-upsampler'),
+                '-m_rnn': ModelArg('wavernn-rnn')
+            }),
+            TestCase(options={
+                '-m_duration': ModelArg('text-to-speech-en-0001-duration-prediction'),
+                '-m_forward': ModelArg('text-to-speech-en-0001-regression'),
+                '-m_melgan': ModelArg('text-to-speech-en-0001-generation')
+            }),
+            TestCase(options={
+                '-m_duration': ModelArg('text-to-speech-en-multi-0001-duration-prediction'),
+                '-m_forward': ModelArg('text-to-speech-en-multi-0001-regression'),
+                '-m_melgan': ModelArg('text-to-speech-en-multi-0001-generation')
+            }),
+        ]
+    )),
+
     PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
                model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
