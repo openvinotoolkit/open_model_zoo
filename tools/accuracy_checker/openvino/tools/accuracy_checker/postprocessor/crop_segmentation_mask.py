@@ -148,7 +148,7 @@ class CropOrPadSegmentationMask(Postprocessor):
 
 
 class CropPaddingSegmentationMask(Postprocessor):
-    __provider__ = 'crop_padding'
+    __provider__ = 'crop_padded_prediction'
 
     annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
@@ -158,7 +158,7 @@ class CropPaddingSegmentationMask(Postprocessor):
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         assert image_metadata and 'padding' in image_metadata, (
-            "Postprocessing step `crop_padding` cannot work without metadata with `padding` field")
+            "Postprocessing step `crop_padded_prediction` cannot work without metadata with `padding` field")
 
         top, left, bottom, right = image_metadata.get('padding', (0, 0, 0, 0))
         for pred in prediction:

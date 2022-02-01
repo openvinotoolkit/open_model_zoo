@@ -14,7 +14,7 @@ models:
             pad_type: right_bottom
             pad_value: '123.675, 116.28, 103.53'
         postprocessing:
-          - type: crop_padding
+          - type: crop_padded_prediction
           - type: resize_segmentation_mask
             apply_to: prediction
           - type: encode_segmentation_mask
