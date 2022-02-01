@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <openvino/openvino.hpp>
+#include <gflags/gflags.h>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
-
-#include <gflags/gflags.h>
-#include <openvino/openvino.hpp>
 
 namespace {
 constexpr char h_msg[] = "show the help message and exit";
@@ -111,7 +110,7 @@ void write_wav(const std::string& file_name, const RiffWaveHeader& wave_header, 
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    set_terminate(catcher);
+    std::set_terminate(catcher);
     parse(argc, argv);
     slog::info << ov::get_openvino_version() << slog::endl;
     ov::Core core;
@@ -134,8 +133,7 @@ int main(int argc, char* argv[]) {
         out_state_name.replace(0, 3, "out");
 
         // find corresponding output state
-        auto name_equal = [&](ov::Output<ov::Node> output) {  };
-        if (outputs.end() != std::find_if(outputs.begin(), outputs.end(), [&out_state_name](const ov::Output<ov::Node>& output) {
+        if (outputs.end() == std::find_if(outputs.begin(), outputs.end(), [&out_state_name](const ov::Output<ov::Node>& output) {
             return output.get_any_name() == out_state_name;
         }))
             throw std::runtime_error("model output state name does not correspond input state name");

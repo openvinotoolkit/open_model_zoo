@@ -40,7 +40,7 @@ constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
 }
 
-static inline void catcher() {
+static inline void catcher() noexcept {
     if (std::current_exception()) {
         try {
             std::rethrow_exception(std::current_exception());
