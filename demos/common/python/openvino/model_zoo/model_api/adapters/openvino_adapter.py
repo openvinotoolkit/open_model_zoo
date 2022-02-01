@@ -23,7 +23,7 @@ try:
 except ImportError:
     openvino_absent = True
 
-from .model_adapter import ModelAdapter, LayerMetadata
+from .model_adapter import ModelAdapter, LayerMetadata, get_layout_from_shape
 from ..pipelines import parse_devices
 
 
@@ -34,13 +34,6 @@ def create_core():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     return Core()
-
-def get_layout_from_shape(shape):
-    if len(shape) != 4:
-        raise RuntimeError('Get_layout supports only 4D input shape')
-
-    layout = 'NCHW' if shape[1] == 3 else 'NHWC'
-    return layout
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -126,6 +119,9 @@ class OpenvinoAdapter(ModelAdapter):
 
     def infer_async(self, dict_data, callback_data):
         self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))
+
+    def set_callback(self, callback_fn):
+        self.async_queue.set_callback(callback_fn)
 
     def is_ready(self):
         return self.async_queue.is_ready()

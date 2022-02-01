@@ -87,7 +87,7 @@ class AsyncPipeline:
 
         self.completed_results = {}
         self.callback_exceptions = []
-        self.model.set_callback(self.callback)
+        self.model.model_adapter.set_callback(self.callback)
 
         self.preprocess_metrics = PerformanceMetrics()
         self.inference_metrics = PerformanceMetrics()
@@ -96,8 +96,11 @@ class AsyncPipeline:
     def callback(self, request, callback_args):
         try:
             get_result_fn, (id, meta, preprocessing_meta, start_time) = callback_args
-            status = request.query_state()
-            if status != []:
+            if isinstance(request, dict):
+                status = 0
+            else:
+                status = request.query_state()
+            if status:
                 raise RuntimeError('Request has returned status code {}'.format(status))
             self.completed_results[id] = (get_result_fn(request), meta, preprocessing_meta, start_time)
         except Exception as e:
