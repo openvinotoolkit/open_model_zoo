@@ -561,9 +561,9 @@ class OpenVINOLauncher(Launcher):
         for input_node in self.network.inputs:
             layer_name = input_node.get_node().friendly_name
             if layer_name in self.const_inputs:
-                input_shapes[layer_name] = parse_partial_shape(layer_name.partial_shape)
+                input_shapes[layer_name] = parse_partial_shape(input_node.get_node().partial_shape)
             else:
-                layer_shape = parse_partial_shape(layer_name.partial_shape)
+                layer_shape = parse_partial_shape(input_node.get_node().partial_shape)
                 layout = self.inputs[layer_name].layout
                 if '...' in str(layout):
                     layout = self.get_layout_from_config(layer_name)
