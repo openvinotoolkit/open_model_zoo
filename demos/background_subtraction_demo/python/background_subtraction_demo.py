@@ -120,7 +120,7 @@ def get_model(model_adapter, configuration, args):
     else:
         model = MaskRCNNModel(model_adapter, configuration)
     if not need_bgr_input and args.bgr is not None:
-        log.info('\'--bgr\' argument is set but not needed, so will not be used')
+        log.warning('The "--bgr" option works only for BackgroundMattingWithBGR model. Option will be omitted.")
 
     if args.raw_output_message and is_matting_model:
         log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
