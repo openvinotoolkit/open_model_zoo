@@ -111,7 +111,7 @@ def get_model(model_adapter, configuration, args):
     elif len(inputs) == 5 and len(outputs) == 6 and 'pha' in outputs.keys():
         model = VideoBackgroundMatting(model_adapter, configuration)
         is_matting_model = True
-    elif len(inputs) == 2 and len(outputs) in (3, 6) and 'bgr' in inputs.keys():
+    elif len(inputs) == 2 and len(outputs) in (2, 3) and 'bgr' in inputs.keys():
         if args.bgr is None:
             raise ValueError('For chosen type of model is needed additional input with '
                              'real background specified by --bgr argument. Please specify it.')
