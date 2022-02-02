@@ -27,6 +27,7 @@ import numpy as np
 sys.path = sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBGR, VideoBackgroundMatting
+from openvino.model_zoo.model_api.models.utils import load_labels
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
 from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
@@ -212,12 +213,8 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    if args.labels is None:
-        labels = ['__background__', 'person']
-    else:
-        with open(args.labels, 'rt') as labels_file:
-            labels = labels_file.read().splitlines()
-        assert len(labels), 'The file with class labels is empty'
+    labels = ['__background__', 'person'] if args.labels is None else load_labels(args.labels)
+    assert len(labels), 'The file with class labels is empty'
 
     configuration = {
         'confidence_threshold': args.prob_threshold,

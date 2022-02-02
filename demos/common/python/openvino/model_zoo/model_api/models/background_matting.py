@@ -31,6 +31,10 @@ class VideoBackgroundMatting(ImageModel):
         self.rec_map = self.get_inputs_map()
         self.rec = self.initialize_rec()
 
+    @classmethod
+    def parameters(cls):
+        return super().parameters()
+
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []
         for name, metadata in self.inputs.items():
@@ -93,6 +97,10 @@ class BackgroundMattingWithBGR(ImageModel):
         self._check_io_number((2, ), (2, 3))
         self.output_blob_name = self._get_outputs()
         self.n, self.c, self.h, self.w = self.set_input_shape()
+
+    @classmethod
+    def parameters(cls):
+        return super().parameters()
 
     def _get_inputs(self):
         image_blob_names, image_info_blob_names = [], []

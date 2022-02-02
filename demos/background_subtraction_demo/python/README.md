@@ -43,7 +43,7 @@ Based on this an instance segmentation model must be trained at least for person
 
 As input, the demo application accepts a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
 
-> **NOTE**: if you use image background matting models `--bgr` argument should be specified
+> **NOTE**: if you use image background matting models, `--bgr` argument should be specified. This is a background image that equal to a real background behind a person on an input frame and must have the same shape as an input image.
 
 The demo workflow is the following:
 
