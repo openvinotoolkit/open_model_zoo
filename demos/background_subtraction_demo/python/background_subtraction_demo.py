@@ -113,8 +113,7 @@ def get_model(model_adapter, configuration, args):
         is_matting_model = True
     elif len(inputs) == 2 and len(outputs) in (2, 3) and 'bgr' in inputs.keys():
         if args.bgr is None:
-            raise ValueError('For chosen type of model is needed additional input with '
-                             'real background specified by --bgr argument. Please specify it.')
+            raise ValueError('The BackgroundMattingWithBGR model expects the specified "--bgr" option.')
         model = BackgroundMattingWithBGR(model_adapter, configuration)
         need_bgr_input = True
         is_matting_model = True
