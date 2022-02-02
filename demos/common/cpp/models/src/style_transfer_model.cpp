@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     // --------------------------- Prepare input blobs --------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
-        throw std::runtime_error("Style transfer model wrapper supports supports topologies only with 1 input");
+        throw std::logic_error("Style transfer model wrapper supports topologies only with 1 input");
     }
 
-    //inputsNames.push_back(model->input().get_any_name());
+    inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
     ov::Layout inputLayout = ov::layout::get_layout(model->input());
@@ -47,7 +47,7 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     netInputWidth = inputShape[ov::layout::width_idx(inputLayout)];
@@ -64,9 +64,9 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
-        throw std::runtime_error("Style transfer model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Style transfer model wrapper supports topologies only with 1 output");
     }
-    //outputsNames.push_back(model->output().get_any_name());
+    outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
@@ -76,7 +76,6 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
-
 }
 
 std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, ov::InferRequest& request) {

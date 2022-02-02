@@ -32,13 +32,13 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1 && inputsInfo.size() != 2) {
-        throw std::runtime_error("Super resolution model wrapper supports topologies with 1 or 2 inputs only");
+        throw std::logic_error("Super resolution model wrapper supports topologies with 1 or 2 inputs only");
     }
     std::string lrInputTensorName = inputsInfo.begin()->get_any_name();
     inputsNames.push_back(lrInputTensorName);
     ov::Shape lrShape = inputsInfo.begin()->get_shape();
     if (lrShape.size() != 4) {
-        throw std::runtime_error("Number of dimensions for an input must be 4");
+        throw std::logic_error("Number of dimensions for an input must be 4");
     }
 
     ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
@@ -50,7 +50,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     auto widthId = ov::layout::width_idx(inputLayout);
 
     if (lrShape[channelsId] != 1 && lrShape[channelsId] != 3) {
-        throw std::runtime_error("Input layer is expected to have 1 or 3 channels");
+        throw std::logic_error("Input layer is expected to have 1 or 3 channels");
     }
 
     // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
@@ -61,13 +61,13 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
         inputsNames.push_back(bicInputTensorName);
         ov::Shape bicShape = (++inputsInfo.begin())->get_shape();
         if (bicShape.size() != 4) {
-            throw std::runtime_error("Number of dimensions for both inputs must be 4");
+            throw std::logic_error("Number of dimensions for both inputs must be 4");
         }
         if (lrShape[widthId] >= bicShape[widthId] && lrShape[heightId] >= bicShape[heightId]) {
             std::swap(bicShape, lrShape);
             inputsNames[0].swap(inputsNames[1]);
         } else if (!(lrShape[widthId] <= bicShape[widthId] && lrShape[heightId] <= bicShape[heightId])) {
-            throw std::runtime_error("Each spatial dimension of one input must surpass or be equal to a spatial"
+            throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
                 "dimension of another input");
         }
     }
@@ -84,7 +84,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Prepare output -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
-        throw std::runtime_error("Super resolution model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Super resolution model wrapper supports topologies only with 1 output");
     }
 
     outputsNames.push_back(outputsInfo.begin()->get_any_name());

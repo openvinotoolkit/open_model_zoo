@@ -309,9 +309,11 @@ public:
         return cv::Scalar(values[0], values[1], values[2]);
     }
 
-    void setPrecision(const InferenceEngine::InputInfo::Ptr& input) {
-        const auto precision = isTrivial ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
-        input->setPrecision(precision);
+    void setPrecision(std::shared_ptr<ov::Model>& model) {
+        const auto precision = isTrivial ? ov::element::u8 : ov::element::f32;
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.input().preprocess().convert_element_type(precision);
+        model = ppp.build();
     }
 
     cv::Mat operator()(const cv::Mat& inputs) {
