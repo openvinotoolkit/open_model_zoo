@@ -284,7 +284,7 @@ NATIVE_DEMOS = [
                 # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
                 '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+                # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})

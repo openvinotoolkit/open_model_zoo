@@ -301,7 +301,7 @@ std::shared_ptr<ov::Model> AgeGenderDetection::read(const ov::Core& core) {
 HeadPoseDetection::HeadPoseDetection(const std::string &pathToModel,
                                      bool doRawOutputMessages)
     : BaseDetection(pathToModel, doRawOutputMessages),
-      outputAngleR("r_fc"), outputAngleP("p_fc"), outputAngleY("y_fc"), enquedFaces(0) {
+      outputAngleR("angle_r_fc"), outputAngleP("angle_p_fc"), outputAngleY("angle_y_fc"), enquedFaces(0) {
 }
 
 void HeadPoseDetection::submitRequest()  {
