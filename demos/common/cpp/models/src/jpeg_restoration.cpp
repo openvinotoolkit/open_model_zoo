@@ -30,7 +30,7 @@ JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, con
 
 void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Prepare input  ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
         throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
@@ -53,7 +53,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     ppp.input().model().set_layout(inputLayout);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
         throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 output");

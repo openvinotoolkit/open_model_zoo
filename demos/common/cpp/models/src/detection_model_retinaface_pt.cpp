@@ -26,7 +26,7 @@
 //
 //void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
-//    // --------------------------- Prepare input blobs ------------------------------------------------------
+//    // --------------------------- Prepare input  ------------------------------------------------------
 //    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //    if (inputInfo.size() != 1) {
 //        throw std::logic_error("This demo accepts networks that have only one input");
@@ -49,7 +49,7 @@
 //    netInputHeight = getTensorHeight(inputDesc);
 //    netInputWidth = getTensorWidth(inputDesc);
 //
-//    // --------------------------- Prepare output blobs -----------------------------------------------------
+//    // --------------------------- Prepare output  -----------------------------------------------------
 //    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    landmarksNum = 0;
 //
