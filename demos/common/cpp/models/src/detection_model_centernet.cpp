@@ -65,15 +65,16 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::runtime_error("CenterNet model wrapper expects models that have 3 outputs blob");
     }
 
+    ov::Layout outLayout{ "NCHW" };
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
+        outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32).
-            set_layout("NCHW");;
-        for (const auto& name : output.get_names()) {
-            outputsNames.push_back(name);
-        }
+            set_layout(outLayout);
     }
+    std::sort(outputsNames.begin(), outputsNames.end());
+    model = ppp.build();
 }
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
@@ -251,6 +252,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     auto whTensor = infResult.outputsData[outputsNames[2]];
     auto wh = filterWH(whTensor, scores, chSize);
 
+
     // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
     auto bboxes = calcBBoxes(scores, reg, wh, heatmapTensorShape);
 
@@ -260,7 +262,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
 
-    transform(bboxes, sz, scale, centerX, centerY);
+    transform(bboxes, heatmapTensorShape, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects ------------------------------------
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);

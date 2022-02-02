@@ -25,7 +25,7 @@ std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::Core& core) {
     /** Read network model **/
     slog::info << "Reading model " << modelFileName << slog::endl;
     std::shared_ptr<ov::Model>  model = core.read_model(modelFileName);
-   // logBasicModelInfo(model);
+    logBasicModelInfo(model);
     // -------------------------- Reading all outputs names and customizing I/O tensors (in inherited classes)
     prepareInputsOutputs(model);
 
