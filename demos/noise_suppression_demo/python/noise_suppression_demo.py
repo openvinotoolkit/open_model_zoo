@@ -4,12 +4,12 @@
 Copyright (C) 2022 Intel Corporation
 SPDX-License-Identifier: Apache-2.0
 """
+import copy
 import logging as log
 import sys
-import copy
-from time import perf_counter
 from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import wave
@@ -19,8 +19,23 @@ from openvino.runtime import Core, get_version
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
-def build():
-    parser = ArgumentParser()
+def parse():
+    def print_version():
+        log.info('OpenVINO Runtime')
+        print('\tbuild: {}'.format(get_version()))
+
+    class DevicePrinter(ArgumentParser):
+        def exit(self, status=0, message=None):
+            if 0 == status and message is None:
+                print('Available devices:', *Core().available_devices)
+                print_version()
+            else:
+                print(message, file=sys.stderr)
+            exit(status)
+
+    parser = DevicePrinter(add_help=False)
+    parser.add_argument('-h', '--help', action='help', help='show this help message and exit')
+
     parser.add_argument("-m", "--model", required=True, type=Path, metavar="<MODEL FILE>",
         help="path to an .xml file with a trained model")
 
@@ -32,7 +47,10 @@ def build():
 
     parser.add_argument("-o", "--output", default="noise_suppression_demo_out.wav", metavar="<WAV>",
         help="path to an output WAV file. Default is noise_suppression_demo_out.wav")
-    return parser
+
+    args = parser.parse_args()
+    print_version()
+    return args
 
 def wav_read(wav_name):
     with wave.open(wav_name, "rb") as wav:
@@ -58,9 +76,7 @@ def wav_write(wav_name, x):
         wav.writeframes(x.tobytes())
 
 def main():
-    args = build().parse_args()
-    log.info('OpenVINO Runtime')
-    log.info('\tbuild: {}'.format(get_version()))
+    args = parse()
     core = Core()
     log.info("Reading model {}".format(args.model))
     ov_encoder = core.read_model(args.model)

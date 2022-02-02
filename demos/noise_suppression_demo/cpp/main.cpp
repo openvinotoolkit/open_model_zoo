@@ -31,8 +31,9 @@ void parse(int argc, char *argv[]) {
                   << "\n\t -m <MODEL FILE>   " << m_msg
                   << "\n\t -i <WAV>          " << i_msg
                   << "\n\t[-d] <DEVICE>      " << d_msg
-                  << "\n\t[-o] <WAV>         " << o_msg;
+                  << "\n\t[-o] <WAV>         " << o_msg << '\n';
         showAvailableDevices();
+        slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
@@ -41,6 +42,7 @@ void parse(int argc, char *argv[]) {
     } if (FLAGS_o.empty()) {
         throw std::invalid_argument{"-o <WAV> can't be empty"};
     }
+    slog::info << ov::get_openvino_version() << slog::endl;
 }
 
 struct RiffWaveHeader {
@@ -112,7 +114,6 @@ void write_wav(const std::string& file_name, const RiffWaveHeader& wave_header, 
 int main(int argc, char* argv[]) {
     std::set_terminate(catcher);
     parse(argc, argv);
-    slog::info << ov::get_openvino_version() << slog::endl;
     ov::Core core;
     slog::info << "Reading model: " << FLAGS_m << slog::endl;
     std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);

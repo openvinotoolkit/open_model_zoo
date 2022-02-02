@@ -232,10 +232,9 @@ inline void showAvailableDevices() {
     std::vector<std::string> devices = ie.GetAvailableDevices();
 #endif
 
-    std::cout << std::endl;
-    std::cout << "Available target devices:";
+    std::cout << "Available devices:";
     for (const auto& device : devices) {
-        std::cout << "  " << device;
+        std::cout << " " << device;
     }
     std::cout << std::endl;
 }
