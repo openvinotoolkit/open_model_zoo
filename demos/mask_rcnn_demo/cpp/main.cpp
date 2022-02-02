@@ -139,8 +139,10 @@ int main(int argc, char* argv[]) {
             image_tensor_type = input.get_element_type();
             image_tensor_shape = shape;
             image_tensor_layout = ov::layout::get_layout(input);
-            if (image_tensor_layout.empty())
+            if (image_tensor_layout.empty() && image_tensor_type == ov::element::f32)
                 image_tensor_layout = {"NCHW"};
+            if (image_tensor_layout.empty() && image_tensor_type == ov::element::u8)
+                image_tensor_layout = { "NHWC" };
             image_tensor_height = image_tensor_shape[ov::layout::height_idx(image_tensor_layout)];
             image_tensor_width = image_tensor_shape[ov::layout::width_idx(image_tensor_layout)];
         }
@@ -190,6 +192,7 @@ int main(int argc, char* argv[]) {
 
     ppp.input(image_tensor_name)
         .tensor()
+        .set_layout(image_tensor_layout)
         .set_spatial_static_shape(
             image_tensor_height,
             image_tensor_width);
