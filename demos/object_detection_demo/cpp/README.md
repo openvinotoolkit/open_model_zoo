@@ -149,8 +149,6 @@ omz_converter --list models.lst
 
 Running the demo with the `-h` option yields a usage message.
 
-Running the application with the empty list of options yields the usage message given above and an error message.
-
 If labels file is used, it should correspond to model output. Demo treat labels, listed in the file, to be indexed from 0, one line - one label (that is very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:

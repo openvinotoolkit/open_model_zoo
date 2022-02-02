@@ -115,30 +115,7 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-classification_benchmark_demo [OPTION]
-Options:
-
-    -h                        Print a usage message.
-    -i "<path>"               Required. Path to a folder with images or path to an image file.
-    -m "<path>"               Required. Path to an .xml file with a trained model.
-    -auto_resize              Optional. Enables resizable input.
-    -labels "<path>"          Required. Path to .txt file with labels.
-    -gt "<path>"              Optional. Path to ground truth .txt file.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
-    -nthreads "<integer>"     Optional. Specify count of threads.
-    -nstreams "<integer>"     Optional. Specify count of streams.
-    -nireq "<integer>"        Optional. Number of infer requests.
-    -nt "<integer>"           Optional. Number of top results. Default value is 5. Must be >= 1.
-    -res "<WxH>"              Optional. Set image grid resolution in format WxH. Default value is 1280x720.
-    -no_show                  Optional. Disable showing of processed images.
-    -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
-    -u                        Optional. List of monitors to show initially.
-```
-
-Running the application with the empty list of options yields an error message.
+Running the demo with the `-h` option yields a usage message.
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
 
