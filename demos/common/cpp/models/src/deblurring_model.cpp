@@ -53,7 +53,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     ppp.input().model().set_layout(inputLayout);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
         throw std::logic_error("Deblurring model wrapper supports topologies only with 1 output");

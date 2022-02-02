@@ -72,7 +72,7 @@
 //
 //void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
-//    // --------------------------- Prepare input blobs ------------------------------------------------------
+//    // --------------------------- Prepare input  ------------------------------------------------------
 //    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
 //    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //    if (inputInfo.size() != 1) {
@@ -95,7 +95,7 @@
 //    netInputHeight = getTensorHeight(inputDesc);
 //    netInputWidth = getTensorWidth(inputDesc);
 //
-//    // --------------------------- Prepare output blobs -----------------------------------------------------
+//    // --------------------------- Prepare output  -----------------------------------------------------
 //    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 //    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    for (auto& output : outputInfo) {

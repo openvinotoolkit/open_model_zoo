@@ -45,7 +45,7 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, i
 
 void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Prepare input  ------------------------------------------------------
     changeInputSize(model);
 
     const ov::OutputVector& inputsInfo = model->inputs();
@@ -65,7 +65,7 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     ppp.input().model().set_layout("NCHW");
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 2)
         throw std::runtime_error("HPE OpenPose supports topologies only with 2 outputs");

@@ -133,7 +133,7 @@
 //
 //void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 //    // --------------------------- Configure input & output -------------------------------------------------
-//    // --------------------------- Prepare input blobs ------------------------------------------------------
+//    // --------------------------- Prepare input  ------------------------------------------------------
 //    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
 //
 //    for (const auto& inputInfoItem : inputInfo) {
@@ -169,7 +169,7 @@
 //        }
 //    }
 //
-//    // --------------------------- Prepare output blobs -----------------------------------------------------
+//    // --------------------------- Prepare output  -----------------------------------------------------
 //    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
 //    if (outputInfo.size() == 1) {
 //        prepareSingleOutput(outputInfo);

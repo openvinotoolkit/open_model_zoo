@@ -68,7 +68,7 @@ std::vector<std::string> ClassificationModel::loadLabels(const std::string& labe
 
 void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Prepare input  ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
         throw std::logic_error("Classification model wrapper supports topologies only with 1 input");
@@ -109,7 +109,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
 
     ppp.input().model().set_layout(inputLayout);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
         throw std::logic_error("Classification model wrapper supports topologies only with 1 output");
@@ -136,7 +136,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
 
-    // --------------------------- Adding softmax and topK output blobs ---------------------------
+    // --------------------------- Adding softmax and topK output  ---------------------------
     auto nodes = model->get_ops();
     auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
         [](const std::shared_ptr<ngraph::Node>& op) { return std::string(op->get_type_name()) == "Softmax"; });

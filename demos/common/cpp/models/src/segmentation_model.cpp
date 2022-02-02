@@ -43,7 +43,7 @@
 //void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 //{
 //    // --------------------------- Configure input & output ---------------------------------------------
-//    // --------------------------- Prepare input blobs -----------------------------------------------------
+//    // --------------------------- Prepare input  -----------------------------------------------------
 //    const ov::OutputVector& inputsInfo = model->inputs();
 //    if (inputShapes.size() != 1) {
 //        throw std::runtime_error("Demo supports topologies only with 1 input");
@@ -64,7 +64,7 @@
 //    } else {
 //        inputInfo.setLayout(InferenceEngine::Layout::NCHW);
 //    }
-//    // --------------------------- Prepare output blobs -----------------------------------------------------
+//    // --------------------------- Prepare output  -----------------------------------------------------
 //    const InferenceEngine::OutputsDataMap& outputsDataMap = model.getOutputsInfo();
 //    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 //
@@ -84,7 +84,7 @@
 //        outWidth = (int)(outSizeVector[3]);
 //        break;
 //    default:
-//        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are supported.");
+//        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output  are supported.");
 //    }
 //}
 //
