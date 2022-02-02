@@ -13,7 +13,7 @@
 #include "threading.hpp"
 
 namespace {
-void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, ov::Tensor tensor) {
+void framesToTensor(const std::vector<std::shared_ptr<VideoFrame>>& frames, const ov::Tensor& tensor) {
     static const ov::Layout layout{"NHWC"};
     static const ov::Shape shape = tensor.get_shape();
     static const size_t batchSize = shape[ov::layout::batch_idx(layout)];
