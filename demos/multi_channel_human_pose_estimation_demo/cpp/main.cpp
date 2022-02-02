@@ -198,8 +198,8 @@ int main(int argc, char* argv[]) {
             ov::Output<ov::Node> pafsOut, heatMapsOut;
             int pafsWidth, pafsHeight, pafsChannels, heatMapsWidth, heatMapsHeight, heatMapsChannels;
         } postParams;
-        postParams.pafsOut = model->outputs()[1];
-        postParams.heatMapsOut = model->outputs()[0];
+        postParams.pafsOut = model->outputs()[0];
+        postParams.heatMapsOut = model->outputs()[1];
         const ov::Layout outLayout{"NCHW"};
         postParams.pafsWidth = postParams.pafsOut.get_shape()[ov::layout::width_idx(outLayout)];
         postParams.pafsHeight = postParams.pafsOut.get_shape()[ov::layout::height_idx(outLayout)];
