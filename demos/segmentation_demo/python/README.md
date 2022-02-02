@@ -130,7 +130,7 @@ Running the application with the empty list of options yields the usage message 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 
 ```sh
-    python3 segmentation_demo.py -d CPU -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
+    python3 segmentation_demo.py -d CPU -i 0 -at segmentation -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -156,7 +156,7 @@ You can also run this demo with model served in [OpenVINO Model Server](https://
 Exemplary command:
 
 ```sh
-    python3 segmentation_demo.py -i 0 -m localhost:9000/models/image_segmentation --adapter ovms
+    python3 segmentation_demo.py -i 0 -at segmentation -m localhost:9000/models/image_segmentation --adapter ovms
 ```
 
 ## Demo Output
