@@ -16,7 +16,6 @@
 #include "utils/common.hpp"
 #include "utils/shared_tensor_allocator.hpp"
 
-
 /**
 * @brief Get cv::Mat value in the correct format.
 */
@@ -30,56 +29,6 @@ const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     }
     throw std::runtime_error("cv::Mat type is not recognized");
 };
-
-/**
-* @brief Resize and copy image data from cv::Mat object to a given Tensor object.
-* @param mat - given cv::Mat object with an image data.
-* @param tensor - Tensor object which to be filled by an image data.
-* @param batchIndex - batch index of an image inside of the blob.
-*/
-static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& tensor, int batchIndex = 0) {
-    ov::Shape tensorShape = tensor.get_shape();
-    ov::Layout layout("NCHW");
-    const size_t width = tensorShape[ov::layout::width_idx(layout)];
-    const size_t height = tensorShape[ov::layout::height_idx(layout)];
-    const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
-    if (static_cast<size_t>(mat.channels()) != channels) {
-        throw std::runtime_error("The number of channels for model input and image must match");
-    }
-    if (channels != 1 && channels != 3) {
-        throw std::runtime_error("Unsupported number of channels");
-    }
-    int batchOffset = batchIndex * width * height * channels;
-
-    cv::Mat resizedMat;
-    if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
-        cv::resize(mat, resizedMat, cv::Size(width, height));
-    }
-    else {
-        resizedMat = mat;
-    }
-
-
-    if (tensor.get_element_type() == ov::element::f32) {
-        float_t* tensorData = tensor.data<float_t>();
-        for (size_t c = 0; c < channels; c++)
-            for (size_t h = 0; h < height; h++)
-                for (size_t w = 0; w < width; w++)
-                    tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<float_t>(resizedMat, h, w, c);
-    }
-    else {
-        uint8_t* tensorData = tensor.data<uint8_t>();
-        if (resizedMat.depth() == CV_32F) {
-            throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
-        }
-        for (size_t c = 0; c < channels; c++)
-            for (size_t h = 0; h < height; h++)
-                for (size_t w = 0; w < width; w++)
-                    tensorData[batchOffset + c * width * height + h * width + w] =
-                    getMatValue<uint8_t>(resizedMat, h, w, c);
-    }
-}
 
 /**
 * @brief Sets image data stored in cv::Mat object to a given Blob object.
@@ -124,6 +73,53 @@ inline void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob
             for (size_t h = 0; h < height; h++)
                 for (size_t w = 0; w < width; w++)
                     blobData[batchOffset + c * width * height + h * width + w] =
+                        getMatValue<uint8_t>(resizedMat, h, w, c);
+    }
+}
+
+/**
+* @brief Resize and copy image data from cv::Mat object to a given Tensor object.
+* @param mat - given cv::Mat object with an image data.
+* @param tensor - Tensor object which to be filled by an image data.
+* @param batchIndex - batch index of an image inside of the blob.
+*/
+static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
+    ov::Shape tensorShape = tensor.get_shape();
+    ov::Layout layout("NCHW");
+    const size_t width = tensorShape[ov::layout::width_idx(layout)];
+    const size_t height = tensorShape[ov::layout::height_idx(layout)];
+    const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
+    if (static_cast<size_t>(mat.channels()) != channels) {
+        throw std::runtime_error("The number of channels for model input and image must match");
+    }
+    if (channels != 1 && channels != 3) {
+        throw std::runtime_error("Unsupported number of channels");
+    }
+    int batchOffset = batchIndex * width * height * channels;
+
+    cv::Mat resizedMat;
+    if (static_cast<int>(width) != mat.size().width || static_cast<int>(height) != mat.size().height) {
+        cv::resize(mat, resizedMat, cv::Size(width, height));
+    } else {
+        resizedMat = mat;
+    }
+
+    if (tensor.get_element_type() == ov::element::f32) {
+        float_t* tensorData = tensor.data<float_t>();
+        for (size_t c = 0; c < channels; c++)
+            for (size_t h = 0; h < height; h++)
+                for (size_t w = 0; w < width; w++)
+                    tensorData[batchOffset + c * width * height + h * width + w] =
+                        getMatValue<float_t>(resizedMat, h, w, c);
+    } else {
+        uint8_t* tensorData = tensor.data<uint8_t>();
+        if (resizedMat.depth() == CV_32F) {
+            throw std::runtime_error("Conversion of cv::Mat from float_t to uint8_t is forbidden");
+        }
+        for (size_t c = 0; c < channels; c++)
+            for (size_t h = 0; h < height; h++)
+                for (size_t w = 0; w < width; w++)
+                    tensorData[batchOffset + c * width * height + h * width + w] =
                         getMatValue<uint8_t>(resizedMat, h, w, c);
     }
 }
@@ -178,6 +174,9 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
 
     const size_t strideH = mat.step.buf[0];
     const size_t strideW = mat.step.buf[1];
+
+    const bool is_dense = strideW == channels && strideH == channels * width;
+    OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
 
     const bool is_dense = strideW == channels && strideH == channels * width;
     OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");

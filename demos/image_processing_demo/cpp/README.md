@@ -81,32 +81,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-[ INFO ] InferenceEngine: <version>
-
-image_processing_demo_async [OPTION]
-Options:
-
-    -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer.
-    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -m "<path>"               Required. Path to an .xml file with a trained model.
-    -o "<path>"               Optional. Name of the output file(s) to save.
-    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
-    -nthreads "<integer>"     Optional. Number of threads.
-    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Do not show processed video.
-    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
-    -u                        Optional. List of monitors to show initially.
-    -jc                       Optional. Flag of using compression for jpeg images. Default value if false. Only for jr architecture type.
-```
-
-Running the application with the empty list of options yields an error message.
+Running the demo with the `-h` option yields a usage message.
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/model_tools/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst`.
 
