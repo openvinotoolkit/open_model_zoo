@@ -71,13 +71,13 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     // --------------------------- Prepare input blobs ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
-        throw std::runtime_error("Classification model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Classification model wrapper supports topologies only with 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
     if (inputShape.size() != 4 || inputShape[1] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
     if (inputShape[2] != inputShape[3]) {
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
@@ -108,18 +108,18 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
-        throw std::runtime_error("Classification model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Classification model wrapper supports topologies only with 1 output");
     }
 
     const ov::Shape& outputShape = model->output().get_shape();
     if (outputShape.size() != 2 && outputShape.size() != 4) {
-        throw std::runtime_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
+        throw std::logic_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
     }
     if (outputShape.size() == 4 && (outputShape[2] != 1 || outputShape[3] != 1)) {
-        throw std::runtime_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
+        throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     }
     if (nTop > outputShape[1]) {
-        throw std::runtime_error("The model provides " + std::to_string(outputShape[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
+        throw std::logic_error("The model provides " + std::to_string(outputShape[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     }
 
     if (outputShape[1] == labels.size() + 1) {

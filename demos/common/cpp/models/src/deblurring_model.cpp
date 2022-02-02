@@ -31,7 +31,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare input ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
-        throw std::runtime_error("Deblurring model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Deblurring model wrapper supports topologies only with 1 input");
     }
 
     inputsNames.push_back(model->input().get_any_name());
@@ -43,7 +43,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
@@ -56,7 +56,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
-        throw std::runtime_error("Deblurring model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Deblurring model wrapper supports topologies only with 1 output");
     }
 
     outputsNames.push_back(model->output().get_any_name());
@@ -64,7 +64,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+        throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 
     ppp.output().tensor().set_element_type(ov::element::f32);
@@ -83,7 +83,7 @@ void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
-        throw std::runtime_error("Model input shape must be divisible by stride");
+        throw std::logic_error("Model input shape must be divisible by stride");
     }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;

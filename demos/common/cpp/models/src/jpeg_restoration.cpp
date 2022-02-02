@@ -33,7 +33,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Prepare input blobs ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
-        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
+        throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
 
@@ -44,7 +44,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
 
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
@@ -56,12 +56,12 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
     if (outputsInfo.size() != 1) {
-        throw std::runtime_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
+        throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
     }
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+        throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 
     outputsNames.push_back(model->output().get_any_name());
@@ -81,7 +81,7 @@ void JPEGRestorationModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
-        throw std::runtime_error("The shape of the model input must be divisible by stride");
+        throw std::logic_error("The shape of the model input must be divisible by stride");
     }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
