@@ -4,18 +4,12 @@
 
 #pragma once
 
-#include <deque>
-#include <set>
+#include <vector>
 #include <map>
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 #include <opencv2/opencv.hpp>
-
-#include "utils/slog.hpp"
+#include <utils/slog.hpp>
 #include "tracker.hpp"
 #include "actions.hpp"
 
