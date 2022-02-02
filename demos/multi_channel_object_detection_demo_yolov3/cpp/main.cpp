@@ -49,7 +49,6 @@ void parse(int argc, char *argv[]) {
                   << "\n    [-duplicate_num]  " << duplication_channel_number_message
                   << "\n     -m <path>        " << model_path_message
                   << "\n    [-d <device>]     " << target_device_message
-                  << "\n    [-bs]             " << batch_size
                   << "\n    [-n_iqs]          " << input_queue_size
                   << "\n    [-fps_sp]         " << fps_sampling_period
                   << "\n    [-n_sp]           " << num_sampling_periods
