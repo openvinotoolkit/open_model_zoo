@@ -39,7 +39,4 @@ public:
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
-    std::string heatmapTensorName = "";
-    std::string regressionTensorName = "";
-    std::string whTensorName = "";
 };
