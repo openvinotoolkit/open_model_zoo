@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Intel Corporation
+# Copyright (c) 2019-2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -279,35 +279,21 @@ NATIVE_DEMOS = [
 
     CppDemo(name='interactive_face_detection_demo',
             model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
-            test_cases=combine_cases(
+            device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
             TestCase(options={
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m': ModelArg('face-detection-retail-0004'),
+                # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
                 '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+                '-m_em': ModelArg('emotions-recognition-retail-0003'),
+                # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+            }),
+            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
+        ]
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
@@ -318,29 +304,16 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
             TestCase(options={
+                '-m': ModelArg('face-detection-retail-0004'),
                 '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+            }),
+            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
+        ]
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
