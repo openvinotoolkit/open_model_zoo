@@ -29,13 +29,9 @@ def parse():
             if 0 == status and message is None:
                 print('Available devices:', *Core().available_devices)
                 print_version()
-            else:
-                print(message, file=sys.stderr)
-            exit(status)
+            super().exit(status, message)
 
-    parser = DevicePrinter(add_help=False)
-    parser.add_argument('-h', '--help', action='help', help='show this help message and exit')
-
+    parser = DevicePrinter()
     parser.add_argument("-m", "--model", required=True, type=Path, metavar="<MODEL FILE>",
         help="path to an .xml file with a trained model")
 

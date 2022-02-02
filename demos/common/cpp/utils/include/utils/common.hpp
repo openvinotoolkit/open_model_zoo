@@ -234,7 +234,7 @@ inline void showAvailableDevices() {
 
     std::cout << "Available devices:";
     for (const auto& device : devices) {
-        std::cout << " " << device;
+        std::cout << ' ' << device;
     }
     std::cout << std::endl;
 }
