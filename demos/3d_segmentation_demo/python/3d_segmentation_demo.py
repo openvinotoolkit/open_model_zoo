@@ -254,10 +254,10 @@ def main():
         if args.path_to_extension:
             core.add_extension(args.path_to_extension, "CPU")
         if args.number_threads is not None:
-            core.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
+            core.set_property("CPU", {'CPU_THREADS_NUM': str(args.number_threads)})
     elif 'GPU' in args.target_device:
         if args.path_to_cldnn_config:
-            core.set_config({'CONFIG_FILE': args.path_to_cldnn_config}, "GPU")
+            core.set_property("GPU", {'CONFIG_FILE': args.path_to_cldnn_config})
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "
                              "Please use CPU, GPU or HETERO:*CPU*, HETERO:*GPU*")

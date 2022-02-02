@@ -89,7 +89,7 @@ def main():
 
     if 'MYRIAD' in args.device:
         myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
-        core.set_config(myriad_config, 'MYRIAD')
+        core.set_property('MYRIAD', myriad_config)
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
