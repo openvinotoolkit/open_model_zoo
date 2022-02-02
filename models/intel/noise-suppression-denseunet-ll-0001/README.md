@@ -50,9 +50,23 @@ Sequence patch, name: `output`, shape: `1, 128`, format: `B, T`, where:
 
  - `B` - batch size
  - `T` - number of samples in patch
+
 Note: The output patch is "shifted" by 384 (24ms) samples in time. So output[0,i] sample is synced with input[0,i-384] sample
 
 output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step. Total number of output states is 39
+
+The next outputs are optional to process
+
+Output spectrum, name: `Y`, shape: `1, 2, 129, 1`, format: `B, C, F, T`, where:
+ - `B` - batch size
+ - `C` - number of complex value components (always 2)
+ - `F` - number of frequency bins
+ - `T` - number of spectrums in patch
+
+Output delay, name: `delay`, shape: `1`, format: `C`, where:
+ - `C` - number of delays (always 1)
+This is provided for convenience and contains the output "shift" relative to the input. For this model it is 384 and can be differ for other noise suppression models.
+
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
