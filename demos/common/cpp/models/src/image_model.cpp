@@ -15,6 +15,7 @@
 */
 
 #include <openvino/openvino.hpp>
+#include <utils/image_utils.h>
 #include "models/image_model.h"
 
 ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
@@ -26,11 +27,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     auto img = inputTransform(origImg);
 
-    if (useAutoResize) {
-        /* Just set input tensor containing read image. Resize and layout conversion will be done automatically */
-        //request.set_input_tensor(wrapMat2Tensor(img));
-    }
-    else {
+    if (!useAutoResize) {
         // /* Resize and copy data from the image to the input tensor */
         // ov::Tensor frameTensor = request.get_input_tensor();
         // matToTensor(img, frameTensor);
@@ -46,8 +43,8 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         if (channels != 1 && channels != 3) {
             throw std::runtime_error("Unsupported number of channels");
         }
-        resize(img, img, width, height);
+        img = resizeImageExt(img, width, height);
     }
     request.set_input_tensor(wrapMat2Tensor(img));
-    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
 }

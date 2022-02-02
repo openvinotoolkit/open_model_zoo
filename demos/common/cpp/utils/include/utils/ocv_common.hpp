@@ -82,19 +82,6 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::runtime::Tensor& te
 }
 
 /**
-* @brief Resize src image to given (width, height) and write it to dst
-* @param src - given cv::Mat object with an image.
-* @param dst - cv::Mat object for result.
-* @param width - desired image width.
-* @param height- desired image height.
-*/
-static UNUSED void resize(const cv::Mat& src, cv::Mat& dst, size_t width, size_t height) {
-    if (static_cast<int>(width) != src.size().width || static_cast<int>(height) != src.size().height) {
-        cv::resize(src, dst, cv::Size(width, height));
-    }
-}
-
-/**
 * @brief Sets image data stored in cv::Mat object to a given Blob object.
 * @param mat - given cv::Mat object with an image data.
 * @param blob - Blob object which to be filled by an image data.
