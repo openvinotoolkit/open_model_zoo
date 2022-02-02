@@ -52,6 +52,7 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 
     netInputWidth = inputShape[ov::layout::width_idx(inputLayout)];
     netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
+
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().preprocess().convert_element_type(ov::element::f32);
     ppp.input().tensor().

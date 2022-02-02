@@ -33,7 +33,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare input blobs ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
-        throw std::logic_error("CenterNet model wrapper supports models that have only one input");
+        throw std::logic_error("CenterNet model wrapper expects models that have only one input");
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
@@ -41,11 +41,18 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     if (inputLayout.empty()) {
         inputLayout = { "NCHW" };
     }
-    inputTransform.setPrecision(model);
 
     if (inputShape[1] != 3) {
         throw std::logic_error("Expected 3-channel input");
     }
+
+    inputTransform.setPrecision(model); // ?
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout("NHWC");
+
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Reading image input parameters -------------------------------------------
     inputsNames.push_back(model->input().get_any_name());
@@ -54,17 +61,18 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 1) {
-        throw std::runtime_error("Style transfer model wrapper supports topologies only with 1 output");
-    }
-    if (outputInfo.size() != 3) {
-        throw std::logic_error("This demo expect networks that have 3 outputs blobs");
+    if (outputsInfo.size() != 3) {
+        throw std::runtime_error("CenterNet model wrapper expects models that have 3 outputs blob");
     }
 
-    for (auto& output : outputInfo) {
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::NCHW);
-        outputsNames.push_back(output.first);
+    for (const auto& output : model->outputs()) {
+        auto outTensorName = output.get_any_name();
+        ppp.output(outTensorName).tensor().
+            set_element_type(ov::element::f32).
+            set_layout("NCHW");;
+        for (const auto& name : output.get_names()) {
+            outputsNames.push_back(name);
+        }
     }
 }
 
@@ -114,11 +122,11 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     auto& img = inputData.asRef<ImageInputData>().inputImage;
     const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
 
-    request->SetBlob(inputsNames[0], wrapMat2Blob(inputTransform(resizedImg)));
+    request.set_input_tensor(wrapMat2Tensor(inputTransform(resizedImg)));
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
-std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
+std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
     auto chSize = sz[2] * sz[3];
@@ -168,18 +176,15 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::Siz
 }
 
 
-static std::vector<std::pair<size_t, float>> filterScores(const InferenceEngine::MemoryBlob::Ptr& scoresInfRes, float threshold) {
-    InferenceEngine::LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
-    auto desc = scoresInfRes->getTensorDesc();
-    auto sz = desc.getDims();
-    float *scoresPtr = scoresOutputMapped.as<float*>();
+static std::vector<std::pair<size_t, float>> filterScores(const ov::Tensor& scoresTensor, float threshold) {
+    auto shape = scoresTensor.get_shape();
+    float* scoresPtr = scoresTensor.data<float>();
 
-    return nms(scoresPtr, sz, threshold);
+    return nms(scoresPtr, shape, threshold);
 }
 
-std::vector<std::pair<float, float>> filterReg(const InferenceEngine::MemoryBlob::Ptr& regInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
-    InferenceEngine::LockedMemory<const void> bboxesOutputMapped = regInfRes->rmap();
-    const float *regPtr = bboxesOutputMapped.as<float*>();
+std::vector<std::pair<float, float>> filterReg(const ov::Tensor& regressionTensor, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    const float* regPtr = regressionTensor.data<float>();
     std::vector<std::pair<float, float>> reg;
 
     for (auto s : scores) {
@@ -189,9 +194,8 @@ std::vector<std::pair<float, float>> filterReg(const InferenceEngine::MemoryBlob
     return reg;
 }
 
-std::vector<std::pair<float, float>> filterWH(const InferenceEngine::MemoryBlob::Ptr& whInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
-    InferenceEngine::LockedMemory<const void> bboxesOutputMapped = whInfRes->rmap();
-    const float *whPtr = bboxesOutputMapped.as<float*>();
+std::vector<std::pair<float, float>> filterWH(const ov::Tensor& whTensor, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    const float* whPtr = whTensor.data<float>();
     std::vector<std::pair<float, float>> wh;
 
     for (auto s : scores) {
@@ -236,19 +240,19 @@ void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine:
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter data and get valid indices ---------------------------------
-    auto heatInfRes = infResult.outputsData[outputsNames[0]];
-    auto sz = heatInfRes->getTensorDesc().getDims();
-    auto chSize = sz[2] * sz[3];
-    auto scores = filterScores(heatInfRes, confidenceThreshold);
+    auto heatmapTensor = infResult.outputsData[outputsNames[0]];
+    auto heatmapTensorShape = heatmapTensor.get_shape();
+    auto chSize = heatmapTensorShape[2] * heatmapTensorShape[3];
+    auto scores = filterScores(heatmapTensor, confidenceThreshold);
 
-    auto regInfRes = infResult.outputsData[outputsNames[1]];
-    auto reg = filterReg(regInfRes, scores, chSize);
+    auto regressionTensor = infResult.outputsData[outputsNames[1]];
+    auto reg = filterReg(regressionTensor, scores, chSize);
 
-    auto whInfRes = infResult.outputsData[outputsNames[2]];
-    auto wh = filterWH(whInfRes, scores, chSize);
+    auto whTensor = infResult.outputsData[outputsNames[2]];
+    auto wh = filterWH(whTensor, scores, chSize);
 
     // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
-    auto bboxes = calcBBoxes(scores, reg, wh, sz);
+    auto bboxes = calcBBoxes(scores, reg, wh, heatmapTensorShape);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
