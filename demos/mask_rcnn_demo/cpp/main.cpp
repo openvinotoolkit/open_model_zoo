@@ -244,18 +244,17 @@ int main(int argc, char* argv[]) {
         ov::Shape shape = tensor.get_shape();
 
         if (shape.size() == 4) {
-            for (size_t image_id = 0; image_id < images.size(); ++image_id) {
+            for (size_t batchId = 0; batchId < modelBatchSize; ++batchId) {
                 if (old_model) {
-                    matToTensor(images[image_id], tensor, image_id);
+                    matToTensor(images[batchId], tensor, batchId);
                 } else {
                     cv::Size size = {
                         int(image_tensor_width),
                         int(image_tensor_height)
                     };
-                    unsigned char* data = tensor.data<unsigned char>() + image_id * image_tensor_width * image_tensor_height * 3;
+                    unsigned char* data = tensor.data<unsigned char>() + batchId * image_tensor_width * image_tensor_height * 3;
                     cv::Mat image_resized(size, CV_8UC3, data);
-                    cv::resize(images[image_id], image_resized, size);
-                    tensor = { ov::element::u8, { 1, size_t(image_resized.rows), size_t(image_resized.cols), size_t(image_resized.channels()) }, image_resized.data };
+                    cv::resize(images[batchId], image_resized, size);
                 }
             }
         }
@@ -268,6 +267,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    slog::info << "Start inference..." << slog::endl;
     // Do inference
     infer_request.infer();
 
@@ -282,6 +282,7 @@ int main(int argc, char* argv[]) {
     size_t H = 0;
     size_t W = 0;
 
+    slog::info << "Processing results..." << slog::endl;
     for (size_t idx = 0; idx < outputs.size(); idx++) {
         ov::Tensor tensor = infer_request.get_output_tensor(idx);
         ov::Shape shape = tensor.get_shape();
