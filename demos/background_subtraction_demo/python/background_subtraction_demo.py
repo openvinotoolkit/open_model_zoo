@@ -226,7 +226,7 @@ def main():
 
     model, need_bgr_input = get_model(model_adapter, configuration, args)
 
-    input_bgr = open_images_capture(args.bgr, True) if need_bgr_input else None
+    input_bgr = open_images_capture(args.bgr, False).read() if need_bgr_input else None
 
     person_id = -1
     for i, label in enumerate(labels):
