@@ -70,7 +70,7 @@ def parse_args():
         help='path to report file')
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
         help='paths to Markdown files with supported devices for each model')
-    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
         help='IR precisions for all models. By default, models are tested in FP16 precision')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
         help='directory with pre-converted models (IRs)')
@@ -214,9 +214,13 @@ def main():
         num_failures = 0
 
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
+        try:
+            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+        except KeyError:
+            pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
         }
 
         for demo in demos_to_test:

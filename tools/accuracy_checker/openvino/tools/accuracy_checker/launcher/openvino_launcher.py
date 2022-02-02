@@ -152,7 +152,7 @@ class OpenVINOLauncher(Launcher):
                 if channel_dim in [3, -1]:
                     self.default_layout = 'NHWC'
                     return
-            if shape[-1] in [1, 3, 4]:
+            if shape[-1] in [1, 2, 3, 4, 6, 9]:
                 self.default_layout = 'NHWC'
                 return
         self.default_layout = 'NCHW'

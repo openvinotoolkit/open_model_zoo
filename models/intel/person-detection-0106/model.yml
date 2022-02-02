@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-0106.xml
-    size: 1450390
-    checksum: bb24738ed7a90527287d34fdd3af932eeacec6ff6701e5bcb5d07730ad086fad8977c2b8e81a3330f1f47a205e7fcc95
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP32/person-detection-0106.xml
+    size: 1739827
+    checksum: 0229308a8d58714db68c023e64fcfcc0b567a61763b1898be82a5af3cbcdfe6ed86fa032273235dc3cc17b1bcc89ea14
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP32/person-detection-0106.xml
   - name: FP32/person-detection-0106.bin
-    size: 276501900
-    checksum: 20ef3b23d0a1315f3edb32b771bdae537f227fb3c10b359e4b2b272e8189dcb15ebdd2584653d83e606afe1a03b4bc7a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP32/person-detection-0106.bin
+    size: 276711256
+    checksum: 8bf9d8bb54a48da0ac8e2fcc986f236eb64f400f3b7055a1e17eec34d78c2f3e1f575e2f3178db3bb99dfa81ed791fde
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP32/person-detection-0106.bin
   - name: FP16/person-detection-0106.xml
-    size: 1449678
-    checksum: 0f8930b39fc52a71bf13481c4a08686844b8e279352a9b47c1a0beb3d18835e2b203be4574b5b28823862f91616fdd0b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP16/person-detection-0106.xml
+    size: 1956993
+    checksum: 21b7d39250f6a121c2e387a0329ecc38daa1caaeb626a5306b3f72253b5972fdf384301f22ed8b99dff54e102c97c0aa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP16/person-detection-0106.xml
   - name: FP16/person-detection-0106.bin
-    size: 138251164
-    checksum: 608070aabee27cbc105935e63708c2b85f35f66981c0bc25e45667e602b279ea1feaf725a3b95681167e9f2783c2bfaf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP16/person-detection-0106.bin
+    size: 138353766
+    checksum: e8b60367e41e20e30b793ee359257f39137bd41993bf4d09a07d31e1ecd79f8663b7f193a3678d2ff47b5b91f9ed054e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP16/person-detection-0106.bin
   - name: FP16-INT8/person-detection-0106.xml
-    size: 1781713
-    checksum: 766d2f5cf1d390bf10ee65714fd90c039a6b8a4e32fa32d9e2fa5466b3d8a58eda3f9fed015c7df76cc373ec09af3010
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP16-INT8/person-detection-0106.xml
+    size: 2088280
+    checksum: cc8d4ffc2b142314643cf22a0cfa2df4a1f2ee3f49cc8b29bfc0ffc8407d9442c4351f399c104089a453793160cb686f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP16-INT8/person-detection-0106.xml
   - name: FP16-INT8/person-detection-0106.bin
-    size: 146371996
-    checksum: ab8e8ae498a7ba8ff88b7c3100607dab8f406a01e533fa4ac24f349c333b8c20cdf5d67545f91aff12e5c52e2d10a2f0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-0106/FP16-INT8/person-detection-0106.bin
+    size: 69442106
+    checksum: 16f72b8c9c899019274ae368aa01f549dc15ffb522f86c458fdc0ae3476d33b5a307889f6e963cb9de208fc5748885d6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-detection-0106/FP16-INT8/person-detection-0106.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
