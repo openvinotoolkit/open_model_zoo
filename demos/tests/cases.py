@@ -278,30 +278,15 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
-        [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    # TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}), FIXME
-                ],
-            ),
-            TestCase(options={
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-                # '-m_am': ModelArg('anti-spoof-mn3'), FIXME
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+        TestCase(options={
+            '-m': ModelArg('face-detection-retail-0004'),
+            # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO: wait for 77673: INT8: Attempt to get a name for a Tensor without names
+            # '-m_am': ModelArg('anti-spoof-mn3'),
+            '-m_em': ModelArg('emotions-recognition-retail-0003'),
+            '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+            '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+        }),
+        TestCase(options={'-m', ModelArg('face-detection-adas-0001')})
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
@@ -311,30 +296,15 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
-        [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
-            TestCase(options={
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+        TestCase(options={
+            '-m': ModelArg('face-detection-retail-0004'),
+            '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
+            '-m_am': ModelArg('anti-spoof-mn3'),
+            '-m_em': ModelArg('emotions-recognition-retail-0003'),
+            '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+            '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+        }),
+        TestCase(options={'-m', ModelArg('face-detection-adas-0001')})
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
