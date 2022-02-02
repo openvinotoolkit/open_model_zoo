@@ -18,6 +18,7 @@ description: >-
   bounding boxes and five facial landmarks in a single forward pass. More details
   provided in the paper <https://arxiv.org/abs/1905.00641> and repository <https://github.com/biubug6/Pytorch_Retinaface>
 task_type: detection
+architecture_type: retinaface-pytorch
 files:
   - name: models/retinaface.py
     size: 4865

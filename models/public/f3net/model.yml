@@ -16,6 +16,7 @@ description: >-
   F3Net: Fusion, Feedback and Focus for Salient Object Detection. For details see
   the repository <https://github.com/weijun88/F3Net>, paper <https://arxiv.org/abs/1911.11445>
 task_type: salient_object_detection
+architecture_type: salient_object_detection
 files:
   - name: f3net/net.py
     size: 8656

@@ -18,6 +18,7 @@ description: >-
   (transformers's bert-large-uncased-whole-word-masking) that is fine-tuned on the
   SQuAD v1.1 training. (91.4% F1 -  84.4% EM on the v1.1 dev set).
 task_type: question_answering
+architecture_type: bert-question-answering
 files:
   - name: vocab.txt
     size: 231508

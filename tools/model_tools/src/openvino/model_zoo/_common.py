@@ -22,6 +22,30 @@ from pathlib import Path
 
 from openvino.model_zoo._version import __version__
 
+try:
+    from model_api.adapters import create_core, OpenvinoAdapter
+    from model_api.models import Model, Classification
+    from model_api.pipelines import get_user_config
+except ImportError:
+    class OpenvinoAdapter:
+        def __init__(self, ie=None, model_path=None, **kwargs):
+            pass
+
+    class Model:
+        @classmethod
+        def create_model(cls, name=None, model_adapter=None, configuration=None):
+            return None
+
+    class Classification:
+        def __init__(self, model_adapter=None, configuration=None):
+            pass
+    
+    def create_core():
+        return None
+
+    def get_user_config(flags_d=None, flags_nstreams=None, flags_nthreads=None):
+        return None
+
 PACKAGE_DIR = Path(__file__).resolve().parent
 MODEL_ROOT = PACKAGE_DIR / 'models'
 DATASET_DEFINITIONS = PACKAGE_DIR / 'data/dataset_definitions.yml'

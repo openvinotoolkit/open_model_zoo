@@ -15,6 +15,7 @@
 description: >-
   U-Net trained on CamVid in PyTorch (71.95% mIoU)
 task_type: semantic_segmentation
+architecture_type: segmentation
 files:
   - name: FP32/unet-camvid-onnx-0001.xml
     size: 80769

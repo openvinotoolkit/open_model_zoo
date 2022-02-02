@@ -34,6 +34,7 @@ description: >-
 
   For details about this model, check out the repository <https://github.com/weiliu89/caffe/tree/ssd>.
 task_type: detection
+architecture_type: ssd
 files:
   - name: ssd512.tar.gz
     size: 100991061

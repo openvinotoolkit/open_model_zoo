@@ -20,6 +20,7 @@ description: >-
   tasks. For details see repository <https://github.com/open-mmlab/mmsegmentation/tree/master>,
   paper <https://arxiv.org/abs/1612.01105>.
 task_type: semantic_segmentation
+architecture_type: segmentation
 files:
   - name: pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
     size: 196212259

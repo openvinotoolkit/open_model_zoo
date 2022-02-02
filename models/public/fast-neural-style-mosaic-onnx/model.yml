@@ -19,6 +19,7 @@ description: >-
   <https://arxiv.org/abs/1603.08155> along with Instance Normalization <https://arxiv.org/abs/1607.08022>.
   Original ONNX models are provided in the repository <https://github.com/onnx/models>.
 task_type: style_transfer
+architecture_type: style
 files:
   - name: fast-neural-style-mosaic-onnx.onnx
     checksum: 3333259b6f7014ecdcc6be4863322988935e23c9ae6bf9668aa6208a5991d2c603cd342881bab0a064f365e929eeb4d4

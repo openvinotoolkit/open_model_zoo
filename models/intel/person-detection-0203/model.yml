@@ -15,6 +15,7 @@
 description: >-
   Person Detection based on MobileNetV2 (ATSS) on 864x480 resolution.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/person-detection-0203.xml
     size: 1271707

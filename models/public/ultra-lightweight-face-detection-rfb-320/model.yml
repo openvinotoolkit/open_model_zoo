@@ -20,6 +20,7 @@ description: >-
 
   For details see repository <https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB>.
 task_type: detection
+architecture_type: ultra_lightweight_face_detection
 files:
   - name: ultra-lightweight-face-detection-rfb-320.onnx
     size: 1270727

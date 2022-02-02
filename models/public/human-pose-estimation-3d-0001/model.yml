@@ -17,6 +17,7 @@ description: >-
   and Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB <https://arxiv.org/abs/1712.03453>
   papers.
 task_type: human_pose_estimation
+architecture_type: openpose
 files:
   - name: human-pose-estimation-3d-0001.tar.gz
     checksum: 14d1b70eb2d4102969b29c7716cbcdf9d1acd35839e044d2e62d69fbce4b98aa06cb954bb703d411cf991ffd809c6ea9

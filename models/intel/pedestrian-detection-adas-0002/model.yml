@@ -15,6 +15,7 @@
 description: >-
   Pedestrian detector based on ssd + mobilenet with reduced channels number.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/pedestrian-detection-adas-0002.xml
     size: 294661

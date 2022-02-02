@@ -18,6 +18,7 @@ description: >-
   dataset. For details see repository <https://github.com/legendary111/mobilenet-yolo-v4-syg/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 task_type: detection
+architecture_type: yolo
 files:
   - name: mobilenet-yolo-v4-syg.pb
     size: 42004202

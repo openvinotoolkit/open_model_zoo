@@ -15,6 +15,7 @@
 description: >-
   Multiclass (vehicle -  license plates) detector based on MobileNetV2+SSD
 task_type: detection
+architecture_type: ssd
 files:
   - name: MobileNetSSD.tfmo.json
     size: 2305

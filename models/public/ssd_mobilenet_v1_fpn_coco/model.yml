@@ -15,6 +15,7 @@
 description: >-
   MobileNetV1 FPN is used for object detection. For details, see the paper <https://arxiv.org/abs/1807.03284>.
 task_type: detection
+architecture_type: ssd
 files:
   - name: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
     size: 135664441

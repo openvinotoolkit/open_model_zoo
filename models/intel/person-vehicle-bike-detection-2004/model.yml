@@ -15,6 +15,7 @@
 description: >-
   Person Vehicle Bike Detection based on MobileNetV2 (ATSS) on 448x256 resolution.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/person-vehicle-bike-detection-2004.xml
     size: 1274610

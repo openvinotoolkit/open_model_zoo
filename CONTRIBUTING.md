@@ -78,6 +78,10 @@ Description of the model. Must match with the description from the model [docume
 
 [Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
 
+**`architecture_type`** (*optional*)
+
+Model architecture type, used for [Python Model API](demos/README.md#python-model-api-installation) class creation.
+
 **`files`**
 
 > **NOTE**: Before filling this section, make sure that the model can be downloaded either via a direct HTTP(S) link or from Google Drive\*.

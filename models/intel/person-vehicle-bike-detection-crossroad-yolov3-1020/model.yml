@@ -15,6 +15,7 @@
 description: >-
   YOLO v3 finetuned for person-vehicle-bike detection task
 task_type: detection
+architecture_type: yolo
 files:
   - name: yolo_v3_new.json
     size: 384

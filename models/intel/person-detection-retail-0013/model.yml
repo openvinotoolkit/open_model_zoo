@@ -15,6 +15,7 @@
 description: >-
   Pedestrian detection (RMNet with lrelu + SSD)
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/person-detection-retail-0013.xml
     size: 470356

@@ -15,6 +15,7 @@
 description: >-
   ICNet trained on CamVid in TensorFlow (69.54% mIoU)
 task_type: semantic_segmentation
+architecture_type: segmentation
 files:
   - name: FP32/icnet-camvid-ava-0001.xml
     size: 483908

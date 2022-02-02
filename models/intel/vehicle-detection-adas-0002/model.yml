@@ -16,6 +16,7 @@ description: >-
   Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise
   head.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/vehicle-detection-adas-0002.xml
     size: 261691

@@ -17,6 +17,7 @@ description: >-
   the paper <https://arxiv.org/abs/1801.04381>, MobileNetV2: Inverted Residuals and
   Linear Bottlenecks.
 task_type: detection
+architecture_type: ssd
 files:
   - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
     size: 51025348

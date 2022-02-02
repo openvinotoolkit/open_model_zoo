@@ -54,7 +54,8 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info
+        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info,
+        architecture_type
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -67,6 +68,7 @@ class Model:
         self.precisions = precisions
         self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
+        self.architecture_type = architecture_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
@@ -86,6 +88,10 @@ class Model:
 
             files = []
             file_names = set()
+
+            architecture_type = model.get('architecture_type')
+            if architecture_type:
+                architecture_type = validation.validate_string('"architecture_type"', architecture_type)
 
             for file in model['files']:
                 files.append(ModelFile.deserialize(file))
@@ -174,7 +180,7 @@ class Model:
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
                 task_type, conversion_to_onnx_args, known_frameworks[framework],
-                composite_model_name, input_info)
+                composite_model_name, input_info, architecture_type)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,

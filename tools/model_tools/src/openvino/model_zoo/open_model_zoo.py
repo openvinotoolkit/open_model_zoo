@@ -1,3 +1,17 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import argparse
 import yaml
@@ -11,12 +25,16 @@ from openvino.model_zoo.download_engine import validation
 
 
 class Model:
-    def __init__(self, name=None, model_path=None, description=None, task_type=None, subdirectory=None, ie=None):
+    def __init__(
+        self, name=None, model_path=None, description=None, task_type=None,
+        subdirectory=None, architecture_type=None, ie=None
+    ):
         self.model_path = model_path
         self.description = description
         self.task_type = task_type
         self.name = name
         self.subdirectory = subdirectory
+        self.architecture_type = architecture_type
 
         self.model = None
         self.compiled_model = None
@@ -89,7 +107,7 @@ class Model:
         if not os.path.exists(model_path) or not os.path.exists(bin_path):
             omz_converter.converter(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
-        return cls(name, model_path, description, task_type, subdirectory, ie)
+        return cls(name, model_path, description, task_type, subdirectory, model.architecture_type, ie)
 
     @classmethod
     def from_pretrained(cls, model_path, *, task_type=None, ie=None):
@@ -117,9 +135,10 @@ class Model:
         model = cls._load_model(cls, name)
         task_type = model.task_type if model else task_type
         subdirectory = model.subdirectory if model else model_path.parent
+        architecture_type = model.architecture_type if model else None
         model_path = str(model_path)
 
-        return cls(name, model_path, description, task_type, subdirectory, ie)
+        return cls(name, model_path, description, task_type, subdirectory, architecture_type, ie)
 
     def _load_model(self, model_name):
         parser = argparse.ArgumentParser()
@@ -209,3 +228,38 @@ class Model:
 
     def input_info(self):
         return self.model_config().get('input_info', [])
+
+    def _create_model_api_instance(
+        self, model_creator, num_streams='', num_threads=None, max_num_requests=1, configuration=None
+    ):
+        plugin_config = _common.get_user_config(self.device, num_streams, num_threads)
+        model_adapter = _common.OpenvinoAdapter(_common.create_core(), self.model_path, device=self.device,
+                            plugin_config=plugin_config, max_num_requests=max_num_requests)
+        self.model_api = model_creator(model_adapter, configuration)
+        self.model_api.load()
+
+    def model_api_inference(self, inputs, device='CPU', model_creator=None, asynk_mode=False, **kwargs):
+        self.device = device
+        if model_creator is None:
+            model_creator = self.model_creator
+
+        self._create_model_api_instance(model_creator, **kwargs)
+
+        # if not asynk_mode:
+        preprocessed_inputs, meta = self.model_api.preprocess(inputs)
+        raw_results = self.model_api.infer_sync(preprocessed_inputs)
+        results = self.model_api.postprocess(raw_results, meta)
+
+        return results
+
+    def model_creator(self, model_adapter, configuration):
+        try:
+            if self.task_type == 'classification' and self.architecture_type is None:
+                return _common.Classification(model_adapter, configuration)
+            elif self.architecture_type is None:
+                raise TypeError('architecture_type is not set or model is usupported by Model API.')
+            else:
+                return _common.Model.create_model(self.architecture_type, model_adapter, configuration)
+        except Exception as exc:
+            raise RuntimeError('Unable to create model class, please check configuration parameters.'
+                               'Errors occured: ' + str(exc))

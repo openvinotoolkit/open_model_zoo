@@ -20,6 +20,7 @@ description: >-
   images and double jpeg restoration), check out the "Towards Flexible Blind JPEG
   Artifacts Removal (FBCNN, ICCV 2021)" <https://github.com/jiaxi-jiang/FBCNN>.
 task_type: image_processing
+architecture_type: jr
 files:
   - name: net.py
     size: 14063

@@ -15,6 +15,7 @@
 description: >-
   Face Detection based on ResNet152 (ATSS).
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/face-detection-0206.xml
     size: 1791872

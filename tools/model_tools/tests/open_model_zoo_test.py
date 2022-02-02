@@ -1,8 +1,11 @@
+from luigi import configuration
 import numpy as np
 import unittest
 import os
 
 import openvino.model_zoo.open_model_zoo as omz
+
+from model_api.models import Classification
 
 from openvino.runtime import Core
 
@@ -109,6 +112,24 @@ class TestModel(unittest.TestCase):
     def test_input_layout(self):
         model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertEqual(model.layout('data_l'), 'NCHW')
+
+    def test_model_api_inference(self):
+        ie = Core()
+        model = omz.Model.download('densenet-121', cache_dir='models/public/densenet-121/', ie=ie)
+
+        input = np.zeros((224, 224, 3))
+        result = model.model_api_inference(input, model_creator=Classification, configuration={'topk': 1})
+
+        self.assertEqual(len(result), 1)
+
+    def test_model_api_auto_model_creation(self):
+        ie = Core()
+        model = omz.Model.download('pspnet-pytorch', cache_dir='models/public/pspnet-pytorch/', ie=ie)
+
+        input = np.random.randint(0, 256, (512, 512, 3))
+        result = model.model_api_inference(input)
+
+        self.assertEqual(result.shape, (512, 512))
 
 if __name__ == '__main__':
     unittest.main()

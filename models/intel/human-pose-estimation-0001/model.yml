@@ -15,6 +15,7 @@
 description: >-
   2D human pose estimation with tuned mobilenet backbone (based on OpenPose).
 task_type: human_pose_estimation
+architecture_type: openpose
 files:
   - name: FP32/human-pose-estimation-0001.xml
     size: 185324

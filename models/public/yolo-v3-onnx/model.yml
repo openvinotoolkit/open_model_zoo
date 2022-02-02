@@ -20,6 +20,7 @@ description: >-
   pre-trained on Common Objects in Context <COCO> <https://cocodataset.org/#home>
   dataset with 80 classes.
 task_type: detection
+architecture_type: yolov3-onnx
 files:
   - name: yolov3-10.onnx
     checksum: 832bb4c2be2f9a0eb3e69c426ceaadf472ef260802995fc694b5e8e36a63f0bdfe005058d16e18f091bfdefde3489746

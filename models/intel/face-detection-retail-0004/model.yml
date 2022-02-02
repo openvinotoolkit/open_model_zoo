@@ -16,6 +16,7 @@ description: >-
   Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with
   negatives.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/face-detection-retail-0004.xml
     size: 128172
