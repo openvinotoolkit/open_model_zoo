@@ -123,7 +123,7 @@ def get_model(model_adapter, configuration, args):
         log.warning('The \"--bgr\" option works only for BackgroundMattingWithBGR model. Option will be omitted.')
 
     if args.raw_output_message and is_matting_model:
-        log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
+        log.warning('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
         args.raw_output_message = False
     return model, need_bgr_input
 
