@@ -24,9 +24,9 @@ from time import perf_counter
 import cv2
 import numpy as np
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path = [str(Path(__file__).resolve().parents[2] / 'common/python')] + sys.path
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel
+from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBGR, VideoBackgroundMatting
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
 from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
@@ -61,6 +61,8 @@ def build_argparser():
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
+    args.add_argument('--bgr', default=None, type=str,
+                      help='Optional. Background image for background-matting model.')
     args.add_argument('--blur_bgr', default=0, type=int,
                       help='Optional. Background blur strength (by default with value 0 is not applied).')
 
@@ -99,13 +101,20 @@ def build_argparser():
     return parser
 
 
-def get_model(model_adapter, configuration):
+def get_model(model_adapter, configuration, bgr):
     inputs = model_adapter.get_input_layers()
     outputs = model_adapter.get_output_layers()
     if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
-        return YolactModel(model_adapter, configuration)
+        return YolactModel(model_adapter, configuration), False, False
+    elif len(inputs) == 5 and len(outputs) == 6 and 'pha' in outputs.keys():
+        return VideoBackgroundMatting(model_adapter, configuration), True, False
+    elif len(inputs) == 2 and len(outputs) in (3, 6) and 'bgr' in inputs.keys():
+        if bgr is None:
+            raise ValueError('For chosen type of model is needed additional input with '
+                             'real background specified by --bgr argument. Please specify it.')
+        return BackgroundMattingWithBGR(model_adapter, configuration), True, True
     else:
-        return MaskRCNNModel(model_adapter, configuration)
+        return MaskRCNNModel(model_adapter, configuration), False, False
 
 
 def print_raw_results(outputs, frame_id):
@@ -132,14 +141,13 @@ def fit_to_window(input_img, output_resolution):
     return output
 
 
-def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_kernel=0, show_with_original_frame=False):
-    blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
-    if target_bgr is None:
-        target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
-    else:
-        target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
-        if blur_kernel:
-            target_bgr = cv2.blur(target_bgr, blur_kernel)
+def process_matting(objects, target_bgr):
+    fgr, pha = objects
+    output = fgr * pha + target_bgr * (1 - pha)
+    return (output * 255).astype(np.uint8)
+
+
+def process_masks(objects, frame, target_bgr, person_id):
     classes, masks = objects[1], objects[3]
     # Choose masks only for person class
     valid_inds = classes == person_id
@@ -154,6 +162,24 @@ def render_results(frame, objects, output_resolution, target_bgr, person_id, blu
         composed_mask = cv2.medianBlur(composed_mask.astype(np.uint8), 11)
         composed_mask = np.repeat(np.expand_dims(composed_mask, axis=-1), 3, axis=2)
         output = np.where(composed_mask == 1, frame, target_bgr)
+    return output
+
+
+def render_results(frame, objects, output_resolution, target_bgr, person_id, matting_process,
+                   blur_kernel=0, show_with_original_frame=False):
+    blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
+    if target_bgr is None:
+        target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
+    else:
+        target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
+        if blur_kernel:
+            target_bgr = cv2.blur(target_bgr, blur_kernel)
+
+    if matting_process:
+        output = process_matting(objects, target_bgr.astype(np.float32) / 255)
+    else:
+        output = process_masks(objects, frame, target_bgr, person_id)
+
     if show_with_original_frame:
         output = cv2.hconcat([frame, output])
     h, w = output.shape[:2]
@@ -176,14 +202,26 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    labels = ['__background__', 'person'] if args.labels is None else args.labels
+    if args.labels is None:
+        labels = ['__background__', 'person']
+    else:
+        with open(args.labels, 'rt') as labels_file:
+            labels = labels_file.read().splitlines()
+        assert len(labels), 'The file with class labels is empty'
 
     configuration = {
         'confidence_threshold': args.prob_threshold,
         'resize_type': args.resize_type
     }
 
-    model = get_model(model_adapter, configuration)
+    model, is_matting_model, need_bgr_input = get_model(model_adapter, configuration, args.bgr)
+
+    input_bgr = open_images_capture(args.bgr, True) if need_bgr_input else None
+    if not need_bgr_input and args.bgr is not None:
+        log.info('\'--bgr\' argument is set but not needed, so will not be used')
+
+    if args.raw_output_message and is_matting_model:
+        log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
 
     person_id = -1
     for i, label in enumerate(labels):
@@ -226,7 +264,8 @@ def main():
                                                          cap.fps(), tuple(output_resolution)):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
-            pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            data = {'src': frame, 'bgr': input_bgr.read()} if input_bgr is not None else frame
+            pipeline.submit_data(data, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
         else:
             # Wait for empty request
@@ -238,12 +277,12 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
-            if args.raw_output_message:
+            if args.raw_output_message and not is_matting_model:
                 print_raw_results(objects, next_frame_id_to_show)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             rendering_start_time = perf_counter()
-            frame = render_results(frame, objects, output_resolution, bgr, person_id,
+            frame = render_results(frame, objects, output_resolution, bgr, person_id, is_matting_model,
                                    args.blur_bgr, args.show_with_original_frame)
             render_metrics.update(rendering_start_time)
             presenter.drawGraphs(frame)
@@ -267,13 +306,13 @@ def main():
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
-        if args.raw_output_message:
+        if args.raw_output_message and not is_matting_model:
             print_raw_results(objects, next_frame_id_to_show, model.labels)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
         rendering_start_time = perf_counter()
-        frame = render_results(frame, objects, output_resolution, bgr, person_id,
+        frame = render_results(frame, objects, output_resolution, bgr, person_id, is_matting_model,
                                args.blur_bgr, args.show_with_original_frame)
         render_metrics.update(rendering_start_time)
         presenter.drawGraphs(frame)

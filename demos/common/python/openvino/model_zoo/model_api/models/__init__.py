@@ -16,6 +16,7 @@
 
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
+from .background_matting import BackgroundMattingWithBGR, VideoBackgroundMatting
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
@@ -37,6 +38,7 @@ from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESI
 from .yolo import YOLO, YoloV3ONNX, YoloV4, YOLOF, YOLOX
 
 __all__ = [
+    'BackgroundMattingWithBGR',
     'BertEmbedding',
     'BertNamedEntityRecognition',
     'BertQuestionAnswering',
@@ -63,6 +65,7 @@ __all__ = [
     'SegmentationModel',
     'SSD',
     'UltraLightweightFaceDetection',
+    'VideoBackgroundMatting',
     'YolactModel',
     'YOLO',
     'YoloV3ONNX',

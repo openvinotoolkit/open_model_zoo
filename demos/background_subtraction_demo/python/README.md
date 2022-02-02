@@ -8,7 +8,7 @@ This demo shows how to perform background subtraction using OpenVINO.
 
 ## How It Works
 
-The demo application expects an instance segmentation model in the Intermediate Representation (IR) format with the following constraints:
+The demo application expects an instance segmentation or background matting model in the Intermediate Representation (IR) format with the following constraints:
 1. for instance segmentation models based on `Mask RCNN` approach:
     * One input: `image` for input image.
     * At least three outputs including:
@@ -22,11 +22,28 @@ The demo application expects an instance segmentation model in the Intermediate 
         * `conf` with confidence scores for each class for all boxes
         * `mask` with fixed-size mask channels for all boxes.
         * `proto` with fixed-size segmentation heat maps prototypes for all boxes.
+3. for image background matting models:
+    * Two inputs:
+        * `src` for input image
+        * `bgr` for input real background
+    * At least two outputs including:
+        * `fgr` with normalized in [0, 1] range foreground
+        * `pha` with normalized in [0, 1] range alpha
+4. for video background matting models based on RNN architecture:
+    * Five inputs:
+        * `src` for input image
+        * recurrent inputs: `r1`, `r2`, `r3`, `r4`
+    * At least six outputs including:
+        * `fgr` with normalized in [0, 1] range foreground
+        * `pha` with normalized in [0, 1] range alpha
+        * recurrent outputs: `rr1`, `rr2`, `rr3`, `rr4`
 
 The use case for the demo is an online conference where is needed to show only foreground - people and, respectively, to hide or replace background.
 Based on this an instance segmentation model must be trained at least for person class.
 
 As input, the demo application accepts a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
+
+> **NOTE**: if you use image background matting models `--bgr` argument should be specified
 
 The demo workflow is the following:
 
@@ -60,6 +77,8 @@ omz_converter --list models.lst
 
 * instance-segmentation-person-????
 * yolact-resnet50-fpn-pytorch
+* background-matting-mobilenetv2
+* robust-video-matting
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -73,7 +92,7 @@ usage: background_subtraction_demo.py [-h] -m MODEL
                                       [-d DEVICE] [-t PROB_THRESHOLD]
                                       [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
                                       [--labels LABELS]
-                                      [--target_bgr TARGET_BGR]
+                                      [--target_bgr TARGET_BGR] [--bgr BGR]
                                       [--blur_bgr BLUR_BGR]
                                       [-nireq NUM_INFER_REQUESTS]
                                       [-nstreams NUM_STREAMS]
@@ -87,7 +106,8 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model or
-                        address of model inference service if using OVMS adapter.
+                        address of model inference service if using ovms
+                        adapter.
   --adapter {openvino,ovms}
                         Optional. Specify the model adapter. Default is
                         openvino.
@@ -110,6 +130,8 @@ Options:
   --target_bgr TARGET_BGR
                         Optional. Background onto which to composite the
                         output (by default to green field).
+  --bgr BGR             Optional. Background image for background-matting
+                        model.
   --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with
                         value 0 is not applied).
 
