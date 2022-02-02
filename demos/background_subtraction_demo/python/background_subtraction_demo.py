@@ -44,7 +44,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', required=True,
                       help='Required. Path to an .xml file with a trained model '
-                           'or address of model inference service if using ovms adapter.')
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
@@ -120,7 +120,7 @@ def get_model(model_adapter, configuration, args):
     else:
         model = MaskRCNNModel(model_adapter, configuration)
     if not need_bgr_input and args.bgr is not None:
-        log.warning('The "--bgr" option works only for BackgroundMattingWithBGR model. Option will be omitted.")
+        log.warning('The \"--bgr\" option works only for BackgroundMattingWithBGR model. Option will be omitted.')
 
     if args.raw_output_message and is_matting_model:
         log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
@@ -269,7 +269,7 @@ def main():
                                                          cap.fps(), tuple(output_resolution)):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
-            data = {'src': frame, 'bgr': input_bgr.read()} if input_bgr is not None else frame
+            data = {'src': frame, 'bgr': input_bgr} if input_bgr is not None else frame
             pipeline.submit_data(data, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
         else:
