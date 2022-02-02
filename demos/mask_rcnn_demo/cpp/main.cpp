@@ -8,6 +8,7 @@
  * @example mask_rcnn_demo/main.cpp
  */
 #include <algorithm>
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -19,6 +20,7 @@
 
 #include "gflags/gflags.h"
 #include "utils/args_helper.hpp"
+#include "utils/common.hpp"
 #include "utils/ocv_common.hpp"
 #include "utils/performance_metrics.hpp"
 #include "utils/slog.hpp"
@@ -79,7 +81,7 @@ void validateInputsAndOutputs(ov::OutputVector& inputs, ov::OutputVector& output
 }
 
 int main(int argc, char* argv[]) {
-    set_terminate(catcher);
+    std::set_terminate(catcher);
 
     PerformanceMetrics metrics;
 
