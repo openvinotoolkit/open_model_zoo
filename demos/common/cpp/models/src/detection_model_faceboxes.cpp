@@ -29,49 +29,62 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
 void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    InferenceEngine::InputsDataMap inputInfo(model.getInputsInfo());
-
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks that have only one input");
+    const ov::OutputVector& inputsInfo = model->inputs();
+    if (inputsInfo.size() != 1) {
+        throw std::logic_error("FaceBoxes model wrapper expects models that have only one input");
     }
 
-    InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
-    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    inputTransform.setPrecision(input);
+    const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout = ov::layout::get_layout(model->input());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
 
-    if (inputDesc.getDims()[1] != 3) {
-         throw std::logic_error("Expected 3-channel input");
-     }
+    if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+        throw std::logic_error("Expected 3-channel input");
+    }
 
+    ov::preprocess::PrePostProcessor ppp(model);
     if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+        ppp.input().tensor().
+            set_element_type(ov::element::u8).
+            set_spatial_dynamic_shape().
+            set_layout({ "NHWC" });
+
+        ppp.input().preprocess().
+            convert_element_type(ov::element::f32).
+            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
     else {
-        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+        ppp.input().tensor().
+            set_element_type(ov::element::u8).
+            set_layout({ "NHWC" });
     }
+
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Reading image input parameters -------------------------------------------
-    std::string imageInputName = inputInfo.begin()->first;
-    inputsNames.push_back(imageInputName);
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
+    inputsNames.push_back(model->input().get_any_name());
+    netInputWidth = inputShape[ov::layout::width_idx(inputLayout)];
+    netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    InferenceEngine::OutputsDataMap outputInfo(model.getOutputsInfo());
-
-    if (outputInfo.size() != 2) {
-        throw std::logic_error("This demo expect networks that have 2 outputs blobs");
+    const ov::OutputVector& outputsInfo = model->outputs();
+    if (outputsInfo.size() != 2) {
+        throw std::runtime_error("FaceBoxes model wrapper expects models that have 2 outputs blob");
     }
 
-    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
-    maxProposalsCount = outputDesc.getDims()[1];
-
-    for (auto& output : outputInfo) {
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::CHW);
-        outputsNames.push_back(output.first);
+    ov::Layout outLayout{ "CWH" };
+    maxProposalsCount = outputsInfo.front().get_shape()[ov::layout::height_idx(outLayout)];
+    for (const auto& output : model->outputs()) {
+        auto outTensorName = output.get_any_name();
+        outputsNames.push_back(outTensorName);
+        ppp.output(outTensorName).tensor().
+            set_element_type(ov::element::f32);
+          //  set_layout(outLayout);
     }
+    std::sort(outputsNames.begin(), outputsNames.end());
+    model = ppp.build();
 
     // --------------------------- Calculating anchors ----------------------------------------------------
     std::vector<std::pair<size_t, size_t>> featureMaps;
@@ -155,17 +168,15 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
     }
 }
 
-std::pair<std::vector<size_t>, std::vector<float>> filterScores(const InferenceEngine::MemoryBlob::Ptr& scoreInfRes, const float confidenceThreshold) {
-    auto desc = scoreInfRes->getTensorDesc();
-    auto sz = desc.getDims();
-    InferenceEngine::LockedMemory<const void> outputMapped = scoreInfRes->rmap();
-    const float* scoresPtr = outputMapped.as<float*>();
+std::pair<std::vector<size_t>, std::vector<float>> filterScores(const ov::Tensor& scoresTensor, const float confidenceThreshold) {
+    auto shape = scoresTensor.get_shape();
+    const float* scoresPtr = scoresTensor.data<float>();
 
     std::vector<size_t> indices;
     std::vector<float> scores;
     scores.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     indices.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
-    for (size_t i = 1; i < sz[1] * sz[2]; i = i + 2) {
+    for (size_t i = 1; i < shape[1] * shape[2]; i = i + 2) {
         if (scoresPtr[i] > confidenceThreshold) {
             indices.push_back(i / 2);
             scores.push_back(scoresPtr[i]);
@@ -175,23 +186,20 @@ std::pair<std::vector<size_t>, std::vector<float>> filterScores(const InferenceE
     return { indices, scores };
 }
 
-std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBlob::Ptr& bboxesInfRes, const std::vector<ModelFaceBoxes::Anchor>& anchors,
+std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const ov::Tensor& bboxesTensor, const std::vector<ModelFaceBoxes::Anchor>& anchors,
     const std::vector<size_t>& validIndices, const std::vector<float>& variance) {
-    InferenceEngine::LockedMemory<const void> bboxesOutputMapped = bboxesInfRes->rmap();
-    auto desc = bboxesInfRes->getTensorDesc();
-    auto sz = desc.getDims();
-    const float *bboxesPtr = bboxesOutputMapped.as<float*>();
+    auto shape = bboxesTensor.get_shape();
+    const float* bboxesPtr = bboxesTensor.data<float>();
 
     std::vector<ModelFaceBoxes::Anchor> bboxes;
     bboxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     for (auto i : validIndices) {
-        auto objStart = sz[2] * i;
+        auto objStart = shape[2] * i;
 
         auto dx = bboxesPtr[objStart];
         auto dy = bboxesPtr[objStart + 1];
         auto dw = bboxesPtr[objStart + 2];
         auto dh = bboxesPtr[objStart + 3];
-
         auto predCtrX = dx * variance[0] * anchors[i].getWidth() + anchors[i].getXCenter();
         auto predCtrY = dy * variance[0] * anchors[i].getHeight() + anchors[i].getYCenter();
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
@@ -199,7 +207,6 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
 
         bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
                                      static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
-
     }
 
     return bboxes;
@@ -207,12 +214,12 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter scores and get valid indices for bounding boxes----------------------------------
-    const auto scoresInfRes = infResult.outputsData[outputsNames[1]];
-    auto scores = filterScores(scoresInfRes, confidenceThreshold);
+    const auto scoresTensor = infResult.outputsData[outputsNames[1]];
+    auto scores = filterScores(scoresTensor, confidenceThreshold);
 
     // --------------------------- Filter bounding boxes on indices -------------------------------------------------------
-    auto bboxesInfRes = infResult.outputsData[outputsNames[0]];
-    std::vector<Anchor> bboxes = filterBBoxes(bboxesInfRes, anchors, scores.first, variance);
+    auto bboxesTensor = infResult.outputsData[outputsNames[0]];
+    std::vector<Anchor> bboxes = filterBBoxes(bboxesTensor, anchors, scores.first, variance);
 
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
     std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);

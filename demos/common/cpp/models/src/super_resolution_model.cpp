@@ -15,6 +15,7 @@
 */
 
 #include <openvino/openvino.hpp>
+#include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -148,7 +149,7 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     }
     const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
     const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
-    resize(img, img, width, height);
+    img = resizeImageExt(img, width, height);
     request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
 
     if (inputsNames.size() == 2) {

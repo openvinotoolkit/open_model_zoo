@@ -42,11 +42,11 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         inputLayout = { "NCHW" };
     }
 
-    if (inputShape[1] != 3) {
+    if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");
     }
 
-    inputTransform.setPrecision(model); // ?
+    inputTransform.setPrecision(model);
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
         set_element_type(ov::element::u8).

@@ -76,6 +76,11 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout = ov::layout::get_layout(model->input());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
+
     if (inputShape.size() != 4 || inputShape[1] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
@@ -94,7 +99,6 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
 
         ppp.input().preprocess().
             convert_element_type(ov::element::f32).
-            //convert_layout("NHWC").
             resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
     else {
@@ -103,7 +107,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
             set_layout({ "NHWC" });
     }
 
-    ppp.input().model().set_layout("NCHW");
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const ov::OutputVector& outputsInfo = model->outputs();
