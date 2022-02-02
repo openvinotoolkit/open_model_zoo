@@ -24,7 +24,7 @@ from time import perf_counter
 import cv2
 import numpy as np
 
-sys.path = sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBGR, VideoBackgroundMatting
 from openvino.model_zoo.model_api.models.utils import load_labels
