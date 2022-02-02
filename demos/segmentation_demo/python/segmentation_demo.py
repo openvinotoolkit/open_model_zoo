@@ -82,7 +82,7 @@ class SaliencyMapVisualizer:
 def render_segmentation(frame, masks, visualiser, resizer, only_masks=False):
     output = visualiser.apply_color_map(masks)
     if not only_masks:
-        output = np.floor_divide(frame, 2) + np.floor_divide(output, 2)
+        output = cv2.addWeighted(frame, 0.5, output, 0.5, 0)
     return resizer.resize(output)
 
 def build_argparser():
