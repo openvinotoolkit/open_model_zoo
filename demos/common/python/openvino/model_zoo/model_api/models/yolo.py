@@ -480,7 +480,7 @@ class YoloV3ONNX(DetectionModel):
         resized_image = self._change_layout(resized_image)
         dict_inputs = {
             self.image_blob_name: resized_image,
-            self.image_info_blob_name: [image.shape[0], image.shape[1]]
+            self.image_info_blob_name: [[image.shape[0], image.shape[1]]]
         }
         return dict_inputs, meta
 
