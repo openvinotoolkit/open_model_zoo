@@ -30,8 +30,8 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--help]           print help on all arguments"
                   << "\n\t -m <MODEL FILE>   " << m_msg
                   << "\n\t -i <WAV>          " << i_msg
-                  << "\n\t[-d] <DEVICE>      " << d_msg
-                  << "\n\t[-o] <WAV>         " << o_msg << '\n';
+                  << "\n\t[-d <DEVICE>]      " << d_msg
+                  << "\n\t[-o <WAV>]         " << o_msg << '\n';
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
