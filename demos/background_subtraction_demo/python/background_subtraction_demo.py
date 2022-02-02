@@ -24,7 +24,7 @@ from time import perf_counter
 import cv2
 import numpy as np
 
-sys.path = [str(Path(__file__).resolve().parents[2] / 'common/python')] + sys.path
+sys.path = sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBGR, VideoBackgroundMatting
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
@@ -101,20 +101,32 @@ def build_argparser():
     return parser
 
 
-def get_model(model_adapter, configuration, bgr):
+def get_model(model_adapter, configuration, args):
     inputs = model_adapter.get_input_layers()
     outputs = model_adapter.get_output_layers()
+    need_bgr_input = False
+    is_matting_model = False
     if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
-        return YolactModel(model_adapter, configuration), False, False
+        model = YolactModel(model_adapter, configuration)
     elif len(inputs) == 5 and len(outputs) == 6 and 'pha' in outputs.keys():
-        return VideoBackgroundMatting(model_adapter, configuration), True, False
+        model = VideoBackgroundMatting(model_adapter, configuration)
+        is_matting_model = True
     elif len(inputs) == 2 and len(outputs) in (3, 6) and 'bgr' in inputs.keys():
-        if bgr is None:
+        if args.bgr is None:
             raise ValueError('For chosen type of model is needed additional input with '
                              'real background specified by --bgr argument. Please specify it.')
-        return BackgroundMattingWithBGR(model_adapter, configuration), True, True
+        model = BackgroundMattingWithBGR(model_adapter, configuration)
+        need_bgr_input = True
+        is_matting_model = True
     else:
-        return MaskRCNNModel(model_adapter, configuration), False, False
+        model = MaskRCNNModel(model_adapter, configuration)
+    if not need_bgr_input and args.bgr is not None:
+        log.info('\'--bgr\' argument is set but not needed, so will not be used')
+
+    if args.raw_output_message and is_matting_model:
+        log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
+        args.raw_output_message = False
+    return model, need_bgr_input
 
 
 def print_raw_results(outputs, frame_id):
@@ -165,8 +177,7 @@ def process_masks(objects, frame, target_bgr, person_id):
     return output
 
 
-def render_results(frame, objects, output_resolution, target_bgr, person_id, matting_process,
-                   blur_kernel=0, show_with_original_frame=False):
+def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_kernel=0, show_with_original_frame=False):
     blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
     if target_bgr is None:
         target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
@@ -175,10 +186,10 @@ def render_results(frame, objects, output_resolution, target_bgr, person_id, mat
         if blur_kernel:
             target_bgr = cv2.blur(target_bgr, blur_kernel)
 
-    if matting_process:
-        output = process_matting(objects, target_bgr.astype(np.float32) / 255)
-    else:
+    if len(objects) == 4:
         output = process_masks(objects, frame, target_bgr, person_id)
+    else:
+        output = process_matting(objects, target_bgr.astype(np.float32) / 255)
 
     if show_with_original_frame:
         output = cv2.hconcat([frame, output])
@@ -214,14 +225,9 @@ def main():
         'resize_type': args.resize_type
     }
 
-    model, is_matting_model, need_bgr_input = get_model(model_adapter, configuration, args.bgr)
+    model, need_bgr_input = get_model(model_adapter, configuration, args)
 
     input_bgr = open_images_capture(args.bgr, True) if need_bgr_input else None
-    if not need_bgr_input and args.bgr is not None:
-        log.info('\'--bgr\' argument is set but not needed, so will not be used')
-
-    if args.raw_output_message and is_matting_model:
-        log.info('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
 
     person_id = -1
     for i, label in enumerate(labels):
@@ -277,12 +283,12 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
-            if args.raw_output_message and not is_matting_model:
+            if args.raw_output_message:
                 print_raw_results(objects, next_frame_id_to_show)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             rendering_start_time = perf_counter()
-            frame = render_results(frame, objects, output_resolution, bgr, person_id, is_matting_model,
+            frame = render_results(frame, objects, output_resolution, bgr, person_id,
                                    args.blur_bgr, args.show_with_original_frame)
             render_metrics.update(rendering_start_time)
             presenter.drawGraphs(frame)
@@ -306,13 +312,13 @@ def main():
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
-        if args.raw_output_message and not is_matting_model:
+        if args.raw_output_message:
             print_raw_results(objects, next_frame_id_to_show, model.labels)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
         rendering_start_time = perf_counter()
-        frame = render_results(frame, objects, output_resolution, bgr, person_id, is_matting_model,
+        frame = render_results(frame, objects, output_resolution, bgr, person_id,
                                args.blur_bgr, args.show_with_original_frame)
         render_metrics.update(rendering_start_time)
         presenter.drawGraphs(frame)
