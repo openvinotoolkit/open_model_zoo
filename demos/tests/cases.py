@@ -715,7 +715,7 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
-            '--bgr': DataPatternArg('instance-segmentation'),
+            '--background': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),

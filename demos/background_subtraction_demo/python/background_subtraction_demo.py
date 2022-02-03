@@ -63,7 +63,9 @@ def build_argparser():
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
     args.add_argument('--background', default=None, type=str,
-                      help='Optional. Background image for background-matting model.')
+                      help='Optional. Background image for background-matting model. This is a background image '
+                           'that equal to a real background behind a person on an input frame and must have the '
+                           'same shape as an input image.')
     args.add_argument('--blur_bgr', default=0, type=int,
                       help='Optional. Background blur strength (by default with value 0 is not applied).')
 

@@ -133,7 +133,9 @@ Options:
                         output (by default to green field).
   --background BACKGROUND
                         Optional. Background image for background-matting
-                        model.
+                        model. This is a background image that equal to a real
+                        background behind a person on an input frame and must
+                        have the same shape as an input image.
   --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with
                         value 0 is not applied).
 
