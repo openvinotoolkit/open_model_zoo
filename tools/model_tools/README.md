@@ -1,6 +1,6 @@
 # Model Downloader and other automation tools
 
-Open Model Zoo automation tools contains scripts that automate certain model-related tasks
+Open Model Zoo automation tools contain scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
 
 * `omz_downloader` (model downloader) downloads model files from online sources
@@ -29,7 +29,7 @@ future releases.
 
 ## Installation
 
-Model Downloader and other automation tools can be installed as a part of [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package or from source.
+Model Downloader and other automation tools can be installed as part of the [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package or from source.
 Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):

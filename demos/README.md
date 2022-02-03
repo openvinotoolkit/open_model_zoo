@@ -98,7 +98,7 @@ Please run the following command before the demos build (assuming that the binar
 source <INSTALL_DIR>/setupvars.sh
 ```
 
-> **NOTE:** If you are planning to use Python\* demos only, you can install OpenVINO Python\* package.
+> **NOTE:** If you plan to use Python\* demos only, you can install the OpenVINO Python\* package.
 > ```sh
 > pip install openvino
 > ```
@@ -326,7 +326,7 @@ list above.
 ### Get Ready for Running the Demo Applications on Windows*
 
 Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
-Optionally download OpenCV community FFmpeg plugin. There is a downloader script in the OpenVINO package: `<INSTALL_DIR>\extras\opencv\ffmpeg-download.ps1`.
+Optionally, download the OpenCV community FFmpeg plugin using the downloader script in the OpenVINO package: `<INSTALL_DIR>\extras\opencv\ffmpeg-download.ps1`.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 
