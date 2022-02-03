@@ -31,6 +31,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
   - --input=input
+  - --layout=input(NCWL)
   - --output=output
   - --input_model=$dl_dir/aclnet_des_53.onnx
 framework: onnx

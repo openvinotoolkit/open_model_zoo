@@ -72,6 +72,7 @@ model_optimizer_args:
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395,57.12,57.375]
   - --reverse_input_channels
+  - --layout=image(NCHW)
   - --output=probs
 framework: pytorch
 license: https://raw.githubusercontent.com/yitu-opensource/T2T-ViT/main/LICENSE

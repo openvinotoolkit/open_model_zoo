@@ -32,6 +32,7 @@ model_optimizer_args:
   - --input=actual_input_1
   - --mean_values=actual_input_1[151.2405,119.5950,107.8395]
   - --scale_values=actual_input_1[63.0105,56.4570,55.0035]
+  - --layout=actual_input_1(NCHW)
   - --reverse_input_channels
   - --input_model=$dl_dir/anti-spoof-mn3.onnx
 framework: onnx

@@ -33,6 +33,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,160,160,3],[1]
   - --input=image_batch,phase_train
+  # - --layout=image_batch(NHWC)
   - --mean_values=image_batch[127.5,127.5,127.5]
   - --scale_values=image_batch[128.0]
   - --output=embeddings

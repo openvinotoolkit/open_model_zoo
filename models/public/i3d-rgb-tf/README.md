@@ -61,13 +61,13 @@ Channel order is `RGB`. Mean value - 127.5, scale value - 127.5.
 
 ### Converted Model
 
-Video clip, name - `Placeholder`, shape - `1, 79, 3, 224, 224`, format is `B, D, C, H, W`, where:
+Video clip, name - `Placeholder`, shape - `1, 79, 224, 224, 3`, format is `B, D, H, W, C`, where:
 
 - `B` - batch size
 - `D` - duration of input clip
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `RGB`.
 
