@@ -179,8 +179,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
 
         if callback:
             callback(enc_raw_res)
-        features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
-        dec_state = enc_res[self.recognizer_encoder.outputs_mapping['decoder_hidden']]
+        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res)
+        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res)
+        features = enc_res[feats_out]
+        dec_state = enc_res[hidden_out]
 
         tgt = np.array([self.sos_index])
         logits = []
@@ -198,8 +200,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             else:
                 dec_raw_res = dec_res
 
-            dec_state = dec_res[self.recognizer_decoder.outputs_mapping['decoder_hidden']]
-            logit = dec_res[self.recognizer_decoder.outputs_mapping['decoder_output']]
+            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res)
+            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res)
+            dec_state = dec_res[hidden_out]
+            logit = dec_res[logits_out]
             tgt = np.argmax(logit, axis=1)
             if self.eos_index == tgt[0]:
                 break
