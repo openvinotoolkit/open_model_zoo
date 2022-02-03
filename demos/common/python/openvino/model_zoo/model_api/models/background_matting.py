@@ -118,7 +118,7 @@ class BackgroundMattingWithBGR(ImageModel):
         return shapes[0]
 
     def _get_outputs(self):
-        image_blob_names= {}
+        image_blob_names = {}
         for name, metadata in self.outputs.items():
             if len(metadata.shape) == 4 and metadata.shape[1] == 3:
                 image_blob_names['fgr'] = name
