@@ -112,12 +112,9 @@ class BackgroundMattingWithBGR(ImageModel):
         return image_blob_names, image_info_blob_names
 
     def set_input_shape(self):
-        shapes = []
-        for name in self.image_blob_names:
-            shapes.append(self.inputs[name].shape)
-        for i in range(1, len(shapes)):
-            if shapes[i] != shapes[i - 1]:
-                raise WrapperError(self.__model__, 'Image inputs have incompatible shapes: {}'.format(shapes))
+        shapes = [tuple(self.inputs[name].shape) for name in self.image_blob_names]
+        if len(set(shapes)) != 1:
+            raise WrapperError(self.__model__, 'Image inputs have incompatible shapes: {}'.format(shapes))
         return shapes[0]
 
     def _get_outputs(self):
