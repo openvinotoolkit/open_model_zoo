@@ -15,7 +15,9 @@
 */
 
 #include <ngraph/ngraph.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
+
 #include "models/detection_model_retinaface.h"
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)

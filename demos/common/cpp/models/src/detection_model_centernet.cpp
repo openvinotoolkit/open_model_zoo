@@ -16,11 +16,13 @@
 
 #include <ngraph/ngraph.hpp>
 #include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
+#include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
+
 #include "models/detection_model_centernet.h"
 
-#include <utils/image_utils.h>
 
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,

@@ -15,10 +15,13 @@
 */
 
 #pragma once
-#include <vector>
-#include "detection_model.h"
-#include <utils/nms.hpp>
 #include <string>
+#include <vector>
+
+#include <openvino/openvino.hpp>
+#include <utils/nms.hpp>
+
+#include "detection_model.h"
 
 class ModelRetinaFacePT : public DetectionModel {
 public:

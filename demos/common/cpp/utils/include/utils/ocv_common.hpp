@@ -177,9 +177,6 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
 
     const bool is_dense = strideW == channels && strideH == channels * width;
     OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
-
-    const bool is_dense = strideW == channels && strideH == channels * width;
-    OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
     auto allocator = std::make_shared<SharedTensorAllocator>(mat);
     return ov::runtime::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, ov::Allocator(allocator));
 }
@@ -298,7 +295,9 @@ public:
     void setPrecision(std::shared_ptr<ov::Model>& model) {
         const auto precision = isTrivial ? ov::element::u8 : ov::element::f32;
         ov::preprocess::PrePostProcessor ppp(model);
-        ppp.input().preprocess().convert_element_type(precision);
+        for (const auto& input : model->inputs()) {
+            ppp.input(input.get_any_name()).preprocess().convert_element_type(precision);
+        }
         model = ppp.build();
     }
 
