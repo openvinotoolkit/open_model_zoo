@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
         // Graph input
         cv::GMat in;
         // Graph outputs
-        auto outs = cv::GOut(cv::gapi::copy(in));
+        auto outs = cv::GOut();
 
         // Size of frame
         cv::GOpaque<cv::Size> size = cv::gapi::streaming::size(in);
@@ -196,7 +196,6 @@ int main(int argc, char *argv[]) {
         /** ---------------- End of graph ---------------- **/
 
         auto kernels  = custom::kernels();
-        auto pipeline = graph.compileStreaming(cv::compile_args(kernels, config.networks));
 
         // Getting information about frame from ImagesCapture
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(inputPath, loop);
@@ -218,20 +217,24 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u, tmp.rows - graphSize.height - 10, graphSize);
 
         // Output containers for results
-        cv::Mat image;
         std::vector<std::vector<cv::Point2f>> outPts;
         std::vector<cv::Mat> outTexts;
-        auto outVector = cv::gout(image);
-        if (trRequired) {
-            outVector += cv::gout(outTexts);
-        }
-        outVector += cv::gout(outPts);
         /** ---------------- The execution part ---------------- **/
-        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap)));
-        pipeline.start();
         PerformanceMetrics metrics;
         std::chrono::steady_clock::time_point beginFrame = std::chrono::steady_clock::now();
-        while (pipeline.pull(std::move(outVector))) {
+        cv::Mat image = cap->read();
+        if (!image.data) {
+            throw std::runtime_error("Can't read an image from the input");
+        }
+        do {
+            cv::Mat demoImage = image.clone();
+            auto outVector = cv::gout();
+            if (trRequired) {
+                outVector += cv::gout(outTexts);
+            }
+            outVector += cv::gout(outPts);
+            graph.apply(cv::gin(image), std::move(outVector),
+                        cv::compile_args(kernels, config.networks));
             const auto numFound = outPts.size();
             int numRecognized = trRequired ? 0 : numFound;
             for (std::size_t l = 0; l < numFound; l++) {
@@ -317,7 +320,8 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
             }
             beginFrame = std::chrono::steady_clock::now();
-        }
+            image = cap->read();
+        } while (image.data);
         // Printing logs
         slog::info << slog::endl << "Metrics report:" << slog::endl;
         metrics.logTotal();

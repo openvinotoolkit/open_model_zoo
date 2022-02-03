@@ -246,14 +246,6 @@ DATA_SEQUENCES = {
         image_net_arg('00030223'),
     ],
 
-    'text-detection-gapi': [
-        image_net_arg('00000032'),
-        image_net_arg('00010394'),
-        image_net_arg('00010401'),
-        image_net_arg('00028164'),
-        image_net_arg('00030223'),
-    ],
-
     'vehicle-license-plate-detection-barrier': [
         image_net_arg('00000014'),
         image_net_arg('00001892'),
