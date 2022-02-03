@@ -302,9 +302,9 @@ public:
         return cv::Scalar(values[0], values[1], values[2]);
     }
 
-    void setPrecision(ov::preprocess::PrePostProcessor& ppp) {
+    void setPrecision(ov::preprocess::PrePostProcessor& ppp, const std::string& tensorName) {
         const auto precision = isTrivial ? ov::element::u8 : ov::element::f32;
-        ppp.input().tensor().
+        ppp.input(tensorName).tensor().
                 set_element_type(precision);
     }
 

@@ -32,6 +32,7 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
         info[0] = static_cast<float>(netInputHeight);
         info[1] = static_cast<float>(netInputWidth);
         info[2] = 1;
+        request.set_tensor(inputsNames[1], imageInfoTensor);
     }
 
     return DetectionModel::preprocess(inputData, request);
@@ -44,7 +45,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
-    ov::Tensor detectionsTensor = infResult.getFirstOutputTensor();
+    const ov::Tensor& detectionsTensor = infResult.getFirstOutputTensor();
+    size_t detectionsNum = detectionsTensor.get_shape()[detectionsNumId];
     const float* detections = detectionsTensor.data<float>();
 
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
@@ -52,7 +54,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    for (size_t i = 0; i < maxProposalCount; i++) {
+    for (size_t i = 0; i < detectionsNum; i++) {
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
@@ -86,6 +88,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
     const float* boxes = infResult.outputsData[outputsNames[0]].data<float>();
+    size_t detectionsNum = infResult.outputsData[outputsNames[0]].get_shape()[detectionsNumId];
     const float* labels = infResult.outputsData[outputsNames[1]].data<float>();
     const float *scores = outputsNames.size() > 2 ? infResult.outputsData[outputsNames[2]].data<float>() : nullptr;
 
@@ -99,7 +102,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     float widthScale = ((float)internalData.inputImgWidth) / (scores ? 1 : netInputWidth);
     float heightScale = ((float)internalData.inputImgHeight) / (scores ? 1 : netInputHeight);
 
-    for (size_t i = 0; i < maxProposalCount; i++) {
+    for (size_t i = 0; i < detectionsNum; i++) {
         float confidence = scores ? scores[i] : boxes[i * objectSize + 4];
 
         /** Filtering out objects with confidence < confidence_threshold probability **/
@@ -131,10 +134,10 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare input ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     ov::preprocess::PrePostProcessor ppp(model);
-    inputTransform.setPrecision(ppp);
     for (const auto& input : inputsInfo) {
         auto inputTensorName = input.get_any_name();
         ov::Layout inputLayout = ov::layout::get_layout(model->input(inputTensorName));
+        auto shape = input.get_shape();
         if (input.get_shape().size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
                 inputsNames.push_back(inputTensorName);
@@ -144,11 +147,15 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             }
 
             if (inputLayout.empty()) {
-                inputLayout = { "NCHW" };
+                inputLayout = {"NCHW"};
+                if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
+                    input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+                    inputLayout = {"NHWC"};
+                }
             }
+            inputTransform.setPrecision(ppp, inputTensorName);
             if (useAutoResize) {
                 ppp.input(inputTensorName).tensor().
-                    set_element_type(ov::element::u8).
                     set_spatial_dynamic_shape().
                     set_layout({ "NHWC" });
 
@@ -158,14 +165,12 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             }
             else {
                 ppp.input(inputTensorName).tensor().
-                    set_element_type(ov::element::u8).
                     set_layout({ "NHWC" });
             }
-
             ppp.input(inputTensorName).model().set_layout(inputLayout);
 
-            netInputHeight = input.get_shape()[ov::layout::height_idx(inputLayout)];
-            netInputWidth = input.get_shape()[ov::layout::width_idx(inputLayout)];
+            netInputWidth = shape[ov::layout::width_idx(inputLayout)];
+            netInputHeight = shape[ov::layout::height_idx(inputLayout)];
         }
         else if (input.get_shape().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
@@ -201,8 +206,7 @@ void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
     if (shape.size() != 4) {
         throw std::logic_error("SSD single output must have 4 dimensions, but had " + std::to_string(shape.size()));
     }
-
-    maxProposalCount = shape[ov::layout::channels_idx(layout)];
+    detectionsNumId = ov::layout::channels_idx(layout);
     objectSize = shape[ov::layout::width_idx(layout)];
     if (objectSize != 7) {
         throw std::logic_error("SSD single output must have 7 as a last dimension, but had " + std::to_string(objectSize));
@@ -240,20 +244,21 @@ void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
 
     ov::preprocess::PrePostProcessor ppp(model);
     const auto& bboxesShape = model->output(outputsNames[0]).get_partial_shape().get_max_shape();
-    ov::Layout bboxesLayout;
+
+    ov::Layout boxesLayout;
     if (bboxesShape.size() == 2) {
-        bboxesLayout = "NC";
-        maxProposalCount = bboxesShape[ov::layout::batch_idx(bboxesLayout)];
-        objectSize = bboxesShape[ov::layout::channels_idx(bboxesLayout)];
+        boxesLayout = "NC";
+        detectionsNumId = ov::layout::batch_idx(boxesLayout);
+        objectSize = bboxesShape[ov::layout::channels_idx(boxesLayout)];
 
         if (objectSize != 5) {
             throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
         }
     }
     else if (bboxesShape.size() == 3) {
-        bboxesLayout = "CHW";
-        maxProposalCount = bboxesShape[ov::layout::height_idx(bboxesLayout)];
-        objectSize = bboxesShape[ov::layout::width_idx(bboxesLayout)];
+        boxesLayout = "CHW";
+        detectionsNumId = ov::layout::height_idx(boxesLayout);
+        objectSize = bboxesShape[ov::layout::width_idx(boxesLayout)];
 
         if (objectSize != 4) {
             throw std::logic_error("Incorrect 'boxes' output shape, [b][n][4] shape is required");
@@ -264,7 +269,7 @@ void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     ppp.output(outputsNames[0]).tensor().
-        set_layout(bboxesLayout);
+        set_layout(boxesLayout);
     for (const auto& outName : outputsNames) {
         ppp.output(outName).tensor().
             set_element_type(ov::element::f32);

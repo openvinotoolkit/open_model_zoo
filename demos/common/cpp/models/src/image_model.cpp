@@ -31,7 +31,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         // /* Resize and copy data from the image to the input tensor */
         // ov::Tensor frameTensor = request.get_input_tensor();
         // matToTensor(img, frameTensor);
-        ov::Tensor frameTensor = request.get_input_tensor();
+        ov::Tensor frameTensor = request.get_tensor(inputsNames[0]);  // first input should be image
         ov::Shape tensorShape = frameTensor.get_shape();
         ov::Layout layout("NHWC");
         const size_t width = tensorShape[ov::layout::width_idx(layout)];
@@ -45,6 +45,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         }
         img = resizeImageExt(img, width, height);
     }
-    request.set_input_tensor(wrapMat2Tensor(img));
+    request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
     return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
 }

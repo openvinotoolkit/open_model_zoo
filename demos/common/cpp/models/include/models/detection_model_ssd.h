@@ -42,6 +42,6 @@ protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
     void prepareSingleOutput(std::shared_ptr<ov::Model>& model);
     void prepareMultipleOutputs(std::shared_ptr<ov::Model>& model);
-    size_t maxProposalCount = 0;
     size_t objectSize = 0;
+    size_t detectionsNumId = 0;
 };
