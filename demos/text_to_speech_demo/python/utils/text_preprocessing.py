@@ -19,7 +19,7 @@ commit d26c763342518d4e432e9c4036a1aff3b4fdaa1e on Feb 3, 2020
 
 import re
 from utils.numbers import normalize_numbers
-
+import utils.cmudict as cmudict
 
 
 _pad = '_'
@@ -31,10 +31,18 @@ _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 # Export all symbols:
 symbols = [_pad] + list(_special) + list(_punctuation) + list(_letters)
 
+# Prepend "@" to ARPAbet symbols to ensure uniqueness (some are the same as uppercase letters):
+_arpabet = ['@' + s for s in cmudict.valid_symbols]
+# Export all symbols:
+symbols_arpabet = [_pad] + list(_special) + list(_punctuation) + list(_letters) + _arpabet
+
 
 # Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}
 _id_to_symbol = {i: s for i, s in enumerate(symbols)}
+
+_symbol_to_id_arpabet = {s: i for i, s in enumerate(symbols_arpabet)}
+_id_to_symbol_arpabet = {i: s for i, s in enumerate(symbols_arpabet)}
 
 
 
@@ -90,9 +98,60 @@ def text_to_sequence(text):
     return sequence
 
 
+def get_arpabet(word, dictionary):
+    word_arpabet = dictionary.lookup(word)
+    if word_arpabet is not None:
+        return "{" + word_arpabet[0] + "}"
+    else:
+        return word
+
+
+def text_to_sequence_with_dictionary(text, dictionary):
+    '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
+    The text can optionally have ARPAbet sequences enclosed in curly braces embedded
+    in it. For example, "Turn left on {HH AW1 S S T AH0 N} Street."
+    Args:
+      text: string to convert to a sequence
+      cleaner_names: names of the cleaner functions to run the text through
+    Returns:
+      List of integers corresponding to the symbols in the text
+  '''
+    text = text.lower()
+    text = normalize_numbers(text)
+    text = expand_abbreviations(text)
+    text = collapse_whitespace(text)
+
+    words = [w for w in text.split(" ") if len(w)]
+    clean_text = [get_arpabet(w, dictionary) for w in words]
+
+    sequence = []
+    space = _symbols_to_sequence(' ')
+    for t in clean_text:
+        if t.startswith("{"):
+            sequence += _arpabet_to_sequence(t[1:-1])
+        else:
+            sequence += _symbols_to_sequence(t)
+        sequence += space
+
+    return sequence
+
+def _arpabet_to_sequence(text):
+    return _symbols_to_sequence_arpabet(['@' + s for s in text.split()])
+
+def _symbols_to_sequence_arpabet(symbols):
+    return [_symbol_to_id_arpabet[s] for s in symbols if _should_keep_symbol(s)]
+
 def _symbols_to_sequence(symbols):
     return [_symbol_to_id[s] for s in symbols if _should_keep_symbol(s)]
 
 
 def _should_keep_symbol(s):
     return s in _symbol_to_id and s != _pad
+
+
+def intersperse(lst):
+    item = len(symbols_arpabet)
+
+    result = [item] * (len(lst) * 2 + 1)
+    result[1::2] = lst
+    return result
