@@ -190,7 +190,7 @@ class DLSDKLauncher(Launcher):
                 state.reset()
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata) if not self.dyn_input_layers else self._fill_meta(metadata, infer_inputs)
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -210,19 +210,19 @@ class DLSDKLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata) if not self.dyn_input_layers else self._fill_meta(metadata, feed_dict)
         self._do_reshape = False
         return results
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata) if not self.dyn_input_layers else self._fill_meta(metadata, infer_inputs)
         ir.infer(infer_inputs, metadata, context)
 
-    def _fill_meta(self, metadata):
+    def _fill_meta(self, metadata, inputs=None):
         for meta_ in metadata:
-            meta_['input_shape'] = self.inputs_info_for_meta()
+            meta_['input_shape'] = self.inputs_info_for_meta(inputs)
             if self._output_layouts:
                 meta_['output_layout'] = self._output_layouts
             if self._output_precisions:
@@ -659,7 +659,9 @@ class DLSDKLauncher(Launcher):
             network = ie.IENetwork(model=str(model), weights=str(weights))
         return network
 
-    def inputs_info_for_meta(self):
+    def inputs_info_for_meta(self, inputs=None):
+        if inputs:
+            return {layer_name: np.shape(data) for layer_name, data in inputs.items()}
         if not self.dyn_input_layers:
             return {
                 layer_name: layer.shape for layer_name, layer in self.inputs.items()
