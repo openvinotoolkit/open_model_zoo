@@ -49,9 +49,9 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
+    inputTransform.setPrecision(ppp, model->input().get_any_name());
     if (useAutoResize) {
         ppp.input().tensor().
-            set_element_type(ov::element::u8).
             set_spatial_dynamic_shape().
             set_layout({ "NHWC" });
 
@@ -61,7 +61,6 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     else {
         ppp.input().tensor().
-            set_element_type(ov::element::u8).
             set_layout({ "NHWC" });
     }
 
