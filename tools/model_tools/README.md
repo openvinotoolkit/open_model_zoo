@@ -36,12 +36,12 @@ Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
-2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package of the corresponding version:
+2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package to obtain Model Optimizer and other tools:
 
 ```sh
-pip install openvino-dev[caffe,onnx,tensorflow2,pytorch,mxnet]
+pip install openvino-dev
 ```
-> **NOTE**: For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
+> **NOTE**: openvino-dev version should be the same as OMZ Tools. For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
 
 2. Install the tools with the following command:
 
