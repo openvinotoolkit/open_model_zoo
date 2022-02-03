@@ -1,19 +1,19 @@
 # Model Downloader and other automation tools
 
-This directory contains scripts that automate certain model-related tasks
+Open Model Zoo automation tools contains scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
 
-* `downloader.py` (model downloader) downloads model files from online sources
+* `omz_downloader` (model downloader) downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
   Optimizer;
 
-* `converter.py` (model converter) converts the models that are not in the
+* `omz_converter` (model converter) converts the models that are not in the
   Inference Engine IR format into that format using Model Optimizer.
 
-* `quantizer.py` (model quantizer) quantizes full-precision models in the IR
+* `omz_quantizer` (model quantizer) quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
 
-* `info_dumper.py` (model information dumper) prints information about the models
+* `omz_info_dumper` (model information dumper) prints information about the models
   in a stable machine-readable format.
 
 Please use these tools instead of attempting to parse the configuration files
@@ -29,12 +29,12 @@ future releases.
 
 ## Installation
 
-Model Downloader and other automation tools can be installed as a part of OpenVINO&trade; toolkit or from source.
+Model Downloader and other automation tools can be installed as a part of [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package or from source.
 Installation from source is as follows:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
-2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) python package of the corresponding version:
+2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package of the corresponding version:
 
 ```sh
 pip install openvino-dev[caffe,onnx,tensorflow2,pytorch,mxnet]
