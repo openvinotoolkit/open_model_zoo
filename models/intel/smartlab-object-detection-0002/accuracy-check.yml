@@ -13,8 +13,8 @@ models:
 
         preprocessing:
           - type: resize
-            dst_width: 224
-            dst_height: 224
+            dst_width: 416
+            dst_height: 416
 
         postprocessing:
           - type: filter
