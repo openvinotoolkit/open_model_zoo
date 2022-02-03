@@ -92,7 +92,7 @@ static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
     if (static_cast<size_t>(mat.channels()) != channels) {
-        throw std::runtime_error("The number of channels for net input and image must match");
+        throw std::runtime_error("The number of channels for model input and image must match");
     }
     if (channels != 1 && channels != 3) {
         throw std::runtime_error("Unsupported number of channels");
