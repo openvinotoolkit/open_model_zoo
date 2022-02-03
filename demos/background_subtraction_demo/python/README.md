@@ -43,7 +43,7 @@ Based on this an instance segmentation model must be trained at least for person
 
 As input, the demo application accepts a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
 
-> **NOTE**: if you use image background matting models, `--bgr` argument should be specified. This is a background image that equal to a real background behind a person on an input frame and must have the same shape as an input image.
+> **NOTE**: if you use image background matting models, `--background` argument should be specified. This is a background image that equal to a real background behind a person on an input frame and must have the same shape as an input image.
 
 The demo workflow is the following:
 
@@ -92,7 +92,8 @@ usage: background_subtraction_demo.py [-h] -m MODEL
                                       [-d DEVICE] [-t PROB_THRESHOLD]
                                       [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
                                       [--labels LABELS]
-                                      [--target_bgr TARGET_BGR] [--bgr BGR]
+                                      [--target_bgr TARGET_BGR]
+                                      [--background BACKGROUND]
                                       [--blur_bgr BLUR_BGR]
                                       [-nireq NUM_INFER_REQUESTS]
                                       [-nstreams NUM_STREAMS]
@@ -130,7 +131,8 @@ Options:
   --target_bgr TARGET_BGR
                         Optional. Background onto which to composite the
                         output (by default to green field).
-  --bgr BGR             Optional. Background image for background-matting
+  --background BACKGROUND
+                        Optional. Background image for background-matting
                         model.
   --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with
                         value 0 is not applied).

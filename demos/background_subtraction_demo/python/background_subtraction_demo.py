@@ -26,7 +26,7 @@ import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBGR, VideoBackgroundMatting
+from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBackground, VideoBackgroundMatting
 from openvino.model_zoo.model_api.models.utils import load_labels
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
@@ -62,7 +62,7 @@ def build_argparser():
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
-    args.add_argument('--bgr', default=None, type=str,
+    args.add_argument('--background', default=None, type=str,
                       help='Optional. Background image for background-matting model.')
     args.add_argument('--blur_bgr', default=0, type=int,
                       help='Optional. Background blur strength (by default with value 0 is not applied).')
@@ -113,15 +113,15 @@ def get_model(model_adapter, configuration, args):
         model = VideoBackgroundMatting(model_adapter, configuration)
         is_matting_model = True
     elif len(inputs) == 2 and len(outputs) in (2, 3) and 'bgr' in inputs.keys():
-        if args.bgr is None:
-            raise ValueError('The BackgroundMattingWithBGR model expects the specified "--bgr" option.')
-        model = BackgroundMattingWithBGR(model_adapter, configuration)
+        if args.background is None:
+            raise ValueError('The BackgroundMattingWithBackground model expects the specified "--background" option.')
+        model = BackgroundMattingWithBackground(model_adapter, configuration)
         need_bgr_input = True
         is_matting_model = True
     else:
         model = MaskRCNNModel(model_adapter, configuration)
-    if not need_bgr_input and args.bgr is not None:
-        log.warning('The \"--bgr\" option works only for BackgroundMattingWithBGR model. Option will be omitted.')
+    if not need_bgr_input and args.background is not None:
+        log.warning('The \"--background\" option works only for BackgroundMattingWithBackground model. Option will be omitted.')
 
     if args.raw_output_message and is_matting_model:
         log.warning('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
@@ -223,7 +223,7 @@ def main():
 
     model, need_bgr_input = get_model(model_adapter, configuration, args)
 
-    input_bgr = open_images_capture(args.bgr, False).read() if need_bgr_input else None
+    input_bgr = open_images_capture(args.background, False).read() if need_bgr_input else None
 
     person_id = -1
     for i, label in enumerate(labels):
