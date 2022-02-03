@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
 */
 
 #include <ngraph/ngraph.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
+
 #include "models/detection_model_retinaface_pt.h"
 
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
@@ -26,7 +28,7 @@ ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float con
 
 void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input  ------------------------------------------------------
+    // --------------------------- Prepare input ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
     if (inputsInfo.size() != 1) {
         throw std::logic_error("RetinaFacePT model wrapper expects models that have only one input");
@@ -75,12 +77,14 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     landmarksNum = 0;
 
     std::vector<uint32_t> outputsSizes[OT_MAX];
+    ov::Layout chw("CHW");
+    ov::Layout nchw("NCHW");
     for (auto& output : outputsInfo) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32).
-            set_layout(output.get_shape().size() == 4 ? "NCHW" : "CHW");
+            set_layout(output.get_shape().size() == 4 ? nchw : chw);
 
         outputsNames.resize(2);
         if (outTensorName.find("bbox") != std::string::npos) {
@@ -94,7 +98,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
             // Considering that other outputs names are already filled in or will be filled later
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OT_LANDMARK + 1));
             outputsNames[OT_LANDMARK] = outTensorName;
-            landmarksNum = output.get_shape()[2] / 2; // Each landmark consist of 2 variables (x and y)
+            landmarksNum = output.get_shape()[ov::layout::width_idx(chw)] / 2; // Each landmark consist of 2 variables (x and y)
         }
         else {
             continue;

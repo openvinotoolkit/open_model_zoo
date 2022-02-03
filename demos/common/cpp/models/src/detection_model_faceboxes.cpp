@@ -15,8 +15,12 @@
 */
 
 #include <algorithm>
+
+
 #include <ngraph/ngraph.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
+
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
