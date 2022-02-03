@@ -193,7 +193,7 @@ Demos are required to support the following args:
 
 * `-h, --help`        show this help message and exit
 * `-m <MODEL FILE>`   path to an .xml file with a trained model. If the demo uses several models at the same time, use format `--m?*`.
-* `-i <INPUT ID>`   an input id to process. For vision tasks the input must be a single image, a folder of images, video file or camera id. For vision tasks the default value must be `0`
+* `-i <INPUT>`        input to process. For vision tasks the input might be a path to single image or video file, a path to folder of images, or numeric camera id. For vision tasks the default value must be `0`. For speech/audio tasks input is path to WAV file. For NLP tasks input might be a path to text file or just quoted sentence of text.
 * `-d <DEVICE>`       specify a device to infer on (the list of available devices is shown below). Default is CPU
 * `-o <FILE PATTERN>` pattern for output file(s) to save
 
