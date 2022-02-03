@@ -34,22 +34,6 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-```sh
-./noise_suppression_demo -h
-```
-The command yields the following usage message:
-```
-noise_suppression_demo [OPTION]
-Options:
-
-    -h           Print a usage message.
-    -i INPUT     Required. Path to a input WAV file.
-    -o OUTPUT    Optional. Path to a output WAV file.
-    -m MODEL     Required. Path to an .xml file with a trained model.
-    -d DEVICE    Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
-```
-
 Running the application with an empty list of options yields an error message.
 
 For example, to do inference on a CPU, run the following command:
