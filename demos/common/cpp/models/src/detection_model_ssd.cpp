@@ -130,8 +130,8 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input ------------------------------------------------------
     const ov::OutputVector& inputsInfo = model->inputs();
-    inputTransform.setPrecision(model);
     ov::preprocess::PrePostProcessor ppp(model);
+    inputTransform.setPrecision(ppp);
     for (const auto& input : inputsInfo) {
         auto inputTensorName = input.get_any_name();
         ov::Layout inputLayout = ov::layout::get_layout(model->input(inputTensorName));
