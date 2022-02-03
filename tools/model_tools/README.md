@@ -16,6 +16,8 @@ based on configuration files in the models' directories.
 * `omz_info_dumper` (model information dumper) prints information about the models
   in a stable machine-readable format.
 
+* `omz_data_downloader` (datasets' data downloader) copies datasets' data from installed location.
+
 Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
