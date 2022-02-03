@@ -19,7 +19,8 @@
 #include <memory>
 
 #include <openvino/openvino.hpp>
-#include "utils/ocv_common.hpp"
+#include <utils/image_utils.h>
+#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
 #include "models/style_transfer_model.h"
@@ -83,7 +84,7 @@ std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputDat
     auto& img = imgData.inputImage;
 
     cv::Mat resizedImage;
-    cv::resize(img, resizedImage, cv::Size(netInputWidth, netInputHeight));
+    resizedImage = resizeImageExt(img, netInputWidth, netInputHeight);
     request.set_input_tensor(wrapMat2Tensor(resizedImage));
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
