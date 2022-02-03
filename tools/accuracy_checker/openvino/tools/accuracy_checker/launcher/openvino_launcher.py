@@ -211,7 +211,7 @@ class OpenVINOLauncher(Launcher):
                 state.reset()
 
         if metadata is not None:
-            self._fill_meta(metadata, None if not self.dyn_input_layers else infer_inputs)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         if return_raw:
             return results, raw_results
@@ -241,7 +241,7 @@ class OpenVINOLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            self._fill_meta(metadata, None if not self.dyn_input_layers else feed_dict)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         if return_raw:
             return results, raw_results
@@ -974,7 +974,7 @@ class OpenVINOLauncher(Launcher):
         infer_inputs = inputs[0]
         feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}
         if batch_meta is not None:
-            self._fill_meta(batch_meta)
+            self._fill_meta(batch_meta, None if not self.dyn_input_layers else infer_inputs)
         context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
         return feed_dict, context
 

@@ -190,7 +190,7 @@ class DLSDKLauncher(Launcher):
                 state.reset()
 
         if metadata is not None:
-            self._fill_meta(metadata, None if not self.dyn_input_layers else infer_inputs)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -210,7 +210,7 @@ class DLSDKLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            self._fill_meta(metadata, None if not self.dyn_input_layers else feed_dict)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         return results
 
