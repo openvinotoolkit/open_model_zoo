@@ -138,7 +138,7 @@ class BackgroundMattingWithBGR(ImageModel):
             if target_shape is None:
                 target_shape = meta['original_shape']
             elif meta['original_shape'] != target_shape:
-                raise WrapperError(self.__model__, 'Image inputs should have equal shapes bot got: {} vs {}'
+                raise WrapperError(self.__model__, 'Image inputs must have equal shapes but got: {} vs {}'
                                     .format(target_shape, meta['original_shape']))
         return dict_inputs, meta
 
