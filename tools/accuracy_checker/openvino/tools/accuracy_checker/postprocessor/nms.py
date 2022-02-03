@@ -335,3 +335,107 @@ class DIoUNMS(Postprocessor):
             order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
+
+class WeightedNMS(Postprocessor):
+    __provider__ = 'weighted_nms'
+
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'overlap': NumberField(
+                min_value=0, max_value=1, optional=True, default=0.3,
+                description="Overlap threshold for merging detections."
+            ),
+            # 'include_boundaries': BoolField(
+            #     optional=True, default=True, description="Shows if boundaries are included."
+            # ),
+            # 'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K.")
+        })
+        return parameters
+
+    def configure(self):
+        self.overlap = self.get_value_from_config('overlap')
+        # self.include_boundaries = self.get_value_from_config('include_boundaries')
+        # self.keep_top_k = self.get_value_from_config('keep_top_k')
+
+    def process_image(self, annotation, prediction):
+        pred_out = []
+        for pred in prediction:
+            scores = get_scores(pred)
+            x_mins, y_mins, x_maxs, y_maxs, scores = self.weighted_nms(pred.x_mins, pred.y_mins, pred.x_maxs, pred.y_maxs, scores, self.overlap)
+            pred.replace(np.ones_like(x_mins) * pred.labels[0], scores, x_mins, y_mins, x_maxs, y_maxs)
+
+        return annotation, prediction
+
+    @staticmethod
+    def weighted_nms(x1, y1, x2, y2, scores, thresh):
+
+        if scores.size == 1:
+            return x1, y1, x2, y2, scores
+
+        b = 0
+
+        areas = (x2 - x1 + b) * (y2 - y1 + b)
+        order = scores.argsort()[::-1]
+
+        # if keep_top_k:
+        #     order = order[:keep_top_k]
+
+        keep = []
+
+        out_x1 = []
+        out_x2 = []
+        out_y1 = []
+        out_y2 = []
+        out_scores = []
+
+        while order.size > 0:
+
+            if order.size == 1:
+                i = order[0]
+                out_x1.append(x1[i])
+                out_y1.append(y1[i])
+                out_x2.append(x2[i])
+                out_y2.append(y2[i])
+                out_scores.append(scores[i])
+                order = np.array([])
+                continue
+
+            i = order[0]
+            keep.append(i)
+
+            xx1 = np.maximum(x1[i], x1[order[1:]])
+            yy1 = np.maximum(y1[i], y1[order[1:]])
+            xx2 = np.minimum(x2[i], x2[order[1:]])
+            yy2 = np.minimum(y2[i], y2[order[1:]])
+
+            w = np.maximum(0.0, xx2 - xx1 + b)
+            h = np.maximum(0.0, yy2 - yy1 + b)
+            intersection = w * h
+            normalization = areas[i] + areas[order[1:]] - intersection
+
+            overlap = np.divide(
+                intersection,
+                normalization,
+                out=np.zeros_like(intersection, dtype=float),
+                where=normalization != 0
+            )
+
+            candidates = order[1:][np.where(overlap >= thresh)]
+            remained = order[1:][np.where(overlap < thresh)]
+            candidates = np.array([i] + list(candidates))
+
+            total_score = np.sum(scores[candidates])
+            out_x1.append(np.sum(x1[candidates] * scores[candidates]) / total_score)
+            out_y1.append(np.sum(y1[candidates] * scores[candidates]) / total_score)
+            out_x2.append(np.sum(x2[candidates] * scores[candidates]) / total_score)
+            out_y2.append(np.sum(y2[candidates] * scores[candidates]) / total_score)
+            out_scores.append(total_score / candidates.size)
+
+            order = remained
+
+        return np.array(out_x1), np.array(out_y1), np.array(out_x2), np.array(out_y2), np.array(out_scores)

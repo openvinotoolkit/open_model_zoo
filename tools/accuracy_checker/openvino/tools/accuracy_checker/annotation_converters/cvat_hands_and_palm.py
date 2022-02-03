@@ -178,6 +178,8 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
             return self.convert_from_landmarks(check_content, progress_callback, progress_interval, **kwargs)
 
         annotation = read_json(self.annotation_file)
+        meta = {'label_map': {0: 'PALM'}, 'label': ['PALM']}
+        palm_id = 0
         annotations = []
         content_errors = None if not check_content else []
         for ann_id, ann in enumerate(annotation['annotations']):
@@ -189,17 +191,21 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             bbox = ann['bbox']
-            detection_annotation = DetectionAnnotation(identifier, None, bbox[0], bbox[1], bbox[0] + bbox[2],
-                                                       bbox[1] + bbox[3])
+            detection_annotation = DetectionAnnotation(identifier, [palm_id],
+                                                       [bbox[0]],
+                                                       [bbox[1]],
+                                                       [bbox[0] + bbox[2]],
+                                                       [bbox[1] + bbox[3]])
             annotations.append(detection_annotation)
             if progress_callback is not None and ann_id % progress_interval == 0:
                 progress_callback(ann_id * 100 / len(annotation['annotations']))
 
-        return ConverterReturn(annotations, None, content_errors)
+        return ConverterReturn(annotations, meta, content_errors)
 
     def convert_from_landmarks(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_json(self.landmarks_file)
         label_to_id, meta = self.generate_labels_mapping(annotation['categories'])
+        palm_id = label_to_id['PALM']
         num_landmarks = len(meta['label']) - 1
         annotations = []
         content_errors = None if not check_content else []
@@ -212,13 +218,13 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
-            detection_annotation = DetectionAnnotation(identifier, None,
-                                                       landmarks_x.min() - self.padding,
-                                                       landmarks_y.min() - self.padding,
-                                                       landmarks_x.max() + self.padding,
-                                                       landmarks_y.max() + self.padding)
+            detection_annotation = DetectionAnnotation(identifier, palm_id,
+                                                       [landmarks_x.min() - self.padding],
+                                                       [landmarks_y.min() - self.padding],
+                                                       [landmarks_x.max() + self.padding],
+                                                       [landmarks_y.max() + self.padding])
             annotations.append(detection_annotation)
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / len(annotation['images']))
 
-        return ConverterReturn(annotations, None, content_errors)
+        return ConverterReturn(annotations, meta, content_errors)

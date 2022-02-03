@@ -99,6 +99,14 @@ class DetectionPrediction(Detection):
             self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
         )
 
+    def replace(self, labels, scores, x_mins, y_mins, x_maxs, y_maxs):
+        self.remove(np.array(range(self.scores.size)))
+        self.labels = np.array(labels) if labels is not None else np.array([])
+        self.x_mins = np.array(x_mins) if x_mins is not None else np.array([])
+        self.y_mins = np.array(y_mins) if y_mins is not None else np.array([])
+        self.x_maxs = np.array(x_maxs) if x_maxs is not None else np.array([])
+        self.y_maxs = np.array(y_maxs) if y_maxs is not None else np.array([])
+        self.scores = np.array(scores) if scores is not None else np.array([])
 
 class AttributeDetectionAnnotation(DetectionAnnotation):
     pass

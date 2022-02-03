@@ -1077,38 +1077,6 @@ class PalmDetectionAdapter(Adapter):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.outputs_verified = False
 
-        # num_layers: 4
-        # min_scale: 0.1484375
-        # max_scale: 0.75
-        # input_size_width: 192
-        # input_size_height: 192
-        # anchor_offset_x: 0.5
-        # anchor_offset_y: 0.5
-        # strides: 8
-        # strides: 16
-        # strides: 16
-        # strides: 16
-        # aspect_ratios: 1.0
-        # fixed_anchor_size: true
-
-        # options: {
-        #     [mediapipe.SsdAnchorsCalculatorOptions.ext]
-        # {
-        #     num_layers: 4
-        #     min_scale: 0.1484375
-        #     max_scale: 0.75
-        #     input_size_height: 128
-        #     input_size_width: 128
-        #     anchor_offset_x: 0.5
-        #     anchor_offset_y: 0.5
-        #     strides: 8
-        #     strides: 16
-        #     strides: 16
-        #     strides: 16
-        #     aspect_ratios: 1.0
-        #     fixed_anchor_size: true
-        # }
-
         self.num_layers = 4
         self.min_scale = 0.1484375
         self.max_scale = 0.75
@@ -1133,6 +1101,7 @@ class PalmDetectionAdapter(Adapter):
         self.keypoint_coord_offset = 4
         self.num_keypoints = 7
         self.num_values_per_keypoint = 2
+        # self.palm_id = 22
 
         self.x_scale = 128.0
         self.y_scale = 128.0
@@ -1156,81 +1125,40 @@ class PalmDetectionAdapter(Adapter):
         if not self.outputs_verified:
             self.select_output_blob(raw_output)
 
-        # def box_cxcywh_to_xyxy(x):
-        #     x_c, y_c, w, h = x.T
-        #     b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-        #          (x_c + 0.5 * w), (y_c + 0.5 * h)]
-        #     return b
-        #
-        # def softmax(logits):
-        #     res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
-        #     return np.array(res)
-
         for identifier, raw_scores, raw_boxes in zip(identifiers, raw_output[self.scores_out],
                                                      raw_output[self.boxes_out]):
             num_boxes, _ = raw_boxes.shape
-            #     MP_RETURN_IF_ERROR(DecodeBoxes(raw_boxes, anchors_, &boxes));
             boxes = self.decode_boxes(raw_boxes)
             detection_scores = np.zeros(num_boxes)
             detection_classes = np.zeros(num_boxes)
-            #
-            #     std::vector<float> detection_scores(num_boxes_);
-            #     std::vector<int> detection_classes(num_boxes_);
-            #
-            #     // Filter classes by scores.
-            #     for (int i = 0; i < num_boxes_; ++i) {
+
             for i in range(num_boxes):
-            #       int class_id = -1;
-            #       float max_score = -std::numeric_limits<float>::max();
                 class_id = -1
                 max_score = -np.inf
-            #       // Find the top score for box i.
-            #       for (int score_idx = 0; score_idx < num_classes_; ++score_idx) {
                 for score_idx in range(self.num_classes):
-            #         if (ignore_classes_.find(score_idx) == ignore_classes_.end()) {
-            #           auto score = raw_scores[i * num_classes_ + score_idx];
                     score = raw_scores[i, score_idx]
-            #           if (options_.sigmoid_score()) {
                     if self.sigmoid_score:
-            #             if (options_.has_score_clipping_thresh()) {
                         if self.has_score_clipping_thresh:
-            #               score = score < -options_.score_clipping_thresh()
-            #                           ? -options_.score_clipping_thresh()
-            #                           : score;
                             score = -self.score_clipping_thresh if score < -self.score_clipping_thresh else score
-            #               score = score > options_.score_clipping_thresh()
-            #                           ? options_.score_clipping_thresh()
-            #                           : score;
                             score = self.score_clipping_thresh if score > self.score_clipping_thresh else score
-            #             }
-            #             score = 1.0f / (1.0f + std::exp(-score));
                         score = 1.0 / (1.0 + np.exp(-score))
-            #           }
-            #           if (max_score < score) {
-            #             max_score = score;
-            #             class_id = score_idx;
-            #           }
                     if max_score < score:
                         max_score = score
                         class_id = score_idx
-            #         }
-            #       }
-            #       detection_scores[i] = max_score;
-            #       detection_classes[i] = class_id;
                 detection_classes[i] = class_id
                 detection_scores[i] = max_score
-            #     }
-            #
-            #     MP_RETURN_IF_ERROR(
-            #         ConvertToDetections(boxes.data(), detection_scores.data(),
-            #                             detection_classes.data(), output_detections));
-            detections = self.convert_to_detections(boxes, detection_scores, detection_classes)
-            # x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
-            # scores = softmax(logits)
+            cond = detection_scores >= self.min_score_thresh
+            boxes = np.array(boxes)[cond]
+            detection_classes = detection_classes[cond]
+            detection_scores = detection_scores[cond]
 
-            # NMS decoding
+            cond = ((boxes[:,2] - boxes[:, 0]) >= 0) & ((boxes[:, 3] - boxes[:, 1]) >=0)
 
-            detections = self.do_nms(detections)
+            boxes = boxes[cond, :]
+            detection_classes = detection_classes[cond]
+            detection_scores = detection_scores[cond]
+
+            num_boxes, _ = boxes.shape
 
             x_mins = []
             y_mins = []
@@ -1238,276 +1166,17 @@ class PalmDetectionAdapter(Adapter):
             y_maxs = []
             labels = []
             det_scores = []
-            for detection in detections:
-                bbox = detection.location_data.relative_bounding_box()
-                x_mins.append(bbox.xmin * self.x_scale)
-                y_mins.append(bbox.ymin * self.x_scale)
-                x_maxs.append((bbox.xmin + bbox.width) * self.x_scale)
-                y_maxs.append((bbox.ymin + bbox.height) * self.x_scale)
-                labels.append(detection.label_id[0])
-                det_scores.append(detection.score[0])
+            for i in range(num_boxes):
+                x_mins.append(boxes[i, 1])
+                y_mins.append(boxes[i, 0])
+                x_maxs.append(boxes[i, 3])
+                y_maxs.append(boxes[i, 2])
+                labels.append(detection_classes[i])
+                det_scores.append(detection_scores[i])
 
             result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
-
-
-# absl::Status    Process(CalculatorContext * cc) override
-    def do_nms(self, detections):
-#     {
-#     // Add all input detections to the same vector.
-#         Detections input_detections;
-#     for (int i = 0; i < options_.num_detection_streams(); ++i) {
-#         const auto & detections_packet = cc->Inputs().Index(i).Value();
-#         // Check whether this stream has a packet for this timestamp.
-#         if (detections_packet.IsEmpty()) {
-#         continue;
-#         }
-#         const auto & detections = detections_packet.Get < Detections > ();
-#         input_detections.insert(input_detections.end(), detections.begin(),
-#                                 detections.end());
-#     }
-#
-#     // Check if there are any detections at all.
-#     if (input_detections.empty())
-#     {
-#         if (options_.return_empty_detections())
-#         {
-#
-#
-#             cc->Outputs().Index(0).Add(new
-#             Detections(), cc->InputTimestamp());
-#         }
-#         return absl::OkStatus();
-#     }
-#
-#     // Remove all but the maximum scoring label from each input detection.This
-#     // corresponds to non - maximum suppression among detections which have
-#     // identical locations.
-#     Detections pruned_detections;
-#     pruned_detections.reserve(input_detections.size());
-#     for (auto & detection : input_detections)
-#     {
-#         if (RetainMaxScoringLabelOnly( & detection)) {
-#             pruned_detections.push_back(detection);
-#         }
-#     }
-        pruned_detections = [detection for detection in detections if detection.RetainMaxScoringLabelOnly()]
-#
-# // Copy all the scores (there is a single score in each detection after
-# // the above pruning) to an indexed vector for sorting. The first value is
-# // the index of the detection in the original vector from which the score
-# // stems, while the second is the actual score.
-#     IndexedScores indexed_scores;
-#     indexed_scores.reserve(pruned_detections.size());
-#     for (int index = 0; index < pruned_detections.size(); ++index) {
-#         indexed_scores.push_back(std::make_pair(index, pruned_detections[index].score(0)));
-#     }
-#     std::sort(indexed_scores.begin(), indexed_scores.end(), SortBySecond);
-        indexed_scores = [(i, pruned_detections[i].score[0]) for i in range(len(pruned_detections))]
-        indexed_scores.sort(key=lambda x: x[1])
-#
-#     const int max_num_detections = (options_.max_num_detections() > -1) ? options_.max_num_detections() : static_cast < int > (indexed_scores.size());
-# // A set of detections and locations, wrapping the location data from each
-# // detection, which are retained after the non - maximum suppression.
-#     auto * retained_detections = new Detections();
-#     retained_detections->reserve(max_num_detections);
-#
-#     if (options_.algorithm() == NonMaxSuppressionCalculatorOptions::WEIGHTED) {
-#         WeightedNonMaxSuppression(indexed_scores, pruned_detections,
-#         max_num_detections, cc, retained_detections);
-#     }
-#     else {
-#         NonMaxSuppression(indexed_scores, pruned_detections, max_num_detections,
-#         cc, retained_detections);
-#     }
-#
-        retained_detections = self.WeightedNMS(indexed_scores, pruned_detections)
-#     cc->Outputs().Index(0).Add(retained_detections, cc->InputTimestamp());
-#
-#     return absl::OkStatus();
-        return retained_detections
-# }
-
-  # void WeightedNonMaxSuppression(const IndexedScores& indexed_scores,
-  #                                const Detections& detections,
-  #                                int max_num_detections, CalculatorContext* cc,
-  #                                Detections* output_detections) {
-    def WeightedNMS(self, indexed_scores, detections):
-  #   IndexedScores remained_indexed_scores;
-  #   remained_indexed_scores.assign(indexed_scores.begin(),
-  #                                  indexed_scores.end());
-  #
-  #   IndexedScores remained;
-  #   IndexedScores candidates;
-  #   output_detections->clear();
-        remained_indexed_scores = [t for t in indexed_scores]
-        output_detections = []
-#   while (!remained_indexed_scores.empty()) {
-        while len(remained_indexed_scores):
-  #     const int original_indexed_scores_size = remained_indexed_scores.size();
-  #     const auto& detection = detections[remained_indexed_scores[0].first];
-  #     if (options_.min_score_threshold() > 0 &&
-  #         detection.score(0) < options_.min_score_threshold()) {
-  #       break;
-  #     }
-  #     remained.clear();
-  #     candidates.clear();
-  #     const Location location(detection.location_data());
-            original_indexed_scores_size = len(remained_indexed_scores)
-            detection = detections[remained_indexed_scores[0][0]]
-            if self.min_score_thresh > 0 and detection.score[0] < self.min_score_thresh:
-                break
-            remained = []
-            candidates = []
-            location = detection.location_data
-  #     // This includes the first box.
-  #     for (const auto& indexed_score : remained_indexed_scores) {
-            for indexed_score in remained_indexed_scores:
-  #       Location rest_location(detections[indexed_score.first].location_data());
-  #       float similarity =
-  #           OverlapSimilarity(options_.overlap_type(), rest_location, location);
-  #       if (similarity > options_.min_suppression_threshold()) {
-  #         candidates.push_back(indexed_score);
-  #       } else {
-  #         remained.push_back(indexed_score);
-  #       }
-                rest_location = detections[indexed_score[0]].location_data
-                similarity = self.overlap_similarity_iou(rest_location, location)
-                if similarity > self.min_suppression_threshold:
-                    candidates.append(indexed_score)
-                else:
-                    remained.append(indexed_score)
-  #     }
-  #     auto weighted_detection = detection;
-            weighted_detection = Detection()
-            weighted_detection.add_label_id(detection.label_id[0])
-            weighted_detection.add_score(detection.score[0])
-  #     if (!candidates.empty()) {
-            if len(candidates):
-  #       const int num_keypoints =
-  #           detection.location_data().relative_keypoints_size();
-  #       std::vector<float> keypoints(num_keypoints * 2);
-  #       float w_xmin = 0.0f;
-  #       float w_ymin = 0.0f;
-  #       float w_xmax = 0.0f;
-  #       float w_ymax = 0.0f;
-  #       float total_score = 0.0f;
-                w_xmin = 0
-                w_xmax = 0
-                w_ymin = 0
-                w_ymax = 0
-                total_score = 0
-                keypoints = [[0, 0]] * self.num_keypoints
-  #       for (const auto& candidate : candidates) {
-                for candidate in candidates:
-  #         total_score += candidate.second;
-  #         const auto& location_data =
-  #             detections[candidate.first].location_data();
-  #         const auto& bbox = location_data.relative_bounding_box();
-  #         w_xmin += bbox.xmin() * candidate.second;
-  #         w_ymin += bbox.ymin() * candidate.second;
-  #         w_xmax += (bbox.xmin() + bbox.width()) * candidate.second;
-  #         w_ymax += (bbox.ymin() + bbox.height()) * candidate.second;
-  #
-                    total_score += candidate[1]
-                    location_data = detections[candidate[0]].location_data
-                    bbox = location_data.relative_bounding_box()
-                    w_xmin += bbox.xmin * candidate[1]
-                    w_ymin += bbox.ymin * candidate[1]
-                    w_xmax += (bbox.xmin + bbox.width) * candidate[1]
-                    w_ymax += (bbox.ymin + bbox.height) * candidate[1]
-
-#         for (int i = 0; i < num_keypoints; ++i) {
-                    for i in range(self.num_keypoints):
-  #           keypoints[i * 2] +=
-  #               location_data.relative_keypoints(i).x() * candidate.second;
-  #           keypoints[i * 2 + 1] +=
-  #               location_data.relative_keypoints(i).y() * candidate.second;
-                        keypoints[i][0] += location_data.keypoints[i].x * candidate[1]
-                        keypoints[i][1] += location_data.keypoints[i].y * candidate[1]
-  #         }
-  #       }
-  #       auto* weighted_location = weighted_detection.mutable_location_data()
-  #                                     ->mutable_relative_bounding_box();
-
-  #       weighted_location->set_xmin(w_xmin / total_score);
-  #       weighted_location->set_ymin(w_ymin / total_score);
-  #       weighted_location->set_width((w_xmax / total_score) -
-  #                                    weighted_location->xmin());
-  #       weighted_location->set_height((w_ymax / total_score) -
-  #                                     weighted_location->ymin());
-                weighted_location = weighted_detection.get_location_data()
-                bbox = weighted_location.relative_bounding_box()
-                bbox.set_xmin(w_xmin / total_score)
-                bbox.set_ymin(w_ymin / total_score)
-                bbox.set_width((w_xmax - w_xmin) / total_score)
-                bbox.set_height((w_ymax - w_ymin) / total_score)
-
-#       for (int i = 0; i < num_keypoints; ++i) {
-  #         auto* keypoint = weighted_detection.mutable_location_data()
-  #                              ->mutable_relative_keypoints(i);
-  #         keypoint->set_x(keypoints[i * 2] / total_score);
-  #         keypoint->set_y(keypoints[i * 2 + 1] / total_score);
-  #       }
-                for kpdata in keypoints:
-                    kp = weighted_location.add_relative_keypoint()
-                    kp.set_x(kpdata[0] / total_score)
-                    kp.set_y(kpdata[1] / total_score)
-
-
-    #     }
-  #
-  #     output_detections->push_back(weighted_detection);
-                output_detections.append(weighted_detection)
-  #     // Breaks the loop if the size of indexed scores doesn't change after an
-  #     // iteration.
-  #     if (original_indexed_scores_size == remained.size()) {
-  #       break;
-  #     } else {
-  #       remained_indexed_scores = std::move(remained);
-  #     }
-            if original_indexed_scores_size == len(remained):
-                break
-            else:
-                remained_indexed_scores = [t for t in remained]
-
-        return output_detections
-    #   }
-  # }
-
-
-# // Computes an overlap similarity between two rectangles. Similarity measure is
-# // defined by overlap_type parameter.
-# float OverlapSimilarity(
-#     const NonMaxSuppressionCalculatorOptions::OverlapType overlap_type,
-#     const Rectangle_f& rect1, const Rectangle_f& rect2) {
-    def overlap_similarity_iou(self, rect1, rect2):
-#   if (!rect1.Intersects(rect2)) return 0.0f;
-        if not rect1.intersects(rect2):
-            return 0
-#   const float intersection_area = Rectangle_f(rect1).Intersect(rect2).Area();
-#   float normalization;
-        intersection_area = rect1.intersect(rect2).area()
-#   switch (overlap_type) {
-#     case NonMaxSuppressionCalculatorOptions::JACCARD:
-#       normalization = Rectangle_f(rect1).Union(rect2).Area();
-#       break;
-#     case NonMaxSuppressionCalculatorOptions::MODIFIED_JACCARD:
-#       normalization = rect2.Area();
-#       break;
-#     case NonMaxSuppressionCalculatorOptions::INTERSECTION_OVER_UNION:
-#       normalization = rect1.Area() + rect2.Area() - intersection_area;
-#       break;
-#     default:
-#       LOG(FATAL) << "Unrecognized overlap type: " << overlap_type;
-#   }
-        normalization = rect1.area() + rect2.area() - rect1.intersect(rect2).area()
-#   return normalization > 0.0f ? intersection_area / normalization : 0.0f;
-        return intersection_area / normalization if normalization > 0 else 0.
-# }
-
-
 
     @staticmethod
     def calculate_scale(min_scale, max_scale, stride_index, num_strides):
@@ -1542,10 +1211,8 @@ class PalmDetectionAdapter(Adapter):
                         aspect_ratios.append(self.aspect_ratios[aspect_ratio_id])
                         scales.append(scale)
                 if self.inteprolated_scale_aspect_ratio > 0.0:
-                    scale_next = 1.0 if last_same_stride_layer == len(self.strides) - 1 else self.calculate_scale(self.min_scale,
-                                                                                                                  self.max_scale,
-                                                                                                                  last_same_stride_layer + 1,
-                                                                                                                  len(self.strides))
+                    scale_next = 1.0 if last_same_stride_layer == len(self.strides) - 1 else self.calculate_scale(
+                        self.min_scale, self.max_scale, last_same_stride_layer + 1, len(self.strides))
                     scales.append(np.sqrt(scale * scale_next))
                     aspect_ratios.append(self.inteprolated_scale_aspect_ratio)
                 last_same_stride_layer += 1
@@ -1586,204 +1253,24 @@ class PalmDetectionAdapter(Adapter):
 
         return anchors
 
-# void ConvertRawValuesToAnchors(const float* raw_anchors, int num_boxes,
-#                                std::vector<Anchor>* anchors) {
-#   anchors->clear();
-#   for (int i = 0; i < num_boxes; ++i) {
-#     Anchor new_anchor;
-#     new_anchor.set_y_center(raw_anchors[i * kNumCoordsPerBox + 0]);
-#     new_anchor.set_x_center(raw_anchors[i * kNumCoordsPerBox + 1]);
-#     new_anchor.set_h(raw_anchors[i * kNumCoordsPerBox + 2]);
-#     new_anchor.set_w(raw_anchors[i * kNumCoordsPerBox + 3]);
-#     anchors->push_back(new_anchor);
-# }
-#
-# void ConvertAnchorsToRawValues(const std::vector<Anchor>& anchors,
-#                                int num_boxes, float* raw_anchors) {
-#   CHECK_EQ(anchors.size(), num_boxes);
-#   int box = 0;
-#   for (const auto& anchor : anchors) {
-#     raw_anchors[box * kNumCoordsPerBox + 0] = anchor.y_center();
-#     raw_anchors[box * kNumCoordsPerBox + 1] = anchor.x_center();
-#     raw_anchors[box * kNumCoordsPerBox + 2] = anchor.h();
-#     raw_anchors[box * kNumCoordsPerBox + 3] = anchor.w();
-#     ++box;
-#   }
-# }
-
-# absl::Status TensorsToDetectionsCalculator::ProcessCPU(
-#     CalculatorContext* cc, std::vector<Detection>* output_detections) {
-#   const auto& input_tensors = *kInTensors(cc);
-#
-#   if (input_tensors.size() == 2 ||-
-#       input_tensors.size() == kNumInputTensorsWithAnchors) {
-#     // Postprocessing on CPU for model without postprocessing op. E.g. output
-#     // raw score tensor and box tensor. Anchor decoding will be handled below.
-#     // TODO: Add flexible input tensor size handling.
-#     auto raw_box_tensor = &input_tensors[0];
-#     RET_CHECK_EQ(raw_box_tensor->shape().dims.size(), 3);
-#     RET_CHECK_EQ(raw_box_tensor->shape().dims[0], 1);
-#     RET_CHECK_EQ(raw_box_tensor->shape().dims[1], num_boxes_);
-#     RET_CHECK_EQ(raw_box_tensor->shape().dims[2], num_coords_);
-#     auto raw_score_tensor = &input_tensors[1];
-#     RET_CHECK_EQ(raw_score_tensor->shape().dims.size(), 3);
-#     RET_CHECK_EQ(raw_score_tensor->shape().dims[0], 1);
-#     RET_CHECK_EQ(raw_score_tensor->shape().dims[1], num_boxes_);
-#     RET_CHECK_EQ(raw_score_tensor->shape().dims[2], num_classes_);
-#     auto raw_box_view = raw_box_tensor->GetCpuReadView();
-#     auto raw_boxes = raw_box_view.buffer<float>();
-#     auto raw_scores_view = raw_score_tensor->GetCpuReadView();
-#     auto raw_scores = raw_scores_view.buffer<float>();
-#
-#     // TODO: Support other options to load anchors.
-#     if (!anchors_init_) {
-#       if (input_tensors.size() == kNumInputTensorsWithAnchors) {
-#         auto anchor_tensor = &input_tensors[2];
-#         RET_CHECK_EQ(anchor_tensor->shape().dims.size(), 2);
-#         RET_CHECK_EQ(anchor_tensor->shape().dims[0], num_boxes_);
-#         RET_CHECK_EQ(anchor_tensor->shape().dims[1], kNumCoordsPerBox);
-#         auto anchor_view = anchor_tensor->GetCpuReadView();
-#         auto raw_anchors = anchor_view.buffer<float>();
-#         ConvertRawValuesToAnchors(raw_anchors, num_boxes_, &anchors_);
-#       } else if (!kInAnchors(cc).IsEmpty()) {
-#         anchors_ = *kInAnchors(cc);
-#       } else {
-#         return absl::UnavailableError("No anchor data available.");
-#       }
-#       anchors_init_ = true;
-#     }
-#     std::vector<float> boxes(num_boxes_ * num_coords_);
-#     MP_RETURN_IF_ERROR(DecodeBoxes(raw_boxes, anchors_, &boxes));
-#
-#     std::vector<float> detection_scores(num_boxes_);
-#     std::vector<int> detection_classes(num_boxes_);
-#
-#     // Filter classes by scores.
-#     for (int i = 0; i < num_boxes_; ++i) {
-#       int class_id = -1;
-#       float max_score = -std::numeric_limits<float>::max();
-#       // Find the top score for box i.
-#       for (int score_idx = 0; score_idx < num_classes_; ++score_idx) {
-#         if (ignore_classes_.find(score_idx) == ignore_classes_.end()) {
-#           auto score = raw_scores[i * num_classes_ + score_idx];
-#           if (options_.sigmoid_score()) {
-#             if (options_.has_score_clipping_thresh()) {
-#               score = score < -options_.score_clipping_thresh()
-#                           ? -options_.score_clipping_thresh()
-#                           : score;
-#               score = score > options_.score_clipping_thresh()
-#                           ? options_.score_clipping_thresh()
-#                           : score;
-#             }
-#             score = 1.0f / (1.0f + std::exp(-score));
-#           }
-#           if (max_score < score) {
-#             max_score = score;
-#             class_id = score_idx;
-#           }
-#         }
-#       }
-#       detection_scores[i] = max_score;
-#       detection_classes[i] = class_id;
-#     }
-#
-#     MP_RETURN_IF_ERROR(
-#         ConvertToDetections(boxes.data(), detection_scores.data(),
-#                             detection_classes.data(), output_detections));
-#   } else {
-#     // Postprocessing on CPU with postprocessing op (e.g. anchor decoding and
-#     // non-maximum suppression) within the model.
-#     RET_CHECK_EQ(input_tensors.size(), 4);
-#
-#     auto num_boxes_tensor = &input_tensors[3];
-#     RET_CHECK_EQ(num_boxes_tensor->shape().dims.size(), 1);
-#     RET_CHECK_EQ(num_boxes_tensor->shape().dims[0], 1);
-#
-#     auto detection_boxes_tensor = &input_tensors[0];
-#     RET_CHECK_EQ(detection_boxes_tensor->shape().dims.size(), 3);
-#     RET_CHECK_EQ(detection_boxes_tensor->shape().dims[0], 1);
-#     const int max_detections = detection_boxes_tensor->shape().dims[1];
-#     RET_CHECK_EQ(detection_boxes_tensor->shape().dims[2], num_coords_);
-#
-#     auto detection_classes_tensor = &input_tensors[1];
-#     RET_CHECK_EQ(detection_classes_tensor->shape().dims.size(), 2);
-#     RET_CHECK_EQ(detection_classes_tensor->shape().dims[0], 1);
-#     RET_CHECK_EQ(detection_classes_tensor->shape().dims[1], max_detections);
-#
-#     auto detection_scores_tensor = &input_tensors[2];
-#     RET_CHECK_EQ(detection_scores_tensor->shape().dims.size(), 2);
-#     RET_CHECK_EQ(detection_scores_tensor->shape().dims[0], 1);
-#     RET_CHECK_EQ(detection_scores_tensor->shape().dims[1], max_detections);
-#
-#     auto num_boxes_view = num_boxes_tensor->GetCpuReadView();
-#     auto num_boxes = num_boxes_view.buffer<float>();
-#     num_boxes_ = num_boxes[0];
-#
-#     auto detection_boxes_view = detection_boxes_tensor->GetCpuReadView();
-#     auto detection_boxes = detection_boxes_view.buffer<float>();
-#
-#     auto detection_scores_view = detection_scores_tensor->GetCpuReadView();
-#     auto detection_scores = detection_scores_view.buffer<float>();
-#
-#     auto detection_classes_view = detection_classes_tensor->GetCpuReadView();
-#     auto detection_classes_ptr = detection_classes_view.buffer<float>();
-#     std::vector<int> detection_classes(num_boxes_);
-#     for (int i = 0; i < num_boxes_; ++i) {
-#       detection_classes[i] = static_cast<int>(detection_classes_ptr[i]);
-#     }
-#     MP_RETURN_IF_ERROR(ConvertToDetections(detection_boxes, detection_scores,
-#                                            detection_classes.data(),
-#                                            output_detections));
-#   }
-#   return absl::OkStatus();
-# }
-
-# absl::Status TensorsToDetectionsCalculator::DecodeBoxes(
-#     const float* raw_boxes, const std::vector<Anchor>& anchors,
-#     std::vector<float>* boxes) {
     def decode_boxes(self, raw_boxes):
         boxes = []
         num_boxes, _ = raw_boxes.shape
 
-#   for (int i = 0; i < num_boxes_; ++i) {
         for i in range(num_boxes):
-#     const int box_offset = i * num_coords_ + options_.box_coord_offset();
-#
-#     float y_center = raw_boxes[box_offset];
-#     float x_center = raw_boxes[box_offset + 1];
-#     float h = raw_boxes[box_offset + 2];
-#     float w = raw_boxes[box_offset + 3];
             y_center = raw_boxes[i, 0]
             x_center = raw_boxes[i, 1]
             h = raw_boxes[i, 2]
             w = raw_boxes[i, 3]
-#     if (options_.reverse_output_order()) {
+
             if self.reverse_output_order:
-#       x_center = raw_boxes[box_offset];
-#       y_center = raw_boxes[box_offset + 1];
-#       w = raw_boxes[box_offset + 2];
-#       h = raw_boxes[box_offset + 3];
                 x_center = raw_boxes[i, 0]
                 y_center = raw_boxes[i, 1]
                 w = raw_boxes[i, 2]
                 h = raw_boxes[i, 3]
-#     }
-#
-#     x_center =
-#         x_center / options_.x_scale() * anchors[i].w() + anchors[i].x_center();
-#     y_center =
-#         y_center / options_.y_scale() * anchors[i].h() + anchors[i].y_center();
-#
+
             x_center = x_center / self.x_scale * self.anchors[i].width + self.anchors[i].x
             y_center = y_center / self.y_scale * self.anchors[i].height + self.anchors[i].y
-
-#     if (options_.apply_exponential_on_box_size()) {
-#       h = std::exp(h / options_.h_scale()) * anchors[i].h();
-#       w = std::exp(w / options_.w_scale()) * anchors[i].w();
-#     } else {
-#       h = h / options_.h_scale() * anchors[i].h();
-#       w = w / options_.w_scale() * anchors[i].w();
-#     }
 
             if self.apply_exponential_on_box_size:
                 h = np.exp(h / self.h_scale) * self.anchors[i].height
@@ -1792,295 +1279,21 @@ class PalmDetectionAdapter(Adapter):
                 h = h / self.h_scale * self.anchors[i].height
                 w = w / self.w_scale * self.anchors[i].width
 
-#
-#     const float ymin = y_center - h / 2.f;
-#     const float xmin = x_center - w / 2.f;
-#     const float ymax = y_center + h / 2.f;
-#     const float xmax = x_center + w / 2.f;
-#
-#     (*boxes)[i * num_coords_ + 0] = ymin;
-#     (*boxes)[i * num_coords_ + 1] = xmin;
-#     (*boxes)[i * num_coords_ + 2] = ymax;
-#     (*boxes)[i * num_coords_ + 3] = xmax;
-
             decoded = [y_center - h / 2, x_center - w / 2, y_center + h / 2, x_center + w / 2]
 #
-#     if (options_.num_keypoints()) {
-#       for (int k = 0; k < options_.num_keypoints(); ++k) {
             for k in range(self.num_keypoints):
-#         const int offset = i * num_coords_ + options_.keypoint_coord_offset() +
-#                            k * options_.num_values_per_keypoint();
                 offset = self.keypoint_coord_offset + k * self.num_values_per_keypoint
 #
-#         float keypoint_y = raw_boxes[offset];
-#         float keypoint_x = raw_boxes[offset + 1];
                 keypoint_y = raw_boxes[i, offset]
                 keypoint_x = raw_boxes[i, offset + 1]
-#         if (options_.reverse_output_order()) {
-#           keypoint_x = raw_boxes[offset];
-#           keypoint_y = raw_boxes[offset + 1];
-#         }
+
                 if self.reverse_output_order:
                     keypoint_x = raw_boxes[i, offset]
                     keypoint_y = raw_boxes[i, offset + 1]
-#
-#         (*boxes)[offset] = keypoint_x / options_.x_scale() * anchors[i].w() +
-#                            anchors[i].x_center();
-#         (*boxes)[offset + 1] =
-#             keypoint_y / options_.y_scale() * anchors[i].h() +
-#             anchors[i].y_center();
-#       }
+
                 decoded.append(keypoint_x / self.x_scale * self.anchors[i].width + self.anchors[i].x)
                 decoded.append(keypoint_y / self.y_scale * self.anchors[i].height + self.anchors[i].y)
-#     }
-#   }
-#
-#   return absl::OkStatus();
-# }
-#
+
             boxes.append(decoded)
 
         return boxes
-
-# absl::Status TensorsToDetectionsCalculator::ConvertToDetections(
-#     const float* detection_boxes, const float* detection_scores,
-#     const int* detection_classes, std::vector<Detection>* output_detections) {
-    def convert_to_detections(self, detection_boxes, detection_scores, detection_classes):
-        detections = []
-#   for (int i = 0; i < num_boxes_; ++i) {
-        for detection_box, detection_score, detection_class in zip(detection_boxes, detection_scores,
-                                                                   detection_classes):
-#     if (options_.has_min_score_thresh() &&
-#         detection_scores[i] < options_.min_score_thresh()) {
-#       continue;
-#     }
-            if self.has_min_score_thresh and detection_score < self.min_score_thresh:
-                continue
-#     const int box_offset = i * num_coords_;
-#     Detection detection = ConvertToDetection(
-#         detection_boxes[box_offset + 0], detection_boxes[box_offset + 1],
-#         detection_boxes[box_offset + 2], detection_boxes[box_offset + 3],
-#         detection_scores[i], detection_classes[i], options_.flip_vertically());
-            detection = self.convert_to_detection(detection_box[0], detection_box[1], detection_box[2],
-                                                  detection_box[3], detection_score, detection_class)
-#     const auto& bbox = detection.location_data().relative_bounding_box();
-#     if (bbox.width() < 0 || bbox.height() < 0 || std::isnan(bbox.width()) ||
-#         std::isnan(bbox.height())) {
-#       // Decoded detection boxes could have negative values for width/height due
-#       // to model prediction. Filter out those boxes since some downstream-
-#       // calculators may assume non-negative values. (b/171391719)
-#       continue;
-#     }
-            bbox = detection.location_data.relative_bounding_box()
-            if bbox.width < 0 or bbox.height < 0 or np.isnan(bbox.width) or np.isnan(bbox.height):
-                continue
-#     // Add keypoints.
-#     if (options_.num_keypoints() > 0) {
-#       auto* location_data = detection.mutable_location_data();
-#       for (int kp_id = 0; kp_id < options_.num_keypoints() *
-#                                       options_.num_values_per_keypoint();
-            for i in range(self.num_keypoints):
-#            kp_id += options_.num_values_per_keypoint()) {
-#         auto keypoint = location_data->add_relative_keypoints();
-                kp = detection.location_data.add_relative_keypoint()
-#         const int keypoint_index =
-#             box_offset + options_.keypoint_coord_offset() + kp_id;
-#         keypoint->set_x(detection_boxes[keypoint_index + 0]);
-#         keypoint->set_y(options_.flip_vertically()
-#                             ? 1.f - detection_boxes[keypoint_index + 1]
-#                             : detection_boxes[keypoint_index + 1]);
-                kp.set_x(detection_box[self.keypoint_coord_offset + i * self.num_values_per_keypoint])
-                kp.set_y(detection_box[self.keypoint_coord_offset + i * self.num_values_per_keypoint + 1])
-
-#       }
-#     }
-
-            detections.append(detection)
-#     output_detections->emplace_back(detection);
-#   }
-#   return absl::OkStatus();
-# }
-        return detections
-
-#
-# Detection TensorsToDetectionsCalculator::ConvertToDetection(
-#     float box_ymin, float box_xmin, float box_ymax, float box_xmax, float score,
-#     int class_id, bool flip_vertically) {
-    def convert_to_detection(self, ymin, xmin, ymax, xmax, score, class_id):
-#   Detection detection;
-#   detection.add_score(score);
-#   detection.add_label_id(class_id);
-        detection = Detection()
-        detection.add_score(score)
-        detection.add_label_id(class_id)
-#
-#   LocationData* location_data = detection.mutable_location_data();
-#   location_data->set_format(LocationData::RELATIVE_BOUNDING_BOX);
-#/
-#   LocationData::RelativeBoundingBox* relative_bbox =
-#       location_data->mutable_relative_bounding_box();
-#
-        location_data = detection.get_location_data()
-        relative_bbox = location_data.relative_bounding_box()
-
-#   relative_bbox->set_xmin(box_xmin);
-#   relative_bbox->set_ymin(flip_vertically ? 1.f - box_ymax : box_ymin);
-#   relative_bbox->set_width(box_xmax - box_xmin);
-#   relative_bbox->set_height(box_ymax - box_ymin);
-
-        relative_bbox.set_xmin(xmin)
-        relative_bbox.set_ymin(ymin)
-        relative_bbox.set_width(xmax - xmin)
-        relative_bbox.set_height(ymax - ymin)
-
-#   return detection;
-# }
-        return detection
-
-
-class Detection:
-    def __init__(self):
-        self.score = []
-        self.label_id = []
-        self.location_data = None
-
-    def add_score(self, score):
-        self.score.append(score)
-
-    def add_label_id(self, label_id):
-        self.label_id.append(label_id)
-
-    def get_location_data(self):
-        if self.location_data is None:
-            self.location_data = Location()
-        return self.location_data
-
-    def clear_score(self):
-        self.score = []
-
-
-    def clear_label_id(self):
-        self.label_id = []
-
-    # // Removes all but the max scoring label and its score from the detection.
-# // Returns true if the detection has at least one label.
-# bool RetainMaxScoringLabelOnly(Detection* detection) {
-    def RetainMaxScoringLabelOnly(self):
-#   if (detection->label_id_size() == 0 && detection->label_size() == 0) {
-#     return false;
-#   }
-        if len(self.label_id) == 0:
-            return False
-#   CHECK(detection->label_id_size() == detection->score_size() ||
-#         detection->label_size() == detection->score_size())
-#       << "Number of scores must be equal to number of detections.";
-#
-        assert len(self.label_id) == len(self.score)
-#   std::vector<std::pair<int, float>> indexed_scores;
-#   indexed_scores.reserve(detection->score_size());
-#   for (int k = 0; k < detection->score_size(); ++k) {
-#     indexed_scores.push_back(std::make_pair(k, detection->score(k)));
-#   }
-        indexed_scores = [(i, self.score[i]) for i in range(len(self.score))]
-
-#   std::sort(indexed_scores.begin(), indexed_scores.end(), SortBySecond);
-        indexed_scores.sort(key=lambda x: x[1])
-#   const int top_index = indexed_scores[0].first;
-#   detection->clear_score();
-#   detection->add_score(indexed_scores[0].second);
-        top_index = indexed_scores[0][0]
-        self.clear_score()
-        self.add_score(indexed_scores[0][1])
-#   if (detection->label_id_size() > top_index) {
-#     const int top_label_id = detection->label_id(top_index);
-#     detection->clear_label_id();
-#     detection->add_label_id(top_label_id);
-#   } else {
-#     const std::string top_label = detection->label(top_index);
-#     detection->clear_label();
-#     detection->add_label(top_label);
-#   }
-        top_label_id = self.label_id[top_index]
-        self.clear_label_id()
-        self.add_label_id(top_label_id)
-#
-#   return true;
-        return True
-# }
-
-
-class Location:
-    def __init__(self):
-        self.bbox = None
-        self.keypoints = []
-
-    def relative_bounding_box(self):
-        if self.bbox is None:
-            self.bbox = RelativeBoundingBox()
-        return self.bbox
-
-    def add_relative_keypoint(self):
-        kp = RelativeKeypoint()
-        self.keypoints.append(kp)
-        return kp
-
-    def intersects(self, other):
-        return ((self.bbox.xmin <= other.bbox.xmin and (self.bbox.xmin + self.bbox.width) >= other.bbox.xmin) or
-                (other.bbox.xmin <= self.bbox.xmin and (other.bbox.xmin + other.bbox.width) >= self.bbox.xmin)) and (
-            (self.bbox.ymin <= other.bbox.ymin and (self.bbox.ymin + self.bbox.height) >= other.bbox.ymin) or
-            (other.bbox.ymin <= self.bbox.ymin and (other.bbox.ymin + other.bbox.width >= self.bbox.ymin)))
-
-    def intersect(self, other):
-        intersection = Location()
-        ibox = intersection.relative_bounding_box()
-        if self.intersects(other):
-            bbox = self.bbox
-            obox = other.bbox
-            coords = [bbox.xmin, bbox.xmin + bbox.width, obox.xmin, obox.xmin + obox.width]
-            coords.sort()
-            ibox.set_xmin(coords[1])
-            ibox.set_width(coords[2] - coords[1])
-            coords = [bbox.ymin, bbox.ymin + bbox.height, obox.ymin, obox.ymin + obox.height]
-            coords.sort()
-            ibox.set_ymin(coords[1])
-            ibox.set_height(coords[2] - coords[1])
-        else:
-            ibox.set_height(0.)
-            ibox.set_width(0.)
-            ibox.set_xmin(0.)
-            ibox.set_ymin(0.)
-        return intersection
-
-    def area(self):
-        return self.bbox.height * self.bbox.width
-
-class RelativeBoundingBox:
-    def __init__(self):
-        self.xmin = 0
-        self.ymin = 0
-        self.width = 0
-        self.height = 0
-
-    def set_xmin(self, xmin):
-        self.xmin = xmin
-
-    def set_ymin(self, ymin):
-        self.ymin = ymin
-
-    def set_width(self, width):
-        self.width = width
-
-    def set_height(self, height):
-        self.height = height
-
-
-class RelativeKeypoint:
-    def __init__(self):
-        self.x = None
-        self.y = None
-
-    def set_x(self, x):
-        self.x = x
-
-    def set_y(self, y):
-        self.y = y

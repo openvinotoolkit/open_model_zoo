@@ -35,12 +35,16 @@ class ResizePredictionBoxes(Postprocessor):
         params.update({
             'rescale': BoolField(
                 optional=True, default=False, description='required rescale boxes on input size or not'
+            ),
+            'unpadding': BoolField(
+                optional=True, default=False, description='remove padding effect for normalized coordinates'
             )
         })
         return params
 
     def configure(self):
         self.rescale = self.get_value_from_config('rescale')
+        self.unpadding = self.get_value_from_config('unpadding')
 
     def process_image(self, annotation, prediction):
         h, w, _ = self.image_size
@@ -58,6 +62,14 @@ class ResizePredictionBoxes(Postprocessor):
             input_h, input_w, _ = image_metadata.get('image_info', self.image_size)
             w = self.image_size[1] / input_w
             h = self.image_size[0] / input_h
+
+        if self.unpadding:
+            input_h, input_w, _ = image_metadata.get('image_info', self.image_size)
+            _, _, i_h, i_w = image_metadata.get('input_shape')['input']
+
+            w = self.image_size[1] / input_w * i_w
+            h = self.image_size[0] / input_h * i_h
+
 
         for pred in prediction:
             pred.x_mins *= w
