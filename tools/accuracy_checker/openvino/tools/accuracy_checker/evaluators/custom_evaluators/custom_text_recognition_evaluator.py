@@ -294,9 +294,9 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
             O_t = dec_res[self.recognizer_decoder.outputs_mapping['output']]
             logit = dec_res[self.recognizer_decoder.outputs_mapping['logit']]
             logits.append(logit)
-            tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
+            tgt = np.array([np.argmax(np.array(logit), axis=1)])
 
-            if tgt[0][0][0] == self.eos_index:
+            if tgt[0][0] == self.eos_index:
                 break
 
         logits = np.array(logits)
