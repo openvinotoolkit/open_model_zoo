@@ -48,10 +48,9 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("Expected 3-channel input");
     }
 
-    inputTransform.setPrecision(model);
     ov::preprocess::PrePostProcessor ppp(model);
+    inputTransform.setPrecision(ppp);
     ppp.input().tensor().
-        set_element_type(ov::element::u8).
         set_layout("NHWC");
 
     ppp.input().model().set_layout(inputLayout);

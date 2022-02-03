@@ -168,6 +168,12 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
 }
 
 static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
+    auto matType = mat.type() & CV_MAT_DEPTH_MASK;
+    if (matType != CV_8U && matType != CV_32F) {
+        throw std::runtime_error("Unsupported mat type for wrapping");
+    }
+    bool isMatFloat = matType == CV_32F;
+
     const size_t channels = mat.channels();
     const size_t height = mat.rows;
     const size_t width = mat.cols;
@@ -175,10 +181,14 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     const size_t strideH = mat.step.buf[0];
     const size_t strideW = mat.step.buf[1];
 
-    const bool is_dense = strideW == channels && strideH == channels * width;
-    OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
+    const bool isDense = !isMatFloat ? (strideW == channels && strideH == channels * width) :
+        (strideW == channels * sizeof(float) && strideH == channels * width * sizeof(float));
+    if (!isDense) {
+        throw std::runtime_error("Doesn't support conversion from not dense cv::Mat");
+    }
+    auto precision = isMatFloat ? ov::element::f32 : ov::element::u8;
     auto allocator = std::make_shared<SharedTensorAllocator>(mat);
-    return ov::runtime::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, ov::Allocator(allocator));
+    return ov::runtime::Tensor(precision, ov::Shape{ 1, height, width, channels }, ov::Allocator(allocator));
 }
 
 static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
@@ -292,13 +302,10 @@ public:
         return cv::Scalar(values[0], values[1], values[2]);
     }
 
-    void setPrecision(std::shared_ptr<ov::Model>& model) {
+    void setPrecision(ov::preprocess::PrePostProcessor& ppp) {
         const auto precision = isTrivial ? ov::element::u8 : ov::element::f32;
-        ov::preprocess::PrePostProcessor ppp(model);
-        for (const auto& input : model->inputs()) {
-            ppp.input(input.get_any_name()).preprocess().convert_element_type(precision);
-        }
-        model = ppp.build();
+        ppp.input().tensor().
+                set_element_type(precision);
     }
 
     cv::Mat operator()(const cv::Mat& inputs) {
