@@ -8,7 +8,7 @@
 #include <utils/slog.hpp>
 
 namespace {
-constexpr char h_msg[] = "show the help message and exit";
+constexpr char h_msg[] = "show this help message and exit";
 DEFINE_bool(h, false, h_msg);
 
 constexpr char m_msg[] = "path to an .xml file with a trained model";
