@@ -12,7 +12,7 @@ This is a smartlab object detector that is based on YoloX for 416x416 resolution
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | see PASCAL per-cls AP (internal test set) |
+| mAP                             | 0.55                                      |
 | GFlops                          | 1.077                                     |
 | MParams                         | 0.8908                                    |
 | Source framework                | PyTorch\*                                 |
