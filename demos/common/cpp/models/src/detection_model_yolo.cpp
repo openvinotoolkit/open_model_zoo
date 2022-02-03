@@ -74,15 +74,19 @@ ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold
 void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    const ov::OutputVector& inputs = model->inputs();
-    if (inputs.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("YOLO model wrapper accepts models that have only one input");
     }
 
-    const ov::Shape& inputShape = model->input().get_shape();
+    const auto& input = model->input();
+    const ov::Shape& inputShape = input.get_shape();
     ov::Layout inputLayout = ov::layout::get_layout(model->input());
     if (inputLayout.empty()) {
         inputLayout = { "NCHW" };
+        if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
+            input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+            inputLayout = { "NHWC" };
+        }
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -119,7 +123,11 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     for (auto& out : outputs) {
         ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
         if (out.get_shape().size() == 4) {
-            ppp.output(out.get_any_name()).tensor().set_layout("NCHW");
+            if (out.get_shape()[ov::layout::height_idx(yolo4DRegionLayout)] != out.get_shape()[ov::layout::width_idx(yolo4DRegionLayout)] &&
+                out.get_shape()[ov::layout::height_idx({ "NHWC" })] == out.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+                yolo4DRegionLayout = { "NHWC" };
+            }
+            ppp.output(out.get_any_name()).tensor().set_layout(yolo4DRegionLayout);
         }
         outputsNames.push_back(out.get_any_name());
         outShapes[out.get_any_name()] = out.get_shape();
@@ -128,20 +136,24 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     yoloVersion = YOLO_V3;
     bool isRegionFound = false;
-    for (const auto op : model->get_ops()) {
-        auto opName = op->get_friendly_name();
-        auto outputFound = std::find(outputsNames.begin(), outputsNames.end(), opName);
-        if (outputFound != outputsNames.end()) {
+    for (const auto op : model->get_ordered_ops()) {
+        //std::cout << op->get_friendly_name() << std::endl;
+        if (std::string("RegionYolo") == op->get_type_name()) {
             auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
 
             if (regionYolo) {
-                isRegionFound = true;
-
                 if (!regionYolo->get_mask().size()) {
                     yoloVersion = YOLO_V1V2;
                 }
 
-                regions.emplace(*outputFound, Region(regionYolo));
+                const auto& opName = op->get_friendly_name();
+                for (const auto out : outputs) {
+                    if (out.get_node()->get_friendly_name() == opName ||
+                        out.get_node()->get_input_node_ptr(0)->get_friendly_name() == opName) {
+                        isRegionFound = true;
+                        regions.emplace(out.get_any_name(), Region(regionYolo));
+                    }
+                }
             }
         }
     }
@@ -171,18 +183,19 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         }
 
         std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outShapes](const std::string& x, const std::string& y) {return outShapes[x][2] > outShapes[y][2]; });
+            [&outShapes,this](const std::string& x, const std::string& y)
+                {return outShapes[x][ov::layout::height_idx(yolo4DRegionLayout)] > outShapes[y][ov::layout::height_idx(yolo4DRegionLayout)]; });
 
         for (const auto& name : outputsNames) {
             const auto& shape = outShapes[name];
-            int classes = (int)shape[1] / num - 4 - (isObjConf ? 1 : 0);
-            if (shape[1] % num != 0) {
+            int classes = (int)shape[ov::layout::channels_idx(yolo4DRegionLayout)] / num - 4 - (isObjConf ? 1 : 0);
+            if (shape[ov::layout::channels_idx(yolo4DRegionLayout)] % num != 0) {
                 throw std::runtime_error(std::string("Output tenosor ") + name + " has wrong 2nd dimension");
             }
             regions.emplace(name, Region(classes, 4,
                 presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
-                std::vector<int64_t>(chosenMasks.begin() + i*num, chosenMasks.begin() + (i+1)*num),
-                (int)shape[3], (int)shape[2]));
+                std::vector<int64_t>(chosenMasks.begin() + i * num, chosenMasks.begin() + (i + 1) * num),
+                (int)shape[ov::layout::width_idx(yolo4DRegionLayout)], (int)shape[ov::layout::height_idx(yolo4DRegionLayout)]));
             i++;
         }
     }
@@ -268,8 +281,8 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     case YOLO_V4:
     case YOLO_V4_TINY:
     case YOLOF:
-        sideH = static_cast<int>(tensor.get_shape()[2]);
-        sideW = static_cast<int>(tensor.get_shape()[3]);
+        sideH = static_cast<int>(tensor.get_shape()[ov::layout::height_idx(yolo4DRegionLayout)]);
+        sideW = static_cast<int>(tensor.get_shape()[ov::layout::width_idx(yolo4DRegionLayout)]);
         scaleW = resized_im_w;
         scaleH = resized_im_h;
         break;
