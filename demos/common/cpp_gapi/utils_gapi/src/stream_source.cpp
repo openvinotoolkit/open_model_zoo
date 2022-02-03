@@ -26,12 +26,11 @@ bool CommonCapSrc::pull(cv::gapi::wip::Data &data) {
         data = first.clone();
         return true;
     }
-    cv::Mat current_frame = cap->read();
-    if (!current_frame.data) {
+    cv::Mat frame = cap->read();
+    if (!frame.data) {
         return false;
     }
-    GAPI_Assert(cv::descr_of(first) == cv::descr_of(current_frame));
-    data = current_frame.clone();
+    data = frame.clone();
     return true;
 }
 
