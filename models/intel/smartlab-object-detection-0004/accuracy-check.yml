@@ -3,13 +3,17 @@ models:
 
     launchers:
       - framework: dlsdk
+        device: CPU
         adapter: 
           type: yolox
-          classes: 3
           anchors: yolox
+          classes: 3
 
     datasets:
       - name: DSI1867
+        data_source: ..\..\..\DSI-1867\object_detection\streams_1\top\images
+        annotation: dir_conv\mscoco_detection.pickle
+        dataset_meta: dir_conv\mscoco_detection.json
 
         preprocessing:
           - type: resize
@@ -19,10 +23,10 @@ models:
         postprocessing:
           - type: filter
             apply_to: prediction
-            min_confidence: 0.01
+            min_confidence: 0.1
             remove_filtered: True
           - type: nms
-            overlap: 0.5
+            overlap: 0.2
             include_boundaries: False
           - type: resize_prediction_boxes
           - type: clip_boxes
