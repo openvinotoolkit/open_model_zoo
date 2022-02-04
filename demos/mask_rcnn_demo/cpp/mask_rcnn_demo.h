@@ -5,8 +5,6 @@
 #pragma once
 
 #include <iostream>
-#include <string>
-#include <vector>
 #include "gflags/gflags.h"
 
 static const char help_message[] = "Print a usage message.";

@@ -53,31 +53,19 @@ void validateInputsAndOutputs(ov::OutputVector& inputs, ov::OutputVector& output
     if (inputs.size() != 2 || outputs.size() != 2)
         throw std::logic_error("Expected model with 2 inputs and 2 outputs");
 
-    size_t dims;
-    auto compare_dims = [&](const ov::Output<ov::Node>& input) { return input.get_shape().size() == dims; };
+    std::string input_error = "Unexpected input dimensions: ";
+    std::string output_error = "Unexpected output dimensions: ";
 
-    dims = 4;
-    auto it = std::find_if(inputs.begin(), inputs.end(), compare_dims);
-    if (inputs.end() == it) {
-        throw std::logic_error("Can't find input with " + std::to_string(dims) + " dimensions");
-    }
+    auto check_dims = [&](ov::OutputVector& nodes, std::string& error_msg) {
+        for (ov::Output<ov::Node> node : nodes) {
+            size_t dims = node.get_shape().size();
+            if (dims != 2 && dims != 4)
+                throw std::logic_error(error_msg + std::to_string(dims));
+        }
+    };
 
-    dims = 2;
-    it = std::find_if(inputs.begin(), inputs.end(), compare_dims);
-    if (inputs.end() == it) {
-        throw std::logic_error("Can't find input with " + std::to_string(dims) + " dimensions");
-    }
-
-    it = std::find_if(outputs.begin(), outputs.end(), compare_dims);
-    if (outputs.end() == it) {
-        throw std::logic_error("Can't find output with " + std::to_string(dims) + " dimensions");
-    }
-
-    dims = 2;
-    it = std::find_if(outputs.begin(), outputs.end(), compare_dims);
-    if (outputs.end() == it) {
-        throw std::logic_error("Can't find output with " + std::to_string(dims) + " dimensions");
-    }
+    check_dims(inputs, input_error);
+    check_dims(outputs, output_error);
 }
 
 int main(int argc, char* argv[]) {
@@ -326,10 +314,10 @@ int main(int argc, char* argv[]) {
 
         float prob = box_info[2];
 
-        float x1 = std::min(std::max(0.0f, box_info[3] * images[batch].cols), static_cast<float>(images[batch].cols));
-        float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].rows), static_cast<float>(images[batch].rows));
-        float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].cols), static_cast<float>(images[batch].cols));
-        float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].rows), static_cast<float>(images[batch].rows));
+        float x1 = clamp(static_cast<float>(images[batch].cols), .0f, box_info[3] * images[batch].cols);
+        float y1 = clamp(static_cast<float>(images[batch].rows), .0f, box_info[4] * images[batch].rows);
+        float x2 = clamp(static_cast<float>(images[batch].cols), .0f, box_info[5] * images[batch].cols);
+        float y2 = clamp(static_cast<float>(images[batch].rows), .0f, box_info[6] * images[batch].rows);
 
         int box_width = static_cast<int>(x2 - x1);
         int box_height = static_cast<int>(y2 - y1);
@@ -364,7 +352,8 @@ int main(int argc, char* argv[]) {
 
     for (size_t i = 0; i < output_images.size(); i++) {
         std::string imgName = "out" + std::to_string(i) + ".png";
-        cv::imwrite(imgName, output_images[i]);
+        if(!cv::imwrite(imgName, output_images[i]))
+            throw std::runtime_error("Can't write image to file: " + imgName);
         slog::info << "Image " << imgName << " created!" << slog::endl;
     }
 
