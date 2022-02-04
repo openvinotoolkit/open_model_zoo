@@ -993,52 +993,6 @@ class NanoDetAdapter(Adapter):
                                     detections['y_mins'], detections['x_maxs'], detections['y_maxs']))
         return result
 
-class HandLandmarkAdapter(Adapter):
-    __provider__ = 'hand_landmark'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'scores_out': StringField(description='scores output'),
-            'boxes_out': StringField(description='boxes output')
-        })
-        return params
-
-    def configure(self):
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
-        self.outputs_verified = False
-
-    def select_output_blob(self, outputs):
-        self.scores_out = self.check_output_name(self.scores_out, outputs)
-        self.boxes_out = self.check_output_name(self.boxes_out, outputs)
-        self.outputs_verified = True
-
-    def process(self, raw, identifiers, frame_meta):
-        result = []
-        raw_output = self._extract_predictions(raw, frame_meta)
-        if not self.outputs_verified:
-            self.select_output_blob(raw_output)
-
-        def box_cxcywh_to_xyxy(x):
-            x_c, y_c, w, h = x.T
-            b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-                 (x_c + 0.5 * w), (y_c + 0.5 * h)]
-            return b
-
-        def softmax(logits):
-            res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
-            return np.array(res)
-
-        for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
-            x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
-            scores = softmax(logits)
-            labels = np.argmax(scores[:, :-1], axis=-1)
-            det_scores = np.max(scores[:, :-1], axis=-1)
-            result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return result
 
 class Anchor:
     def __init__(self):
