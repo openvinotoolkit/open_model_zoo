@@ -88,6 +88,9 @@ static const char decoderBandwidthMsg[] =
 static const char decoderStartIndexMsg[] =
     "Optional. Start index for Simple decoder. Default value is 0.";
 static const char padSymbolMsg[] = "Optional. Pad symbol. Default value is '#'.";
+static const char gapiRegularMsg[] =
+    "Optional. If it is set, G-API graph is compiled in the regular execution mode;"
+    " otherwise, graph is compiled in the streaming mode for processing video stream data.";
 
 DEFINE_bool(h, false, helpMsg);
 DEFINE_string(m_td, "", tdModelMsg);
@@ -119,6 +122,7 @@ DEFINE_string(u, "", utilMonitorsMsg);
 DEFINE_uint32(b, 0, decoderBandwidthMsg);
 DEFINE_uint32(start_index, 0, decoderStartIndexMsg);
 DEFINE_string(pad, "#", padSymbolMsg);
+DEFINE_bool(gapi_regular_mode, false, gapiRegularMsg);
 
 /**
 * @brief This function shows a help message
@@ -161,4 +165,5 @@ static void showUsage() {
     std::cout << "    -b                                 " << decoderBandwidthMsg << std::endl;
     std::cout << "    -start_index                       " << decoderStartIndexMsg << std::endl;
     std::cout << "    -pad                               " << padSymbolMsg << std::endl;
+    std::cout << "    -gapi_regular_mode                 " << gapiRegularMsg << std::endl;
 }

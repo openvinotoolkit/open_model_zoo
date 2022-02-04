@@ -68,10 +68,11 @@ int main(int argc, char *argv[]) {
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
-        const auto inputPath = FLAGS_i;
-        const bool noShow    = FLAGS_no_show;
-        const bool loop      = FLAGS_loop;
-        const bool rawOutput = FLAGS_r;
+        const auto inputPath     = FLAGS_i;
+        const bool noShow        = FLAGS_no_show;
+        const bool loop          = FLAGS_loop;
+        const bool gapiStreaming = !FLAGS_gapi_regular_mode;
+        const bool rawOutput     = FLAGS_r;
         const auto outputPath        = FLAGS_o;
         const uint outputFramesLimit = FLAGS_limit;
 
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
         // Graph input
         cv::GMat in;
         // Graph outputs
-        auto outs = cv::GOut();
+        auto outs = gapiStreaming ? cv::GOut(cv::gapi::copy(in)) : cv::GOut();
 
         // Size of frame
         cv::GOpaque<cv::Size> size = cv::gapi::streaming::size(in);
@@ -195,8 +196,6 @@ int main(int argc, char *argv[]) {
         cv::GComputation graph(cv::GIn(in), std::move(outs));
         /** ---------------- End of graph ---------------- **/
 
-        auto kernels  = custom::kernels();
-
         // Getting information about frame from ImagesCapture
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(inputPath, loop);
         const cv::Mat tmp = cap->read();
@@ -205,6 +204,14 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Couldn't grab first frame");
         }
         cap = openImagesCapture(inputPath, loop);
+
+        auto kernels  = custom::kernels();
+        cv::GStreamingCompiled pipeline;
+        if (gapiStreaming) {
+            pipeline = graph.compileStreaming(cv::compile_args(kernels, config.networks));
+            pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap)));
+            pipeline.start();
+        }
 
         cv::VideoWriter videoWriter;
         if (!outputPath.empty() &&
@@ -217,24 +224,36 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u, tmp.rows - graphSize.height - 10, graphSize);
 
         // Output containers for results
+        cv::Mat image;
         std::vector<std::vector<cv::Point2f>> outPts;
         std::vector<cv::Mat> outTexts;
-        /** ---------------- The execution part ---------------- **/
-        PerformanceMetrics metrics;
-        std::chrono::steady_clock::time_point beginFrame = std::chrono::steady_clock::now();
-        cv::Mat image = cap->read();
-        if (!image.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
-        do {
-            cv::Mat demoImage = image.clone();
-            auto outVector = cv::gout();
+        auto getOutVector = [&](){
+            auto outVector = gapiStreaming ? cv::gout(image) : cv::gout();
             if (trRequired) {
                 outVector += cv::gout(outTexts);
             }
             outVector += cv::gout(outPts);
-            graph.apply(cv::gin(image), std::move(outVector),
-                        cv::compile_args(kernels, config.networks));
+            return outVector;
+        };
+
+        /** ---------------- The execution part ---------------- **/
+        PerformanceMetrics metrics;
+        std::chrono::steady_clock::time_point beginFrame = std::chrono::steady_clock::now();
+        bool continueExecution;
+        if (gapiStreaming) {
+            continueExecution = pipeline.pull(getOutVector());
+        } else {
+            image = cap->read();
+            if (!image.data) {
+                throw std::runtime_error("Can't read an image from the input");
+            }
+            continueExecution = bool(image.data);
+        }
+        while (continueExecution) {
+            if (!gapiStreaming) {
+                graph.apply(cv::gin(image), getOutVector(),
+                            cv::compile_args(kernels, config.networks));
+            }
             const auto numFound = outPts.size();
             int numRecognized = trRequired ? 0 : numFound;
             for (std::size_t l = 0; l < numFound; l++) {
@@ -320,8 +339,13 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
             }
             beginFrame = std::chrono::steady_clock::now();
-            image = cap->read();
-        } while (image.data);
+            if (gapiStreaming) {
+                continueExecution = pipeline.pull(getOutVector());
+            } else {
+                image = cap->read();
+                continueExecution = bool(image.data);
+            }
+        }
         // Printing logs
         slog::info << slog::endl << "Metrics report:" << slog::endl;
         metrics.logTotal();

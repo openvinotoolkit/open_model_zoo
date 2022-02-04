@@ -278,6 +278,7 @@ DEMOS = [
             model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-gapi_regular_mode' : None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td',
