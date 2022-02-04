@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
 
     // try to get delay output and freq output for model
     int delay = 0;
-    int freq_model = 16000; //default sampling rate for model
+    int freq_model = 16000; // default sampling rate for model
     infer_request.infer();
     for (size_t i = 0; i < outputs.size(); i++) {
         std::string out_name = outputs[i].get_any_name();
