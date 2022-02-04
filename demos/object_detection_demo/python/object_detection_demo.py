@@ -15,16 +15,13 @@
  limitations under the License.
 """
 
-import colorsys
 import logging as log
-import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -36,6 +33,7 @@ from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, 
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_latency_per_stage
+from drawing_utils import ColorPalette
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -120,48 +118,6 @@ def build_argparser():
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
     return parser
-
-
-class ColorPalette:
-    def __init__(self, n, rng=None):
-        assert n > 0
-
-        if rng is None:
-            rng = random.Random(0xACE) # nosec - disable B311:random check
-
-        candidates_num = 100
-        hsv_colors = [(1.0, 1.0, 1.0)]
-        for _ in range(1, n):
-            colors_candidates = [(rng.random(), rng.uniform(0.8, 1.0), rng.uniform(0.5, 1.0))
-                                 for _ in range(candidates_num)]
-            min_distances = [self.min_distance(hsv_colors, c) for c in colors_candidates]
-            arg_max = np.argmax(min_distances)
-            hsv_colors.append(colors_candidates[arg_max])
-
-        self.palette = [self.hsv2rgb(*hsv) for hsv in hsv_colors]
-
-    @staticmethod
-    def dist(c1, c2):
-        dh = min(abs(c1[0] - c2[0]), 1 - abs(c1[0] - c2[0])) * 2
-        ds = abs(c1[1] - c2[1])
-        dv = abs(c1[2] - c2[2])
-        return dh * dh + ds * ds + dv * dv
-
-    @classmethod
-    def min_distance(cls, colors_set, color_candidate):
-        distances = [cls.dist(o, color_candidate) for o in colors_set]
-        return np.min(distances)
-
-    @staticmethod
-    def hsv2rgb(h, s, v):
-        return tuple(round(c * 255) for c in colorsys.hsv_to_rgb(h, s, v))
-
-    def __getitem__(self, n):
-        return self.palette[n % len(self.palette)]
-
-    def __len__(self):
-        return len(self.palette)
-
 
 
 def draw_detections(frame, detections, palette, labels, output_transform):
