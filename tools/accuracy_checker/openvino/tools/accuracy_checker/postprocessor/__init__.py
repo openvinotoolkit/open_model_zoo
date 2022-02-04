@@ -67,7 +67,6 @@ from .invert_mask import InvertMask
 from .rescale_mask import RescaleMask
 from .facial_landmarks_98_postprocess import Heatmap2Keypoints
 from .text_similarity_pooling import SentenceSimilarityPooling
-from .hand_landmarks_postprocess import HandLandmarksPostprocessor
 
 __all__ = [
     'Postprocessor',
@@ -157,7 +156,5 @@ __all__ = [
 
     'SentenceSimilarityPooling',
 
-    'WeightedNMS',
-
-    'HandLandmarksPostprocessor'
+    'WeightedNMS'
 ]
