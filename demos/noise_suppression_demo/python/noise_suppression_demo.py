@@ -36,7 +36,7 @@ def parse():
         help="path to an .xml file with a trained model")
 
     parser.add_argument("-i", "--input", required=True, type=Path, metavar="<WAV>",
-        help="path to an input 16kHz WAV file")
+        help="path to an input WAV file")
 
     parser.add_argument("-d", "--device", default="CPU", metavar="<DEVICE>",
         help="specify a device to infer on (the list of available devices is shown below). Default is CPU")
@@ -63,7 +63,7 @@ def wav_read(wav_name):
     return x, freq
 
 def wav_write(wav_name, x, freq):
-    x = np.clip(x,-1,+1)
+    x = np.clip(x, -1, +1)
     x = (x*np.iinfo(np.int16).max).astype(np.int16)
     with wave.open(wav_name, "wb") as wav:
         wav.setnchannels(1)
@@ -97,15 +97,26 @@ def main():
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
-    sample_inp, freq = wav_read(str(args.input))
+    sample_inp, freq_data = wav_read(str(args.input))
     sample_size = sample_inp.shape[0]
 
+    infer_request.infer()
     delay = 0
     if "delay" in out_shapes:
-        infer_request.infer()
         delay = infer_request.get_tensor("delay").data[0]
-        log.info("\tDelay: {} samples".format(delay))
         sample_inp = np.pad(sample_inp,((0,delay),))
+    freq_model = 16000
+    if "freq" in out_shapes:
+        freq_model = infer_request.get_tensor("freq").data[0]
+        sample_inp = np.pad(sample_inp,((0,delay),))
+
+    log.info("\tDelay: {} samples".format(delay))
+    log.info("\tFreq: {} Hz".format(freq_model))
+
+    if freq_data != freq_model:
+        raise RuntimeError(
+            "Wav file {} sampling rate {} does not match model sampling rate {}".
+                format(args.input, freq_data, freq_model))
 
     start_time = perf_counter()
 
@@ -138,13 +149,13 @@ def main():
     total_latency = perf_counter() - start_time
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
-    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size*1e3/freq))
-    log.info("\tSampling freq: {} Hz".format(freq))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size*1e3/freq_data))
+    log.info("\tSampling freq: {} Hz".format(freq_data))
 
     #concat output patches and align with input
     sample_out = np.concatenate(samples_out, 0)
     sample_out = sample_out[delay:sample_size+delay]
-    wav_write(args.output, sample_out, freq)
+    wav_write(args.output, sample_out, freq_data)
 
 
 if __name__ == '__main__':
