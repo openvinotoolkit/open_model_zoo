@@ -133,6 +133,102 @@ static UNUSED const Color CITYSCAPES_COLORS[] = {
     { 81,  0,   81 }
 };
 
+inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.back();
+    } else {
+        throw std::runtime_error("Tensor does not have width dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.at(size - 2);
+    } else {
+        throw std::runtime_error("Tensor does not have height dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::C     ||
+        layout == InferenceEngine::Layout::CHW   ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::C:     return dims.at(0);
+            case InferenceEngine::Layout::NC:    return dims.at(1);
+            case InferenceEngine::Layout::CHW:   return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(1);
+            case InferenceEngine::Layout::NCDHW: return dims.at(1);
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+    }
+    return 0;
+}
+
+inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::NC:    return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(0);
+            case InferenceEngine::Layout::NCDHW: return dims.at(0);
+            case InferenceEngine::Layout::CHW:      // [[fallthrough]]
+            case InferenceEngine::Layout::C:        // [[fallthrough]]
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+    }
+    return 0;
+}
+
 inline void showAvailableDevices() {
 #if defined(OV_NEW_API)
     ov::Core core;
