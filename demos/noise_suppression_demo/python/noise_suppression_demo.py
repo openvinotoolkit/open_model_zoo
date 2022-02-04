@@ -81,7 +81,7 @@ def main():
     out_shapes = {name: obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
 
     state_out_names = [n for n in out_shapes.keys() if "state" in n]
-    state_inp_names = [n for n in inp_shapes.keys()  if "state" in n]
+    state_inp_names = [n for n in inp_shapes.keys() if "state" in n]
     if len(state_inp_names) != len(state_out_names):
         raise RuntimeError(
             "Number of input states of the model ({}) is not equal to number of output states({})".
