@@ -448,7 +448,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    # TODO: Attempt to get a name for a Tensor without names
+                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),

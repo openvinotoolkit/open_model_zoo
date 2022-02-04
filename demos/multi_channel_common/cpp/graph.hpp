@@ -71,10 +71,10 @@ private:
     std::thread getterThread;
 public:
     IEGraph(std::queue<ov::InferRequest>&& availableRequests, bool collectStats):
-        availableRequests(std::move(availableRequests)),
-        maxRequests(this->availableRequests.size()),
         perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
-        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0) {}
+        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        availableRequests(std::move(availableRequests)),
+        maxRequests(this->availableRequests.size()) {}
 
     void start(size_t batchSize, GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 
