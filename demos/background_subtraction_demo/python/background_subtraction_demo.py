@@ -26,7 +26,7 @@ import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, BackgroundMattingWithBackground, VideoBackgroundMatting
+from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, ImageMattingWithBackground, VideoBackgroundMatting
 from openvino.model_zoo.model_api.models.utils import load_labels
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
@@ -116,14 +116,14 @@ def get_model(model_adapter, configuration, args):
         is_matting_model = True
     elif len(inputs) == 2 and len(outputs) in (2, 3) and 'bgr' in inputs.keys():
         if args.background is None:
-            raise ValueError('The BackgroundMattingWithBackground model expects the specified "--background" option.')
-        model = BackgroundMattingWithBackground(model_adapter, configuration)
+            raise ValueError('The ImageMattingWithBackground model expects the specified "--background" option.')
+        model = ImageMattingWithBackground(model_adapter, configuration)
         need_bgr_input = True
         is_matting_model = True
     else:
         model = MaskRCNNModel(model_adapter, configuration)
     if not need_bgr_input and args.background is not None:
-        log.warning('The \"--background\" option works only for BackgroundMattingWithBackground model. Option will be omitted.')
+        log.warning('The \"--background\" option works only for ImageMattingWithBackground model. Option will be omitted.')
 
     if args.raw_output_message and is_matting_model:
         log.warning('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')

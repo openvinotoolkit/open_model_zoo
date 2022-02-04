@@ -89,7 +89,7 @@ class VideoBackgroundMatting(ImageModel):
         return rec
 
 
-class BackgroundMattingWithBackground(ImageModel):
+class ImageMattingWithBackground(ImageModel):
     __model__ = 'Background-matting'
 
     def __init__(self, model_adapter, configuration, preload=False):
