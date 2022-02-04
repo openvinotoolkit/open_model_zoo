@@ -61,7 +61,11 @@ void CnnDLSDKBase::InferBatch(
     ov::Tensor input_tensor = m_infer_request.get_tensor(m_input_tensor_name);
 
     size_t num_imgs = frames.size();
-    m_config.m_max_batch_size;
+
+    // shrink tensor from default m_config.m_max_batch_size to actual num of images;
+    ov::Shape shape = input_tensor.get_shape();
+    shape[ov::layout::batch_idx(m_modelLayout)] = num_imgs;
+
     for (size_t i = 0; i < num_imgs; i++) {
         matToTensor(frames[i], input_tensor, i);
     }
