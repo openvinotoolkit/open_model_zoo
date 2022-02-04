@@ -41,8 +41,7 @@ std::vector<std::string> SegmentationModel::loadLabels(const std::string & label
     return labelsList;
 }
 
-void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
-{
+void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input  -----------------------------------------------------
     if (model->inputs().size() != 1) {
@@ -53,6 +52,10 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     ov::Layout inputLayout = ov::layout::get_layout(input);
     if (inputLayout.empty()) {
         inputLayout = { "NCHW" };
+        if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
+            input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+            inputLayout = { "NHWC" };
+        }
     }
 
     const ov::Shape& inputShape = input.get_shape();
@@ -78,7 +81,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     }
 
     ppp.input().model().set_layout(inputLayout);
-
+    model = ppp.build();
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 1) {
         throw std::runtime_error("Segmentation model wrapper supports topologies only with 1 output");
@@ -111,22 +114,29 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
     ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
     const auto& outTensor = infResult.getFirstOutputTensor();
-    void* data = outTensor.data<void>();
 
     result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
 
     if (outChannels == 1 && outTensor.get_element_type() == ov::element::i32) {
-        cv::Mat predictions(outHeight, outWidth, CV_32SC1, data);
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1, outTensor.data<int32_t>());
+        predictions.convertTo(result->resultImage, CV_8UC1);
+    }
+    else if (outChannels == 1 && outTensor.get_element_type() == ov::element::i64) {
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1);
+        const auto data = outTensor.data<int64_t>();
+        for (size_t i = 0; i < predictions.total(); ++i) {
+            reinterpret_cast<int32_t*>(predictions.data)[i] = data[i];
+        }
         predictions.convertTo(result->resultImage, CV_8UC1);
     }
     else if (outTensor.get_element_type() == ov::element::f32) {
-        float* ptr = reinterpret_cast<float*>(data);
+        const float* data = outTensor.data<float>();
         for (int rowId = 0; rowId < outHeight; ++rowId) {
             for (int colId = 0; colId < outWidth; ++colId) {
                 int classId = 0;
                 float maxProb = -1.0f;
                 for (int chId = 0; chId < outChannels; ++chId) {
-                    float prob = ptr[chId * outHeight * outWidth + rowId * outWidth + colId];
+                    float prob = data[chId * outHeight * outWidth + rowId * outWidth + colId];
                     if (prob > maxProb) {
                         classId = chId;
                         maxProb = prob;
