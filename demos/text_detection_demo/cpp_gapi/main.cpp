@@ -120,6 +120,8 @@ int main(int argc, char *argv[]) {
         if (tdRequired) {
             config.getTDinfo();
             config.configureTD(tdDevice, tdNewInputWidth, tdNewInputHeight);
+            slog::info << "The Text Detection model " << tdModelPath << " is loaded to " <<
+                tdDevice << slog::endl;
         }
         if (trRequired) {
             config.getTRinputInfo();
@@ -128,10 +130,16 @@ int main(int argc, char *argv[]) {
                                           decoderOutputNames, trPadSymbolFirst, kPadSymbol,
                                           trSymbolsSet, decoderType);
                 config.configureTRcomposite(trDevice);
+                slog::info << "The Composite Text Recognition Encoder model " << trModelPath
+                    << " is loaded to " << trDevice << slog::endl;
+                slog::info << "The Composite Text Recognition Decoder model " << trModelPath
+                    << " is loaded to " << trDevice << slog::endl;
             } else {
                 config.getTRoutputInfo(trOutputBlobName, trPadSymbolFirst, kPadSymbol,
                                        decoderStartIndex, trSymbolsSet);
                 config.configureTR(trDevice);
+            slog::info << "The Text Recognition model " << trModelPath << " is loaded to " <<
+                trDevice << slog::endl;
             }
         }
 

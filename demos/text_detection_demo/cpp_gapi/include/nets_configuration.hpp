@@ -26,7 +26,6 @@ class NetsConfig {
     std::string trModelPath = "";
     std::string trOutputName = "";
 
-    std::string decoderModelPath = "";
     std::array<std::string,2> encoderOutputNames{};
     std::array<std::string,3> decoderInputNames{};
     std::array<std::string,2> decoderOutputNames{};
@@ -54,6 +53,7 @@ public:
 
     std::vector<size_t> trInputDims{};
     size_t              trInputChannels = 0;
+    std::string decoderModelPath = "";
 
     size_t decoderNumClasses = 0;
     size_t decoderEndToken = 0;

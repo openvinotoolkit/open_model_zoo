@@ -10,8 +10,8 @@
 
 void softmax(std::vector<float>& rdata) {
     const size_t lastDim = 2;
-    for (size_t i = 0 ; i < rdata.size(); i+=lastDim) {
-        float m = std::max(rdata[i], rdata[i+1]);
+    for (size_t i = 0; i < rdata.size(); i += lastDim) {
+        float m = std::max(rdata[i], rdata[i + 1]);
         rdata[i] = std::exp(rdata[i] - m);
         rdata[i + 1] = std::exp(rdata[i + 1] - m);
         float s = rdata[i] + rdata[i + 1];
@@ -31,7 +31,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
             throw std::runtime_error("Axis must be less than dimension of shape.");
         }
     }
-    size_t totalSize = shape[0]*shape[1]*shape[2]*shape[3];
+    size_t totalSize = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
     std::vector<size_t> steps {
         shape[axes[1]]*shape[axes[2]]*shape[axes[3]],
         shape[axes[2]]*shape[axes[3]],
@@ -56,13 +56,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
 }
 
 std::vector<std::size_t> dimsToShape(const cv::MatSize& sz) {
-    const int nDims = sz.dims();
-    std::vector<std::size_t> result(nDims, 0);
-    // cv::MatSize is not iterable...
-    for (int i = 0; i < nDims; i++) {
-        result[i] = static_cast<std::size_t>(sz[i]);
-    }
-    return result;
+    return std::vector<std::size_t>(sz.p, sz.p + sz.dims());
 }
 
 std::vector<float> sliceAndGetSecondChannel(const std::vector<float>& data) {
@@ -94,7 +88,7 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat& mask, const float minAre
             continue;
         if (r.size.area() < minArea)
             continue;
-        bboxes.emplace_back(r);
+        bboxes.push_back(r);
     }
     return bboxes;
 }
@@ -342,7 +336,7 @@ GAPI_OCV_KERNEL(OCVCropLabels, custom::CropLabels) {
             }
             crop.reshape(1, blobShape).convertTo(blob, CV_32F);
             out.emplace_back(blob.clone());
-            pts.emplace_back(points);
+            pts.push_back(points);
         }
     }
 };
@@ -365,8 +359,8 @@ GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
 
         res.reserve(numDetectedLabels);
         for (auto i = 0U; i < numDetectedLabels; i++) {
-            res.emplace_back(cv::Mat({ maxDecodedSymbols, 1, static_cast<int>(numClasses) },
-                                     CV_32FC1));
+            res.emplace_back(std::vector<int>{ maxDecodedSymbols, 1, static_cast<int>(numClasses) },
+                             CV_32FC1);
         }
 
         cv::GMat inDec, inHidden, feature, outHidden, outDec;

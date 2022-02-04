@@ -104,6 +104,7 @@ Options:
     -b                             Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
     -start_index                   Optional. Start index for Simple decoder. Default value is 0.
     -pad                           Optional. Pad symbol. Default value is '#'.
+    -gapi_regular_mode             Optional. If it is set, G-API graph is compiled in the regular execution mode; otherwise, graph is compiled in the streaming mode for processing video stream data.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
