@@ -104,11 +104,11 @@ def main():
     delay = 0
     if "delay" in out_shapes:
         delay = infer_request.get_tensor("delay").data[0]
-        sample_inp = np.pad(sample_inp,((0,delay),))
+        sample_inp = np.pad(sample_inp, ((0, delay), ))
     freq_model = 16000
     if "freq" in out_shapes:
         freq_model = infer_request.get_tensor("freq").data[0]
-        sample_inp = np.pad(sample_inp,((0,delay),))
+        sample_inp = np.pad(sample_inp, ((0, delay), ))
 
     log.info("\tDelay: {} samples".format(delay))
     log.info("\tFreq: {} Hz".format(freq_model))
