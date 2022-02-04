@@ -31,7 +31,7 @@ vehicle-detection-????
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
 # For -at yolo
-# mobilenet-yolo-v4-syg
+mobilenet-yolo-v4-syg
 person-vehicle-bike-detection-crossroad-yolov3-1020
 yolo-v1-tiny-tf
 yolo-v2-ava-0001
@@ -45,4 +45,4 @@ yolo-v3-tf
 yolo-v3-tiny-tf
 yolo-v4-tf
 yolo-v4-tiny-tf
-# yolof
+yolof
