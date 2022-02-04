@@ -107,9 +107,9 @@ Chunk processing order must be from early to late audio positions.
 
  3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

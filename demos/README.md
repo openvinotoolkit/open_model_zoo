@@ -84,13 +84,13 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** OpenVINO™ Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/model_tools/README.md).
 
 ## Build the Demo Applications
 
-To be able to build demos you need to source Inference Engine and OpenCV environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
+To be able to build demos you need to source OpenVINO™ and OpenCV environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
 Please run the following command before the demos build (assuming that the binary package was installed to `<INSTALL_DIR>`):
 
 ```sh
@@ -103,9 +103,9 @@ source <INSTALL_DIR>/setupvars.sh
 > pip install openvino
 > ```
 
-You can also build demos manually using Inference Engine built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for Inference Engine and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
-Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
-for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
+You can also build demos manually using OpenVINO™ built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for OpenVINO™ and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
+Please refer to the OpenVINO™ [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
+for details. Please also add path to built OpenVINO™ libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
 
@@ -282,7 +282,7 @@ build_demos_msvc.bat --target="classification_demo segmentation_demo"
 
 ### Get Ready for Running the Demo Applications on Linux*
 
-Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
+Before running compiled binary files, make sure your application can find the OpenVINO™ and OpenCV libraries.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 
@@ -290,7 +290,7 @@ run the `setupvars` script to set all necessary environment variables:
 source <INSTALL_DIR>/setupvars.sh
 ```
 
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added them
+If you use your own OpenVINO™ and OpenCV binaries to build the demos please make sure you have added them
 to the `LD_LIBRARY_PATH` environment variable.
 
 **(Optional)**: The OpenVINO environment variables are removed when you close the
@@ -325,7 +325,7 @@ list above.
 
 ### Get Ready for Running the Demo Applications on Windows*
 
-Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
+Before running compiled binary files, make sure your application can find the OpenVINO™ and OpenCV libraries.
 Optionally, download the OpenCV community FFmpeg plugin using the downloader script in the OpenVINO package: `<INSTALL_DIR>\extras\opencv\ffmpeg-download.ps1`.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
@@ -334,7 +334,7 @@ run the `setupvars` script to set all necessary environment variables:
 <INSTALL_DIR>\setupvars.bat
 ```
 
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
+If you use your own OpenVINO™ and OpenCV binaries to build the demos please make sure you have added
 to the `PATH` environment variable.
 
 To run Python demo applications that require native Python extension modules, you must additionally
@@ -348,7 +348,7 @@ set PYTHONPATH=%PYTHONPATH%;<bin_dir>
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you
 have properly configured **Debugging** environment settings for the **Debug**
 and **Release** configurations. Set correct paths to the OpenCV libraries, and
-debug and release versions of the Inference Engine libraries.
+debug and release versions of the OpenVINO™ libraries.
 For example, for the **Debug** configuration, go to the project's
 **Configuration Properties** to the **Debugging** category and set the `PATH`
 variable in the **Environment** field to the following:

@@ -11,7 +11,7 @@ The output of network is also sequence of audio patches with clean speech. The p
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/noise_suppression_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

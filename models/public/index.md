@@ -5,7 +5,7 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
+You can download models and convert them into OpenVINO™ IR format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
 ## Classification
 

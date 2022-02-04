@@ -8,7 +8,7 @@ based on configuration files in the models' directories.
   Optimizer;
 
 * `omz_converter` (model converter) converts the models that are not in the
-  Inference Engine IR format into that format using Model Optimizer.
+  OpenVINO™ IR format into that format using Model Optimizer.
 
 * `omz_quantizer` (model quantizer) quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
@@ -242,7 +242,7 @@ The basic usage is to run the script like this:
 omz_converter --all
 ```
 
-This will convert all models into the Inference Engine IR format. Models that
+This will convert all models into the OpenVINO™ IR format. Models that
 were originally in that format are ignored. Models in PyTorch format will be
 converted in ONNX format first.
 
@@ -445,13 +445,13 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `onnx`,
+  Current possible values are `dldt` (OpenVINO™ IR), `caffe`, `mxnet`, `onnx`,
   `pytorch` and `tf` (TensorFlow). Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.
 
 * `precisions`: the list of precisions that the model has IR files for. For models downloaded
-  in a format other than the Inference Engine IR format, these are the precisions that the model
+  in a format other than the OpenVINO™ IR format, these are the precisions that the model
   converter can produce IR files in. Current possible values are:
 
   * `FP16`

@@ -177,7 +177,7 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model Conversion
 
-Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
+OpenVINO&trade; Inference Engine supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
 
 > **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
