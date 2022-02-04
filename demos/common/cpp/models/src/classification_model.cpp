@@ -120,19 +120,20 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     if (outputShape.size() != 2 && outputShape.size() != 4) {
         throw std::logic_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
     }
-    const ov::Layout outputLayout4D("");
-    if (outputShape.size() == 4 && (outputShape[2] != 1 || outputShape[3] != 1)) {
+    const ov::Layout outputLayout4D("NCHW");
+    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1 || outputShape[ov::layout::widht_idx(outputLayout4D)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     }
-    if (nTop > outputShape[1]) {
-        throw std::logic_error("The model provides " + std::to_string(outputShape[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
+    auto classesNum = ov::layout::channels_idx(outputLayout4D);
+    if (nTop > classesNum) {
+        throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     }
 
-    if (outputShape[1] == labels.size() + 1) {
+    if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
         slog::warn << "\tInserted 'other' label as first." << slog::endl;
     }
-    else if (outputShape[1] != labels.size()) {
+    else if (classesNum != labels.size()) {
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
     }
     ppp.output().tensor().set_element_type(ov::element::f32);
