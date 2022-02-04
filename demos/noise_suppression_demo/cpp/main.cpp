@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
     double total_latency = std::chrono::duration_cast<ms>(std::chrono::steady_clock::now() - start_time).count();
     slog::info << "Metrics report:" << slog::endl;
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
-    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / (freq_data*1e-3) << " ms" << slog::endl;
+    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / (freq_data * 1e-3) << " ms" << slog::endl;
     slog::info << "\tSampling freq: " << freq_data << " Hz" << slog::endl;
 
     // convert fp32 to int16_t and save to wav

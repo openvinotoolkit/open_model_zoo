@@ -77,7 +77,7 @@ def main():
     log.info("Reading model {}".format(args.model))
     ov_encoder = core.read_model(args.model)
 
-    inp_shapes = {name: obj.shape for obj in ov_encoder.inputs  for name in obj.get_names()}
+    inp_shapes = {name: obj.shape for obj in ov_encoder.inputs for name in obj.get_names()}
     out_shapes = {name: obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
 
     state_out_names = [n for n in out_shapes.keys() if "state" in n]
@@ -149,7 +149,7 @@ def main():
     total_latency = perf_counter() - start_time
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
-    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size*1e3/freq_data))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out) * input_size * 1e3 / freq_data))
     log.info("\tSampling freq: {} Hz".format(freq_data))
 
     #concat output patches and align with input
