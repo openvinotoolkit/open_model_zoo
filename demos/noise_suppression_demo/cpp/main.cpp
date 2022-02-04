@@ -243,7 +243,7 @@ int main(int argc, char* argv[]) {
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
     slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / (freq_data*1e-3) << " ms" << slog::endl;
     slog::info << "\tSampling freq: " << freq_data << " Hz" << slog::endl;
-    
+
     // convert fp32 to int16_t and save to wav
     for(size_t i = 0; i < out_wave_s16.size(); ++i) {
         float v = out_wave_fp32[i+delay];
