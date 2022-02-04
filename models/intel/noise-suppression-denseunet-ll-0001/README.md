@@ -65,7 +65,7 @@ Output spectrum, name: `Y`, shape: `1, 2, 129, 1`, format: `B, C, F, T`, where:
 
 Output delay, name: `delay`, shape: `1`, format: `C`, where:
  - `C` - number of delays (always 1)
-This is provided for convenience and contains the output "shift" relative to the input. For this model it is 384 and can be differ for other noise suppression models.
+This is provided for convenience and contains the output "shift" relative to the input. For this model it is 384 and can differ for other noise suppression models.
 
 
 ## Legal Information
