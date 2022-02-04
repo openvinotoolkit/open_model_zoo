@@ -52,8 +52,7 @@ def wav_read(wav_name):
     with wave.open(wav_name, "rb") as wav:
         if wav.getsampwidth() != 2:
             raise RuntimeError("wav file {} does not have int16 format".format(wav_name))
-        if wav.getframerate() != 16000:
-            raise RuntimeError("wav file {} does not have 16kHz sampling rate".format(wav_name))
+        freq = wav.getframerate()
 
         data = wav.readframes( wav.getnframes() )
         x = np.frombuffer(data, dtype=np.int16)
@@ -61,13 +60,14 @@ def wav_read(wav_name):
         if wav.getnchannels() > 1:
             x = x.reshape(-1, wav.getnchannels())
             x = x.mean(1)
-    return x
+    return x, freq
 
-def wav_write(wav_name, x):
+def wav_write(wav_name, x, freq):
+    x = np.clip(x,-1,+1)
     x = (x*np.iinfo(np.int16).max).astype(np.int16)
     with wave.open(wav_name, "wb") as wav:
         wav.setnchannels(1)
-        wav.setframerate(16000)
+        wav.setframerate(freq)
         wav.setsampwidth(2)
         wav.writeframes(x.tobytes())
 
@@ -77,27 +77,17 @@ def main():
     log.info("Reading model {}".format(args.model))
     ov_encoder = core.read_model(args.model)
 
-    # check input and output names
-    if len(ov_encoder.inputs) == len(ov_encoder.outputs):
-        input_shapes = {}
+    inp_shapes = {name:obj.shape for obj in ov_encoder.inputs  for name in obj.get_names()}
+    out_shapes = {name:obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
 
-        for const_obj in ov_encoder.inputs:
-            for name in const_obj.get_names():
-                if ("state" in name) or ("input" in name):
-                    input_shapes[name] = const_obj.shape
-                else:
-                    raise RuntimeError("The model expected input tensor with name 'input' or 'inp_state_*'")
+    state_out_names = [n for n in out_shapes.keys() if "state" in n]
+    state_inp_names = [n for n in inp_shapes.keys()  if "state" in n]
+    if len(state_inp_names) != len(state_out_names):
+        raise RuntimeError(
+            "Number of input states of the model ({}) is not equal to number of output states({})".format(len(state_inp_names),
+                                                                                              len(state_out_names)))
 
-        for const_obj in ov_encoder.outputs:
-            for name in const_obj.get_names():
-                if ("state" not in name) and ("output" not in name):
-                    raise RuntimeError("The model expected output tensor with names 'output' and 'out_state_*'")
-
-    else:
-        raise RuntimeError("Number of inputs of the model ({}) is not equal to number of outputs({})".format(len(ov_encoder.inputs), len(ov_encoder.outputs)))
-
-    state_inp_names = [n for n in input_shapes.keys() if "state" in n]
-    state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
+    state_param_num = sum(np.prod(inp_shapes[n]) for n in state_inp_names)
     log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
     # load model to the device
@@ -107,10 +97,19 @@ def main():
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
-    start_time = perf_counter()
-    sample_inp = wav_read(str(args.input))
+    sample_inp, freq = wav_read(str(args.input))
+    sample_size = sample_inp.shape[0]
 
-    input_size = input_shapes["input"][1]
+    delay = 0
+    if "delay" in out_shapes:
+        infer_request.infer()
+        delay = infer_request.get_tensor("delay").data[0]
+        log.info("\tDelay: {} samples".format(delay))
+        sample_inp = np.pad(sample_inp,((0,delay),))
+
+    start_time = perf_counter()
+
+    input_size = inp_shapes["input"][1]
     res = None
 
     samples_out = []
@@ -131,17 +130,21 @@ def main():
                 inputs[n] = infer_request.get_tensor(n.replace('inp', 'out')).data
             else:
                 #on the first iteration fill states by zeros
-                inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
+                inputs[n] = np.zeros(inp_shapes[n], dtype=np.float32)
 
         infer_request.infer(inputs)
         res = infer_request.get_tensor("output")
         samples_out.append(copy.deepcopy(res.data).squeeze(0))
-    total_latency = (perf_counter() - start_time) * 1e3
+    total_latency = perf_counter() - start_time
     log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency))
-    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size/16.0))
+    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size*1e3/freq))
+    log.info("\tSampling freq: {} Hz".format(freq))
+
+    #concat output patches and align with input
     sample_out = np.concatenate(samples_out, 0)
-    wav_write(args.output, sample_out)
+    sample_out = sample_out[delay:sample_size+delay]
+    wav_write(args.output, sample_out, freq)
 
 
 if __name__ == '__main__':

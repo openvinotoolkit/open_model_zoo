@@ -85,8 +85,6 @@ void read_wav(const std::string& file_name, RiffWaveHeader& wave_header, std::ve
     CHECK_IF(wave_header.num_of_channels != 1);
     // only 16 bit
     CHECK_IF(wave_header.bits_per_sample != 16);
-    // only 16KHz
-    CHECK_IF(wave_header.sampling_freq != 16000);
     // make sure that data chunk follows file header
     CHECK_IF(wave_header.data_tag != fourcc("data"));
     #undef CHECK_IF
@@ -174,7 +172,20 @@ int main(int argc, char* argv[]) {
     std::vector<float> inp_wave_fp32;
     std::vector<float> out_wave_fp32;
     // fp32 input wave will be expanded to be divisible by patch_size
-    size_t iter = 1 + (inp_wave_s16.size() / patch_size);
+
+    // try to get delay output
+    int delay = 0;
+    for (size_t i = 0; i < outputs.size(); i++) {
+        std::string out_name = outputs[i].get_any_name();
+        if (out_name == "delay") {
+            infer_request.infer();
+            delay = infer_request.get_tensor("delay").data<int>()[0];
+            break;
+        }
+    }
+    slog::info << "\tDelay: " << delay << " samples" << slog::endl;
+
+    size_t iter = 1 + ((inp_wave_s16.size() + delay) / patch_size);
     size_t inp_size = patch_size * iter;
     inp_wave_fp32.resize(inp_size, 0);
     out_wave_fp32.resize(inp_size, 0);
@@ -218,13 +229,16 @@ int main(int argc, char* argv[]) {
 
     using ms = std::chrono::duration<double, std::ratio<1, 1000>>;
     double total_latency = std::chrono::duration_cast<ms>(std::chrono::steady_clock::now() - start_time).count();
+    int freq = wave_header.sampling_freq;
     slog::info << "Metrics report:" << slog::endl;
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
-    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / 16.0f << " ms" << slog::endl;
-
+    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / (freq*1e-3) << " ms" << slog::endl;
+    slog::info << "\tSampling freq: " << freq << " Hz" << slog::endl;
     // convert fp32 to int16_t
     for(size_t i = 0; i < out_wave_s16.size(); ++i) {
-        out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
+        float v = out_wave_fp32[i+delay];
+        v = std::max(-1.0f, std::min(+1.0f, v));
+        out_wave_s16[i] = (int16_t)(v * std::numeric_limits<int16_t>::max());
     }
     write_wav(FLAGS_o, wave_header, out_wave_s16);
     return 0;
