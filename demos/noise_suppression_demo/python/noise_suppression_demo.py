@@ -84,8 +84,8 @@ def main():
     state_inp_names = [n for n in inp_shapes.keys()  if "state" in n]
     if len(state_inp_names) != len(state_out_names):
         raise RuntimeError(
-            "Number of input states of the model ({}) is not equal to number of output states({})".format(len(state_inp_names),
-                                                                                              len(state_out_names)))
+            "Number of input states of the model ({}) is not equal to number of output states({})".
+                format(len(state_inp_names), len(state_out_names)))
 
     state_param_num = sum(np.prod(inp_shapes[n]) for n in state_inp_names)
     log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
