@@ -350,7 +350,8 @@ NATIVE_DEMOS = [
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
         [
-            TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
+            # TODO: INT8: Attempt to get a name for a Tensor without names
+            # TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
             TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
                 '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
             TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
@@ -448,7 +449,7 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    # TODO: Attempt to get a name for a Tensor without names
+                    # TODO: INT8: Attempt to get a name for a Tensor without names
                     # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
