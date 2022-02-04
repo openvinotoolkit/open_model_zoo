@@ -350,23 +350,17 @@ class WeightedNMS(Postprocessor):
                 min_value=0, max_value=1, optional=True, default=0.3,
                 description="Overlap threshold for merging detections."
             ),
-            # 'include_boundaries': BoolField(
-            #     optional=True, default=True, description="Shows if boundaries are included."
-            # ),
-            # 'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K.")
         })
         return parameters
 
     def configure(self):
         self.overlap = self.get_value_from_config('overlap')
-        # self.include_boundaries = self.get_value_from_config('include_boundaries')
-        # self.keep_top_k = self.get_value_from_config('keep_top_k')
 
     def process_image(self, annotation, prediction):
-        pred_out = []
         for pred in prediction:
             scores = get_scores(pred)
-            x_mins, y_mins, x_maxs, y_maxs, scores = self.weighted_nms(pred.x_mins, pred.y_mins, pred.x_maxs, pred.y_maxs, scores, self.overlap)
+            x_mins, y_mins, x_maxs, y_maxs, scores = self.weighted_nms(pred.x_mins, pred.y_mins, pred.x_maxs,
+                                                                       pred.y_maxs, scores, self.overlap)
             pred.replace(np.ones_like(x_mins) * pred.labels[0], scores, x_mins, y_mins, x_maxs, y_maxs)
 
         return annotation, prediction
@@ -377,15 +371,9 @@ class WeightedNMS(Postprocessor):
         if scores.size == 1:
             return x1, y1, x2, y2, scores
 
-        b = 0
-
-        areas = (x2 - x1 + b) * (y2 - y1 + b)
+        areas = (x2 - x1) * (y2 - y1)
         order = scores.argsort()[::-1]
 
-        # if keep_top_k:
-        #     order = order[:keep_top_k]
-
-        keep = []
 
         out_x1 = []
         out_x2 = []
@@ -406,15 +394,14 @@ class WeightedNMS(Postprocessor):
                 continue
 
             i = order[0]
-            keep.append(i)
 
             xx1 = np.maximum(x1[i], x1[order[1:]])
             yy1 = np.maximum(y1[i], y1[order[1:]])
             xx2 = np.minimum(x2[i], x2[order[1:]])
             yy2 = np.minimum(y2[i], y2[order[1:]])
 
-            w = np.maximum(0.0, xx2 - xx1 + b)
-            h = np.maximum(0.0, yy2 - yy1 + b)
+            w = np.maximum(0.0, xx2 - xx1)
+            h = np.maximum(0.0, yy2 - yy1)
             intersection = w * h
             normalization = areas[i] + areas[order[1:]] - intersection
 
