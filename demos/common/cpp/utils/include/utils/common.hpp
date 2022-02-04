@@ -307,7 +307,7 @@ void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     ov::OutputVector outputs = model->outputs();
 
     slog::info << "inputs: " << slog::endl;
-    for (const ov::Output<ov::Node> input : inputs) {
+    for (const ov::Output<ov::Node>& input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
@@ -317,7 +317,7 @@ void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     }
 
     slog::info << "outputs: " << slog::endl;
-    for (const ov::Output<ov::Node> output : outputs) {
+    for (const ov::Output<ov::Node>& output : outputs) {
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
