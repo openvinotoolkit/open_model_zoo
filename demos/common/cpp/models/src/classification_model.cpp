@@ -14,8 +14,8 @@
 // limitations under the License.
 */
 
-#include <openvino/openvino.hpp>
 #include <ngraph/ngraph.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -69,25 +69,27 @@ std::vector<std::string> ClassificationModel::loadLabels(const std::string& labe
 void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("Classification model wrapper supports topologies only with 1 input");
     }
-    inputsNames.push_back(model->input().get_any_name());
+    const auto& input = model->input();
+    inputsNames.push_back(input.get_any_name());
 
-    const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
+    const ov::Shape& inputShape = input.get_shape();
+    ov::Layout inputLayout = ov::layout::get_layout(input);
     if (inputLayout.empty()) {
         inputLayout = { "NCHW" };
     }
 
-    if (inputShape.size() != 4 || inputShape[1] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
-    if (inputShape[2] != inputShape[3]) {
+    const auto width = ov::layout::width_idx(inputLayout);
+    const auto height = ov::layout::height_idx(inputLayout);
+    if (height != width) {
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
-            " Got " + std::to_string(inputShape[2]) +
-            "x" + std::to_string(inputShape[3]) + ".");
+            " Got " + std::to_string(height) +
+            "x" + std::to_string(width) + ".");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
@@ -110,8 +112,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 1) {
+    if (model->outputs().size() != 1) {
         throw std::logic_error("Classification model wrapper supports topologies only with 1 output");
     }
 
@@ -119,6 +120,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     if (outputShape.size() != 2 && outputShape.size() != 4) {
         throw std::logic_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
     }
+    const ov::Layout outputLayout4D("");
     if (outputShape.size() == 4 && (outputShape[2] != 1 || outputShape[3] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     }
