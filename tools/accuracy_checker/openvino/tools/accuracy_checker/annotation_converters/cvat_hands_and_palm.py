@@ -36,41 +36,12 @@ class CVATHandPalmConverterBase:
     @staticmethod
     def generate_labels_mapping(categories):
         label_to_id = {t['name']: t['id'] for t in categories}
-        meta = {'label_map': {value: key for key, value in label_to_id.items()}, 'label': list(label_to_id.keys())}
-        # if self.dataset_meta:
-        #     meta = read_json(self.dataset_meta)
-        #     if 'labels' in meta and 'label_map' not in meta:
-        #         offset = int(self.has_background)
-        #         label_to_id = {label_name: label_id + offset for label_id, label_name in enumerate(meta['labels'])}
-        #         meta['label_map'] = {'label_map': {value: key for key, value in label_to_id.items()}}
-        #         if self.has_background:
-        #             meta['label_map'][0] = 'background'
-        #             meta['background_label'] = 0
-        #
-        #     label_map = meta.get('label_map')
-        #     if not label_map:
-        #         raise ConfigError('dataset_meta_file should contains labels or label_map')
-        #     label_to_id = {value: key for key, value in label_map.items()}
-        #
-        #     return label_to_id, meta
-        #
-        # meta = {}
-        # if self.label_map_file:
-        #     label_to_id = read_json(self.label_map_file).get('labels')
-        #     if not label_to_id:
-        #         raise ConfigError('label_map_file does not contains labels key')
-        # else:
-        #     labels = [label.find('name').text for label in annotation_meta.iter('label') if label.find('name').text]
-        #     if not labels:
-        #         raise ConfigError('annotation file does not contains labels')
-        #     if self.has_background:
-        #         labels = ['background'] + labels
-        #         meta['background_label'] = 0
-        #     label_to_id = {label: idx for idx, label in enumerate(labels)}
-        # meta['label_map'] = {value: key for key, value in label_to_id.items()}
-
+        meta = {'label_map': {value: key for key, value in label_to_id.items()},
+                'label': list(label_to_id.keys()),
+                'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
+                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1
+        }
         return label_to_id, meta
-
 
 
 class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConverterBase):

@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField, PathField, NumberField
+from ..config import ConfigValidator, StringField, PathField, NumberField, BoolField
 from ..representation import (
     ContainerPrediction,
     RegressionPrediction,
@@ -278,13 +278,16 @@ class LandmarksRegressionAdapter(Adapter):
         parameters.update({
             'landmarks_out': StringField(description="Output layer name for landmarks recognition.", optional=True),
             'landmarks_step': NumberField(description='Number of data per landmark point', optional=True, default=2,
-                                          value_type=int)
+                                          value_type=int),
+            'is_hand_landmarks': BoolField(description="Model predicts hand landmarks", optional=True,
+                                        default=False),
         })
         return parameters
 
     def configure(self):
         self.landmarks_out = self.get_value_from_config('landmarks_out')
         self.landmarks_step = self.get_value_from_config('landmarks_step')
+        self.is_hand_landmarks = self.get_value_from_config('is_hand_landmarks')
         self.output_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
@@ -295,7 +298,10 @@ class LandmarksRegressionAdapter(Adapter):
         prediction = raw_output[self.landmarks_out]
         for identifier, values in zip(identifiers, prediction):
             x_values, y_values = values[::self.landmarks_step], values[1::self.landmarks_step]
-            res.append(FacialLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
+            if self.is_hand_landmarks:
+                res.append(HandLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
+            else:
+                res.append(FacialLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
 
         return res
 
@@ -304,9 +310,9 @@ class LandmarksRegressionAdapter(Adapter):
         if self.landmarks_out:
             self.landmarks_out = self.check_output_name(self.landmarks_out, outputs)
             return
+
         super().select_output_blob(outputs)
         self.landmarks_out = self.output_blob
-        return
 
 class PersonAttributesAdapter(Adapter):
     __provider__ = 'person_attributes'

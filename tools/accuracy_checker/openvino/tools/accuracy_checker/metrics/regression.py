@@ -450,8 +450,10 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation,
+                        HandLandmarksAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction,
+                        HandLandmarksPrediction)
 
     @classmethod
     def parameters(cls):
