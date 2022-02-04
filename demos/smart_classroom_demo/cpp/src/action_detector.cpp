@@ -25,35 +25,15 @@ bool SortScorePairDescend(const std::pair<float, T>& pair1,
     return pair1.first > pair2.first;
 }
 
-void ActionDetection::submitRequest() {
-    if (!m_enqueued_frames)
-        return;
-    m_enqueued_frames = 0;
-
-    BaseCnnDetection::submitRequest();
-}
-
-void ActionDetection::enqueue(const cv::Mat& frame) {
-    if (request == nullptr) {
-        request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
-    }
-
-    m_width = static_cast<float>(frame.cols);
-    m_height = static_cast<float>(frame.rows);
-
-    ov::Tensor input_tensor = request->get_tensor(m_input_name);
-
-    matToTensor(frame, input_tensor);
-
-    m_enqueued_frames = 1;
-}
-
 ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     BaseCnnDetection(config.is_async), m_config(config) {
-    topoName = "action detector";
-    auto model = m_config.m_core.read_model(m_config.m_path_to_model);
-    model->get_parameters()[0]->set_layout("NCHW");
-    ov::set_batch(model, m_config.m_max_batch_size);
+    m_detectorName = "action detector";
+
+    ov::Layout inputLayout = {"NCHW"};
+
+    slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
+    std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
+    logBasicModelInfo(model);
 
     ov::OutputVector inputInfo = model->inputs();
     if (inputInfo.size() != 1) {
@@ -61,24 +41,28 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     }
 
     m_input_name = model->input().get_any_name();
-    ov::OutputVector outputs = model->outputs();
-    m_network_input_size.height = model->input().get_shape()[2];
-    m_network_input_size.width = model->input().get_shape()[3];
+
+    m_network_input_size.height = model->input().get_shape()[ov::layout::height_idx(inputLayout)];
+    m_network_input_size.width = model->input().get_shape()[ov::layout::width_idx(inputLayout)];
 
     m_new_model = false;
 
-    ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-      set_element_type(ov::element::u8).
-      set_layout({"NCHW"});
-
+    ov::OutputVector outputs = model->outputs();
     for (auto&& item : outputs) {
-        ppp.output(item.get_any_name()).tensor().set_element_type(ov::element::f32);
         m_new_model = item.get_any_name() == m_config.new_loc_blob_name;
     }
+
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout(inputLayout);
     model = ppp.build();
+
+    ov::set_batch(model, m_config.m_max_batch_size);
+
     m_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
     logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
+
     const auto& head_anchors = m_new_model ? m_config.new_anchors : m_config.old_anchors;
     const int num_heads = head_anchors.size();
     m_head_ranges.resize(num_heads + 1);
@@ -86,6 +70,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     m_head_step_sizes.resize(num_heads);
     m_head_ranges[0] = 0;
     int head_shift = 0;
+
     for (int head_id = 0; head_id < num_heads; ++head_id) {
         m_glob_anchor_map[head_id].resize(head_anchors[head_id]);
         int anchor_height, anchor_width;
@@ -95,6 +80,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
                     m_config.new_action_conf_blob_name_suffix + std::to_string(anchor_id + 1) :
                 m_config.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
             m_glob_anchor_names.push_back(glob_anchor_name);
+
             const auto anchor_dims = m_model.output(glob_anchor_name).get_shape();
             anchor_height = m_new_model ? anchor_dims[2] : anchor_dims[1];
             anchor_width = m_new_model ? anchor_dims[3] : anchor_dims[2];
@@ -120,51 +106,71 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     m_binary_task = m_config.num_action_classes == 2;
 }
 
-std::vector<int> ieSizeToVector(const ov::Shape& ie_output_dims) {
-    std::vector<int> blob_sizes(ie_output_dims.size(), 0);
-    for (size_t i = 0; i < blob_sizes.size(); ++i) {
-        blob_sizes[i] = ie_output_dims[i];
+void ActionDetection::submitRequest() {
+    if (!m_enqueued_frames)
+        return;
+    m_enqueued_frames = 0;
+
+    BaseCnnDetection::submitRequest();
+}
+
+void ActionDetection::enqueue(const cv::Mat& frame) {
+    if (m_request == nullptr) {
+        m_request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
     }
-    return blob_sizes;
+
+    m_width = static_cast<float>(frame.cols);
+    m_height = static_cast<float>(frame.rows);
+
+    ov::Tensor input_tensor = m_request->get_tensor(m_input_name);
+
+    matToTensor(frame, input_tensor);
+
+    m_enqueued_frames = 1;
 }
 
 DetectedActions ActionDetection::fetchResults() {
     const auto loc_blob_name = m_new_model ? m_config.new_loc_blob_name : m_config.old_loc_blob_name;
     const auto det_conf_blob_name = m_new_model ? m_config.new_det_conf_blob_name : m_config.old_det_conf_blob_name;
 
-    auto loc_out_size = ieSizeToVector(m_model.output(loc_blob_name).get_shape());
-    const cv::Mat loc_out(loc_out_size[0],
-                          loc_out_size[1],
+    ov::Shape loc_out_shape = m_model.output(loc_blob_name).get_shape();
+    const cv::Mat loc_out(loc_out_shape[0],
+                          loc_out_shape[1],
                           CV_32F,
-                          request->get_tensor(loc_blob_name).data<float>());
+                          m_request->get_tensor(loc_blob_name).data<float>());
 
-    auto main_conf_out_size = ieSizeToVector(m_model.output(det_conf_blob_name).get_shape());
-    const cv::Mat main_conf_out(main_conf_out_size[0],
-                                main_conf_out_size[1],
+    ov::Shape conf_out_shape = m_model.output(det_conf_blob_name).get_shape();
+    const cv::Mat main_conf_out(conf_out_shape[0],
+                                conf_out_shape[1],
                                 CV_32F,
-                                request->get_tensor(det_conf_blob_name).data<float>());
+                                m_request->get_tensor(det_conf_blob_name).data<float>());
 
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < m_num_glob_anchors; ++glob_anchor_id) {
         const auto& blob_name = m_glob_anchor_names[glob_anchor_id];
-        add_conf_out.emplace_back(request->get_tensor(blob_name).get_shape()[2],
-                                  request->get_tensor(blob_name).get_shape()[3],
+        add_conf_out.emplace_back(m_request->get_tensor(blob_name).get_shape()[2],
+                                  m_request->get_tensor(blob_name).get_shape()[3],
                                   CV_32F,
-                                  request->get_tensor(blob_name).data());
+                                  m_request->get_tensor(blob_name).data());
     }
 
     // Parse detections
+    DetectedActions result;
     if (m_new_model) {
         const cv::Mat priorbox_out;
-        return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
+        result = GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
                              cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
+    } else {
+        ov::Shape old_priorbox_shape = m_model.output(m_config.old_priorbox_blob_name).get_shape();
+        const cv::Mat priorbox_out((int)old_priorbox_shape[0], (int)old_priorbox_shape[1],
+            CV_32F,
+            m_request->get_tensor(m_config.old_priorbox_blob_name).data());
+
+        result = GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
+            cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
     }
 
-    const cv::Mat priorbox_out(ieSizeToVector(m_model.output(m_config.old_priorbox_blob_name).get_shape()),
-                          CV_32F,
-                          request->get_tensor(m_config.old_priorbox_blob_name).data());
-    return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
-                         cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
+    return result;
 }
 
 inline ActionDetection::NormalizedBBox

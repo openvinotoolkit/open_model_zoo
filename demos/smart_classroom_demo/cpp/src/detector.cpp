@@ -45,56 +45,34 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x, float coeff_y) {
 }
 }  // namespace
 
-void FaceDetection::submitRequest() {
-    if (!m_enqueued_frames)
-        return;
-    m_enqueued_frames = 0;
-
-    BaseCnnDetection::submitRequest();
-}
-
-void FaceDetection::enqueue(const cv::Mat& frame) {
-    if (request == nullptr) {
-        request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
-    }
-
-    m_width = static_cast<float>(frame.cols);
-    m_height = static_cast<float>(frame.rows);
-
-    ov::Tensor inputTensor = request->get_tensor(m_input_name);
-
-    matToTensor(frame, inputTensor);
-
-    m_enqueued_frames = 1;
-}
-
 FaceDetection::FaceDetection(const DetectorConfig& config) :
         BaseCnnDetection(config.is_async), m_config(config) {
-    topoName = "Face Detection";
-    auto cnnNetwork = config.m_core.read_model(config.m_path_to_model);
+    m_detectorName = "Face Detection";
 
-    ov::OutputVector inputs_info = cnnNetwork->inputs();
+    slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
+    std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
+    logBasicModelInfo(model);
+
+    ov::Layout inputLayout = {"NCHW"};
+
+    ov::OutputVector inputs_info = model->inputs();
     if (inputs_info.size() != 1) {
         throw std::runtime_error("Face Detection network should have only one input");
     }
 
-    ov::preprocess::PrePostProcessor ppp(cnnNetwork);
-    ov::preprocess::InputInfo& input_info = ppp.input();
-    input_info.tensor().set_element_type(ov::element::u8).set_layout({ "NCHW" });
-
-    ov::Output<ov::Node> input = cnnNetwork->input();
-    ov::Shape input_dims = input.get_shape();
-    input_dims[2] = m_config.input_h;
-    input_dims[3] = m_config.input_w;
-    std::map<std::string, ov::PartialShape> input_shapes;
-    input_shapes[input.get_any_name()] = input_dims;
-    cnnNetwork->reshape(input_shapes);
-
-    ov::OutputVector outputs_info = cnnNetwork->outputs();
+    ov::OutputVector outputs_info = model->outputs();
     if (outputs_info.size() != 1) {
         throw std::runtime_error("Face Detection network should have only one output");
     }
-    ov::Output<ov::Node> output = cnnNetwork->output();
+
+    m_input_name = model->input().get_any_name();
+
+    ov::Output<ov::Node> input = model->input();
+    ov::Shape shape = input.get_shape();
+    shape[ov::layout::height_idx(inputLayout)] = m_config.input_h;
+    shape[ov::layout::width_idx(inputLayout)] = m_config.input_w;
+
+    ov::Output<ov::Node> output = model->output();
     m_output_name = output.get_any_name();
 
     ov::Shape outputDims = output.get_shape();
@@ -108,19 +86,49 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
             std::to_string(outputDims.size()));
     }
 
-    ov::preprocess::OutputInfo& output_info = ppp.output();
-    output_info.tensor().set_element_type(ov::element::f32);
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout(inputLayout);
+    ppp.output()
+        .tensor()
+        .set_element_type(ov::element::f32);
+    model = ppp.build();
 
-    m_input_name = cnnNetwork->input().get_any_name();
-    cnnNetwork = ppp.build();
-    m_model = m_config.m_core.compile_model(cnnNetwork, m_config.m_deviceName);
+    std::map<std::string, ov::PartialShape> input_shapes;
+    input_shapes[input.get_any_name()] = shape;
+    model->reshape(input_shapes);
 
-    logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, topoName);
+    m_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
+    logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, m_detectorName);
+}
+
+void FaceDetection::submitRequest() {
+    if (!m_enqueued_frames)
+        return;
+    m_enqueued_frames = 0;
+
+    BaseCnnDetection::submitRequest();
+}
+
+void FaceDetection::enqueue(const cv::Mat& frame) {
+    if (m_request == nullptr) {
+        m_request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
+    }
+
+    m_width = static_cast<float>(frame.cols);
+    m_height = static_cast<float>(frame.rows);
+
+    ov::Tensor inputTensor = m_request->get_tensor(m_input_name);
+
+    matToTensor(frame, inputTensor);
+
+    m_enqueued_frames = 1;
 }
 
 DetectedObjects FaceDetection::fetchResults() {
     DetectedObjects results;
-    const float* data = request->get_tensor(m_output_name).data<float>();
+    const float* data = m_request->get_tensor(m_output_name).data<float>();
 
     for (int det_id = 0; det_id < m_max_detections_count; ++det_id) {
         const int start_pos = det_id * m_object_size;

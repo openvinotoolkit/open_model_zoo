@@ -17,71 +17,70 @@
 CnnDLSDKBase::CnnDLSDKBase(const Config& config) : m_config(config) {}
 
 void CnnDLSDKBase::Load() {
-    auto cnnNetwork = m_config.m_core.read_model(m_config.m_path_to_model);
+    slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
+    std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
+    logBasicModelInfo(model);
 
-    const int currentBatchSize = cnnNetwork->input().get_shape()[0];
+    m_modelLayout = {"NCHW"};
 
-    ov::OutputVector in = cnnNetwork->inputs();
-    if (in.size() != 1) {
+    ov::OutputVector inputs = model->inputs();
+    if (inputs.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
 
-    ov::preprocess::PrePostProcessor ppp(cnnNetwork);
-    ppp.input().tensor().
-      set_element_type(ov::element::f32).
-      set_layout({"NCHW"});
-    m_input_blob_name = cnnNetwork->input().get_any_name();
-    ov::OutputVector outputs = cnnNetwork->outputs();
-    for (auto&& item : outputs) {
-      ppp.output(*item.get_names().begin()).tensor().set_element_type(ov::element::f32);
-      m_output_blobs_names.push_back(item.get_any_name());
-    }
-    cnnNetwork = ppp.build();
-    ov::set_batch(cnnNetwork, m_config.m_max_batch_size);
+    m_input_tensor_name = model->input().get_any_name();
 
-    try {
-        m_compiled_model = m_config.m_core.compile_model(cnnNetwork, m_config.m_deviceName);
-    } catch (const ov::Exception&) {
-        ov::set_batch(cnnNetwork, 1);
-        m_compiled_model = m_config.m_core.compile_model(cnnNetwork, m_config.m_deviceName);
+    ov::OutputVector outputs = model->outputs();
+    for (auto& item : outputs) {
+        const std::string name = item.get_any_name();
+        m_output_tensors_names.push_back(name);
     }
+
+    ov::preprocess::PrePostProcessor ppp(model);
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::f32)
+        .set_layout(m_modelLayout);
+
+    model = ppp.build();
+
+    slog::info << "PrePostProcessor configuration:" << slog::endl;
+    slog::info << ppp << slog::endl;
+
+    ov::set_batch(model, m_config.m_max_batch_size);
+
+    m_compiled_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
     logCompiledModelInfo(m_compiled_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
+
     m_infer_request = m_compiled_model.create_infer_request();
 }
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
         const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
-    ov::Tensor input = m_infer_request.get_tensor(m_input_blob_name);
-    const size_t batch_size = input.get_shape()[0];
+    ov::Tensor input_tensor = m_infer_request.get_tensor(m_input_tensor_name);
 
     size_t num_imgs = frames.size();
-    for (size_t batch_i = 0; batch_i < num_imgs; batch_i += batch_size) {
-        const size_t current_batch_size = std::min(batch_size, num_imgs - batch_i);
-        for (size_t b = 0; b < current_batch_size; b++) {
-            matToTensor(frames[batch_i + b], input, b);
-        }
-
-//        if (config_.max_batch_size != 1)
-//            infer_request_.SetBatch(current_batch_size);
-        m_infer_request.infer();
-        std::map<std::string, ov::Tensor> tensors;
-
-        for (const auto& name : m_output_blobs_names) {
-            tensors[name] = m_infer_request.get_tensor(name);
-        }
-        fetch_results(tensors, current_batch_size);
+    m_config.m_max_batch_size;
+    for (size_t i = 0; i < num_imgs; i++) {
+        matToTensor(frames[i], input_tensor, i);
     }
-}
 
-void CnnDLSDKBase::Infer(const cv::Mat& frame,
-                         const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
-    InferBatch({frame}, fetch_results);
+    m_infer_request.set_input_tensor(input_tensor);
+
+    m_infer_request.infer();
+
+    std::map<std::string, ov::Tensor> output_tensors;
+    for (const auto& output_tensor_name : m_output_tensors_names) {
+        output_tensors[output_tensor_name] = m_infer_request.get_tensor(output_tensor_name);
+    }
+
+    fetch_results(output_tensors, num_imgs);
 }
 
 VectorCNN::VectorCNN(const Config& config) : CnnDLSDKBase(config) {
     Load();
-    if (m_output_blobs_names.size() != 1) {
+    if (m_output_tensors_names.size() != 1) {
         throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 }
@@ -98,12 +97,12 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
     }
     vectors->clear();
     auto results_fetcher = [vectors, outp_shape](const std::map<std::string, ov::Tensor>& outputs, size_t batch_size) {
-        for (auto&& item : outputs) {
-            ov::Tensor tensor = item.second;
-            ov::Shape ie_output_dims = tensor.get_shape();
-            std::vector<int> tensor_sizes(ie_output_dims.size(), 0);
+        for (auto& output : outputs) {
+            ov::Tensor tensor = output.second;
+            ov::Shape shape = tensor.get_shape();
+            std::vector<int> tensor_sizes(shape.size(), 0);
             for (size_t i = 0; i < tensor_sizes.size(); ++i) {
-                tensor_sizes[i] = ie_output_dims[i];
+                tensor_sizes[i] = shape[i];
             }
             cv::Mat out_tensor(tensor_sizes, CV_32F, tensor.data<float>());
             for (size_t b = 0; b < batch_size; b++) {
@@ -117,4 +116,8 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         }
     };
     InferBatch(images, results_fetcher);
+}
+
+int VectorCNN::maxBatchSize() const {
+    return m_config.m_max_batch_size;
 }

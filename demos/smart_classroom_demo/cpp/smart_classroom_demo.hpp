@@ -37,10 +37,6 @@ static const char target_device_message_face_reid[] = "Optional. Specify the tar
                                                       "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                       "The application looks for a suitable plugin for the specified device.";
 static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
-static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
-                                           "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char face_threshold_output_message[] = "Optional. Probability threshold for face detections.";
 static const char person_threshold_output_message[] = "Optional. Probability threshold for person/action detection.";
 static const char action_threshold_output_message[] = "Optional. Probability threshold for action recognition.";
@@ -79,8 +75,6 @@ DEFINE_string(d_fd, "CPU", target_device_message_face_detection);
 DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
 DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_string(ad, "", act_stat_output_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t_ad, 0.3, person_threshold_output_message);
@@ -125,9 +119,6 @@ static void showUsage() {
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;
     std::cout << "    -m_reid '<path>'               " << face_reid_model_message << std::endl;
-    std::cout << "    -l '<absolute_path>'           " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "    -c '<absolute_path>'           " << custom_cldnn_message << std::endl;
     std::cout << "    -d_act '<device>'              " << target_device_message_action_detection << std::endl;
     std::cout << "    -d_fd '<device>'               " << target_device_message_face_detection << std::endl;
     std::cout << "    -d_lm '<device>'               " << target_device_message_landmarks_regression << std::endl;

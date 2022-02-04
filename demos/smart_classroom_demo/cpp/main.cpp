@@ -466,14 +466,40 @@ public:
     }
 
     std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) override {
+        const int maxLandmarksBatch = landmarks_detector.maxBatchSize();
+        int numFaces = (int)faces.size();
+
+        std::vector<cv::Mat> landmarks;
+        std::vector<cv::Mat> embeddings;
         std::vector<cv::Mat> face_rois;
-        for (const auto& face : faces) {
-            face_rois.push_back(frame(face.rect));
+
+        auto face_roi = [&](const detection::DetectedObject& face) {
+            return frame(face.rect);
+        };
+        if (numFaces < maxLandmarksBatch) {
+            std::transform(faces.begin(), faces.end(), std::back_inserter(face_rois), face_roi);
+            landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+            AlignFaces(&face_rois, &landmarks);
+            face_reid.Compute(face_rois, &embeddings);
+        } else {
+            auto embedding = [&](cv::Mat& emb) { return emb; };
+            for (int n = numFaces; n > 0; n -= maxLandmarksBatch) {
+                landmarks.clear();
+                face_rois.clear();
+                size_t start_idx = size_t(numFaces) - n;
+                size_t end_idx = start_idx + std::min(numFaces, maxLandmarksBatch);
+                std::transform(faces.begin() + start_idx, faces.begin() + end_idx, std::back_inserter(face_rois), face_roi);
+
+                landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+
+                AlignFaces(&face_rois, &landmarks);
+
+                std::vector<cv::Mat> batch_embeddings;
+                face_reid.Compute(face_rois, &batch_embeddings);
+                std::transform(batch_embeddings.begin(), batch_embeddings.end(), std::back_inserter(embeddings), embedding);
+            }
         }
-        std::vector<cv::Mat> landmarks, embeddings;
-        landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
-        AlignFaces(&face_rois, &landmarks);
-        face_reid.Compute(face_rois, &embeddings);
+
         return face_gallery.GetIDsByEmbeddings(embeddings);
     }
 

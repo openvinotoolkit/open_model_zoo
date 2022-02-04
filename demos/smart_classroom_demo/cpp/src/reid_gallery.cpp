@@ -48,38 +48,6 @@ namespace {
 const char EmbeddingsGallery::unknown_label[] = "Unknown";
 const int EmbeddingsGallery::unknown_id = TrackedObject::UNKNOWN_LABEL_IDX;
 
-RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identity_label,
-                                                       const cv::Mat& image,
-                                                       int min_size_fr, bool crop_gallery,
-                                                       detection::FaceDetection& detector,
-                                                       const VectorCNN& landmarks_det,
-                                                       const VectorCNN& image_reid,
-                                                       cv::Mat& embedding) {
-    cv::Mat target = image;
-    if (crop_gallery) {
-        detector.enqueue(image);
-        detector.submitRequest();
-        detector.wait();
-        detection::DetectedObjects faces = detector.fetchResults();
-        if (faces.size() == 0) {
-            return RegistrationStatus::FAILURE_NOT_DETECTED;
-        }
-        CV_Assert(faces.size() == 1);
-        cv::Mat face_roi = image(faces[0].rect);
-        target = face_roi;
-    }
-    if ((target.rows < min_size_fr) && (target.cols < min_size_fr)) {
-        return RegistrationStatus::FAILURE_LOW_QUALITY;
-    }
-    cv::Mat landmarks;
-    landmarks_det.Compute(target, &landmarks, cv::Size(2, 5));
-    std::vector<cv::Mat> images = {target};
-    std::vector<cv::Mat> landmarks_vec = {landmarks};
-    AlignFaces(&images, &landmarks_vec);
-    image_reid.Compute(images[0], &embedding);
-    return RegistrationStatus::SUCCESS;
-}
-
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
                                      bool crop_gallery, const detection::DetectorConfig& detector_config,
@@ -148,6 +116,10 @@ std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat
     auto matched_idx = matcher.Solve(distances);
     std::vector<int> output_ids;
     for (auto col_idx : matched_idx) {
+        if (col_idx == -1) {
+            output_ids.push_back(unknown_id);
+            continue;
+        }
         if (distances.at<float>(output_ids.size(), col_idx) > reid_threshold)
             output_ids.push_back(unknown_id);
         else
@@ -179,4 +151,36 @@ std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const  {
 bool EmbeddingsGallery::LabelExists(const std::string& label) const {
     return identities.end() != std::find_if(identities.begin(), identities.end(),
                                         [label](const GalleryObject& o){return o.label == label;});
+}
+
+RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identity_label,
+    const cv::Mat& image,
+    int min_size_fr, bool crop_gallery,
+    detection::FaceDetection& detector,
+    const VectorCNN& landmarks_det,
+    const VectorCNN& image_reid,
+    cv::Mat& embedding) {
+    cv::Mat target = image;
+    if (crop_gallery) {
+        detector.enqueue(image);
+        detector.submitRequest();
+        detector.wait();
+        detection::DetectedObjects faces = detector.fetchResults();
+        if (faces.size() == 0) {
+            return RegistrationStatus::FAILURE_NOT_DETECTED;
+        }
+        CV_Assert(faces.size() == 1);
+        cv::Mat face_roi = image(faces[0].rect);
+        target = face_roi;
+    }
+    if ((target.rows < min_size_fr) && (target.cols < min_size_fr)) {
+        return RegistrationStatus::FAILURE_LOW_QUALITY;
+    }
+    cv::Mat landmarks;
+    landmarks_det.Compute(target, &landmarks, cv::Size(2, 5));
+    std::vector<cv::Mat> images = { target };
+    std::vector<cv::Mat> landmarks_vec = { landmarks };
+    AlignFaces(&images, &landmarks_vec);
+    image_reid.Compute(images[0], &embedding);
+    return RegistrationStatus::SUCCESS;
 }

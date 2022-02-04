@@ -34,7 +34,7 @@ struct CnnConfig {
 };
 
 /**
-* @brief Base class of network
+* @brief Base class of model
 */
 class CnnDLSDKBase {
 public:
@@ -57,16 +57,7 @@ public:
 
 protected:
     /**
-   * @brief Run network
-   *
-   * @param frame Input image
-   * @param results_fetcher Callback to fetch inference results
-   */
-    void Infer(const cv::Mat& frame,
-               const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher) const;
-
-    /**
-   * @brief Run network in batch mode
+   * @brief Run model in batch mode
    *
    * @param frames Vector of input images
    * @param results_fetcher Callback to fetch inference results
@@ -76,18 +67,20 @@ protected:
 
     /** @brief Config */
     Config m_config;
-    /** @brief Net inputs info */
+    /** @brief Model inputs info */
     ov::OutputVector m_inInfo;
-    /** @brief Net outputs info */
+    /** @brief Model outputs info */
     ov::OutputVector m_outInfo_;
-    /** @brief IE network */
+    /** @brief Model layout */
+    ov::Layout m_modelLayout;
+    /** @brief Compled model */
     ov::CompiledModel m_compiled_model;
-    /** @brief IE InferRequest */
+    /** @brief Inference request */
     mutable ov::InferRequest m_infer_request;
-    /** @brief Name of the input blob input blob */
-    std::string m_input_blob_name;
-    /** @brief Names of output blobs */
-    std::vector<std::string> m_output_blobs_names;
+    /** @brief Name of the input tensor */
+    std::string m_input_tensor_name;
+    /** @brief Names of output tensors */
+    std::vector<std::string> m_output_tensors_names;
 };
 
 class VectorCNN : public CnnDLSDKBase {
@@ -98,6 +91,7 @@ public:
                  cv::Mat* vector, cv::Size outp_shape = cv::Size()) const;
     void Compute(const std::vector<cv::Mat>& images,
                  std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
+    int maxBatchSize() const;
 };
 
 class AsyncAlgorithm {
@@ -125,25 +119,26 @@ public:
 
 class BaseCnnDetection : public AsyncAlgorithm {
 protected:
-    std::shared_ptr<ov::InferRequest> request;
-    const bool isAsync;
-    std::string topoName;
+    std::shared_ptr<ov::InferRequest> m_request;
+    const bool m_isAsync;
+    std::string m_detectorName;
 
 public:
-    explicit BaseCnnDetection(bool isAsync = false) :
-                              isAsync(isAsync) {}
+    explicit BaseCnnDetection(bool isAsync = false) : m_isAsync(isAsync) {}
 
     void submitRequest() override {
-        if (request == nullptr) return;
-        if (isAsync) {
-            request->start_async();
+        if (m_request == nullptr)
+            return;
+        if (m_isAsync) {
+            m_request->start_async();
         } else {
-            request->infer();
+            m_request->infer();
         }
     }
 
     void wait() override {
-        if (!request || !isAsync) return;
-        request->wait();
+        if (!m_request || !m_isAsync)
+            return;
+        m_request->wait();
     }
 };
