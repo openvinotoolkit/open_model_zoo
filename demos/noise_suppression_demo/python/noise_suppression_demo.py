@@ -77,8 +77,8 @@ def main():
     log.info("Reading model {}".format(args.model))
     ov_encoder = core.read_model(args.model)
 
-    inp_shapes = {name:obj.shape for obj in ov_encoder.inputs  for name in obj.get_names()}
-    out_shapes = {name:obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
+    inp_shapes = {name: obj.shape for obj in ov_encoder.inputs  for name in obj.get_names()}
+    out_shapes = {name: obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
 
     state_out_names = [n for n in out_shapes.keys() if "state" in n]
     state_inp_names = [n for n in inp_shapes.keys()  if "state" in n]
