@@ -514,7 +514,7 @@ Load::Load(BaseDetection& detector) : detector(detector) {
 
 void Load::into(ov::Core& core, const std::string & deviceName) const {
     if (!detector.pathToModel.empty()) {
-        ov::runtime::CompiledModel cml = core.compile_model(detector.read(core), deviceName);
+        ov::CompiledModel cml = core.compile_model(detector.read(core), deviceName);
         logCompiledModelInfo(cml, detector.pathToModel, deviceName);
         detector.request = cml.create_infer_request();
     }
