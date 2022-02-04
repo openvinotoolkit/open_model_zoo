@@ -10,31 +10,14 @@ This is a smartlab object detector that is based on YoloX for 416x416 resolution
 
 ## Specification
 
+Accuracy metrics obtained on Smartlab validation dataset with yolox adapter for converted model.
+
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| mAP                             | 0.55                                      |
+| [COCO mAP (0.5:0.05:0.95)]      | 37.12%                                    |
 | GFlops                          | 1.077                                     |
 | MParams                         | 0.8908                                    |
 | Source framework                | PyTorch\*                                 |
-
-PASCAL per-cls AP:
-
-|    Class     |       per-cls AP         |
-|--------------|--------------------------|
-|  "balance",  |  0.98                    |
-|  "weights",  |  0.23 omit in this model |
-|  "tweezers", |  0.27 omit in this model |
-|  "box",      |  0.88                    |
-|  "battery",  |  0.85                    |
-|  "tray",     |  0.99                    |
-|  "ruler",    |  0.97                    |
-|  "rider",    |  0 omit in this model    |
-|  "scale",    |  0.93                    |
-|  "hand"      |  0.92                    |
-
-Average Precision (AP) is defined as an area under
-the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve.
 
 ## Inputs
 

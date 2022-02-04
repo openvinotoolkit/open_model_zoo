@@ -1,10 +1,10 @@
 models:
-  - name: smartlab-object-detection-0001
+  - name: smartlab-object-detection-0002
 
     launchers:
       - framework: dlsdk
         device: CPU
-        adapter: 
+        adapter:
           type: yolox
           anchors: yolox
           classes: 3
@@ -12,29 +12,23 @@ models:
     datasets:
       - name: DSI1867
         data_source: ..\..\..\DSI-1867\object_detection\streams_1\top\images
-        annotation: dir_conv\mscoco_detection.pickle
-        dataset_meta: dir_conv\mscoco_detection.json
-
+        annotation: dir_conv_top\mscoco_detection_top_3cls.pickle
+        dataset_meta: dir_conv_top\mscoco_detection_top_3cls.json
         preprocessing:
           - type: resize
             size: 416
 
         postprocessing:
-          - type: filter
-            apply_to: prediction
-            min_confidence: 0.1
-            remove_filtered: True
+          - type: resize_prediction_boxes
+            rescale: True
           - type: nms
             overlap: 0.2
-            include_boundaries: False
-          - type: resize_prediction_boxes
           - type: clip_boxes
             apply_to: prediction
 
         metrics:
-          - type: map
-            ignore_difficult: True
-            include_boundaries: True
-            presenter: print_scalar
-            allow_multiple_matches_per_ignored: True
-            reference: #TODO
+          - name: AP@0.5:0.05:95
+            type: coco_precision
+            max_detections: 100
+            threshold: '0.5:0.05:0.95'
+            reference: 0.3712
