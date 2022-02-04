@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
+#include <openvino/openvino.hpp>
+#include <gflags/gflags.h>
+
+#include <models/segmentation_model.h>
 #include <monitors/presenter.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
 #include <utils/ocv_common.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
 #include <utils/images_capture.h>
 #include <utils/default_flags.hpp>
 #include <utils/performance_metrics.hpp>
-#include <gflags/gflags.h>
-
-#include <unordered_map>
-
-#include <pipelines/async_pipeline.h>
-#include <models/segmentation_model.h>
-#include <pipelines/metadata.h>
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -88,9 +88,6 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
@@ -234,18 +231,19 @@ int main(int argc, char* argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
 
-        InferenceEngine::Core core;
+        ov::Core core;
         AsyncPipeline pipeline(
             std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
         std::vector<std::string> labels;
-        if (!FLAGS_labels.empty())
+        if (!FLAGS_labels.empty()) {
             labels = SegmentationModel::loadLabels(FLAGS_labels);
+        }
 
         bool keepRunning = true;
         int64_t frameNum = -1;

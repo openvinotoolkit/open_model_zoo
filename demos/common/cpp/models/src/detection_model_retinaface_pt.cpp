@@ -75,6 +75,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     landmarksNum = 0;
 
+    outputsNames.resize(2);
     std::vector<uint32_t> outputsSizes[OT_MAX];
     ov::Layout chw("CHW");
     ov::Layout nchw("NCHW");
@@ -85,7 +86,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
             set_element_type(ov::element::f32).
             set_layout(output.get_shape().size() == 4 ? nchw : chw);
 
-        outputsNames.resize(2);
         if (outTensorName.find("bbox") != std::string::npos) {
             outputsNames[OT_BBOX] = outTensorName;
         }
