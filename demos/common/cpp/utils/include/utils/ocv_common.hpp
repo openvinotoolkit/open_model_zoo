@@ -18,7 +18,6 @@
 #include "utils/shared_blob_allocator.h"
 
 
-
 /**
 * @brief Get cv::Mat value in the correct format.
 */
@@ -182,6 +181,17 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     OPENVINO_ASSERT(is_dense, "Doesn't support conversion from not dense cv::Mat");
 
     return ov::Tensor(ov::element::u8, ov::Shape{ 1, height, width, channels }, mat.data);
+}
+
+static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
+    static const ov::Layout layout{"NHWC"};
+    const ov::Shape& shape = tensor.get_shape();
+    cv::Size size{int(shape[ov::layout::width_idx(layout)]), int(shape[ov::layout::height_idx(layout)])};
+    assert(tensor.get_element_type() == ov::element::u8);
+    assert(shape.size() == 4);
+    assert(shape[ov::layout::batch_idx(layout)] == 1);
+    assert(shape[ov::layout::channels_idx(layout)] == 3);
+    cv::resize(mat, cv::Mat{size, CV_8UC3, tensor.data()}, size);
 }
 
 /**

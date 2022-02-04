@@ -40,6 +40,20 @@ constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
 }
 
+static inline void catcher() noexcept {
+    if (std::current_exception()) {
+        try {
+            std::rethrow_exception(std::current_exception());
+        } catch (const std::exception& error) {
+            slog::err << error.what() << slog::endl;
+        } catch (...) {
+            slog::err << "Non-exception object thrown" << slog::endl;
+        }
+        std::exit(1);
+    }
+    std::abort();
+}
+
 template <typename T>
 T clamp(T value, T low, T high) {
     return value < low ? low : (value > high ? high : value);
@@ -224,10 +238,9 @@ inline void showAvailableDevices() {
     std::vector<std::string> devices = ie.GetAvailableDevices();
 #endif
 
-    std::cout << std::endl;
-    std::cout << "Available target devices:";
+    std::cout << "Available devices:";
     for (const auto& device : devices) {
-        std::cout << "  " << device;
+        std::cout << ' ' << device;
     }
     std::cout << std::endl;
 }

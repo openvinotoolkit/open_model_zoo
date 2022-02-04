@@ -199,6 +199,10 @@ class CoCosNetModelOV(BaseOpenVINOModel):
 
     def set_input_and_output(self):
         self.inputs_names = list(self.inputs.keys())
+        if 'seg_map' in self.inputs_names[1]:
+            img_input = self.inputs_names[-1]
+            self.inputs_names[2] = self.inputs_names[1]
+            self.inputs_names[1] = img_input
         if self.output_blob is None:
             self.output_blob = next(iter(self.exec_network.outputs)).get_node().friendly_name
 

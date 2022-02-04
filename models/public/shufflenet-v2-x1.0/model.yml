@@ -42,6 +42,7 @@ conversion_to_onnx_args:
   - --output-names=output
 model_optimizer_args:
   - --input=input
+  - --layout=input(NCHW)
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.395,57.12,57.375]
   - --reverse_input_channels

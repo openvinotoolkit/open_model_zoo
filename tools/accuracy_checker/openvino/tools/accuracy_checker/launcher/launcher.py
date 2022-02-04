@@ -86,7 +86,7 @@ class LauncherConfigValidator(ConfigValidator):
             if input_type == 'INPUT':
                 reason = 'input value should be specified in case of several non constant inputs'
                 input_value = input_layer.get('value')
-                if not input_value and count_non_const_inputs:
+                if input_value is None and count_non_const_inputs:
                     if not fetch_only:
                         raise ConfigError(reason)
                     error_stack.append(
@@ -297,6 +297,10 @@ class Launcher(ClassProvider):
 
     @property
     def layout_mapping(self):
+        return {}
+
+    @property
+    def additional_output_mapping(self):
         return {}
 
 

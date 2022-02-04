@@ -33,6 +33,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
   - --input=result.1
+  - --layout=result.1(NCWL)
   - --output=486
   - --input_model=$dl_dir/aclnet_des_53_int8.onnx
 framework: onnx

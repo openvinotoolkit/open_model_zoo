@@ -438,6 +438,7 @@ class ModelEvaluator(BaseEvaluator):
             enable_profiling=False, output_callback=None):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
         copy_annotations, copy_predictions = None, None
@@ -524,6 +525,7 @@ class ModelEvaluator(BaseEvaluator):
 
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
             batch_predictions = self.adapter.process(batch_predictions, [image], batch_meta)
 
         _, predictions = self.postprocessor.process_batch(
@@ -719,14 +721,18 @@ class ModelEvaluator(BaseEvaluator):
         per_input_tamplates = []
         for stat_shape in shapes_statistic:
             shape_template = [-1] * len(stat_shape[0])
+            if isinstance(stat_shape[0], tuple):
+                stat_shape = np.array([np.array(st) for st in stat_shape])
 
-            undefined_shapes = np.sum(stat_shape == -1, axis=0).astype(int)
+            undefined_shapes = np.sum(np.array(stat_shape) == -1, axis=0).astype(int)
             if undefined_shapes.ndim >= 2:
                 undefined_shapes = np.squeeze(undefined_shapes, 0)
+            if undefined_shapes.ndim == 0:
+                undefined_shapes = np.expand_dims(undefined_shapes, 0)
             for i, ds in enumerate(undefined_shapes):
                 if ds > 0:
                     continue
-                axis_sizes = stat_shape[:, i]
+                axis_sizes = np.array(stat_shape)[:, i]
                 min_size = np.min(axis_sizes)
                 max_size = np.max(axis_sizes)
                 shape_template[i] = min_size if min_size == max_size else (min_size, max_size)

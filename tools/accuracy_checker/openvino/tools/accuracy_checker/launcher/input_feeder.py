@@ -200,7 +200,7 @@ class InputFeeder:
                     identifiers = identifiers.data_id
 
                 if isinstance(identifiers, ParametricImageIdentifier):
-                    input_batch.append(data[idx])
+                    input_batch.append(data[idx] if input_regex is None else data[input_regex])
                     continue
 
                 if not isinstance(identifiers, list) and input_regex is None:

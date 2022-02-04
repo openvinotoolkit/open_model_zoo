@@ -45,7 +45,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `Placeholder`, shape - `1, 3, 228, 304`, format is `B, C, H, W`, where:
+Image, name - `Placeholder`, shape - `1, 228, 304, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `C` - channel

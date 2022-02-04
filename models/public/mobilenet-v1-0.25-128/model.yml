@@ -32,6 +32,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,128,128,3]
   - --input=input
+  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=MobilenetV1/Predictions/Reshape_1

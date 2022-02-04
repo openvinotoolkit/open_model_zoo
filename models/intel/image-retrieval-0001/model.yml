@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/image-retrieval-0001.xml
-    size: 166236
-    checksum: d2aa7e79b8be3a807445d1b8b7faf9a945623791ba170fc4c13e0e2a6c5764e8b47515da0446604dccf26ff20f0e972e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP32/image-retrieval-0001.xml
+    size: 191684
+    checksum: 15d24909d29377e804c42b224fe737ff8dbf691d6140f9b831f618d7b4c883ce9e666ad2d5ffba6eb723b2b9bea925e1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.xml
   - name: FP32/image-retrieval-0001.bin
-    size: 10139232
-    checksum: 5cb8486aaeecb2a5dd22976c6019ea9952640ed14091d384e40c0bd4474c41b3cf5df8801fc39c6f0a6afa7a6e980f92
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP32/image-retrieval-0001.bin
+    size: 10139196
+    checksum: 8b32b8bcd0d54302fd0bddab3ae93322cf70d397b69d06daa5efa28e219988368c7d14df4d0ee5496b5bd97e1fdaed21
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.bin
   - name: FP16/image-retrieval-0001.xml
-    size: 166167
-    checksum: 10fde5b572c9e12568046556fcaf5e75e6ca2c60de0753670d0b9ad936be2f4c56b3b3b0fa3a51eb3a6fcf69b32dd94f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP16/image-retrieval-0001.xml
+    size: 253551
+    checksum: 23f37f12329f5996752a78b25cf9cb5fa79cf7c311a66f0d9739fbbda8b0fa818c00a7eb76f8e00afeb5c103c626c278
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.xml
   - name: FP16/image-retrieval-0001.bin
-    size: 5069716
-    checksum: f1b04cd98494d9d0a9e1ee9c3cc15f67283bfeca284e5ecc6de3aed83dc30922cc4fe409fce2c5a4edb91f8840024483
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP16/image-retrieval-0001.bin
+    size: 5069682
+    checksum: 1950afcd71cc5cf0aa07762fc7ef8e0b6099cd1518a8b65d32d2e01bd80083d8dc6d1e8aa8adbe4a632b93d377530c4a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.bin
   - name: FP16-INT8/image-retrieval-0001.xml
-    size: 434759
-    checksum: daff4bb3de370d6c00b8488d6716bf4210fbb1c5e3600e45824bd043f562a12f14f9603ad8ec019ac8667c088510b3a6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
+    size: 477962
+    checksum: ddf9f6c3c5a755d5bec7f531c0e3dcd21fa01ea0de1b6db8c1516a1c37d916b4d696c87544107aca11ee7b3904b0db67
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
   - name: FP16-INT8/image-retrieval-0001.bin
-    size: 2640981
-    checksum: 79a4feea583ce4faa1a7b51b822c3eadfb6e7ca52d32204b85fd921b23255c8efddf60cd3ec4ed444454f3e374b965f2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
+    size: 2729405
+    checksum: 1aa24cded91500a28d8761330aeafb89b8a31c35c80d978b4163a42a2b83c0b9a889c0842f270aa55fd81f98be6adfc6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

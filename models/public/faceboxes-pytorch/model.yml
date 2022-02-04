@@ -43,6 +43,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,3,1024,1024]
   - --input=input.1
+  - --layout=input.1(NCHW)
   - --input_model=$conv_dir/faceboxes-pytorch.onnx
   - --mean_values=input.1[104.0,117.0,123.0]
   - --output=boxes,scores

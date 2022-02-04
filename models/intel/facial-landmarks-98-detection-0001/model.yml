@@ -1,0 +1,44 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Landmark's detection. 98 points. Trained on the internal dataset
+task_type: object_attributes
+files:
+  - name: FP32/facial-landmarks-98-detection-0001.xml
+    size: 2157465
+    checksum: 1ee56fa35bdc2232843960a7bd8c360937823cf38ebafa003e66b404a7713cac9e3cf9e2995a0ca432f7ce3aea68d12c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP32/facial-landmarks-98-detection-0001.xml
+  - name: FP32/facial-landmarks-98-detection-0001.bin
+    size: 38712632
+    checksum: 89cc27fc5b8ddb8f9b64d7dad4cc2760f7b80bc606940c23197f5574cf20435d9eebb1879a51ccd14506e21c11427beb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP32/facial-landmarks-98-detection-0001.bin
+  - name: FP16/facial-landmarks-98-detection-0001.xml
+    size: 2850532
+    checksum: 94b971a1969da905e3084e362e5966e4bd47f7991c376c5c1a614e03823d7979bc814d3e882347aba9ed42d530949e0b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP16/facial-landmarks-98-detection-0001.xml
+  - name: FP16/facial-landmarks-98-detection-0001.bin
+    size: 19354980
+    checksum: f314ecfcbf9b8bf876b6bc14d519efcd022b5ab9695cd460e4dc0ab4731c37e7ca22593aeb5151c41c344ce5d8b8b6b2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP16/facial-landmarks-98-detection-0001.bin
+  - name: FP16-INT8/facial-landmarks-98-detection-0001.xml
+    size: 3459604
+    checksum: fcd1dc87b806b7fd89f3243ffc28e2e76bc678ab16e3ad225a22518d891358d7a063aa66c10678d13d03c4ed3c96e166
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP16-INT8/facial-landmarks-98-detection-0001.xml
+  - name: FP16-INT8/facial-landmarks-98-detection-0001.bin
+    size: 9804117
+    checksum: 1883b7f55112fd752e7de85f7368f4c44f02160974eca10826704461535ced3de4b5748044df3017bbad8dae888d6a80
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/facial-landmarks-98-detection-0001/FP16-INT8/facial-landmarks-98-detection-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
