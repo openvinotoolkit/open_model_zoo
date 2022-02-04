@@ -179,13 +179,11 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
     }
 }
 
-inline
-void logCompiledModelInfo(
+inline void logCompiledModelInfo(
     const ov::CompiledModel& compiledModel,
     const std::string& modelName,
     const std::string& deviceName,
-    const std::string& modelType = "")
-{
+    const std::string& modelType = "") {
     slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
