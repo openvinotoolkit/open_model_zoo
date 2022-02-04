@@ -534,8 +534,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation, HandLandmarksAnnotation, FacialLandmarksAnnotation)
-    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction, HandLandmarksPrediction, FacialLandmarksPrediction)
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation, HandLandmarksAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction, HandLandmarksPrediction)
 
     @classmethod
     def parameters(cls):
