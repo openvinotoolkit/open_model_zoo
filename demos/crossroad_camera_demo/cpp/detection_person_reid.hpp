@@ -10,8 +10,6 @@
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
 
-using namespace ov::preprocess;
-
 struct PersonReIdentification : BaseDetection {
     std::vector<std::vector<float>> globalReIdVec; // contains vectors characterising all detected persons
 
@@ -87,7 +85,7 @@ struct PersonReIdentification : BaseDetection {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
+        ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -97,7 +95,7 @@ struct PersonReIdentification : BaseDetection {
             ppp.input().preprocess().
                 convert_element_type(ov::element::f32).
                 convert_layout("NCHW").
-                resize(ResizeAlgorithm::RESIZE_LINEAR);
+                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
         } else {
             ppp.input().tensor().

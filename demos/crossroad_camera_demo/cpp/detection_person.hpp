@@ -11,8 +11,6 @@
 #include "detection_base.hpp"
 #include "crossroad_camera_demo.hpp"
 
-using namespace ov::preprocess;
-
 struct PersonDetection : BaseDetection {
     size_t maxProposalCount;
     size_t objectSize;
@@ -90,7 +88,7 @@ struct PersonDetection : BaseDetection {
 
         const ov::Layout tensor_layout{ "NHWC" };
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
+        ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -100,7 +98,7 @@ struct PersonDetection : BaseDetection {
             ppp.input().preprocess().
                 convert_element_type(ov::element::f32).
                 convert_layout("NCHW").
-                resize(ResizeAlgorithm::RESIZE_LINEAR);
+                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
             ppp.output().tensor().set_element_type(ov::element::f32);
         } else {

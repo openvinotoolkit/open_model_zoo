@@ -10,8 +10,6 @@
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
 
-using namespace ov::preprocess;
-
 struct PersonAttribsDetection : BaseDetection {
     std::string outputNameForAttributes;
     std::string outputNameForTopColorPoint;
@@ -143,7 +141,7 @@ struct PersonAttribsDetection : BaseDetection {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
 
-        ov::preprocess::PrePostProcessor ppp = PrePostProcessor(model);
+        ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
             ppp.input().tensor().
@@ -153,7 +151,7 @@ struct PersonAttribsDetection : BaseDetection {
             ppp.input().preprocess().
                 convert_element_type(ov::element::f32).
                 convert_layout("NCHW").
-                resize(ResizeAlgorithm::RESIZE_LINEAR);
+                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
         } else {
             ppp.input().tensor().

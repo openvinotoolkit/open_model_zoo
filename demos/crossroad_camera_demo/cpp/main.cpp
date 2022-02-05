@@ -26,8 +26,6 @@
 #include "detection_person_reid.hpp"
 #include "crossroad_camera_demo.hpp"
 
-using namespace ov::preprocess;
-
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // Parsing and validation of input args
 
