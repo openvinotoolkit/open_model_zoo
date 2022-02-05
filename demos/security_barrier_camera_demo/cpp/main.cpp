@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -14,24 +14,25 @@
 #include <vector>
 #include <set>
 
-#include <gpu/gpu_config.hpp>
-#include <inference_engine.hpp>
-#include <vpu/hddl_config.hpp>
-#include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
-#include <utils/grid_mat.hpp>
-#include <utils/input_wrappers.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include <utils/threads_common.hpp>
+#include "openvino/openvino.hpp"
+#include "gpu/gpu_config.hpp"
+#include "vpu/hddl_config.hpp"
 
-#include "security_barrier_camera_demo.hpp"
+#include "monitors/presenter.h"
+#include "utils/args_helper.hpp"
+#include "utils/grid_mat.hpp"
+#include "utils/input_wrappers.hpp"
+#include "utils/ocv_common.hpp"
+#include "utils/slog.hpp"
+#include "utils/threads_common.hpp"
+
 #include "net_wrappers.hpp"
+#include "security_barrier_camera_demo.hpp"
 
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
+    // Parsing and validation of input args
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -68,7 +69,7 @@ struct InferRequestsContainer {
     InferRequestsContainer(const InferRequestsContainer&) = delete;
     InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
 
-    void assign(const std::vector<InferenceEngine::InferRequest>& inferRequests) {
+    void assign(const std::vector<ov::InferRequest>& inferRequests) {
         actualInferRequests = inferRequests;
         this->inferRequests.container.clear();
 
@@ -77,25 +78,23 @@ struct InferRequestsContainer {
         }
     }
 
-    std::vector<InferenceEngine::InferRequest> getActualInferRequests() {
-        return actualInferRequests;
-    }
-    ConcurrentContainer<std::vector<std::reference_wrapper<InferenceEngine::InferRequest>>> inferRequests;
+    ConcurrentContainer<std::vector<std::reference_wrapper<ov::InferRequest>>> inferRequests;
 
 private:
-    std::vector<InferenceEngine::InferRequest> actualInferRequests;
+    std::vector<ov::InferRequest> actualInferRequests;
 };
 
-struct Context {  // stores all global data for tasks
+// stores all global data for tasks
+struct Context {
     Context(const std::vector<std::shared_ptr<InputChannel>>& inputChannels,
             const Detector& detector,
             const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr,
             int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                const std::string& monitorsStr,
+            const std::string& monitorsStr,
             uint64_t lastFrameId,
             uint64_t nireq,
             bool isVideo,
-            std::size_t nclassifiersireq, std::size_t nrecognizersireq):
+            std::size_t nclassifiersireq, std::size_t nrecognizersireq) :
         readersContext{inputChannels, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
         inferTasksContext{detector},
         detectionsProcessorsContext{vehicleAttributesClassifier, lpr},
@@ -107,9 +106,9 @@ struct Context {  // stores all global data for tasks
         frameCounter{0}
     {
         assert(inputChannels.size() == gridParam.size());
-        std::vector<InferenceEngine::InferRequest> detectorInferRequests;
-        std::vector<InferenceEngine::InferRequest> attributesInferRequests;
-        std::vector<InferenceEngine::InferRequest> lprInferRequests;
+        std::vector<ov::InferRequest> detectorInferRequests;
+        std::vector<ov::InferRequest> attributesInferRequests;
+        std::vector<ov::InferRequest> lprInferRequests;
         detectorInferRequests.reserve(nireq);
         attributesInferRequests.reserve(nclassifiersireq);
         lprInferRequests.reserve(nrecognizersireq);
@@ -123,21 +122,25 @@ struct Context {  // stores all global data for tasks
         attributesInfers.assign(attributesInferRequests);
         platesInfers.assign(lprInferRequests);
     }
+
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;
         std::vector<int64_t> lastCapturedFrameIds;
         std::vector<std::mutex> lastCapturedFrameIdsMutexes;
         std::weak_ptr<Worker> readersWorker;
     } readersContext;
+
     struct {
         Detector detector;
         std::weak_ptr<Worker> inferTasksWorker;
     } inferTasksContext;
+
     struct {
         VehicleAttributesClassifier vehicleAttributesClassifier;
         Lpr lpr;
         std::weak_ptr<Worker> detectionsProcessorsWorker;
     } detectionsProcessorsContext;
+
     struct DrawersContext {
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::string& monitorsStr):
@@ -149,23 +152,25 @@ struct Context {  // stores all global data for tasks
         int pause;
         std::vector<cv::Size> gridParam;
         cv::Size displayResolution;
-        std::chrono::steady_clock::duration showPeriod;  // desiered frequency of imshow
+        std::chrono::steady_clock::duration showPeriod; // desired frequency of imshow
         std::weak_ptr<Worker> drawersWorker;
         int64_t lastShownframeId;
-        std::chrono::steady_clock::time_point prevShow;  // time stamp of previous imshow
+        std::chrono::steady_clock::time_point prevShow; // time stamp of previous imshow
         std::map<int64_t, GridMat> gridMats;
         std::mutex drawerMutex;
         Presenter presenter;
     } drawersContext;
+
     struct {
         std::vector<uint64_t> lastframeIds;
         std::vector<std::mutex> lastFrameIdsMutexes;
     } videoFramesContext;
+
     std::weak_ptr<Worker> resAggregatorsWorker;
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    std::atomic<std::vector<InferenceEngine::InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<std::vector<ov::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, attributesInfers, platesInfers;
     PerformanceMetrics metrics;
@@ -179,18 +184,21 @@ public:
     Context& context;
 };
 
-class Drawer: public Task {  // accumulates and shows processed frames
+// accumulates and shows processed frames
+class Drawer : public Task {
 public:
-    explicit Drawer(VideoFrame::Ptr sharedVideoFrame):
-        Task{sharedVideoFrame, 1.0} {}
+    explicit Drawer(VideoFrame::Ptr sharedVideoFrame) :
+        Task{ sharedVideoFrame, 1.0 } {}
     bool isReady() override;
     void process() override;
 };
 
-class ResAggregator: public Task {  // draws results on the frame
+// draws results on the frame
+class ResAggregator : public Task {
 public:
     ResAggregator(const VideoFrame::Ptr& sharedVideoFrame, std::list<BboxAndDescr>&& boxesAndDescrs):
         Task{sharedVideoFrame, 4.0}, boxesAndDescrs{std::move(boxesAndDescrs)} {}
+
     bool isReady() override {
         return true;
     }
@@ -199,7 +207,8 @@ private:
     std::list<BboxAndDescr> boxesAndDescrs;
 };
 
-class ClassifiersAggregator {  // waits for all classifiers and recognisers accumulating results
+// waits for all classifiers and recognisers accumulating results
+class ClassifiersAggregator {
 public:
     std::vector<std::string> rawDetections;
     ConcurrentContainer<std::list<std::string>> rawAttributes;
@@ -211,9 +220,10 @@ public:
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (FLAGS_r && !rawDetections.empty()) {
-            slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
+            slog::debug << "Frame #: " << sharedVideoFrame->frameId << slog::endl;
             slog::debug << rawDetections;
-            for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
+            // destructor assures that none uses the container
+            for (const std::string& rawAttribute : rawAttributes.container) {
                 slog::debug << rawAttribute << slog::endl;
             }
             for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
@@ -224,39 +234,45 @@ public:
         tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxesAndDescrs)));
     }
+
     void push(BboxAndDescr&& bboxAndDescr) {
         boxesAndDescrs.lockedPushBack(std::move(bboxAndDescr));
     }
+
     const VideoFrame::Ptr sharedVideoFrame;
 
 private:
     ConcurrentContainer<std::list<BboxAndDescr>> boxesAndDescrs;
 };
 
-class DetectionsProcessor: public Task {  // extracts detections from blob InferRequests and runs classifiers and recognisers
+// extracts detections from blob InferRequests and runs classifiers and recognisers
+class DetectionsProcessor : public Task {
 public:
-    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferenceEngine::InferRequest* inferRequest):
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, ov::InferRequest* inferRequest) :
         Task{sharedVideoFrame, 1.0}, inferRequest{inferRequest}, requireGettingNumberOfDetections{true} {}
+
     DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, std::shared_ptr<ClassifiersAggregator>&& classifiersAggregator, std::list<cv::Rect>&& vehicleRects,
-    std::list<cv::Rect>&& plateRects):
-        Task{sharedVideoFrame, 1.0}, classifiersAggregator{std::move(classifiersAggregator)}, inferRequest{nullptr},
-        vehicleRects{std::move(vehicleRects)}, plateRects{std::move(plateRects)}, requireGettingNumberOfDetections{false} {}
+        std::list<cv::Rect>&& plateRects) :
+            Task{sharedVideoFrame, 1.0}, classifiersAggregator{std::move(classifiersAggregator)}, inferRequest{nullptr},
+            vehicleRects{std::move(vehicleRects)}, plateRects{std::move(plateRects)}, requireGettingNumberOfDetections{false} {}
+
     bool isReady() override;
     void process() override;
 
 private:
-    std::shared_ptr<ClassifiersAggregator> classifiersAggregator;  // when no one stores this object we will draw
-    InferenceEngine::InferRequest* inferRequest;
+    std::shared_ptr<ClassifiersAggregator> classifiersAggregator; // when no one stores this object we will draw
+    ov::InferRequest* inferRequest;
     std::list<cv::Rect> vehicleRects;
     std::list<cv::Rect> plateRects;
-    std::vector<std::reference_wrapper<InferenceEngine::InferRequest>> reservedAttributesRequests;
-    std::vector<std::reference_wrapper<InferenceEngine::InferRequest>> reservedLprRequests;
+    std::vector<std::reference_wrapper<ov::InferRequest>> reservedAttributesRequests;
+    std::vector<std::reference_wrapper<ov::InferRequest>> reservedLprRequests;
     bool requireGettingNumberOfDetections;
 };
 
-class InferTask: public Task {  // runs detection
+// runs detection
+class InferTask: public Task {
 public:
-    explicit InferTask(VideoFrame::Ptr sharedVideoFrame):
+    explicit InferTask(VideoFrame::Ptr sharedVideoFrame) :
         Task{sharedVideoFrame, 5.0} {}
     bool isReady() override;
     void process() override;
@@ -264,7 +280,7 @@ public:
 
 class Reader: public Task {
 public:
-    explicit Reader(VideoFrame::Ptr sharedVideoFrame):
+    explicit Reader(VideoFrame::Ptr sharedVideoFrame) :
         Task{sharedVideoFrame, 2.0} {}
     bool isReady() override;
     void process() override;
@@ -357,12 +373,10 @@ void Drawer::process() {
             }
             else if (key == 32) {
                 context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-            }
-            else {
+            } else {
                 context.drawersContext.presenter.handleKey(key);
             }
-        }
-        else {
+        } else {
             if (!context.isVideo) {
                 try {
                     std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
@@ -383,20 +397,27 @@ void ResAggregator::process() {
     context.frameCounter++;
     for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
         switch (bboxAndDescr.objectType) {
-            case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
-                                                    break;
-            case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
-                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                    cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
-                                                                    cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
-                                                        break;
-            case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
-                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
-                                                                cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
-                                                    break;
-            default: throw std::exception();  // must never happen
-                        break;
+            case BboxAndDescr::ObjectType::NONE:
+                cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
+                break;
+
+            case BboxAndDescr::ObjectType::VEHICLE:
+                cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                    cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
+                    cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
+                break;
+
+            case BboxAndDescr::ObjectType::PLATE:
+                cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
+                putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                    cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
+                    cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
+                break;
+
+            default:
+                throw std::runtime_error("Unexpected detection result"); // must never happen
+                break;
         }
     }
     tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
@@ -425,8 +446,9 @@ bool DetectionsProcessor::isReady() {
                     plateRects.emplace_back(result.location & cv::Rect{cv::Point(0, 0), sharedVideoFrame->frame.size()});
                     break;
                 }
-                default: throw std::exception();  // must never happen
-                         break;
+                default:
+                    throw std::runtime_error("Unexpected detection results"); // must never happen
+                    break;
             }
         }
         context.detectorsInfers.inferRequests.lockedPushBack(*inferRequest);
@@ -465,32 +487,32 @@ void DetectionsProcessor::process() {
         for (auto attributesRequestIt = reservedAttributesRequests.begin(); attributesRequestIt != reservedAttributesRequests.end();
                 vehicleRectsIt++, attributesRequestIt++) {
             const cv::Rect vehicleRect = *vehicleRectsIt;
-            InferenceEngine::InferRequest& attributesRequest = *attributesRequestIt;
+            ov::InferRequest& attributesRequest = *attributesRequestIt;
             context.detectionsProcessorsContext.vehicleAttributesClassifier.setImage(attributesRequest, sharedVideoFrame->frame, vehicleRect);
 
-            attributesRequest.SetCompletionCallback(
+            attributesRequest.set_callback(
                 std::bind(
                     [](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                        InferenceEngine::InferRequest& attributesRequest,
+                        ov::InferRequest& attributesRequest,
                         cv::Rect rect,
                         Context& context) {
-                            attributesRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+                            attributesRequest.set_callback({}); // destroy the stored bind object
 
-                            const std::pair<std::string, std::string>& attributes
-                                = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
+                            const std::pair<std::string, std::string>& attributes =
+                                context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawAttributes.lockedPushBack("Vehicle Attributes results:" + attributes.first + ';'
-                                                                                      + attributes.second);
+                                classifiersAggregator->rawAttributes.lockedPushBack(
+                                    "Vehicle Attributes results:" + attributes.first + ';' + attributes.second);
                             }
-                            classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
+                            classifiersAggregator->push(
+                                BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
                         }, classifiersAggregator,
                            std::ref(attributesRequest),
                            vehicleRect,
                            std::ref(context)));
-
-            attributesRequest.StartAsync();
+            attributesRequest.start_async();
         }
         vehicleRects.erase(vehicleRects.begin(), vehicleRectsIt);
     } else {
@@ -504,16 +526,16 @@ void DetectionsProcessor::process() {
         auto plateRectsIt = plateRects.begin();
         for (auto lprRequestsIt = reservedLprRequests.begin(); lprRequestsIt != reservedLprRequests.end(); plateRectsIt++, lprRequestsIt++) {
             const cv::Rect plateRect = *plateRectsIt;
-            InferenceEngine::InferRequest& lprRequest = *lprRequestsIt;
+            ov::InferRequest& lprRequest = *lprRequestsIt;
             context.detectionsProcessorsContext.lpr.setImage(lprRequest, sharedVideoFrame->frame, plateRect);
 
-            lprRequest.SetCompletionCallback(
+            lprRequest.set_callback(
                 std::bind(
                     [](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                        InferenceEngine::InferRequest& lprRequest,
+                        ov::InferRequest& lprRequest,
                         cv::Rect rect,
                         Context& context) {
-                            lprRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+                            lprRequest.set_callback({}); // destroy the stored bind object
 
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
@@ -527,7 +549,7 @@ void DetectionsProcessor::process() {
                            plateRect,
                            std::ref(context)));
 
-            lprRequest.StartAsync();
+            lprRequest.start_async();
         }
         plateRects.erase(plateRects.begin(), plateRectsIt);
     } else {
@@ -560,24 +582,25 @@ bool InferTask::isReady() {
 void InferTask::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
-    std::reference_wrapper<InferenceEngine::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
     context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
 
-    inferRequest.get().SetCompletionCallback(
+    inferRequest.get().set_callback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
-                InferenceEngine::InferRequest& inferRequest,
-               Context& context) {
-                    inferRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+                ov::InferRequest& inferRequest,
+                Context& context) {
+                    inferRequest.set_callback({}); // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
                         std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
                    inferRequest,
                    std::ref(context)));
-    inferRequest.get().StartAsync();
+
+    inferRequest.get().start_async();
     // do not push as callback does it
 }
 
@@ -612,7 +635,7 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        // ------------------------------ Parsing and validation of input args ---------------------------------
+        // Parsing and validation of input args
         try {
             if (!ParseAndCheckCommandLine(argc, argv)) {
                 return 0;
@@ -624,9 +647,12 @@ int main(int argc, char* argv[]) {
 
         std::vector<std::string> files;
         parseInputFilesArguments(files);
-        if (files.empty() && 0 == FLAGS_nc) throw std::logic_error("No inputs were found");
+        if (files.empty() && 0 == FLAGS_nc)
+            throw std::logic_error("No inputs were found");
+
         std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSourcess;
         std::vector<std::shared_ptr<ImageSource>> imageSourcess;
+
         if (FLAGS_nc) {
             for (size_t i = 0; i < FLAGS_nc; ++i) {
                 cv::VideoCapture videoCapture(i);
@@ -673,11 +699,9 @@ int main(int argc, char* argv[]) {
             inputChannels.push_back(InputChannel::create(inputSources[channelI]));
         }
 
-        // -----------------------------------------------------------------------------------------------------
-
-        // --------------------------- 1. Load Inference Engine -------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+        // Init OpenVINO Core
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
 
         std::set<std::string> devices;
         for (const std::string& netDevices : {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
@@ -692,73 +716,67 @@ int main(int argc, char* argv[]) {
 
         for (const std::string& device : devices) {
             if ("CPU" == device) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                }
                 if (FLAGS_nthreads != 0) {
-                    ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
+                    core.set_property("CPU", {{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }});
                 }
-                ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
-                ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
+                core.set_property("CPU", {{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }});
+                core.set_property("CPU", {{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, "CPU");
-                device_nstreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
+                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }});
+                device_nstreams["CPU"] = std::stoi(core.get_property("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             }
 
             if ("GPU" == device) {
                 // Load any user-specified clDNN Extensions
-                if (!FLAGS_c.empty()) {
-                    ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
-                }
-                ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+                core.set_property("GPU", {{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
-                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
-                device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }});
+                device_nstreams["GPU"] = std::stoi(core.get_property("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                    core.set_property("GPU", {{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }});
                 }
             }
         }
 
-        /** Graph tagging via config options**/
-        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
-            std::map<std::string, std::string> config;
+        // Graph tagging via config options
+        auto makeTagConfig = [&](const std::string& deviceName, const std::string& suffix) {
+            ov::AnyMap config;
             if (FLAGS_tag && deviceName == "HDDL") {
                 config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
             }
             return config;
         };
 
-        // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        Detector detector(ie, FLAGS_d, FLAGS_m,
+
+        Detector detector(core, FLAGS_d, FLAGS_m,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
         slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
 
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
+
         Lpr lpr;
         std::size_t nrecognizersireq{0};
+
         if (!FLAGS_m_va.empty()) {
-            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
+            vehicleAttributesClassifier = VehicleAttributesClassifier(core, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
             slog::info << "\tNumber of network inference requests: " << nclassifiersireq << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Vehicle Attributes Recognition DISABLED." << slog::endl;
         }
+
         if (!FLAGS_m_lpr.empty()) {
-            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
+            lpr = Lpr(core, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
             slog::info << "\tNumber of network inference requests: " << nrecognizersireq << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "License Plate Recognition DISABLED." << slog::endl;
         }
+
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;
         std::chrono::steady_clock::duration showPeriod = 0 == FLAGS_fps ? std::chrono::steady_clock::duration::zero()
@@ -785,9 +803,11 @@ int main(int argc, char* argv[]) {
         // when the context is destroyed and the worker still lives with its ReborningVideoFrames referring to the
         // destroyed context.
         std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
-        context.readersContext.readersWorker = context.inferTasksContext.inferTasksWorker
-            = context.detectionsProcessorsContext.detectionsProcessorsWorker = context.drawersContext.drawersWorker
-            = context.resAggregatorsWorker = worker;
+        context.readersContext.readersWorker = worker;
+        context.inferTasksContext.inferTasksWorker = worker;
+        context.detectionsProcessorsContext.detectionsProcessorsWorker = worker;
+        context.drawersContext.drawersWorker = worker;
+        context.resAggregatorsWorker = worker;
 
         for (uint64_t i = 0; i < FLAGS_n_iqs; i++) {
             for (unsigned sourceID = 0; sourceID < inputChannels.size(); sourceID++) {
