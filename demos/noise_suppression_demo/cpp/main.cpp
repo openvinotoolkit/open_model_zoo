@@ -14,7 +14,7 @@ DEFINE_bool(h, false, h_msg);
 constexpr char m_msg[] = "path to an .xml file with a trained model";
 DEFINE_string(m, "", m_msg);
 
-constexpr char i_msg[] = "path to an input 16kHz WAV file";
+constexpr char i_msg[] = "path to an input WAV file";
 DEFINE_string(i, "", i_msg);
 
 constexpr char d_msg[] = "specify a device to infer on (the list of available devices is shown below). Default is CPU";
@@ -85,8 +85,6 @@ void read_wav(const std::string& file_name, RiffWaveHeader& wave_header, std::ve
     CHECK_IF(wave_header.num_of_channels != 1);
     // only 16 bit
     CHECK_IF(wave_header.bits_per_sample != 16);
-    // only 16KHz
-    CHECK_IF(wave_header.sampling_freq != 16000);
     // make sure that data chunk follows file header
     CHECK_IF(wave_header.data_tag != fourcc("data"));
     #undef CHECK_IF
@@ -163,18 +161,41 @@ int main(int argc, char* argv[]) {
     ov::Shape inp_shape = model->input(input_name).get_shape();
     size_t patch_size = inp_shape[1];
 
+    // try to get delay output and freq output for model
+    int delay = 0;
+    int freq_model = 16000; // default sampling rate for model
+    infer_request.infer();
+    for (size_t i = 0; i < outputs.size(); i++) {
+        std::string out_name = outputs[i].get_any_name();
+        if (out_name == "delay") {
+            delay = infer_request.get_tensor("delay").data<int>()[0];
+        }
+        if (out_name == "freq") {
+            freq_model = infer_request.get_tensor("freq").data<int>()[0];
+        }
+    }
+    slog::info << "\tDelay: " << delay << " samples" << slog::endl;
+    slog::info << "\tFreq: " << freq_model << " Hz" << slog::endl;
+
     // read input wav file
     RiffWaveHeader wave_header;
     std::vector<int16_t> inp_wave_s16;
     read_wav(FLAGS_i, wave_header, inp_wave_s16);
+    int freq_data = wave_header.sampling_freq;
+
+    if (freq_data != freq_model) {
+        slog::err << "Wav file " << FLAGS_i << " sampling rate " << freq_data << " does not match model sampling rate " << freq_model << slog::endl;
+        throw std::runtime_error("data sampling rate does not match model sampling rate");
+    }
 
     std::vector<int16_t> out_wave_s16;
     out_wave_s16.resize(inp_wave_s16.size());
 
     std::vector<float> inp_wave_fp32;
     std::vector<float> out_wave_fp32;
+
     // fp32 input wave will be expanded to be divisible by patch_size
-    size_t iter = 1 + (inp_wave_s16.size() / patch_size);
+    size_t iter = 1 + ((inp_wave_s16.size() + delay) / patch_size);
     size_t inp_size = patch_size * iter;
     inp_wave_fp32.resize(inp_size, 0);
     out_wave_fp32.resize(inp_size, 0);
@@ -220,11 +241,14 @@ int main(int argc, char* argv[]) {
     double total_latency = std::chrono::duration_cast<ms>(std::chrono::steady_clock::now() - start_time).count();
     slog::info << "Metrics report:" << slog::endl;
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << total_latency << " ms" << slog::endl;
-    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / 16.0f << " ms" << slog::endl;
+    slog::info << "\tSample length: " << std::fixed << std::setprecision(1) << patch_size * iter / (freq_data * 1e-3) << " ms" << slog::endl;
+    slog::info << "\tSampling freq: " << freq_data << " Hz" << slog::endl;
 
-    // convert fp32 to int16_t
+    // convert fp32 to int16_t and save to wav
     for(size_t i = 0; i < out_wave_s16.size(); ++i) {
-        out_wave_s16[i] = (int16_t)(out_wave_fp32[i] * std::numeric_limits<int16_t>::max());
+        float v = out_wave_fp32[i+delay];
+        v = clamp(v, -1.0f, +1.0f);
+        out_wave_s16[i] = (int16_t)(v * std::numeric_limits<int16_t>::max());
     }
     write_wav(FLAGS_o, wave_header, out_wave_s16);
     return 0;

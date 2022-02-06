@@ -663,8 +663,7 @@ NATIVE_DEMOS = [
     CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
-            # TODO: regenerate intel model: Number of inputs of the model (40) is not equal to number of outputs(42)
-            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-denseunet-ll-0001'),
             ModelArg('noise-suppression-poconetlike-0001')),
     )),
 
@@ -1032,8 +1031,7 @@ PYTHON_DEMOS = [
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
-            # TODO: regenerate intel model: Number of inputs of the model (40) is not equal to number of outputs(42)
-            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-denseunet-ll-0001'),
             ModelArg('noise-suppression-poconetlike-0001'))
     )),
 
