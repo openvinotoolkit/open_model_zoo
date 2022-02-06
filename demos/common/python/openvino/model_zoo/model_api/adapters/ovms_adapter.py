@@ -23,7 +23,7 @@ except ImportError:
 import re
 import numpy as np
 import logging as log
-from .model_adapter import ModelAdapter, LayerMetadata, get_layout_from_shape
+from .model_adapter import ModelAdapter, Metadata, get_layout_from_shape
 
 
 class OVMSAdapter(ModelAdapter):
@@ -124,13 +124,13 @@ class OVMSAdapter(ModelAdapter):
         inputs = {}
         for name, meta in self.metadata["inputs"].items():
             input_layout = get_layout_from_shape(meta['shape'])
-            inputs[name] = LayerMetadata(names=set(name), shape=meta["shape"], layout=input_layout, precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            inputs[name] = Metadata(names=set(name), shape=meta["shape"], layout=input_layout, precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for name, meta in self.metadata["outputs"].items():
-            outputs[name] = LayerMetadata(names=set(name), shape=meta["shape"], precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            outputs[name] = Metadata(names=set(name), shape=meta["shape"], precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return outputs
 
     def reshape_model(self, new_shape):

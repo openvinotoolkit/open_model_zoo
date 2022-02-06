@@ -54,7 +54,7 @@ class CTPN(DetectionModel):
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, self.input_size[1], self.input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         default_input_shape = self.inputs[self.image_blob_name].shape
-        new_shape = [self.n, self.c, self.h2, self.w2] if self.input_layout == 'NCHW' else [self.n, self.h2, self.w2, self.c]
+        new_shape = [self.n, self.c, self.h2, self.w2] if self.nchw_layout else [self.n, self.h2, self.w2, self.c]
         input_shape = {self.image_blob_name: (new_shape)}
         self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.reshape(input_shape)
@@ -67,7 +67,7 @@ class CTPN(DetectionModel):
         if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
             raise WrapperError(self.__model__, "Unexpected output blob shape. Only 4D output blobs are supported")
 
-        if self.input_layout == 'NCHW':
+        if self.nchw_layout:
             scores_channels = scores_data_repr.shape[1]
             boxes_channels = boxes_data_repr.shape[1]
         else:
@@ -111,9 +111,9 @@ class CTPN(DetectionModel):
     def postprocess(self, outputs, meta):
         first_scales = meta['scales'].pop()
         boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0)) \
-                if self.input_layout == 'NCHW' else outputs[self.bboxes_blob_name][0]
+                if self.nchw_layout else outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0)) \
-                 if self.input_layout == 'NCHW' else outputs[self.scores_blob_name][0]
+                 if self.nchw_layout else outputs[self.scores_blob_name][0]
 
         textsegs, scores = self.get_proposals(scores, boxes, meta['original_shape'])
         textsegs[:, 0::2] /= first_scales[0]

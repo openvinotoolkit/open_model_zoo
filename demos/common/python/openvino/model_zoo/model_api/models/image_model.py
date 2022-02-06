@@ -17,7 +17,7 @@
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform
-
+from openvino.runtime import Layout
 
 class ImageModel(Model):
     '''An abstract wrapper for an image-based model
@@ -47,7 +47,7 @@ class ImageModel(Model):
         self.image_blob_name = self.image_blob_names[0]
 
         self.input_layout = self.inputs[self.image_blob_name].layout
-        self.nchw_layout = self.input_layout == 'NCHW'
+        self.nchw_layout = self.input_layout == Layout('NCHW')
         if self.nchw_layout:
             self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
         else:

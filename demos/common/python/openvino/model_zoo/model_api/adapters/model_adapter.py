@@ -16,24 +16,25 @@
 
 import abc
 from dataclasses import dataclass, field
+from openvino.runtime import Layout, Type
 from typing import Dict, List, Set
 
 
 @dataclass
-class LayerMetadata:
+class Metadata:
     names: Set[str] = field(default_factory=set)
     shape: List[int] = field(default_factory=list)
-    layout: str = ''
+    layout: Layout = field(default_factory=Layout)
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)
 
 
-def get_layout_from_shape(shape):
+def get_layout_from_shape(shape) -> Layout:
     if len(shape) != 4:
         raise RuntimeError('Get_layout supports only 4D input shape')
 
-    layout = 'NCHW' if shape[1] == 3 else 'NHWC'
+    layout = Layout('NCHW') if shape[1] == 3 or shape[1] == 1 else Layout('NHWC')
     return layout
 
 
