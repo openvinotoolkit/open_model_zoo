@@ -25,7 +25,6 @@
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include <utils/image_utils.h>
-#include <ngraph/ngraph.hpp>
 
 #include "models/hpe_model_openpose.h"
 #include "models/openpose_decoder.h"

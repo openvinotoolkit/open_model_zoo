@@ -15,7 +15,6 @@
 */
 
 #include <openvino/openvino.hpp>
-#include <openvino/op/constant.hpp>
 #include <openvino/op/softmax.hpp>
 #include <openvino/op/topk.hpp>
 
@@ -155,8 +154,8 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     else {
         softmaxNode = *softmaxNodeIt;
     }
-    const auto k = std::make_shared<ov::op::v0::Constant>(ngraph::element::i32, ngraph::Shape{}, std::vector<size_t>{nTop});
-    std::shared_ptr<ngraph::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1, ov::op::v1::TopK::Mode::MAX,
+    const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32, ov::Shape{}, std::vector<size_t>{nTop});
+    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1, ov::op::v1::TopK::Mode::MAX,
                                                                                     ov::op::v1::TopK::SortType::SORT_VALUES);
 
     auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
