@@ -30,7 +30,7 @@ struct CnnConfig {
     ov::AnyMap compiledModelConfig;
 
     std::set<std::string> getDevices();
-
+    std::map<std::string, std::string> getLegacyConfig();
 protected:
     std::set<std::string> devices;
 };
