@@ -139,7 +139,7 @@ def _arpabet_to_sequence(text):
     return _symbols_to_sequence_arpabet(['@' + s for s in text.split()])
 
 def _symbols_to_sequence_arpabet(symbols):
-    return [_symbol_to_id_arpabet[s] for s in symbols if _should_keep_symbol(s)]
+    return [_symbol_to_id_arpabet[s] for s in symbols if _should_keep_symbol_arpabet(s)]
 
 def _symbols_to_sequence(symbols):
     return [_symbol_to_id[s] for s in symbols if _should_keep_symbol(s)]
@@ -147,6 +147,9 @@ def _symbols_to_sequence(symbols):
 
 def _should_keep_symbol(s):
     return s in _symbol_to_id and s != _pad
+
+def _should_keep_symbol_arpabet(s):
+    return s in _symbol_to_id_arpabet and s != _pad
 
 
 def intersperse(lst):

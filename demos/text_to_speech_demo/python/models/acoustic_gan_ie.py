@@ -18,11 +18,10 @@ import logging as log
 import os.path as osp
 
 import numpy as np
+from openvino.runtime import PartialShape
 
 from utils.text_preprocessing import text_to_sequence_with_dictionary, intersperse
-from utils.cmudict import cmudict
-
-from openvino.runtime import Core, get_version
+import utils.cmudict as cmudict
 
 def check_input_name(model, input_tensor_name):
     try:
@@ -38,7 +37,7 @@ class AcousticGANIE:
         self.device = device
         self.ie = ie
 
-        self.cmudict = cmudict.CMUDict(osp.dirname(osp.realpath(__file__)))
+        self.cmudict = cmudict.CMUDict(osp.join(osp.dirname(osp.realpath(__file__)), 'data/cmu_dictionary'))
 
         self.encoder = self.load_network(model_encoder)
         self.encoder_request = self.create_infer_request(self.encoder, model_encoder)
@@ -98,7 +97,7 @@ class AcousticGANIE:
         cum_duration = np.cumsum(duration, 1)
 
         cum_duration_flat = cum_duration.flatten()  # view(b * t_x)
-        path = AcousticGANIE.sequence_mask_numpy(cum_duration_flat, t_y).astype(mask.dtype)
+        path = AcousticGANIE.sequence_mask(cum_duration_flat, t_y).astype(mask.dtype)
 
         path = path.reshape(b, t_x, t_y)
         path = path - np.pad(path, ((0, 0), (1, 0), (0, 0)))[:, :-1]
@@ -107,9 +106,9 @@ class AcousticGANIE:
 
         return path
 
-    def gen_decoder_in(self, x_res, logw, x_mask, offset=0.3):
+    def gen_decoder_in(self, x_res, logw, x_mask, offset=0.3, alpha=1.0):
         w = (np.exp(logw) + offset) * x_mask
-        w_ceil = np.ceil(w)
+        w_ceil = np.ceil(w) * alpha
 
         mel_lengths = np.clip(np.sum(w_ceil, axis=(1, 2)), a_min=1, a_max=None).astype(dtype=np.long)
 
@@ -132,31 +131,35 @@ class AcousticGANIE:
 
         model_shape = self.encoder.input(self.enc_input_data_name).shape[1]
         if model_shape != seq.shape[1]:
-            self.encoder.reshape({self.enc_input_data_name: seq.shape})
+            new_shape = {self.enc_input_data_name: PartialShape(seq.shape), self.enc_input_mask_name: PartialShape([1])}
+            self.encoder.reshape(new_shape)
             self.encoder_request = self.create_infer_request(self.encoder)
 
         return {self.enc_input_data_name: seq, self.enc_input_mask_name: seq_len}
 
-    def decoder_preprocess(self):
+    def decoder_preprocess(self, alpha):
         x_mask = self.encoder_request.get_tensor("x_mask").data[:]
         x_res = self.encoder_request.get_tensor("x_res").data[:]
         logw = self.encoder_request.get_tensor("logw").data[:]
 
-        z, z_mask = self.gen_decoder_in(x_res, logw, x_mask)
+        z, z_mask = self.gen_decoder_in(x_res, logw, x_mask, alpha)
 
-        model_shape = self.decoder.input(self.dec_input_data_name).shape[-1]
-        if model_shape != z.shape[-1]:
-            self.encoder.reshape({self.dec_input_data_name: z.shape})
+        model_shape = list(self.decoder.input(self.dec_input_data_name).shape)
+        if model_shape[-1] != z.shape[-1]:
+            self.decoder.reshape({self.dec_input_data_name: PartialShape(z.shape),
+                                  self.dec_input_mask_name: PartialShape(z_mask.shape)})
             self.decoder_request = self.create_infer_request(self.decoder)
 
-        return {self.dec_input_data_name: "z", self.dec_input_mask_name: "z_mask"}
+        return {self.dec_input_data_name: z, self.dec_input_mask_name: z_mask}
 
-
-
-    def forward(self, text, alpha=1.0):
+    def forward(self, text, alpha=1.0, **kwargs):
         encoder_in = self.encoder_preprocess(text)
         self.encoder_request.infer(encoder_in)
 
-        decoder_in = self.decoder_preprocess()
+        decoder_in = self.decoder_preprocess(alpha)
         self.decoder_request.infer(decoder_in)
+
+        res = self.decoder_request.get_tensor("mel").data[:]
+        res = res * 6.0 - 6.0
+        return res
 
