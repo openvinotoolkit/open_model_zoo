@@ -28,6 +28,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
   - --input=input_1
+  - --layout=input_1(NHWC)
   - --output=StatefulPartitionedCall/MobilenetV3small/Predictions/Softmax
   - --saved_model_dir=$dl_dir/mobilenet_v3_small_224_1.0_float.savedmodel
 framework: tf

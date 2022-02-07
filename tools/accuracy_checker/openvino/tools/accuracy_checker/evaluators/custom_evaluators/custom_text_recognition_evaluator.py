@@ -179,8 +179,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
 
         if callback:
             callback(enc_raw_res)
-        features = enc_res[self.recognizer_encoder.outputs_mapping['features']]
-        dec_state = enc_res[self.recognizer_encoder.outputs_mapping['decoder_hidden']]
+        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res)
+        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res)
+        features = enc_res[feats_out]
+        dec_state = enc_res[hidden_out]
 
         tgt = np.array([self.sos_index])
         logits = []
@@ -198,8 +200,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             else:
                 dec_raw_res = dec_res
 
-            dec_state = dec_res[self.recognizer_decoder.outputs_mapping['decoder_hidden']]
-            logit = dec_res[self.recognizer_decoder.outputs_mapping['decoder_output']]
+            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res)
+            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res)
+            dec_state = dec_res[hidden_out]
+            logit = dec_res[logits_out]
             tgt = np.argmax(logit, axis=1)
             if self.eos_index == tgt[0]:
                 break
@@ -241,6 +245,7 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
             'output': 'output',
             'logit': 'logit'
         }
+        self.update_inputs_outputs_info()
 
     def get_phrase(self, indices):
         res = ''
@@ -293,9 +298,9 @@ class SequentialFormulaRecognitionModel(BaseSequentialModel):
             O_t = dec_res[self.recognizer_decoder.outputs_mapping['output']]
             logit = dec_res[self.recognizer_decoder.outputs_mapping['logit']]
             logits.append(logit)
-            tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
+            tgt = np.array([np.argmax(np.array(logit), axis=1)])
 
-            if tgt[0][0][0] == self.eos_index:
+            if tgt[0][0] == self.eos_index:
                 break
 
         logits = np.array(logits)

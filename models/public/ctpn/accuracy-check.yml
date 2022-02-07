@@ -4,8 +4,8 @@ models:
       - framework: dlsdk
         adapter:
           type: ctpn_text_detection
-          cls_prob_out: 'Reshape_2/Transpose'
-          bbox_pred_out: 'rpn_bbox_pred/Reshape_1/Transpose'
+          cls_prob_out: 'Reshape_2'
+          bbox_pred_out: 'rpn_bbox_pred/Reshape_1'
         allow_reshape_input: True
 
     datasets:

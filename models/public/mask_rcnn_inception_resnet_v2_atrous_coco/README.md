@@ -35,12 +35,12 @@ Expected color order: `RGB`.
 
 ### Converted Model
 
-1. Image, name: `image_tensor`, shape: `1, 3, 800, 1365`, format: `B, C, H, W`, where:
+1. Image, name: `image_tensor`, shape: `1, 800, 1365, 3`, format: `B, H, W, C`, where:
 
     - `B` - batch size
-    - `C` - number of channels
     - `H` - image height
     - `W` - image width
+    - `C` - number of channels
 
     Expected color order: `BGR`.
 

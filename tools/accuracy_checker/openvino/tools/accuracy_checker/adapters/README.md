@@ -418,6 +418,7 @@ AccuracyChecker supports following set of adapters:
     * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
 * `multi_output_regression` - converting raw output features to `RegressionPrediction` for regression with gt data.
   * `output` - list of target output names.
+  * `ignore_batch` - whether ignore the output batch size. When processing online video streams, the output batch size is ignored. Default is False.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
     * `adapters` - Dict where key is an output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
@@ -492,3 +493,11 @@ AccuracyChecker supports following set of adapters:
   * `keep_top_k` - maximal number of boxes which should be kept during NMS (optional, default 200).
   * `diff_coord_order` - ordering convention of coordinates differs from the commonly used format [x0, y0, x1, y1]. If value is True, the format of coordinates is [y0, x0, y1, x1] (optional, default False).
   * `max_detections` - maximal number of boxes which should be kept (optional).
+* `nanodet` - converting output of NanoDet models family to `DetectionPrediction` representation.
+  * `num_classes` - number of predicted classes (optional, default 80).
+  * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
+  * `nms_threshold` - overlap threshold for NMS (optional, default 0.6).
+  * `max_detections` - maximal number of boxes which should be kept (optional, default 100).
+  * `reg_max` - maximal value of integral set (optional, default 7).
+  * `strides` - strides of input multi-level feature maps (optional, default [8, 16, 32]).
+  * `is_legacy` - using a legacy NanoDet model (optional, default False).

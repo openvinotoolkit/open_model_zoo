@@ -70,21 +70,21 @@ and disguised at random positions with pre-generated free-form masks.
 
 ### Converted Model
 
-1. Image, name: `Placeholder`, shape: `1, 3, 512, 680`, format: `B, C, H, W`, where:
+1. Image, name: `Placeholder`, shape: `1, 512, 680, 3`, format: `B, H, W, C`, where:
 
     - `B` - batch size
-    - `C` - number of channels
     - `H` - image height
     - `W` - image width
+    - `C` - number of channels
 
    Expected color order: `BGR`.
 
-2. Mask, name: `Placeholder_1`, shape: `1, 1, 512, 680`, format: `B, C, H, W`, where:
+2. Mask, name: `Placeholder_1`, shape: `1, 512, 680, 1`, format: `B, H, W, C`, where:
 
     - `B` - batch size
-    - `C` - number of channels
     - `H` - mask height
     - `W` - mask width
+    - `C` - number of channels
 
 ## Output
 

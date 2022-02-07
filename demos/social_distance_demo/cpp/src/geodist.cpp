@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -9,7 +9,7 @@
 
 typedef std::pair<cv::Point2d, cv::Point2d> Line2d;
 
-std::pair<double, double> getLineComponent(const cv::Point2d &p1, const cv::Point2d &p2) {
+std::pair<double, double> getLineComponent(const cv::Point2d& p1, const cv::Point2d& p2) {
     double run = p2.x - p1.x;
     double rise = p2.y - p1.y;
     double a = 0;
@@ -26,7 +26,7 @@ std::pair<double, double> getLineComponent(const cv::Point2d &p1, const cv::Poin
     return std::make_pair(a, k);
 }
 
-Line2d getLine(const cv::Point2d &A, const cv::Point2d &B) {
+Line2d getLine(const cv::Point2d& A, const cv::Point2d& B) {
     return std::make_pair(A, B);
 }
 
@@ -50,7 +50,7 @@ cv::Point2d lineCentroid(const Line2d& line) {
     return cv::Point2d((line.first.x + line.second.x) / 2, (line.first.y + line.second.y) / 2);
 }
 
-std::vector<Line2d> cut(const Line2d &line, double distance) {
+std::vector<Line2d> cut(const Line2d& line, double distance) {
     double llen = getDistance(line.first, line.second);
 
     std::vector<Line2d> ret;
@@ -114,7 +114,7 @@ bool lineContainsPoint(const Line2d& l, const cv::Point2d& p) {
 }
 
 // euclidean, alert, distance
-std::tuple<bool, bool, double> euclideanDistance(const Line2d &AB, const Line2d &CD,
+std::tuple<bool, bool, double> euclideanDistance(const Line2d& AB, const Line2d& CD,
                                                   unsigned minIter, double coef) {
     cv::Point2d Z1 = lineCentroid(AB);
     cv::Point2d Z2 = lineCentroid(CD);
@@ -130,8 +130,8 @@ std::tuple<bool, bool, double> euclideanDistance(const Line2d &AB, const Line2d 
     return std::make_tuple(true, alert, distance);
 }
 
-double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2d &F,
-                    cv::Point2d &za, cv::Point2d &zb, const cv::Point2d &zLimitA, const cv::Point2d &zLimitB,
+double getDistance(const cv::Point2d& PF, const cv::Point2d& E, const cv::Point2d& F,
+                    cv::Point2d& za, cv::Point2d& zb, const cv::Point2d& zLimitA, const cv::Point2d& zLimitB,
                     double inf1Dir, unsigned initIter = 1, double coef = 1) {
     double _inf = inf1Dir;
     double inf = inf1Dir * -1;
@@ -193,9 +193,9 @@ double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2
 }
 
 // euclidean, alert, distance
-std::tuple<bool, bool, double> socialDistance(std::tuple<int, int> &frameShape,
-                                               cv::Point2d &A, cv::Point2d &B,
-                                               cv::Point2d &C, cv::Point2d &D,
+std::tuple<bool, bool, double> socialDistance(std::tuple<int, int>& frameShape,
+                                               cv::Point2d& A, cv::Point2d& B,
+                                               cv::Point2d& C, cv::Point2d& D,
                                                unsigned minIter, double minW, double maxW) {
     double h, w;
     std::tie(h, w) = frameShape;

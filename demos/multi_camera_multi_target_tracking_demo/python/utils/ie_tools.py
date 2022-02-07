@@ -16,36 +16,36 @@ import logging as log
 import numpy as np
 import cv2
 
+from openvino.runtime import AsyncInferQueue
+
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
     def __init__(self, core, model_path, device, model_type, num_reqs=1, cpu_extension=''):
         self.load_model(core, model_path, device, model_type, num_reqs, cpu_extension)
-        self.reqs_ids = []
+        self.outputs = {}
 
     def _preprocess(self, img):
         _, _, h, w = self.get_input_shape()
         img = np.expand_dims(cv2.resize(img, (w, h)).transpose(2, 0, 1), axis=0)
         return img
 
+    def completion_callback(self, infer_request, id):
+        self.outputs[id] = infer_request.get_tensor(self.output_tensor_name).data[:]
+
     def forward(self, img):
         """Performs forward pass of the wrapped IE model"""
-        self.infer_requests[0].infer({self.input_tensor_name: self._preprocess(img)})
-        return self.infer_requests[0].get_tensor(self.output_tensor_name).data[:]
+        self.forward_async(img, 0)
+        self.infer_queue.wait_all()
+        return self.outputs.pop(0)
 
-    def forward_async(self, img):
-        id = len(self.reqs_ids)
-        self.infer_requests[id].start_async({self.input_tensor_name: self._preprocess(img)})
-        self.reqs_ids.append(id)
+    def forward_async(self, img, req_id):
+        input_data = {self.input_tensor_name: self._preprocess(img)}
+        self.infer_queue.start_async(input_data, req_id)
 
     def grab_all_async(self):
-        outputs = []
-        for id in self.reqs_ids:
-            self.infer_requests[id].wait()
-            res = self.infer_requests[id].get_tensor(self.output_tensor_name).data[:]
-            outputs.append(res)
-        self.reqs_ids = []
-        return outputs
+        self.infer_queue.wait_all()
+        return [self.outputs.pop(i) for i in range(len(self.outputs))]
 
     def get_allowed_inputs_len(self):
         return (1, 2)
@@ -77,5 +77,6 @@ class IEModel:
         self.output_tensor_name = self.model.outputs[0].get_any_name()
         # Loading model to the plugin
         compiled_model = core.compile_model(self.model, device)
-        self.infer_requests = [compiled_model.create_infer_request() for _ in range(num_reqs)]
+        self.infer_queue = AsyncInferQueue(compiled_model, num_reqs)
+        self.infer_queue.set_callback(self.completion_callback)
         log.info('The {} model {} is loaded to {}'.format(model_type, model_xml, device))

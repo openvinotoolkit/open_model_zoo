@@ -67,10 +67,11 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,3,1024,2048]
   - --input=x
-  - --output=save_infer_model/scale_0.tmp_1
+  - --output=argmax_0.tmp_0
   - --mean_values=x[127.5,127.5,127.5]
   - --scale_values=x[127.5,127.5,127.5]
   - --input_model=$conv_dir/inference_model/model.pdmodel
   - --reverse_input_channels
+  - --layout=x(NCHW)
 framework: paddle
 license: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/release/2.3/LICENSE

@@ -85,6 +85,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --input=input
+  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionV2/Predictions/Softmax

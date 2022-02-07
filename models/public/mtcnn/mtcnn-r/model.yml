@@ -44,6 +44,7 @@ model_optimizer_args:
   - --input=data
   - --mean_values=data[127.5,127.5,127.5]
   - --scale_values=data[128.0]
+  - --layout=data(NCWH)
   - --output=conv5-2,prob1
   - --input_model=$dl_dir/mtcnn-r.caffemodel
   - --input_proto=$dl_dir/mtcnn-r.prototxt

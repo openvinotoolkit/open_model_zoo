@@ -29,7 +29,7 @@ which is our own made\* validation dataset for converted model.
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C` where:
 
 - `B` - batch size
 - `H` - height
@@ -41,7 +41,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C` where:
 
 - `B` - batch size
 - `H` - height
@@ -73,11 +73,11 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 ### Converted model
 
-1. The array of detection summary info, name - `separable_conv2d_22/separable_conv2d/YoloRegion`,  shape - `1,27,52,52`. The anchor values are `12,16,  19,36,  40,28`.
+1. The array of detection summary info, name - `separable_conv2d_22/separable_conv2d/YoloRegion`,  shape - `1, 52, 52, 27`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30/separable_conv2d/YoloRegion`,  shape - `1,27,26,26`. The anchor values are `36,75,  76,55,  72,146`.
+2. The array of detection summary info, name - `separable_conv2d_30/separable_conv2d/YoloRegion`,  shape - `1, 26, 26, 27`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1,27,13,13`. The anchor values are `142,110,  192,243,  459,401`.
+3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1, 13, 13, 27`. The anchor values are `142,110,  192,243,  459,401`.
 
 Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_4`], where:
 - (`x`,`y`) - coordinates of box center relative to the cell

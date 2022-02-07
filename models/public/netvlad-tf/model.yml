@@ -53,6 +53,7 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,200,300,3]
+  - --layout=Placeholder(NHWC)
   - --input=Placeholder
   - --output=vgg16_netvlad_pca/l2_normalize_1
   - --input_model=$conv_dir/model_frozen.pb

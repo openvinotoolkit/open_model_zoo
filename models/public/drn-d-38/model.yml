@@ -61,6 +61,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1024,2048]
   - --input=input
+  - --layout=input(NCHW)
   - --output=output
   - --mean_values=[73.975742869,83.660769353,73.175805779]
   - --scale_values=[46.653282963,47.574230671,47.041147921]

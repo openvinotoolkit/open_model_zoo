@@ -36,12 +36,12 @@ Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5.
 
 ### Converted Model
 
-Image, name: `input`, shape: `1, 3, 224, 224`, format: `B, C, H, W`, where:
+Image, name: `input`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 

@@ -14,7 +14,7 @@
 namespace gaze_estimation {
 
 FaceDetector::FaceDetector(
-    ov::runtime::Core& core, const std::string& modelPath, const std::string& deviceName,
+    ov::Core& core, const std::string& modelPath, const std::string& deviceName,
     double detectionConfidenceThreshold, bool enableReshape) :
         ieWrapper(core, modelPath, modelType, deviceName),
         detectionThreshold(detectionConfidenceThreshold),

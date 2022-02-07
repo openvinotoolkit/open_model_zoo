@@ -56,10 +56,12 @@
 | instance-segmentation-person-0007 | YES |    |    |
 | landmarks-regression-retail-0009 | YES | YES | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
-| machine-translation-nar-de-en-0002 | YES | YES |    |
-| machine-translation-nar-en-de-0002 | YES | YES |    |
-| machine-translation-nar-en-ru-0001 | YES | YES |    |
-| machine-translation-nar-ru-en-0001 | YES | YES |    |
+| machine-translation-nar-de-en-0002 | YES |     |    |
+| machine-translation-nar-en-de-0002 | YES |     |    |
+| machine-translation-nar-en-ru-0001 | YES |     |    |
+| machine-translation-nar-ru-en-0001 | YES |     |    |
+| machine-translation-nar-en-ru-0002 | YES |     |    |
+| machine-translation-nar-ru-en-0002 | YES |     |    |
 | noise-suppression-denseunet-ll-0001 | YES |    |    |
 | noise-suppression-poconetlike-0001 | YES |    |    |
 | pedestrian-and-vehicle-detector-adas-0001 | YES | YES | YES |
@@ -72,6 +74,9 @@
 | person-detection-0201 | YES | YES | YES |
 | person-detection-0202 | YES | YES | YES |
 | person-detection-0203 | YES | YES | YES |
+| person-detection-0301 | YES |  |  |
+| person-detection-0302 | YES |  |  |
+| person-detection-0303 | YES |  |  |
 | person-detection-action-recognition-0005 | YES | YES | YES |
 | person-detection-action-recognition-0006 | YES | YES | YES |
 | person-detection-action-recognition-teacher-0002 | YES | YES | YES |
@@ -105,6 +110,8 @@
 | text-recognition-0014 | YES | YES |    |
 | text-recognition-0015-encoder | YES |    |    |
 | text-recognition-0015-decoder | YES |    |    |
+| text-recognition-0016-encoder | YES |    |    |
+| text-recognition-0016-decoder | YES |    |    |
 | text-spotting-0005-detector | YES |    |    |
 | text-spotting-0005-recognizer-decoder | YES |    |    |
 | text-spotting-0005-recognizer-encoder | YES |    |    |
@@ -131,3 +138,10 @@
 | yolo-v2-tiny-ava-sparse-30-0001 | YES | YES | YES |
 | yolo-v2-tiny-ava-sparse-60-0001 | YES | YES | YES |
 | yolo-v2-tiny-vehicle-detection-0001 | YES | YES | YES |
+| smartlab-action-recognition-encoder-0001 | YES |  |  |
+| smartlab-action-recognition-decoder-0001 | YES |  |  |
+| smartlab-object-detection-0001 | YES |  |  |
+| smartlab-object-detection-0002 | YES |  |  |
+| smartlab-object-detection-0003 | YES |  |  |
+| smartlab-object-detection-0004 | YES |  |  |
+| smartlab-sequence-modelling-0001 | YES | YES |  |

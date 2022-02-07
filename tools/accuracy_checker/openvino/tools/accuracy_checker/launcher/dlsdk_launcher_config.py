@@ -308,3 +308,16 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         print_info('Found weights {}'.format(get_path(weights)))
 
     return model, weights
+
+
+def ov_set_config(ov_obj, config, *args, device=None, **kwargs):
+    if hasattr(ov_obj, 'set_property'):
+        if device is not None:
+            ov_obj.set_property(device, config, *args, **kwargs)
+        else:
+            ov_obj.set_property(config, *args, **kwargs)
+        return
+    if device is not None:
+        ov_obj.set_config(config, device, *args, **kwargs)
+    else:
+        ov_obj.set_config(config, *args, **kwargs)
