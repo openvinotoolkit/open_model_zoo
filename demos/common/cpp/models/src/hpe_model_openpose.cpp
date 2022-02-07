@@ -51,9 +51,13 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::runtime_error("HPE OpenPose model wrapper supports topologies only with 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
-
+    ov::Layout inputLayout = ov::layout::get_layout(model->input());
+    if (inputLayout.empty()) {
+        inputLayout = { "NCHW" };
+    }
     const ov::Shape& inputShape = model->input().get_shape();
-    if (inputShape.size() != 4 || inputShape[0] != 1 || inputShape[1] != 3)
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
     ov::preprocess::PrePostProcessor ppp(model);
@@ -61,34 +65,44 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         set_element_type(ov::element::u8).
         set_layout({ "NHWC" });
 
-    ppp.input().model().set_layout("NCHW");
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     if (outputs.size() != 2)
         throw std::runtime_error("HPE OpenPose supports topologies only with 2 outputs");
-
+    ov::Layout outputLayout("NCHW");
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32)
-            .set_layout("NCHW");
+            .set_layout(outputLayout);
         outputsNames.push_back(outTensorName);
     }
     model = ppp.build();
 
-    auto outputIt = outputs.begin();
+    size_t batchId = ov::layout::batch_idx(outputLayout);
+    size_t channelsId = ov::layout::channels_idx(outputLayout);
+    size_t widthId = ov::layout::width_idx(outputLayout);
+    size_t heightId = ov::layout::height_idx(outputLayout);
 
-    const ov::Shape& heatmapsOutputShape = (*outputIt++).get_shape();
-    if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[0] != 1 || heatmapsOutputShape[1] != keypointsNumber + 1) {
+    ov::Shape heatmapsOutputShape = model->outputs().front().get_shape();
+    ov::Shape pafsOutputShape = model->outputs().back().get_shape();
+    if (heatmapsOutputShape[channelsId] > pafsOutputShape[channelsId]) {
+        std::swap(heatmapsOutputShape, pafsOutputShape);
+        std::swap(outputsNames[0], outputsNames[1]);
+    }
+
+    if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[batchId] != 1
+        || heatmapsOutputShape[ov::layout::channels_idx(outputLayout)] != keypointsNumber + 1) {
         throw std::runtime_error("1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM dimension of model's heatmap is expected");
     }
-
-    const ov::Shape& pafsOutputShape = (*outputIt++).get_shape();
-    if (pafsOutputShape.size() != 4 || pafsOutputShape[0] != 1 || pafsOutputShape[1] != 2 * (keypointsNumber + 1)) {
+    if (pafsOutputShape.size() != 4 || pafsOutputShape[batchId] != 1
+        || pafsOutputShape[channelsId] != 2 * (keypointsNumber + 1)) {
         throw std::runtime_error("1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM dimension of model's output is expected");
     }
-    if (pafsOutputShape[2] != heatmapsOutputShape[2] || pafsOutputShape[3] != heatmapsOutputShape[3]) {
+    if (pafsOutputShape[heightId] != heatmapsOutputShape[heightId]
+        || pafsOutputShape[widthId] != heatmapsOutputShape[widthId]) {
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
     }
 }
