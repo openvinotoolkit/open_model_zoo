@@ -63,13 +63,14 @@ class ColorPalette:
 
 
 class InstanceSegmentationVisualizer:
-    def __init__(self, labels, show_boxes=False, show_scores=False):
-        self.palette = ColorPalette(len(labels))
+    def __init__(self, labels=None, show_boxes=False, show_scores=False):
+        colors_num = len(labels) if labels else 80
         self.labels = labels
+        self.palette = ColorPalette(colors_num)
         self.show_boxes = show_boxes
         self.show_scores = show_scores
 
-    def __call__(self, image, boxes, classes, scores, masks=None, ids=None):
+    def __call__(self, image, boxes, classes, scores, masks=None, ids=None, texts=None):
         result = image.copy()
 
         if masks is not None:
@@ -77,7 +78,7 @@ class InstanceSegmentationVisualizer:
         if self.show_boxes:
             result = self.overlay_boxes(result, boxes, classes)
 
-        result = self.overlay_labels(result, boxes, classes, scores)
+        result = self.overlay_labels(result, boxes, classes, scores, texts)
         return result
 
     def overlay_masks(self, image, masks, ids=None):
@@ -111,8 +112,13 @@ class InstanceSegmentationVisualizer:
             image = cv2.rectangle(image, top_left, bottom_right, color, 2)
         return image
 
-    def overlay_labels(self, image, boxes, classes, scores):
-        labels = (self.labels[class_id] for class_id in classes)
+    def overlay_labels(self, image, boxes, classes, scores, texts=None):
+        if texts:
+            labels = texts
+        elif self.labels:
+            labels = (self.labels[class_id] for class_id in classes)
+        else:
+            raise RuntimeError('InstanceSegmentationVisualizer must contain either labels or texts to display')
         template = '{}: {:.2f}' if self.show_scores else '{}'
 
         for box, score, label in zip(boxes, scores, labels):
