@@ -206,7 +206,7 @@ void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
     if (shape.size() != 4) {
         throw std::logic_error("SSD single output must have 4 dimensions, but had " + std::to_string(shape.size()));
     }
-    detectionsNumId = ov::layout::channels_idx(layout);
+    detectionsNumId = ov::layout::height_idx(layout);
     objectSize = shape[ov::layout::width_idx(layout)];
     if (objectSize != 7) {
         throw std::logic_error("SSD single output must have 7 as a last dimension, but had " + std::to_string(objectSize));
