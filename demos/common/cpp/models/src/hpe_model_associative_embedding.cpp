@@ -47,8 +47,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     // --------------------------- Prepare input Tensors ------------------------------------------------------
     changeInputSize(model);
 
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::runtime_error("HPE AE model wrapper supports topologies only with 1 input.");
     }
     inputsNames.push_back(model->input().get_any_name());
@@ -66,8 +65,8 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     ppp.input().model().set_layout("NCHW");
 
     // --------------------------- Prepare output Tensors -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 2 && outputsInfo.size() != 3) {
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 2 && outputs.size() != 3) {
         throw std::runtime_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
     }
 

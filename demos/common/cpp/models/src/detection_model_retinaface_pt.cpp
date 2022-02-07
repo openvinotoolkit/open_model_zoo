@@ -28,8 +28,7 @@ ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float con
 void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("RetinaFacePT model wrapper expects models that have only one input");
     }
 
@@ -61,8 +60,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 3) {
+    if (model->outputs().size() != 3) {
         throw std::logic_error("RetinaFace model wrapper expects models that have 3 outputs");
     }
 
@@ -72,7 +70,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     std::vector<uint32_t> outputsSizes[OT_MAX];
     ov::Layout chw("CHW");
     ov::Layout nchw("NCHW");
-    for (auto& output : outputsInfo) {
+    for (auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().

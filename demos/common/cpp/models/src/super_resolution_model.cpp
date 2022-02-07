@@ -31,13 +31,13 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
 
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1 && inputsInfo.size() != 2) {
+    const ov::OutputVector& inputs = model->inputs();
+    if (inputs.size() != 1 && inputs.size() != 2) {
         throw std::logic_error("Super resolution model wrapper supports topologies with 1 or 2 inputs only");
     }
-    std::string lrInputTensorName = inputsInfo.begin()->get_any_name();
+    std::string lrInputTensorName = inputs.begin()->get_any_name();
     inputsNames.push_back(lrInputTensorName);
-    ov::Shape lrShape = inputsInfo.begin()->get_shape();
+    ov::Shape lrShape = inputs.begin()->get_shape();
     if (lrShape.size() != 4) {
         throw std::logic_error("Number of dimensions for an input must be 4");
     }
@@ -57,10 +57,10 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
     // second input
     std::string bicInputTensorName;
-    if (inputsInfo.size() == 2) {
-        bicInputTensorName = (++inputsInfo.begin())->get_any_name();
+    if (inputs.size() == 2) {
+        bicInputTensorName = (++inputs.begin())->get_any_name();
         inputsNames.push_back(bicInputTensorName);
-        ov::Shape bicShape = (++inputsInfo.begin())->get_shape();
+        ov::Shape bicShape = (++inputs.begin())->get_shape();
         if (bicShape.size() != 4) {
             throw std::logic_error("Number of dimensions for both inputs must be 4");
         }
@@ -74,7 +74,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    for (const auto& input : inputsInfo) {
+    for (const auto& input : inputs) {
         ppp.input(input.get_any_name()).tensor().
             set_element_type(ov::element::u8).
             set_layout("NHWC");
@@ -83,12 +83,12 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
 
     // --------------------------- Prepare output -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 1) {
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 1) {
         throw std::logic_error("Super resolution model wrapper supports topologies only with 1 output");
     }
 
-    outputsNames.push_back(outputsInfo.begin()->get_any_name());
+    outputsNames.push_back(outputs.begin()->get_any_name());
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
 
@@ -107,13 +107,13 @@ void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, in
     auto heightId = ov::layout::height_idx(layout);
     auto widthId = ov::layout::width_idx(layout);
 
-    const ov::OutputVector& inputsInfo = model->inputs();
-    std::string lrInputTensorName = inputsInfo.begin()->get_any_name();
-    ov::Shape lrShape = inputsInfo.begin()->get_shape();
+    const ov::OutputVector& inputs = model->inputs();
+    std::string lrInputTensorName = inputs.begin()->get_any_name();
+    ov::Shape lrShape = inputs.begin()->get_shape();
 
-    if (inputsInfo.size() == 2) {
-        std::string bicInputTensorName = (++inputsInfo.begin())->get_any_name();
-        ov::Shape bicShape = (++inputsInfo.begin())->get_shape();
+    if (inputs.size() == 2) {
+        std::string bicInputTensorName = (++inputs.begin())->get_any_name();
+        ov::Shape bicShape = (++inputs.begin())->get_shape();
         if (lrShape[heightId] >= bicShape[heightId] && lrShape[widthId] >= bicShape[widthId]) {
             std::swap(bicShape, lrShape);
             std::swap(bicInputTensorName, lrInputTensorName);

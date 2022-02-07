@@ -31,8 +31,7 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
 void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("RetinaFace model wrapper expects models that have only one input");
     }
     const ov::Shape& inputShape = model->input().get_shape();
@@ -64,8 +63,8 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output  -----------------------------------------------------
 
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 6 && outputsInfo.size() != 9 && outputsInfo.size() != 12) {
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 6 && outputs.size() != 9 && outputs.size() != 12) {
         throw std::logic_error("RetinaFace model wrapper expects models that have 6, 9 or 12 outputs");
     }
 

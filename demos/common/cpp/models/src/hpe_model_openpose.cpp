@@ -47,8 +47,7 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare input  ------------------------------------------------------
     changeInputSize(model);
 
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::runtime_error("HPE OpenPose model wrapper supports topologies only with 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
@@ -65,8 +64,8 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     ppp.input().model().set_layout("NCHW");
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 2)
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 2)
         throw std::runtime_error("HPE OpenPose supports topologies only with 2 outputs");
 
     for (const auto& output : model->outputs()) {
@@ -78,7 +77,7 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     model = ppp.build();
 
-    auto outputIt = outputsInfo.begin();
+    auto outputIt = outputs.begin();
 
     const ov::Shape& heatmapsOutputShape = (*outputIt++).get_shape();
     if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[0] != 1 || heatmapsOutputShape[1] != keypointsNumber + 1) {

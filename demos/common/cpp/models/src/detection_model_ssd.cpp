@@ -131,9 +131,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
     ov::preprocess::PrePostProcessor ppp(model);
-    for (const auto& input : inputsInfo) {
+    for (const auto& input : model->inputs()) {
         auto inputTensorName = input.get_any_name();
         ov::Layout inputLayout = ov::layout::get_layout(model->input(inputTensorName));
         auto shape = input.get_shape();
@@ -213,8 +212,8 @@ void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
 }
 
 void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
-    const ov::OutputVector& outputsInfo = model->outputs();
-    for (auto& output : outputsInfo) {
+    const ov::OutputVector& outputs = model->outputs();
+    for (auto& output : outputs) {
         const auto& tensorNames = output.get_names();
         for (const auto& name : tensorNames) {
             if (name.find("boxes") != std::string::npos) {

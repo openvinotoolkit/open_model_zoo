@@ -31,8 +31,7 @@ ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
 void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("CenterNet model wrapper expects models that have only one input");
     }
 
@@ -59,8 +58,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 3) {
+    if (model->outputs().size() != 3) {
         throw std::runtime_error("CenterNet model wrapper expects models that have 3 outputs blob");
     }
 
