@@ -31,8 +31,7 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
 void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("FaceBoxes model wrapper expects models that have only one input");
     }
 
@@ -64,13 +63,12 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 2) {
+    if (model->outputs().size() != 2) {
         throw std::logic_error("FaceBoxes model wrapper expects models that have 2 outputs blob");
     }
 
     ov::Layout outLayout{ "CHW" };
-    maxProposalsCount = outputsInfo.front().get_shape()[ov::layout::height_idx(outLayout)];
+    maxProposalsCount = model->outputs().front().get_shape()[ov::layout::height_idx(outLayout)];
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);

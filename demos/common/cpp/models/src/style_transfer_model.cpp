@@ -33,8 +33,7 @@ StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
 void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
-    const ov::OutputVector& inputsInfo = model->inputs();
-    if (inputsInfo.size() != 1) {
+    if (model->inputs().size() != 1) {
         throw std::logic_error("Style transfer model wrapper supports topologies only with 1 input");
     }
 
@@ -63,8 +62,8 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 
 
     // --------------------------- Prepare output  -----------------------------------------------------
-    const ov::OutputVector& outputsInfo = model->outputs();
-    if (outputsInfo.size() != 1) {
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 1) {
         throw std::logic_error("Style transfer model wrapper supports topologies only with 1 output");
     }
     outputsNames.push_back(model->output().get_any_name());
