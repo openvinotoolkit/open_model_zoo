@@ -99,5 +99,5 @@ target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 find_package(Threads REQUIRED)
 
 target_link_libraries(${TARGET_NAME}
-    PRIVATE ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} Threads::Threads
+    PRIVATE openvino::runtime gflags ${OpenCV_LIBRARIES} Threads::Threads
     PUBLIC utils)

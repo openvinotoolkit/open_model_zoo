@@ -143,7 +143,7 @@ def main():
         ie.add_extension(args.cpu_extension, 'CPU')
 
     log.info('Reading model {}'.format(args.model))
-    model = ie.read_model(args.model, args.model[:-4] + ".bin")
+    model = ie.read_model(args.model)
 
     if len(model.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")

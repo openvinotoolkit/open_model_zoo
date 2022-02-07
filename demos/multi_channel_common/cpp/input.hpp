@@ -76,7 +76,7 @@ private:
 
 public:
     struct InitParams {
-        std::string inputs;
+        std::vector<std::string> inputs;
         bool loop;
         std::size_t queueSize = 5;
         std::size_t pollingTimeMSec = 1000;

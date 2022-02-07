@@ -42,8 +42,8 @@ Accuracy validations performed on validation part of [Kinetics-400](https://www.
 
 | Metric | Converted Model | Converted Model (subset 400) |
 | ------ | --------------- | ---------------------------- |
-| Top 1  | 65.96%          | 67.0%                        |
-| Top 5  | 86.01%          | 88.7%                        |
+| Top 1  | 65.96%          | 64.83%                        |
+| Top 5  | 86.01%          | 84.58%                        |
 
 ## Input
 

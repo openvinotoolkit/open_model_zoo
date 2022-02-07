@@ -323,38 +323,40 @@ NATIVE_DEMOS = [
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
-    CppDemo(name='multi_channel_face_detection_demo',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_face_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['face-detection-adas']}),
-        single_option_cases('-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            ModelArg('face-detection-retail-0044')),
+        [
+            TestCase(options={'-m':  ModelArg('face-detection-adas-0001')}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0004'), '-bs': '2',
+                '-show_stats': '', '-n_iqs': '1', '-duplicate_num': '2'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0005'), '-bs': '3',
+                '-n_iqs': '999'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0044'), '-bs': '4',
+                '-show_stats': '', '-duplicate_num': '3', '-real_input_fps': ''})
+        ]
     )),
 
     CppDemo(name='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        test_cases=[TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
-    )),
+    ]),
 
-    CppDemo(name='multi_channel_object_detection_demo_yolov3',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_object_detection_demo_yolov3', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
-        single_option_cases('-m',
-            # TODO: nothing
-            # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-            ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf')),
+        [
+            # TODO: INT8: Attempt to get a name for a Tensor without names
+            # TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+        ]
     )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -447,7 +449,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    # TODO: INT8: Attempt to get a name for a Tensor without names
+                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -663,8 +666,7 @@ NATIVE_DEMOS = [
     CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
-            # TODO: regenerate intel model: Number of inputs of the model (40) is not equal to number of outputs(42)
-            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-denseunet-ll-0001'),
             ModelArg('noise-suppression-poconetlike-0001')),
     )),
 
@@ -715,9 +717,12 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
+            '--background': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
+    #       ModelArg('robust-video-matting'),
+    #       ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -1032,8 +1037,7 @@ PYTHON_DEMOS = [
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
-            # TODO: regenerate intel model: Number of inputs of the model (40) is not equal to number of outputs(42)
-            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-denseunet-ll-0001'),
             ModelArg('noise-suppression-poconetlike-0001'))
     )),
 
