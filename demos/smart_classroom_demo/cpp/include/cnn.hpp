@@ -73,6 +73,8 @@ protected:
     ov::OutputVector m_outInfo_;
     /** @brief Model layout */
     ov::Layout m_modelLayout;
+    /** @brief Model input shape */
+    ov::Shape m_modelShape;
     /** @brief Compled model */
     ov::CompiledModel m_compiled_model;
     /** @brief Inference request */

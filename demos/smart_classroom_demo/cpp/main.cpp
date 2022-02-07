@@ -570,22 +570,6 @@ int main(int argc, char* argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
-        std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm, FLAGS_d_reid};
-        std::set<std::string> loadedDevices;
-        for (const auto& device : devices) {
-            if (loadedDevices.find(device) != loadedDevices.end())
-                continue;
-            if (device.find("CPU") != std::string::npos) {
-                core.set_property("CPU", { {InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
-                    InferenceEngine::PluginConfigParams::YES}});
-            } else if (device.find("GPU") != std::string::npos) {
-                core.set_property("CPU", { {InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
-                    InferenceEngine::PluginConfigParams::YES}});
-            }
-
-            loadedDevices.insert(device);
-        }
-
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
@@ -633,18 +617,12 @@ int main(int argc, char* argv[]) {
 
             CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.m_deviceName = FLAGS_d_reid;
-            if (checkDynamicBatchSupport(core, FLAGS_d_reid))
-                reid_config.m_max_batch_size = 16;
-            else
-                reid_config.m_max_batch_size = 1;
+            reid_config.m_max_batch_size = 16;
             reid_config.m_core = core;
 
             CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.m_deviceName = FLAGS_d_lm;
-            if (checkDynamicBatchSupport(core, FLAGS_d_lm))
-                landmarks_config.m_max_batch_size = 16;
-            else
-                landmarks_config.m_max_batch_size = 1;
+            landmarks_config.m_max_batch_size = 16;
             landmarks_config.m_core = core;
             face_recognizer.reset(new FaceRecognizerDefault(
                 landmarks_config, reid_config,

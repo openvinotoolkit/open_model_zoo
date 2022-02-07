@@ -29,7 +29,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     BaseCnnDetection(config.is_async), m_config(config) {
     m_detectorName = "action detector";
 
-    ov::Layout inputLayout = {"NCHW"};
+    ov::Layout modelLayout = {"NCHW"};
 
     slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
     std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
@@ -42,8 +42,8 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
 
     m_input_name = model->input().get_any_name();
 
-    m_network_input_size.height = model->input().get_shape()[ov::layout::height_idx(inputLayout)];
-    m_network_input_size.width = model->input().get_shape()[ov::layout::width_idx(inputLayout)];
+    m_network_input_size.height = model->input().get_shape()[ov::layout::height_idx(modelLayout)];
+    m_network_input_size.width = model->input().get_shape()[ov::layout::width_idx(modelLayout)];
 
     m_new_model = false;
 
@@ -53,10 +53,22 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout(inputLayout);
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout({"NHWC"})
+        .set_spatial_static_shape(
+            m_network_input_size.height,
+            m_network_input_size.width);
+    ppp.input().preprocess()
+        .convert_layout(modelLayout)
+        .convert_element_type(ov::element::f32);
+    ppp.input().model().set_layout(modelLayout);
+
     model = ppp.build();
+
+    slog::info << "PrePostProcessor configuration:" << slog::endl;
+    slog::info << ppp << slog::endl;
 
     ov::set_batch(model, m_config.m_max_batch_size);
 
@@ -124,7 +136,7 @@ void ActionDetection::enqueue(const cv::Mat& frame) {
 
     ov::Tensor input_tensor = m_request->get_tensor(m_input_name);
 
-    matToTensor(frame, input_tensor);
+    resize2tensor(frame, input_tensor);
 
     m_enqueued_frames = 1;
 }

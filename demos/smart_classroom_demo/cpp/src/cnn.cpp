@@ -21,14 +21,16 @@ void CnnDLSDKBase::Load() {
     std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
     logBasicModelInfo(model);
 
-    m_modelLayout = {"NCHW"};
-
     ov::OutputVector inputs = model->inputs();
     if (inputs.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
 
+    m_modelLayout = { "NCHW" };
+
     m_input_tensor_name = model->input().get_any_name();
+
+    m_modelShape = model->input().get_shape();
 
     ov::OutputVector outputs = model->outputs();
     for (auto& item : outputs) {
@@ -39,15 +41,25 @@ void CnnDLSDKBase::Load() {
     ov::preprocess::PrePostProcessor ppp(model);
 
     ppp.input().tensor()
-        .set_element_type(ov::element::f32)
-        .set_layout(m_modelLayout);
+        .set_element_type(ov::element::u8)
+        .set_layout({"NHWC"})
+        .set_spatial_static_shape(
+            m_modelShape[ov::layout::height_idx(m_modelLayout)],
+            m_modelShape[ov::layout::width_idx(m_modelLayout)]);
+    ppp.input().preprocess()
+        .convert_layout(m_modelLayout)
+        .convert_element_type(ov::element::f32);
+    ppp.input().model().set_layout(m_modelLayout);
 
     model = ppp.build();
 
     slog::info << "PrePostProcessor configuration:" << slog::endl;
     slog::info << ppp << slog::endl;
 
-    ov::set_batch(model, m_config.m_max_batch_size);
+    // allow 1...max_batch range, actual will be set at inference time
+    ov::set_batch(model, {1, m_config.m_max_batch_size});
+
+    m_modelShape[ov::layout::batch_idx(m_modelLayout)] = m_config.m_max_batch_size;
 
     m_compiled_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
     logCompiledModelInfo(m_compiled_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
@@ -62,15 +74,18 @@ void CnnDLSDKBase::InferBatch(
 
     size_t num_imgs = frames.size();
 
+    size_t h = m_modelShape[ov::layout::height_idx(m_modelLayout)];
+    size_t w = m_modelShape[ov::layout::width_idx(m_modelLayout)];
+    size_t c = m_modelShape[ov::layout::channels_idx(m_modelLayout)];
+
     // shrink tensor from default m_config.m_max_batch_size to actual num of images;
-    ov::Shape shape = input_tensor.get_shape();
-    shape[ov::layout::batch_idx(m_modelLayout)] = num_imgs;
+    input_tensor.set_shape({ num_imgs, h, w, c });
 
     for (size_t i = 0; i < num_imgs; i++) {
-        matToTensor(frames[i], input_tensor, i);
+        resize2tensor(frames[i], ov::Tensor{ input_tensor, {i, 0, 0, 0}, {i, h, w, c} });
     }
 
-    m_infer_request.set_input_tensor(input_tensor);
+    m_infer_request.set_input_tensor(ov::Tensor{ input_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
 
     m_infer_request.infer();
 

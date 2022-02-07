@@ -53,7 +53,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
     logBasicModelInfo(model);
 
-    ov::Layout inputLayout = {"NCHW"};
+    ov::Layout modelLayout = {"NCHW"};
 
     ov::OutputVector inputs_info = model->inputs();
     if (inputs_info.size() != 1) {
@@ -69,8 +69,8 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     ov::Output<ov::Node> input = model->input();
     ov::Shape shape = input.get_shape();
-    shape[ov::layout::height_idx(inputLayout)] = m_config.input_h;
-    shape[ov::layout::width_idx(inputLayout)] = m_config.input_w;
+    shape[ov::layout::height_idx(modelLayout)] = m_config.input_h;
+    shape[ov::layout::width_idx(modelLayout)] = m_config.input_w;
 
     ov::Output<ov::Node> output = model->output();
     m_output_name = output.get_any_name();
@@ -86,18 +86,30 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
             std::to_string(outputDims.size()));
     }
 
-    ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor()
-        .set_element_type(ov::element::u8)
-        .set_layout(inputLayout);
-    ppp.output()
-        .tensor()
-        .set_element_type(ov::element::f32);
-    model = ppp.build();
-
     std::map<std::string, ov::PartialShape> input_shapes;
     input_shapes[input.get_any_name()] = shape;
     model->reshape(input_shapes);
+
+    ov::preprocess::PrePostProcessor ppp(model);
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout({ "NHWC" })
+        .set_spatial_static_shape(
+            shape[ov::layout::height_idx(modelLayout)],
+            shape[ov::layout::width_idx(modelLayout)]);
+    ppp.input().preprocess()
+        .convert_layout(modelLayout)
+        .convert_element_type(ov::element::f32);
+    ppp.input().model().set_layout(modelLayout);
+    ppp.output()
+        .tensor()
+        .set_element_type(ov::element::f32);
+
+    model = ppp.build();
+
+    slog::info << "PrePostProcessor configuration:" << slog::endl;
+    slog::info << ppp << slog::endl;
 
     m_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
     logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, m_detectorName);
@@ -121,7 +133,7 @@ void FaceDetection::enqueue(const cv::Mat& frame) {
 
     ov::Tensor inputTensor = m_request->get_tensor(m_input_name);
 
-    matToTensor(frame, inputTensor);
+    resize2tensor(frame, inputTensor);
 
     m_enqueued_frames = 1;
 }
