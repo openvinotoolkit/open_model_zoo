@@ -1134,15 +1134,19 @@ class PalmDetectionAdapter(Adapter):
 
     @staticmethod
     def calculate_scale(min_scale, max_scale, stride_index, num_strides):
-        if num_strides == 1:
-            return (min_scale + max_scale) * 0.5
-        else:
-            return min_scale + (max_scale - min_scale) * 1.0 * stride_index / (num_strides - 1)
+        return (min_scale +
+                max_scale) * 0.5 if num_strides == 1 else min_scale + (max_scale -
+                                                                       min_scale) * stride_index / (num_strides - 1)
+        # if num_strides == 1:
+        #     scale = (min_scale + max_scale) * 0.5
+        # else:
+        #     scale = min_scale + (max_scale - min_scale) * 1.0 * stride_index / (num_strides - 1)
+        # return scale
 
     def generate_anchors(self):
         anchors = []
         layer_id = 0
-        while (layer_id < self.num_layers):
+        while layer_id < self.num_layers:
             anchor_height = []
             anchor_width = []
             aspect_ratios = []

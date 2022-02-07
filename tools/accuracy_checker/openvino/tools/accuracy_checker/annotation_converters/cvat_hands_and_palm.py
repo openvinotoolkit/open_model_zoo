@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import DetectionAnnotation, HandLandmarksAnnotation
 from ..utils import check_file_existence, read_json
 from ..config import PathField, BoolField, NumberField
+
 
 class CVATHandPalmConverterBase:
     @staticmethod
@@ -40,7 +41,7 @@ class CVATHandPalmConverterBase:
                 'label': list(label_to_id.keys()),
                 'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
                 'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1
-        }
+                }
         return label_to_id, meta
 
 
@@ -53,20 +54,14 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
     def parameters(cls):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
-            'images_dir': PathField(
-                is_directory=True, optional=True,
-                description='path to dataset images, used only for content existence check'
-            ),
-            'bbox_file': PathField(
-                is_directory=False, optional=False,
-                description='path to file with palm bounding box data'
-            ),
+            'images_dir': PathField(is_directory=True, optional=True,
+                                    description='path to dataset images, used only for content existence check'),
+            'bbox_file': PathField(is_directory=False, optional=False,
+                                   description='path to file with palm bounding box data'),
             'from_landmarks': BoolField(optional=True, default=False,
-                description='acquire bounding box data from landmarks'
-            ),
+                                        description='acquire bounding box data from landmarks'),
             'padding': NumberField(optional=True, default=10, value_type=int,
-                description='additional padding while acquiring bounding box data from landmarks'
-            ),
+                                   description='additional padding while acquiring bounding box data from landmarks'),
         })
         return configuration_parameters
 
@@ -80,10 +75,7 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_json(self.annotation_file)
         bboxes = read_json(self.bbox_file)
-        # annotation_meta = annotation.find('meta')
-        # size = int(annotation_meta.find('task').find('size').text)
-        # label_to_id, meta = self.generate_labels_mapping(annotation_meta)
-        label_to_id, meta = self.generate_labels_mapping(annotation['categories'])
+        _, meta = self.generate_labels_mapping(annotation['categories'])
         num_landmarks = len(meta['label']) - 1
         annotations = []
         content_errors = None if not check_content else []
@@ -103,10 +95,10 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
             landmarks_annotation = HandLandmarksAnnotation(identifier, landmarks_x, landmarks_y)
             if self.from_landmarks:
-                landmarks_annotation.metadata['rect'] = [landmarks_x.min() - self.padding,
-                                                         landmarks_y.min() - self.padding,
-                                                         landmarks_x.max() + self.padding,
-                                                         landmarks_y.max() + self.padding]
+                landmarks_annotation.metadata['rect'] = [np.min(landmarks_x) - self.padding,
+                                                         np.min(landmarks_y) - self.padding,
+                                                         np.max(landmarks_x) + self.padding,
+                                                         np.max(landmarks_y) + self.padding]
             else:
                 landmarks_annotation.metadata['rect'] = [bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]]
             annotations.append(landmarks_annotation)
@@ -190,10 +182,10 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
             detection_annotation = DetectionAnnotation(identifier, palm_id,
-                                                       [landmarks_x.min() - self.padding],
-                                                       [landmarks_y.min() - self.padding],
-                                                       [landmarks_x.max() + self.padding],
-                                                       [landmarks_y.max() + self.padding])
+                                                       [np.min(landmarks_x) - self.padding],
+                                                       [np.min(landmarks_y) - self.padding],
+                                                       [np.max(landmarks_x) + self.padding],
+                                                       [np.max(landmarks_y) + self.padding])
             annotations.append(detection_annotation)
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / len(annotation['images']))
