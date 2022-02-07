@@ -22,7 +22,7 @@
 #include "models/super_resolution_model.h"
 
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName, false) {
+    ImageModel(modelFileName) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }

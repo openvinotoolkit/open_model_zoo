@@ -55,7 +55,6 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 "Absolute path to a shared library with the kernel implementations.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
@@ -86,7 +85,6 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -119,7 +117,6 @@ static void showUsage() {
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
@@ -325,19 +322,19 @@ int main(int argc, char *argv[]) {
             model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
         }
         else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
+            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

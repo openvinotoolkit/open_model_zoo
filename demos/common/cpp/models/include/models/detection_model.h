@@ -22,11 +22,10 @@ public:
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
-    /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels);
+    DetectionModel(const std::string& modelFileName, float confidenceThreshold, const std::vector<std::string>& labels);
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 

@@ -23,10 +23,9 @@ public:
     /// @param modelFileName name of model to load.
     /// @param nTop - number of top results.
     /// Any detected object with confidence lower than this threshold will be ignored.
-    /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class.
-    ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels);
+    ClassificationModel(const std::string& modelFileName, size_t nTop, const std::vector<std::string>& labels);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 

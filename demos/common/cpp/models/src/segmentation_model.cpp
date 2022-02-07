@@ -19,8 +19,8 @@
 
 #include "models/segmentation_model.h"
 
-SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageModel(modelFileName, useAutoResize) {}
+SegmentationModel::SegmentationModel(const std::string& modelFileName) :
+    ImageModel(modelFileName) {}
 
 std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename) {
     std::vector<std::string> labelsList;
@@ -64,21 +64,14 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    if (useAutoResize) {
-        ppp.input().tensor().
-            set_element_type(ov::element::u8).
-            set_spatial_dynamic_shape().
-            set_layout({ "NHWC" });
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_spatial_dynamic_shape().
+        set_layout({ "NHWC" });
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
-    }
-    else {
-        ppp.input().tensor().
-            set_element_type(ov::element::u8).
-            set_layout({ "NHWC" });
-    }
+    ppp.input().preprocess().
+        convert_element_type(ov::element::f32).
+        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
 
     ppp.input().model().set_layout(inputLayout);
     model = ppp.build();
@@ -125,7 +118,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
         cv::Mat predictions(outHeight, outWidth, CV_32SC1);
         const auto data = outTensor.data<int64_t>();
         for (size_t i = 0; i < predictions.total(); ++i) {
-            reinterpret_cast<int32_t*>(predictions.data)[i] = data[i];
+            reinterpret_cast<int32_t*>(predictions.data)[i] = (int32_t)data[i];
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
     }

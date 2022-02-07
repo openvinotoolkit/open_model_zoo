@@ -47,7 +47,6 @@ public:
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
-    /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param useAdvancedPostprocessing - if true, an advanced algorithm for filtering/postprocessing will be used
     /// (with better processing of multiple crossing objects). Otherwise, classic algorithm will be used.
@@ -57,7 +56,7 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     /// @param anchors - vector of anchors coordinates. Required for YOLOv4, for other versions it may be omitted.
     /// @param masks - vector of masks values. Required for YOLOv4, for other versions it may be omitted.
-    ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    ModelYolo(const std::string& modelFileName, float confidenceThreshold,
         bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
         const std::vector<float>& anchors = std::vector<float>(), const std::vector<int64_t>& masks = std::vector<int64_t>());
 

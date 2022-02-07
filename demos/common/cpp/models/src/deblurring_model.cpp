@@ -21,7 +21,7 @@
 #include "models/deblurring_model.h"
 
 DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName, false) {
+    ImageModel(modelFileName) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
