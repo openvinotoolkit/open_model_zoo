@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 */
 
 #pragma once
-#include "detection_model.h"
 #include <utils/nms.hpp>
+#include "detection_model.h"
 
 class ModelFaceBoxes : public DetectionModel {
 public:

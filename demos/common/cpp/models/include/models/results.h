@@ -15,10 +15,9 @@
 */
 
 #pragma once
+#include <map>
 #include <opencv2/core.hpp>
 #include <openvino/openvino.hpp>
-#include <map>
-
 #include "internal_model_data.h"
 
 struct MetaData;

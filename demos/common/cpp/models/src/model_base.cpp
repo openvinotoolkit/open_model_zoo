@@ -17,7 +17,6 @@
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
-
 #include "models/model_base.h"
 
 std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::Core& core) {

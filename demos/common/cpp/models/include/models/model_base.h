@@ -18,7 +18,6 @@
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/config_factory.h>
-
 #include "input_data.h"
 #include "results.h"
 

@@ -17,12 +17,10 @@
 #include <string>
 #include <vector>
 #include <memory>
-
 #include <openvino/openvino.hpp>
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-
 #include "models/style_transfer_model.h"
 
 

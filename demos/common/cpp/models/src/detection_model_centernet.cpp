@@ -19,10 +19,7 @@
 #include <utils/common.hpp>
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
-
 #include "models/detection_model_centernet.h"
-
-
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
     float confidenceThreshold, const std::vector<std::string>& labels)

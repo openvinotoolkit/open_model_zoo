@@ -17,7 +17,6 @@
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-
 #include "models/deblurring_model.h"
 
 DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
