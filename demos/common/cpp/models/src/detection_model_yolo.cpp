@@ -60,10 +60,10 @@ static inline float linear(float x) {
 }
 
 
-ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
     const std::vector<float>& anchors, const std::vector<int64_t>& masks) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
+    DetectionModel(modelFileName, confidenceThreshold, labels),
     boxIOUThreshold(boxIOUThreshold),
     useAdvancedPostprocessing(useAdvancedPostprocessing),
     yoloVersion(YOLO_V3),
@@ -94,21 +94,14 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    if (useAutoResize) {
-        ppp.input().tensor().
-            set_element_type(ov::element::u8).
-            set_spatial_dynamic_shape().
-            set_layout({ "NHWC" });
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_spatial_dynamic_shape().
+        set_layout({ "NHWC" });
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
-    }
-    else {
-        ppp.input().tensor().
-            set_element_type(ov::element::u8).
-            set_layout({ "NHWC" });
-    }
+    ppp.input().preprocess().
+        convert_element_type(ov::element::f32).
+        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
 
     ppp.input().model().set_layout(inputLayout);
 

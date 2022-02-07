@@ -33,7 +33,7 @@ public:
     };
     static const int INIT_VECTOR_SIZE = 200;
 
-    ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
+    ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

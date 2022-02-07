@@ -42,7 +42,6 @@ static const char output_log_message[] = "Optional. The file name to write outpu
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char at_message[] = "Required. Architecture type for detector model: centernet, ssd or yolo.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
@@ -70,7 +69,6 @@ DEFINE_string(out, "", output_log_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(at, "", at_message);
 DEFINE_double(t, 0.5, thresh_output_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(labels, "", labels_message);
@@ -109,7 +107,6 @@ static void showUsage() {
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -t                          " << thresh_output_message << std::endl;
-    std::cout << "    -auto_resize                " << input_resizable_message << std::endl;
     std::cout << "    -iou_t                      " << iou_thresh_output_message << std::endl;
     std::cout << "    -yolo_af                    " << yolo_af_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;

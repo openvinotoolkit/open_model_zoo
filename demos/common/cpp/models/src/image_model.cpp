@@ -18,33 +18,12 @@
 #include <utils/image_utils.h>
 #include "models/image_model.h"
 
-ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
-    ModelBase(modelFileName),
-    useAutoResize(useAutoResize) {
-}
+ImageModel::ImageModel(const std::string& modelFileName) :
+    ModelBase(modelFileName){}
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     auto img = inputTransform(origImg);
-
-    if (!useAutoResize) {
-        // /* Resize and copy data from the image to the input tensor */
-        // ov::Tensor frameTensor = request.get_input_tensor();
-        // matToTensor(img, frameTensor);
-        ov::Tensor frameTensor = request.get_tensor(inputsNames[0]);  // first input should be image
-        ov::Shape tensorShape = frameTensor.get_shape();
-        ov::Layout layout("NHWC");
-        const size_t width = tensorShape[ov::layout::width_idx(layout)];
-        const size_t height = tensorShape[ov::layout::height_idx(layout)];
-        const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
-        if (static_cast<size_t>(img.channels()) != channels) {
-            throw std::runtime_error("The number of channels for model input and image must match");
-        }
-        if (channels != 1 && channels != 3) {
-            throw std::runtime_error("Unsupported number of channels");
-        }
-        img = resizeImageExt(img, width, height);
-    }
     request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
     return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
 }

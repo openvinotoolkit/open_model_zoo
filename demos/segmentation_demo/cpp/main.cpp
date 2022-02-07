@@ -48,7 +48,6 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 "Absolute path to a shared library with the kernel implementations.";
 static const char raw_output_message[] = "Optional. Output inference results as mask histogram.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
@@ -67,7 +66,6 @@ DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_uint32(nireq, 0, nireq_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
@@ -92,7 +90,6 @@ static void showUsage() {
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
@@ -235,7 +232,7 @@ int main(int argc, char* argv[]) {
 
         ov::Core core;
         AsyncPipeline pipeline(
-            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
+            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
