@@ -19,8 +19,8 @@
 #include <utils/slog.hpp>
 #include "models/deblurring_model.h"
 
-DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName) {
+DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
+    ImageModel(modelFileName, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
@@ -35,12 +35,16 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
@@ -60,7 +64,8 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
-    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
+        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 

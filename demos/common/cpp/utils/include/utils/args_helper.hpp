@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <opencv2/core/types.hpp>
+#include <openvino/openvino.hpp>
 
 /**
 * @brief This function checks input args and existence of specified files in a given folder
@@ -38,3 +39,5 @@ std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>&
                                                     const std::string& values_string);
 
 cv::Size stringToSize(const std::string& str);
+
+std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string);

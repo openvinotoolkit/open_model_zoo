@@ -62,8 +62,9 @@ static inline float linear(float x) {
 
 ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
-    const std::vector<float>& anchors, const std::vector<int64_t>& masks) :
-    DetectionModel(modelFileName, confidenceThreshold, labels),
+    const std::vector<float>& anchors, const std::vector<int64_t>& masks,
+    const std::string& layout) :
+    DetectionModel(modelFileName, confidenceThreshold, labels, layout),
     boxIOUThreshold(boxIOUThreshold),
     useAdvancedPostprocessing(useAdvancedPostprocessing),
     yoloVersion(YOLO_V3),
@@ -79,14 +80,13 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const auto& input = model->input();
-    const ov::Shape& inputShape = input.get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
-        if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
-            input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
-            inputLayout = { "NHWC" };
-        }
+    const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

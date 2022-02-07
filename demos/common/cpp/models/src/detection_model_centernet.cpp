@@ -22,8 +22,8 @@
 #include "models/detection_model_centernet.h"
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
-    float confidenceThreshold, const std::vector<std::string>& labels)
-    : DetectionModel(modelFileName, confidenceThreshold, labels) {}
+    float confidenceThreshold, const std::vector<std::string>& labels, const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, labels, layout) {}
 
 void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -33,9 +33,12 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

@@ -20,8 +20,8 @@
 #include <utils/slog.hpp>
 #include "models/super_resolution_model.h"
 
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName) {
+SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
+    ImageModel(modelFileName, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
@@ -41,10 +41,14 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
         throw std::logic_error("Number of dimensions for an input must be 4");
     }
 
-    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
     }
+    else {
+        inputLayout = getLayoutFromShape(model->inputs().front().get_shape());
+    }
+
     auto channelsId = ov::layout::channels_idx(inputLayout);
     auto heightId = ov::layout::height_idx(inputLayout);
     auto widthId = ov::layout::width_idx(inputLayout);
@@ -78,7 +82,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
             set_element_type(ov::element::u8).
             set_layout("NHWC");
 
-        ppp.input(input.get_any_name()).model().set_layout("NCHW");
+        ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
 
     // --------------------------- Prepare output -----------------------------------------------------

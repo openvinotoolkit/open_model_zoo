@@ -18,8 +18,9 @@
 #include <utils/common.hpp>
 #include "models/detection_model_retinaface.h"
 
-ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}),  // Default label is "Face"
+ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
+    const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}, layout),  // Default label is "Face"
     shouldDetectMasks(false), shouldDetectLandmarks(false), boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
               { 16, { 8, 4 }, 16, { 1 }},
@@ -34,10 +35,14 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("RetinaFace model wrapper expects models that have only one input");
     }
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
     }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
+    }
+
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");

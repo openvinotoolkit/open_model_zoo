@@ -20,8 +20,9 @@
 #include <utils/slog.hpp>
 #include "models/jpeg_restoration_model.h"
 
-JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize, bool _jpegCompression) :
-    ImageModel(modelFileName) {
+JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize,
+    bool _jpegCompression, const std::string& layout) :
+    ImageModel(modelFileName, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
         jpegCompression = _jpegCompression;
@@ -37,9 +38,12 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->inputs().front());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3)

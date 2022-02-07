@@ -30,27 +30,33 @@ const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, float delta, RESIZE_MODE resizeMode) :
-    ModelBase(modelFileName),
+    int targetSize, float confidenceThreshold, const std::string& layout, float delta, RESIZE_MODE resizeMode) :
+    ModelBase(modelFileName, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold),
     delta(delta),
-    resizeMode(resizeMode) {
-}
+    resizeMode(resizeMode) {}
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input Tensors ------------------------------------------------------
-    changeInputSize(model);
-
     if (model->inputs().size() != 1) {
         throw std::runtime_error("HPE AE model wrapper supports topologies only with 1 input.");
     }
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    if (inputShape.size() != 4 || inputShape[0] != 1 || inputShape[1] != 3) {
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
+    }
+
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
     }
 
@@ -59,7 +65,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
         set_element_type(ov::element::u8).
         set_layout({ "NHWC" });
 
-    ppp.input().model().set_layout("NCHW");
+    ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output Tensors -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
@@ -78,7 +84,8 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
         if (outputShape.size() != 4 && outputShape.size() != 5) {
             throw std::runtime_error("output tensors are expected to be 4-dimensional or 5-dimensional");
         }
-        if (outputShape[0] != 1 || outputShape[1] != 17) {
+        if (outputShape[ov::layout::batch_idx("NC...")] != 1
+            || outputShape[ov::layout::channels_idx("NC...")] != 17) {
             throw std::runtime_error("output tensors are expected to have 1 batch size and 17 channels");
         }
     }
@@ -92,22 +99,29 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     catch (const std::runtime_error&) {
         nmsHeatmapsTensorName = heatmapsTensorName;
     }
+
+    changeInputSize(model);
 }
 
 void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
+    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
+    auto batchId = ov::layout::batch_idx(layout);
+    auto heightId = ov::layout::height_idx(layout);
+    auto widthId = ov::layout::width_idx(layout);
+
     if (!targetSize) {
-        targetSize =  static_cast<int>(std::min(inputShape[2], inputShape[3]));
+        targetSize =  static_cast<int>(std::min(inputShape[heightId], inputShape[widthId]));
     }
     int inputHeight = aspectRatio >= 1.0 ? targetSize : static_cast<int>(std::round(targetSize / aspectRatio));
     int inputWidth = aspectRatio >= 1.0 ? static_cast<int>(std::round(targetSize * aspectRatio)) : targetSize;
     int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    inputShape[0] = 1;
-    inputShape[2] = height;
-    inputShape[3] = width;
-    inputLayerSize = cv::Size(inputShape[3], inputShape[2]);
+    inputShape[batchId] = 1;
+    inputShape[heightId] = height;
+    inputShape[widthId] = width;
+    inputLayerSize = cv::Size(width, height);
 
     std::map<std::string, ov::PartialShape> shapes;
     shapes[inTensorName] = ov::PartialShape(inputShape);

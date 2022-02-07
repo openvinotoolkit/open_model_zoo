@@ -22,7 +22,8 @@ class StyleTransferModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    StyleTransferModel(const std::string& modelFileName);
+    /// @param layout - model input layout
+    StyleTransferModel(const std::string& modelFileName, const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, ov::InferRequest& request) override;

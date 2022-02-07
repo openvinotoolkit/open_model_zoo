@@ -16,6 +16,7 @@
 
 #pragma once
 #include <openvino/openvino.hpp>
+#include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/config_factory.h>
 #include "input_data.h"
@@ -23,19 +24,20 @@
 
 class ModelBase {
 public:
-    ModelBase(const std::string& modelFileName)
-        : modelFileName(modelFileName)
-    {}
+    ModelBase(const std::string& modelFileName, const std::string& layout = "")
+        : modelFileName(modelFileName) {
+        layouts = parseLayoutString(layout);
+    }
 
     virtual ~ModelBase() {}
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
-    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
+    virtual ov::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::Core& core);
     virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::InferRequest>>& requests) {}
+    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
+
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
-
-    virtual ov::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::Core& core);
 
     std::string getModelFileName() { return modelFileName; }
 
@@ -44,8 +46,9 @@ public:
     }
 
 protected:
-    std::shared_ptr<ov::Model> prepareModel(ov::Core& core);
     virtual void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) = 0;
+
+    std::shared_ptr<ov::Model> prepareModel(ov::Core& core);
 
     InputTransform inputTransform = InputTransform();
     std::vector<std::string> inputsNames;
@@ -53,4 +56,5 @@ protected:
     ov::CompiledModel compiledModel;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
+    std::map<std::string, ov::Layout> layouts;
 };

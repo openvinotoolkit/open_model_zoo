@@ -18,8 +18,8 @@
 #include <utils/ocv_common.hpp>
 #include "models/segmentation_model.h"
 
-SegmentationModel::SegmentationModel(const std::string& modelFileName) :
-    ImageModel(modelFileName) {}
+SegmentationModel::SegmentationModel(const std::string& modelFileName, const std::string& layout) :
+    ImageModel(modelFileName, layout) {}
 
 std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename) {
     std::vector<std::string> labelsList;
@@ -48,13 +48,12 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
-    ov::Layout inputLayout = ov::layout::get_layout(input);
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
-        if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
-            input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
-            inputLayout = { "NHWC" };
-        }
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(input.get_shape());
     }
 
     const ov::Shape& inputShape = input.get_shape();

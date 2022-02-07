@@ -32,8 +32,9 @@ const float HPEOpenPose::midPointsScoreThreshold = 0.05f;
 const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
 const float HPEOpenPose::minSubsetScore = 0.2f;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
-    ImageModel(modelFileName),
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
+    float confidenceThreshold, const std::string& layout) :
+    ImageModel(modelFileName, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
@@ -42,17 +43,19 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, i
 void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
-    changeInputSize(model);
-
     if (model->inputs().size() != 1) {
         throw std::runtime_error("HPE OpenPose model wrapper supports topologies only with 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
-    }
     const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
+    }
+
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
@@ -102,21 +105,28 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         || pafsOutputShape[widthId] != heatmapsOutputShape[widthId]) {
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
     }
+
+    changeInputSize(model);
 }
 
 void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
+    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
+    auto batchId = ov::layout::batch_idx(layout);
+    auto heightId = ov::layout::height_idx(layout);
+    auto widthId = ov::layout::width_idx(layout);
+
     if (!targetSize) {
-        targetSize = inputShape[2];
+        targetSize = inputShape[heightId];
     }
     int height = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     int inputWidth = static_cast<int>(std::round(targetSize * aspectRatio));
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    inputShape[0] = 1;
-    inputShape[2] = height;
-    inputShape[3] = width;
-    inputLayerSize = cv::Size(inputShape[3], inputShape[2]);
+    inputShape[batchId] = 1;
+    inputShape[heightId] = height;
+    inputShape[widthId] = width;
+    inputLayerSize = cv::Size(width, height);
     std::map<std::string, ov::PartialShape> shapes;
     shapes[inTensorName] = ov::PartialShape(inputShape);
     model->reshape(shapes);

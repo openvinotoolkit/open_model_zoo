@@ -24,7 +24,9 @@ public:
     /// @param aspectRatio - the ratio of input width to its height.
     /// @param targetSize - the height used for network reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
-    HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
+    /// @param layout - model input layout
+    HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
+        float confidenceThreshold, const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 

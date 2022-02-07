@@ -17,8 +17,9 @@
 #include <utils/ocv_common.hpp>
 #include "models/detection_model.h"
 
-DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, const std::vector<std::string>& labels) :
-    ImageModel(modelFileName),
+DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold,
+    const std::vector<std::string>& labels, const std::string& layout) :
+    ImageModel(modelFileName, layout),
     confidenceThreshold(confidenceThreshold),
     labels(labels) {}
 

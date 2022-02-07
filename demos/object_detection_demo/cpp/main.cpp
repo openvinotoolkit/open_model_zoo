@@ -49,6 +49,8 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
+static const char layout_message[] = "Optional. Model inputs layouts. "
+"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -80,6 +82,7 @@ DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -114,6 +117,7 @@ static void showUsage() {
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -319,22 +323,22 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels, FLAGS_layout));
         }
         else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, labels));
+            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, labels, FLAGS_layout));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks, FLAGS_layout));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

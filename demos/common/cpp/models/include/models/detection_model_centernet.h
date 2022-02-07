@@ -32,7 +32,7 @@ public:
     static const int INIT_VECTOR_SIZE = 200;
 
     ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
-        const std::vector<std::string>& labels = std::vector<std::string>());
+        const std::vector<std::string>& labels = std::vector<std::string>(), const std::string& layout = "");
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;

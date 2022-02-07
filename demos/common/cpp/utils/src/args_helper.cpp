@@ -128,3 +128,29 @@ cv::Size stringToSize(const std::string& str) {
     }
     return {std::stoi(strings[0]), std::stoi(strings[1])};
 }
+
+std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string) {
+    // Parse parameter string like "input0[value0],input1[value1]" or "[value]" (applied to all
+    // inputs)
+    std::map<std::string, ov::Layout> layouts;
+    std::string searchStr = layout_string;
+    auto startPos = searchStr.find_first_of('[');
+    while (startPos != std::string::npos) {
+        auto end_pos = searchStr.find_first_of(']');
+        if (end_pos == std::string::npos)
+            break;
+        auto inputName = searchStr.substr(0, startPos);
+        auto inputVal = searchStr.substr(startPos + 1, end_pos - startPos - 1);
+        layouts[inputName] = ov::Layout(inputVal);
+        searchStr = searchStr.substr(end_pos + 1);
+        if (searchStr.empty() || searchStr.front() != ',') {
+            break;
+        }
+        searchStr = searchStr.substr(1);
+        startPos = searchStr.find_first_of('[');
+    }
+    if (!searchStr.empty()) {
+        throw std::logic_error("Can't parse input layout string: " + layout_string);
+    }
+    return layouts;
+}
