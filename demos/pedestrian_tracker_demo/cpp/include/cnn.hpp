@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,9 +10,9 @@
 #include <vector>
 #include <functional>
 
-#include <utils/ocv_common.hpp>
 
-#include <inference_engine.hpp>
+#include <openvino/openvino.hpp>
+#include <utils/ocv_common.hpp>
 
 /**
  * @brief Base class of config for network
@@ -38,7 +38,7 @@ public:
      * @brief Constructor
      */
     CnnBase(const Config& config,
-            const InferenceEngine::Core & ie,
+            const ov::Core& core,
             const std::string & deviceName);
 
     /**
@@ -55,45 +55,44 @@ public:
 
 protected:
     /**
-     * @brief Run network
-     *
-     * @param frame Input image
-     * @param results_fetcher Callback to fetch inference results
-     */
-    void Infer(const cv::Mat& frame,
-               const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
-
-    /**
      * @brief Run network in batch mode
      *
      * @param frames Vector of input images
      * @param results_fetcher Callback to fetch inference results
      */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
+                    const std::function<void(const ov::Tensor&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
-    Config config_;
-    /** @brief Inference Engine instance */
-    InferenceEngine::Core ie_;
-    /** @brief Inference Engine device */
-    std::string deviceName_;
-    /** @brief Net outputs info */
-    InferenceEngine::OutputsDataMap outInfo_;
-    /** @brief IE network */
-    InferenceEngine::ExecutableNetwork executable_network_;
-    /** @brief IE InferRequest */
-    mutable InferenceEngine::InferRequest infer_request_;
-    /** @brief Pointer to the pre-allocated input blob */
-    mutable InferenceEngine::Blob::Ptr input_blob_;
-    /** @brief Map of output blobs */
-    InferenceEngine::BlobMap outputs_;
+    Config config;
+    /** @brief OpenVINO instance */
+    ov::Core core;
+    /** @brief device */
+    std::string device_name;
+    /** @brief Model inputs info */
+    ov::OutputVector inputs;
+    /** @brief Model outputs info */
+    ov::OutputVector outputs;
+     /** @brief Model input layout */
+    ov::Layout input_layout;
+    /** @brief Compiled model */
+    ov::CompiledModel compiled_model;
+    /** @brief Inference Request */
+    mutable ov::InferRequest infer_request;
+    /** @brief Input Tensor */
+    mutable ov::Tensor input_tensor;
+    /** @brief Input Tensor shape */
+    ov::Shape input_shape;
+    /** @brief Output tensor */
+    ov::Tensor output_tensor;
+    /** @brief Input Tensor shape */
+    ov::Shape output_shape;
 };
 
 class VectorCNN : public CnnBase {
 public:
     VectorCNN(const CnnConfigTracker& config,
-              const InferenceEngine::Core & ie,
+              const ov::Core & core,
               const std::string & deviceName);
 
     void Compute(const cv::Mat& image,
@@ -101,8 +100,8 @@ public:
     void Compute(const std::vector<cv::Mat>& images,
                  std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
 
-    int size() const { return result_size_; }
+    int size() const { return result_size; }
 
 private:
-    int result_size_;               ///< Length of result
+    int result_size;  /// Length of result
 };
