@@ -9,33 +9,30 @@
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+namespace {
+void parse(int argc, char *argv[]) {
     // ---------------------------Parsing and validating input arguments--------------------------------------
-    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-    if (FLAGS_h) {
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
+    if (FLAGS_h || 1 == argc) {
         showUsage();
         showAvailableDevices();
-        return false;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        exit(0);
+    } if (FLAGS_i.empty()) {
+        throw std::invalid_argument{"-i <INPUT> can't be empty"};
+    } if (FLAGS_m.empty()) {
+        throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-
-    if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
-    }
-
-    if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
-    }
-    return true;
+    slog::info << ov::get_openvino_version() << slog::endl;
 }
+}// namespace
 
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
-        if (!ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
-        }
+        parse(argc, argv);
 
         // --------------------------- 1. Loading Inference Engine -----------------------------
         slog::info << ov::get_openvino_version() << slog::endl;

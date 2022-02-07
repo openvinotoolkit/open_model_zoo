@@ -13,47 +13,63 @@
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
-static const char help_message[] = "Print a usage message";
-static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
-static const char age_gender_model_message[] = "Optional. Path to an .xml file with a trained Age/Gender Recognition model.";
-static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
-static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
-static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char antispoofing_model_message[] = "Optional. Path to an .xml file with a trained Antispoofing Classification model.";
-static const char device_message[] =
+constexpr char help_message[] = "Print a usage message";
+DEFINE_bool(h, false, help_message);
+
+constexpr char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
+DEFINE_string(m, "", face_detection_model_message);
+
+constexpr char age_gender_model_message[] = "Optional. Path to an .xml file with a trained Age/Gender Recognition model.";
+DEFINE_string(m_ag, "", age_gender_model_message);
+
+constexpr char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
+DEFINE_string(m_hp, "", head_pose_model_message);
+
+constexpr char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
+DEFINE_string(m_em, "", emotions_model_message);
+
+constexpr char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
+DEFINE_string(m_lm, "", facial_landmarks_model_message);
+
+constexpr char antispoofing_model_message[] = "Optional. Path to an .xml file with a trained Antispoofing Classification model.";
+DEFINE_string(m_am, "", antispoofing_model_message);
+
+constexpr char device_message[] =
     "Specify a target device to infer on (the list of available devices is shown below). "
     "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify "
     "HETERO plugin. "
     "Use \"-d MULTI:<comma-separated_devices_list>\" format to specify MULTI plugin. "
     "The application looks for a suitable plugin for the specified device.";
-static const char thresh_output_message[] = "Optional. Probability threshold for detections";
-static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
-static const char raw_output_message[] = "Optional. Output inference results as raw values";
-static const char no_show_message[] = "Optional. Don't show output.";
-static const char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
-static const char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
-static const char fps_output_message[] = "Optional. Maximum FPS for playing video";
-static const char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
-static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
-static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-
-DEFINE_bool(h, false, help_message);
-DEFINE_string(m, "", face_detection_model_message);
-DEFINE_string(m_ag, "", age_gender_model_message);
-DEFINE_string(m_hp, "", head_pose_model_message);
-DEFINE_string(m_em, "", emotions_model_message);
-DEFINE_string(m_lm, "", facial_landmarks_model_message);
-DEFINE_string(m_am, "", antispoofing_model_message);
 DEFINE_string(d, "CPU", device_message);
-DEFINE_bool(r, false, raw_output_message);
+
+constexpr char thresh_output_message[] = "Optional. Probability threshold for detections";
 DEFINE_double(t, 0.5, thresh_output_message);
+
+constexpr char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
+
+constexpr char raw_output_message[] = "Optional. Output inference results as raw values";
+DEFINE_bool(r, false, raw_output_message);
+
+constexpr char no_show_message[] = "Optional. Don't show output.";
 DEFINE_bool(no_show, false, no_show_message);
+
+constexpr char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
 DEFINE_double(dx_coef, 1, dx_coef_output_message);
+
+constexpr char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
 DEFINE_double(dy_coef, 1, dy_coef_output_message);
+
+constexpr char fps_output_message[] = "Optional. Maximum FPS for playing video";
 DEFINE_double(fps, -std::numeric_limits<double>::infinity(), fps_output_message);
+
+constexpr char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
 DEFINE_bool(no_smooth, false, no_smooth_output_message);
+
+constexpr char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
+
+constexpr char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 DEFINE_string(u, "", utilization_monitors_message);
 
 static void showUsage() {

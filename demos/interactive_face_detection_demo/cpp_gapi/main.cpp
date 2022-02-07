@@ -25,6 +25,7 @@
 #include "face.hpp"
 #include "visualizer.hpp"
 
+namespace {
 static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
                                                         "happy",
                                                         "sad",
@@ -258,23 +259,23 @@ void ASpoofDataUpdate(const Face::Ptr& face, const cv::Mat& out_a_spoof) {
     const auto real_face_conf = as_data[0] * 100;
     face->updateRealFaceConfidence(real_face_conf);
 }
+}// namespace
 
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
         /** ---------- Parsing and validating input arguments ----------**/
-        gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-        if (FLAGS_h) {
+        gflags::ParseCommandLineFlags(&argc, &argv, false);
+        if (FLAGS_h || 1 == argc) {
             showUsage();
             showAvailableDevices();
-            return 0;
+            slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+            exit(0);
+        } if (FLAGS_i.empty()) {
+            throw std::invalid_argument("-i <INPUT> can't be empty");
+        } if (FLAGS_m.empty()) {
+            throw std::invalid_argument("-m <MODEL FILE> can't be empty");
         }
-
-        if (FLAGS_i.empty())
-            throw std::logic_error("Parameter -i is not set");
-        if (FLAGS_m.empty())
-            throw std::logic_error("Parameter -m is not set");
-
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         /** ---------------- Graph of demo ---------------- **/
