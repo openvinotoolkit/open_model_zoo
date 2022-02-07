@@ -410,7 +410,7 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        ModelArg('face-detection-retail-0005'),
+                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -425,7 +425,7 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2002'),
                         ModelArg('person-vehicle-bike-detection-2003'),
                         ModelArg('person-vehicle-bike-detection-2004'),
-                        ModelArg('product-detection-0001'),
+                        # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -488,7 +488,7 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
+            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
