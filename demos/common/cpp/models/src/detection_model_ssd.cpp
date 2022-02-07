@@ -136,7 +136,7 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         auto inputTensorName = input.get_any_name();
         ov::Layout inputLayout = ov::layout::get_layout(model->input(inputTensorName));
         auto shape = input.get_shape();
-        if (input.get_shape().size() == 4) {  // 1st input contains images
+        if (shape.size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
                 inputsNames.push_back(inputTensorName);
             }
@@ -165,12 +165,11 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             netInputWidth = shape[ov::layout::width_idx(inputLayout)];
             netInputHeight = shape[ov::layout::height_idx(inputLayout)];
         }
-        else if (input.get_shape().size() == 2) {  // 2nd input contains image info
+        else if (shape.size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
             inputsNames[1] = inputTensorName;
             ppp.input(inputTensorName).tensor().
-                set_element_type(ov::element::f32).
-                set_layout({ "NC" });
+                set_element_type(ov::element::f32);
         }
         else {
             throw std::logic_error("Unsupported " +
