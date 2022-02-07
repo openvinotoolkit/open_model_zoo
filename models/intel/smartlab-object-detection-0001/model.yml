@@ -1,0 +1,37 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Yolox based object detector with all 10 class (balance -  weights -  tweezers -  box
+  -  battery -  tray -  ruler -  rider -  scale -  hand) for mythware top-view stream
+task_type: detection
+files:
+  - name: FP32/smartlab-object-detection-0001.xml
+    size: 376725
+    checksum: fe5d6572e8d88153b4f647fe3b5f979e471af18d0ca37beb8b294a6bcf86463a544528375970a1c403125279443a65fd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.xml
+  - name: FP32/smartlab-object-detection-0001.bin
+    size: 3563580
+    checksum: f134293f7a882c5402fe023a6fce0ba531040ddb99eb74c04fcde6a042b9ae75a911e08640f83afa7fe8be4557b91770
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.bin
+  - name: FP16/smartlab-object-detection-0001.xml
+    size: 502938
+    checksum: 379ab489b8b753a5910afdd8a14cc17cb2f81621df3d056841a1b9f905d5b4cc8a585268cdb7dfb1e4cf7efdb16f34e5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0001/FP16/smartlab-object-detection-0001.xml
+  - name: FP16/smartlab-object-detection-0001.bin
+    size: 1781942
+    checksum: 9fe03eccea86ad3c190754f5f1629517711d9ea3badf5382833151ba499a505a684ca54330720fa39eae1f7fd8d885cd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0001/FP16/smartlab-object-detection-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -410,7 +410,7 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        ModelArg('face-detection-retail-0005'),
+                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -425,7 +425,7 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2002'),
                         ModelArg('person-vehicle-bike-detection-2003'),
                         ModelArg('person-vehicle-bike-detection-2004'),
-                        ModelArg('product-detection-0001'),
+                        # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -488,7 +488,7 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
+            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -990,9 +990,9 @@ PYTHON_DEMOS = [
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-en-ru-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
                 '-i': [
                     'The quick brown fox jumps over the lazy dog.',
                     'The five boxing wizards jump quickly.',
@@ -1000,9 +1000,9 @@ PYTHON_DEMOS = [
                 ],
             }),
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-ru-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
                 '-i': [
                     'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                     'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',

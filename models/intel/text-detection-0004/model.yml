@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/text-detection-0004.xml
     size: 295626
-    checksum: 78cec92c9b53147fa4e1f16f9a8da7ddd7b70ad5a1f921d876b9f3c85052cec6d3d64615ab667588767be022a62b28d5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP32/text-detection-0004.xml
+    checksum: 12494ccb438ca3b1e4718726b234535537e0b63735ea164418552037802e660e1f17ff5503d86254b4fd87d2bc96aaef
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP32/text-detection-0004.xml
   - name: FP32/text-detection-0004.bin
     size: 17312240
     checksum: bb85d7cfbee6fd09db19bf8286b21d3a01d816ec62e41ad853179b93ad0375904845589d41168693d102f4675e54fd56
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP32/text-detection-0004.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP32/text-detection-0004.bin
   - name: FP16/text-detection-0004.xml
     size: 364780
-    checksum: 31a16c9822258242ffbe0fb2da7511feb6de9f6ef63953864ec050bf0535945a59ee522a61af433cf01a54869be4a410
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP16/text-detection-0004.xml
+    checksum: b1ccdc412765101e1d56a21c2b99c89fb0d167c0397a67e796d5de875829febfef859c98e57fd2dc07e4c27e759fa742
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP16/text-detection-0004.xml
   - name: FP16/text-detection-0004.bin
     size: 8656076
     checksum: 0c5efd215759d4f1e61a910f883da0c2a310126e4df5a894ea70bf01cc547cf14a62590fd57b8dc03d6af1144db88bd0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP16/text-detection-0004.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP16/text-detection-0004.bin
   - name: FP16-INT8/text-detection-0004.xml
-    size: 623485
-    checksum: e38834f086bf76ec29ca5feb6fee22575d75964485a6ecbcf52365e40b21463956380b93dcbad569cf6c4c1fa01d48f7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP16-INT8/text-detection-0004.xml
+    size: 623895
+    checksum: a36037c50ad724417ef9781758dd5ca8ace583de0362fb3285a2fca6e83f02c9e6db4eb65fb423080b03f568770ce01f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP16-INT8/text-detection-0004.xml
   - name: FP16-INT8/text-detection-0004.bin
     size: 4598708
-    checksum: efcaaeb283321bb59e31a42743478d8500aa4daa33107c6d88bafd875c76592d866edfc082f434c73c47cc15c58493fb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-detection-0004/FP16-INT8/text-detection-0004.bin
+    checksum: 7bda189b10817e7e43f0af925c909c136e5a1a27ae9bc48d5698779ada50bab971db6cbd891a354d3915f70039af075c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0004/FP16-INT8/text-detection-0004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
