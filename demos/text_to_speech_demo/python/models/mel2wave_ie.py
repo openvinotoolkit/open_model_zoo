@@ -15,7 +15,6 @@
 """
 
 import logging as log
-import os.path as osp
 
 import numpy as np
 
@@ -64,12 +63,9 @@ class WaveRNNIE:
         self.mel_len = self.upsample_model.input('mels').shape[1] - 2 * self.pad
         self.rnn_width = self.rnn_model.input('h1.1').shape[1]
 
-    def load_network(self, model_xml):
-        model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
-        model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading WaveRNN model {}'.format(model_xml))
-        model = self.ie.read_model(model=model_xml, weights=model_bin)
-        return model
+    def load_network(self, model_path):
+        log.info('Reading WaveRNN model {}'.format(model_path))
+        return self.ie.read_model(model_path)
 
     def create_infer_requests(self, model, path, batch_sizes=None):
         if batch_sizes is not None:
@@ -221,12 +217,9 @@ class MelGANIE:
         self.mel_len = self.model.input('mel').shape[2]
         self.widths = [self.mel_len * (i + 1) for i in range(self.scales)]
 
-    def load_network(self, model_xml):
-        model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
-        model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading MelGAN model {}'.format(model_xml))
-        model = self.ie.read_model(model=model_xml, weights=model_bin)
-        return model
+    def load_network(self, model_path):
+        log.info('Reading MelGAN model {}'.format(model_path))
+        return self.ie.read_model(model_path)
 
     def create_infer_requests(self, model, path, scales=None):
         if scales is not None:

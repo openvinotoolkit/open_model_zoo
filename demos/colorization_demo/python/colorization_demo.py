@@ -67,7 +67,7 @@ def main(args):
     core = Core()
 
     log.info('Reading model {}'.format(args.model))
-    model = core.read_model(args.model, args.model.with_suffix(".bin"))
+    model = core.read_model(args.model)
 
     input_tensor_name = 'data_l'
     input_shape = model.input(input_tensor_name).shape

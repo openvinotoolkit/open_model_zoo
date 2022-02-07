@@ -115,7 +115,7 @@ def main():
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
-    model = core.read_model(args.model, args.model.with_suffix('.bin'))
+    model = core.read_model(args.model)
     image_input, image_info_input, (n, c, h, w), model_type, output_names, postprocessor = check_model(model)
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
