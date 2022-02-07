@@ -26,7 +26,8 @@ import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel
+from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, ImageMattingWithBackground, VideoBackgroundMatting
+from openvino.model_zoo.model_api.models.utils import load_labels
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
 from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
@@ -44,7 +45,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', required=True,
                       help='Required. Path to an .xml file with a trained model '
-                           'or address of model inference service if using ovms adapter.')
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
@@ -61,6 +62,10 @@ def build_argparser():
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
+    args.add_argument('--background', default=None, type=str,
+                      help='Optional. Background image for background-matting model. This is a background image '
+                           'that equal to a real background behind a person on an input frame and must have the '
+                           'same shape as an input image.')
     args.add_argument('--blur_bgr', default=0, type=int,
                       help='Optional. Background blur strength (by default with value 0 is not applied).')
 
@@ -99,13 +104,31 @@ def build_argparser():
     return parser
 
 
-def get_model(model_adapter, configuration):
+def get_model(model_adapter, configuration, args):
     inputs = model_adapter.get_input_layers()
     outputs = model_adapter.get_output_layers()
+    need_bgr_input = False
+    is_matting_model = False
     if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
-        return YolactModel(model_adapter, configuration)
+        model = YolactModel(model_adapter, configuration)
+    elif len(inputs) == 5 and len(outputs) == 6 and 'pha' in outputs.keys():
+        model = VideoBackgroundMatting(model_adapter, configuration)
+        is_matting_model = True
+    elif len(inputs) == 2 and len(outputs) in (2, 3) and 'bgr' in inputs.keys():
+        if args.background is None:
+            raise ValueError('The ImageMattingWithBackground model expects the specified "--background" option.')
+        model = ImageMattingWithBackground(model_adapter, configuration)
+        need_bgr_input = True
+        is_matting_model = True
     else:
-        return MaskRCNNModel(model_adapter, configuration)
+        model = MaskRCNNModel(model_adapter, configuration)
+    if not need_bgr_input and args.background is not None:
+        log.warning('The \"--background\" option works only for ImageMattingWithBackground model. Option will be omitted.')
+
+    if args.raw_output_message and is_matting_model:
+        log.warning('\'--raw_output_message\' argument is set but is used background-matting based model, nothing to show')
+        args.raw_output_message = False
+    return model, need_bgr_input
 
 
 def print_raw_results(outputs, frame_id):
@@ -132,14 +155,13 @@ def fit_to_window(input_img, output_resolution):
     return output
 
 
-def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_kernel=0, show_with_original_frame=False):
-    blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
-    if target_bgr is None:
-        target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
-    else:
-        target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
-        if blur_kernel:
-            target_bgr = cv2.blur(target_bgr, blur_kernel)
+def process_matting(objects, target_bgr):
+    fgr, pha = objects
+    output = fgr * pha + target_bgr * (1 - pha)
+    return (output * 255).astype(np.uint8)
+
+
+def process_masks(objects, frame, target_bgr, person_id):
     classes, masks = objects[1], objects[3]
     # Choose masks only for person class
     valid_inds = classes == person_id
@@ -154,6 +176,23 @@ def render_results(frame, objects, output_resolution, target_bgr, person_id, blu
         composed_mask = cv2.medianBlur(composed_mask.astype(np.uint8), 11)
         composed_mask = np.repeat(np.expand_dims(composed_mask, axis=-1), 3, axis=2)
         output = np.where(composed_mask == 1, frame, target_bgr)
+    return output
+
+
+def render_results(frame, objects, output_resolution, target_bgr, person_id, blur_kernel=0, show_with_original_frame=False):
+    blur_kernel = tuple([blur_kernel] * 2) if blur_kernel else blur_kernel
+    if target_bgr is None:
+        target_bgr = cv2.blur(frame, blur_kernel) if blur_kernel else np.full(frame.shape, [155, 255, 120], dtype=np.uint8)
+    else:
+        target_bgr = cv2.resize(target_bgr, (frame.shape[1], frame.shape[0]))
+        if blur_kernel:
+            target_bgr = cv2.blur(target_bgr, blur_kernel)
+
+    if len(objects) == 4:
+        output = process_masks(objects, frame, target_bgr, person_id)
+    else:
+        output = process_matting(objects, target_bgr.astype(np.float32) / 255)
+
     if show_with_original_frame:
         output = cv2.hconcat([frame, output])
     h, w = output.shape[:2]
@@ -176,14 +215,17 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    labels = ['__background__', 'person'] if args.labels is None else args.labels
+    labels = ['__background__', 'person'] if args.labels is None else load_labels(args.labels)
+    assert len(labels), 'The file with class labels is empty'
 
     configuration = {
         'confidence_threshold': args.prob_threshold,
         'resize_type': args.resize_type
     }
 
-    model = get_model(model_adapter, configuration)
+    model, need_bgr_input = get_model(model_adapter, configuration, args)
+
+    input_bgr = open_images_capture(args.background, False).read() if need_bgr_input else None
 
     person_id = -1
     for i, label in enumerate(labels):
@@ -226,7 +268,8 @@ def main():
                                                          cap.fps(), tuple(output_resolution)):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
-            pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            data = {'src': frame, 'bgr': input_bgr} if input_bgr is not None else frame
+            pipeline.submit_data(data, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
         else:
             # Wait for empty request
