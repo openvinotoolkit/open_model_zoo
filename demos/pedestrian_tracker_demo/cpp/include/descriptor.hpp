@@ -7,11 +7,10 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <inference_engine.hpp>
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc.hpp"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
 #include "core.hpp"
 #include "cnn.hpp"
@@ -108,9 +107,9 @@ private:
 
 public:
     DescriptorIE(const CnnConfigTracker& config,
-                 const InferenceEngine::Core& ie,
+                 const ov::Core& core,
                  const std::string& deviceName):
-        handler(config, ie, deviceName) {}
+        handler(config, core, deviceName) {}
 
     ///
     /// \brief Descriptor size getter.

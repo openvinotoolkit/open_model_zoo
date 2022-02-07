@@ -121,10 +121,10 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         throw std::logic_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
     }
     const ov::Layout outputLayout4D("NCHW");
-    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1 || outputShape[ov::layout::widht_idx(outputLayout4D)] != 1)) {
+    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1 || outputShape[ov::layout::width_idx(outputLayout4D)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     }
-    auto classesNum = ov::layout::channels_idx(outputLayout4D);
+    size_t classesNum = (size_t)ov::layout::channels_idx(outputLayout4D);
     if (nTop > classesNum) {
         throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     }
