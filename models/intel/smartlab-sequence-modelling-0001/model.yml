@@ -14,7 +14,7 @@
 
 description: >-
   online version of MS-TCN++(multi-stage temporal convolutional network)
-task_type: sequence_modelling
+task_type: action_recognition
 files:
   - name: FP32/smartlab-sequence-modelling-0001.xml
     size: 579378
