@@ -990,9 +990,9 @@ PYTHON_DEMOS = [
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-en-ru-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
                 '-i': [
                     'The quick brown fox jumps over the lazy dog.',
                     'The five boxing wizards jump quickly.',
@@ -1000,9 +1000,9 @@ PYTHON_DEMOS = [
                 ],
             }),
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-ru-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
                 '-i': [
                     'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                     'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
