@@ -18,19 +18,19 @@ task_type: object_attributes
 files:
   - name: FP32/person-reidentification-retail-0288.xml
     size: 679412
-    checksum: e7224497a640f30418da3e36ffe3f3ce656ec6648cbd5b44756cd7636747eea3acef4827fb6ca768f412f83ddc32f520
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.xml
+    checksum: 1bf7c87b26a8a7c9b8912388ac3af5087aec45ec97c1d110190d8553417f4d446236c4076df38ceeb34f11006dac56a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.xml
   - name: FP32/person-reidentification-retail-0288.bin
     size: 749796
     checksum: 083b3f8eb762551d0fb661269010a1c2223728658aa604562626e578a9daa21a5d86d7e87a2d219f1d8b5ff617e2b589
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.bin
   - name: FP16/person-reidentification-retail-0288.xml
     size: 927427
-    checksum: 91c351145a7fb8fc64a8d0519cf76328f2948dc1801127d25040f23e79e65f6f249247418d5d3040af6ae3bb43cc2687
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.xml
+    checksum: 8378c86da7c8a4083d89f0052a186ebfa857c8b0214a480765dc8b853b0beb74d8d1571d6646c4590146941996dce797
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.xml
   - name: FP16/person-reidentification-retail-0288.bin
     size: 374962
     checksum: fbef996b9eb840738cb8c1475f6f56177710e36301569d1ee606fcbb9335584fe5822cddce0e28e6978f1f55cf2d669b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

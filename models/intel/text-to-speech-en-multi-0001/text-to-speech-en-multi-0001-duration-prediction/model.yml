@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 650961
-    checksum: 34eb221cef25ffd33d2faeb772d7c9a778d5285fec2622e136e6994b28832b4a5c4e68ac3d10009004e62329c1a070d5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 707824
+    checksum: edc8ac67726091511efb70f322aeb2e9e0dcd4b888bbc24ff16b3604dc9c091ac280c6794a6bae997493f5131550f1b0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.bin
-    size: 104707900
-    checksum: 2e68205d17f202a294a98e966918e0d4af73f323dda7de5823a61b92fa81cc19ee62aa09b789cd56c28590b849733632
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
+    size: 104713040
+    checksum: 4a15b72072175b1a8bb1a2f10f5bc1b50265dee62af8e26a6dcb80c51f2ef13da9705263e81a240b40dac19fd69b370e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 650523
-    checksum: e4b259dd9da771a3757e449db417c4dfc81d14f9be643cb69faa7b134b0eefdc7e180cba5a41e47fe097752c1aeba7e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 870462
+    checksum: 5e3664010ef0e375c09fd51c75fac6179ae2bed03020ec314e8f4828f02e3e92e26cc7ace1a4884e77609044f4515534
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.bin
-    size: 52354022
-    checksum: f66571d2063aed0ad598e14f971afa8b0c3306089e1274647915d180d4c1bc84362997fad4d5ecc6770bb937552896f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
+    size: 52356608
+    checksum: 8dd80f3cc7e6cf06cacd568c4870d365abea0ced3a926097b4c4c007390ac9d5bb0106952a61098786bb170dde9b99ab
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

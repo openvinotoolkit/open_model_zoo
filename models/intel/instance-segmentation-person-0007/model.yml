@@ -18,20 +18,20 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-person-0007.xml
-    size: 4298620
-    checksum: 1370bbaa9a84efe97e5ed6b0b2a5452a932938036393ba85c10a2adfd9203707807f24311592650a2d2e0863123f22c9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.xml
+    size: 4298173
+    checksum: 8f4af8fc3ca275724a952647456f800f3ec0ca2ce4bde56b9ea3cab435e021c4d94b35be3e2497816b15c043f52081f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.xml
   - name: FP32/instance-segmentation-person-0007.bin
     size: 28243148
     checksum: 39cbd44678df08fce96be3e8181fd61a401af7a6b414d4c8e21c416b25ce42c7c571c1f2f4ebc9a1c1eff57da2987e82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.bin
   - name: FP16/instance-segmentation-person-0007.xml
-    size: 4581654
-    checksum: 81881beadf7d0df5513a59ce9ab060ebd9dc2ff3e74b7be2c8cea615cdb8f99b5a897ac0dddd670bd9ba46d4e1cab54a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.xml
+    size: 4581257
+    checksum: fe82539ed9e4c39b19279461fb09688ec1c277d62133eeb075b3219a6ff699742a52bb4bbd4110d350eb871ee673604d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.xml
   - name: FP16/instance-segmentation-person-0007.bin
     size: 14121852
     checksum: 95ee8c36a42dea006e3e9d2c609668343cbbafff175a7ba909161a72119c724ded25d160cd1c512a3e87663d099ded5c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
