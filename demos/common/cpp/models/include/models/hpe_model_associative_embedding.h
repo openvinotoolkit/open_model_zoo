@@ -26,7 +26,9 @@ public:
     /// @param targetSize - the length of a short image side used for network reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
+    /// @param layout - model input layout
     HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold,
+                            const std::string& layout = "",
                             float delta = 0.0, RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;

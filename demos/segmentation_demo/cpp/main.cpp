@@ -42,6 +42,8 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
+static const char layout_message[] = "Optional. Model inputs layouts. "
+"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -62,6 +64,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -88,6 +91,7 @@ static void showUsage() {
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -232,7 +236,7 @@ int main(int argc, char* argv[]) {
 
         ov::Core core;
         AsyncPipeline pipeline(
-            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m)),
+            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_layout)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);

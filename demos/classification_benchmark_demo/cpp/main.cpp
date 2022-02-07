@@ -30,6 +30,8 @@ static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
+static const char layout_message[] = "Optional. Model inputs layouts. "
+                                     "For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
@@ -49,6 +51,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(labels, "", labels_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_string(gt, "", gt_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -69,6 +72,7 @@ static void showUsage() {
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -194,7 +198,7 @@ int main(int argc, char *argv[]) {
 
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
-        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels)),
+        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels, FLAGS_layout)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
 

@@ -20,8 +20,9 @@
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold,
-    const std::vector<std::string>& labels) :
-    DetectionModel(modelFileName, confidenceThreshold, labels) {
+    const std::vector<std::string>& labels,
+    const std::string& layout) :
+    DetectionModel(modelFileName, confidenceThreshold, labels, layout) {
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
@@ -134,8 +135,21 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     ov::preprocess::PrePostProcessor ppp(model);
     for (const auto& input : model->inputs()) {
         auto inputTensorName = input.get_any_name();
-        ov::Layout inputLayout = ov::layout::get_layout(model->input(inputTensorName));
-        auto shape = input.get_shape();
+        const ov::Shape& shape = input.get_shape();
+
+        ov::Layout inputLayout;
+        if (!layouts.empty()) {
+            if (layouts.size() == 1) {
+                inputLayout = layouts.begin()->second;
+            }
+            else {
+                inputLayout = layouts[inputTensorName];
+            }
+        }
+        else {
+            inputLayout = getLayoutFromShape(shape);
+        }
+
         if (shape.size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
                 inputsNames.push_back(inputTensorName);
@@ -144,13 +158,6 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
                 inputsNames[0] = inputTensorName;
             }
 
-            if (inputLayout.empty()) {
-                inputLayout = {"NCHW"};
-                if (input.get_shape()[ov::layout::height_idx(inputLayout)] != input.get_shape()[ov::layout::width_idx(inputLayout)] &&
-                    input.get_shape()[ov::layout::height_idx({ "NHWC" })] == input.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
-                    inputLayout = {"NHWC"};
-                }
-            }
             inputTransform.setPrecision(ppp, inputTensorName);
             ppp.input(inputTensorName).tensor().
                 set_spatial_dynamic_shape().

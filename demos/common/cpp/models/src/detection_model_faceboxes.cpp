@@ -20,8 +20,8 @@
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
-    float confidenceThreshold, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}),
+    float confidenceThreshold, float boxIOUThreshold, const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}, layout),
       maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
       steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
@@ -34,9 +34,12 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(model->inputs().front().get_shape());
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

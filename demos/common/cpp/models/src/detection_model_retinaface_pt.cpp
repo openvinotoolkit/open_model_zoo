@@ -19,8 +19,9 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
 
-ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}),  // Default label is "Face"
+ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
+    const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}, layout),  // Default label is "Face"
     landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
 }
 
@@ -32,9 +33,12 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

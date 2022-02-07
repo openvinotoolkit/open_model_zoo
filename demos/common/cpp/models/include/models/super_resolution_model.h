@@ -22,7 +22,8 @@ class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize);
+    /// @param layout - model input layout
+    SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, ov::InferRequest& request) override;

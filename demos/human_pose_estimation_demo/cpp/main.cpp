@@ -42,6 +42,8 @@ static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
 "or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char layout_message[] = "Optional. Model inputs layouts. "
+"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -60,6 +62,7 @@ static const char output_resolution_message[] = "Optional. Specify the maximum o
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_uint32(tsize, 0, target_size_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_double(t, 0.1, thresh_output_message);
@@ -82,6 +85,7 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i                        " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -tsize                    " << target_size_message << std::endl;
@@ -233,14 +237,14 @@ int main(int argc, char *argv[]) {
         double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
+            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout));
         }
         else if (FLAGS_at == "ae") {
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout));
         }
         else if (FLAGS_at == "higherhrnet") {
             float delta = 0.5f;
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, RESIZE_KEEP_ASPECT_LETTERBOX));
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout, delta, RESIZE_KEEP_ASPECT_LETTERBOX));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

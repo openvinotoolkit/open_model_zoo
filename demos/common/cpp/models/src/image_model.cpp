@@ -18,9 +18,6 @@
 #include <utils/image_utils.h>
 #include "models/image_model.h"
 
-ImageModel::ImageModel(const std::string& modelFileName) :
-    ModelBase(modelFileName){}
-
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     auto img = inputTransform(origImg);

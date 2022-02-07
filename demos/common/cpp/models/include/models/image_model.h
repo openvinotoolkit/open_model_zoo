@@ -21,7 +21,9 @@ class ImageModel : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    ImageModel(const std::string& modelFileName);
+    /// @param layout - model input layout
+    ImageModel(const std::string& modelFileName, const std::string& layout = "")
+        : ModelBase(modelFileName, layout) {}
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 

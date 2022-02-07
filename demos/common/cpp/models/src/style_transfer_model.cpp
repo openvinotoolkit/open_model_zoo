@@ -24,8 +24,8 @@
 #include "models/style_transfer_model.h"
 
 
-StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
-    ImageModel(modelFileName) {
+StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout) :
+    ImageModel(modelFileName, layout) {
 }
 
 void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
@@ -38,9 +38,12 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(model->input());
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

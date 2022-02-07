@@ -47,7 +47,8 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
-    ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold);
+    ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
+        const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

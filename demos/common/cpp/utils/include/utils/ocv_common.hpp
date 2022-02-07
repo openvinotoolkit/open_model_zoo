@@ -202,6 +202,21 @@ static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
     cv::resize(mat, cv::Mat{size, CV_8UC3, tensor.data()}, size);
 }
 
+static inline ov::Layout getLayoutFromShape(const ov::Shape&  shape) {
+    if (shape.size() == 2) {
+        return { "NC" };
+    }
+    else if (shape.size() == 3) {
+        return { "CHW" };
+    }
+    else if (shape.size() == 4) {
+        return (shape[1] == 3 || shape[1] == 1) ? ov::Layout{"NCHW"} :
+                                                  ov::Layout{"NHWC"};
+    }
+    else {
+        throw std::runtime_error("Usupported " + std::to_string(shape.size()) + "D shape");
+    }
+}
 /**
  * @brief Puts text message on the frame, highlights the text with a white border to make it distinguishable from
  *        the background.

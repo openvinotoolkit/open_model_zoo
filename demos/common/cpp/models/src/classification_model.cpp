@@ -21,11 +21,11 @@
 #include <utils/slog.hpp>
 #include "models/classification_model.h"
 
-ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, const std::vector<std::string>& labels) :
-    ImageModel(modelFileName),
+ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop,
+    const std::vector<std::string>& labels, const std::string& layout) :
+    ImageModel(modelFileName, layout),
     nTop(nTop),
-    labels(labels) {
-}
+    labels(labels) {}
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
     ov::Tensor scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
@@ -76,9 +76,12 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     inputsNames.push_back(input.get_any_name());
 
     const ov::Shape& inputShape = input.get_shape();
-    ov::Layout inputLayout = ov::layout::get_layout(input);
-    if (inputLayout.empty()) {
-        inputLayout = { "NCHW" };
+    ov::Layout inputLayout;
+    if (!layouts.empty()) {
+        inputLayout = layouts.begin()->second;
+    }
+    else {
+        inputLayout = getLayoutFromShape(inputShape);
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
