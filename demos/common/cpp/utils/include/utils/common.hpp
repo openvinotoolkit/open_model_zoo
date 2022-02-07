@@ -68,6 +68,12 @@ inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::V
     return os;
 }
 
+inline slog::LogStream& operator<<(slog::LogStream& os, const ov::Version& version) {
+    return os << "OpenVINO" << slog::endl
+        << "\tversion: " << OPENVINO_VERSION_MAJOR << "." << OPENVINO_VERSION_MINOR << "." << OPENVINO_VERSION_PATCH << slog::endl
+        << "\tbuild: " << version.buildNumber;
+}
+
 /**
  * @class Color
  * @brief A Color class stores channels of a given color
