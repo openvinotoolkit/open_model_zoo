@@ -14,8 +14,11 @@
 // limitations under the License.
 */
 
-#include <ngraph/ngraph.hpp>
 #include <openvino/openvino.hpp>
+#include <openvino/op/constant.hpp>
+#include <openvino/op/softmax.hpp>
+#include <openvino/op/topk.hpp>
+
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -84,8 +87,8 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
-    const auto width = ov::layout::width_idx(inputLayout);
-    const auto height = ov::layout::height_idx(inputLayout);
+    const auto width = inputShape[ov::layout::width_idx(inputLayout)];
+    const auto height = inputShape[ov::layout::height_idx(inputLayout)];
     if (height != width) {
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
             " Got " + std::to_string(height) +
@@ -124,7 +127,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1 || outputShape[ov::layout::width_idx(outputLayout4D)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     }
-    size_t classesNum = (size_t)ov::layout::channels_idx(outputLayout4D);
+    size_t classesNum = outputShape[ov::layout::channels_idx(outputLayout4D)];
     if (nTop > classesNum) {
         throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     }
@@ -142,28 +145,24 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     // --------------------------- Adding softmax and topK output  ---------------------------
     auto nodes = model->get_ops();
     auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
-        [](const std::shared_ptr<ngraph::Node>& op) { return std::string(op->get_type_name()) == "Softmax"; });
+        [](const std::shared_ptr<ov::Node>& op) { return std::string(op->get_type_name()) == "Softmax"; });
 
-    std::shared_ptr<ngraph::Node> softmaxNode;
+    std::shared_ptr<ov::Node> softmaxNode;
     if (softmaxNodeIt == nodes.end()) {
         auto logitsNode = model->get_output_op(0)->input(0).get_source_output().get_node();
-        softmaxNode = std::make_shared<ngraph::op::v1::Softmax>(logitsNode->output(0), 1);
+        softmaxNode = std::make_shared<ov::op::v1::Softmax>(logitsNode->output(0), 1);
     }
     else {
         softmaxNode = *softmaxNodeIt;
     }
-    const auto k = std::make_shared<ngraph::op::Constant>(ngraph::element::i32, ngraph::Shape{}, std::vector<size_t>{nTop});
-    ngraph::op::v1::TopK::Mode mode = ngraph::op::v1::TopK::Mode::MAX;
-    ngraph::op::v1::TopK::SortType sort = ngraph::op::v1::TopK::SortType::SORT_VALUES;
-    std::shared_ptr<ngraph::Node> topkNode = std::make_shared<ngraph::op::v1::TopK>(softmaxNode, k, 1, mode, sort);
+    const auto k = std::make_shared<ov::op::v0::Constant>(ngraph::element::i32, ngraph::Shape{}, std::vector<size_t>{nTop});
+    std::shared_ptr<ngraph::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1, ov::op::v1::TopK::Mode::MAX,
+                                                                                    ov::op::v1::TopK::SortType::SORT_VALUES);
 
-    auto scores = std::make_shared<ngraph::op::Result>(topkNode->output(0));
-    auto indices = std::make_shared<ngraph::op::Result>(topkNode->output(1));
-    std::vector<std::shared_ptr<ngraph::op::v0::Result>> res({ scores, indices });
-    std::shared_ptr<ngraph::Function> f =
-        std::make_shared<ngraph::Function>(res, model->get_parameters(), "classification");
-
-    model = f;
+    auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
+    auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
+    ov::ResultVector res({ scores, indices });
+    model = std::make_shared<ov::Model>(res, model->get_parameters(), "classification");
     // manually set output tensors name for created topK node
     model->outputs()[0].set_names({"indices"});
     outputsNames.push_back("indices");
