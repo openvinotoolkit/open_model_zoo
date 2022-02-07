@@ -85,3 +85,11 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, uint32_t fl
 
     return config;
 }
+
+std::map<std::string, std::string> CnnConfig::getLegacyConfig() {
+    std::map<std::string, std::string> config;
+    for (const auto& item : compiledModelConfig) {
+        config[item.first] = item.second.as<std::string>();
+    }
+    return config;
+}
