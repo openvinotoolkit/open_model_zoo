@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,12 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-
 #include <opencv2/imgproc/imgproc.hpp>
 #include <openvino/openvino.hpp>
-
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include <utils/image_utils.h>
-
 #include "models/hpe_model_openpose.h"
 #include "models/openpose_decoder.h"
 

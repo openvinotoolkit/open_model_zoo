@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 // limitations under the License.
 */
 
-#include "models/detection_model.h"
 #include <utils/ocv_common.hpp>
+#include "models/detection_model.h"
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, const std::vector<std::string>& labels) :
     ImageModel(modelFileName),

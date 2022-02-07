@@ -17,10 +17,8 @@
 #include <openvino/openvino.hpp>
 #include <openvino/op/softmax.hpp>
 #include <openvino/op/topk.hpp>
-
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-
 #include "models/classification_model.h"
 
 ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, const std::vector<std::string>& labels) :
