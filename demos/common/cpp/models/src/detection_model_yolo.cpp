@@ -15,8 +15,8 @@
 */
 
 #include <iostream>
-#include <ngraph/ngraph.hpp>
 #include <openvino/openvino.hpp>
+#include <openvino/op/region_yolo.hpp>
 #include <utils/common.hpp>
 #include "models/detection_model_yolo.h"
 
@@ -137,9 +137,8 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     yoloVersion = YOLO_V3;
     bool isRegionFound = false;
     for (const auto op : model->get_ordered_ops()) {
-        //std::cout << op->get_friendly_name() << std::endl;
         if (std::string("RegionYolo") == op->get_type_name()) {
-            auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+            auto regionYolo = std::dynamic_pointer_cast<ov::op::v0::RegionYolo>(op);
 
             if (regionYolo) {
                 if (!regionYolo->get_mask().size()) {
@@ -157,7 +156,6 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             }
         }
     }
-
 
     if(!isRegionFound) {
         switch(outputsNames.size()) {
@@ -354,7 +352,7 @@ double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const Detected
     return intersectionArea / unionArea;
 }
 
-ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo) {
+ModelYolo::Region::Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionYolo) {
     coords = regionYolo->get_num_coords();
     classes = regionYolo->get_num_classes();
     auto mask = regionYolo->get_mask();

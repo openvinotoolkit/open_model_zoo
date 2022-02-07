@@ -24,7 +24,6 @@
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-#include <ngraph/ngraph.hpp>
 
 #include "models/associative_embedding_decoder.h"
 #include "models/hpe_model_associative_embedding.h"

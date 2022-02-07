@@ -14,7 +14,6 @@
 // limitations under the License.
 */
 
-#include <ngraph/ngraph.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 

@@ -16,8 +16,6 @@
 
 #include <algorithm>
 
-
-#include <ngraph/ngraph.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 
