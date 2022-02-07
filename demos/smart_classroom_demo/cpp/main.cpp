@@ -31,8 +31,6 @@
 #include "logger.hpp"
 #include "smart_classroom_demo.hpp"
 
-using namespace ov::preprocess;
-
 namespace {
 
 class Visualizer {
