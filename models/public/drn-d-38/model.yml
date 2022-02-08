@@ -47,6 +47,10 @@ postprocessing:
     file: models/segment.py
     pattern: 'import data_transforms as transforms'
     replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/segment.py
+    pattern: '        target = target.cuda\(async=True\)'
+    replacement: '# \g<0>'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models
