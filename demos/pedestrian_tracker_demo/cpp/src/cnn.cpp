@@ -60,13 +60,17 @@ void BaseModel::InferBatch(
     const std::function<void(const ov::Tensor&, size_t)>&  fetch_results) const {
     size_t num_imgs = frames.size();
     input_tensor.set_shape(input_shape);
-    for (size_t i = 0; i < num_imgs; ++i) {
-        matToTensor(frames[i], input_tensor, i);
+    for (size_t batch_i = 0; batch_i < num_imgs;) {
+        size_t batch_size = std::min(num_imgs - batch_i, (size_t)config.max_batch_size);
+        for (size_t b = 0; b < batch_size; ++b) {
+            matToTensor(frames[batch_i + b], input_tensor, b);
+        }
+        infer_request.set_input_tensor(ov::Tensor(input_tensor, { 0, 0, 0, 0 }, { batch_size, input_shape[ov::layout::channels_idx(input_layout)],
+            input_shape[ov::layout::height_idx(input_layout)], input_shape[ov::layout::width_idx(input_layout)] }));
+        infer_request.infer();
+        fetch_results(infer_request.get_output_tensor(), batch_size);
+        batch_i += batch_size;
     }
-    infer_request.set_input_tensor(ov::Tensor(input_tensor, {0, 0, 0, 0}, {num_imgs, input_shape[ov::layout::channels_idx(input_layout)],
-        input_shape[ov::layout::height_idx(input_layout)], input_shape[ov::layout::width_idx(input_layout)]}));
-    infer_request.infer();
-    fetch_results(infer_request.get_output_tensor(), num_imgs);
 }
 
 VectorCNN::VectorCNN(const Config& config,
