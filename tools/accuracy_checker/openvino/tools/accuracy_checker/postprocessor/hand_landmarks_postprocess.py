@@ -24,6 +24,9 @@ class HandLandmarksPostprocessor(Postprocessor):
     annotation_types = (HandLandmarksAnnotation, )
     prediction_types = (HandLandmarksPrediction, )
 
+    def process_image(self, annotation, prediction):
+        raise ValueError('Postprocessor {} requires image metadata.'.format(self.__provider__))
+
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         for annotation_, prediction_ in zip(annotation, prediction):
             x_start, y_start, _, _ = annotation_.metadata.get('rect')

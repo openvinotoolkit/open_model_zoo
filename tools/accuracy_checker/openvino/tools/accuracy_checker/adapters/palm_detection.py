@@ -159,7 +159,7 @@ class PalmDetectionAdapter(Adapter):
                 scale = self.calculate_scale(self.min_scale, self.max_scale, last_same_stride_layer, len(self.strides))
                 ar_and_s = zip([1, 2, 0.5], [0.1, scale, scale]) if (
                     last_same_stride_layer == 0) and self.reduce_boxes_in_lowest_layer else zip(
-                    self.aspect_ratios, [scale for t in self.aspect_ratios])
+                    self.aspect_ratios, [scale] * len(self.aspect_ratios))
                 for aspect_ratio, scale_ in ar_and_s:
                     aspect_ratios.append(aspect_ratio)
                     scales.append(scale_)
@@ -175,9 +175,9 @@ class PalmDetectionAdapter(Adapter):
                 anchor_height.append(scale / np.sqrt(aspect_ratio))
                 anchor_width.append(scale * np.sqrt(aspect_ratio))
 
-            feature_map_height = self.feature_map_height[layer_id] if len(self.feature_map_height) else int(
+            feature_map_height = self.feature_map_height[layer_id] if self.feature_map_height else int(
                 np.ceil(self.input_size_height / self.strides[layer_id]))
-            feature_map_width = self.feature_map_width[layer_id] if len(self.feature_map_height) else int(
+            feature_map_width = self.feature_map_width[layer_id] if self.feature_map_height else int(
                 np.ceil(self.input_size_width / self.strides[layer_id]))
 
             for y in range(feature_map_height):
