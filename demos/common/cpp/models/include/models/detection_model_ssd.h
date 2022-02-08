@@ -15,8 +15,11 @@
 */
 
 #pragma once
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
-#include "detection_model.h"
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelSSD : public DetectionModel {
 public:
@@ -26,6 +29,7 @@ public:
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
+    /// @param layout - model input layout
     ModelSSD(const std::string& modelFileName,
         float confidenceThreshold,
         const std::vector<std::string>& labels = std::vector<std::string>(),

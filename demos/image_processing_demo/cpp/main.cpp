@@ -14,34 +14,28 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine image_processing_demo_async demo application
-* \file image_processing_async/main.cpp
-* \example image_processing_async/main.cpp
-*/
-
 #include <iostream>
 #include <map>
 #include <string>
-
-#include <monitors/presenter.h>
-#include <openvino/openvino.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
 #include <unordered_map>
-#include <gflags/gflags.h>
 #include <sys/stat.h>
 
-#include <pipelines/async_pipeline.h>
-#include <models/super_resolution_model.h>
+#include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
+
+#include <monitors/presenter.h>
 #include <models/deblurring_model.h>
 #include <models/jpeg_restoration_model.h>
 #include <models/style_transfer_model.h>
+#include <models/super_resolution_model.h>
+#include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/images_capture.h>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "visualizer.hpp"
 
@@ -49,10 +43,10 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
+static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Model inputs layouts. "
-"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
+"Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -94,7 +88,7 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;

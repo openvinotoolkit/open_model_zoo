@@ -14,11 +14,15 @@
 // limitations under the License.
 */
 
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include "models/super_resolution_model.h"
+#include "models/results.h"
 
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
     ImageModel(modelFileName, layout) {
@@ -88,7 +92,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Prepare output -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     if (outputs.size() != 1) {
-        throw std::logic_error("Super resolution model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Super resolution model wrapper supports topologies with only 1 output");
     }
 
     outputsNames.push_back(outputs.begin()->get_any_name());
@@ -139,7 +143,6 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    /* Resize and copy data from the image to the input Tensor */
     ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
     ov::Layout layout("NHWC");
 

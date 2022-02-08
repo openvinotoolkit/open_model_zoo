@@ -13,22 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/image_utils.h>
-#include "model_base.h"
+#include "models/model_base.h"
+#include <models/results.h>
 
 class HpeAssociativeEmbedding : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
-    /// @param targetSize - the length of a short image side used for network reshaping.
+    /// @param targetSize - the length of a short image side used for model reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     /// @param layout - model input layout
-    HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold,
-                            const std::string& layout = "",
+    HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize,
+                            float confidenceThreshold, const std::string& layout = "",
                             float delta = 0.0, RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
@@ -59,7 +64,7 @@ protected:
 
     void changeInputSize(std::shared_ptr<ov::Model>& model);
 
-    std::string findTensorByName(const std::string tensorName,
+    std::string findTensorByName(const std::string& tensorName,
                                 const std::vector<std::string>& outputsNames);
 
     std::vector<cv::Mat> split(float* data, const ov::Shape& shape);

@@ -22,7 +22,7 @@
 #include <openvino/openvino.hpp>
 #include "gflags/gflags.h"
 
-struct CnnConfig {
+struct ModelConfig {
     std::string deviceName;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
@@ -37,10 +37,10 @@ protected:
 
 class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& flags_d, uint32_t flags_nireq,
+    static ModelConfig getUserConfig(const std::string& flags_d, uint32_t flags_nireq,
         const std::string& flags_nstreams, uint32_t flags_nthreads);
-    static CnnConfig getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq);
+    static ModelConfig getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq);
 
 protected:
-    static CnnConfig getCommonConfig(const std::string& flags_d, uint32_t flags_nireq);
+    static ModelConfig getCommonConfig(const std::string& flags_d, uint32_t flags_nireq);
 };

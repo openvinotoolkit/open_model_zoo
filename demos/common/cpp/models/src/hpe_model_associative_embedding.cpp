@@ -42,7 +42,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input Tensors ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::runtime_error("HPE AE model wrapper supports topologies only with 1 input.");
+        throw std::logic_error("HPE AE model wrapper supports topologies with only 1 input.");
     }
     inputsNames.push_back(model->input().get_any_name());
 
@@ -57,7 +57,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
@@ -70,23 +70,25 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     // --------------------------- Prepare output Tensors -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     if (outputs.size() != 2 && outputs.size() != 3) {
-        throw std::runtime_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
+        throw std::logic_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
     }
 
     for (const auto& output : model->outputs()) {
-        auto outTensorName = output.get_any_name();
+        const auto& outTensorName = output.get_any_name();
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32);
+
         for (const auto& name : output.get_names()) {
             outputsNames.push_back(name);
         }
+
         const ov::Shape& outputShape = output.get_shape();
         if (outputShape.size() != 4 && outputShape.size() != 5) {
-            throw std::runtime_error("output tensors are expected to be 4-dimensional or 5-dimensional");
+            throw std::logic_error("output tensors are expected to be 4-dimensional or 5-dimensional");
         }
         if (outputShape[ov::layout::batch_idx("NC...")] != 1
             || outputShape[ov::layout::channels_idx("NC...")] != 17) {
-            throw std::runtime_error("output tensors are expected to have 1 batch size and 17 channels");
+            throw std::logic_error("output tensors are expected to have 1 batch size and 17 channels");
         }
     }
     model = ppp.build();
@@ -106,7 +108,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
 void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
-    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
+    ov::Layout layout = ov::layout::get_layout(model->input());
     auto batchId = ov::layout::batch_idx(layout);
     auto heightId = ov::layout::height_idx(layout);
     auto widthId = ov::layout::width_idx(layout);
@@ -158,7 +160,7 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
     if (nmsHeatmapsTensorName != heatmapsTensorName) {
         auto nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
-        const InferenceEngine::SizeVector& nmsHeatMapsShape = nmsHeats.get_shape();
+        const ov::Shape& nmsHeatMapsShape = nmsHeats.get_shape();
         float* nmsHeatMapsMapped = nmsHeats.data<float>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsShape);
     }
@@ -195,7 +197,7 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     return std::unique_ptr<ResultBase>(result);
 }
 
-std::string HpeAssociativeEmbedding::findTensorByName(const std::string tensorName,
+std::string HpeAssociativeEmbedding::findTensorByName(const std::string& tensorName,
                                                      const std::vector<std::string>& outputsNames) {
     std::vector<std::string> suitableLayers;
     for (auto& outputName: outputsNames) {

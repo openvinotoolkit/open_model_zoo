@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include <map>
 #include <atomic>
-#include <opencv2/core.hpp>
+#include <map>
 #include <openvino/openvino.hpp>
 #include <map>
 

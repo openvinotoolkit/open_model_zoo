@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
+#include <utils/nms.hpp>
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
@@ -30,7 +31,7 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("FaceBoxes model wrapper expects models that have only one input");
+        throw std::logic_error("FaceBoxes model wrapper expects models that have only 1 input");
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
@@ -39,7 +40,7 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         inputLayout = layouts.begin()->second;
     }
     else {
-        inputLayout = getLayoutFromShape(model->inputs().front().get_shape());
+        inputLayout = getLayoutFromShape(model->input().get_shape());
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -65,13 +66,13 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 2) {
-        throw std::logic_error("FaceBoxes model wrapper expects models that have 2 outputs blob");
+        throw std::logic_error("FaceBoxes model wrapper expects models that have 2 outputs");
     }
 
     ov::Layout outLayout{ "CHW" };
     maxProposalsCount = model->outputs().front().get_shape()[ov::layout::height_idx(outLayout)];
     for (const auto& output : model->outputs()) {
-        auto outTensorName = output.get_any_name();
+        const auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32).
@@ -180,30 +181,31 @@ std::pair<std::vector<size_t>, std::vector<float>> filterScores(const ov::Tensor
     return { indices, scores };
 }
 
-std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const ov::Tensor& bboxesTensor, const std::vector<ModelFaceBoxes::Anchor>& anchors,
+std::vector<ModelFaceBoxes::Anchor> filterBoxes(const ov::Tensor& boxesTensor, const std::vector<ModelFaceBoxes::Anchor>& anchors,
     const std::vector<size_t>& validIndices, const std::vector<float>& variance) {
-    auto shape = bboxesTensor.get_shape();
-    const float* bboxesPtr = bboxesTensor.data<float>();
+    auto shape = boxesTensor.get_shape();
+    const float* boxesPtr = boxesTensor.data<float>();
 
-    std::vector<ModelFaceBoxes::Anchor> bboxes;
-    bboxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
+    std::vector<ModelFaceBoxes::Anchor> boxes;
+    boxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     for (auto i : validIndices) {
         auto objStart = shape[2] * i;
 
-        auto dx = bboxesPtr[objStart];
-        auto dy = bboxesPtr[objStart + 1];
-        auto dw = bboxesPtr[objStart + 2];
-        auto dh = bboxesPtr[objStart + 3];
+        auto dx = boxesPtr[objStart];
+        auto dy = boxesPtr[objStart + 1];
+        auto dw = boxesPtr[objStart + 2];
+        auto dh = boxesPtr[objStart + 3];
+
         auto predCtrX = dx * variance[0] * anchors[i].getWidth() + anchors[i].getXCenter();
         auto predCtrY = dy * variance[0] * anchors[i].getHeight() + anchors[i].getYCenter();
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
-        bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
+        boxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
                                      static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
     }
 
-    return bboxes;
+    return boxes;
 }
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
@@ -212,11 +214,11 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     auto scores = filterScores(scoresTensor, confidenceThreshold);
 
     // --------------------------- Filter bounding boxes on indices -------------------------------------------------------
-    auto bboxesTensor = infResult.outputsData[outputsNames[0]];
-    std::vector<Anchor> bboxes = filterBBoxes(bboxesTensor, anchors, scores.first, variance);
+    auto boxesTensor = infResult.outputsData[outputsNames[0]];
+    std::vector<Anchor> boxes = filterBoxes(boxesTensor, anchors, scores.first, variance);
 
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
+    std::vector<int> keep = nms(boxes, scores.second, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
@@ -229,10 +231,10 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = scores.second[i];
-        desc.x = clamp(bboxes[i].left / scaleX, 0.f, (float)imgWidth);
-        desc.y = clamp(bboxes[i].top / scaleY, 0.f, (float)imgHeight);
-        desc.width = clamp(bboxes[i].getWidth() / scaleX, 0.f, (float)imgWidth);
-        desc.height = clamp(bboxes[i].getHeight() / scaleY, 0.f, (float)imgHeight);
+        desc.x = clamp(boxes[i].left / scaleX, 0.f, (float)imgWidth);
+        desc.y = clamp(boxes[i].top / scaleY, 0.f, (float)imgHeight);
+        desc.width = clamp(boxes[i].getWidth() / scaleX, 0.f, (float)imgWidth);
+        desc.height = clamp(boxes[i].getHeight() / scaleY, 0.f, (float)imgHeight);
         desc.labelID =  0;
         desc.label = labels[0];
 

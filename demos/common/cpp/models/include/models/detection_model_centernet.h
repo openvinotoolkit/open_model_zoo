@@ -15,8 +15,11 @@
 */
 
 #pragma once
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
-#include "detection_model.h"
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelCenterNet : public DetectionModel {
 public:

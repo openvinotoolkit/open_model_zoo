@@ -15,9 +15,12 @@
 */
 
 #pragma once
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
 #include <openvino/op/region_yolo.hpp>
-#include "detection_model.h"
+#include "models/detection_model.h"
+#include <models/results.h>
 
 class ModelYolo : public DetectionModel {
 protected:
@@ -80,5 +83,4 @@ protected:
     YoloVersion yoloVersion;
     const std::vector<float> presetAnchors;
     const std::vector<int64_t> presetMasks;
-    ov::Layout yolo4DRegionLayout = "NCHW";
 };

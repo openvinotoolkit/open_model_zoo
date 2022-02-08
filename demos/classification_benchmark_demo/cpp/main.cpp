@@ -2,27 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <vector>
-#include <queue>
-#include <memory>
-#include <string>
 #include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include <cstdio>
-#include <functional>
-#include <atomic>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <string>
+#include <vector>
 
 #include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
+
+#include <models/classification_model.h>
+#include <models/results.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
-#include <models/classification_model.h>
-#include <utils/common.hpp>
-#include <utils/slog.hpp>
+
 #include <utils/args_helper.hpp>
+#include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "grid_mat.hpp"
 
@@ -31,7 +31,7 @@ static const char image_message[] = "Required. Path to a folder with images or p
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char layout_message[] = "Optional. Model inputs layouts. "
-                                     "For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
+                                     "Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
@@ -72,7 +72,7 @@ static void showUsage() {
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -156,11 +156,12 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_gt.empty()) {
             std::map<std::string, unsigned> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
-            if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
+            if (!inputGtFile.is_open()) {
+                throw std::runtime_error("Can't open the ground truth file.");
+            }
 
             std::string line;
-            while (std::getline(inputGtFile, line))
-            {
+            while (std::getline(inputGtFile, line)) {
                 size_t separatorIdx = line.find(' ');
                 if (separatorIdx == std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
@@ -187,7 +188,7 @@ int main(int argc, char *argv[]) {
             std::fill(classIndices.begin(), classIndices.end(), 0);
         }
 
-        //------------------------------ Running Detection routines ----------------------------------------------
+        //------------------------------ Running routines ----------------------------------------------
         std::vector<std::string> labels = ClassificationModel::loadLabels(FLAGS_labels);
         for (const auto & classIndex : classIndices) {
             if (classIndex >= labels.size()) {
@@ -198,6 +199,7 @@ int main(int argc, char *argv[]) {
 
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::runtime::Core core;
+
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels, FLAGS_layout)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);

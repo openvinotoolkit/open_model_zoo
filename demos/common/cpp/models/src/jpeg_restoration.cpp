@@ -14,11 +14,14 @@
 // limitations under the License.
 */
 
-#include <iostream>
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include "models/jpeg_restoration_model.h"
+#include "models/results.h"
 
 JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize,
     bool _jpegCompression, const std::string& layout) :
@@ -33,7 +36,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 input");
+        throw std::logic_error("The JPEG Restoration model wrapper supports topologies with only 1 input");
     }
     inputsNames.push_back(model->input().get_any_name());
 
@@ -46,8 +49,10 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
         inputLayout = getLayoutFromShape(inputShape);
     }
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
+        inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
+    }
 
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
@@ -59,11 +64,12 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     if (outputs.size() != 1) {
-        throw std::logic_error("The JPEG Restoration model wrapper supports topologies only with 1 output");
+        throw std::logic_error("The JPEG Restoration model wrapper supports topologies with only 1 output");
     }
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
-    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
+        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 

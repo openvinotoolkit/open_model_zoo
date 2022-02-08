@@ -14,8 +14,10 @@
 // limitations under the License.
 */
 
-#include <utils/ocv_common.hpp>
+#include <string>
+#include <vector>
 #include "models/detection_model.h"
+#include "models/image_model.h"
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold,
     const std::vector<std::string>& labels, const std::string& layout) :

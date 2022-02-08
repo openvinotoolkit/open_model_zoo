@@ -19,8 +19,8 @@
 #include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/config_factory.h>
-#include "input_data.h"
-#include "results.h"
+#include "models/input_data.h"
+#include "models/results.h"
 
 class ModelBase {
 public:
@@ -32,7 +32,7 @@ public:
     virtual ~ModelBase() {}
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
-    virtual ov::CompiledModel compileModel(const CnnConfig& cnnConfig, ov::Core& core);
+    virtual ov::CompiledModel compileModel(const ModelConfig& config, ov::Core& core);
     virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::InferRequest>>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
 
@@ -55,6 +55,6 @@ protected:
     std::vector<std::string> outputsNames;
     ov::CompiledModel compiledModel;
     std::string modelFileName;
-    CnnConfig cnnConfig = {};
+    ModelConfig config = {};
     std::map<std::string, ov::Layout> layouts;
 };

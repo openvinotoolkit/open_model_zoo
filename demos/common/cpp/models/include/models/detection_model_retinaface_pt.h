@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 #include <openvino/openvino.hpp>
-#include <utils/nms.hpp>
-#include "detection_model.h"
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelRetinaFacePT : public DetectionModel {
 public:
@@ -47,6 +47,7 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
+    /// @param layout - model input layout
     ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
         const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
@@ -56,11 +57,11 @@ protected:
     const float boxIOUThreshold;
     float variance[2] = { 0.1f, 0.2f };
 
-    enum EOutputType {
-        OT_BBOX,
-        OT_SCORES,
-        OT_LANDMARK,
-        OT_MAX
+    enum OutputType {
+        OUT_BOXES,
+        OUT_SCORES,
+        OUT_LANDMARKS,
+        OUT_MAX
     };
 
     std::vector<ModelRetinaFacePT::Box> priors;
@@ -70,7 +71,7 @@ protected:
     std::vector<cv::Point2f> getFilteredLandmarks(const ov::Tensor& landmarksTensor,
         const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
     std::vector<ModelRetinaFacePT::Box> generatePriorData();
-    std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const ov::Tensor& bboxesTensor,
+    std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const ov::Tensor& boxesTensor,
         const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
 
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;

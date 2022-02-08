@@ -13,7 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
+#include <string>
+#include <vector>
 #include "models/image_model.h"
 
 class DetectionModel : public ImageModel {
@@ -34,5 +37,6 @@ protected:
     float confidenceThreshold;
     std::vector<std::string> labels;
 
-    std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ?
+                                                   labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 };

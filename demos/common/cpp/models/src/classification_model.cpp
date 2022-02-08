@@ -14,12 +14,15 @@
 // limitations under the License.
 */
 
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
 #include <openvino/op/softmax.hpp>
 #include <openvino/op/topk.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include "models/classification_model.h"
+#include "models/results.h"
 
 ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop,
     const std::vector<std::string>& labels, const std::string& layout) :
@@ -70,7 +73,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("Classification model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Classification model wrapper supports topologies with only 1 input");
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
@@ -110,20 +113,24 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
 
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 1) {
-        throw std::logic_error("Classification model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Classification model wrapper supports topologies with only 1 output");
     }
 
     const ov::Shape& outputShape = model->output().get_shape();
     if (outputShape.size() != 2 && outputShape.size() != 4) {
-        throw std::logic_error("Classification model wrapper supports topologies only with 2-dimensional or 4-dimensional output");
+        throw std::logic_error("Classification model wrapper supports topologies only with"
+            " 2-dimensional or 4-dimensional output");
     }
     const ov::Layout outputLayout4D("NCHW");
-    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1 || outputShape[ov::layout::width_idx(outputLayout4D)] != 1)) {
-        throw std::logic_error("Classification model wrapper supports topologies only with 4-dimensional output which has last two dimensions of size 1");
+    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1
+        || outputShape[ov::layout::width_idx(outputLayout4D)] != 1)) {
+        throw std::logic_error("Classification model wrapper supports topologies only"
+            " with 4-dimensional output which has last two dimensions of size 1");
     }
     size_t classesNum = outputShape[ov::layout::channels_idx(outputLayout4D)];
     if (nTop > classesNum) {
-        throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
+        throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but "
+            + std::to_string(nTop) + " labels are requested to be predicted");
     }
 
     if (classesNum == labels.size() + 1) {
@@ -131,7 +138,8 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         slog::warn << "\tInserted 'other' label as first." << slog::endl;
     }
     else if (classesNum != labels.size()) {
-        throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
+        throw std::logic_error("Model's number of classes and parsed labels must match ("
+            + std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
     }
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
@@ -149,9 +157,12 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     else {
         softmaxNode = *softmaxNodeIt;
     }
-    const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32, ov::Shape{}, std::vector<size_t>{nTop});
-    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1, ov::op::v1::TopK::Mode::MAX,
-                                                                                    ov::op::v1::TopK::SortType::SORT_VALUES);
+    const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32,
+                                                          ov::Shape{},
+                                                          std::vector<size_t>{nTop});
+    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1,
+                                                                            ov::op::v1::TopK::Mode::MAX,
+                                                                            ov::op::v1::TopK::SortType::SORT_VALUES);
 
     auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
     auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(1));

@@ -14,10 +14,15 @@
 // limitations under the License.
 */
 
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
+#include <utils/nms.hpp>
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
+#include "models/results.h"
 
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
     const std::string& layout)
@@ -29,7 +34,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("RetinaFacePT model wrapper expects models that have only one input");
+        throw std::logic_error("RetinaFacePT model wrapper expects models that have only 1 input");
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
@@ -70,7 +75,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     landmarksNum = 0;
 
     outputsNames.resize(2);
-    std::vector<uint32_t> outputsSizes[OT_MAX];
+    std::vector<uint32_t> outputsSizes[OUT_MAX];
     ov::Layout chw("CHW");
     ov::Layout nchw("NCHW");
     for (auto& output : model->outputs()) {
@@ -81,16 +86,16 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
             set_layout(output.get_shape().size() == 4 ? nchw : chw);
 
         if (outTensorName.find("bbox") != std::string::npos) {
-            outputsNames[OT_BBOX] = outTensorName;
+            outputsNames[OUT_BOXES] = outTensorName;
         }
         else if (outTensorName.find("cls") != std::string::npos) {
-            outputsNames[OT_SCORES] = outTensorName;
+            outputsNames[OUT_SCORES] = outTensorName;
         }
         else if (outTensorName.find("landmark") != std::string::npos) {
             // Landmarks might be optional, if it is present, resize names array to fit landmarks output name to the last item of array
             // Considering that other outputs names are already filled in or will be filled later
-            outputsNames.resize(std::max(outputsNames.size(), (size_t)OT_LANDMARK + 1));
-            outputsNames[OT_LANDMARK] = outTensorName;
+            outputsNames.resize(std::max(outputsNames.size(), (size_t)OUT_LANDMARKS + 1));
+            outputsNames[OUT_LANDMARKS] = outTensorName;
             landmarksNum = output.get_shape()[ov::layout::width_idx(chw)] / 2; // Each landmark consist of 2 variables (x and y)
         }
         else {
@@ -98,7 +103,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
         }
     }
 
-    if (outputsNames[OT_BBOX] == "" || outputsNames[OT_SCORES] == "") {
+    if (outputsNames[OUT_BOXES] == "" || outputsNames[OUT_SCORES] == "") {
         throw std::logic_error("Bbox or cls layers are not found");
     }
 
@@ -136,7 +141,8 @@ std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scores
     return scores;
 }
 
-std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tensor& landmarksTensor, const std::vector<size_t>& indicies, int imgWidth, int imgHeight) {
+std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tensor& landmarksTensor,
+    const std::vector<size_t>& indicies, int imgWidth, int imgHeight) {
     auto shape = landmarksTensor.get_shape();
     const float* landmarksPtr = landmarksTensor.data<float>();
 
@@ -146,8 +152,10 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tenso
         size_t idx = indicies[i];
         auto& prior = priors[idx];
         for (size_t j = 0; j < landmarksNum; j++) {
-            landmarks[i*landmarksNum + j].x = clamp(prior.cX + landmarksPtr[idx*shape[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
-            landmarks[i*landmarksNum + j].y = clamp(prior.cY + landmarksPtr[idx*shape[2] + j*2 + 1] * variance[0] * prior.height, 0.f, 1.f) * imgHeight;
+            landmarks[i*landmarksNum + j].x =
+                clamp(prior.cX + landmarksPtr[idx*shape[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
+            landmarks[i*landmarksNum + j].y =
+                clamp(prior.cY + landmarksPtr[idx*shape[2] + j*2 + 1] * variance[0] * prior.height, 0.f, 1.f) * imgHeight;
         }
     }
     return landmarks;
@@ -177,20 +185,21 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     return anchors;
 }
 
-std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const ov::Tensor& bboxesTensor, const std::vector<size_t>& indicies,int imgWidth, int imgHeight) {
+std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const ov::Tensor& boxesTensor,
+    const std::vector<size_t>& indicies,int imgWidth, int imgHeight) {
     std::vector<ModelRetinaFacePT::Rect> rects;
     rects.reserve(indicies.size());
 
-    auto shape = bboxesTensor.get_shape();
-    const float* bboxesPtr = bboxesTensor.data<float>();
+    auto shape = boxesTensor.get_shape();
+    const float* boxesPtr = boxesTensor.data<float>();
 
 
     if (shape[1] != priors.size()) {
-        throw std::runtime_error("rawBoxes size is not equal to priors size");
+        throw std::logic_error("rawBoxes size is not equal to priors size");
     }
 
     for (auto i : indicies) {
-        auto pRawBox = reinterpret_cast<const Box*>(bboxesPtr + i*shape[2]);
+        auto pRawBox = reinterpret_cast<const Box*>(boxesPtr + i*shape[2]);
         auto& prior = priors[i];
         float cX = priors[i].cX + pRawBox->cX * variance[0] * prior.width;
         float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
@@ -208,18 +217,20 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
 
 std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infResult) {
     //(raw_output, scale_x, scale_y, face_prob_threshold, image_size):
-    const auto bboxesTensor = infResult.outputsData[outputsNames[OT_BBOX]];
-    const auto scoresTensor = infResult.outputsData[outputsNames[OT_SCORES]];
+    const auto boxesTensor = infResult.outputsData[outputsNames[OUT_BOXES]];
+    const auto scoresTensor = infResult.outputsData[outputsNames[OUT_SCORES]];
 
     const auto& validIndicies = filterByScore(scoresTensor, confidenceThreshold);
     const auto& scores = getFilteredScores(scoresTensor, validIndicies);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
     const auto& landmarks = landmarksNum ?
-        getFilteredLandmarks(infResult.outputsData[outputsNames[OT_LANDMARK]], validIndicies, internalData.inputImgWidth, internalData.inputImgHeight) :
+        getFilteredLandmarks(infResult.outputsData[outputsNames[OUT_LANDMARKS]],
+            validIndicies, internalData.inputImgWidth, internalData.inputImgHeight) :
         std::vector<cv::Point2f>();
 
-    const auto& proposals = getFilteredProposals(bboxesTensor, validIndicies, internalData.inputImgWidth, internalData.inputImgHeight);
+    const auto& proposals = getFilteredProposals(boxesTensor, validIndicies,
+        internalData.inputImgWidth, internalData.inputImgHeight);
 
     const auto& keptIndicies = nms(proposals, scores, boxIOUThreshold, !landmarksNum);
 

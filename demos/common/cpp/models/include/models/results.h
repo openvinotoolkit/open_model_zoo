@@ -44,9 +44,9 @@ struct InferenceResult : public ResultBase {
     std::shared_ptr<InternalModelData> internalModelData;
     std::map<std::string, ov::Tensor> outputsData;
 
-    /// Returns pointer to first output tensor
+    /// Returns the first output tensor
     /// This function is a useful addition to direct access to outputs list as many models have only one output
-    /// @returns pointer to first output tensor
+    /// @returns first output tensor
     ov::Tensor getFirstOutputTensor() {
         if (outputsData.empty()) {
             throw std::out_of_range("Outputs map is empty.");

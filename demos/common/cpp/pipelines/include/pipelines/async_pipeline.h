@@ -15,17 +15,16 @@
 */
 
 #pragma once
-#include <string>
+#include <condition_variable>
 #include <deque>
 #include <map>
+#include <string>
 #include <openvino/openvino.hpp>
-#include <condition_variable>
-#include "utils/config_factory.h"
+#include <models/results.h>
+#include <models/model_base.h>
+#include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
-
 #include "pipelines/requests_pool.h"
-#include "models/results.h"
-#include "models/model_base.h"
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
@@ -33,10 +32,10 @@ class AsyncPipeline {
 public:
     /// Loads model and performs required initialization
     /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.
-    /// @param cnnConfig - fine tuning configuration for CNN model
-    /// @param engine - reference to ov::runtime::Core instance to use.
+    /// @param ModelConfig - fine tuning configuration for model
+    /// @param core - reference to ov::runtime::Core instance to use.
     /// If it is omitted, new instance of  ov::runtime::Core will be created inside.
-    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, ov::runtime::Core& core);
+    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::runtime::Core& core);
     virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.

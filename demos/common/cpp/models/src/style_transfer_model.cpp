@@ -17,12 +17,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include "models/style_transfer_model.h"
-
+#include "models/results.h"
 
 StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout) :
     ImageModel(modelFileName, layout) {
@@ -32,7 +33,7 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("Style transfer model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Style transfer model wrapper supports topologies with only 1 input");
     }
 
     inputsNames.push_back(model->input().get_any_name());
@@ -46,7 +47,8 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
         inputLayout = getLayoutFromShape(inputShape);
     }
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
@@ -65,14 +67,15 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     if (outputs.size() != 1) {
-        throw std::logic_error("Style transfer model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Style transfer model wrapper supports topologies with only 1 output");
     }
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
     ov::Layout outputLayout{ "NCHW" };
-    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
+        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 
     ppp.output().tensor().set_element_type(ov::element::f32);

@@ -14,9 +14,12 @@
 // limitations under the License.
 */
 
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include "models/detection_model_ssd.h"
+#include "models/results.h"
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold,
@@ -90,7 +93,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     const float* boxes = infResult.outputsData[outputsNames[0]].data<float>();
     size_t detectionsNum = infResult.outputsData[outputsNames[0]].get_shape()[detectionsNumId];
     const float* labels = infResult.outputsData[outputsNames[1]].data<float>();
-    const float *scores = outputsNames.size() > 2 ? infResult.outputsData[outputsNames[2]].data<float>() : nullptr;
+    const float* scores = outputsNames.size() > 2 ? infResult.outputsData[outputsNames[2]].data<float>() : nullptr;
 
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
@@ -197,7 +200,7 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 }
 
 void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
-    auto output = model->output();
+    const auto& output = model->output();
     outputsNames.push_back(output.get_any_name());
 
     ov::Shape shape = output.get_shape();
@@ -242,29 +245,29 @@ void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
     std::sort(outputsNames.begin(), outputsNames.end());
 
     ov::preprocess::PrePostProcessor ppp(model);
-    const auto& bboxesShape = model->output(outputsNames[0]).get_partial_shape().get_max_shape();
+    const auto& boxesShape = model->output(outputsNames[0]).get_partial_shape().get_max_shape();
 
     ov::Layout boxesLayout;
-    if (bboxesShape.size() == 2) {
+    if (boxesShape.size() == 2) {
         boxesLayout = "NC";
         detectionsNumId = ov::layout::batch_idx(boxesLayout);
-        objectSize = bboxesShape[ov::layout::channels_idx(boxesLayout)];
+        objectSize = boxesShape[ov::layout::channels_idx(boxesLayout)];
 
         if (objectSize != 5) {
             throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
         }
     }
-    else if (bboxesShape.size() == 3) {
+    else if (boxesShape.size() == 3) {
         boxesLayout = "CHW";
         detectionsNumId = ov::layout::height_idx(boxesLayout);
-        objectSize = bboxesShape[ov::layout::width_idx(boxesLayout)];
+        objectSize = boxesShape[ov::layout::width_idx(boxesLayout)];
 
         if (objectSize != 4) {
             throw std::logic_error("Incorrect 'boxes' output shape, [b][n][4] shape is required");
         }
     }
     else {
-        throw std::logic_error("Incorrect number of 'boxes' output dimensions, expected 2 or 3, but had " + bboxesShape.size());
+        throw std::logic_error("Incorrect number of 'boxes' output dimensions, expected 2 or 3, but had " + boxesShape.size());
     }
 
     ppp.output(outputsNames[0]).tensor().

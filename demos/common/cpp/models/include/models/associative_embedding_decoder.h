@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
 #include <opencv2/core.hpp>
-#include "results.h"
 
 struct Peak {
     explicit Peak(const cv::Point2f& keypoint = cv::Point2f(-1, -1),

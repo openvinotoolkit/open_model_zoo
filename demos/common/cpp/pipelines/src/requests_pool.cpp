@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 
+#include <vector>
 #include <openvino/openvino.hpp>
 #include "pipelines/requests_pool.h"
 
