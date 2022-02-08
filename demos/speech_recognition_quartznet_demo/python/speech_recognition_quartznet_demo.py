@@ -19,6 +19,7 @@ from argparse import ArgumentParser, SUPPRESS
 import logging as log
 from time import perf_counter
 import sys
+import json
 
 # Workaround to import librosa on Linux without installed libsndfile.so
 try:
@@ -37,11 +38,44 @@ from openvino.runtime import Core, get_version, PartialShape
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
+class Vocab:
+    def __init__(
+            self,
+            vocab = " abcdefghijklmnopqrstuvwxyz'-",
+            space_symbol = " ",
+            pad_id = 29,
+            bos_id = 29,
+            eos_id = 29,
+            unk_id = 29
+    ):
+        self.vocab = vocab
+        self.space_symbol = space_symbol
+        self.pad_id = pad_id
+        self.bos_id = bos_id
+        self.eos_id = eos_id
+        self.unk_id = unk_id
+
+    def __len__(self):
+        return len(self.vocab)
+
+    def __getitem__(self, idx):
+        assert idx < len(self.vocab)
+        return self.vocab[idx]
+
+    def remove_special_symbols(self, s):
+        for t in [self.pad_id, self.bos_id, self.eos_id, self.unk_id]:
+            s = s.replace(self.vocab[t], "")
+        s = s.replace(self.space_symbol, " ")
+        if s[0] == " ":
+            s = s[1:]
+        return s
+
+
 class QuartzNet:
     pad_to = 16
-    alphabet = " abcdefghijklmnopqrstuvwxyz'"
 
-    def __init__(self, core, model_path, input_shape, device):
+    def __init__(self, core, model_path, input_shape, vocab, device):
+        self.vocab = vocab
         assert not input_shape[2] % self.pad_to, f"{self.pad_to} must be a divisor of input_shape's third dimension"
         log.info('Reading model {}'.format(model_path))
         model = core.read_model(model_path)
@@ -60,8 +94,8 @@ class QuartzNet:
         model_output_shape = model.outputs[0].shape
         if len(model_output_shape) != 3:
             raise RuntimeError('QuartzNet output must be 3-dimensional')
-        if model_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char
-            raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
+        if model_output_shape[2] != len(self.vocab):
+            raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.vocab)}')
         model.reshape({self.input_tensor_name: PartialShape(input_shape)})
         compiled_model = core.compile_model(model, device)
         self.infer_request = compiled_model.create_infer_request()
@@ -70,6 +104,18 @@ class QuartzNet:
     def infer(self, melspectrogram):
         input_data = {self.input_tensor_name: melspectrogram}
         return next(iter(self.infer_request.infer(input_data).values()))
+
+    def ctc_greedy_decode(self, pred, remove_special_symbols=False):
+        prev_id = blank_id = self.vocab.pad_id
+        transcription = []
+        for idx in pred[0].argmax(1):
+            if prev_id != idx != blank_id:
+                transcription.append(self.vocab[idx])
+            prev_id = idx
+        out = ''.join(transcription)
+        if remove_special_symbols:
+            out = self.vocab.remove_special_symbols(out)
+        return out
 
     @classmethod
     def audio_to_melspectrum(cls, audio, sampling_rate):
@@ -89,22 +135,13 @@ class QuartzNet:
             return np.pad(normalized, ((0, 0), (0, cls.pad_to - remainder)))[None]
         return normalized[None]
 
-    @classmethod
-    def ctc_greedy_decode(cls, pred):
-        prev_id = blank_id = len(cls.alphabet)
-        transcription = []
-        for idx in pred[0].argmax(1):
-            if prev_id != idx != blank_id:
-                transcription.append(cls.alphabet[idx])
-            prev_id = idx
-        return ''.join(transcription)
-
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     parser.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.', required=True)
     parser.add_argument('-i', '--input', help="Required. Path to an audio file in WAV PCM 16 kHz mono format", required=True)
+    parser.add_argument('-v', '--vocab', help="Optional. Path to vocabulary file in .json format", default=None)
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
@@ -130,9 +167,13 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
-    quartz_net = QuartzNet(core, args.model, log_melspectrum.shape, args.device)
+    if args.vocab is None:
+        vocab = Vocab()
+    else:
+        vocab = Vocab(**json.load(open(args.vocab)))
+    quartz_net = QuartzNet(core, args.model, log_melspectrum.shape, vocab, args.device)
     character_probs = quartz_net.infer(log_melspectrum)
-    transcription = QuartzNet.ctc_greedy_decode(character_probs)
+    transcription = quartz_net.ctc_greedy_decode(character_probs, remove_special_symbols=False if args.vocab is None else True)
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))

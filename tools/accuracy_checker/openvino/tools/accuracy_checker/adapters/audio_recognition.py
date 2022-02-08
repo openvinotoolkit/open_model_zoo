@@ -214,6 +214,14 @@ class CTCGreedyDecoder(Adapter):
         params = super().parameters()
         params.update({
             'alphabet': ListField(optional=True),
+            'space_symbol': StringField(optional=True, default=" ", description="Space symbol"),
+            'pad_id': NumberField(optional=True, description="Padding symbol id"),
+            'bos_id': NumberField(optional=True, description="Begin of sentence symbol id"),
+            'eos_id': NumberField(optional=True, description="End of sentence symbol id"),
+            'unk_id': NumberField(optional=True, description="Unknown symbol id"),
+            'remove_special_symbols': BoolField(
+                optional=True, default=False, description="Indicator that special symbols should be removed from output sequence"
+            ),
             'softmaxed_probabilities': BoolField(
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
             ),
@@ -225,6 +233,12 @@ class CTCGreedyDecoder(Adapter):
 
     def configure(self):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
+        self.space_symbol = self.get_value_from_config('space_symbol')
+        self.pad_id = self.get_value_from_config("pad_id") or len(self.alphabet)
+        self.bos_id = self.get_value_from_config("bos_id") or len(self.alphabet)
+        self.eos_id = self.get_value_from_config("eos_id") or len(self.alphabet)
+        self.unk_id = self.get_value_from_config("unk_id") or len(self.alphabet)
+        self.remove_special_symbols = self.launcher_config.get('remove_special_symbols')
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
         self.classification_out = self.get_value_from_config('classification_out')
         self.output_verified = False
@@ -273,12 +287,11 @@ class CTCGreedyDecoder(Adapter):
         decoded = self._ctc_decoder_prediction(argmx, self.alphabet)[0].upper()
         return [CharacterRecognitionPrediction(identifiers[0], decoded)]
 
-    @staticmethod
-    def _ctc_decoder_prediction(prediction, labels):
+    def _ctc_decoder_prediction(self, prediction, labels):
         """
         Decodes a sequence of labels to words
         """
-        blank_id = len(labels)
+        blank_id = self.pad_id
         hypotheses = []
         # CTC decoding procedure
         for batch_elem in prediction:
@@ -288,8 +301,19 @@ class CTCGreedyDecoder(Adapter):
                 if previous != p != blank_id:
                     decoded_prediction.append(labels[p])
                 previous = p
-            hypotheses.append(''.join(decoded_prediction))
+            s = ''.join(decoded_prediction)
+            if self.remove_special_symbols:
+                s = self._remove_special_symbols(s)
+            hypotheses.append(s)
         return hypotheses
+
+    def _remove_special_symbols(self, s):
+        for t in [self.pad_id, self.bos_id, self.eos_id, self.unk_id]:
+            s = s.replace(self.vocab[t], "")
+        s = s.replace(self.space_symbol, " ")
+        if s[0] == " ":
+            s = s[1:]
+        return s
 
 
 class CTCBeamSearchDecoderWithLm(Adapter):
