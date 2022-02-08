@@ -44,7 +44,7 @@ class MaskRCNNModel(ImageModel):
             ),
             'labels': ListValue(description="List of class labels"),
             'path_to_labels': StringValue(
-                description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter"
+                description="Path to file with labels. Overrides the labels"
             ),
         })
         return parameters
@@ -171,7 +171,7 @@ class YolactModel(ImageModel):
             ),
             'labels': ListValue(description="List of class labels"),
             'path_to_labels': StringValue(
-                description="Path to file with labels. Overrides the labels, if they sets via 'labels' parameter"
+                description="Path to file with labels. Overrides the labels"
             ),
         })
         return parameters
