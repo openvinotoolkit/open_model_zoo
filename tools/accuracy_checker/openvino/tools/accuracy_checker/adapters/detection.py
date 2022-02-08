@@ -1019,28 +1019,27 @@ class PalmDetectionAdapter(Adapter):
         self.anchor_offset_x = 0.5
         self.anchor_offset_y = 0.5
         self.strides = [8, 16, 16, 16]
-        self.aspect_ratios = [1.0,]
+        self.aspect_ratios = [1]
         self.reduce_boxes_in_lowest_layer = False
         self.feature_map_height = []
         self.feature_map_width = []
-        self.inteprolated_scale_aspect_ratio = 1.0
+        self.inteprolated_scale_aspect_ratio = 1
         self.fixed_anchor_size = True
 
         self.anchors = self.generate_anchors()
 
         self.sigmoid_score = True
-        self.score_clipping_thresh = 100.0
+        self.score_clipping_thresh = 100
         self.has_score_clipping_thresh = self.score_clipping_thresh != 0
         self.reverse_output_order = True
         self.keypoint_coord_offset = 4
         self.num_keypoints = 7
         self.num_values_per_keypoint = 2
-        # self.palm_id = 22
 
-        self.x_scale = 128.0
-        self.y_scale = 128.0
-        self.w_scale = 128.0
-        self.h_scale = 128.0
+        self.x_scale = 128
+        self.y_scale = 128
+        self.w_scale = 128
+        self.h_scale = 128
         self.min_score_thresh = 0.5
         self.has_min_score_thresh = self.min_score_thresh != 0
         self.apply_exp_on_box_size = False
