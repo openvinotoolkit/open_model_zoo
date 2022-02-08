@@ -213,7 +213,7 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
-        (scores, classes, boxes, scores), frame_meta = results
+        (scores, classes, boxes, masks), frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
