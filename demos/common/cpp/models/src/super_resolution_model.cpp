@@ -51,6 +51,8 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
     else {
         inputLayout = getLayoutFromShape(model->inputs().front().get_shape());
+        slog::warn << "Layout for input \"" << model->inputs().front().get_any_name() << "\" was not set explicitly. "
+            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
     }
 
     auto channelsId = ov::layout::channels_idx(inputLayout);

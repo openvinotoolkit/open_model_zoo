@@ -47,6 +47,8 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     }
     else {
         inputLayout = getLayoutFromShape(inputShape);
+        slog::warn << "Layout for input \"" << model->input().get_any_name() << "\" was not set explicitly. "
+            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
