@@ -1,4 +1,3 @@
-from luigi import configuration
 import numpy as np
 import unittest
 import os
@@ -130,6 +129,10 @@ class TestModel(unittest.TestCase):
         result = model.model_api_inference(input)
 
         self.assertEqual(result.shape, (512, 512))
+
+    def test_vocab_loading(self):
+        model = omz.Model.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16')
+        self.assertIsInstance(model.vocab(), dict)
 
 if __name__ == '__main__':
     unittest.main()

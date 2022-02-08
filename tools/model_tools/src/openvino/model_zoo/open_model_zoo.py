@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import argparse
+import os
+import json
 import yaml
 
 from pathlib import Path
@@ -27,7 +28,7 @@ from openvino.model_zoo.download_engine import validation
 class Model:
     def __init__(
         self, name=None, model_path=None, description=None, task_type=None,
-        subdirectory=None, architecture_type=None, ie=None
+        subdirectory=None, architecture_type=None, ie=None, download_dir=None
     ):
         self.model_path = model_path
         self.description = description
@@ -35,6 +36,7 @@ class Model:
         self.name = name
         self.subdirectory = subdirectory
         self.architecture_type = architecture_type
+        self.download_dir = download_dir
 
         self.model = None
         self.compiled_model = None
@@ -107,7 +109,7 @@ class Model:
         if not os.path.exists(model_path) or not os.path.exists(bin_path):
             omz_converter.converter(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
-        return cls(name, model_path, description, task_type, subdirectory, model.architecture_type, ie)
+        return cls(name, model_path, description, task_type, subdirectory, model.architecture_type, ie, download_dir)
 
     @classmethod
     def from_pretrained(cls, model_path, *, task_type=None, ie=None):
@@ -134,11 +136,11 @@ class Model:
         name = model_path.stem
         model = cls._load_model(cls, name)
         task_type = model.task_type if model else task_type
-        subdirectory = model.subdirectory if model else model_path.parent
         architecture_type = model.architecture_type if model else None
-        model_path = str(model_path)
+        download_dir = model_path.parents[3]
+        subdirectory = model.subdirectory if model else model_path.parent.relative_to(download_dir)
 
-        return cls(name, model_path, description, task_type, subdirectory, architecture_type, ie)
+        return cls(name, str(model_path), description, task_type, subdirectory, architecture_type, ie, download_dir)
 
     def _load_model(self, model_name):
         parser = argparse.ArgumentParser()
@@ -190,6 +192,33 @@ class Model:
 
         return model_config
 
+    @staticmethod
+    def load_vocab_file(vocab_file):
+        with open(vocab_file, "r", encoding="utf-8") as r:
+            if vocab_file.suffix == '.txt':
+                return {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
+            elif vocab_file.suffix == '.json':
+                return json.load(r)
+
+    def vocab(self):
+        model = self._load_model(self.name)
+        vocab_dir = self.download_dir / self.subdirectory
+        if model:
+            for file in model.files:
+                if 'vocab' in file.name.name:
+                    vocab_path = vocab_dir / file.name
+                    break
+        else:
+            if (vocab_dir / 'vocab.txt').exists():
+                vocab_path = vocab_dir / 'vocab.txt'
+            else:
+                vocab_path = vocab_dir / 'vocab.json'
+
+        if vocab_path.exists():
+            return self.load_vocab_file(vocab_path)
+        else:
+            return None
+
     def inputs(self):
         if self.model is None:
             try:
@@ -238,14 +267,13 @@ class Model:
         self.model_api = model_creator(model_adapter, configuration)
         self.model_api.load()
 
-    def model_api_inference(self, inputs, device='CPU', model_creator=None, asynk_mode=False, **kwargs):
+    def model_api_inference(self, inputs, device='CPU', model_creator=None, **kwargs):
         self.device = device
         if model_creator is None:
             model_creator = self.model_creator
 
         self._create_model_api_instance(model_creator, **kwargs)
 
-        # if not asynk_mode:
         preprocessed_inputs, meta = self.model_api.preprocess(inputs)
         raw_results = self.model_api.infer_sync(preprocessed_inputs)
         results = self.model_api.postprocess(raw_results, meta)

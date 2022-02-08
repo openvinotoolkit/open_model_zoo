@@ -15,6 +15,7 @@
 description: >-
   Person Detection based on Resnet50 (VFNet) on 1344x800 resolution.
 task_type: detection
+architecture_type: ssd
 files:
   - name: FP32/person-detection-0301.xml
     size: 2996145

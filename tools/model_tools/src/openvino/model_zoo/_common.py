@@ -39,7 +39,7 @@ except ImportError:
     class Classification:
         def __init__(self, model_adapter=None, configuration=None):
             pass
-    
+
     def create_core():
         return None
 
