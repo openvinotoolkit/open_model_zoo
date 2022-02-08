@@ -59,6 +59,8 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
     else {
         inputLayout = getLayoutFromShape(input.get_shape());
+        slog::warn << "Layout for input \"" << input.get_any_name() << "\" was not set explicitly. "
+            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
     }
 
     const ov::Shape& inputShape = input.get_shape();

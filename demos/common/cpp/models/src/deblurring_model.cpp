@@ -44,6 +44,8 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     else {
         inputLayout = getLayoutFromShape(inputShape);
+        slog::warn << "Layout for input \"" << model->input().get_any_name() << "\" was not set explicitly. "
+            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
     }
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
@@ -66,7 +68,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
-    ov::Layout outputLayout = getLayoutFromShape(outputShape);
+    ov::Layout outputLayout("NCHW");
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
         || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
@@ -135,7 +137,7 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outputShape= infResult.getFirstOutputTensor().get_shape();
-    ov::Layout outputLayout = getLayoutFromShape(outputShape);
+    ov::Layout outputLayout("NCHW");
     size_t outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
     size_t outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
     size_t numOfPixels = outWidth * outHeight;

@@ -39,6 +39,8 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     else {
         inputLayout = getLayoutFromShape(inputShape);
+        slog::warn << "Layout for input \"" << model->input().get_any_name() << "\" was not set explicitly. "
+            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
     }
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

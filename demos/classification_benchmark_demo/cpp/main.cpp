@@ -201,8 +201,7 @@ int main(int argc, char *argv[]) {
         ov::runtime::Core core;
 
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels, FLAGS_layout)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
 
         Presenter presenter(FLAGS_u, 0);
         int width;
