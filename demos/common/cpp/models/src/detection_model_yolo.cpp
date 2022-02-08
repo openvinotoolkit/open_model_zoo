@@ -118,11 +118,13 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
     std::map<std::string, ov::Shape> outShapes;
-    ov::Layout yoloRegionLayout;
     for (auto& out : outputs) {
         ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
         if (out.get_shape().size() == 4) {
-            yoloRegionLayout = getLayoutFromShape(out.get_shape());
+            if (out.get_shape()[ov::layout::height_idx(yoloRegionLayout)] != out.get_shape()[ov::layout::width_idx(yoloRegionLayout)] &&
+                out.get_shape()[ov::layout::height_idx({ "NHWC" })] == out.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+                yoloRegionLayout = { "NHWC" };
+            }
             ppp.output(out.get_any_name()).tensor().set_layout(yoloRegionLayout);
         }
         outputsNames.push_back(out.get_any_name());
@@ -177,7 +179,7 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         }
 
         std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outShapes, &yoloRegionLayout](const std::string& x, const std::string& y)
+            [&outShapes, this](const std::string& x, const std::string& y)
                 {return outShapes[x][ov::layout::height_idx(yoloRegionLayout)] > outShapes[y][ov::layout::height_idx(yoloRegionLayout)]; });
 
         for (const auto& name : outputsNames) {
@@ -252,7 +254,6 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     const unsigned long resized_im_w, const unsigned long original_im_h,
     const unsigned long original_im_w,
     std::vector<DetectedObject>& objects) {
-    ov::Layout yoloRegionLayout = getLayoutFromShape(tensor.get_shape());
     // --------------------------- Extracting layer parameters -------------------------------------
     auto it = regions.find(output_name);
     if (it == regions.end()) {

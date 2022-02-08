@@ -83,4 +83,5 @@ protected:
     YoloVersion yoloVersion;
     const std::vector<float> presetAnchors;
     const std::vector<int64_t> presetMasks;
+    ov::Layout yoloRegionLayout = "NCHW";
 };
