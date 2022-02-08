@@ -531,7 +531,6 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: Dynamic batch is not enabled.
     CppDemo(name='smart_classroom_demo',
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],

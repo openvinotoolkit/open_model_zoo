@@ -390,17 +390,6 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     return face_track_id_to_label;
 }
 
-bool checkDynamicBatchSupport(const ov::Core& core, const std::string& device)  {
-    try  {
-        if (core.get_property(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
-            return false;
-    }
-    catch(const std::exception&)  {
-        return false;
-    }
-    return true;
-}
-
 class FaceRecognizer {
 public:
     virtual ~FaceRecognizer() = default;
