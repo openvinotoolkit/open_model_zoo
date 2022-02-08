@@ -203,7 +203,7 @@ class MelGANIE:
         self.device = device
         self.core = core
         self.input_name = 'mel'
-        self.MAX_WAV_VALUE = 32768.0
+        self.MAX_WAV_VALUE = 32768.0 # constant for normalizing audio output in training stage
 
         self.model = self.load_network(model)
         if self.model.input(self.input_name).shape[2] != default_width:
@@ -239,10 +239,8 @@ class MelGANIE:
         input = self.preprocess_input(mel)
         self.request.infer(input)
         audio = self.request.get_tensor("audio").data[:]
-
         if np.max(audio) <= 2.0:
             audio = audio * self.MAX_WAV_VALUE
-
         audio = np.array(audio).astype(dtype=np.int16)
 
         return audio
