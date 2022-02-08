@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Intel Corporation
+# Copyright (c) 2019-2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -279,35 +279,21 @@ NATIVE_DEMOS = [
 
     CppDemo(name='interactive_face_detection_demo',
             model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
-            test_cases=combine_cases(
+            device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
             TestCase(options={
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m': ModelArg('face-detection-retail-0004'),
+                # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
                 '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+                '-m_em': ModelArg('emotions-recognition-retail-0003'),
+                # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+            }),
+            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
+        ]
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
@@ -318,29 +304,16 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
             TestCase(options={
+                '-m': ModelArg('face-detection-retail-0004'),
                 '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
+            }),
+            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
+        ]
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -350,38 +323,40 @@ NATIVE_DEMOS = [
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
-    CppDemo(name='multi_channel_face_detection_demo',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_face_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['face-detection-adas']}),
-        single_option_cases('-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            ModelArg('face-detection-retail-0044')),
+        [
+            TestCase(options={'-m':  ModelArg('face-detection-adas-0001')}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0004'), '-bs': '2',
+                '-show_stats': '', '-n_iqs': '1', '-duplicate_num': '2'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0005'), '-bs': '3',
+                '-n_iqs': '999'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0044'), '-bs': '4',
+                '-show_stats': '', '-duplicate_num': '3', '-real_input_fps': ''})
+        ]
     )),
 
     CppDemo(name='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        test_cases=[TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
-    )),
+    ]),
 
-    CppDemo(name='multi_channel_object_detection_demo_yolov3',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_object_detection_demo_yolov3', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
-        single_option_cases('-m',
-            # TODO: nothing
-            # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-            ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf')),
+        [
+            # TODO: INT8: Attempt to get a name for a Tensor without names
+            # TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+        ]
     )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -435,7 +410,7 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        ModelArg('face-detection-retail-0005'),
+                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -450,7 +425,7 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2002'),
                         ModelArg('person-vehicle-bike-detection-2003'),
                         ModelArg('person-vehicle-bike-detection-2004'),
-                        ModelArg('product-detection-0001'),
+                        # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -474,7 +449,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    # TODO: INT8: Attempt to get a name for a Tensor without names
+                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -512,7 +488,7 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
+            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -687,13 +663,12 @@ NATIVE_DEMOS = [
         ]
     )),
 
-    # TODO: fix
-    # CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     single_option_cases('-m',
-    #         ModelArg('noise-suppression-denseunet-ll-0001'),
-    #         ModelArg('noise-suppression-poconetlike-0001')),
-    # )),
+    CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-poconetlike-0001')),
+    )),
 
     CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-at': 'maskrcnn',
@@ -742,9 +717,12 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
+            '--background': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
+    #       ModelArg('robust-video-matting'),
+    #       ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -1012,9 +990,9 @@ PYTHON_DEMOS = [
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-en-ru-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
                 '-i': [
                     'The quick brown fox jumps over the lazy dog.',
                     'The five boxing wizards jump quickly.',
@@ -1022,9 +1000,9 @@ PYTHON_DEMOS = [
                 ],
             }),
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-ru-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
                 '-i': [
                     'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                     'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
@@ -1059,8 +1037,7 @@ PYTHON_DEMOS = [
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
-            # TODO: Number of inputs of the model (40) is not equal to number of outputs(42)
-            # ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-denseunet-ll-0001'),
             ModelArg('noise-suppression-poconetlike-0001'))
     )),
 

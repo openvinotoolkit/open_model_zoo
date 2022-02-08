@@ -811,6 +811,12 @@ The main difference between this converter and `super_resolution` in data organi
 * `mvtec` - converts MVTec dataset to `AnomalySegmentationAnnotation` or `ClassificationAnnotation`.
   * `data_dir` - directory with subset images.
   * `classification_only` - converts dataset to `ClassificationAnnotation` withot saving pixel level information (Optional, default `False`).
+* `kitti_2d_detection` - converts KITTI annotation for 2D object detection task to `DetectionAnnotation`.
+  * `annotations_dir` - path to directory with annotation files.
+  * `labels_file` - path to file with labels.
+  * `images_dir` - path to directory with images (optional, default image_2).
+  * `label_start` - specifies label index start in label map. Optional, default value is 1. You can provide another value, if you want to use this dataset for separate label validation.
+  * `images_suffix` - suffix for image file names (Optional, default: `.png`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

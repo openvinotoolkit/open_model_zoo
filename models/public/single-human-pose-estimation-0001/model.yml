@@ -37,6 +37,7 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/single-human-pose-estimation-0001.onnx
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --output=heatmaps

@@ -71,6 +71,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=image_input
+  - --layout=image_input(NHWC)
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny.json

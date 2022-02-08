@@ -30,6 +30,7 @@ files:
 framework: tf
 model_optimizer_args:
   - --input_shape=[1,79,224,224,3]
+  - --layout=Placeholder(NDHWC)
   - --mean_values=Placeholder[127.5]
   - --scale_values=Placeholder[127.5]
   - --input_model=$dl_dir/i3d-rgb.frozen.pb

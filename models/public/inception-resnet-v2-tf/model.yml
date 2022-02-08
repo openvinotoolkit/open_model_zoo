@@ -30,6 +30,7 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,299,299,3]
+  - --layout=input(NHWC)
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]

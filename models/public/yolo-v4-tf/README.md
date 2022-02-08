@@ -39,12 +39,12 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `image_input`, shape - `1, 3, 608, 608`, format is `B, C, H, W`, where:
+Image, name - `image_input`, shape - `1, 608, 608, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -75,13 +75,13 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ### Converted model
 
-1. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_93/BiasAdd/Add`, shape - `1, 255, 76, 76`. The anchor values are `12,16, 19,36, 40,28`.
+1. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_93/BiasAdd/Add`, shape - `1, 76, 76, 255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_101/BiasAdd/Add`, shape - `1, 255, 38, 38`. The anchor values are `36,75, 76,55, 72,146`.
+2. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_101/BiasAdd/Add`, shape - `1, 38, 38, 255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_109/BiasAdd/Add`, shape - `1, 255, 19, 19`. The anchor values are `142,110, 192,243, 459,401`.
+3. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_109/BiasAdd/Add`, shape - `1, 19, 19, 255`. The anchor values are `142,110, 192,243, 459,401`.
 
-For each case format is `B, N*85, Cx, Cy`, where:
+For each case format is `B, Cx, Cy, N*85`, where:
 
 - `B` - batch size
 - `N` - number of detection boxes for cell

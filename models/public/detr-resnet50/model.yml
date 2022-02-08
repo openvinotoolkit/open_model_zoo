@@ -82,6 +82,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,800,1137]
   - --input=input
+  - --layout=input(NCHW)
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.395,57.12,57.375]
   - --output=boxes,scores

@@ -41,6 +41,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,4,128,128,128]
   - --input=data_crop
+  - --layout=data_crop(NCDHW)
   - --output=blockgrad7
   - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
 framework: mxnet

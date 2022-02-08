@@ -30,20 +30,20 @@ class ForecastingEngine:
     """ OpenVINO engine for Time Series Forecasting.
 
     Arguments:
-        model_xml (str): path to model's .xml file.
+        model_path (str): path to model's .xml file.
         input_name (str): name of input blob of model.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, input_name, output_name, quantiles):
+    def __init__(self, model_path, input_name, output_name, quantiles):
         device = "CPU"
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
-        log.info('Reading model {}'.format(model_xml))
-        model = core.read_model(model_xml)
+        log.info('Reading model {}'.format(model_path))
+        model = core.read_model(model_path)
         compiled_model = core.compile_model(model, device)
         self.infer_request = compiled_model.create_infer_request()
-        log.info('The model {} is loaded to {}'.format(model_xml, device))
+        log.info('The model {} is loaded to {}'.format(model_path, device))
         self.input_tensor_name = input_name
         self.output_tensor_name = output_name
         self.quantiles = quantiles
@@ -159,7 +159,7 @@ def build_argparser():
 def main(args):
     quantiles = args.quantiles.split(",")
     model = ForecastingEngine(
-        model_xml=args.model,
+        model_path=args.model,
         input_name=args.input_name,
         output_name=args.output_name,
         quantiles=quantiles

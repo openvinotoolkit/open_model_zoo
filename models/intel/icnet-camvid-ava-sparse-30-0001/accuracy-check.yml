@@ -23,5 +23,5 @@ models:
           - type: mean_iou
             use_argmax: false
             ignore_label: 11
-            presenter: print_vector
+            presenter: print_scalar
             reference: 0.7587

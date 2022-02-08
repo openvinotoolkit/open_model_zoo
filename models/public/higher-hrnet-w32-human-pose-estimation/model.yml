@@ -72,6 +72,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,512,512]
   - --input=image
+  - --layout=image(NCHW)
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395,57.12,57.375]
   - --output=embeddings,heatmaps

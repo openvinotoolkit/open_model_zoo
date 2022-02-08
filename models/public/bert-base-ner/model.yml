@@ -89,6 +89,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,128],[1,128],[1,128]
   - --input=input_ids,attention_mask,token_type_ids
+  - --layout=input_ids(NC),attention_mask(NC),token_type_ids(NC)
   - --input_model=$conv_dir/bert-base-ner.onnx
   - --output=output
 framework: pytorch

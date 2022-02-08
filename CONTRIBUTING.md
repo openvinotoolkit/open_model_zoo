@@ -46,7 +46,7 @@ File | Destination
 configuration file | `models/public/<model_name>/model.yml`
 documentation file | `models/public/<model_name>/README.md`
 validation configuration file|`models/public/<model_name>/accuracy-check.yml`
-demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
+demo|`demos/<demo_name>/<language>/`
 
 ### Tests
 
@@ -185,22 +185,19 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
+A demo shows the main idea of how to infer a model using OpenVINO™. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 
-Demos are required to support the following keys:
+Demos are required to support the following args:
 
- -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
- -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
- -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
- -  `-no_show`: Optional. Do not visualize inference results.
+* `-h, --help`        show this help message and exit
+* `-m <MODEL FILE>`   path to an .xml file with a trained model. If the demo uses several models an extended syntax can be used, like `--mdet`
+* `-i <INPUT>`        input to process. For vision tasks the input might be a path to single image or video file, a path to folder of images, or numeric camera id. For vision tasks the default value must be `0`. For speech/audio tasks input is path to WAV file. For NLP tasks input might be a path to text file or just quoted sentence of text.
+* `-d <DEVICE>`       specify a device to infer on (the list of available devices is shown below). Default is CPU
+* `-o <FILE PATTERN>` pattern for output file(s) to save
 
-> **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.
-
-You can also add any other necessary parameters.
-
-Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
+Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) by adding your demo to the list.
 
 ## Accuracy Validation
 

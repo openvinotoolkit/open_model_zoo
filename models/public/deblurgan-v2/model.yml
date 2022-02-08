@@ -75,6 +75,7 @@ model_optimizer_args:
   - --scale_values=blur_image[127.5]
   - --input_shape=[1,3,736,1312]
   - --input=blur_image
+  - --layout=blur_image(NCHW)
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx
 framework: pytorch

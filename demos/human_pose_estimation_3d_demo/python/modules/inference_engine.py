@@ -18,7 +18,7 @@ from openvino.runtime import Core, get_version, PartialShape
 
 
 class InferenceEngine:
-    def __init__(self, net_model_xml_path, device, stride):
+    def __init__(self, model_path, device, stride):
         self.device = device
         self.stride = stride
 
@@ -26,8 +26,8 @@ class InferenceEngine:
         log.info('\tbuild: {}'.format(get_version()))
         self.core = Core()
 
-        log.info('Reading model {}'.format(net_model_xml_path))
-        self.model = self.core.read_model(net_model_xml_path)
+        log.info('Reading model {}'.format(model_path))
+        self.model = self.core.read_model(model_path)
 
         required_output_keys = {'features', 'heatmaps', 'pafs'}
         for output_tensor_name in required_output_keys:
@@ -40,7 +40,7 @@ class InferenceEngine:
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         compiled_model = self.core.compile_model(self.model, self.device)
         self.infer_request = compiled_model.create_infer_request()
-        log.info('The model {} is loaded to {}'.format(net_model_xml_path, self.device))
+        log.info('The model {} is loaded to {}'.format(model_path, self.device))
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),

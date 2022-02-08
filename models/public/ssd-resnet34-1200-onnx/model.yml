@@ -29,6 +29,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1200,1200]
   - --input=image
+  - --layout=image(NCHW)
   - --mean_values=[123.675,116.28,103.53]
   - --scale_values=[58.395,57.12,57.375]
   - --input_model=$dl_dir/resnet34-ssd1200.onnx

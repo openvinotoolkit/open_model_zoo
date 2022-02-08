@@ -29,6 +29,7 @@ files:
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
+  - --layout=input_1(NHWC)
   - --input=input_1
   - --scale_values=input_1[255]
   - --reverse_input_channels
