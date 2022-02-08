@@ -217,7 +217,10 @@ AccuracyChecker supports following set of adapters:
   * `u_output` - U channel output layer.
   * `v_output` - V channel output layer.
   * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
-* `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
+* `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction` or `HandLandmarksPrediction`.
+  * `landmarks_out` - landmarks output layer.
+  * `landmarks_step` - number of coordinates per landmark (optional, default `2`).
+  * `is_hand_landmarks` - allows conversion to `HandLandmarksPrediction` instead of `FacialLandmarksPrediction` (optional, default `False`).
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
   * `pixel_link_out` - name of layer containing information related to linkage between pixels and their neighbors.

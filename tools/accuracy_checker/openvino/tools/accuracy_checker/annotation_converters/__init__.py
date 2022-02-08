@@ -130,7 +130,7 @@ from .gan_annotation_converter import GANAnnotationConverter
 from .kitti_converter import KITTIConverter
 from .smartlab_action_recognition import SmartLabActionRecognition
 from .malware_classification import MalwareClassificationDatasetConverter
-from .cvat_hands_and_palm import CVATPalmDetectionConverter
+from .cvat_hands_and_palm import CVATPalmDetectionConverter, CVATHandLandmarkConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -262,4 +262,5 @@ __all__ = [
     'SmartLabActionRecognition',
     'MalwareClassificationDatasetConverter',
     'CVATPalmDetectionConverter',
+    'CVATHandLandmarkConverter',
 ]
