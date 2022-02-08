@@ -26,7 +26,7 @@ class HandLandmarksPostprocessor(Postprocessor):
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         for annotation_, prediction_ in zip(annotation, prediction):
-            x_start, y_start, x_max, y_max = annotation_.metadata.get('rect')
+            x_start, y_start, _, _ = annotation_.metadata.get('rect')
             scale_x = image_metadata.get('scale_x')
             scale_y = image_metadata.get('scale_y')
 
@@ -36,4 +36,3 @@ class HandLandmarksPostprocessor(Postprocessor):
                 prediction_.y_values[i] = prediction_.y_values[i] / scale_y + y_start
 
         return annotation, prediction
-

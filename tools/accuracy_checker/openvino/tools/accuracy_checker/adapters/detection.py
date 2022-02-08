@@ -994,26 +994,6 @@ class NanoDetAdapter(Adapter):
         return result
 
 
-class Anchor:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.width = 0
-        self.height = 0
-
-    def set_x_center(self, x_center):
-        self.x = x_center
-
-    def set_y_center(self, y_center):
-        self.y = y_center
-
-    def set_w(self, width):
-        self.width = width
-
-    def set_h(self, height):
-        self.height = height
-
-
 class PalmDetectionAdapter(Adapter):
     __provider__ = 'palm_detection'
 
@@ -1063,7 +1043,7 @@ class PalmDetectionAdapter(Adapter):
         self.h_scale = 128.0
         self.min_score_thresh = 0.5
         self.has_min_score_thresh = self.min_score_thresh != 0
-        self.apply_exponential_on_box_size = False
+        self.apply_exp_on_box_size = False
         self.num_classes = 1
 
         self.min_suppression_threshold = 0.3
@@ -1095,7 +1075,7 @@ class PalmDetectionAdapter(Adapter):
                         if self.has_score_clipping_thresh:
                             score = -self.score_clipping_thresh if score < -self.score_clipping_thresh else score
                             score = self.score_clipping_thresh if score > self.score_clipping_thresh else score
-                        score = 1.0 / (1.0 + np.exp(-score))
+                        score = 1 / (1 + np.exp(-score))
                     if max_score < score:
                         max_score = score
                         class_id = score_idx
@@ -1106,7 +1086,7 @@ class PalmDetectionAdapter(Adapter):
             detection_classes = detection_classes[cond]
             detection_scores = detection_scores[cond]
 
-            cond = ((boxes[:,2] - boxes[:, 0]) >= 0) & ((boxes[:, 3] - boxes[:, 1]) >=0)
+            cond = ((boxes[:, 2] - boxes[:, 0]) >= 0) & ((boxes[:, 3] - boxes[:, 1]) >= 0)
 
             boxes = boxes[cond, :]
             detection_classes = detection_classes[cond]
@@ -1137,11 +1117,6 @@ class PalmDetectionAdapter(Adapter):
         return (min_scale +
                 max_scale) * 0.5 if num_strides == 1 else min_scale + (max_scale -
                                                                        min_scale) * stride_index / (num_strides - 1)
-        # if num_strides == 1:
-        #     scale = (min_scale + max_scale) * 0.5
-        # else:
-        #     scale = min_scale + (max_scale - min_scale) * 1.0 * stride_index / (num_strides - 1)
-        # return scale
 
     def generate_anchors(self):
         anchors = []
@@ -1157,100 +1132,73 @@ class PalmDetectionAdapter(Adapter):
                                                                   self.strides[layer_id]):
                 scale = self.calculate_scale(self.min_scale, self.max_scale, last_same_stride_layer, len(self.strides))
                 if (last_same_stride_layer == 0) and self.reduce_boxes_in_lowest_layer:
-                    aspect_ratios.append(1.0)
-                    aspect_ratios.append(2.0)
-                    aspect_ratios.append(0.5)
-
-                    scales.append(0.1)
-                    scales.append(scale)
-                    scales.append(scale)
-                else:
-                    for aspect_ratio_id in range(0, len(self.aspect_ratios)):
-                        aspect_ratios.append(self.aspect_ratios[aspect_ratio_id])
+                    for aspect_ratio, scale_ in zip([1, 2, 0.5], [0.1, scale, scale]):
+                        aspect_ratios.append(aspect_ratio)
                         scales.append(scale)
-                if self.inteprolated_scale_aspect_ratio > 0.0:
-                    scale_next = 1.0 if last_same_stride_layer == len(self.strides) - 1 else self.calculate_scale(
+                else:
+                    for aspect_ratio in self.aspect_ratios:
+                        aspect_ratios.append(aspect_ratio)
+                        scales.append(scale)
+
+                if self.inteprolated_scale_aspect_ratio > 0:
+                    scale_next = 1 if last_same_stride_layer == len(self.strides) - 1 else self.calculate_scale(
                         self.min_scale, self.max_scale, last_same_stride_layer + 1, len(self.strides))
                     scales.append(np.sqrt(scale * scale_next))
                     aspect_ratios.append(self.inteprolated_scale_aspect_ratio)
                 last_same_stride_layer += 1
 
-            for i in range(0, len(aspect_ratios)):
-                ratio_sqrts = np.sqrt(aspect_ratios[i])
-                anchor_height.append(scales[i] / ratio_sqrts)
-                anchor_width.append(scales[i] * ratio_sqrts)
-            feature_map_height = 0
-            feature_map_width = 0
+            for aspect_ratio, scale in zip(aspect_ratios, scales):
+                ratio_sqrts = np.sqrt(aspect_ratio)
+                anchor_height.append(scale / ratio_sqrts)
+                anchor_width.append(scale * ratio_sqrts)
+
             if len(self.feature_map_height):
                 feature_map_height = self.feature_map_height[layer_id]
                 feature_map_width = self.feature_map_width[layer_id]
             else:
                 stride = self.strides[layer_id]
-                feature_map_height = int(np.ceil(1.0 * self.input_size_height / stride))
-                feature_map_width = int(np.ceil(1.0 * self.input_size_width / stride))
+                feature_map_height = int(np.ceil(self.input_size_height / stride))
+                feature_map_width = int(np.ceil(self.input_size_width / stride))
 
-            for y in range(0, feature_map_height):
-                for x in range(0, feature_map_width):
-                    for anchor_id in range(0, len(anchor_height)):
-                        x_center = (x + self.anchor_offset_x) / feature_map_width
-                        y_center = (y + self.anchor_offset_y) / feature_map_height
+            for y in range(feature_map_height):
+                for x in range(feature_map_width):
+                    for anchor_w, anchor_h in zip(anchor_width, anchor_height):
+                        anchor = [(x + self.anchor_offset_x) / feature_map_width,
+                                  (y + self.anchor_offset_y) / feature_map_height,
+                                  1 if self.fixed_anchor_size else anchor_w,
+                                  1 if self.fixed_anchor_size else anchor_h]
 
-                        anchor = Anchor()
-                        anchor.set_x_center(x_center)
-                        anchor.set_y_center(y_center)
-
-                        if self.fixed_anchor_size:
-                            anchor.set_w(1.0)
-                            anchor.set_h(1.0)
-                        else:
-                            anchor.set_w(anchor_width[anchor_id])
-                            anchor.set_h(anchor_height[anchor_id])
                         anchors.append(anchor)
 
             layer_id = last_same_stride_layer
 
-        return anchors
+        return np.array(anchors)
 
     def decode_boxes(self, raw_boxes):
         boxes = []
         num_boxes, _ = raw_boxes.shape
 
         for i in range(num_boxes):
-            y_center = raw_boxes[i, 0]
-            x_center = raw_boxes[i, 1]
-            h = raw_boxes[i, 2]
-            w = raw_boxes[i, 3]
+            anchor = self.anchors[i, :]
+            y_center = raw_boxes[i, 1] if self.reverse_output_order else raw_boxes[i, 0]
+            x_center = raw_boxes[i, 0] if self.reverse_output_order else raw_boxes[i, 1]
+            h = raw_boxes[i, 3] if self.reverse_output_order else raw_boxes[i, 2]
+            w = raw_boxes[i, 2] if self.reverse_output_order else raw_boxes[i, 3]
 
-            if self.reverse_output_order:
-                x_center = raw_boxes[i, 0]
-                y_center = raw_boxes[i, 1]
-                w = raw_boxes[i, 2]
-                h = raw_boxes[i, 3]
-
-            x_center = x_center / self.x_scale * self.anchors[i].width + self.anchors[i].x
-            y_center = y_center / self.y_scale * self.anchors[i].height + self.anchors[i].y
-
-            if self.apply_exponential_on_box_size:
-                h = np.exp(h / self.h_scale) * self.anchors[i].height
-                w = np.exp(w / self.w_scale) * self.anchors[i].width
-            else:
-                h = h / self.h_scale * self.anchors[i].height
-                w = w / self.w_scale * self.anchors[i].width
+            x_center = x_center / self.x_scale * anchor[2] + anchor[0]
+            y_center = y_center / self.y_scale * anchor[3] + anchor[1]
+            h = np.exp(h / self.h_scale) * anchor[3] if self.apply_exp_on_box_size else h / self.h_scale * anchor[3]
+            w = np.exp(w / self.w_scale) * anchor[2] if self.apply_exp_on_box_size else w / self.w_scale * anchor[2]
 
             decoded = [y_center - h / 2, x_center - w / 2, y_center + h / 2, x_center + w / 2]
-#
+
             for k in range(self.num_keypoints):
                 offset = self.keypoint_coord_offset + k * self.num_values_per_keypoint
-#
-                keypoint_y = raw_boxes[i, offset]
-                keypoint_x = raw_boxes[i, offset + 1]
+                keypoint_y = raw_boxes[i, offset + 1] if self.reverse_output_order else raw_boxes[i, offset]
+                keypoint_x = raw_boxes[i, offset] if self.reverse_output_order else raw_boxes[i, offset + 1]
 
-                if self.reverse_output_order:
-                    keypoint_x = raw_boxes[i, offset]
-                    keypoint_y = raw_boxes[i, offset + 1]
-
-                decoded.append(keypoint_x / self.x_scale * self.anchors[i].width + self.anchors[i].x)
-                decoded.append(keypoint_y / self.y_scale * self.anchors[i].height + self.anchors[i].y)
+                decoded.append(keypoint_x / self.x_scale * anchor[2] + anchor[0])
+                decoded.append(keypoint_y / self.y_scale * anchor[3] + anchor[1])
 
             boxes.append(decoded)
 
