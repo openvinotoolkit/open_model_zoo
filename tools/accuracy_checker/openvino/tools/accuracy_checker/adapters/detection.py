@@ -1133,7 +1133,7 @@ class PalmDetectionAdapter(Adapter):
                 if (last_same_stride_layer == 0) and self.reduce_boxes_in_lowest_layer:
                     for aspect_ratio, scale_ in zip([1, 2, 0.5], [0.1, scale, scale]):
                         aspect_ratios.append(aspect_ratio)
-                        scales.append(scale)
+                        scales.append(scale_)
                 else:
                     for aspect_ratio in self.aspect_ratios:
                         aspect_ratios.append(aspect_ratio)

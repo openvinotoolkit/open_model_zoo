@@ -130,6 +130,8 @@ from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassi
 
 from .time_series import QuantilesPredictorAdapter
 
+from .palm_detection import PalmDetectionAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -276,4 +278,6 @@ __all__ = [
     'ActionRecognitionWithNoAction',
 
     'ImageBackgroundMattingAdapter',
+
+    'PalmDetectionAdapter'
 ]
