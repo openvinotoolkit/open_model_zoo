@@ -19,7 +19,6 @@
 #include "openvino/openvino.hpp"
 
 #include "gflags/gflags.h"
-#include "utils/args_helper.hpp"
 #include "utils/common.hpp"
 #include "utils/ocv_common.hpp"
 #include "utils/performance_metrics.hpp"
@@ -130,20 +129,18 @@ int main(int argc, char* argv[]) {
             if (image_tensor_layout.empty() && image_tensor_type == ov::element::f32)
                 image_tensor_layout = {"NCHW"};
             if (image_tensor_layout.empty() && image_tensor_type == ov::element::u8)
-                image_tensor_layout = { "NHWC" };
+                image_tensor_layout = {"NHWC"};
             image_tensor_height = image_tensor_shape[ov::layout::height_idx(image_tensor_layout)];
             image_tensor_width = image_tensor_shape[ov::layout::width_idx(image_tensor_layout)];
+            modelBatchSize = image_tensor_shape[ov::layout::batch_idx(image_tensor_layout)];
         }
     }
 
-    bool old_model = false;
-    if (image_tensor_layout == "NCHW" && image_tensor_type == ov::element::f32) {
-        old_model = true;
-    }
+    ov::Layout desired_tensor_layout = {"NHWC"};
 
     std::string boxes_tensor_name;
     std::string masks_tensor_name;
-    ov::Layout masks_tensor_layout = {"NCHW"};
+    ov::Layout masks_tensor_layout = {"NCHW"}; // expected by mask processing logic
 
     for (ov::Output<ov::Node> output : outputs) {
         ov::Shape shape = output.get_shape();
@@ -171,24 +168,20 @@ int main(int argc, char* argv[]) {
 
     ov::preprocess::PrePostProcessor ppp(model);
 
-    if (old_model) {
-        ppp.input(image_tensor_name)
-            .tensor()
-            .set_element_type(ov::element::u8)
-            .set_layout(image_tensor_layout);
-    }
-
     ppp.input(image_tensor_name)
         .tensor()
-        .set_layout(image_tensor_layout);
-
+        .set_element_type(ov::element::u8)
+        .set_layout(desired_tensor_layout);
     ppp.input(info_tensor_name)
         .tensor()
         .set_layout(info_tensor_layout);
 
-    // Convert 'mask' output to NCHW as mask processing logic works with NCHW masks
-    ppp.output(masks_tensor_name).model().set_layout(image_tensor_layout);
+    ppp.input(image_tensor_name).model()
+        .set_layout(image_tensor_layout);
+
+    // mask processing logic expect NCHW masks, so implicit conversion will apply when neded
     ppp.output(masks_tensor_name).tensor().set_layout(masks_tensor_layout);
+    ppp.output(masks_tensor_name).model().set_layout(image_tensor_layout);
 
     slog::info << "Preprocessor configuration: " << slog::endl;
     slog::info << ppp << slog::endl;
@@ -230,17 +223,13 @@ int main(int argc, char* argv[]) {
 
         if (shape.size() == 4) {
             for (size_t batchId = 0; batchId < modelBatchSize; ++batchId) {
-                if (old_model) {
-                    matToTensor(images[batchId], tensor, batchId);
-                } else {
-                    cv::Size size = {
-                        int(image_tensor_width),
-                        int(image_tensor_height)
-                    };
-                    unsigned char* data = tensor.data<unsigned char>() + batchId * image_tensor_width * image_tensor_height * 3;
-                    cv::Mat image_resized(size, CV_8UC3, data);
-                    cv::resize(images[batchId], image_resized, size);
-                }
+                cv::Size size = {
+                    int(image_tensor_width),
+                    int(image_tensor_height)
+                };
+                unsigned char* data = tensor.data<unsigned char>() + batchId * image_tensor_width * image_tensor_height * 3;
+                cv::Mat image_resized(size, CV_8UC3, data);
+                cv::resize(images[batchId], image_resized, size);
             }
         }
 
