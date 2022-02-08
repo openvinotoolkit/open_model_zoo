@@ -339,8 +339,8 @@ class DIoUNMS(Postprocessor):
 class WeightedNMS(Postprocessor):
     __provider__ = 'weighted_nms'
 
-    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
-    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
+    prediction_types = (DetectionPrediction,)
+    annotation_types = (DetectionAnnotation,)
 
     @classmethod
     def parameters(cls):

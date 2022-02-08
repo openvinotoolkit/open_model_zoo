@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import StringField
+from ..config import StringField, NumberField, BoolField, ListField
 from ..representation import DetectionPrediction
 
 
@@ -29,7 +29,45 @@ class PalmDetectionAdapter(Adapter):
         params = super().parameters()
         params.update({
             'scores_out': StringField(description='scores output'),
-            'boxes_out': StringField(description='boxes output')
+            'boxes_out': StringField(description='boxes output'),
+            'num_layers': NumberField(
+                description="Number of layers.", value_type=int, min_value=0, default=4, optional=True),
+            'strides': ListField(value_type=int, optional=True, default=[8, 16, 16, 16],
+                                 description='strides of input multi-level feature maps'),
+            'min_scale': NumberField(description="Minimal scale", default=0.1484375, optional=True),
+            'max_scale': NumberField(description="Maximal scale", default=0.75, optional=True),
+            'input_size_width': NumberField(
+                description="Width of a model input image.", value_type=int, min_value=128, default=128, optional=True),
+            'input_size_height': NumberField(
+                description="Width of a model input image.", value_type=int, min_value=128, default=128, optional=True),
+            'reduce_boxes_in_lowest_layer': BoolField(
+                description="Reduce size of anchors in lowest layer", default=False, optional=True),
+            'aspect_ratios': ListField(value_type=int, optional=True, default=[1],
+                                       description='Aspect ratios of for each level of input multi-level feature maps'),
+            'inteprolated_scale_aspect_ratio': NumberField(
+                description="Aspect ratio for interpolated scale", default=1, optional=True),
+            'fixed_anchor_size': BoolField(
+                description="Produces anchors with fixed size", default=True, optional=True),
+            'sigmoid_score': BoolField(description="Score output is sigmoid", default=True, optional=True),
+            'score_clipping_thresh': NumberField(
+                description="Score clipping threshold", default=100, optional=True),
+            'reverse_output_order': BoolField(
+                description="(x,y) coordinates order instead of (y,x)", default=True, optional=True),
+            'keypoint_coord_offset': NumberField(
+                description="Offset of keypoints coordinates", value_type=int, min_value=4, default=4, optional=True),
+            'num_keypoints': NumberField(
+                description="Number of keypoints", value_type=int, min_value=0, default=7, optional=True),
+            'num_values_per_keypoint': NumberField(
+                description="Number of coordinates per keypoint",
+                value_type=int, min_value=0, default=2, optional=True),
+            'scales': ListField(
+                description='Detection box scales for x,y,w,h.', value_type=int, optional=True,
+                default=[128, 128, 128, 128]),
+            'min_score_thresh': NumberField(description="Minimal score threshold", default=0.5, optional=True),
+            'apply_exp_on_box_size': BoolField(
+                description="Box sizes is argument of exponent", default=False, optional=True),
+            'num_classes': NumberField(
+                description="Number of classes.", value_type=int, min_value=0, default=1, optional=True),
         })
         return params
 
@@ -38,41 +76,34 @@ class PalmDetectionAdapter(Adapter):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.outputs_verified = False
 
-        self.num_layers = 4
-        self.min_scale = 0.1484375
-        self.max_scale = 0.75
-        self.input_size_height = 128
-        self.input_size_width = 128
+        self.num_layers = self.get_value_from_config('num_layers')
+        self.min_scale = self.get_value_from_config('min_scale')
+        self.max_scale = self.get_value_from_config('max_scale')
+        self.input_size_height = self.get_value_from_config('input_size_height')
+        self.input_size_width = self.get_value_from_config('input_size_width')
+        self.strides = self.get_value_from_config('strides')
+        self.reduce_boxes_in_lowest_layer = self.get_value_from_config('reduce_boxes_in_lowest_layer')
+        self.inteprolated_scale_aspect_ratio = self.get_value_from_config('inteprolated_scale_aspect_ratio')
+        self.fixed_anchor_size = self.get_value_from_config('fixed_anchor_size')
+        self.aspect_ratios = self.get_value_from_config('aspect_ratios')
         self.anchor_offset_x = 0.5
         self.anchor_offset_y = 0.5
-        self.strides = [8, 16, 16, 16]
-        self.aspect_ratios = [1]
-        self.reduce_boxes_in_lowest_layer = False
         self.feature_map_height = []
         self.feature_map_width = []
-        self.inteprolated_scale_aspect_ratio = 1
-        self.fixed_anchor_size = True
-
         self.anchors = self.generate_anchors()
 
-        self.sigmoid_score = True
-        self.score_clipping_thresh = 100
-        self.has_score_clipping_thresh = self.score_clipping_thresh != 0
-        self.reverse_output_order = True
-        self.keypoint_coord_offset = 4
-        self.num_keypoints = 7
-        self.num_values_per_keypoint = 2
-
-        self.x_scale = 128
-        self.y_scale = 128
-        self.w_scale = 128
-        self.h_scale = 128
-        self.min_score_thresh = 0.5
-        self.has_min_score_thresh = self.min_score_thresh != 0
-        self.apply_exp_on_box_size = False
-        self.num_classes = 1
-
-        self.min_suppression_threshold = 0.3
+        self.sigmoid_score = self.get_value_from_config('sigmoid_score')
+        self.score_clipping_thresh = self.get_value_from_config('score_clipping_thresh')
+        self.reverse_output_order = self.get_value_from_config('reverse_output_order')
+        self.keypoint_coord_offset = self.get_value_from_config('keypoint_coord_offset')
+        self.num_keypoints = self.get_value_from_config('num_keypoints')
+        self.num_values_per_keypoint = self.get_value_from_config('num_values_per_keypoint')
+        scales = self.get_value_from_config('scales')
+        assert len(scales) == 4
+        self.x_scale, self.y_scale, self.w_scale, self.h_scale = scales
+        self.min_score_thresh = self.get_value_from_config('min_score_thresh')
+        self.apply_exp_on_box_size = self.get_value_from_config('apply_exp_on_box_size')
+        self.num_classes = self.get_value_from_config('num_classes')
 
     def select_output_blob(self, outputs):
         self.scores_out = self.check_output_name(self.scores_out, outputs)
@@ -98,7 +129,7 @@ class PalmDetectionAdapter(Adapter):
                 for score_idx in range(self.num_classes):
                     score = raw_scores[i, score_idx]
                     if self.sigmoid_score:
-                        if self.has_score_clipping_thresh:
+                        if self.score_clipping_thresh:
                             score = -self.score_clipping_thresh if score < -self.score_clipping_thresh else score
                             score = self.score_clipping_thresh if score > self.score_clipping_thresh else score
                         score = 1 / (1 + np.exp(-score))

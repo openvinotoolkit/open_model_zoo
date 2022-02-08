@@ -837,6 +837,17 @@ The main difference between this converter and `super_resolution` in data organi
   * `data_dir` - path to dataset root folder.
   * `known_folder` - name of folder containing known files (optional, default `KNOWN_1000`).
   * `malicious_folder` - name of folder containing malicious files (optional, default `MALICIOUS_1000`).
+* `cvat_palm_detection` - converts Hands dataset for palm detection task to `DetectionAnnotation`.
+  * `annotation_file` - path to dataset annotation file.
+  * `images_dir` - path to directory with images (optional, default `final`).
+  * `landmarks_file` - path to file with hand landmarks coordinates for annotation images (optional). If provided, converter uses GT box coordinates calculated from landmarks data instead of data provided in `annotation_file`.
+  * `padding` - additional padding, in pixels, around GT bounding box, calculated from `landmarks_file`.
+* `cvat_hand_landmarks` - converts Hands dataset for hand recognition task to `HandLandmarksAnnotation`.
+  * `annotation_file` - path to dataset annotation file.
+  * `bbox_file` - path to file with hand bounding box annotation.
+  * `images_dir` - path to directory with images (optional, default `final`).
+  * `from_landmarks` - allow to calculate hand bounding box coordinates from landmarks data instead of data provided in `bbox_file` (optional, default `False`).
+  * `padding` - additional padding, in pixels, around hand bounding box, calculated in `from_landmarks` mode (optional, default `10`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

@@ -48,7 +48,7 @@ class CVATHandPalmConverterBase:
 class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConverterBase):
     __provider__ = 'cvat_hand_landmark'
 
-    annotation_types = (DetectionAnnotation, )
+    annotation_types = (HandLandmarksAnnotation, )
 
     @classmethod
     def parameters(cls):

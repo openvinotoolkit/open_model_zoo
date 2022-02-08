@@ -24,6 +24,7 @@ Accuracy Checker supports following set of postprocessors:
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`).
+  * `unpadding` if this option enabled, recalculation of boxes normalized coordinates to remove additional padding will be performed before multiplying on original input size. (Optional, default `False`).
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
     Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
@@ -40,6 +41,8 @@ Accuracy Checker supports following set of postprocessors:
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.
   * `min_score` - break point.
+* `weighted_nms` - weighted non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
+  * `overlap` - overlap threshold for merging detections.
 * `filter` - filtering data using different parameters. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `apply_to` - determines target boxes for processing (`annotation` for ground truth boxes and `prediction` for detection results, `all` for both).
   * `remove_filtered` - removing filtered data. Annotations support ignoring filtered data without removing as default, in other cases filtered data will be removed automatically.
@@ -134,3 +137,4 @@ Accuracy Checker supports following set of postprocessors:
 * `sentence_similarity_pooling` - pool words embeddings for sentence similarity task. Supported representations: `SentenceSimilarityAnnotation`, `ReidentificationPrediction`.
   * `pooling type` - pooling type for embeddings - `mean` for mean pooling, `max` for max pooling (Optional, default `mean`).
   * `remove_padding` - remove end of string padding from word embeddings (Optional, default `True`).
+* `hand_landmarks` - converts hand landmark coordinates to source image coordinate space. Supported representations: `HandLandmarksPrediction`.
