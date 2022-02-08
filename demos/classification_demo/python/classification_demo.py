@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2021 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -106,11 +106,11 @@ def build_argparser():
 
 def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
-    сlass_label = ""
+    class_label = ""
     if classifications:
-        сlass_label = classifications[0][1]
+        class_label = classifications[0][1]
     font_scale = 0.7
-    label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
+    label_height = cv2.getTextSize(class_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
     initial_labels_pos =  frame.shape[0] - label_height * (int(1.5 * len(classifications)) + 1)
 
     if (initial_labels_pos < 0):
@@ -123,8 +123,8 @@ def draw_labels(frame, classifications, output_transform):
     put_highlighted_text(frame, header, (frame.shape[1] - label_width, offset_y),
         cv2.FONT_HERSHEY_COMPLEX, font_scale, (255, 0, 0), 2)
 
-    for idx, сlass_label, score in classifications:
-        label = '{}. {}    {:.2f}'.format(idx, сlass_label, score)
+    for idx, class_label, score in classifications:
+        label = '{}. {}    {:.2f}'.format(idx, class_label, score)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
         offset_y += int(label_height * 1.5)
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),

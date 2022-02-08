@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ except ImportError:
 import re
 import numpy as np
 import logging as log
-from .model_adapter import ModelAdapter, Metadata, get_layout_from_shape
+from .model_adapter import ModelAdapter, Metadata
 
 
 class OVMSAdapter(ModelAdapter):
@@ -123,8 +123,7 @@ class OVMSAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for name, meta in self.metadata["inputs"].items():
-            input_layout = get_layout_from_shape(meta['shape'])
-            inputs[name] = Metadata(names=set(name), shape=meta["shape"], layout=input_layout, precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            inputs[name] = Metadata(names=set(name), shape=meta["shape"], precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return inputs
 
     def get_output_layers(self):
