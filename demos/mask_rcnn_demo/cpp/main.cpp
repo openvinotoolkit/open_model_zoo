@@ -180,10 +180,7 @@ int main(int argc, char* argv[]) {
 
     ppp.input(image_tensor_name)
         .tensor()
-        .set_layout(image_tensor_layout)
-        .set_spatial_static_shape(
-            image_tensor_height,
-            image_tensor_width);
+        .set_layout(image_tensor_layout);
 
     ppp.input(info_tensor_name)
         .tensor()
