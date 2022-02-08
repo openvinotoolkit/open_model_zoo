@@ -127,7 +127,7 @@ class AsyncPipeline:
             self.inference_metrics.update(infer_start_time)
 
             postprocessing_start_time = perf_counter()
-            result = self.model.postprocess(raw_result, preprocess_meta), {**meta, **preprocess_meta}
+            result = self.model.postprocess(raw_result, preprocess_meta), meta
             self.postprocess_metrics.update(postprocessing_start_time)
             return result
         return None

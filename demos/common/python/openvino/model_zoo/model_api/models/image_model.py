@@ -17,16 +17,6 @@
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform
-from openvino.runtime import Layout
-
-
-def get_layout_from_shape(shape) -> Layout:
-    if len(shape) != 4:
-        raise RuntimeError('Get_layout supports only 4D input shape')
-
-    layout = Layout('NCHW') if shape[1] == 3 or shape[1] == 1 else Layout('NHWC')
-    return layout
-
 
 
 class ImageModel(Model):
@@ -56,10 +46,7 @@ class ImageModel(Model):
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
         self.image_blob_name = self.image_blob_names[0]
 
-        self.input_layout = self.inputs[self.image_blob_name].layout
-        if self.input_layout.empty:
-            self.input_layout = get_layout_from_shape(self.inputs[self.image_blob_name].shape)
-        self.nchw_layout = self.input_layout == Layout('NCHW')
+        self.nchw_layout = self.inputs[self.image_blob_name].layout == 'NCHW'
         if self.nchw_layout:
             self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
         else:

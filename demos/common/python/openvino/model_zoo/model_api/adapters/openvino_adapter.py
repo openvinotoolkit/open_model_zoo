@@ -23,7 +23,7 @@ try:
 except ImportError:
     openvino_absent = True
 
-from .model_adapter import ModelAdapter, Metadata
+from .model_adapter import ModelAdapter, Metadata, get_layout_from_shape
 from ..pipelines import parse_devices
 
 
@@ -89,7 +89,11 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for input in self.model.inputs:
-            input_layout = layout_helpers.get_layout(input)
+            input_layout = ''
+            if not layout_helpers.get_layout(input).empty:
+                input_layout = layout_helpers.get_layout(input).to_string().strip('[]').replace(',', '')
+            elif len(input.shape) == 4:
+                input_layout = get_layout_from_shape(input.shape)
             inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs

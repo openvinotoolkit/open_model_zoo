@@ -16,7 +16,6 @@
 
 import abc
 from dataclasses import dataclass, field
-from openvino.runtime import Layout
 from typing import Dict, List, Set
 
 
@@ -24,10 +23,18 @@ from typing import Dict, List, Set
 class Metadata:
     names: Set[str] = field(default_factory=set)
     shape: List[int] = field(default_factory=list)
-    layout: Layout = field(default_factory=Layout)
+    layout: str = ''
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)
+
+
+def get_layout_from_shape(shape) -> str:
+    if len(shape) != 4:
+        raise RuntimeError('Get_layout supports only 4D input shape')
+
+    layout = 'NCHW' if shape[1] in range(1, 4) else 'NHWC'
+    return layout
 
 
 class ModelAdapter(metaclass=abc.ABCMeta):
