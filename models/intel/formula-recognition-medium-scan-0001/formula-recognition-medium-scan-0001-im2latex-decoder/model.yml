@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +16,25 @@ description: >-
   Decoder part of latex formula recognition model.
 task_type: token_recognition
 files:
+  - name: vocab.json
+    size: 3930
+    checksum: af08d997a4cfe1e42a58bf581ae6afda7fcb16ed6618609f3d891190bb812983a95ea240d82b913017a4779ccee36963
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 52273
-    checksum: c85fe0474e982d407c5272e1ac3be660210e6b873fc7c35aacd8a600d107d523b29c5a9cbeb543f2d15c1b8554f2c77a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 56065
+    checksum: 4c7d32852ab976d0a1a6d18a400bc89e627284463b60f774b76157930a657224e7acceaba8f577682688f55bebc27cda
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
-    size: 10252352
-    checksum: 175b85d7a3b59085d64d7c0212450a51506baad1b3e9dc71dd873b1ea419e88fc4936c9b3440a4fa7b2c671ed867ea8b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 10252364
+    checksum: 702a850618c6dff6a49d34370a35df84b42a3fd53b799c65ece28c2b1e245a922f8113408e69ae4c1397ad0b704ee44c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 52265
-    checksum: c88c163d52942c041c9b3ff6296a9c0b0f480a52fd34fcddce5e731fde2552b6a9b3da218f565987bec6a8ecce1021be
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 62824
+    checksum: 5c1d60ac4ad542a46a7f0092550771a20593e8162602c7e5cc343f308edae773e4ef7d2df3c73330b66b1bcf21bb176b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
-    size: 5126230
-    checksum: 2dc1387f2418b4319150e7bdc73295f20eaa07639fe6a333fc3c1a918809bdec014ac024ca38cd5ce94c7840dd4677f9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 5126242
+    checksum: 3e1c34fb6215a9e29cdc913667854904dde89fa78465c9893642da354244a626c2f9bf0f8de58731d4c89988314efa1c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

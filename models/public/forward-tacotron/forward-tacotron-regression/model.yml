@@ -28,6 +28,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,805,512]
   - --input=data
+  - --layout=data(NCH)
   - --output=mel
   - --input_model=$dl_dir/forward-tacotron-regression/forward_tacotron_regression.onnx
 framework: onnx

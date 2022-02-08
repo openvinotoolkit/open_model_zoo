@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,20 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0091.xml
-    size: 1381647
-    checksum: 00dfe3ae4e41aa2088447577affe8a6c1cdcb5de90f4f64f4ee3c0428ae09e1eda9a1e57b9974855dd77a4e47d51f47e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.xml
+    size: 1655145
+    checksum: f30698b00338e8bbb7a932a246770d9f7d0bb9db1f57a60b02e75f608b0e34128a4cadcb731b79b7b341e3a2d474b477
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.xml
   - name: FP32/instance-segmentation-security-0091.bin
-    size: 390233536
-    checksum: 554f90c40dd9601cadfb60c6132d68b418fc513308a4bdd53e4869850fe6f70b3016929b87ebbe395fba357210ec695d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.bin
+    size: 390622136
+    checksum: cacc09a66931e3a807b9961942db6dbfcf9ec1d5879787e306bdcd4bdbfcf59109488ef0aa0611e585c56c9b37ba8107
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.bin
   - name: FP16/instance-segmentation-security-0091.xml
-    size: 1380558
-    checksum: 0957ca26070417375eb3dbc354f499c2e34ee6ee5b96b33932ab1393a09bf948eb7969517db6ed8359f21ff7036649cd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.xml
+    size: 2001799
+    checksum: 5c3a47d46394a7b82cc294ad3b120f76409d6acae75be8d54ffde4a3bca6f34350e069c8b646055aeee39addfac95417
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.xml
   - name: FP16/instance-segmentation-security-0091.bin
-    size: 195117022
-    checksum: b3c9813e9fc34e719bc4d928ecd28891493ab42d956d683625ea705518080083933fa25cf5e2ee9100d6253a52f1f1a8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.bin
-  - name: FP16-INT8/instance-segmentation-security-0091.xml
-    size: 2082233
-    checksum: aef66830c7f100735b67e83d9a12c7a3261fc6f6499f8780e07a006a515f846e0515575be5e7e2e96498471e273c70c9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.xml
-  - name: FP16-INT8/instance-segmentation-security-0091.bin
-    size: 196951642
-    checksum: ac5fd8b40f946ac3cce8f51e07e9bcbd47f7cb0f6334977b758755af097f1278cac3465879246140b5c07b190636ee4f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.bin
+    size: 195310292
+    checksum: 743fdb9b6a9991fc9748ecb6275256237d99beaa777a3fc96af6f7f38e4fa6eb56ca5ff6694a547af9787c7cb12ab99e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -289,6 +289,8 @@ Deep Learning compressed models
 |------------|---------------------|-----------|
 | [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-en-ru-0002](./machine-translation-nar-en-ru-0002/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-ru-en-0002](./machine-translation-nar-ru-en-0002/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |
 | [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md) | 23.19 | 77.47 |
 

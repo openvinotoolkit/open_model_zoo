@@ -27,6 +27,7 @@ postprocessing:
     file: wavernn-rnn.zip
 model_optimizer_args:
   - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
+  - --layout=m_t(NC),a1_t(NC),a2_t(NC),a3_t(NC),a4_t(NC),h1.1(NC),h2.1(NC),x(NC)
   - --output=logits,h1,h2
   - --input_model=$dl_dir/wavernn-rnn/wavernn_rnn.onnx
 framework: onnx

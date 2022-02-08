@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,20 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/weld-porosity-detection-0001.xml
-    size: 63294
-    checksum: 714957312fd633b31c437c05300577c0f5a4a975484769c407faf258c6609f5f2d3d2dce8e0edc42a20e74c2846d0cf4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
+    size: 114105
+    checksum: 92d955db6ed9597a8c684576b774312768165eb3ca2b7984f4b439e39ee87e43c8b8fb19cc4cb39ab5bb04216fc18cd1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
   - name: FP32/weld-porosity-detection-0001.bin
-    size: 44693044
-    checksum: 34b2decb3f381810b706083da42fad6462c96d98a1447df4e332fd2dc3f7208991bb16dd4167cee965fee7845e097035
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
+    size: 44727848
+    checksum: fdf6e93d9c7c5c50ce2c7ed54fba85e77e7e084e81a3a30afa1b2ae41e88ee517437c98301f06b233a1cdf1292dc46f7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
   - name: FP16/weld-porosity-detection-0001.xml
-    size: 63269
-    checksum: 5fbab58adb5b24453c2c7636ed2ee1d2a359f9ff9b51b48a2b26c318cbbe5d79d7b28cb428599b8ad2d149d8485ef456
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
+    size: 160233
+    checksum: 1e57ebe9fbb93416dd910765f3724b2d248789fe944c0009984a6ef8e8fe1ec314788e3deff4094db67a22fb7882b1a2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
   - name: FP16/weld-porosity-detection-0001.bin
-    size: 22346530
-    checksum: e7aa38cf7377e709280f353a2949029c220edfa9a0141e13ec0466669d73de00174d59820b4de107af0a0358f0bcf48d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
-  - name: FP16-INT8/weld-porosity-detection-0001.xml
-    size: 162672
-    checksum: edb0137a41e63c40fce55e83dbf110716a999dcba79df97b0174b6483e3d44c1de3098708d600231ec211df5f87360b1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.xml
-  - name: FP16-INT8/weld-porosity-detection-0001.bin
-    size: 11197380
-    checksum: 7b879ca13c8bb8e913400b645ef476652d4ada31bcac512b05c6b7b4969aacdde616be3dd4f4a5f5e3f08e635cc253af
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.bin
+    size: 22363932
+    checksum: eeeec4ce9167f53101f5db1afedede957a6e7de85fc80893bf19aa21100544647f3dbb50c4bca38e36baef2c80145439
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -125,6 +125,7 @@ model_optimizer_args:
   - --output=exemplar_based_output
   - --mean_values=ref_image[127.5,127.5,127.5]
   - --scale_values=ref_image[127.5,127.5,127.5]
+  - --layout=input_seg_map(NCHW),ref_image(NCHW),ref_seg_map(NCHW)
   - --reverse_input_channels
 framework: pytorch
 license: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/LICENSE

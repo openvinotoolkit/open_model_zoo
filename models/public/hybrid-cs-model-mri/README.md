@@ -28,21 +28,21 @@ Accuracy metrics are obtained on [Calgary-Campinas Public Brain MR Dataset](http
 
 ### Original model
 
-MRI input, name - `input_1`, shape - `1, 2, 256, 256`, format - `B, C, H, W`, where:
+MRI input, name - `input_1`, shape - `1, 256, 256, 2`, format - `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 ### Converted model
 
-MRI input, name - `input_1`, shape - `1, 2, 256, 256`, format - `B, C, H, W`, where:
+MRI input, name - `input_1`, shape - `1, 256, 256, 2`, format - `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 ## Output
 

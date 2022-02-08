@@ -117,6 +117,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,640,640,3]
   - --input=image_arrays
+  # - --layout=image_arrays(NHWC)
   - --reverse_input_channels
   - --input_model=$conv_dir/efficientdet-d1_saved_model/efficientdet-d1_frozen.pb
   - --transformations_config=$mo_ext_dir/front/tf/automl_efficientdet.json

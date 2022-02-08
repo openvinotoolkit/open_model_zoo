@@ -63,6 +63,7 @@ class SequentialModel(BaseCascadeModel):
         self.decoder = create_model(network_info['decoder'], launcher, self._decoder_mapping, 'decoder',
                                     delayed_model_loading)
         self.adapter = create_adapter(adapter_info)
+        self.update_inputs_outputs_info()
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
@@ -95,7 +96,7 @@ class SequentialModel(BaseCascadeModel):
     def update_inputs_outputs_info(self):
         current_name = next(iter(self.encoder.inputs))
         with_prefix = current_name.startswith('encoder_')
-        if with_prefix != self.with_prefix:
+        if not hasattr(self, 'with_prefix') or with_prefix != self.with_prefix:
             self.encoder.update_inputs_outputs_info(with_prefix)
             self.decoder.update_inputs_outputs_info(with_prefix)
 

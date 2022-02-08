@@ -39,36 +39,14 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 
 class SegmentationVisualizer:
-    pascal_voc_palette = [
-        (0,   0,   0),
-        (128, 0,   0),
-        (0,   128, 0),
-        (128, 128, 0),
-        (0,   0,   128),
-        (128, 0,   128),
-        (0,   128, 128),
-        (128, 128, 128),
-        (64,  0,   0),
-        (192, 0,   0),
-        (64,  128, 0),
-        (192, 128, 0),
-        (64,  0,   128),
-        (192, 0,   128),
-        (64,  128, 128),
-        (192, 128, 128),
-        (0,   64,  0),
-        (128, 64,  0),
-        (0,   192, 0),
-        (128, 192, 0),
-        (0,   64,  128)
-    ]
-
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
             log.debug('The palette is loaded from {}'.format(colors_path))
         else:
-            self.color_palette = self.pascal_voc_palette
+            pascal_palette_path = Path(__file__).resolve().parents[3] /\
+                'data/palettes/pascal_voc_21cl_colors.txt'
+            self.color_palette = self.get_palette_from_file(pascal_palette_path)
             log.debug('The PASCAL VOC palette is used')
         log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
@@ -104,7 +82,7 @@ class SaliencyMapVisualizer:
 def render_segmentation(frame, masks, visualiser, resizer, only_masks=False):
     output = visualiser.apply_color_map(masks)
     if not only_masks:
-        output = np.floor_divide(frame, 2) + np.floor_divide(output, 2)
+        output = cv2.addWeighted(frame, 0.5, output, 0.5, 0)
     return resizer.resize(output)
 
 def build_argparser():

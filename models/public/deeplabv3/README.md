@@ -34,12 +34,12 @@ Expected color order: `RGB`.
 
 ### Converted Model
 
-Image, name: `mul_1/placeholder_port_1`, shape: `1, 3, 513, 513`, format: `B, C, H, W`, where:
+Image, name: `mul_1/placeholder_port_1`, shape: `1, 513, 513, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 

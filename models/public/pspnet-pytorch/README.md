@@ -17,7 +17,7 @@
 
 | Metric    | Value |
 | --------- | ----- |
-| mean_iou  | 70.6% |
+| mean_iou  | 70.1% |
 
 Accuracy metrics were obtained with fixed input resolution 512x512.
 

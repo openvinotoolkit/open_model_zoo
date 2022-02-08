@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,20 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0014.xml
-    size: 220869
-    checksum: 7bdb7f11588aca22656014e096b10b98bdf204c90a2557da25cea52f9955b2b6ff858df111ac9bc25627c73b7cdee512
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.xml
+    size: 206774
+    checksum: 0d4a3039f10a9e64e5a690f57275b8d495843374a4754d9727268145b706e896d97acb7319c1b308c75607205999a19e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0014/FP32/text-recognition-0014.xml
   - name: FP32/text-recognition-0014.bin
-    size: 36555752
-    checksum: 270e5a11e9a73c1f72df468c6acf60cfeda87bcbf4f2876584e0ce5fd5cd9740cd0edba4762dc45859ad8598ce044338
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.bin
+    size: 36628840
+    checksum: 7287f9ae538e429508dababf5739e228eefd357be1e5d5c257dccba166b0ee0968579f8596fb87354917a888fdc76a1d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0014/FP32/text-recognition-0014.bin
   - name: FP16/text-recognition-0014.xml
-    size: 220711
-    checksum: 14c4ed52cf9a178e951cdbb298c21628d4e8b6873ce2f4eda72f1379b9d07e3ef3bcd38a1d77ef36f98ac60a115984c0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.xml
+    size: 269122
+    checksum: 30134b2f74930e3348fca32c3012403616e50b6ed6344857d21a25aef2dea3c1799c2881891a4ef616eed13ce092b56c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0014/FP16/text-recognition-0014.xml
   - name: FP16/text-recognition-0014.bin
-    size: 18278038
-    checksum: a0be445dcca932082f26c5db40f96b263f86c17ef14826fe647c3cede719f6fffd57057be8a52921c7c5011b51c15da4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.bin
-  - name: FP16-INT8/text-recognition-0014.xml
-    size: 346571
-    checksum: 005376c823635b302109c688e5f02b71683a7147c26990cc6b14ee39f735c481ead60a247564045b6afdd496ea5737ee
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.xml
-  - name: FP16-INT8/text-recognition-0014.bin
-    size: 15485590
-    checksum: 215d50460e102c089c9c78fbc6975ff3d6f2737d2c43cf42aa5354630a0bf3e8670bfe105a1d350527ec7cc8dfba69ae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.bin
+    size: 18314518
+    checksum: d961b0f68108192ce3aef850ab591e10cc44e3040dfaab4ce6f00878eda9bc9bc0d9acfe388d0156bc895b79da8c4618
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0014/FP16/text-recognition-0014.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
