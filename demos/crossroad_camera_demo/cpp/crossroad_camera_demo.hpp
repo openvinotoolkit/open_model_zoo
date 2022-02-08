@@ -1,15 +1,12 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
-#include <vector>
-#include <gflags/gflags.h>
-
-#include <utils/default_flags.hpp>
+#include "gflags/gflags.h"
+#include "utils/default_flags.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS

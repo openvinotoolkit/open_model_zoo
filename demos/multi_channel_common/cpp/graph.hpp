@@ -15,46 +15,48 @@
 #include <string>
 #include <memory>
 
-#include <inference_engine.hpp>
-
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 #include "perf_timer.hpp"
 #include "input.hpp"
 
-void loadImageToIEGraph(cv::Mat img, void* ie_buffer);
+static inline size_t roundUp(size_t enumerator, size_t denominator) {
+    assert(enumerator > 0);
+    assert(denominator > 0);
+    return 1 + (enumerator - 1) / denominator;
+}
 
-class VideoFrame;
+static inline std::queue<ov::InferRequest> compile(std::shared_ptr<ov::Model>&& model, const std::string& modelPath,
+        const std::string& device, size_t performanceHintNumRequests, ov::Core& core) {
+    core.set_property("CPU", {{"CPU_BIND_THREAD", "NO"}});
+    ov::CompiledModel compiled = core.compile_model(model, device, {
+        {"PERFORMANCE_HINT", "THROUGHPUT"},
+        {"PERFORMANCE_HINT_NUM_REQUESTS", std::to_string(performanceHintNumRequests)}});
+    unsigned maxRequests = compiled.get_property("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
+    logCompiledModelInfo(compiled, modelPath, device);
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
+    std::queue<ov::InferRequest> reqQueue;
+    for (unsigned i = 0; i < maxRequests; ++i) {
+        reqQueue.push(compiled.create_infer_request());
+    }
+    return reqQueue;
+}
 
 class IEGraph{
 private:
     PerfTimer perfTimerPreprocess;
     PerfTimer perfTimerInfer;
-
-    float confidenceThreshold;
-
-    std::size_t batchSize;
-
-    std::string modelPath;
-    std::string cpuExtensionPath;
-    std::string cldnnConfigPath;
-
-    std::string inputDataBlobName;
-    std::vector<std::string> outputDataBlobNames;
-
-    std::string deviceName;
-
-    InferenceEngine::Core ie;
-    std::queue<InferenceEngine::InferRequest::Ptr> availableRequests;
+    std::queue<ov::InferRequest> availableRequests;
 
     struct BatchRequestDesc {
         std::vector<std::shared_ptr<VideoFrame>> vfPtrVec;
-        InferenceEngine::InferRequest::Ptr req;
+        ov::InferRequest req;
         std::chrono::high_resolution_clock::time_point startTime;
     };
     std::queue<BatchRequestDesc> busyBatchRequests;
 
-    std::size_t maxRequests = 0;
+    std::size_t maxRequests;
 
     std::atomic_bool terminate = {false};
     std::mutex mtxAvalableRequests;
@@ -64,39 +66,21 @@ private:
 
     using GetterFunc = std::function<bool(VideoFrame&)>;
     GetterFunc getter;
-    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
+    using PostprocessingFunc = std::function<std::vector<Detections>(ov::InferRequest, cv::Size)>;
     PostprocessingFunc postprocessing;
-    using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetwork&)>;
-    PostLoadFunc postLoad;
     std::thread getterThread;
-
-    void initNetwork(const std::string& deviceName);
-
 public:
-    struct InitParams {
-        std::size_t batchSize = 1;
-        std::size_t maxRequests = 5;
-        bool collectStats = false;
-        std::string modelPath;
-        std::string cpuExtPath;
-        std::string cldnnConfigPath;
-        std::string deviceName;
-        PostLoadFunc postLoadFunc = nullptr;
-    };
+    IEGraph(std::queue<ov::InferRequest>&& availableRequests, bool collectStats):
+        perfTimerPreprocess(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        perfTimerInfer(collectStats ? PerfTimer::DefaultIterationsCount : 0),
+        availableRequests(std::move(availableRequests)),
+        maxRequests(this->availableRequests.size()) {}
 
-    explicit IEGraph(const InitParams& p);
-
-    void start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
+    void start(size_t batchSize, GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 
     bool isRunning();
 
-    InferenceEngine::SizeVector getInputDims() const;
-
     std::vector<std::shared_ptr<VideoFrame>> getBatchData(cv::Size windowSize);
-
-    unsigned int getBatchSize() const;
-
-    void setDetectionConfidence(float conf);
 
     ~IEGraph();
 

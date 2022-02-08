@@ -15,7 +15,6 @@
 """
 
 import logging as log
-import os.path as osp
 
 import numpy as np
 
@@ -110,12 +109,9 @@ class ForwardTacotronIE:
                                                   [-1 if i == j else 1 for j in range(a.ndim)]) for i in range(a.ndim)]
         return a[tuple(expanded_index)]
 
-    def load_network(self, model_xml):
-        model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
-        model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading ForwardTacotron model {}'.format(model_xml))
-        model = self.ie.read_model(model=model_xml, weights=model_bin)
-        return model
+    def load_network(self, model_path):
+        log.info('Reading ForwardTacotron model {}'.format(model_path))
+        return self.ie.read_model(model_path)
 
     def create_infer_request(self, model, path):
         compiled_model = self.ie.compile_model(model, device_name=self.device)

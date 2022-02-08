@@ -111,7 +111,7 @@ void Presenter::handleKey(int key) {
     }
 }
 
-void Presenter::drawGraphs(cv::Mat& frame) {
+void Presenter::drawGraphs(const cv::Mat& frame) {
     const std::chrono::steady_clock::time_point curTimeStamp = std::chrono::steady_clock::now();
     if (curTimeStamp - prevTimeStamp >= std::chrono::milliseconds{1000}) {
         prevTimeStamp = curTimeStamp;

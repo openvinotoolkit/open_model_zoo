@@ -16,7 +16,7 @@ import numpy as np
 
 class ImageInpainting:
     def __init__(self, core, model_path, device='CPU'):
-        model = core.read_model(model_path, model_path.with_suffix('.bin'))
+        model = core.read_model(model_path)
 
         if len(model.inputs) != 2:
             raise RuntimeError("The model expects 2 input layers")

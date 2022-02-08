@@ -18,27 +18,19 @@ task_type: token_recognition
 files:
   - name: FP32/text-recognition-0016-decoder.xml
     size: 50326
-    checksum: 7501eece6217f6b3a3a3586d63da35ea83cf42fae1391c6a30ebe8def2965d13ef53e52e74bb277118e390dfa30f1aa4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP32/text-recognition-0016-decoder.xml
+    checksum: 43ad30a8e23928df9dd2588c3cb61da6d085acebeb6761cc67f578a542c58707a618f29a5a11d5fc7ec8afe342a72471
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-decoder/FP32/text-recognition-0016-decoder.xml
   - name: FP32/text-recognition-0016-decoder.bin
     size: 42303856
     checksum: cecd508212fbafc0cb1bc8cc0bd46817acae819a94802b4d35bf289f0a10604264bd21aebfbdb4ba8aff483b1cbd1253
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP32/text-recognition-0016-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-decoder/FP32/text-recognition-0016-decoder.bin
   - name: FP16/text-recognition-0016-decoder.xml
     size: 56722
-    checksum: 93cb3222ac4cd9cbb7d541b5e7fa71a65b974078a2e2399fed6062aa0c5f93f8ad98e4d299cbea156b08fc966c82f132
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP16/text-recognition-0016-decoder.xml
+    checksum: b4064022fefc931c2c386b21d2370a7271c0106cc30b007d9d786e3944e83975c622c72ca95b568fd11448fea967f566
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-decoder/FP16/text-recognition-0016-decoder.xml
   - name: FP16/text-recognition-0016-decoder.bin
     size: 21152032
     checksum: 8cbdfcda1839ecd1c183dbd9355660db7b85f6e815a205d61d2b80b94270bea25660f391a73a80912e2c2b754a2b9f02
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP16/text-recognition-0016-decoder.bin
-  - name: FP16-INT8/text-recognition-0016-decoder.xml
-    size: 100219
-    checksum: 2ebd7ee119c2833e901f314b2a27a966fe0e8f3e2f26e9d0b85da62ad2b733c9324fa02576723302508ae85337bce3e3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP16-INT8/text-recognition-0016-decoder.xml
-  - name: FP16-INT8/text-recognition-0016-decoder.bin
-    size: 16940644
-    checksum: 4e52618987da53281592796a776fd2adb905feb00ba696852fa68700af819c4616b271111fe483e8e079cb4cfe3a5826
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/text-recognition-0016/text-recognition-0016-decoder/FP16-INT8/text-recognition-0016-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-decoder/FP16/text-recognition-0016-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

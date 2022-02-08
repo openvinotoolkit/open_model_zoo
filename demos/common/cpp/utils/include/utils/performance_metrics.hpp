@@ -37,7 +37,7 @@ public:
 
     PerformanceMetrics(Duration timeWindow = std::chrono::seconds(1));
     void update(TimePoint lastRequestStartTime,
-                cv::Mat& frame,
+                const cv::Mat& frame,
                 cv::Point position = {15, 30},
                 int fontFace = cv::FONT_HERSHEY_COMPLEX,
                 double fontScale = 0.75,
@@ -51,7 +51,7 @@ public:
     /// @param fontScale font scale
     /// @param color font color
     /// @param thickness font thickness
-    void paintMetrics(cv::Mat& frame,
+    void paintMetrics(const cv::Mat& frame,
         cv::Point position = { 15, 30 },
         int fontFace = cv::FONT_HERSHEY_COMPLEX,
         double fontScale = 0.75,

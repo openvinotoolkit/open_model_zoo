@@ -19,27 +19,27 @@ task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
     size: 383308
-    checksum: 0de752c9d376e734f68f73f82f4d1de751a8749e92b1f2110465d273036a0cc8849eca1463db24ef31c655b7dd92a4f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+    checksum: 14af3bb912aae18dfa95cae3f486098889336ab2e80dece495d1a7189a61fb9d367a571b9165f7f8ee22d2e0b8d152f4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
     size: 11749496
     checksum: e70fa64ad870c80357bd2148c843e8ff738a8a495bcd821c0e267a1bae22aa8ab9d2167fd9955f8ba384e46f93d8e0b0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
     size: 531855
-    checksum: 20628631e902c4cfd608c62a2d3d34a4ee054990c76efa42915e0dea1a202c14ddc12873494391d97ae232e04af4d5a1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+    checksum: f64f3469f98f21cf8d6070f40b6ba5c4723e682c2b70b210a440054327f260437e0e8d385d53af061aff74f907795d7a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
     size: 5874804
     checksum: 4d8b2913a84deff43242ba4c198c96a8dc1027d4f3a21a2af8722f5edeaf4dcf52ced9fabe542f78b2044a4c971b9b55
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 596108
-    checksum: 843b6a8a16e9298ed8277378da2cd4f1918a04d9255d2c5f3cfdfc4341bb546d157dc4ce5587048456ca8059371cc157
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 945679
+    checksum: cb4d5004eb098a23cbf110b098ae8e62f3896b45a17329b95288779c43bbb8a1afa2d338a569cf617b5aa35ef066fa9a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 3139346
-    checksum: 0e53488f656fa9e63c88f697f179217a29921762d16c3f8a1e9e6b5cb6f9f7aa1d880b52b7bc1e956df5703fe7b00ea2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 3248037
+    checksum: 10455dc40c3a28f01fd9f71073b8bb77a4a07a5fe83f9dc5258956401b3719d6431fc2e3bb17cc2db72f58e3a2d63c92
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

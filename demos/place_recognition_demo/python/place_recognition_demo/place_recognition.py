@@ -36,7 +36,7 @@ class IEModel: # pylint: disable=too-few-public-methods
             core.add_extension(cpu_extension, 'CPU')
 
         log.info('Reading model {}'.format(model_path))
-        self.model = core.read_model(model_path, model_path.with_suffix('.bin'))
+        self.model = core.read_model(model_path)
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         self.input_size = self.model.input(self.input_tensor_name).shape
         self.nchw_layout = self.input_size[1] == 3

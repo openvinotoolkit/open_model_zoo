@@ -323,38 +323,40 @@ NATIVE_DEMOS = [
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
-    CppDemo(name='multi_channel_face_detection_demo',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_face_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['face-detection-adas']}),
-        single_option_cases('-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            ModelArg('face-detection-retail-0044')),
+        [
+            TestCase(options={'-m':  ModelArg('face-detection-adas-0001')}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0004'), '-bs': '2',
+                '-show_stats': '', '-n_iqs': '1', '-duplicate_num': '2'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0005'), '-bs': '3',
+                '-n_iqs': '999'}),
+            TestCase(options={'-m':  ModelArg('face-detection-retail-0044'), '-bs': '4',
+                '-show_stats': '', '-duplicate_num': '3', '-real_input_fps': ''})
+        ]
     )),
 
     CppDemo(name='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        test_cases=[TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DATA_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
-    )),
+    ]),
 
-    CppDemo(name='multi_channel_object_detection_demo_yolov3',
-            device_keys=['-d'],
-            test_cases=combine_cases(
+    CppDemo(name='multi_channel_object_detection_demo_yolov3', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
-        single_option_cases('-m',
-            # TODO: nothing
-            # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-            ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf')),
+        [
+            # TODO: INT8: Attempt to get a name for a Tensor without names
+            # TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+        ]
     )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -408,7 +410,7 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        ModelArg('face-detection-retail-0005'),
+                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -423,7 +425,7 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2002'),
                         ModelArg('person-vehicle-bike-detection-2003'),
                         ModelArg('person-vehicle-bike-detection-2004'),
-                        ModelArg('product-detection-0001'),
+                        # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -447,7 +449,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    # TODO: INT8: Attempt to get a name for a Tensor without names
+                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -485,7 +488,7 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
+            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
             # TODO
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -714,9 +717,12 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
+            '--background': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
+    #       ModelArg('robust-video-matting'),
+    #       ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -984,9 +990,9 @@ PYTHON_DEMOS = [
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-en-ru-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
                 '-i': [
                     'The quick brown fox jumps over the lazy dog.',
                     'The five boxing wizards jump quickly.',
@@ -994,9 +1000,9 @@ PYTHON_DEMOS = [
                 ],
             }),
             TestCase(options={
-                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-m': ModelArg('machine-translation-nar-ru-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
                 '-i': [
                     'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                     'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',

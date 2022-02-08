@@ -12,8 +12,8 @@
 """
 
 class CocosnetModel:
-    def __init__(self, core, model_xml, device='CPU'):
-        model = core.read_model(model_xml)
+    def __init__(self, core, model_path, device='CPU'):
+        model = core.read_model(model_path)
         if len(model.inputs) != 3:
             raise RuntimeError("The CocosnetModel expects 3 input layers")
         if len(model.outputs) != 1:
@@ -38,8 +38,8 @@ class CocosnetModel:
 
 
 class SegmentationModel:
-    def __init__(self, core, model_xml, device='CPU'):
-        model = core.read_model(model_xml)
+    def __init__(self, core, model_path, device='CPU'):
+        model = core.read_model(model_path)
         if len(model.inputs) != 1:
             raise RuntimeError("The SegmentationModel expects 1 input layer")
         if len(model.outputs) != 1:
