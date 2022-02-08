@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -130,15 +130,16 @@ cv::Size stringToSize(const std::string& str) {
 }
 
 std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string) {
-    // Parse parameter string like "input0[value0],input1[value1]" or "[value]" (applied to all
+    // Parse parameter string like "input0[NCHW],input1[NC]" or "[NCHW]" (applied to all
     // inputs)
     std::map<std::string, ov::Layout> layouts;
     std::string searchStr = layout_string;
     auto startPos = searchStr.find_first_of('[');
     while (startPos != std::string::npos) {
         auto end_pos = searchStr.find_first_of(']');
-        if (end_pos == std::string::npos)
+        if (end_pos == std::string::npos) {
             break;
+        }
         auto inputName = searchStr.substr(0, startPos);
         auto inputVal = searchStr.substr(startPos + 1, end_pos - startPos - 1);
         layouts[inputName] = ov::Layout(inputVal);

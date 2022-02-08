@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 */
 
 #pragma once
-#include "ie_allocator.hpp"
-#include "openvino/runtime/allocator.hpp"
-#include "opencv2/core.hpp"
+#include <ie_allocator.hpp>
+#include <opencv2/core.hpp>
+#include <openvino/runtime/allocator.hpp>
 
 class SharedBlobAllocator : public InferenceEngine::IAllocator {
 public:

@@ -15,29 +15,32 @@
 */
 
 #include <iostream>
-#include <vector>
-#include <string>
 #include <numeric>
 #include <random>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 
 #include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
-#include <unordered_map>
-#include <gflags/gflags.h>
-
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
 #include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -50,11 +53,7 @@ static const char target_device_message[] = "Optional. Specify the target device
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
 static const char layout_message[] = "Optional. Model inputs layouts. "
-"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
+"Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";;
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
@@ -83,8 +82,6 @@ DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
 DEFINE_string(layout, "", layout_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
@@ -117,7 +114,7 @@ static void showUsage() {
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;

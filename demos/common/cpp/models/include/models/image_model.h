@@ -13,9 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
 #include <openvino/openvino.hpp>
 #include "models/model_base.h"
+#include "models/internal_model_data.h"
 
 class ImageModel : public ModelBase {
 public:

@@ -13,9 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
+#include <string>
+#include <vector>
 #include <openvino/openvino.hpp>
 #include "models/image_model.h"
+#include "models/results.h"
 
 class ClassificationModel : public ImageModel {
 public:

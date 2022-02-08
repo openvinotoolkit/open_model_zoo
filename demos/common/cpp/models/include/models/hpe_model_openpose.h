@@ -13,16 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
-#include "image_model.h"
+#include "models/image_model.h"
+#include "models/results.h"
 
 class HPEOpenPose : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
-    /// @param targetSize - the height used for network reshaping.
+    /// @param targetSize - the height used for model reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
     /// @param layout - model input layout
     HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,

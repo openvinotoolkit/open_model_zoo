@@ -14,27 +14,28 @@
 // limitations under the License.
 */
 
+#include <memory>
+#include <string>
 #include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
-
 #include "pipelines/async_pipeline.h"
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, ov::runtime::Core& core) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::runtime::Core& core) :
     model(std::move(modelInstance)) {
-    compiledModel = model->compileModel(cnnConfig, core);
+    compiledModel = model->compileModel(config, core);
     // --------------------------- Create infer requests ------------------------------------------------
-    unsigned int nireq = cnnConfig.maxAsyncRequests;
+    unsigned int nireq = config.maxAsyncRequests;
     if (nireq == 0) {
         try {
             // +1 to use it as a buffer of the pipeline
             nireq = compiledModel.get_property(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
         } catch (const ov::Exception& ex) {
-            throw std::runtime_error(std::string("Every device used with the demo should support "
-                "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
+            throw std::runtime_error(std::string("Every device used with the demo should support compiled model's property "
+                "\"OPTIMAL_NUMBER_OF_INFER_REQUESTS\". Failed to query the property with error: ") + ex.what());
         }
     }
-    slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
+    slog::info << "\tNumber of inference requests: " << nireq << slog::endl;
     requestsPool.reset(new RequestsPool(compiledModel, nireq));
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());

@@ -15,8 +15,10 @@
 */
 
 #pragma once
+#include <string>
 #include <openvino/openvino.hpp>
-#include "image_model.h"
+#include "models/image_model.h"
+#include "models/results.h"
 
 class JPEGRestorationModel : public ImageModel {
 public:

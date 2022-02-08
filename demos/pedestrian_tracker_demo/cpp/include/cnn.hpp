@@ -9,16 +9,15 @@
 #include <string>
 #include <vector>
 #include <functional>
-
-
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 
 /**
- * @brief Base class of config for network
+ * @brief Base class of config for model
  */
-struct CnnConfigTracker {
-    explicit CnnConfigTracker(const std::string& path_to_model)
+struct ModelConfigTracker {
+    explicit ModelConfigTracker(const std::string& path_to_model)
         : path_to_model(path_to_model) {}
 
     /** @brief Path to model description */
@@ -28,26 +27,26 @@ struct CnnConfigTracker {
 };
 
 /**
- * @brief Base class of network
+ * @brief Base class of model
  */
-class CnnBase {
+class BaseModel {
 public:
-    using Config = CnnConfigTracker;
+    using Config = ModelConfigTracker;
 
     /**
      * @brief Constructor
      */
-    CnnBase(const Config& config,
+    BaseModel(const Config& config,
             const ov::Core& core,
             const std::string & deviceName);
 
     /**
      * @brief Descructor
      */
-    virtual ~CnnBase() {}
+    virtual ~BaseModel() {}
 
     /**
-     * @brief Loads network
+     * @brief Loads model
      */
     void Load();
 
@@ -55,7 +54,7 @@ public:
 
 protected:
     /**
-     * @brief Run network in batch mode
+     * @brief Run model in batch mode
      *
      * @param frames Vector of input images
      * @param results_fetcher Callback to fetch inference results
@@ -65,33 +64,29 @@ protected:
 
     /** @brief Config */
     Config config;
-    /** @brief OpenVINO instance */
+    /** @brief OpenVINO Core instance */
     ov::Core core;
     /** @brief device */
     std::string device_name;
-    /** @brief Model inputs info */
-    ov::OutputVector inputs;
-    /** @brief Model outputs info */
-    ov::OutputVector outputs;
      /** @brief Model input layout */
     ov::Layout input_layout;
     /** @brief Compiled model */
     ov::CompiledModel compiled_model;
     /** @brief Inference Request */
     mutable ov::InferRequest infer_request;
-    /** @brief Input Tensor */
+    /** @brief Input tensor */
     mutable ov::Tensor input_tensor;
-    /** @brief Input Tensor shape */
+    /** @brief Input tensor shape */
     ov::Shape input_shape;
     /** @brief Output tensor */
     ov::Tensor output_tensor;
-    /** @brief Input Tensor shape */
+    /** @brief Input tensor shape */
     ov::Shape output_shape;
 };
 
-class VectorCNN : public CnnBase {
+class VectorCNN : public BaseModel {
 public:
-    VectorCNN(const CnnConfigTracker& config,
+    VectorCNN(const ModelConfigTracker& config,
               const ov::Core & core,
               const std::string & deviceName);
 
@@ -103,5 +98,5 @@ public:
     int size() const { return result_size; }
 
 private:
-    int result_size;  /// Length of result
+    int result_size;  // Length of result
 };

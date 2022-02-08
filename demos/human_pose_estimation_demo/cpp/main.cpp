@@ -15,35 +15,35 @@
 */
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <gflags/gflags.h>
-#include <monitors/presenter.h>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 
-#include <utils/args_helper.hpp>
-#include <utils/images_capture.h>
-#include <utils/performance_metrics.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include <utils/default_flags.hpp>
-
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
-
+#include <monitors/presenter.h>
 #include <models/hpe_model_associative_embedding.h>
 #include <models/hpe_model_openpose.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
+static const char at_message[] = "Required. Type of the model, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
 "or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Model inputs layouts. "
-"For , \"input1[NCHW],input2[NC]\" or \"[NCHW]\" in case of one input size.";
+"Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -85,7 +85,7 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i                        " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -layout \"<string>\"          " << layout_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -tsize                    " << target_size_message << std::endl;

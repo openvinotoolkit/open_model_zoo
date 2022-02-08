@@ -15,9 +15,11 @@
 */
 
 #pragma once
+#include <string>
 #include <vector>
-#include <utils/nms.hpp>
-#include "detection_model.h"
+#include <openvino/openvino.hpp>
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelRetinaFace
     : public DetectionModel {
@@ -41,6 +43,7 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
+    /// @param layout - model input layout
     ModelRetinaFace(const std::string& model_name, float confidenceThreshold, float boxIOUThreshold,
         const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
@@ -59,15 +62,15 @@ protected:
     const float maskThreshold;
     float landmarkStd;
 
-    enum EOutputType {
-        OT_BBOX,
-        OT_SCORES,
-        OT_LANDMARK,
-        OT_MASKSCORES,
-        OT_MAX
+    enum OutputType {
+        OUT_BOXES,
+        OUT_SCORES,
+        OUT_LANDMARKS,
+        OUT_MASKSCORES,
+        OUT_MAX
     };
 
-    std::vector <std::string> separateOutputsNames[OT_MAX];
+    std::vector <std::string> separateOutputsNames[OUT_MAX];
     const std::vector<AnchorCfgLine> anchorCfg;
     std::map<int, std::vector <Anchor>> anchorsFpn;
     std::vector<std::vector<Anchor>> anchors;

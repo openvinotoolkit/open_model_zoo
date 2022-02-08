@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 #pragma once
-#include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 
 struct InputData {
     virtual ~InputData() {}

@@ -14,9 +14,14 @@
 // limitations under the License.
 */
 
+#include <fstream>
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include "models/segmentation_model.h"
+#include "models/results.h"
 
 SegmentationModel::SegmentationModel(const std::string& modelFileName, const std::string& layout) :
     ImageModel(modelFileName, layout) {}
@@ -44,7 +49,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input  -----------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::runtime_error("Segmentation model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Segmentation model wrapper supports topologies with only 1 input");
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
@@ -58,7 +63,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     const ov::Shape& inputShape = input.get_shape();
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
@@ -75,7 +80,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     model = ppp.build();
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 1) {
-        throw std::runtime_error("Segmentation model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Segmentation model wrapper supports topologies with only 1 output");
     }
 
     const auto& output = model->output();
@@ -97,7 +102,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
         outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
         break;
     default:
-        throw std::runtime_error("Unexpected output tensor shape. Only 4D and 3D output  are supported.");
+        throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D output  are supported.");
     }
 }
 

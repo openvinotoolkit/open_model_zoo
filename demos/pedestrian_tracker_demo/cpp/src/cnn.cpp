@@ -2,38 +2,33 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-
+#include <algorithm>
+#include <functional>
+#include <numeric>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <numeric>
-#include <functional>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
-
-#include <utils/slog.hpp>
 #include <utils/common.hpp>
-
+#include <utils/slog.hpp>
 #include "cnn.hpp"
 
-CnnBase::CnnBase(const Config& config,
+BaseModel::BaseModel(const Config& config,
     const ov::Core& core,
     const std::string& device_name) :
     config(config), core(core), device_name(device_name) {}
 
-void CnnBase::Load() {
+void BaseModel::Load() {
     slog::info << "Reading model: " << config.path_to_model << slog::endl;
     auto model = core.read_model(config.path_to_model);
     logBasicModelInfo(model);
 
     if (model->inputs().size() != 1) {
-        throw std::logic_error("Demo supports topologies only with 1 input");
+        throw std::logic_error("Demo supports topologies with only 1 input");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    input_layout = { "NCHW" };
+    input_layout = getLayoutFromShape(model->input().get_shape());
     ppp.input().tensor().
         set_element_type(ov::element::u8).
         set_layout({ "NCHW" });
@@ -41,7 +36,7 @@ void CnnBase::Load() {
     ppp.input().model().set_layout(input_layout);
 
     if (model->outputs().size() != 1) {
-        throw std::runtime_error("Demo supports topologies only with 1 output");
+        throw std::runtime_error("Demo supports topologies with only 1 output");
     }
     ppp.output().tensor().set_element_type(ov::element::f32);
 
@@ -60,7 +55,7 @@ void CnnBase::Load() {
     output_tensor = infer_request.get_output_tensor();
 }
 
-void CnnBase::InferBatch(
+void BaseModel::InferBatch(
     const std::vector<cv::Mat>& frames,
     const std::function<void(const ov::Tensor&, size_t)>&  fetch_results) const {
     size_t num_imgs = frames.size();
@@ -77,7 +72,7 @@ void CnnBase::InferBatch(
 VectorCNN::VectorCNN(const Config& config,
     const ov::Core& core,
     const std::string& deviceName)
-    : CnnBase(config, core, deviceName) {
+    : BaseModel(config, core, deviceName) {
     Load();
     result_size = std::accumulate(std::next(output_shape.begin(), 1), output_shape.end(), 1, std::multiplies<int>());
 }

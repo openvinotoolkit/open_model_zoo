@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,11 @@
 // limitations under the License.
 */
 
+#pragma once
+#include <string>
 #include <openvino/openvino.hpp>
-#include "image_model.h"
+#include "models/image_model.h"
+#include "models/results.h"
 
 #pragma once
 class SegmentationModel : public ImageModel {

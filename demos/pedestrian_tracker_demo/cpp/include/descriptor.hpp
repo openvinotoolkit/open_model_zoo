@@ -1,19 +1,16 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#include <vector>
-#include <string>
 #include <memory>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc.hpp>
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
-
-#include "core.hpp"
 #include "cnn.hpp"
+#include "core.hpp"
+#include "logging.hpp"
 
 ///
 /// \brief The IImageDescriptor class declares base class for image
@@ -101,12 +98,12 @@ private:
 };
 
 
-class DescriptorIE : public IImageDescriptor {
+class Descriptor : public IImageDescriptor {
 private:
     VectorCNN handler;
 
 public:
-    DescriptorIE(const CnnConfigTracker& config,
+    Descriptor(const ModelConfigTracker& config,
                  const ov::Core& core,
                  const std::string& deviceName):
         handler(config, core, deviceName) {}

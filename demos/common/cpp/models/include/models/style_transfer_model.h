@@ -16,7 +16,8 @@
 
 #pragma once
 #include <openvino/openvino.hpp>
-#include "image_model.h"
+#include "models/image_model.h"
+#include "models/results.h"
 
 class StyleTransferModel : public ImageModel {
 public:
@@ -30,5 +31,5 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(std::shared_ptr<ov::Model> & model) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

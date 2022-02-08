@@ -16,7 +16,8 @@
 
 #pragma once
 #include <openvino/openvino.hpp>
-#include "image_model.h"
+#include "models/image_model.h"
+#include "models/results.h"
 
 class SuperResolutionModel : public ImageModel {
 public:

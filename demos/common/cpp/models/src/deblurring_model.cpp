@@ -14,6 +14,9 @@
 // limitations under the License.
 */
 
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
@@ -29,7 +32,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("Deblurring model wrapper supports topologies only with 1 input");
+        throw std::logic_error("Deblurring model wrapper supports topologies with only 1 input");
     }
 
     inputsNames.push_back(model->input().get_any_name());
@@ -57,13 +60,13 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 1) {
-        throw std::logic_error("Deblurring model wrapper supports topologies only with 1 output");
+        throw std::logic_error("Deblurring model wrapper supports topologies with only 1 output");
     }
 
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
-    ov::Layout outputLayout{ "NCHW" };
+    ov::Layout outputLayout = getLayoutFromShape(outputShape);
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
         || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
@@ -85,7 +88,9 @@ void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
-        throw std::logic_error("Model input shape must be divisible by stride");
+        throw std::logic_error("Model input shape HxW = "
+            + std::to_string(inputShape[heightId]) + "x" + std::to_string(inputShape[widthId])
+            + "must be divisible by stride " + std::to_string(stride));
     }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
@@ -130,8 +135,9 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outputShape= infResult.getFirstOutputTensor().get_shape();
-    size_t outHeight = (int)(outputShape[2]);
-    size_t outWidth = (int)(outputShape[3]);
+    ov::Layout outputLayout = getLayoutFromShape(outputShape);
+    size_t outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
+    size_t outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
     size_t numOfPixels = outWidth * outHeight;
     imgPlanes = std::vector<cv::Mat>{
           cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),

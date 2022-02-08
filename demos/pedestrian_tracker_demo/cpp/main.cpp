@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-
-
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <map>
 #include <memory>
+#include <iostream>
 #include <string>
-
+#include <utility>
+#include <vector>
 
 #include <gflags/gflags.h>
-#include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 
 #include <models/detection_model_centernet.h>
@@ -25,11 +22,11 @@
 #include <utils/slog.hpp>
 
 #include "core.hpp"
-#include "utils.hpp"
-#include "tracker.hpp"
 #include "descriptor.hpp"
 #include "distance.hpp"
 #include "pedestrian_tracker_demo.hpp"
+#include "tracker.hpp"
+#include "utils.hpp"
 
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
@@ -58,10 +55,10 @@ CreatePedestrianTracker(const std::string& reid_model,
     tracker->set_distance_fast(distance_fast);
 
     if (!reid_model.empty()) {
-        CnnConfigTracker reid_config(reid_model);
+        ModelConfigTracker reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
         std::shared_ptr<IImageDescriptor> descriptor_strong =
-            std::make_shared<DescriptorIE>(reid_config, core, deviceName);
+            std::make_shared<Descriptor>(reid_config, core, deviceName);
 
         if (descriptor_strong == nullptr) {
             throw std::runtime_error("[SAMPLES] internal error - invalid descriptor");
@@ -125,9 +122,6 @@ int main(int argc, char **argv) {
 
         auto detector_mode = FLAGS_d_det;
         auto reid_mode = FLAGS_d_reid;
-
-        auto custom_cpu_library = FLAGS_l;
-        auto path_to_custom_layers = FLAGS_c;
 
         bool should_print_out = FLAGS_r;
 

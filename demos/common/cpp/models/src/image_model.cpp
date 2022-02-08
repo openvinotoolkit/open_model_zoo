@@ -21,6 +21,6 @@
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
     auto img = inputTransform(origImg);
-    request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
+    request.set_tensor(inputsNames[0], wrapMat2Tensor(img)); // for models with more than one input inputsNames[0] - expected to be image input
     return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
 }

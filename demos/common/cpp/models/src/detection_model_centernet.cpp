@@ -59,7 +59,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 3) {
-        throw std::runtime_error("CenterNet model wrapper expects models that have 3 outputs blob");
+        throw std::logic_error("CenterNet model wrapper expects models that have 3 outputs");
     }
 
     ov::Layout outLayout{ "NCHW" };
@@ -124,19 +124,19 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
-std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sz, float threshold, int kernel = 3) {
+std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& shape, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
-    auto chSize = sz[2] * sz[3];
+    auto chSize = shape[2] * shape[3];
 
-    for (size_t i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
+    for (size_t i = 0; i < shape[1] * shape[2] * shape[3]; ++i) {
         scoresPtr[i] = expf(scoresPtr[i]) / (1 + expf(scoresPtr[i]));
     }
 
-    for (size_t ch = 0; ch < sz[1]; ++ch) {
-        for (size_t w = 0; w < sz[2]; ++w) {
-            for (size_t h = 0; h < sz[3]; ++h) {
-                float max = scoresPtr[chSize * ch + sz[2] * w + h];
+    for (size_t ch = 0; ch < shape[1]; ++ch) {
+        for (size_t w = 0; w < shape[2]; ++w) {
+            for (size_t h = 0; h < shape[3]; ++h) {
+                float max = scoresPtr[chSize * ch + shape[2] * w + h];
 
                 // ---------------------  filter on threshold--------------------------------------
                 if (max < threshold) {
@@ -144,14 +144,14 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sz,
                 }
 
                 // ---------------------  store index and score------------------------------------
-                scores.push_back({ chSize * ch + sz[2] * w + h, max });
+                scores.push_back({ chSize * ch + shape[2] * w + h, max });
 
                 bool next = true;
                 // ---------------------- maxpool2d -----------------------------------------------
                 for (int i = -kernel / 2; i < kernel / 2 + 1 && next; ++i) {
                     for (int j = -kernel / 2; j < kernel / 2 + 1; ++j) {
-                        if (w + i >= 0 && w + i < sz[2] && h + j >= 0 && h + j < sz[3]) {
-                            if (scoresPtr[chSize * ch + sz[2] * (w + i) + h + j] > max) {
+                        if (w + i >= 0 && w + i < shape[2] && h + j >= 0 && h + j < shape[3]) {
+                            if (scoresPtr[chSize * ch + shape[2] * (w + i) + h + j] > max) {
                                 scores.pop_back();
                                 next = false;
                                 break;
@@ -203,28 +203,28 @@ std::vector<std::pair<float, float>> filterWH(const ov::Tensor& whTensor, const 
     return wh;
 }
 
-std::vector<ModelCenterNet::BBox> calcBBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
-    const std::vector<std::pair<float, float>>& wh, const InferenceEngine::SizeVector& sz) {
-    std::vector<ModelCenterNet::BBox> bboxes(scores.size());
+std::vector<ModelCenterNet::BBox> calcBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
+    const std::vector<std::pair<float, float>>& wh, const ov::Shape& shape) {
+    std::vector<ModelCenterNet::BBox> boxes(scores.size());
 
-    for (size_t i = 0; i < bboxes.size(); ++i) {
-        size_t chIdx = scores[i].first % (sz[2] * sz[3]);
-        auto xCenter = chIdx % sz[3];
-        auto yCenter = chIdx / sz[3];
+    for (size_t i = 0; i < boxes.size(); ++i) {
+        size_t chIdx = scores[i].first % (shape[2] * shape[3]);
+        auto xCenter = chIdx % shape[3];
+        auto yCenter = chIdx / shape[3];
 
-        bboxes[i].left = xCenter + reg[i].first - wh[i].first / 2.0f;
-        bboxes[i].top = yCenter + reg[i].second - wh[i].second / 2.0f;
-        bboxes[i].right = xCenter + reg[i].first + wh[i].first / 2.0f;
-        bboxes[i].bottom = yCenter + reg[i].second + wh[i].second / 2.0f;
+        boxes[i].left = xCenter + reg[i].first - wh[i].first / 2.0f;
+        boxes[i].top = yCenter + reg[i].second - wh[i].second / 2.0f;
+        boxes[i].right = xCenter + reg[i].first + wh[i].first / 2.0f;
+        boxes[i].bottom = yCenter + reg[i].second + wh[i].second / 2.0f;
     }
 
-    return bboxes;
+    return boxes;
 }
 
-void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine::SizeVector& sz, int scale, float centerX, float centerY) {
-    cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
+void transform(std::vector<ModelCenterNet::BBox>& boxes, const ov::Shape& shape, int scale, float centerX, float centerY) {
+    cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, shape[2], shape[3], true);
 
-    for (auto& b : bboxes) {
+    for (auto& b : boxes) {
         ModelCenterNet::BBox newbb;
 
         newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
@@ -251,7 +251,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
 
     // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
-    auto bboxes = calcBBoxes(scores, reg, wh, heatmapTensorShape);
+    auto boxes = calcBoxes(scores, reg, wh, heatmapTensorShape);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
@@ -259,7 +259,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
 
-    transform(bboxes, heatmapTensorShape, scale, centerX, centerY);
+    transform(boxes, heatmapTensorShape, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects ------------------------------------
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
@@ -270,10 +270,10 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
-        desc.x = clamp(bboxes[i].left, 0.f, (float)imgWidth);
-        desc.y = clamp(bboxes[i].top, 0.f, (float)imgHeight);
-        desc.width = clamp(bboxes[i].getWidth(), 0.f, (float)imgWidth);
-        desc.height = clamp(bboxes[i].getHeight(), 0.f, (float)imgHeight);
+        desc.x = clamp(boxes[i].left, 0.f, (float)imgWidth);
+        desc.y = clamp(boxes[i].top, 0.f, (float)imgHeight);
+        desc.width = clamp(boxes[i].getWidth(), 0.f, (float)imgWidth);
+        desc.height = clamp(boxes[i].getHeight(), 0.f, (float)imgHeight);
 
         result->objects.push_back(desc);
     }
