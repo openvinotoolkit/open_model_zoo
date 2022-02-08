@@ -130,8 +130,8 @@ class PalmDetectionAdapter(Adapter):
                     score = raw_scores[i, score_idx]
                     if self.sigmoid_score:
                         if self.score_clipping_thresh:
-                            score = np.clip(score, -self.score_clipping_thresh, self.score_clipping_thresh)
-                        score = 1 / (1 + np.exp(-score))
+                            score = np.clip(score, (-1) * self.score_clipping_thresh, self.score_clipping_thresh)
+                        score = 1 / (1 + np.exp((-1) * score))
                     if max_score < score:
                         max_score = score
                         class_id = score_idx
