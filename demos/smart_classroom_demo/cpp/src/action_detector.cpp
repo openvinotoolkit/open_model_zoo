@@ -52,7 +52,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
     m_new_model = false;
 
     ov::OutputVector outputs = model->outputs();
-    auto cmp = [&](ov::Output<ov::Node>& output) { return output.get_any_name() == m_config.new_loc_blob_name; };
+    auto cmp = [&](const ov::Output<ov::Node>& output) { return output.get_any_name() == m_config.new_loc_blob_name; };
     auto& it = std::find_if(outputs.begin(), outputs.end(), cmp);
     if (it != outputs.end())
         m_new_model = true;
