@@ -91,4 +91,3 @@ class Display(object):
         result_image = np.concatenate((frame_top, frame_front), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)
         cv2.imshow("Smart Science Lab",result_image)
-        

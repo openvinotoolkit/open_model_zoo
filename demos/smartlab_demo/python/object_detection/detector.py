@@ -253,4 +253,3 @@ class Detector(object):
             return vis_top, vis_front
         else:
             return [top_bboxes, top_cls_ids, top_scores], [front_bboxes, front_cls_ids, front_scores]
-            
