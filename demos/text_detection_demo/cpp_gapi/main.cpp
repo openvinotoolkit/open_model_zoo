@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
                 config.configureTRcomposite(trDevice);
                 slog::info << "The Composite Text Recognition Encoder model " << trModelPath
                     << " is loaded to " << trDevice << slog::endl;
-                slog::info << "The Composite Text Recognition Decoder model " << trModelPath
-                    << " is loaded to " << trDevice << slog::endl;
+                slog::info << "The Composite Text Recognition Decoder model "
+                    << config.decoderModelPath << " is loaded to " << trDevice << slog::endl;
             } else {
                 config.getTRoutputInfo(trOutputBlobName, trPadSymbolFirst, kPadSymbol,
                                        decoderStartIndex, trSymbolsSet);

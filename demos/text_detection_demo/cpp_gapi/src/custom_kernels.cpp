@@ -341,16 +341,30 @@ GAPI_OCV_KERNEL(OCVCropLabels, custom::CropLabels) {
     }
 };
 
-GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
+GAPI_OCV_KERNEL_ST(OCVCompositeTRDecode, custom::CompositeTRDecode, cv::GComputation) {
+    static void setup(const cv::GArrayDesc&, const cv::GArrayDesc&, const cv::gapi::GNetPackage&,
+                      const size_t, const size_t, std::shared_ptr<cv::GComputation>& graph) {
+        cv::GMat inDec, inHidden, feature, outHidden, outDec;
+        std::tie(outHidden, outDec) =
+            cv::gapi::infer<nets::TextRecognitionDecoding>(inDec, inHidden, feature);
+        graph = std::make_shared<cv::GComputation>(cv::GIn(inDec, inHidden, feature),
+                                                   cv::GOut(outHidden, outDec));
+    }
     static void run(const std::vector<cv::Mat>&  hiddens_,
                     const std::vector<cv::Mat>&  features,
                     const cv::gapi::GNetPackage& net,
                     const size_t                 numClasses,
                     const size_t                 endToken,
-                          std::vector<cv::Mat>&  res) {
+                          std::vector<cv::Mat>&  res,
+                          cv::GComputation& graph) {
         constexpr int maxDecodedSymbols = 20;
         GAPI_DbgAssert(hiddens_.size() == features.size());
         const size_t numDetectedLabels = features.size();
+
+        if (0 == numDetectedLabels) {
+            res.clear();
+            return;
+        }
 
         std::vector<cv::Mat> states(numDetectedLabels, cv::Mat({1}, CV_32FC1));
         std::for_each(states.begin(), states.end(),
@@ -363,19 +377,12 @@ GAPI_OCV_KERNEL(OCVCompositeTRDecode, custom::CompositeTRDecode) {
                              CV_32FC1);
         }
 
-        cv::GMat inDec, inHidden, feature, outHidden, outDec;
-        std::tie(outHidden, outDec) =
-            cv::gapi::infer<nets::TextRecognitionDecoding>(inDec, inHidden, feature);
-        static cv::GComputation graph(cv::GIn(inDec, inHidden, feature),
-                                      cv::GOut(outHidden, outDec));
-        static auto pipeline = graph.compile(
-            cv::descr_of(cv::gin(states[0], hiddens[0], features[0])), cv::compile_args(net));
-
         cv::Mat hidden, out;
         for (size_t nLabel = 0; nLabel < numDetectedLabels; nLabel++) {
             for (int nSymbol = 0; nSymbol < maxDecodedSymbols; nSymbol++) {
-                pipeline(cv::gin(states[nLabel], hiddens[nLabel], features[nLabel]),
-                         cv::gout(hidden, out));
+                graph.apply(cv::gin(states[nLabel], hiddens[nLabel], features[nLabel]),
+                            cv::gout(hidden, out),
+                            cv::compile_args(net));
 
                 auto maxElem = std::max_element(out.begin<float>(),
                                                 out.begin<float>() + numClasses);
