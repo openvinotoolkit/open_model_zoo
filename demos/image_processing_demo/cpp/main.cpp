@@ -163,14 +163,11 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq > 1);
         cv::Mat curr_frame;
 
         auto startTime = std::chrono::steady_clock::now();
         curr_frame = cap->read();
-        if (curr_frame.empty()) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;

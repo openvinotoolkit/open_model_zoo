@@ -96,14 +96,11 @@ int main(int argc, char* argv[]) {
         config::printInfo(netsFlags, FLAGS_teacher_id, FLAGS_top_id);
 
         /** Set input source (image, video, camera) **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_read_limit);
         cv::Mat tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_read_limit);
         /** Fill shared constants and trackers parameters **/
         TrackerParams tracker_reid_params, tracker_action_params;
         ConstantParams const_params;

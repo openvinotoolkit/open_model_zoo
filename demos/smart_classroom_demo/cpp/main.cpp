@@ -709,11 +709,8 @@ int main(int argc, char* argv[]) {
 
         int teacher_track_id = -1;
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_read_limit);
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);

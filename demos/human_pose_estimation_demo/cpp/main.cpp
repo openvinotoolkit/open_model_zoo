@@ -216,12 +216,9 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq > 1);
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
-        if (curr_frame.empty()) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         cv::VideoWriter videoWriter;
 

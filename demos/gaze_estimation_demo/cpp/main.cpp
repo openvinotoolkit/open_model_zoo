@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
         std::string windowName = "Gaze estimation demo";
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(
-            FLAGS_i, FLAGS_loop, 0, std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+            FLAGS_i, FLAGS_loop, EFFICIENT_READ, 0, std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();

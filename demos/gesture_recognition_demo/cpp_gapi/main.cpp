@@ -54,15 +54,12 @@ int main(int argc, char *argv[]) {
         const auto ar_net_shape = getNetShape(FLAGS_m_a);
 
         /** Get information about frame from cv::VideoCapture **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         /** Share runtime id with graph **/

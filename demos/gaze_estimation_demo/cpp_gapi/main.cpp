@@ -166,15 +166,12 @@ int main(int argc, char *argv[]) {
         slog::info << "The Face Detection model " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
 
         /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         if (FLAGS_fd_reshape) {

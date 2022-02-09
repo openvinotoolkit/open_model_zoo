@@ -424,15 +424,12 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Presenter> presenter;
 
          /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
             FLAGS_limit);
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);
 

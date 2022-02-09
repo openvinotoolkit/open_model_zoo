@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq > 1);
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
@@ -267,12 +267,8 @@ int main(int argc, char* argv[]) {
                 curr_frame = cap->read();
 
                 if (curr_frame.empty()) {
-                    if (frameNum == -1) {
-                        throw std::logic_error("Can't read an image from the input");
-                    } else {
-                        // Input stream is over
-                        break;
-                    }
+                    // Input stream is over
+                    break;
                 }
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
