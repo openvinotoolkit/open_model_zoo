@@ -110,12 +110,9 @@ class Evaluator(object):
             df_2screw = bboxes[np.array(cls_ids) == "roundscrew1"].squeeze()
             df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
 
-            roundscrew1_center_coordinate = (x0, y0) =\
-                ((df_2screw[0, 1] + df_2screw[0, 0])/2, 
-                (df_2screw[0, 3] + df_2screw[0, 2])/2)
-            roundscrew2_center_coordinate = (x1, y1) =\
-                ((df_2screw[1, 1] + df_2screw[1, 0])/2, 
-                (df_2screw[1, 3] + df_2screw[1, 2])/2)
+            x0 = (df_2screw[0, 1] + df_2screw[0, 0])/2
+            x1 = (df_2screw[1, 1] + df_2screw[1, 0])/2
+
             rider_center_coordinate = \
                 ((df_rider[1] + df_rider[0])/2, 
                 (df_rider[3] + df_rider[2])/2)
@@ -239,9 +236,8 @@ class Evaluator(object):
                 battery_center_coordinate = \
                     ((df_battery[1] + df_battery[0])/2,
                     (df_battery[3] + df_battery[2])/2)
-                (balance_x_min, balance_y_min, balance_x_max, balance_y_max) = \
-                    (df_balance[0], df_balance[2],
-                    df_balance[1], df_balance[3] )
+                balance_y_max = df_balance[3]
+
                 if battery_center_coordinate[1]<balance_y_max:
                     self.scoring["end_score_tidy"] = 1
 
