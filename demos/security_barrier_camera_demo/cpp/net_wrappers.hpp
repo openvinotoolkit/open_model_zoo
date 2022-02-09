@@ -29,7 +29,7 @@ public:
     Detector() = default;
     Detector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const ov::AnyMap& pluginConfig) :
-        detectionTresholds{detectionTresholds}, m_core{core} {
+        m_autoResize(autoResize), m_detectionTresholds{detectionTresholds}, m_core{core} {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
         logBasicModelInfo(model);
@@ -41,7 +41,11 @@ public:
             throw std::logic_error("Detector should have only one input");
         }
 
-        detectorInputName = model->input().get_any_name();
+        m_detectorInputName = model->input().get_any_name();
+
+        ov::Layout modelLayout = ov::layout::get_layout(model->input());
+        if (modelLayout.empty())
+            modelLayout = {"NCHW"};
 
         ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
@@ -50,7 +54,7 @@ public:
 
         ov::Output<ov::Node> output = outputs[0];
 
-        detectorOutputName = output.get_any_name();
+        m_detectorOutputName = output.get_any_name();
         ov::Shape output_shape = output.get_shape();
 
         if (output_shape.size() != 4) {
@@ -64,29 +68,32 @@ public:
             throw std::logic_error("Output should have 7 as a last dimension");
         }
 
+        ov::Layout desiredLayout = {"NHWC"};
         ov::preprocess::PrePostProcessor ppp(model);
 
         ov::preprocess::InputInfo& inputInfo = ppp.input();
 
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
+        inputTensorInfo.set_layout(desiredLayout);
         if (autoResize) {
-            inputTensorInfo.set_layout({ "NHWC" });
             inputTensorInfo.set_spatial_dynamic_shape();
-        } else {
-            inputTensorInfo.set_layout({ "NCHW" });
         }
 
+        ov::preprocess::InputModelInfo& inputModelInfo = inputInfo.model();
+        inputModelInfo.set_layout(modelLayout);
+
         ov::preprocess::PreProcessSteps& preProcessSteps = inputInfo.preprocess();
+        preProcessSteps.convert_layout(modelLayout);
         preProcessSteps.convert_element_type(ov::element::f32);
         if (autoResize) {
             preProcessSteps.resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
         }
 
-        ov::preprocess::InputModelInfo& inputModelInfo = inputInfo.model();
-        inputModelInfo.set_layout({ "NCHW" });
-
         model = ppp.build();
+
+        slog::info << "Preprocessor configuration: " << slog::endl;
+        slog::info << ppp << slog::endl;
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
@@ -97,20 +104,19 @@ public:
     }
 
     void setImage(ov::InferRequest& inferRequest, const cv::Mat& img) {
-        ov::Tensor inputTensor = inferRequest.get_tensor(detectorInputName);
+        ov::Tensor inputTensor = inferRequest.get_tensor(m_detectorInputName);
         ov::Shape shape = inputTensor.get_shape();
-        if (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
-            // autoResize is set
+        if (m_autoResize) {
             if (!img.isSubmatrix()) {
                 // just wrap Mat object with Tensor without additional memory allocation
                 ov::Tensor frameTensor = wrapMat2Tensor(img);
-                inferRequest.set_tensor(detectorInputName, frameTensor);
+                inferRequest.set_tensor(m_detectorInputName, frameTensor);
             } else {
                 throw std::logic_error("Sparse matrix are not supported");
             }
         } else {
             // resize and copy data from image to tensor using OpenCV
-            matToTensor(img, inputTensor);
+            resize2tensor(img, inputTensor);
         }
     }
 
@@ -118,7 +124,7 @@ public:
         // there is no big difference if InferReq of detector from another device is passed
         // because the processing is the same for the same topology
         std::list<Result> results;
-        ov::Tensor output_tensor = inferRequest.get_tensor(detectorOutputName);
+        ov::Tensor output_tensor = inferRequest.get_tensor(m_detectorOutputName);
         const float* const detections = output_tensor.data<float>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
@@ -126,9 +132,9 @@ public:
             if (image_id < 0) { // indicates end of detections
                 break;
             }
-            size_t label = static_cast<decltype(detectionTresholds.size())>(detections[i * objectSize + 1]);
+            size_t label = static_cast<decltype(m_detectionTresholds.size())>(detections[i * objectSize + 1]);
             float confidence = detections[i * objectSize + 2];
-            if (label - 1 < detectionTresholds.size() && confidence < detectionTresholds[label - 1]) {
+            if (label - 1 < m_detectionTresholds.size() && confidence < m_detectionTresholds[label - 1]) {
                 continue;
             }
 
@@ -147,9 +153,10 @@ public:
     }
 
 private:
-    std::vector<float> detectionTresholds;
-    std::string detectorInputName;
-    std::string detectorOutputName;
+    bool m_autoResize;
+    std::vector<float> m_detectionTresholds;
+    std::string m_detectorInputName;
+    std::string m_detectorOutputName;
     ov::Core m_core; // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
@@ -158,7 +165,8 @@ class VehicleAttributesClassifier {
 public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(ov::Core& core, const std::string& deviceName,
-        const std::string& xmlPath, const bool autoResize, const ov::AnyMap& pluginConfig) : m_core(core) {
+        const std::string& xmlPath, const bool autoResize, const ov::AnyMap& pluginConfig) :
+        m_autoResize(autoResize), m_core(core) {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
         logBasicModelInfo(model);
@@ -168,7 +176,11 @@ public:
             throw std::logic_error("Vehicle Attribs topology should have only one input");
         }
 
-        attributesInputName = model->input().get_any_name();
+        m_attributesInputName = model->input().get_any_name();
+
+        ov::Layout modelLayout = ov::layout::get_layout(model->input());
+        if (modelLayout.empty())
+            modelLayout = {"NCHW"};
 
         ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 2) {
@@ -176,31 +188,37 @@ public:
         }
 
         // color is the first output
-        outputNameForColor = outputs[0].get_any_name();
+        m_outputNameForColor = outputs[0].get_any_name();
         // type is the second output.
-        outputNameForType = outputs[1].get_any_name();
+        m_outputNameForType = outputs[1].get_any_name();
+
+        ov::Layout desiredLayout = {"NHWC"};
 
         ov::preprocess::PrePostProcessor ppp(model);
 
         ov::preprocess::InputInfo& inputInfo = ppp.input();
+
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
+        inputTensorInfo.set_layout(desiredLayout);
         if (autoResize) {
-            inputTensorInfo.set_layout({ "NHWC" });
-        } else {
-            inputTensorInfo.set_layout({ "NCHW" });
+            inputTensorInfo.set_spatial_dynamic_shape();
         }
 
         ov::preprocess::PreProcessSteps& preProcessSteps = inputInfo.preprocess();
+        preProcessSteps.convert_layout(modelLayout);
         preProcessSteps.convert_element_type(ov::element::f32);
         if (autoResize) {
             preProcessSteps.resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
         }
 
         ov::preprocess::InputModelInfo& inputModelInfo = inputInfo.model();
-        inputModelInfo.set_layout({ "NCHW" });
+        inputModelInfo.set_layout(modelLayout);
 
         model = ppp.build();
+
+        slog::info << "Preprocessor configuration: " << slog::endl;
+        slog::info << ppp << slog::endl;
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle Attributes Recognition");
@@ -211,19 +229,18 @@ public:
     }
 
     void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect vehicleRect) {
-        ov::Tensor inputTensor = inferRequest.get_tensor(attributesInputName);
+        ov::Tensor inputTensor = inferRequest.get_tensor(m_attributesInputName);
         ov::Shape shape = inputTensor.get_shape();
-        if (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))]) {
-            // autoResize is set
+        if (m_autoResize) {
             ov::Tensor frameTensor = wrapMat2Tensor(img);
             ov::Coordinate p00({ 0, (size_t)vehicleRect.y, (size_t)vehicleRect.x, 0 });
             ov::Coordinate p01({ 1, (size_t)(vehicleRect.y + vehicleRect.height), (size_t)vehicleRect.x + vehicleRect.width, 3 });
             ov::Tensor roiTensor(frameTensor, p00, p01);
 
-            inferRequest.set_tensor(attributesInputName, roiTensor);
+            inferRequest.set_tensor(m_attributesInputName, roiTensor);
         } else {
             const cv::Mat& vehicleImage = img(vehicleRect);
-            matToTensor(vehicleImage, inputTensor);
+            resize2tensor(vehicleImage, inputTensor);
         }
     }
 
@@ -236,11 +253,11 @@ public:
         };
 
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
-        ov::Tensor colorsTensor = inferRequest.get_tensor(outputNameForColor);
+        ov::Tensor colorsTensor = inferRequest.get_tensor(m_outputNameForColor);
         const float* colorsValues = colorsTensor.data<float>();
 
         // 4 possible types for each vehicle and we should select the one with the maximum probability
-        ov::Tensor typesTensor = inferRequest.get_tensor(outputNameForType);
+        ov::Tensor typesTensor = inferRequest.get_tensor(m_outputNameForType);
         const float* typesValues = typesTensor.data<float>();
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
@@ -250,9 +267,10 @@ public:
     }
 
 private:
-    std::string attributesInputName;
-    std::string outputNameForColor;
-    std::string outputNameForType;
+    bool m_autoResize;
+    std::string m_attributesInputName;
+    std::string m_outputNameForColor;
+    std::string m_outputNameForType;
     ov::Core m_core;  // The only reason to store a device is to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
@@ -262,7 +280,7 @@ public:
     Lpr() = default;
     Lpr(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
         const ov::AnyMap& pluginConfig) :
-        m_core{core} {
+        m_autoResize(autoResize), m_core{core} {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
         logBasicModelInfo(model);
@@ -276,57 +294,66 @@ public:
         }
 
         for (auto input : inputs) {
-            if (input.get_shape().size() == 4)
-                LprInputName = input.get_any_name();
+            if (input.get_shape().size() == 4) {
+                m_LprInputName = input.get_any_name();
+                m_modelLayout = ov::layout::get_layout(input);
+                if (m_modelLayout.empty())
+                    m_modelLayout = {"NCHW"};
+            }
             // LPR model that converted from Caffe have second a stub input
             if (input.get_shape().size() == 2)
-                LprInputSeqName = input.get_any_name();
+                m_LprInputSeqName = input.get_any_name();
         }
 
         // Check outputs
 
-        maxSequenceSizePerPlate = 1;
+        m_maxSequenceSizePerPlate = 1;
 
         ov::OutputVector outputs = model->outputs();
         if (outputs.size() != 1) {
             throw std::logic_error("LPR should have 1 output");
         }
 
-        LprOutputName = outputs[0].get_any_name();
+        m_LprOutputName = outputs[0].get_any_name();
 
         for (size_t dim : outputs[0].get_shape()) {
             if (dim == 1) {
                 continue;
             }
-            if (maxSequenceSizePerPlate == 1) {
-                maxSequenceSizePerPlate = dim;
+            if (m_maxSequenceSizePerPlate == 1) {
+                m_maxSequenceSizePerPlate = dim;
             } else {
                 throw std::logic_error("Every dimension of LPR output except for one must be of size 1");
             }
         }
 
+        ov::Layout desiredLayout = {"NHWC"};
+
         ov::preprocess::PrePostProcessor ppp(model);
 
-        ov::preprocess::InputInfo& inputInfo = ppp.input(LprInputName);
+        ov::preprocess::InputInfo& inputInfo = ppp.input(m_LprInputName);
 
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
         inputTensorInfo.set_element_type(ov::element::u8);
+        inputTensorInfo.set_layout(desiredLayout);
         if (autoResize) {
-            inputTensorInfo.set_layout({ "NHWC" });
-        } else {
-            inputTensorInfo.set_layout({ "NCHW" });
+            inputTensorInfo.set_spatial_dynamic_shape();
         }
 
         ov::preprocess::PreProcessSteps& preProcessSteps = inputInfo.preprocess();
+        preProcessSteps.convert_layout(m_modelLayout);
         preProcessSteps.convert_element_type(ov::element::f32);
         if (autoResize) {
             preProcessSteps.resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
         }
 
         ov::preprocess::InputModelInfo& inputModelInfo = inputInfo.model();
-        inputModelInfo.set_layout({ "NCHW" });
+        inputModelInfo.set_layout(m_modelLayout);
 
         model = ppp.build();
+
+        slog::info << "Preprocessor configuration: " << slog::endl;
+        slog::info << ppp << slog::endl;
 
         m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "License Plate Recognition");
@@ -337,22 +364,22 @@ public:
     }
 
     void setImage(ov::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect plateRect) {
-        ov::Tensor inputTensor = inferRequest.get_tensor(LprInputName);
+        ov::Tensor inputTensor = inferRequest.get_tensor(m_LprInputName);
         ov::Shape shape = inputTensor.get_shape();
-        if ((shape.size() == 4) && (3 == shape[ov::layout::channels_idx(ov::Layout({ "NHWC" }))])) {
+        if ((shape.size() == 4) && m_autoResize) {
             // autoResize is set
             ov::Tensor frameTensor = wrapMat2Tensor(img);
             ov::Coordinate p00({ 0, (size_t)plateRect.y, (size_t)plateRect.x, 0 });
             ov::Coordinate p01({ 1, (size_t)(plateRect.y + plateRect.height), (size_t)(plateRect.x + plateRect.width), 3 });
             ov::Tensor roiTensor(frameTensor, p00, p01);
-            inferRequest.set_tensor(LprInputName, roiTensor);
+            inferRequest.set_tensor(m_LprInputName, roiTensor);
         } else {
             const cv::Mat& vehicleImage = img(plateRect);
-            matToTensor(vehicleImage, inputTensor);
+            resize2tensor(vehicleImage, inputTensor);
         }
 
-        if (LprInputSeqName != "") {
-            ov::Tensor inputSeqTensor = inferRequest.get_tensor(LprInputSeqName);
+        if (m_LprInputSeqName != "") {
+            ov::Tensor inputSeqTensor = inferRequest.get_tensor(m_LprInputSeqName);
             float* data = inputSeqTensor.data<float>();
             std::fill(data, data + inputSeqTensor.get_shape()[0], 1.0f);
         }
@@ -377,7 +404,7 @@ public:
         std::string result;
         result.reserve(14u + 6u);  // the longest province name + 6 plate signs
 
-        ov::Tensor lprOutputTensor = inferRequest.get_tensor(LprOutputName);
+        ov::Tensor lprOutputTensor = inferRequest.get_tensor(m_LprOutputName);
         ov::element::Type precision = lprOutputTensor.get_element_type();
 
         // up to 88 items per license plate, ended with "-1"
@@ -385,7 +412,7 @@ public:
             case ov::element::i32:
             {
                 const auto data = lprOutputTensor.data<int32_t>();
-                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                for (int i = 0; i < m_maxSequenceSizePerPlate; i++) {
                     int32_t val = data[i];
                     if (val == -1) {
                         break;
@@ -398,7 +425,7 @@ public:
             case ov::element::f32:
             {
                 const auto data = lprOutputTensor.data<float>();
-                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                for (int i = 0; i < m_maxSequenceSizePerPlate; i++) {
                     int32_t val = int32_t(data[i]);
                     if (val == -1) {
                         break;
@@ -416,10 +443,12 @@ public:
     }
 
 private:
-    int maxSequenceSizePerPlate = 0;
-    std::string LprInputName;
-    std::string LprInputSeqName;
-    std::string LprOutputName;
+    bool m_autoResize;
+    int m_maxSequenceSizePerPlate = 0;
+    std::string m_LprInputName;
+    std::string m_LprInputSeqName;
+    std::string m_LprOutputName;
+    ov::Layout m_modelLayout;
     ov::Core m_core;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
