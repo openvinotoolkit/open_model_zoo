@@ -68,11 +68,6 @@ The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
 Classification confidence scores in the [0, 1] range
     for every smartlab actions.
 
-## Use smartlab demo
-
-Model is supported by [smartlab_demo python demo](../../../demos/smartlab_demo/python/README.md).
-
-
 For more information, please, see documentation of the demo.
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
