@@ -48,6 +48,7 @@ smartlab-object-detection-0001
 smartlab-object-detection-0002
 smartlab-object-detection-0003
 smartlab-object-detection-0004
+smartlab-sequence-modelling-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
