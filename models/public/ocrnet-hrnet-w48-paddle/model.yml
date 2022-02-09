@@ -72,5 +72,6 @@ model_optimizer_args:
   - --scale_values=x[127.5,127.5,127.5]
   - --input_model=$conv_dir/inference_model/model.pdmodel
   - --reverse_input_channels
+  - --layout=x(NCHW)
 framework: paddle
 license: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/release/2.3/LICENSE

@@ -69,12 +69,12 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1, 3, 416, 416`, format is `B, C, H, W`, where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 

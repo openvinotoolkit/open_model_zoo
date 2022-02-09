@@ -8,7 +8,7 @@ The model is built on the ResNeXt-50 backbone with additional attention-based te
 The model was trained on internal Intel's dataset containing images of handwritten polynomial equations.
 The equations consist of tokens from the corresponding to this model vocabulary file.
 
-Vocabulary file is located under corresponding model configuration directory, `<omz_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json`. Model can predict letters, numbers and upperscript.
+Vocabulary file is located under corresponding model configuration directory, `<models_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json`. Model can predict letters, numbers and upperscript.
 
 ## Example of the input data
 

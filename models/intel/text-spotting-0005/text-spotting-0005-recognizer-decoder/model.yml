@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,20 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-spotting-0005-recognizer-decoder.xml
-    size: 52801
-    checksum: ef3525ed3b211d76be6e431d1de9baf0d1505ce432bd79549f3b4034be3231317e2db2b04570f857f68618a430580b35
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
+    size: 48869
+    checksum: a468b8f448746a2d57b57fbb3e69749d194f490086694620ac4d87a4cde9ad43b89918fb0eb034ea1b459a9ddaac0ef3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
   - name: FP32/text-spotting-0005-recognizer-decoder.bin
-    size: 2707724
-    checksum: 4a0edc8073e167328870e098e82e40bded9a993af805ad7e19a9ee57dd14de49811292698358f7bf06ed6ff04ba6d6b4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
+    size: 2707816
+    checksum: c6aaa39203a8999cfd35154e825d28136e5f217dff5aed277e9713647004a21491f32b20d3e7c35fa85b1e55743a54a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
   - name: FP16/text-spotting-0005-recognizer-decoder.xml
-    size: 52793
-    checksum: e3166251c48e54bb713ef64ddf0dc99db5a0e42b65519ff131703fbe911273c5a0fc12bfbb3d86e63d50e16ee6df0dc4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
+    size: 55048
+    checksum: 9acb77d827e5f0d278efbb4c745f0e9203997919826d93848e76c00b65aeb88cb507c62c13d9e5d3b895aa682ec1a345
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
   - name: FP16/text-spotting-0005-recognizer-decoder.bin
-    size: 1353920
-    checksum: dbb69793304dcd4d49a91b6a193859127e4b05b4cb01e227a0c3dd8ac6217f3966f54fda5d6121136c8f5b241d51fbca
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
-  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.xml
-    size: 80802
-    checksum: b7887e00d558fa7b81e808bba5ed0f2014cdef5ede3471e577e3deec060fb8c4e9da5ad003a29b27593b7e3bb12ea7d6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.xml
-  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.bin
-    size: 1085540
-    checksum: 6e145f52addd1294d43c50bef5a5d1c7f02891d5171411048c0be9229a355cc9f48f33a397c841767efab17f8062d3cb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.bin
+    size: 1354012
+    checksum: 37790b19b5e50ee984b9e8f7ce5822809ffa6285b6fcb3046c9ce2887bc18802ec129eb063868d68c822928550f56bf9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

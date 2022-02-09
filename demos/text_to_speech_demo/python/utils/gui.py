@@ -1,7 +1,6 @@
-import tkinter as tk
-
-
 def init_parameters_interactive(args):
+    import tkinter as tk
+
     window = tk.Tk()
     window.title('Multi-speaker TTS parameters')
     window.geometry('400x400')

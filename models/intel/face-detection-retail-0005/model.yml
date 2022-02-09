@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-retail-0005.xml
-    size: 170193
-    checksum: 1f8bee41bedba141fdc6a3f4f9baf411a62bfd43ad788182ecc6c9c0ad227822b32df4af64b31e665b3cc399902b9c36
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
+    size: 302400
+    checksum: b6655398b1f4d669b70b231e458c44e90b40d9eb31b156cf4a1e81d2f6091ce0d0fe56b117730d270a5e159eb62ca1f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
   - name: FP32/face-detection-retail-0005.bin
-    size: 4083112
-    checksum: 3d5721ecb874fe0cad5f743d4619157652c998376bd8761acd59b603ab643e008e2d903ebc348eb011a63bdcf914eb81
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
+    size: 4183584
+    checksum: b24e5f0f58f1b8fdff408c170f77e32e4b17e7ece313b8fc18976cf274ccc800482346fc1f73ef7938efbad3c901d6b9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
   - name: FP16/face-detection-retail-0005.xml
-    size: 170112
-    checksum: a54b36bc02f8038acf6b315acb5d4a1abaf8c5b43d9723c921ea3e94436d056a8d6f152618cc9d80ea0a2270cbfa069e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
+    size: 427373
+    checksum: f124c44ebafadc93c90555f32a5f4b8bf1a7816dfce075374ab9c055a5dee01b4be1decccbf34f279f4fd41543adc883
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
   - name: FP16/face-detection-retail-0005.bin
-    size: 2041598
-    checksum: da282530f1e8a72352b14cb8dd04a38e3cc160f5f6962fb17856ab62f18951f5a65302355a913cb59e97f71e8070b022
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
+    size: 2091856
+    checksum: d2457cd0608361a53dd409f21cd2b65b3603901b37de76bb795ddd09ab4d40a178bdbba99048f44750c7085dd8105626
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
   - name: FP16-INT8/face-detection-retail-0005.xml
-    size: 434088
-    checksum: 99f3278ce19b8aef23b27b3c2be928bef05a1675a13dd1d4822d8bb399d09c2514bf174b3d0da2111bc8158d00a3a990
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP16-INT8/face-detection-retail-0005.xml
+    size: 787733
+    checksum: 15b13f0309b2115df22c63f8061536e5182997e61f6e6bed21b0522dc2d7293212d6d3ae4756098f831e80a7a5078526
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP16-INT8/face-detection-retail-0005.xml
   - name: FP16-INT8/face-detection-retail-0005.bin
-    size: 1098786
-    checksum: c27e650835f6f7d65c4479de791e248522439ad8487c1335499de3867b34cda198dd3f3c62ae5a11cad004c5adc0d9a6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-retail-0005/FP16-INT8/face-detection-retail-0005.bin
+    size: 1217056
+    checksum: ec7d4facfeb667fa2d52c124ce1f805378e287ebca79b77683f0b4e87b56510433ddc3f495e907dbd2c8e41110dd6d7b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP16-INT8/face-detection-retail-0005.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

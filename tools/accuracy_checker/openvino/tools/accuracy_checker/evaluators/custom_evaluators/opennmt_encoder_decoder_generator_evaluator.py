@@ -22,7 +22,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, parse_partial_shape
+from ...utils import contains_all, extract_image_representations, parse_partial_shape, postprocess_output_name
 
 
 class OpenNMTEvaluator(BaseCustomEvaluator):
@@ -222,19 +222,26 @@ class CommonOVModel(BaseOpenVINOModel):
         results, raw_results = self.infer(input_data, raw_results=True)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(results[name] for name in names) + (raw_results,)
+        return tuple(
+            results[postprocess_output_name(name, results)] for name in names) + (raw_results,)
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
             fitted = {}
             for input_blob in self.inputs:
-                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+                data_key = input_blob
+                if input_blob.startswith(self.default_model_suffix):
+                    data_key = input_blob.replace(self.default_model_suffix + '_', '')
+                fitted.update(self.fit_one_input(input_blob, input_data[data_key]))
         else:
             fitted = self.fit_one_input(self.input_blob, input_data)
         return fitted
 
     def fit_one_input(self, input_blob, input_data):
-        if input_blob in self.dynamic_inputs or parse_partial_shape(self.inputs[input_blob]) != np.shape(input_data):
+        if (
+            input_blob in self.dynamic_inputs or
+            parse_partial_shape(self.inputs[input_blob].get_partial_shape()) != np.shape(input_data)
+        ):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}

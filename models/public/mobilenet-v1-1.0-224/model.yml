@@ -32,6 +32,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[103.94,116.78,123.68]
   - --scale_values=data[58.8235294117647]
   - --output=prob

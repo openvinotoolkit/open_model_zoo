@@ -13,7 +13,7 @@ PerformanceMetrics::PerformanceMetrics(Duration timeWindow)
 {}
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
-    cv::Mat& frame,
+    const cv::Mat& frame,
     cv::Point position,
     int fontFace,
     double fontScale,
@@ -45,7 +45,7 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     }
 }
 
-void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace,
+void PerformanceMetrics::paintMetrics(const cv::Mat& frame, cv::Point position, int fontFace,
     double fontScale, cv::Scalar color, int thickness, MetricTypes metricType) const {
     // Draw performance stats over frame
     Metrics metrics = getLast();

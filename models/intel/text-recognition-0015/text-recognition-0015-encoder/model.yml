@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-recognition-0015-encoder.xml
-    size: 326445
-    checksum: 27441bbe12dee3d4c9dff93d25516883915ff89f1095cbc6674b0897d8d22da4ff986a809eaa5f79dccc2550a67f8dba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
+    size: 581292
+    checksum: 7b3cd8ac6136a0e2aafbf497b4514211096a83c32f7aec4d4d39d6e50a528d04195fed921c1aba1be3e23ecd76675a4f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
   - name: FP32/text-recognition-0015-encoder.bin
-    size: 1592248036
-    checksum: 8e54bd82adf517bb3e08a45d673a4b1626698819ce4b90c8a0cf702ffad1e89853327cc16e9e44b8a8d8dce58ee5dbdc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
+    size: 1593095416
+    checksum: d12833ed4b31cb7e2f77a0675ed6ea0b829d95c3b77e3f0d4fd1f470c063379a5c1f796d19740d0659257b2ac7ed5fe8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
   - name: FP16/text-recognition-0015-encoder.xml
-    size: 326304
-    checksum: 3871c35a68ebe3f4f93e3c763cfe0c8a06b2e6d23c583e976eee57e79f0316587df9524448fdceafbf9f1bd579cad2d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
+    size: 829521
+    checksum: 5103cbfa511d9c89f08f9876954495d14f4d72271943de3ff2a38f8067eec281d9ff190d0aec675a9dbfc5ecd56538e6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
   - name: FP16/text-recognition-0015-encoder.bin
-    size: 796124044
-    checksum: b34ab56d2ff2fb80a6fac649aede61d382bb81543531ea4f0a24001c0cce698de2b31eebd381dc3861c96657df1b9bd9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
+    size: 796547744
+    checksum: 353f363b28f0cc69de9352e63cf7a8cfb71623348a2156c01d66367b44343d9818e1a74dade1b135ed46ec2319c8e2b5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

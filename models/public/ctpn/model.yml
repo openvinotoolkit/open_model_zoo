@@ -25,6 +25,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,600,600,3]
   - --input=Placeholder
+  - --layout=Placeholder(NHWC)
   - --mean_values=Placeholder[102.9801,115.9465,122.7717]
   - --output=Reshape_2,rpn_bbox_pred/Reshape_1
   - --input_model=$dl_dir/ctpn.pb

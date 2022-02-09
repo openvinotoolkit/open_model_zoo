@@ -21,11 +21,15 @@ models:
         metrics:
           - type: clip_accuracy
             presenter: print_vector
+            reference:
+              clip_accuracy: 0.648333
+              video_accuracy: 0.73183
+              mean: 0.690081
           - name: accuracy@top1
             type: accuracy
             top_k: 1
-            reference: 0.67
+            reference: 0.6483
           - name: accuracy@top5
             type: accuracy
             top_k: 5
-            reference: 0.887
+            reference: 0.8458

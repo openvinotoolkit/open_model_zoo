@@ -29,6 +29,7 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,256,256,3]
+  - --layout=NHWC
   - --scale=127.5
   - --mean_values=[127.5,127.5,127.5]
   - --transformations_config=$dl_dir/model/model.tfmo.json

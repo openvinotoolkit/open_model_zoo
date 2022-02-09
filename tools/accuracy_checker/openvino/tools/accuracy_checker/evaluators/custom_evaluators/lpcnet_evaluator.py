@@ -63,6 +63,8 @@ class SequentialModel(BaseCascadeModel):
         self.decoder = create_model(network_info['decoder'], launcher, self._decoder_mapping, 'decoder',
                                     delayed_model_loading)
         self.adapter = create_adapter(adapter_info)
+        if not delayed_model_loading:
+            self.update_inputs_outputs_info()
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
@@ -95,7 +97,7 @@ class SequentialModel(BaseCascadeModel):
     def update_inputs_outputs_info(self):
         current_name = next(iter(self.encoder.inputs))
         with_prefix = current_name.startswith('encoder_')
-        if with_prefix != self.with_prefix:
+        if not hasattr(self, 'with_prefix') or with_prefix != self.with_prefix:
             self.encoder.update_inputs_outputs_info(with_prefix)
             self.decoder.update_inputs_outputs_info(with_prefix)
 
@@ -122,6 +124,10 @@ class EncoderModel:
         self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
         if hasattr(self, 'outputs'):
             self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            if self.output not in self.outputs:
+                self.output = postprocess_output_name(
+                    generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix),
+                    self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -239,8 +245,20 @@ class DecoderModel:
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
         if hasattr(self, 'outputs'):
             self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            if self.output not in self.outputs:
+                self.output = postprocess_output_name(
+                    generate_layer_name(self.output, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
             self.rnn_output1 = postprocess_output_name(self.rnn_output1, self.outputs, raise_error=False)
+            if self.rnn_output1 not in self.outputs:
+                self.rnn_output1 = postprocess_output_name(
+                    generate_layer_name(self.rnn_output1, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
             self.rnn_output2 = postprocess_output_name(self.rnn_output2, self.outputs, raise_error=False)
+            if self.rnn_output2 not in self.outputs:
+                self.rnn_output2 = postprocess_output_name(
+                    generate_layer_name(self.rnn_output2, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

@@ -16,6 +16,7 @@
 
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
+from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
@@ -49,6 +50,7 @@ __all__ = [
     'DETR',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
+    'ImageMattingWithBackground',
     'ImageModel',
     'InputTransform',
     'MaskRCNNModel',
@@ -63,6 +65,7 @@ __all__ = [
     'SegmentationModel',
     'SSD',
     'UltraLightweightFaceDetection',
+    'VideoBackgroundMatting',
     'YolactModel',
     'YOLO',
     'YoloV3ONNX',

@@ -39,12 +39,12 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `sub/placeholder_port_0`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
+Image, name - `sub/placeholder_port_0`, shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 

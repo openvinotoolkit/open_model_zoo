@@ -27,6 +27,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --mean_values=[123.68,116.78,103.94]
+  - --layout=map/TensorArrayStack/TensorArrayGatherV3(NHWC)
   - --input=map/TensorArrayStack/TensorArrayGatherV3
   - --output=softmax_tensor
   - --input_model=$dl_dir/resnet_v1-50.pb

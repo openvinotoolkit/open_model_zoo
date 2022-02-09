@@ -36,7 +36,7 @@ thoroughly. Other types of license plates may underperform.
 
 ### Original Model
 
-Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 24, 94, 3`, format is `1, H, W, C`, where:
 
 - `C` - channel
 - `H` - height
@@ -46,7 +46,7 @@ Channel order is `BGR`.
 
 ### Converted Model
 
-Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 24, 94, 3`, format is `1, H, W, C`, where:
 
 - `C` - channel
 - `H` - height

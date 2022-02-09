@@ -196,6 +196,8 @@ class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
         for name, info in self.inputs.items():
             data = input_data[self._name_to_idx[name]]
             data = np.expand_dims(data, axis=0)
+            if parse_partial_shape(info.get_partial_shape())[1] == 3:
+                data = np.transpose(data, (0, 3, 1, 2))
             if not info.get_partial_shape().is_dynamic:
                 assert tuple(parse_partial_shape(info.get_partial_shape())) == np.shape(data)
             fitted[name] = data
@@ -209,6 +211,14 @@ class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
     def set_input_and_output(self):
         input_info = self.inputs
         input_blob = next(iter(input_info))
+        out_mapping = {}
+        outputs = self.network.outputs if self.network is not None else self.exec_network.outputs
+        for out in outputs:
+            if not out.names:
+                continue
+            for name in out.names:
+                out_mapping[name] = out.get_node().friendly_name
+        self.adapter.additional_output_mapping = out_mapping
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if (with_prefix != self.with_prefix) and with_prefix:
             self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
