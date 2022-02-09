@@ -15,8 +15,17 @@
 #include <limits>
 
 namespace {
-DEFINE_INPUT_FLAGS
-DEFINE_OUTPUT_FLAGS
+constexpr char input_msg[] = "An input to process. The input must be a single image, a folder of images, video file or camera id";
+DEFINE_string(i, "", input_msg);
+
+constexpr char loop_msg[] = "Enable reading the input in a loop";
+DEFINE_bool(loop, false, loop_msg);
+
+constexpr char output_msg[] = "Name of the output file(s) to save";
+DEFINE_string(o, "", output_msg);
+
+constexpr char limit_msg[] = "Number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+DEFINE_uint32(limit, 1000, limit_msg);
 
 constexpr char help_msg[] = "show this help message and exit";
 DEFINE_bool(h, false, help_msg);
@@ -83,27 +92,27 @@ void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {    
         std::cout << "  \t-h                         " << help_msg
-                << "\n\t-i                         " << input_msg
-                << "\n\t-loop                      " << loop_msg
-                << "\n\t-o \"<path>\"              " << output_msg
-                << "\n\t-limit \"<num>\"           " << limit_msg
-                << "\n\t-m \"<path>\"              " << face_detection_model_msg
-                << "\n\t[-m_ag] \"<path>\"         " << age_gender_model_msg
-                << "\n\t[-m_hp] \"<path>\"         " << head_pose_model_msg
-                << "\n\t[-m_em] \"<path>\"         " << emotions_model_msg
-                << "\n\t[-m_lm] \"<path>\"         " << facial_landmarks_model_msg
-                << "\n\t[-m_am] \"<path>\"         " << antispoofing_model_msg
-                << "\n\t-d <device>                " << device_msg
-                << "\n\t[-no_show]                 " << no_show_msg
-                << "\n\t[-r]                       " << raw_output_msg
-                << "\n\t[-t]                       " << thresh_output_msg
-                << "\n\t[-bb_enlarge_coef]         " << bb_enlarge_coef_output_msg
-                << "\n\t[-dx_coef]                 " << dx_coef_output_msg
-                << "\n\t[-dy_coef]                 " << dy_coef_output_msg
-                << "\n\t[-fps]                     " << fps_output_msg
-                << "\n\t[-no_smooth]               " << no_smooth_output_msg
-                << "\n\t[-no_show_emotion_bar]     " << no_show_emotion_bar_msg
-                << "\n\t[-u]                       " << utilization_monitors_msg << '\n';
+                  << "\n\t-i                         " << input_msg
+                  << "\n\t-loop                      " << loop_msg
+                  << "\n\t-o \"<path>\"              " << output_msg
+                  << "\n\t-limit \"<num>\"           " << limit_msg
+                  << "\n\t-m \"<path>\"              " << face_detection_model_msg
+                  << "\n\t[-m_ag] \"<path>\"         " << age_gender_model_msg
+                  << "\n\t[-m_hp] \"<path>\"         " << head_pose_model_msg
+                  << "\n\t[-m_em] \"<path>\"         " << emotions_model_msg
+                  << "\n\t[-m_lm] \"<path>\"         " << facial_landmarks_model_msg
+                  << "\n\t[-m_am] \"<path>\"         " << antispoofing_model_msg
+                  << "\n\t-d <device>                " << device_msg
+                  << "\n\t[-no_show]                 " << no_show_msg
+                  << "\n\t[-r]                       " << raw_output_msg
+                  << "\n\t[-t]                       " << thresh_output_msg
+                  << "\n\t[-bb_enlarge_coef]         " << bb_enlarge_coef_output_msg
+                  << "\n\t[-dx_coef]                 " << dx_coef_output_msg
+                  << "\n\t[-dy_coef]                 " << dy_coef_output_msg
+                  << "\n\t[-fps]                     " << fps_output_msg
+                  << "\n\t[-no_smooth]               " << no_smooth_output_msg
+                  << "\n\t[-no_show_emotion_bar]     " << no_show_emotion_bar_msg
+                  << "\n\t[-u]                       " << utilization_monitors_msg << '\n';
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
