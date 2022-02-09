@@ -145,3 +145,4 @@
 | smartlab-object-detection-0003 | YES |  |  |
 | smartlab-object-detection-0004 | YES |  |  |
 | smartlab-sequence-modelling-0001 | YES | YES |  |
+| speech-to-text-en-0001 | YES |    |    |

@@ -1,0 +1,24 @@
+models:
+  - name: speech-to-text-en-0001
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: ctc_greedy_decoder
+          alphabet: ["<PAD>", "<UNK>", "<BOS>", "<EOS>", "_", "e", "t", "a", "o", "n", "i", "h", "s", "r", "d", "l", "u", "m", "c", "w", "f", "g", "y", "p", "b", "v", "k", "x", "j", "q", "z", "_t", "he", "_a", "_the", "in", "_s", "_w", "_o", "re", "nd", "_b", "_h", "er", "_m", "_i", "ou", "_c", "_f", "at", "ed", "_and", "en", "_to", "_of", "on", "is", "_d", "ing", "_th", "_p", "_he", "or", "es", "_l", "_in", "as", "ll", "it", "ar", "an", "_n", "_g", "om", "_be", "_ha", "_e", "le", "ot", "_y", "ut", "ow", "ic", "_wh", "_it", "ld", "ve", "_that", "ly", "_was", "id", "se", "st", "_on", "gh", "ent", "_re", "_you", "im", "ce", "_u", "ver", "ion", "_as", "et", "_for", "ay", "_his", "ith", "_we", "al", "ir", "_r", "_with", "_st", "ad", "ur", "ght", "_an", "_her", "_not", "_had", "_is", "ter", "her", "ac", "am", "_at", "oo", "_but", "ould", "_she", "_k", "_se", "_sa", "_sh", "_fr", "_him", "_so", "ill", "_me", "ain", "_su", "ight", "ch", "red", "ct", "all", "ro", "ess", "ke", "il", "ore", "_de", "_they", "_my", "_whe", "_all", "ich", "_ne", "ri", "_by", "_have", "ome", "pp", "_this", "_li", "_do", "_con", "us", "_which", "_ch", "ul", "qu", "_j", "nt", "_up", "_said", "_from", "ard", "ge", "_or", "ant", "_v", "_were", "_no", "th", "_ex", "_one", "res", "pe", "and", "est", "_who", "ble", "_man", "_there", "_al", "ie", "ous", "ust", "very", "ers", "ation", "_fe", "_them", "lf", "_when", "ind", "ame", "ra", "_go", "ast", "ood", "_kn", "fe", "_int", "ist", "art", "_are", "out", "_would", "os", "_le", "_their", "ong", "_what", "our", "_if", "ound", "_com", "_ab", "_out", "_wor", "em", "_will", "ak", "_mis", "ol", "ate", "um", "un", "itt", "ough", "ked", "ap", "ig", "one", "_been", "own", "ive", "if", "_then", "_br", "_ar", "_tr"]
+          space_symbol: '_'
+          bos_id: 2
+          eos_id: 3
+          unk_id: 1
+          pad_id: 0
+        inputs:
+          - name: 'mel'
+            type: INPUT
+            layout: NHWC
+
+    datasets:
+      - name: LibriSpeech_test_clean_npy_nemo
+        reader: numpy_reader
+        metrics:
+          - type: wer
+            reference: 0.0735
