@@ -114,6 +114,8 @@ class SequentialModel(BaseCascadeModel):
         self.pos_mask_window = int(pos_mask_window)
         self.adapter = create_adapter(adapter_info)
         self.adapter.output_blob = self.audio_output
+        if not delayed_model_loading:
+            self.update_inputs_outputs_info()
 
         self.init_pos_mask(window_size=self.pos_mask_window)
 
@@ -250,7 +252,7 @@ class SequentialModel(BaseCascadeModel):
             self.adapter.output_blob = self.audio_output
         current_name = next(iter(self.forward_tacotron_duration.inputs))
         with_prefix = current_name.startswith('forward_tacotron_duration_')
-        if with_prefix != self.with_prefix:
+        if not hasattr(self, 'with_prefix') or with_prefix != self.with_prefix:
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
             if self.duration_speaker_embeddings:

@@ -18,27 +18,27 @@ task_type: optical_character_recognition
 files:
   - name: FP32/license-plate-recognition-barrier-0001.xml
     size: 63216
-    checksum: 3e7a145dc2ea475604cecc231c39530a767e59daad2009217f661e467d1b0762f5e7ae16046eb6cc9ac760d1e2f75d78
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+    checksum: 5f4e616df3aaa298432fbed702e36f15b84e9973697f33ad5b719b765356501493f24cf7b0ba71db7fa8af5913421272
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
   - name: FP32/license-plate-recognition-barrier-0001.bin
     size: 4871940
     checksum: 4ec3d6adc5e470cb8faed53c5866e45a89e745b0ee0bd81d5be7d80481c49a2fccd694435e68c1470c365eb77c7ad30d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
   - name: FP16/license-plate-recognition-barrier-0001.xml
     size: 81452
-    checksum: 8b79bd9d53d74bcfa2b7e64c2aed3664f1b4cb1ec1bd401e03235550ae01c0846973e5125bde2b07e385f464dd9f1ebc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+    checksum: 75750ac4d09129a4d7d9ca8ff9f458c8d7f2535f3acf466c8d7cd76cd301cd91bb1c529ecbebb3629944f73ca2789d11
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
   - name: FP16/license-plate-recognition-barrier-0001.bin
     size: 2436038
     checksum: 92cb3edbeb253b930391f85a15a6b251c7e6aa572ad98ef9eec8dcccba6240b7e6bf613668c3f0e423dd8eeab580cba1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
   - name: FP16-INT8/license-plate-recognition-barrier-0001.xml
-    size: 132319
-    checksum: 52b4f4dfe72ced3c8aafa196f81f10338c4694e789a1086e3b8694ce9ecd2205ec3591b1c09d1171fc8649599a81660b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.xml
+    size: 132851
+    checksum: fda6552147eb56de95621ee145dc4571997f3b75f2ccbbb20fd35d7638d8e4cab8160f2eefa3b9d58a89e064811e0c4d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.xml
   - name: FP16-INT8/license-plate-recognition-barrier-0001.bin
     size: 2046458
-    checksum: b8fe0e410d3c34008ce312d468999d650eb520c72840c3e8e7e3335922fac6ae1afde237d55b746f38944a95f419dc82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
+    checksum: fa0bc45315f8df180059a881c978db6d5150166e43e429da21f65747644643b33f7a5165da6e0680a77f7795d33eed5d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,0 +1,53 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Neural machine translation model based on Non-Autoregressive Transformer topology
+  (en-ru).
+task_type: machine_translation
+files:
+  - name: tokenizer_tgt/merges.txt
+    size: 343234
+    checksum: 62a5c4d6db30b61d662334c7033d46ea5f1a388691722ab53ef81d7188fe0c3bf67cabf4bf82292fe246c7e7e58ea3d6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/tokenizer_tgt/merges.txt
+  - name: tokenizer_tgt/vocab.json
+    size: 505048
+    checksum: c2d5768ee9a7e92f4b9ffbc76700456fa8f0a9e3593f79498886e338896bea08f0fd1d4d403b05bfce79de99cfc52c2e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/tokenizer_tgt/vocab.json
+  - name: tokenizer_src/merges.txt
+    size: 224596
+    checksum: cb820a7560c63df3b9fd9e1415239155d83fe52ecf64d38275a55aa58692d393194d9398c9833ed4beac01c0a7f31682
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/tokenizer_src/merges.txt
+  - name: tokenizer_src/vocab.json
+    size: 386184
+    checksum: df2a5b2dddb4da9bf799fa1e6cccd9c2c36ff13b81c2c98d578d63f1d38ede1243d1f6310b32cf71e1d36af9de883a75
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/tokenizer_src/vocab.json
+  - name: FP32/machine-translation-nar-en-ru-0002.xml
+    size: 913424
+    checksum: 57ea1eb5c5e10c48f7cb8f1c8f825f29d14f275fffccd1ebf107f726d519387a6f3136355d15410b103d49b692fccf60
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/FP32/machine-translation-nar-en-ru-0002.xml
+  - name: FP32/machine-translation-nar-en-ru-0002.bin
+    size: 251814348
+    checksum: c2249528e3fb0eea527fc0ef8602d1325516a9b863cffa90590a60da79b486db6ec96f563ff9071bea67be48be5bb2c4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/FP32/machine-translation-nar-en-ru-0002.bin
+  - name: FP16/machine-translation-nar-en-ru-0002.xml
+    size: 1053147
+    checksum: 2dd9875d090e7ef5a07eef2246948ea829dc215e315982d70b356a50d84ead8a3dabdaadfe9ac74502e84f894e7f6210
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/FP16/machine-translation-nar-en-ru-0002.xml
+  - name: FP16/machine-translation-nar-en-ru-0002.bin
+    size: 125907278
+    checksum: 49206e162964bf1a15211d5f3cca1a2360ce9bba27a6d4fdd6f8573d7dfd8f080ceb8ec56ef94098bb1e80e8a2b2147f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-en-ru-0002/FP16/machine-translation-nar-en-ru-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
