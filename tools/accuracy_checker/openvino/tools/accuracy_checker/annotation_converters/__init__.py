@@ -129,8 +129,6 @@ from .mvtec import MVTecDatasetConverter
 from .gan_annotation_converter import GANAnnotationConverter
 from .kitti_converter import KITTIConverter
 
-from .smartlab_action import SmartlabActionConverter
-
 __all__ = [
     'BaseFormatConverter',
     'DatasetConversionInfo',
