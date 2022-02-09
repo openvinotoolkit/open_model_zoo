@@ -33,14 +33,14 @@ class Evaluator(object):
 
         # scoring
         self.scoring = {
-            "initial_score_rider":0, 
-            "initial_score_balance":0, 
-            "measuring_score_rider_tweezers":0, 
-            "measuring_score_balance":0, 
-            "measuring_score_object_left":0, 
-            "measuring_score_weights_right_tweezers":0, 
-            "measuring_score_weights_order":0, 
-            "end_score_tidy":0 
+            "initial_score_rider": 0, 
+            "initial_score_balance": 0, 
+            "measuring_score_rider_tweezers": 0, 
+            "measuring_score_balance": 0, 
+            "measuring_score_object_left": 0, 
+            "measuring_score_weights_right_tweezers": 0, 
+            "measuring_score_weights_order": 0, 
+            "end_score_tidy": 0 
         }
 
     def inference(self, top_det_results, front_det_results, top_seg_results, front_seg_results, frame_top, frame_front):
@@ -86,7 +86,7 @@ class Evaluator(object):
             self.state = "Initial"
 
     def get_obj_coordinate(self, df):
-        for i,row in df.iterrows():
+        for i, row in df.iterrows():
             obj = row["obj"]
             x_min = row["x_min"]
             y_min = row["y_min"]
@@ -113,13 +113,13 @@ class Evaluator(object):
             df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
 
             roundscrew1_center_coordinate = (x0,y0)  =\
-                ((df_2screw[0, 1] + df_2screw[0, 0])/2,
+                ((df_2screw[0, 1] + df_2screw[0, 0])/2, 
                 (df_2screw[0, 3] + df_2screw[0, 2])/2)
             roundscrew2_center_coordinate = (x1,y1)  =\
-                ((df_2screw[1, 1] + df_2screw[1, 0])/2,
+                ((df_2screw[1, 1] + df_2screw[1, 0])/2, 
                 (df_2screw[1, 3] + df_2screw[1, 2])/2)
             rider_center_coordinate  = \
-                ((df_rider[1] + df_rider[0])/2,
+                ((df_rider[1] + df_rider[0])/2, 
                 (df_rider[3] + df_rider[2])/2)
             
             # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
