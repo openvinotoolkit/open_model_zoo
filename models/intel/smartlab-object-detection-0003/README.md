@@ -6,7 +6,7 @@ This is a smartlab object detector that is based on YoloX for 416x416 resolution
 
 ## Example
 
-![](./assets/frame0001.jpg)
+![](./assets/frame0001_front1.jpg)
 
 ## Specification
 
