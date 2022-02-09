@@ -274,9 +274,7 @@ class Model:
 
         self._create_model_api_instance(model_creator, **kwargs)
 
-        preprocessed_inputs, meta = self.model_api.preprocess(inputs)
-        raw_results = self.model_api.infer_sync(preprocessed_inputs)
-        results = self.model_api.postprocess(raw_results, meta)
+        results = self.model_api(inputs)
 
         return results
 
