@@ -82,7 +82,7 @@ void CnnDLSDKBase::InferBatch(
     input_tensor.set_shape({ num_imgs, h, w, c });
 
     for (size_t i = 0; i < num_imgs; i++) {
-        resize2tensor(frames[i], ov::Tensor{ input_tensor, {i, 0, 0, 0}, {i, h, w, c} });
+        resize2tensor(frames[i], ov::Tensor{ input_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} });
     }
 
     m_infer_request.set_input_tensor(ov::Tensor{ input_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
