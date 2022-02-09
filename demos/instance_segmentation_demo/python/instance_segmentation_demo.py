@@ -62,7 +62,7 @@ def build_argparser():
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--no_track', action='store_true',
-                                   help='Optional. Disable tracking.')
+                                   help='Optional. Disable object tracking for video/camera input.')
     common_model_args.add_argument('--show_scores', action='store_true',
                                    help='Optional. Show detection scores.')
     common_model_args.add_argument('--show_boxes', action='store_true',
@@ -140,7 +140,9 @@ def main():
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    tracker = None if args.no_track else StaticIOUTracker()
+    tracker = None
+    if not args.no_track and cap.get_type() in {'VIDEO', 'CAMERA'}:
+        tracker = StaticIOUTracker()
     visualizer = InstanceSegmentationVisualizer(model.labels, args.show_boxes, args.show_scores)
 
     metrics = PerformanceMetrics()
