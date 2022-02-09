@@ -162,9 +162,9 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32,
                                                           ov::Shape{},
                                                           std::vector<size_t>{nTop});
-    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v1::TopK>(softmaxNode, k, 1,
-                                                                            ov::op::v1::TopK::Mode::MAX,
-                                                                            ov::op::v1::TopK::SortType::SORT_VALUES);
+    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v3::TopK>(softmaxNode, k, 1,
+                                                                            ov::op::v3::TopK::Mode::MAX,
+                                                                            ov::op::v3::TopK::SortType::SORT_VALUES);
 
     auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
     auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
