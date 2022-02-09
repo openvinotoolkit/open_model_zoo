@@ -33,19 +33,18 @@ class Evaluator(object):
 
         # scoring
         self.scoring = {
-            "initial_score_rider": 0, 
-            "initial_score_balance": 0, 
-            "measuring_score_rider_tweezers": 0, 
-            "measuring_score_balance": 0, 
-            "measuring_score_object_left": 0, 
-            "measuring_score_weights_right_tweezers": 0, 
-            "measuring_score_weights_order": 0, 
-            "end_score_tidy": 0 
+            "initial_score_rider": 0,
+            "initial_score_balance": 0,
+            "measuring_score_rider_tweezers": 0,
+            "measuring_score_balance": 0,
+            "measuring_score_object_left": 0,
+            "measuring_score_weights_right_tweezers": 0,
+            "measuring_score_weights_order": 0,
+            "end_score_tidy": 0
         }
 
     def inference(self, top_det_results, front_det_results, top_seg_results, front_seg_results, frame_top, frame_front):
         """
-
         Args:
             top_det_results:
             front_det_results:
@@ -70,7 +69,7 @@ class Evaluator(object):
 
             if top_seg_results == "adjust_rider":
                 self.evaluate_rider_tweezers(front_seg_results, front_det_results)
-            
+
         if self.can_tidy:
             self.evaluate_end_tidy()
 
@@ -79,7 +78,7 @@ class Evaluator(object):
     def classify_state(self, top_seg_results, front_seg_results, frame_top, frame_front):
         if top_seg_results == "put_take":
             self.first_put_take = True
-        
+
         if self.first_put_take:
             self.state = "Measuring"
         else:
@@ -107,18 +106,17 @@ class Evaluator(object):
         bboxes = front_det_results[0] # (x1, y1, x2, y2)
         cls_ids = front_det_results[1]
 
-        if cls_ids.count("roundscrew1") == 2 \
-            and cls_ids.count("rider") == 1: 
+        if cls_ids.count("roundscrew1") == 2 and cls_ids.count("rider") == 1:
             df_2screw = bboxes[np.array(cls_ids) == "roundscrew1"].squeeze()
             df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
 
-            roundscrew1_center_coordinate = (x0, y0)  =\
+            roundscrew1_center_coordinate = (x0, y0) =\
                 ((df_2screw[0, 1] + df_2screw[0, 0])/2, 
                 (df_2screw[0, 3] + df_2screw[0, 2])/2)
-            roundscrew2_center_coordinate = (x1, y1)  =\
+            roundscrew2_center_coordinate = (x1, y1) =\
                 ((df_2screw[1, 1] + df_2screw[1, 0])/2, 
                 (df_2screw[1, 3] + df_2screw[1, 2])/2)
-            rider_center_coordinate  = \
+            rider_center_coordinate = \
                 ((df_rider[1] + df_rider[0])/2, 
                 (df_rider[3] + df_rider[2])/2)
             

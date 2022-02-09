@@ -46,7 +46,7 @@ class Detector(object):
         #     "balance", 1; "weights",    omit; "tweezers", 1;
         #     "box"    , 1; "battery", 1; "tray"    , 2;
         #     "ruler"  , 1; "rider"  ,    omit; "scale"   , 1;
-        #     "hand", 2;  
+        #     "hand", 2;
         #  other conditions:
         #     conf 0.1; nms 0.3
         self.top1_exp = MwGlobalExp(
@@ -69,14 +69,14 @@ class Detector(object):
             conf_thresh= 0.1,
             nms_thresh = 0.2,
             ie=ie)
-        
+
         '''configure settings for 2 models in front view'''
         ###          frontview.global_subdetector1           ###
         #  max-number constraints:
         #     "balance", 1; "weights",    omit; "tweezers", 1;
         #     "box"    , 1; "battery", 1; "tray"    , 2;
         #     "ruler"  , 1; "rider"  ,    omit; "scale"   , 1;
-        #     "hand", 2;  
+        #     "hand", 2;
         #  other conditions:
         #     conf 0.2; nms 0.3
         self.front1_exp = MwGlobalExp(
@@ -135,8 +135,8 @@ class Detector(object):
     def _apply_detection_constraints(self, predictions: np.ndarray, nmsthre=0.3):
         ### sort by conf_score * cls_score
         sorted_preds = sorted(
-            predictions, 
-            key=lambda x: x[4]*x[5], 
+            predictions,
+            key=lambda x: x[4]*x[5],
             reverse=True)
         sorted_preds = np.vstack(sorted_preds)
         ### reserve indicated number foreach cls
@@ -205,7 +205,7 @@ class Detector(object):
         boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3]/2.
         boxes_xyxy /= ratio
         dets = multiclass_nms(boxes_xyxy, scores, nms_thr=0.45, score_thr=0.1)
-        
+
         if dets is not None:
             final_boxes = dets[:, :4]
             final_scores, final_cls_inds = dets[:, 4], dets[:, 5]
@@ -237,18 +237,18 @@ class Detector(object):
         # return [], []
         if self.is_show:
             vis_top = vis(
-                img_top, 
-                top_bboxes, 
-                top_scores, 
-                top_cls_ids, 
-                self.top1_exp.confthre, 
+                img_top,
+                top_bboxes,
+                top_scores,
+                top_cls_ids,
+                self.top1_exp.confthre,
                 self.classes)
             vis_front = vis(
-                img_front, 
-                front_bboxes, 
-                front_scores, 
-                front_cls_ids, 
-                self.front1_exp.confthre, 
+                img_front,
+                front_bboxes,
+                front_scores,
+                front_cls_ids,
+                self.front1_exp.confthre,
                 self.classes)
             return vis_top, vis_front
         else:

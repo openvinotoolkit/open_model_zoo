@@ -41,7 +41,7 @@ class SubDetector(object):
                 return img
             else:
                 output = np.cat(output)
-                
+
         bboxes = output[:, 0:4]
         # preprocessing: resize
         bboxes /= ratio
@@ -74,7 +74,7 @@ class SubDetector(object):
             i += 1
             cat_id = int(c)
             res.append({
-                'area': w * h, 
+                'area': w * h,
                 'bbox': [x0, y0, w, h],
                 'category_id': cat_id,
                 'id': idx,

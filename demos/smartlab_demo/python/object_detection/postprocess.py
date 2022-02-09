@@ -4,7 +4,7 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
     # original source: https://github.com/Megvii-BaseDetection/YOLOX
     # Copyright (c) 2014-2021 Megvii Inc. All rights reserved.
     box_corner = np.zeros(prediction.shape)
-    
+
     # box_corner = prediction.new(prediction.shape)
     box_corner[:, :, 0] = prediction[:, :, 0] - prediction[:, :, 2] / 2
     box_corner[:, :, 1] = prediction[:, :, 1] - prediction[:, :, 3] / 2
@@ -12,7 +12,7 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
     box_corner[:, :, 3] = prediction[:, :, 1] + prediction[:, :, 3] / 2
     prediction[:, :, :4] = box_corner[:, :, :4]
     output = [None for _ in range(len(prediction))]
-    
+
     for i, image_pred in enumerate(prediction):
         # If none are remaining => process next image
         if len(image_pred[0]) == 0:

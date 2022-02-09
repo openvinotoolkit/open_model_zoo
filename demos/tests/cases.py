@@ -24,7 +24,7 @@ from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
 TestCase = collections.namedtuple('TestCase', ['options', 'extra_models'])
-# TODO with Python3.7 use namedtuple defaults instead
+# TODO with Python3.7 use namedtuple d instead
 TestCase.__new__.__defaults__ = [],
 
 
@@ -1249,7 +1249,7 @@ PYTHON_DEMOS = [
     PythonDemo(name='smartlab_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-h': None}),
     )),
-    
+
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('aclnet')}),

@@ -60,7 +60,7 @@ Running the application with an empty list of options yields the usage message g
 **For example**, to run the demo, please provide a pathes of models, two input streams:
 
 ```sh
-python3 video_processor_serial.py 
+python3 smartlab_demo.py
     -tv ./stream_1_top.mp4
     -fv ./stream_1_high.mp4
     -m_ta "./intel/smartlab-object-detection-0001/FP32/mw-topview-all-yolox-n.bin"
