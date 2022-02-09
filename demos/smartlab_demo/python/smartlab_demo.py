@@ -39,7 +39,7 @@ def build_argparser():
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
-    
+
     subparsers = parser.add_subparsers(help='sub-command help')
     args_mutiview = subparsers.add_parser('multiview', help='multiview help')
     args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
@@ -60,7 +60,7 @@ def main():
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
     ie = IECore()
-    
+
     ''' Object Detection Variables'''
     detector = Detector(
             ie,
@@ -102,7 +102,6 @@ def main():
             ''' The object detection module need to generate detection results(for the current frame) '''
             top_det_results, front_det_results = detector.inference(
                     img_top=frame_top, img_front=frame_front)
-            
 
             ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
             if(args.mode == "multiview"):
@@ -122,7 +121,7 @@ def main():
                 front_seg_results = frame_predictions
                 if(len(top_seg_results) == 0):
                     continue
-    
+
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             state, scoring = evaluator.inference(
                     top_det_results=top_det_results,

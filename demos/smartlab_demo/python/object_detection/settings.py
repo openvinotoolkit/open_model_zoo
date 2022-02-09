@@ -85,4 +85,3 @@ class MwGlobalExp:
             output_name,
             (h, w),
             self.ie.load_network(network=net, device_name=device))
-

@@ -114,9 +114,9 @@ class Evaluator(object):
             x1 = (df_2screw[1, 1] + df_2screw[1, 0])/2
 
             rider_center_coordinate = \
-                ((df_rider[1] + df_rider[0])/2, 
+                ((df_rider[1] + df_rider[0])/2,
                 (df_rider[3] + df_rider[2])/2)
-            
+
             # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
             if rider_center_coordinate[0] < min(x0, x1)+abs(x0-x1)/10:
                 self.scoring["initial_score_rider"]=1
@@ -143,7 +143,7 @@ class Evaluator(object):
             df_tweezers = bboxes[np.array(cls_ids) == "balance"].squeeze()
             rider_min_coordinate = (df_rider[0], df_rider[2])
             tweezers_min_coordinate = (df_tweezers[0], df_tweezers[2])
-            
+
             # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
             if abs(rider_min_coordinate-tweezers_min_coordinate)>self.use_tweezers_threshold:
                 self.scoring['measuring_score_rider_tweezers']=0
@@ -171,7 +171,7 @@ class Evaluator(object):
 
             if battery_center_coordinate[0]<(balance_x_min+(balance_x_max-balance_x_min)/2) \
                 and battery_center_coordinate[0]>balance_x_min:
-                
+
                 if battery_center_coordinate[1]>balance_y_min \
                     and battery_center_coordinate[1]<balance_y_max:
                     self.scoring['measuring_score_object_left'] = 1
@@ -184,7 +184,7 @@ class Evaluator(object):
                     self.put_object = 1
             else:
                 self.scoring['measuring_score_object_left'] = 0
-    
+
     def evaluate_weights_right_tweezers(self, front_seg_results, front_det_results):
         bboxes = front_det_results[0] # (x1, y1, x2, y2)
         cls_ids = front_det_results[1]
