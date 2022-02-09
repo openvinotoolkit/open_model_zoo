@@ -90,7 +90,7 @@ struct Context {
             const Detector& detector,
             const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr,
             int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-            const std::string& monitorsStr,
+                const std::string& monitorsStr,
             uint64_t lastFrameId,
             uint64_t nireq,
             bool isVideo,

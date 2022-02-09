@@ -29,7 +29,7 @@ public:
     Detector() = default;
     Detector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const ov::AnyMap& pluginConfig) :
-        m_autoResize(autoResize), m_detectionTresholds{detectionTresholds}, m_core{core} {
+        m_autoResize(autoResize), m_detectionTresholds{detectionTresholds} {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
         logBasicModelInfo(model);
@@ -68,14 +68,15 @@ public:
             throw std::logic_error("Output should have 7 as a last dimension");
         }
 
-        ov::Layout desiredLayout = {"NHWC"};
         ov::preprocess::PrePostProcessor ppp(model);
 
         ov::preprocess::InputInfo& inputInfo = ppp.input();
 
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
+        // configure desired input type and layout, the
+        // use preprocessor to convert to actual model input type and layout
         inputTensorInfo.set_element_type(ov::element::u8);
-        inputTensorInfo.set_layout(desiredLayout);
+        inputTensorInfo.set_layout({"NHWC"});
         if (autoResize) {
             inputTensorInfo.set_spatial_dynamic_shape();
         }
@@ -95,7 +96,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
     }
 
@@ -157,7 +158,6 @@ private:
     std::vector<float> m_detectionTresholds;
     std::string m_detectorInputName;
     std::string m_detectorOutputName;
-    ov::Core m_core; // The only reason to store a plugin as to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
 
@@ -166,9 +166,9 @@ public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(ov::Core& core, const std::string& deviceName,
         const std::string& xmlPath, const bool autoResize, const ov::AnyMap& pluginConfig) :
-        m_autoResize(autoResize), m_core(core) {
+        m_autoResize(autoResize) {
         slog::info << "Reading model: " << xmlPath << slog::endl;
-        std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
+        std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
         logBasicModelInfo(model);
 
         ov::OutputVector inputs = model->inputs();
@@ -192,15 +192,15 @@ public:
         // type is the second output.
         m_outputNameForType = outputs[1].get_any_name();
 
-        ov::Layout desiredLayout = {"NHWC"};
-
         ov::preprocess::PrePostProcessor ppp(model);
 
         ov::preprocess::InputInfo& inputInfo = ppp.input();
 
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
+        // configure desired input type and layout, the
+        // use preprocessor to convert to actual model input type and layout
         inputTensorInfo.set_element_type(ov::element::u8);
-        inputTensorInfo.set_layout(desiredLayout);
+        inputTensorInfo.set_layout({"NHWC"});
         if (autoResize) {
             inputTensorInfo.set_spatial_dynamic_shape();
         }
@@ -220,7 +220,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle Attributes Recognition");
     }
 
@@ -271,7 +271,6 @@ private:
     std::string m_attributesInputName;
     std::string m_outputNameForColor;
     std::string m_outputNameForType;
-    ov::Core m_core;  // The only reason to store a device is to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
 
@@ -280,9 +279,9 @@ public:
     Lpr() = default;
     Lpr(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
         const ov::AnyMap& pluginConfig) :
-        m_autoResize(autoResize), m_core{core} {
+        m_autoResize(autoResize) {
         slog::info << "Reading model: " << xmlPath << slog::endl;
-        std::shared_ptr<ov::Model> model = m_core.read_model(xmlPath);
+        std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
         logBasicModelInfo(model);
 
         // LPR network should have 2 inputs (and second is just a stub) and one output
@@ -327,15 +326,15 @@ public:
             }
         }
 
-        ov::Layout desiredLayout = {"NHWC"};
-
         ov::preprocess::PrePostProcessor ppp(model);
 
         ov::preprocess::InputInfo& inputInfo = ppp.input(m_LprInputName);
 
         ov::preprocess::InputTensorInfo& inputTensorInfo = inputInfo.tensor();
+        // configure desired input type and layout, the
+        // use preprocessor to convert to actual model input type and layout
         inputTensorInfo.set_element_type(ov::element::u8);
-        inputTensorInfo.set_layout(desiredLayout);
+        inputTensorInfo.set_layout({"NHWC"});
         if (autoResize) {
             inputTensorInfo.set_spatial_dynamic_shape();
         }
@@ -355,7 +354,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = m_core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "License Plate Recognition");
     }
 
@@ -449,6 +448,5 @@ private:
     std::string m_LprInputSeqName;
     std::string m_LprOutputName;
     ov::Layout m_modelLayout;
-    ov::Core m_core;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
     ov::CompiledModel m_compiled_model;
 };
