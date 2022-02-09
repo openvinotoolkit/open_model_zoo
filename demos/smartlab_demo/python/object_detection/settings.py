@@ -46,7 +46,7 @@ mw_glb1cls10 = (
 
 # global setting of obj-det
 class MwGlobalExp:
-    def __init__(self, num_classes, root_input, fp_model, nms_thresh, conf_thresh, ie):
+    def __init__(self, num_classes, root_input, fp_model, nms_thresh, conf_thresh, ie, device):
         if num_classes == 10:
             self.mw_classes = mw_glb1cls10
         elif num_classes == 6:
@@ -61,6 +61,7 @@ class MwGlobalExp:
         self.nms_thresh = nms_thresh
         self.num_classes = num_classes
         self.ie = ie
+        self.device = device
 
         self.root_imgs = root_input
         support_suffices = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
@@ -71,7 +72,7 @@ class MwGlobalExp:
         self.confthre = conf_thresh
         self.nmsthre = nms_thresh
 
-    def get_openvino_model(self, device='CPU'):
+    def get_openvino_model(self):
         net = self.ie.read_network(self.fp_model)
 
         input_name = next(iter(net.input_info))
@@ -84,4 +85,4 @@ class MwGlobalExp:
             input_name,
             output_name,
             (h, w),
-            self.ie.load_network(network=net, device_name=device))
+            self.ie.load_network(network=net, device_name=self.device))

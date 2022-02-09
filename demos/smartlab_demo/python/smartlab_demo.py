@@ -29,6 +29,8 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                     help='Show this help message and exit.')
+    args.add_argument("-d", "--device", type=str, default='CPU', required=False,
+                        help="Optional. Specify the target to infer on CPU or GPU.")
     args.add_argument('-tv', '--topview', required=True,
                     help='Required. Topview stream to be processed. The input must be a single image, '
                     'a folder of images, video file or camera id.')
@@ -64,15 +66,16 @@ def main():
     ''' Object Detection Variables'''
     detector = Detector(
             ie,
+            args.device,
             [args.m_topall, args.m_topmove],
             [args.m_frontall, args.m_frontmove],
             False)
 
     '''Video Segmentation Variables'''
     if(args.mode == "multiview"):
-        segmentor = Segmentor(ie, args.m_encoder, args.m_decoder)
+        segmentor = Segmentor(ie, args.device, args.m_encoder, args.m_decoder)
     elif(args.mode == "mstcn"):
-        segmentor = SegmentorMstcn(ie, args.m_i3d, args.m_mstcn)
+        segmentor = SegmentorMstcn(ie, args.device, args.m_i3d, args.m_mstcn)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()

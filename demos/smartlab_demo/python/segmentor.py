@@ -23,7 +23,7 @@ from openvino.inference_engine import IECore
 
 
 class Segmentor(object):
-    def __init__(self, ie, backbone_path, classifier_path):
+    def __init__(self, ie, device, backbone_path, classifier_path):
         self.backbone_path = backbone_path
         self.classifier_path = classifier_path
 
@@ -34,11 +34,11 @@ class Segmentor(object):
         ]
 
         net = ie.read_network(self.backbone_path)
-        self.backbone = ie.load_network(network=net, device_name="CPU")
+        self.backbone = ie.load_network(network=net, device_name=device)
         self.backbone_input_keys = list(self.backbone.input_info.keys())
         self.backbone_output_key = list(self.backbone.outputs.keys())
         net = ie.read_network(self.classifier_path)
-        self.classifier = ie.load_network(network=net, device_name="CPU")
+        self.classifier = ie.load_network(network=net, device_name=device)
         self.classifier_input_keys = list(self.classifier.input_info.keys())
         self.classifier_output_key = list(self.classifier.outputs.keys())
 
@@ -83,7 +83,7 @@ class Segmentor(object):
 
 
 class SegmentorMstcn(object):
-    def __init__(self, ie, i3d_path, mstcn_path):
+    def __init__(self, ie, device, i3d_path, mstcn_path):
         self.embed_model = 0
         self.seg_model = 0
         self.temporal_predictions = 0
@@ -128,16 +128,16 @@ class SegmentorMstcn(object):
 
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
-        self.i3d = ie.load_network(network=net, device_name="CPU")
+        self.i3d = ie.load_network(network=net, device_name=device)
         self.i3d_input_keys = list(self.i3d.input_info.keys())
         self.i3d_output_key = list(self.i3d.outputs.keys())
 
         self.mstcn_net = ie.read_network(self.mstcn_path)
-        self.mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
+        self.mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
         self.mstcn_input_keys = list(self.mstcn.input_info.keys())
         self.mstcn_output_key = list(self.mstcn.outputs.keys())
         self.mstcn_net.reshape({'input': (1, 2048, 1)})
-        self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name="CPU")
+        self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
         self.his_fea = [init_his_feature['arr_0'],
                 init_his_feature['arr_1'],

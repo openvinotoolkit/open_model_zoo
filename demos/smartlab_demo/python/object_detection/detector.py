@@ -25,6 +25,7 @@ from .vis import vis
 class Detector(object):
     def __init__(self,
         ie,
+        device,
         fp_top_models: list,
         fp_front_models: list,
         is_show: bool,
@@ -55,7 +56,8 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.3,
-            ie=ie)
+            ie=ie,
+            device=device)
 
         ###           topview.global_subdetector2          ###
         #  max-number constraints:
@@ -68,7 +70,8 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            ie=ie)
+            ie=ie,
+            device=device)
 
         '''configure settings for 2 models in front view'''
         ###          frontview.global_subdetector1           ###
@@ -85,7 +88,8 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.2,
             nms_thresh = 0.3,
-            ie=ie)
+            ie=ie,
+            device=device)
 
         ###           frontview.global_subdetector2          ###
         #  max-number constraints:
@@ -98,7 +102,8 @@ class Detector(object):
             root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            ie=ie)
+            ie=ie,
+            device=device)
 
         ### concatenate list of class names for topview
         cls1 = self.top1_exp.mw_classes
