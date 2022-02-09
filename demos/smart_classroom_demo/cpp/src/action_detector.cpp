@@ -42,18 +42,18 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
 
     m_input_name = model->input().get_any_name();
 
-    ov::Layout modelLayout = ov::layout::get_layout(model->input());
-    if (modelLayout.empty())
-        modelLayout = {"NCHW"};
+    m_modelLayout = ov::layout::get_layout(model->input());
+    if (m_modelLayout.empty())
+        m_modelLayout = {"NCHW"};
 
-    m_network_input_size.height = model->input().get_shape()[ov::layout::height_idx(modelLayout)];
-    m_network_input_size.width = model->input().get_shape()[ov::layout::width_idx(modelLayout)];
+    m_network_input_size.height = model->input().get_shape()[ov::layout::height_idx(m_modelLayout)];
+    m_network_input_size.width = model->input().get_shape()[ov::layout::width_idx(m_modelLayout)];
 
     m_new_model = false;
 
     ov::OutputVector outputs = model->outputs();
     auto cmp = [&](const ov::Output<ov::Node>& output) { return output.get_any_name() == m_config.new_loc_blob_name; };
-    auto& it = std::find_if(outputs.begin(), outputs.end(), cmp);
+    auto it = std::find_if(outputs.begin(), outputs.end(), cmp);
     if (it != outputs.end())
         m_new_model = true;
 
@@ -63,9 +63,9 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
         .set_element_type(ov::element::u8)
         .set_layout(desiredLayout);
     ppp.input().preprocess()
-        .convert_layout(modelLayout)
+        .convert_layout(m_modelLayout)
         .convert_element_type(ov::element::f32);
-    ppp.input().model().set_layout(modelLayout);
+    ppp.input().model().set_layout(m_modelLayout);
 
     model = ppp.build();
 
@@ -98,10 +98,11 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config) :
             m_glob_anchor_names.push_back(glob_anchor_name);
 
             const auto anchor_dims = m_model.output(glob_anchor_name).get_shape();
-            anchor_height = m_new_model ? anchor_dims[ov::layout::height_idx(modelLayout)] : anchor_dims[1];
-            anchor_width = m_new_model ? anchor_dims[ov::layout::width_idx(modelLayout)] : anchor_dims[2];
-            std::size_t action_dimension_idx = m_new_model ? ov::layout::channels_idx(modelLayout) : 3;
-            if (anchor_dims[action_dimension_idx] != m_config.num_action_classes) {
+
+            anchor_height = m_new_model ? anchor_dims[ov::layout::height_idx(m_modelLayout)] : anchor_dims[1];
+            anchor_width = m_new_model ? anchor_dims[ov::layout::width_idx(m_modelLayout)] : anchor_dims[2];
+            std::size_t num_action_classes = m_new_model ? anchor_dims[ov::layout::channels_idx(m_modelLayout)] : anchor_dims[3];
+            if (num_action_classes != m_config.num_action_classes) {
                 throw std::logic_error("The number of specified actions and the number of actions predicted by "
                     "the Person/Action Detection Retail model must match");
             }
@@ -164,8 +165,9 @@ DetectedActions ActionDetection::fetchResults() {
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < m_num_glob_anchors; ++glob_anchor_id) {
         const auto& blob_name = m_glob_anchor_names[glob_anchor_id];
-        add_conf_out.emplace_back(m_request->get_tensor(blob_name).get_shape()[2],
-                                  m_request->get_tensor(blob_name).get_shape()[3],
+        ov::Shape shape = m_request->get_tensor(blob_name).get_shape();
+        add_conf_out.emplace_back(shape[ov::layout::height_idx(m_modelLayout)],
+                                  shape[ov::layout::width_idx(m_modelLayout)],
                                   CV_32F,
                                   m_request->get_tensor(blob_name).data());
     }

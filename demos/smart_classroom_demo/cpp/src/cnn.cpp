@@ -26,9 +26,13 @@ void CnnDLSDKBase::Load() {
         throw std::runtime_error("Network should have only one input");
     }
 
-    m_modelLayout = { "NCHW" };
+    ov::Layout desiredLayout = {"NHWC"};
 
     m_input_tensor_name = model->input().get_any_name();
+
+    m_modelLayout = ov::layout::get_layout(model->input());
+    if (m_modelLayout.empty())
+        m_modelLayout = {"NCHW"};
 
     m_modelShape = model->input().get_shape();
 
@@ -42,10 +46,7 @@ void CnnDLSDKBase::Load() {
 
     ppp.input().tensor()
         .set_element_type(ov::element::u8)
-        .set_layout({"NHWC"})
-        .set_spatial_static_shape(
-            m_modelShape[ov::layout::height_idx(m_modelLayout)],
-            m_modelShape[ov::layout::width_idx(m_modelLayout)]);
+        .set_layout(desiredLayout);
     ppp.input().preprocess()
         .convert_layout(m_modelLayout)
         .convert_element_type(ov::element::f32);

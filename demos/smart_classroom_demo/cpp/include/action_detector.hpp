@@ -122,6 +122,7 @@ public:
 private:
     ActionDetectorConfig m_config;
     ov::CompiledModel m_model;
+    ov::Layout m_modelLayout;
     std::string m_input_name;
     std::map<std::string, ov::Tensor> m_outputs;
 

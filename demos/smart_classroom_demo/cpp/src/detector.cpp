@@ -53,7 +53,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
     logBasicModelInfo(model);
 
-    ov::Layout modelLayout = {"NCHW"};
+    ov::Layout desiredLayout = {"NHWC"};
 
     ov::OutputVector inputs_info = model->inputs();
     if (inputs_info.size() != 1) {
@@ -65,9 +65,13 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
         throw std::runtime_error("Face Detection network should have only one output");
     }
 
-    m_input_name = model->input().get_any_name();
-
     ov::Output<ov::Node> input = model->input();
+    m_input_name = input.get_any_name();
+
+    ov::Layout modelLayout = ov::layout::get_layout(input);
+    if (modelLayout.empty())
+        modelLayout = {"NCHW"};
+
     ov::Shape shape = input.get_shape();
     shape[ov::layout::height_idx(modelLayout)] = m_config.input_h;
     shape[ov::layout::width_idx(modelLayout)] = m_config.input_w;
@@ -94,17 +98,11 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     ppp.input().tensor()
         .set_element_type(ov::element::u8)
-        .set_layout({ "NHWC" })
-        .set_spatial_static_shape(
-            shape[ov::layout::height_idx(modelLayout)],
-            shape[ov::layout::width_idx(modelLayout)]);
+        .set_layout(desiredLayout);
     ppp.input().preprocess()
         .convert_layout(modelLayout)
         .convert_element_type(ov::element::f32);
     ppp.input().model().set_layout(modelLayout);
-    ppp.output()
-        .tensor()
-        .set_element_type(ov::element::f32);
 
     model = ppp.build();
 
