@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: dlsdk
         device: CPU
-        adapter: 
+        adapter:
           type: yolox
           anchors: yolox
           classes: 3

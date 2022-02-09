@@ -17,12 +17,13 @@ evaluations:
       datasets:
         - name: DSI1867
           data_source: .\DSI-1867_small\action_recognition\streams_1\high
-          batch: 1 # Default batch size is 1
+          # Default batch size is 1
+          batch: 1
 
           annotation_conversion:
-              images_dir: .\action_recognition\streams_1
-              annotation_txt: .\action_recognition\labels\streams_1.txt
-              converter: smartlab_action
+            images_dir: .\action_recognition\streams_1
+            annotation_txt: .\action_recognition\labels\streams_1.txt
+            converter: smartlab_action
 
           preprocessing:
             - type: resize
