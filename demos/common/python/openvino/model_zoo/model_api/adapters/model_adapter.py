@@ -29,14 +29,6 @@ class Metadata:
     meta: Dict = field(default_factory=dict)
 
 
-def get_layout_from_shape(shape) -> str:
-    if len(shape) != 4:
-        raise RuntimeError('Get_layout supports only 4D input shape')
-
-    layout = 'NCHW' if shape[1] in range(1, 4) else 'NHWC'
-    return layout
-
-
 class ModelAdapter(metaclass=abc.ABCMeta):
     '''
     An abstract Model Adapter with the following interface:

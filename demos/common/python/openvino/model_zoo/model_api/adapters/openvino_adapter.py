@@ -23,7 +23,8 @@ try:
 except ImportError:
     openvino_absent = True
 
-from .model_adapter import ModelAdapter, Metadata, get_layout_from_shape
+from .model_adapter import ModelAdapter, Metadata
+from .utils import Layout
 from ..pipelines import parse_devices
 
 
@@ -41,12 +42,13 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     """
 
-    def __init__(self, core, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=0):
+    def __init__(self, core, model_path, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
         self.core = core
         self.model_path = model_path
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
+        self.input_layouts = Layout.parse_layouts(model_parameters['input_layouts']) if model_parameters.get('input_layouts', None) else {}
 
         if isinstance(model_path, (str, Path)):
             if Path(model_path).suffix == ".onnx" and weights_path:
@@ -60,9 +62,6 @@ class OpenvinoAdapter(ModelAdapter):
 
     def load_model(self):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
-        # create infer_request fot sync inference
-        self.sync_infer_request = self.compiled_model.create_infer_request()
-
         self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
         if self.max_num_requests == 0:
             # +1 to use it as a buffer of the pipeline
@@ -76,11 +75,11 @@ class OpenvinoAdapter(ModelAdapter):
         if 'AUTO' not in devices:
             for device in devices:
                 try:
-                    nstreams = self.compiled_model.get_config(device + '_THROUGHPUT_STREAMS')
+                    nstreams = self.compiled_model.get_property(device + '_THROUGHPUT_STREAMS')
                     log.info('\tDevice: {}'.format(device))
                     log.info('\t\tNumber of streams: {}'.format(nstreams))
                     if device == 'CPU':
-                        nthreads = self.compiled_model.get_config('CPU_THREADS_NUM')
+                        nthreads = self.compiled_model.get_property('CPU_THREADS_NUM')
                         log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
                 except RuntimeError:
                     pass
@@ -90,10 +89,12 @@ class OpenvinoAdapter(ModelAdapter):
         inputs = {}
         for input in self.model.inputs:
             input_layout = ''
-            if not layout_helpers.get_layout(input).empty:
-                input_layout = layout_helpers.get_layout(input).to_string().strip('[]').replace(',', '')
+            if input.get_any_name() in self.input_layouts or '' in self.input_layouts:
+                input_layout = Layout(self.input_layouts.get(input.get_any_name(), self.input_layouts[''])).layout
+            elif not layout_helpers.get_layout(input).empty:
+                input_layout = Layout.from_openvino(input).layout
             elif len(input.shape) == 4:
-                input_layout = get_layout_from_shape(input.shape)
+                input_layout = Layout.from_shape(input.shape).layout
             inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
@@ -115,23 +116,24 @@ class OpenvinoAdapter(ModelAdapter):
         return raw_result
 
     def infer_sync(self, dict_data):
-        self.sync_infer_request.infer(dict_data)
-        return self.get_raw_result(self.sync_infer_request)
+        self.infer_request = self.async_queue[self.async_queue.get_idle_request_id()]
+        self.infer_request.infer(dict_data)
+        return self.get_raw_result(self.infer_request)
 
-    def infer_async(self, dict_data, callback_data):
+    def infer_async(self, dict_data, callback_data) -> None:
         self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))
 
     def set_callback(self, callback_fn):
         self.async_queue.set_callback(callback_fn)
 
-    def is_ready(self):
+    def is_ready(self) -> bool:
         return self.async_queue.is_ready()
 
-    def await_all(self):
+    def await_all(self) -> None:
         self.async_queue.wait_all()
 
-    def await_any(self):
-        self.async_queue.is_ready()
+    def await_any(self) -> None:
+        self.async_queue.get_idle_request_id()
 
     def _get_meta_from_ngraph(self, layers_info):
         for node in self.model.get_ordered_ops():
