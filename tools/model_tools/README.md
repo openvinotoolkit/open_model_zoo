@@ -506,6 +506,9 @@ describing a single model. Each such object has the following keys:
 
   Additional possible values might be added in the future.
 
+* `model_stages`: the list of model stages, in case if the model is a composition of several models,
+  otherwise the list is empty.
+
 ## Shared options
 
 The are certain options that all tools accept.
