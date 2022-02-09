@@ -9,6 +9,8 @@ The following pre-trained models are delived with the product:
 
 * `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
 
+* `i3d-rgb-tf` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
+
 * `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
 ## How It works
