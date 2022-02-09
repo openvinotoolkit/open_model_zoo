@@ -25,10 +25,10 @@ from .vis import vis
 class Detector(object):
     def __init__(self,
         ie,
-        fp_top_models:list,
-        fp_front_models:list,
-        is_show:bool,
-        backend:str='openvino'):
+        fp_top_models: list,
+        fp_front_models: list,
+        is_show: bool,
+        backend: str='openvino'):
 
         '''Object Detection Variables'''
         self.object_detection_boxes = []
@@ -107,16 +107,16 @@ class Detector(object):
         self.offset_cls_idx = [0, len(self.top1_exp.mw_classes)]
         #  max-number constraints:
         self.max_nums = {
-            "balance":1, "weights":6, "tweezers":1,
-            "box"    :1, "battery":1, "tray"    :2,
-            "ruler"  :1, "rider"  :1, "scale"   :1,
-            "hand":2,
+            "balance": 1, "weights": 6, "tweezers": 1,
+            "box"    : 1, "battery": 1, "tray"    : 2,
+            "ruler"  : 1, "rider"  : 1, "scale"   : 1,
+            "hand": 2,
         }
 
         ### build map of overlap classes
         self.cls2tocls1 = {}
-        cls1_c2i = {c:i for i, c in enumerate(cls1)}
-        cls2_c2i = {c:(i + self.offset_cls_idx[1]) for i, c in enumerate(cls2)}
+        cls1_c2i = {c: i for i, c in enumerate(cls1)}
+        cls2_c2i = {c: (i + self.offset_cls_idx[1]) for i, c in enumerate(cls2)}
         for cls in cls2:
             if cls in cls1:
                 idx1 = cls1_c2i[cls]
@@ -132,11 +132,11 @@ class Detector(object):
         self.front1_subdetector = SubDetector(self.front1_exp, self.backend)
         self.front2_subdetector = SubDetector(self.front2_exp, self.backend)
 
-    def _apply_detection_constraints(self, predictions:np.ndarray, nmsthre=0.3):
+    def _apply_detection_constraints(self, predictions: np.ndarray, nmsthre=0.3):
         ### sort by conf_score * cls_score
         sorted_preds = sorted(
             predictions, 
-            key=lambda x:x[4]*x[5], 
+            key=lambda x: x[4]*x[5], 
             reverse=True)
         sorted_preds = np.vstack(sorted_preds)
         ### reserve indicated number foreach cls
@@ -190,7 +190,7 @@ class Detector(object):
 
         return bboxes, cls, scores
 
-    def pseudo_detect(self, origin_img, input_blob, out_blob, exec_net, h, w, idx_offset:int):
+    def pseudo_detect(self, origin_img, input_blob, out_blob, exec_net, h, w, idx_offset: int):
         image, ratio = preprocess(origin_img, (h, w))
         res = exec_net.infer(inputs={input_blob: image})
         res = res[out_blob]

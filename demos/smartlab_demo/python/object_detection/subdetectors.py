@@ -6,7 +6,7 @@ from .deploy_util import demo_postprocess
 from .vis import vis
 
 class SubDetector(object):
-    def __init__(self, exp:MwGlobalExp, backend:str='openvino'):
+    def __init__(self, exp: MwGlobalExp, backend: str='openvino'):
         self.inode, self.onode, self.input_shape, self.model = exp.get_openvino_model()
 
         self.cls_names = exp.mw_classes
@@ -22,7 +22,7 @@ class SubDetector(object):
 
         img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
-        res = self.model.infer(inputs={self.inode:img_feed})[self.onode]
+        res = self.model.infer(inputs={self.inode: img_feed})[self.onode]
         outputs = demo_postprocess(res, self.input_shape, p6=False)
 
         outputs = postprocess(

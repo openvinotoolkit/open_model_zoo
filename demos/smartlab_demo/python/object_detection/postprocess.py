@@ -18,8 +18,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
         if len(image_pred[0]) == 0:
             continue
         # Get score and class with highest confidence
-        class_conf = np.max(image_pred[:,5:5+num_classes], axis=1, keepdims=True)
-        class_pred = np.argmax(image_pred[:,5:5+num_classes], axis=1)
+        class_conf = np.max(image_pred[:, 5:5+num_classes], axis=1, keepdims=True)
+        class_pred = np.argmax(image_pred[: ,5:5+num_classes], axis=1)
         class_pred = np.expand_dims(class_pred, axis=1)
 
         conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= conf_thre).squeeze()
