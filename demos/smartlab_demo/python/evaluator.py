@@ -112,10 +112,10 @@ class Evaluator(object):
             df_2screw = bboxes[np.array(cls_ids) == "roundscrew1"].squeeze()
             df_rider = bboxes[np.array(cls_ids) == "rider"].squeeze()
 
-            roundscrew1_center_coordinate = (x0,y0)  =\
+            roundscrew1_center_coordinate = (x0, y0)  =\
                 ((df_2screw[0, 1] + df_2screw[0, 0])/2, 
                 (df_2screw[0, 3] + df_2screw[0, 2])/2)
-            roundscrew2_center_coordinate = (x1,y1)  =\
+            roundscrew2_center_coordinate = (x1, y1)  =\
                 ((df_2screw[1, 1] + df_2screw[1, 0])/2, 
                 (df_2screw[1, 3] + df_2screw[1, 2])/2)
             rider_center_coordinate  = \
