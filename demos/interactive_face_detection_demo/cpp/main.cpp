@@ -89,7 +89,7 @@ DEFINE_string(u, "", utilization_monitors_msg);
 void parse(int argc, char *argv[]) {
     // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, false);
-    if (FLAGS_h || 1 == argc) {    
+    if (FLAGS_h || 1 == argc) {
         std::cout << "  \t-h                         " << help_msg
                   << "\n\t-i                         " << input_msg
                   << "\n\t-loop                      " << loop_msg
