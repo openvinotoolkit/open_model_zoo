@@ -50,6 +50,14 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
 ## Legal Information
 
 The original model is distributed under the following

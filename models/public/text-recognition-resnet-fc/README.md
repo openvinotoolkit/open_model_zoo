@@ -57,6 +57,12 @@ Model is supported by text-detection c++ demo(`<omz_dir>/demos/text_detection_de
 
 For more information, please, see documentation of the demo.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
+
 ## Legal Information
 
 The original model is distributed under the

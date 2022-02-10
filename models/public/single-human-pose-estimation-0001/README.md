@@ -61,6 +61,12 @@ An example of using the Model Converter:
 omz_converter --name <model_name>
 ```
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Single Human Pose Estimation Demo](../../../demos/single_human_pose_estimation_demo/python/README.md)
+
 ## Legal Information
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).

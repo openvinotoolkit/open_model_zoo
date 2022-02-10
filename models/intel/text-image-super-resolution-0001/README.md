@@ -42,5 +42,11 @@ Image, name: `0`, shape: `1, 1, 360, 640` in the format `B, C, H, W`, where:
 
 One blob with shapes `1, 1, 1080, 1920`. The blob contains an image after super resolution.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Processing C++ Demo](../../../demos/image_processing_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -49,6 +49,13 @@ The expected channel order is `BGR`
 
 The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/instance_segmentation/model_templates/custom-instance-segmentation/readme.md), allowing to fine-tune the model on custom dataset.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Background subtraction Python\* Demo](../../../demos/background_subtraction_demo/python/README.md)
+* [Instance Segmentation Python\* Demo](../../../demos/instance_segmentation_demo/python/README.md)
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

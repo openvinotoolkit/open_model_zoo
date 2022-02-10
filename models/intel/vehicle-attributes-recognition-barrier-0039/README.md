@@ -65,5 +65,11 @@ Expected color order: `BGR`.
 2.	name: `type`, shape: `1, 4, 1, 1` - Softmax output across four type classes
     [car, bus, truck, van]
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Security Barrier Camera C++ Demo](../../../demos/security_barrier_camera_demo/cpp/README.md)
+
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.
