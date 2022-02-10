@@ -77,11 +77,11 @@ class OpenvinoAdapter(ModelAdapter):
         if 'AUTO' not in devices:
             for device in devices:
                 try:
-                    nstreams = self.exec_net.get_property(device + '_THROUGHPUT_STREAMS')
+                    nstreams = self.exec_net.get_config(device + '_THROUGHPUT_STREAMS')
                     log.info('\tDevice: {}'.format(device))
                     log.info('\t\tNumber of streams: {}'.format(nstreams))
                     if device == 'CPU':
-                        nthreads = self.exec_net.get_property('CPU_THREADS_NUM')
+                        nthreads = self.exec_net.get_config('CPU_THREADS_NUM')
                         log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
                 except RuntimeError:
                     pass
