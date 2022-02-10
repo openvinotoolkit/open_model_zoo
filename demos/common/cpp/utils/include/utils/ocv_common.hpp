@@ -87,7 +87,7 @@ inline void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob
 */
 static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
-    ov::Layout layout("NCHW");
+    static const ov::Layout layout{"NCHW"};
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
