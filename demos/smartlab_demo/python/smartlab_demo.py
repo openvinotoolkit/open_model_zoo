@@ -24,6 +24,7 @@ from evaluator import Evaluator
 from display import Display
 from openvino.runtime import Core
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -98,7 +99,9 @@ def main():
         ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
         ret_front, frame_front = cap_front.read()
 
-        if ret_top and ret_front:
+        if not ret_top or not ret_front:
+            break
+        else:
             frame_counter += 1
 
             ''' The object detection module need to generate detection results(for the current frame) '''
