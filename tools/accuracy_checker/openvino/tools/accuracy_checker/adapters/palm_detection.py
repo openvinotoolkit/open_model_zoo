@@ -30,8 +30,8 @@ class PalmDetectionAdapter(Adapter):
         params.update({
             'scores_out': StringField(description='scores output'),
             'boxes_out': StringField(description='boxes output'),
-            'num_layers': NumberField(
-                description="Number of layers.", value_type=int, min_value=0, default=4, optional=True),
+            'num_anchor_layers': NumberField(
+                description="Number of anchor layers", value_type=int, min_value=0, default=4, optional=True),
             'strides': ListField(value_type=int, optional=True, default=[8, 16, 16, 16],
                                  description='strides of input multi-level feature maps'),
             'min_scale': NumberField(description="Minimal scale", default=0.1484375, optional=True),

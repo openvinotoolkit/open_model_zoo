@@ -507,10 +507,10 @@ AccuracyChecker supports following set of adapters:
   * `reg_max` - maximal value of integral set (optional, default 7).
   * `strides` - strides of input multi-level feature maps (optional, default [8, 16, 32]).
   * `is_legacy` - using a legacy NanoDet model (optional, default False).
-* `palm_detection` - converting output of Palm detection models family to `DetectionPrediction` representation.
+* `palm_detection` - converting output of palm detection model to `DetectionPrediction` representation.
   * `scores_out` - name of `scores` model output.
   * `boxes_out` - name of `boxes` model output.
-  * `num_layers` - number of layers for anchors calculation (optional, default `4`).
+  * `num_anchor_layers` - number of layers for anchors calculation (optional, default `4`).
   * `strides` - strides of input multi-level feature maps (optional, default `[8, 16, 16, 16]`).
   * `min_scale` - minimal scale for anchors calculation (optional, default `0.1484375`).
   * `max_scale` - maximal scale for anchors calculation (optional, default `0.75`).
