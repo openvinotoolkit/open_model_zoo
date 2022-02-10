@@ -39,5 +39,12 @@ The net outputs are two blobs:
 1. `heatmaps` of shape `1, 17, 176, 176` containing location heatmaps for keypoints of all types. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
 2. `embeddings` of shape `1, 17, 176, 176, 1` containing associative embedding values, which are used for grouping individual keypoints into poses.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Human Pose Estimation C++ Demo](../../../demos/human_pose_estimation_demo/cpp/README.md)
+* [Human Pose Estimation Python\* Demo](../../../demos/human_pose_estimation_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -67,6 +67,12 @@ Output delay, name: `delay`, shape: `1`, format: `C`, where:
  - `C` - number of delays (always 1)
 This is provided for convenience and contains the output "shift" relative to the input. For this model it is 384 and can differ for other noise suppression models.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Noise Suppression C++\* Demo](../../../demos/noise_suppression_demo/cpp/README.md)
+* [Noise Suppression Python\* Demo](../../../demos/noise_suppression_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
