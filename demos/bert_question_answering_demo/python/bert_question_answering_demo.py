@@ -231,7 +231,7 @@ def main():
             if pipeline.is_ready():
                 if source.is_over():
                     break
-                pipeline.submit_data(source.get_data(), next_window_id, None)
+                pipeline.submit_data(source.get_data(), next_window_id)
                 next_window_id += 1
             else:
                 pipeline.await_any()

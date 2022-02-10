@@ -97,12 +97,12 @@ class OpenvinoAdapter(ModelAdapter):
     def get_layout_for_input(self, input) -> str:
         input_layout = ''
         if self.model_parameters['input_layouts']:
-            input_layout = Layout.from_user_layouts(input.get_any_name(), self.model_parameters['input_layouts']).layout
+            input_layout = Layout.from_user_layouts(input.get_names(), self.model_parameters['input_layouts'])
         if not input_layout:
             if not layout_helpers.get_layout(input).empty:
-                input_layout = Layout.from_openvino(input).layout
+                input_layout = Layout.from_openvino(input)
             elif len(input.shape) == 4:
-                input_layout = Layout.from_shape(input.shape).layout
+                input_layout = Layout.from_shape(input.shape)
         return input_layout
 
     def get_output_layers(self):

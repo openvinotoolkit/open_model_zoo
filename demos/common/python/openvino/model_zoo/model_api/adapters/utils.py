@@ -23,8 +23,8 @@ class Layout:
     def __init__(self, layout = '') -> None:
         self.layout = layout
 
-    @classmethod
-    def from_shape(cls, shape):
+    @staticmethod
+    def from_shape(shape):
         '''
         Create Layout from given shape
         '''
@@ -32,25 +32,26 @@ class Layout:
             raise RuntimeError('Get layout from shape method supports only 4D input shape')
 
         layout = 'NCHW' if shape[1] in range(1, 4) else 'NHWC'
-        return cls(layout)
+        return layout
 
-    @classmethod
-    def from_openvino(cls, input):
+    @staticmethod
+    def from_openvino(input):
         '''
         Create Layout from openvino input
         '''
-        return cls(layout_helpers.get_layout(input).to_string().strip('[]').replace(',', ''))
+        return layout_helpers.get_layout(input).to_string().strip('[]').replace(',', '')
 
-    @classmethod
-    def from_user_layouts(cls, input_name, user_layouts: dict):
+    @staticmethod
+    def from_user_layouts(input_names: set, user_layouts: dict):
         '''
-        Create Layout from user input
+        Create Layout for input based on user info
         '''
-        if input_name in user_layouts:
-            return cls(user_layouts[input_name])
+        for input_name in input_names:
+            if input_name in user_layouts:
+                return user_layouts[input_name]
         if '' in user_layouts:
-            return cls(user_layouts[''])
-        return cls()
+            return user_layouts['']
+        return ''
 
 
     @staticmethod

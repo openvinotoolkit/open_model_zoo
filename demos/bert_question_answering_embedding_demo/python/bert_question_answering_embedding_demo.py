@@ -60,6 +60,10 @@ def build_argparser():
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
+    args.add_argument('--layout_emb', type=str, default=None,
+                      help='Optional. MODEL_EMB inputs layouts. '
+                           'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                           'To define layout you should use only capital letters')
     args.add_argument("-m_qa", "--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
@@ -75,6 +79,10 @@ def build_argparser():
                       required=False, type=str)
     args.add_argument("--model_qa_squad_ver", help="Optional. SQUAD version used for QuestionAnswering model fine tuning",
                       default="1.2", required=False, type=str)
+    args.add_argument('--layout_qa', type=str, default=None,
+                      help='Optional. MODEL_QA inputs layouts. '
+                           'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                           'To define layout you should use only capital letters')
     args.add_argument("-a", "--max_answer_token_num",
                       help="Optional. Maximum number of tokens in exact answer",
                       default=15,
@@ -170,7 +178,7 @@ def main():
     core = create_core()
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
     model_emb_adapter = OpenvinoAdapter(core, args.model_emb, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout_emb})
     model_emb = BertEmbedding(model_emb_adapter, {'vocab': vocab, 'input_names': args.input_names_emb})
     model_emb.log_layers_info()
 
@@ -187,7 +195,7 @@ def main():
 
     if args.model_qa:
         model_qa_adapter = OpenvinoAdapter(core, args.model_qa, device=args.device, plugin_config=plugin_config,
-                                           max_num_requests=args.num_infer_requests)
+                                           max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout_qa})
         config = {
             'vocab': vocab,
             'input_names': args.input_names_qa,

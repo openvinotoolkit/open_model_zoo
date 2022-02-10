@@ -106,7 +106,7 @@ class AsyncPipeline:
         except Exception as e:
             self.callback_exceptions.append(e)
 
-    def submit_data(self, inputs, id, meta):
+    def submit_data(self, inputs, id, meta={}):
         preprocessing_start_time = perf_counter()
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         self.preprocess_metrics.update(preprocessing_start_time)
@@ -127,7 +127,7 @@ class AsyncPipeline:
             self.inference_metrics.update(infer_start_time)
 
             postprocessing_start_time = perf_counter()
-            result = self.model.postprocess(raw_result, preprocess_meta), meta
+            result = self.model.postprocess(raw_result, preprocess_meta), {**meta, **preprocess_meta}
             self.postprocess_metrics.update(postprocessing_start_time)
             return result
         return None
