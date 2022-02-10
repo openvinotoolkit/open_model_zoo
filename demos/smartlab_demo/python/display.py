@@ -56,7 +56,7 @@ class Display:
             y_min = int(row[1])
             x_max = int(row[2])
             y_max = int(row[3])
-            
+
             cv2.putText(frame_front, obj_cls, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=0.9, thickness=2)
             frame_front = cv2.rectangle(frame_front, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
 
