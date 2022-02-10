@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
         stream.setSource<custom::CommonCapSrc>(cap);
 
         /** Save output result **/
-        LazyVideoWriter videoWriter{FLAGS_o, cap->fsp(), FLAGS_limit};
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();

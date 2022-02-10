@@ -325,9 +325,7 @@ int main(int argc, char *argv[]) {
             renderMetrics.update(renderingStart);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
+            videoWriter.write(outFrame);
             if (!FLAGS_no_show) {
                 cv::imshow("Human Pose Estimation Results", outFrame);
                 //--- Updating output window

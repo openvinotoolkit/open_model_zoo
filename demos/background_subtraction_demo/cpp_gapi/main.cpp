@@ -6,7 +6,7 @@
 #include <utils/args_helper.hpp>
 #include <utils_gapi/stream_source.hpp>
 #include <utils/config_factory.h>
-#include <utils/ocv_common.h>
+#include <utils/ocv_common.hpp>
 
 #include <opencv2/gapi/streaming/cap.hpp>
 #include <opencv2/gapi/imgproc.hpp>
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        LayzyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         bool isStart = true;
         uint64_t curr_frame_num = 0;

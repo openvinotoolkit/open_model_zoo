@@ -37,7 +37,7 @@ private:
     cv::Mat top_persons_;
     const bool enabled_;
     const int num_top_persons_;
-    cv::VideoWriter& writer_;
+    LazyVideoWriter writer_;
     float rect_scale_x_;
     float rect_scale_y_;
     static int const max_input_width_ = 1920;
@@ -49,7 +49,7 @@ private:
     static int const margin_size_ = 5;
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons) :
+    Visualizer(bool enabled, const LazyVideoWriter& writer, int num_top_persons) :
         enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), rect_scale_x_(0), rect_scale_y_(0) {
         if (!enabled_) {
             return;
@@ -89,12 +89,12 @@ public:
         }
     }
 
-    void Show(size_t framesProcessed) const {
+    void Show(size_t framesProcessed) {
         if (enabled_) {
             cv::imshow(main_window_name_, frame_);
         }
 
-        writer_ << frame_;
+        writer_.write(frame_);
     }
 
     void DrawCrop(cv::Rect roi, int id, const cv::Scalar& color) const {
