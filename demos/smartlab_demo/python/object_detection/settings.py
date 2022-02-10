@@ -62,10 +62,7 @@ class MwGlobalExp:
         self.num_classes = num_classes
         self.ie = ie
         self.device = device
-
-        # define conditions
-        self.confthre = conf_thresh
-        self.nmsthre = nms_thresh
+        self.root_imgs = root_input
 
     def get_openvino_model(self):
         net = self.ie.read_network(self.fp_model)
