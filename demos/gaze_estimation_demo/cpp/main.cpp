@@ -108,9 +108,6 @@ int main(int argc, char* argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() &&
