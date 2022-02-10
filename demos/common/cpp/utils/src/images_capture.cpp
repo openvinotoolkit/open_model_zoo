@@ -184,11 +184,11 @@ public:
         if (!success && loop && cap.set(cv::CAP_PROP_POS_FRAMES, initialImageId)) {
             nextImgId = 1;
             cap.read(img);
-            if (safe_read) {
-                img = img.clone();
-            }
         } else {
             ++nextImgId;
+        }
+        if (safe_read) {
+            img = img.clone();
         }
         readerMetrics.update(startTime);
         return img;
