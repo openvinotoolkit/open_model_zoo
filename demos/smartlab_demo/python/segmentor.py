@@ -17,9 +17,7 @@
 import cv2
 import numpy as np
 import logging as log
-from collections import deque
 from scipy.special import softmax
-from openvino.inference_engine import IECore
 
 
 class Segmentor(object):
