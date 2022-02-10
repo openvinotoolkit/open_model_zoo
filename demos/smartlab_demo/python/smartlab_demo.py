@@ -23,7 +23,8 @@ from object_detection.detector import Detector
 from segmentor import Segmentor, SegmentorMstcn
 from evaluator import Evaluator
 from display import Display
-from openvino.runtime import Core
+# from openvino.runtime import Core
+from openvino.inference_engine import IECore as Core
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
