@@ -35,25 +35,25 @@ namespace {
 
 class Visualizer {
 private:
-    cv::Mat frame_;
-    cv::Mat top_persons_;
-    const bool enabled_;
-    const int num_top_persons_;
-    LazyVideoWriter writer_;
-    float rect_scale_x_;
-    float rect_scale_y_;
-    static int const max_input_width_ = 1920;
-    std::string const main_window_name_ = "Smart classroom demo";
-    std::string const top_window_name_ = "Top-k students";
-    static int const crop_width_ = 128;
-    static int const crop_height_ = 320;
-    static int const header_size_ = 80;
-    static int const margin_size_ = 5;
+    cv::Mat m_frame;
+    cv::Mat m_top_persons;
+    const bool m_enabled;
+    const int m_num_top_persons;
+    LazyVideoWriter m_writer;
+    float m_rect_scale_x;
+    float m_rect_scale_y;
+    static int const m_max_input_width = 1920;
+    std::string const m_main_window_name = "Smart classroom demo";
+    std::string const m_top_window_name = "Top-k students";
+    static int const m_crop_width = 128;
+    static int const m_crop_height = 320;
+    static int const m_header_size = 80;
+    static int const m_margin_size = 5;
 
 public:
     Visualizer(bool enabled, const LazyVideoWriter& writer, int num_top_persons) :
-        enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), rect_scale_x_(0), rect_scale_y_(0) {
-        if (!enabled_) {
+        m_enabled(enabled), m_num_top_persons(num_top_persons), m_writer(writer), m_rect_scale_x(0), m_rect_scale_y(0) {
+        if (!m_enabled) {
             return;
         }
 
@@ -76,7 +76,7 @@ public:
     }
 
     void SetFrame(const cv::Mat& frame) {
-        if (!enabled_) {
+        if (!m_enabled) {
             return;
         }
 
@@ -92,11 +92,11 @@ public:
     }
 
     void Show() {
-        if (enabled_) {
-            cv::imshow(main_window_name_, frame_);
+        if (m_enabled) {
+            cv::imshow(m_main_window_name, m_frame);
         }
 
-        writer_.write(frame_);
+        m_writer.write(m_frame);
     }
 
     void DrawCrop(cv::Rect roi, int id, const cv::Scalar& color) const {
@@ -134,7 +134,7 @@ public:
 
     void DrawObject(cv::Rect rect, const std::string& label_to_draw,
                     const cv::Scalar& text_color, const cv::Scalar& bbox_color, bool plot_bg) {
-        if (!enabled_) {
+        if (!m_enabled) {
             return;
         }
 
