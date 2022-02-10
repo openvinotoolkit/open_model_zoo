@@ -237,22 +237,20 @@ class Detector(object):
         top_cls_ids = [ self.classes[int(x)] for x in top_cls_ids ]
         front_cls_ids = [ self.classes[int(x)] for x in front_cls_ids ]
 
-
-        # return [], []
         if self.is_show:
             vis_top = vis(
                 img_top,
                 top_bboxes,
                 top_scores,
                 top_cls_ids,
-                self.top1_exp.confthre,
+                self.top1_exp.conf_thresh,
                 self.classes)
             vis_front = vis(
                 img_front,
                 front_bboxes,
                 front_scores,
                 front_cls_ids,
-                self.front1_exp.confthre,
+                self.front1_exp.conf_thresh,
                 self.classes)
             return vis_top, vis_front
         else:
