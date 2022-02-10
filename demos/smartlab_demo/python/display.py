@@ -88,9 +88,9 @@ class Display:
             fontScale=0.9, thickness=2)
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks
-        frame_top = cv2.resize( \
+        frame_top = cv2.resize(
             frame_top, (int(frame_top.shape[1]/2), int(frame_top.shape[0]/2)))
-        frame_front = cv2.resize( \
+        frame_front = cv2.resize(
             frame_front, (int(frame_front.shape[1]/2), int(frame_front.shape[0]/2)))
 
         result_image = np.concatenate((frame_top, frame_front), axis=1)
