@@ -248,7 +248,7 @@ AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
 void AgeGenderDetection::submitRequest() {
     if (!enquedFaces)
         return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -306,7 +306,7 @@ HeadPoseDetection::HeadPoseDetection(const std::string &pathToModel,
 
 void HeadPoseDetection::submitRequest()  {
     if (!enquedFaces) return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -363,7 +363,7 @@ EmotionsDetection::EmotionsDetection(const std::string &pathToModel,
 
 void EmotionsDetection::submitRequest() {
     if (!enquedFaces) return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
