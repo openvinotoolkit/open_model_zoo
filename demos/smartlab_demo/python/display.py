@@ -72,19 +72,19 @@ class Display:
         m_weights_order = scoring['measuring_score_weights_order']
         e_tidy = scoring['end_score_tidy']
 
-        cv2.putText(self.score_board, \
-            f"Initial : rider[{i_rider}] balance[{i_balance}]", \
-            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+        cv2.putText(self.score_board,
+            f"Initial : rider[{i_rider}] balance[{i_balance}]",
+            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255),
             fontScale=0.9, thickness=2)
 
-        cv2.putText(self.score_board, \
+        cv2.putText(self.score_board,
             f"Measuring : object[{m_object_left}] weights_t[{m_weights_right_tweezers}] \
-            order[{m_weights_order}] rider_t[{m_rider_tweezers}] balance[{m_balance}]", \
-            (30, 100), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+            order[{m_weights_order}] rider_t[{m_rider_tweezers}] balance[{m_balance}]",
+            (30, 100), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255),
             fontScale=0.9, thickness=2)
 
-        cv2.putText(self.score_board, f"End : tidy[{e_tidy}]", \
-            (30, 150), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+        cv2.putText(self.score_board, f"End : tidy[{e_tidy}]",
+            (30, 150), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255),
             fontScale=0.9, thickness=2)
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks

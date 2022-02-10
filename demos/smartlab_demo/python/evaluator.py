@@ -116,8 +116,8 @@ class Evaluator(object):
         Args:
             front_seg_results: action segmentation result of front view, eg: "noise_action" (type:string)
             df: front view object detection result a single frame (type: pandas dataframe)
-
         """
+
         # only evaluate rider zero if 2 roundscrew and 1 rider are found
         bboxes = front_det_results[0] # (x1, y1, x2, y2)
         cls_ids = front_det_results[1]
@@ -204,7 +204,7 @@ class Evaluator(object):
 
     def evaluate_end_state(self):
         if self.object_put == 1 and self.weights_put == 1:
-                self.can_tidy = True
+            self.can_tidy = True
 
     def evaluate_end_tidy(self, front_det_results):
         # define as tidied if no weights is detected(box closed),battery is on the table instead of the balance
