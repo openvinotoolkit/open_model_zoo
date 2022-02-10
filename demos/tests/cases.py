@@ -1252,7 +1252,8 @@ PYTHON_DEMOS = [
             '-m_tm': ModelArg('smartlab-object-detection-0002'),
             '-m_fa': ModelArg('smartlab-object-detection-0003'),
             '-m_fm': ModelArg('smartlab-object-detection-0004'),
-            'multiview -m_en': ModelArg('smartlab-action-recognition-encoder-0001'),
+            'multiview',
+            '-m_en': ModelArg('smartlab-action-recognition-encoder-0001'),
             '-m_de': ModelArg('smartlab-action-recognition-decoder-0001')}),
     )),
 
