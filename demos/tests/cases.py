@@ -1247,14 +1247,6 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='smartlab_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-h': None}),
-        # TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
-        #     '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
-        #     '-m_ta': ModelArg('smartlab-object-detection-0001'),
-        #     '-m_tm': ModelArg('smartlab-object-detection-0002'),
-        #     '-m_fa': ModelArg('smartlab-object-detection-0003'),
-        #     '-m_fm': ModelArg('smartlab-object-detection-0004'),
-        #     'multiview -m_en': ModelArg('smartlab-action-recognition-0001-encoder'),
-        #     '-m_de': ModelArg('smartlab-action-recognition-0001-decoder')}),
     )),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(

@@ -53,7 +53,6 @@ class Detector(object):
         self.top1_exp = MwGlobalExp(
             num_classes = 10,
             fp_model = fp_top_models[0],
-            root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.3,
             ie=ie,
@@ -67,7 +66,6 @@ class Detector(object):
         self.top2_exp = MwGlobalExp(
             num_classes = 3,
             fp_model = fp_top_models[1],
-            root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
             ie=ie,
@@ -85,7 +83,6 @@ class Detector(object):
         self.front1_exp = MwGlobalExp(
             num_classes = 10,
             fp_model = fp_front_models[0],
-            root_input = None,
             conf_thresh= 0.2,
             nms_thresh = 0.3,
             ie=ie,
@@ -99,7 +96,6 @@ class Detector(object):
         self.front2_exp = MwGlobalExp(
             num_classes = 3,
             fp_model = fp_front_models[1],
-            root_input = None,
             conf_thresh= 0.1,
             nms_thresh = 0.2,
             ie=ie,
