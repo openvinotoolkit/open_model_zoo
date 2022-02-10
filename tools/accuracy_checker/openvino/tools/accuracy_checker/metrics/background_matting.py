@@ -49,22 +49,16 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
     @staticmethod
     def prepare_pha(image):
         if image.shape[-1] == 4:
-            return image[:, :, -1].astype(np.float32) / 255
+            image = image[:, :, -1]
         elif image.shape[-1] == 3:
-            return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255
-        elif len(image.shape) == 2:
-            return image.astype(np.float32) / 255
-        else:
-            raise ValueError('Unsupported format of image!')
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        return image.astype(np.float32) / 255
 
     @staticmethod
     def prepare_fgr(image):
         if image.shape[-1] == 4:
-            return image[:, :, :-1].astype(np.float32) / 255
-        elif image.shape[-1] == 3:
-            return image.astype(np.float32) / 255
-        else:
-            raise ValueError('Unsupported format of image!')
+            image = image[:, :, :-1]
+        return image.astype(np.float32) / 255
 
     def get_annotation(self, annotation):
         return self.process_func(annotation.value)

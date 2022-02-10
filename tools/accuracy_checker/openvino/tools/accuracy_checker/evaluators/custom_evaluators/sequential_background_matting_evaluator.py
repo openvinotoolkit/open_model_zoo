@@ -97,10 +97,10 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         )
         self._part_by_name = {'background_matting_model': self.model}
 
-    def predict(self, batch_identifiers, batch_input_data):
+    def predict(self, identifiers, input_data):
         batch_raw_results = []
-        for identifier, input_data in zip(batch_identifiers, batch_input_data):
-            raw_results = self.model.predict(identifier, input_data)
+        for identifier, data in zip(identifiers, input_data):
+            raw_results = self.model.predict(identifier, data)
             batch_raw_results.append(raw_results)
         return batch_raw_results
 

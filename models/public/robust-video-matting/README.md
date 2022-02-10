@@ -7,7 +7,7 @@ a recurrent architecture to exploit temporal information in videos and achieves 
 improvements in temporal coherence and matting quality. This model is pre-trained in PyTorch\*
 framework and converted to ONNX\* format. More details provided in the [paper](https://arxiv.org/abs/2108.11515).
 Backbone is MobileNetV3. For details see the [repository](https://github.com/PeterL1n/RobustVideoMatting).
-For details regarding export to ONNX see the [instruction](https://github.com/DmitriySidnev/RobustVideoMatting#export-to-onnx). 
+For details regarding export to ONNX see the [instruction](https://github.com/DmitriySidnev/RobustVideoMatting#export-to-onnx).
 
 ## Specification
 
