@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq > 1);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq != 1);
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
