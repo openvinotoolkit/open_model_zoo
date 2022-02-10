@@ -47,6 +47,13 @@ Floating point-valued logit scores, where i-th value corresponds to the log-like
 2. Answer end, name: `output_e`, shape: `1, 384`.
 Floating point-valued logit scores, where i-th value corresponds to the log-likelihoods of the answer ending at i-th token position.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [BERT Question Answering Embedding Python\* Demo](../../../demos/bert_question_answering_embedding_demo/python/README.md)
+* [BERT Question Answering Python\* Demo](../../../demos/bert_question_answering_demo/python/README.md)
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

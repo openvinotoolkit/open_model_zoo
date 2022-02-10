@@ -62,5 +62,12 @@ Semantic segmentation class prediction map, shape - `1, 720, 960`, output data f
 
 Output contains the class prediction result of each pixel.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

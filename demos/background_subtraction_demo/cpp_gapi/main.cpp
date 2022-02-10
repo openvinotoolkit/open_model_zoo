@@ -6,6 +6,7 @@
 #include <utils/args_helper.hpp>
 #include <utils_gapi/stream_source.hpp>
 #include <utils/config_factory.h>
+#include <utils/ocv_common.hpp>
 
 #include <opencv2/gapi/streaming/cap.hpp>
 #include <opencv2/gapi/imgproc.hpp>
@@ -160,20 +161,13 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Save output result **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         bool isStart = true;
-        uint64_t curr_frame_num = 0;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
 
         while(pipeline.pull(cv::gout(output))) {
-            ++curr_frame_num;
             presenter.drawGraphs(output);
             if (isStart) {
                 metrics.update(startTime, output, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
@@ -185,10 +179,7 @@ int main(int argc, char *argv[]) {
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
             }
 
-            if (videoWriter.isOpened() &&
-                (FLAGS_limit <= 0 || curr_frame_num <= FLAGS_limit)) {
-                videoWriter.write(output);
-            }
+            videoWriter.write(output);
 
             if (!FLAGS_no_show) {
                 cv::imshow(windowName, output);

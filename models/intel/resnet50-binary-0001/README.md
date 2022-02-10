@@ -42,5 +42,12 @@ The output is a blob with the shape `1, 1000` in the format `B, C`, where:
 - `B` - batch size
 - `C` - predicted probabilities for each class in logits format
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Classification Benchmark C++ Demo](../../../demos/classification_benchmark_demo/cpp/README.md)
+* [Classification Python\* Demo](../../../demos/classification_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

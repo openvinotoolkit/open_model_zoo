@@ -91,6 +91,8 @@ omz_converter --list models.lst
   - face-detection-retail-0005
   - face-detection-retail-0044
   - faster-rcnn-resnet101-coco-sparse-60-0001
+  - faster_rcnn_inception_resnet_v2_atrous_coco
+  - faster_rcnn_resnet50_coco
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
   - pelee-coco

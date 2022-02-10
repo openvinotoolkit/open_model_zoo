@@ -51,5 +51,12 @@ Expected color order is `BGR`.
 1. Name: `age_conv3`, shape: `1, 1, 1, 1` - Estimated age divided by 100.
 2. Name: `prob`, shape: `1, 2, 1, 1` - Softmax output across 2 type classes [0 - female, 1 - male].
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
+* [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

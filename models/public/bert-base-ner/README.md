@@ -92,6 +92,12 @@ An example of using the Model Converter:
 omz_converter --name <model_name>
 ```
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [BERT Named Entity Recognition Python\* Demo](../../../demos/bert_named_entity_recognition_demo/python/README.md)
+
 ## Legal Information
 
 The original model is distributed under [Apache License, Version 2.0](https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE).

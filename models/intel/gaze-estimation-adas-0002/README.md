@@ -55,5 +55,12 @@ The accuracy of gaze direction prediction is evaluated through the use of [MAE](
 
 The net output is a blob with name `gaze_vector` and the shape: `1, 3`, containing Cartesian coordinates of gaze direction vector. Please note that the output vector is not normalizes and has non-unit length.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
+* [G-API Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

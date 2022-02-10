@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is an text-recognition composite model that recognizes scene text.
+This is a text-recognition composite model that recognizes scene text.
 The model uses predefined set of alphanumeric symbols (case-sensitive) to predict words.
 The model is built on the ResNeXt-101 backbone with additional 2d attention-based text recognition head.
 
@@ -83,5 +83,12 @@ Model is supported by [text-detection c++ demo](../../../demos/text_detection_de
 ```
 
 For more information, please, see documentation of the demo.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
