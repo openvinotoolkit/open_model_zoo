@@ -108,7 +108,6 @@ class SegmentorMstcn:
         self.EmbedWindowStride = 1
         self.EmbedWindowAtrous = 3
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
-        self.his_fea = []
 
         net = ie.read_network(i3d_path)
         net.reshape({next(iter(net.input_info)): (
