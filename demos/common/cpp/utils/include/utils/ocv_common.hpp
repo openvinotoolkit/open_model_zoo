@@ -315,3 +315,28 @@ private:
     cv::Scalar means;
     cv::Scalar stdScales;
 };
+
+class LazyVideoWriter {
+    cv::VideoWriter writer;
+    unsigned nwritten;
+public:
+    const std::string filenames;
+    const double fps;
+    const unsigned lim;
+
+    LazyVideoWriter(const std::string& filenames, double fps, unsigned lim) :
+        nwritten{1}, filenames{filenames}, fps{fps}, lim{lim} {}
+    void write(cv::InputArray im) {
+        if (writer.isOpened() && (nwritten < lim || 0 == lim)) {
+            writer.write(im);
+            ++nwritten;
+            return;
+        }
+        if (!writer.isOpened() && !filenames.empty()) {
+            if (!writer.open(filenames, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, im.size())) {
+                throw std::runtime_error("Can't open video writer");
+            }
+            writer.write(im);
+        }
+    }
+};

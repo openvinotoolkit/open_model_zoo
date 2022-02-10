@@ -112,12 +112,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() &&
-            !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), cap->fps(), frame.size()))
-        {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         uint32_t framesProcessed = 0;
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
@@ -149,9 +144,7 @@ int main(int argc, char* argv[]) {
             }
 
             framesProcessed++;
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
-                videoWriter.write(frame);
-            }
+            videoWriter.write(frame);
             if (!FLAGS_no_show) {
                 cv::imshow(windowName, frame);
 

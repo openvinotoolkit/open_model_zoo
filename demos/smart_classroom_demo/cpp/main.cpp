@@ -38,7 +38,6 @@ private:
     const bool enabled_;
     const int num_top_persons_;
     cv::VideoWriter& writer_;
-    uint32_t limit_;
     float rect_scale_x_;
     float rect_scale_y_;
     static int const max_input_width_ = 1920;
@@ -50,8 +49,8 @@ private:
     static int const margin_size_ = 5;
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer, uint32_t limit, int num_top_persons) :
-        enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), limit_(limit), rect_scale_x_(0), rect_scale_y_(0) {
+    Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons) :
+        enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), rect_scale_x_(0), rect_scale_y_(0) {
         if (!enabled_) {
             return;
         }
@@ -75,7 +74,7 @@ public:
     }
 
     void SetFrame(const cv::Mat& frame) {
-        if (!enabled_ && !writer_.isOpened()) {
+        if (!enabled_) {
             return;
         }
 
@@ -95,9 +94,7 @@ public:
             cv::imshow(main_window_name_, frame_);
         }
 
-        if (writer_.isOpened() && (limit_ == 0 || framesProcessed <= limit_)) {
-            writer_ << frame_;
-        }
+        writer_ << frame_;
     }
 
     void DrawCrop(cv::Rect roi, int id, const cv::Scalar& color) const {
@@ -135,7 +132,7 @@ public:
 
     void DrawObject(cv::Rect rect, const std::string& label_to_draw,
                     const cv::Scalar& text_color, const cv::Scalar& bbox_color, bool plot_bg) {
-        if (!enabled_ && !writer_.isOpened()) {
+        if (!enabled_) {
             return;
         }
 
@@ -207,10 +204,6 @@ public:
             if (num_top_persons_ > 0) {
                 cv::destroyWindow(top_window_name_);
             }
-        }
-
-        if (writer_.isOpened()) {
-            writer_.release();
         }
     }
 };
@@ -718,12 +711,8 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame.size())) {
-            throw std::runtime_error("Can't open video writer");
-        }
-        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, num_top_persons);
         DetectionsLogger logger(slog::debug, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         if (actions_type != TOP_K) {

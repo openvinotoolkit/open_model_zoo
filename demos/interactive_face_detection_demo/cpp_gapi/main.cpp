@@ -437,11 +437,7 @@ int main(int argc, char *argv[]) {
         stream.setSource<custom::CommonCapSrc>(cap);
 
         /** Save output result **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fsp(), FLAGS_limit};
 
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
@@ -539,9 +535,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (videoWriter.isOpened()) {
-                videoWriter.write(frame);
-            }
+            videoWriter.write(frame);
         }
 
         cv::destroyAllWindows();

@@ -179,11 +179,7 @@ int main(int argc, char **argv) {
         if (!frame.data) throw std::runtime_error("Can't read an image from the input");
         cv::Size firstFrameSize = frame.size();
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), firstFrameSize)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         uint32_t framesProcessed = 0;
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
@@ -271,9 +267,7 @@ int main(int argc, char **argv) {
             metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             framesProcessed++;
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
-                videoWriter.write(frame);
-            }
+            videoWriter.write(frame);
             if (should_show) {
                 cv::imshow("dbg", frame);
                 char k = cv::waitKey(delay);

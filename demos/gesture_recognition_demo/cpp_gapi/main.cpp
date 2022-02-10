@@ -141,12 +141,7 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Save output result **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         /** Fill labels container from file with classes **/
         const auto labels = fill_labels(FLAGS_c);
@@ -177,9 +172,7 @@ int main(int argc, char *argv[]) {
             visualizer.show(out_frame, out_detections, out_label_number, current_id, gesture);
             gesture = 0;
 
-            if (videoWriter.isOpened()) {
-                videoWriter.write(out_frame);
-            }
+            videoWriter.write(out_frame);
 
             /** Controls **/
             int key = cv::waitKey(1);
