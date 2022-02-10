@@ -5,7 +5,8 @@ from .settings import MwGlobalExp
 from .deploy_util import demo_postprocess
 from .vis import vis
 
-class SubDetector(object):
+
+class SubDetector:
     def __init__(self, exp: MwGlobalExp, backend: str='openvino'):
         self.inode, self.onode, self.input_shape, self.model = exp.get_openvino_model()
 

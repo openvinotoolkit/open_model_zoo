@@ -20,7 +20,7 @@ import logging as log
 from scipy.special import softmax
 
 
-class Segmentor(object):
+class Segmentor:
     def __init__(self, ie, device, backbone_path, classifier_path):
         self.terms = [
             "noise_action",
@@ -77,7 +77,7 @@ class Segmentor(object):
         return self.terms[predicted], self.terms[predicted]
 
 
-class SegmentorMstcn(object):
+class SegmentorMstcn:
     def __init__(self, ie, device, i3d_path, mstcn_path):
         self.ActionTerms = [
             "background",

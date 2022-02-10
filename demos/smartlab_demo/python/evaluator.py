@@ -16,7 +16,7 @@
 
 import numpy as np
 
-class Evaluator(object):
+class Evaluator:
     def __init__(self):
         '''Score Evaluation Variables'''
         self.first_put_take = False

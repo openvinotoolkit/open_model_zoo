@@ -22,7 +22,7 @@ from .subdetectors import SubDetector
 from .vis import vis
 
 
-class Detector(object):
+class Detector:
     def __init__(self,
         ie,
         device,
