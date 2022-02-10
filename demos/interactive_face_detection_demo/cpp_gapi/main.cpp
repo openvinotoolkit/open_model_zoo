@@ -30,7 +30,7 @@ namespace {
 constexpr char help_msg[] = "Print a usage message";
 DEFINE_bool(h, false, help_msg);
 
-constexpr char input_video_msg[] = "Path to a video file (specify \"cam\" to work with camera)";
+constexpr char input_video_msg[] = "An input to process. The input must be a single image, a folder of images, video file or camera id";
 DEFINE_string(i, "", input_video_msg);
 
 constexpr char output_msg[] = "Name of the output file(s) to save";
