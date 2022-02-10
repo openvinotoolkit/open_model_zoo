@@ -28,6 +28,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,3,720,1280],[1,3,720,1280]
   - --input=src,bgr
+  - --layout=src(NCHW),bgr(NCHW)
   - --output=pha,fgr
   - --scale=255
   - --reverse_input_channels
