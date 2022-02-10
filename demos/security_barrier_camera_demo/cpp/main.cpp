@@ -593,7 +593,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback({}); // destroy the stored bind object
+                    inferRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
                         std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
