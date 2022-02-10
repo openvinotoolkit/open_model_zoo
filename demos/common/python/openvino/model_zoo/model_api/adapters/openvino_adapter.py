@@ -48,7 +48,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
-        self.input_layouts = Layout.parse_layouts(model_parameters['input_layouts']) if model_parameters.get('input_layouts', None) else {}
+        self.model_parameters = model_parameters
 
         if isinstance(model_path, (str, Path)):
             if Path(model_path).suffix == ".onnx" and weights_path:
@@ -75,11 +75,11 @@ class OpenvinoAdapter(ModelAdapter):
         if 'AUTO' not in devices:
             for device in devices:
                 try:
-                    nstreams = self.compiled_model.get_property(device + '_THROUGHPUT_STREAMS')
+                    nstreams = self.compiled_model.get_config(device + '_THROUGHPUT_STREAMS')
                     log.info('\tDevice: {}'.format(device))
                     log.info('\t\tNumber of streams: {}'.format(nstreams))
                     if device == 'CPU':
-                        nthreads = self.compiled_model.get_property('CPU_THREADS_NUM')
+                        nthreads = self.compiled_model.get_config('CPU_THREADS_NUM')
                         log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
                 except RuntimeError:
                     pass
@@ -87,17 +87,23 @@ class OpenvinoAdapter(ModelAdapter):
 
     def get_input_layers(self):
         inputs = {}
+        self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
         for input in self.model.inputs:
-            input_layout = ''
-            if input.get_any_name() in self.input_layouts or '' in self.input_layouts:
-                input_layout = Layout(self.input_layouts.get(input.get_any_name(), self.input_layouts[''])).layout
-            elif not layout_helpers.get_layout(input).empty:
-                input_layout = Layout.from_openvino(input).layout
-            elif len(input.shape) == 4:
-                input_layout = Layout.from_shape(input.shape).layout
+            input_layout = self.get_layout_for_input(input)
             inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
+
+    def get_layout_for_input(self, input) -> str:
+        input_layout = ''
+        if self.model_parameters['input_layouts']:
+            input_layout = Layout.from_user_layouts(input.get_any_name(), self.model_parameters['input_layouts']).layout
+        if not input_layout:
+            if not layout_helpers.get_layout(input).empty:
+                input_layout = Layout.from_openvino(input).layout
+            elif len(input.shape) == 4:
+                input_layout = Layout.from_shape(input.shape).layout
+        return input_layout
 
     def get_output_layers(self):
         outputs = {}

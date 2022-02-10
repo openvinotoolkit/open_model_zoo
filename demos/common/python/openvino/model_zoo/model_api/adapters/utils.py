@@ -29,7 +29,7 @@ class Layout:
         Create Layout from given shape
         '''
         if len(shape) != 4:
-            raise RuntimeError('Get_layout supports only 4D input shape')
+            raise RuntimeError('Get layout from shape method supports only 4D input shape')
 
         layout = 'NCHW' if shape[1] in range(1, 4) else 'NHWC'
         return cls(layout)
@@ -41,11 +41,25 @@ class Layout:
         '''
         return cls(layout_helpers.get_layout(input).to_string().strip('[]').replace(',', ''))
 
+    @classmethod
+    def from_user_layouts(cls, input_name, user_layouts: dict):
+        '''
+        Create Layout from user input
+        '''
+        if input_name in user_layouts:
+            return cls(user_layouts[input_name])
+        if '' in user_layouts:
+            return cls(user_layouts[''])
+        return cls()
+
+
     @staticmethod
     def parse_layouts(layout_regex: str) -> Optional[dict]:
         '''
         Parse layout parameter in format "input0:NCHW,input1:NC" or "NCHW" (applied to all inputs)
         '''
+        if not layout_regex:
+            return None
         inputs_layouts = layout_regex.split(',')
         user_layouts = {}
         for layout in inputs_layouts:

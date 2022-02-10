@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -108,6 +108,10 @@ def build_argparser():
     common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -164,7 +168,7 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
