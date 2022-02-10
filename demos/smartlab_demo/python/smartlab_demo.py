@@ -42,7 +42,7 @@ def build_argparser():
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
-    args.add_argument('-m', '--mode', default='multiview', help='Required. action recognition mode: multiview or mstcn', type=str)
+    args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
     subparsers = parser.add_subparsers(help='add sub-command parser for multiview mode and mstcn mode')
     args_mutiview = subparsers.add_parser('multiview', help='sub-command for multiview action recognition mode')
     args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)

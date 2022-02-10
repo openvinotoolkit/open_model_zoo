@@ -16,6 +16,7 @@
 
 import numpy as np
 
+
 class Evaluator:
     def __init__(self):
         '''Score Evaluation Variables'''

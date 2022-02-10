@@ -47,9 +47,8 @@ class Display:
             y_min = int(row[1])
             x_max = int(row[2])
             y_max = int(row[3])
-            obj = obj_cls
 
-            cv2.putText(frame_top, obj, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=0.9, thickness=2)
+            cv2.putText(frame_top, obj_cls, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=0.9, thickness=2)
             frame_top = cv2.rectangle(frame_top, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
 
         for row, obj_cls in zip(front_det_results[0], front_det_results[1]):
@@ -57,9 +56,8 @@ class Display:
             y_min = int(row[1])
             x_max = int(row[2])
             y_max = int(row[3])
-            obj = obj_cls
-
-            cv2.putText(frame_front, obj, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=0.9, thickness=2)
+            
+            cv2.putText(frame_front, obj_cls, (x_min, y_min-10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=0.9, thickness=2)
             frame_front = cv2.rectangle(frame_front, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
 
         # display scoring

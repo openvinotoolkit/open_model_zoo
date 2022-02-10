@@ -59,14 +59,14 @@ i3d-rgb-tf
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-**For example**, to run the demo, please provide the model pathes of models and two input streams:
+**For example**, to run the demo, please provide the model paths and two input streams:
 
 ```sh
 python3 smartlab_demo.py
     -tv ./stream_1_top.mp4
     -fv ./stream_1_high.mp4
-    -m_ta "./intel/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001xml"
-    -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002xml"
+    -m_ta "./intel/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.xml"
+    -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
     -m multiview

@@ -1,6 +1,7 @@
 import numpy as np
 from deploy_util import nms, multiclass_nms
 
+
 def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agnostic=False):
     # original source: https://github.com/Megvii-BaseDetection/YOLOX
     # Copyright (c) 2014-2021 Megvii Inc. All rights reserved.
@@ -40,7 +41,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
                 detections[:, :4],
                 detections[:, 4] * detections[:, 5],
                 detections[:, 6],
-                nms_thre)
+                nms_thre,
+                class_agnostic=class_agnostic)
 
         detections = detections[nms_out_index] # filtering boxes
 
