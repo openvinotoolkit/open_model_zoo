@@ -34,7 +34,7 @@ class ImageBackgroundMattingAdapter(Adapter):
         batch_size = len(identifiers)
         for i in range(batch_size):
             result.append(
-                BackgroundMattingPrediction(identifiers,
+                BackgroundMattingPrediction(identifiers[i],
                     {
                         self.pha: self.to_image(pha[i], frame_meta[i]),
                         self.fgr: self.to_image(fgr[i], frame_meta[i])
