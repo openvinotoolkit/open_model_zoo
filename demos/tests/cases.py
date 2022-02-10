@@ -1252,8 +1252,8 @@ PYTHON_DEMOS = [
             '-m_tm': ModelArg('smartlab-object-detection-0002'),
             '-m_fa': ModelArg('smartlab-object-detection-0003'),
             '-m_fm': ModelArg('smartlab-object-detection-0004'),
-            'multiview -m_en': ModelArg('smartlab-action-recognition-0001-encoder'),
-            '-m_de': ModelArg('smartlab-action-recognition-0001-decoder')}),
+            'multiview -m_en': ModelArg('smartlab-action-recognition-encoder-0001'),
+            '-m_de': ModelArg('smartlab-action-recognition-decoder-0001')}),
     )),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
