@@ -13,12 +13,13 @@
 # limitations under the License.
 
 description: >-
-  The "background-matting-mobilenetv2" model is a high-resolution background replacement technique based on
-  background matting (with MobileNetV2 backbone), where an additional frame of the background is
-  captured and used in recovering the alpha matte and the foreground layer. This model is
-  pre-trained in PyTorch* framework and converted to ONNX* format. More details provided in
-  the paper <https://arxiv.org/abs/2012.07810>.
-  For details see the repository <https://github.com/DmitriySidnev/BackgroundMattingV2>.
+  The "background-matting-mobilenetv2" model is a high-resolution background replacement
+  technique based on background matting (with MobileNetV2 backbone), where an additional
+  frame of the background is captured and used in recovering the alpha matte and the
+  foreground layer. This model is pre-trained in PyTorch* framework and converted
+  to ONNX* format. More details provided in the paper <https://arxiv.org/abs/2012.07810>.
+  For details see the repository <https://github.com/PeterL1n/BackgroundMattingV2>.
+  For details regarding export to ONNX see here <https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/export_onnx.py>.
 task_type: background_matting
 files:
   - name: bgm_mobilenetv2.onnx
