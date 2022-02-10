@@ -63,11 +63,6 @@ class MwGlobalExp:
         self.ie = ie
         self.device = device
 
-        self.root_imgs = root_input
-        support_suffices = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
-        other_suffices = [s.upper() for s in support_suffices]
-        support_suffices += other_suffices
-
         # define conditions
         self.confthre = conf_thresh
         self.nmsthre = nms_thresh

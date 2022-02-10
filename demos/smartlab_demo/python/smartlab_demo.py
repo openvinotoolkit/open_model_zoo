@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
  Copyright (C) 2021-2022 Intel Corporation
 
@@ -22,7 +23,7 @@ from object_detection.detector import Detector
 from segmentor import Segmentor, SegmentorMstcn
 from evaluator import Evaluator
 from display import Display
-from openvino.inference_engine import IECore
+from openvino.runtime import Core
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -42,12 +43,12 @@ def build_argparser():
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
 
-    subparsers = parser.add_subparsers(help='sub-command help')
+    subparsers = parser.add_subparsers(help='sub-command for multiview action recognition mode')
     args_mutiview = subparsers.add_parser('multiview', help='multiview help')
     args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     args_mutiview.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
     args_mutiview.add_argument('--mode', default='multiview', help='Option. Path to decoder model.', type=str)
-    args_mstcn = subparsers.add_parser('mstcn', help='mstcm help')
+    args_mstcn = subparsers.add_parser('mstcn', help='sub-command for mustcn action recognition mode')
     args_mstcn.add_argument('-m_i3d', '--m_i3d', help='Required. Path to i3d model.', required=True, type=str)
     args_mstcn.add_argument('-m_mstcn', '--m_mstcn', help='Required. Path to mstcn model.', required=True, type=str)
     args_mstcn.add_argument('--mode', default='mstcn', help='Option. Path to decoder model.', type=str)
@@ -61,7 +62,7 @@ def main():
     frame_counter = 0 # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
-    ie = IECore()
+    ie = Core()
 
     ''' Object Detection Variables'''
     detector = Detector(

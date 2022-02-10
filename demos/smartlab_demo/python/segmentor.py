@@ -265,31 +265,3 @@ class SegmentorMstcn(object):
                 temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
                 temporal_logits = temporal_logits.transpose((0, 2, 1)).squeeze(axis=0)
                 self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
-
-
-if __name__ == '__main__':
-    ie = IECore()
-    segmentor = SegmentorMstcn(ie, "i3d-rgb.xml", "mstcn_online.xml")
-    frame_counter = 0  # Frame index counter
-    buffer1 = deque(maxlen=1000)  # Array buffer
-    buffer2 = deque(maxlen=1000)
-
-    cap1 = cv2.VideoCapture("stream_1_top.mp4")
-    cap2 = cv2.VideoCapture("stream_1_high.mp4")
-
-    while cap1.isOpened() and cap2.isOpened():
-        ret1, frame1 = cap1.read()  # frame:480 x 640 x 3
-        ret2, frame2 = cap2.read()  # frame:480 x 640 x 3
-        if ret1 and ret2:
-            buffer1.append(cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB))
-            buffer2.append(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB))
-            frame_counter += 1
-
-            frame_predictions = segmentor.inference(
-                    buffer_top=buffer1,
-                    buffer_front=buffer2,
-                    frame_index=frame_counter)
-            print("Frame predictions:", frame_predictions)
-        else:
-            print("Finished!")
-            break
