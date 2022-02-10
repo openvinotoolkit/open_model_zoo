@@ -328,7 +328,7 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
-| robust-video-matting | PyTorch\* | [robust-video-matting](./robust-video-matting/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
+| robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also
 

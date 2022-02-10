@@ -104,7 +104,7 @@
 | retinanet-tf | YES | YES |    |
 | rexnet-v1-x1.0 | YES | YES |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
-| robust-video-matting | YES | YES |    |
+| robust-video-matting-mobilenetv3 | YES | YES |    |
 | se-inception | YES | YES | YES |
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |

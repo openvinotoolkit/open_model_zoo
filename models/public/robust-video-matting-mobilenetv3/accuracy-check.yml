@@ -1,5 +1,5 @@
 evaluations:
-  - name: robust-video-matting
+  - name: robust-video-matting-mobilenetv3
     module: custom_evaluators.sequential_background_matting_evaluator.SequentialBackgroundMatting
     module_config:
 

@@ -1,8 +1,8 @@
-# robust-video-matting
+# robust-video-matting-mobilenetv3
 
 ## Use Case and High-Level Description
 
-The `robust-video-matting` model is a robust high-resolution human video matting method that uses
+The `robust-video-matting-mobilenetv3` model is a robust high-resolution human video matting method that uses
 a recurrent architecture to exploit temporal information in videos and achieves significant
 improvements in temporal coherence and matting quality. This model is pre-trained in PyTorch\*
 framework and converted to ONNX\* format. More details provided in the [paper](https://arxiv.org/abs/2108.11515).
