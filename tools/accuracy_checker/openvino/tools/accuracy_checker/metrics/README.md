@@ -365,6 +365,6 @@ Supported for profiling metrics:
   * `inception_score`
   * `fid`
 * Background matting:
-  * `mean_of_absolute_difference`
+  * `mad`
   * `spatial_gradient`
-  * `mean_squared_error`
+  * `mse_with_mask`

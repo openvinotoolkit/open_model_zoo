@@ -39,7 +39,7 @@ evaluations:
 
           metrics:
             - name: alpha_MAD
-              type: mean_of_absolute_difference
+              type: mad
               prediction_source: pha
               process_type: alpha
               reference: 20.79
@@ -51,14 +51,14 @@ evaluations:
               reference: 4.44
 
             - name: alpha_MSE
-              type: mean_squared_error
+              type: mse_with_mask
               prediction_source: pha
               process_type: alpha
               use_mask: False
               reference: 15.1
 
             - name: foreground_MSE
-              type: mean_squared_error
+              type: mse_with_mask
               prediction_source: fgr
               process_type: image
               use_mask: True

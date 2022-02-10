@@ -2,12 +2,12 @@
 
 ## Use Case and High-Level Description
 
-The `robust-video-matting` model is a robust high-resolution human video matting method that
-achieves new state-of-the-art performance that uses a recurrent architecture to exploit temporal
-information in videos and achieves significant improvements in temporal coherence and matting quality.
-This model is pre-trained in PyTorch\* framework and converted to ONNX\* format. More details
-provided in the [paper](https://arxiv.org/abs/2108.11515). Backbone is MobileNetV3.
-For details see the [repository](https://github.com/DmitriySidnev/RobustVideoMatting).
+The `robust-video-matting` model is a robust high-resolution human video matting method that uses
+a recurrent architecture to exploit temporal information in videos and achieves significant
+improvements in temporal coherence and matting quality. This model is pre-trained in PyTorch\*
+framework and converted to ONNX\* format. More details provided in the [paper](https://arxiv.org/abs/2108.11515).
+Backbone is MobileNetV3. For details see the [repository](https://github.com/PeterL1n/RobustVideoMatting).
+For details regarding export to ONNX see the [instruction](https://github.com/DmitriySidnev/RobustVideoMatting#export-to-onnx). 
 
 ## Specification
 

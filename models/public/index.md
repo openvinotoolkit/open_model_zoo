@@ -321,6 +321,10 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 
 ## Background matting
 
+Background matting is a method of separating a foreground from a background in an image or video,
+wherein some pixels may belong to foreground as well as background, such pixels are called partial
+or mixed pixels. This distinguishes background matting from segmentation approaches where the result is a binary mask.
+
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |

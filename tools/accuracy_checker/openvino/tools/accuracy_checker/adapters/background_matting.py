@@ -43,7 +43,8 @@ class ImageBackgroundMattingAdapter(Adapter):
             )
         return result
 
-    def to_image(self, tensor, meta):
+    @staticmethod
+    def to_image(tensor, meta):
         out = cv2.resize(
             np.transpose(tensor, (1, 2, 0)),
             (meta['original_width'], meta['original_height'])

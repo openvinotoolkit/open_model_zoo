@@ -178,7 +178,8 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                     identifier = [identifier, bgr_name]
 
                 annotations.append(
-                    BackgroundMattingAnnotation(identifier, mask, self.mask_to_gray, self.with_alpha, video_id=clip_name)
+                    BackgroundMattingAnnotation(identifier, mask, self.mask_to_gray,
+                                                self.with_alpha, video_id=clip_name)
                 )
                 if progress_callback is not None and idx % progress_interval == 0:
                     progress_callback(idx / num_iterations * 100)
@@ -191,7 +192,7 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
     @staticmethod
     def get_clips_names(images_list):
         result = []
-        for idx, image in enumerate(images_list):
+        for image in images_list:
             clip_path = image.parent
             result.append(clip_path.name)
         return list(set(result))

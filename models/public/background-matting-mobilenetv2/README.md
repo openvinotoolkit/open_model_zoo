@@ -7,7 +7,8 @@ background matting (with MobileNetV2 backbone), where an additional frame of the
 captured and used in recovering the alpha matte and the foreground layer. This model is
 pre-trained in PyTorch\* framework and converted to ONNX\* format. More details provided in
 the [paper](https://arxiv.org/abs/2012.07810).
-For details see the [repository](https://github.com/DmitriySidnev/BackgroundMattingV2).
+For details see the [repository](https://github.com/PeterL1n/BackgroundMattingV2).
+For details regarding export to ONNX see [here](https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/export_onnx.py).
 
 ## Specification
 
@@ -33,10 +34,6 @@ Accuracy measured on a dataset composed with foregrounds from the HumanMatting d
 * Alpha MSE - mean squared error for alpha.
 * Alpha GRAD - spatial-gradient metric for alpha.
 * Foreground MSE - mean squared error for foreground.
-
-> **Note**: metrics were measured using the [script](https://github.com/DmitriySidnev/RobustVideoMatting/blob/master/evaluation/evaluate_hr.py).
-> Following the original paper the test dataset obtained from the original one by compositing
-> samples onto 5 random background images. The result dataset can be found [here](https://drive.google.com/file/d/1fjVXmP_gsWZiCsY6BdSxIPIv1tBZWIyK/view?usp=sharing).
 
 ## Input
 

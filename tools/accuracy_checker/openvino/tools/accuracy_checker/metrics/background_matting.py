@@ -89,7 +89,7 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
 
 
 class MeanOfAbsoluteDifference(BaseBackgroundMattingMetrics):
-    __provider__ = 'mean_of_absolute_difference'
+    __provider__ = 'mad'
 
     def update(self, annotation, prediction):
         pred = self.get_prediction(prediction)
@@ -145,7 +145,7 @@ class SpatialGradient(BaseBackgroundMattingMetrics):
 
 
 class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
-    __provider__ = 'mean_squared_error'
+    __provider__ = 'mse_with_mask'
 
     def update(self, annotation, prediction):
         pred = self.get_prediction(prediction)

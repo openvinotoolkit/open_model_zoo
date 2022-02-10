@@ -108,7 +108,7 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         output = []
         for _ in range(batch_size):
             zeros_lstm_inputs = {}
-            for lstm_input_name in self.launcher._lstm_inputs.keys():
+            for lstm_input_name in self.launcher.lstm_inputs.keys():
                 shape = self.model.network.input_info[lstm_input_name].input_data.shape
                 zeros_lstm_inputs[lstm_input_name] = np.zeros(shape, dtype=np.float32)
             output.append(zeros_lstm_inputs)
@@ -118,23 +118,17 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         result = []
         for output in outputs:
             batch_rnn_inputs = {}
-            for input_name, output_name in self.launcher._lstm_inputs.items():
+            for input_name, output_name in self.launcher.lstm_inputs.items():
                 batch_rnn_inputs[input_name] = output[output_name]
             result.append(batch_rnn_inputs)
         return result
 
 
 class DLSDKSequentialBackgroundMattingModel(BaseDLSDKModel):
-    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
-        super().__init__(network_info, launcher, suffix, delayed_model_loading)
-
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)
 
 
 class OpenVINOModelSequentialBackgroundMattingModel(BaseOpenVINOModel):
-    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
-        super().__init__(network_info, launcher, suffix, delayed_model_loading)
-
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)
