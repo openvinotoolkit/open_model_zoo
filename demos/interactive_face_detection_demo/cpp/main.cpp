@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "interactive_face_detection.hpp"
 #include "detectors.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
