@@ -1245,7 +1245,6 @@ PYTHON_DEMOS = [
     #    ]
     #)),
 
-    # TODO
     PythonDemo(name='smartlab_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
             '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
@@ -1253,8 +1252,7 @@ PYTHON_DEMOS = [
             '-m_tm': ModelArg('smartlab-object-detection-0002'),
             '-m_fa': ModelArg('smartlab-object-detection-0003'),
             '-m_fm': ModelArg('smartlab-object-detection-0004'),
-            'multiview': "",
-            '-m_en': ModelArg('smartlab-action-recognition-0001-encoder'),
+            'multiview -m_en': ModelArg('smartlab-action-recognition-0001-encoder'),
             '-m_de': ModelArg('smartlab-action-recognition-0001-decoder')}),
     )),
 
