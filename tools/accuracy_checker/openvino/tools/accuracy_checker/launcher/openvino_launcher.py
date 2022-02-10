@@ -211,7 +211,7 @@ class OpenVINOLauncher(Launcher):
                 state.reset()
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         if return_raw:
             return results, raw_results
@@ -241,7 +241,7 @@ class OpenVINOLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         if return_raw:
             return results, raw_results
@@ -251,12 +251,12 @@ class OpenVINOLauncher(Launcher):
         infer_inputs = inputs[0]
         feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else infer_inputs)
         ir.infer(feed_dict, metadata, context)
 
-    def _fill_meta(self, metadata):
+    def _fill_meta(self, metadata, inputs=None):
         for meta_ in metadata:
-            meta_['input_shape'] = self.inputs_info_for_meta()
+            meta_['input_shape'] = self.inputs_info_for_meta(inputs)
             if self._output_layouts:
                 meta_['output_layout'] = self._output_layouts
             if self._output_precisions:
@@ -611,6 +611,11 @@ class OpenVINOLauncher(Launcher):
                 self.print_input_output_info(self.network if self.network is not None else self.exec_network)
             if preprocessing:
                 self._set_preprocess(preprocessing)
+            model_batch = self._get_model_batch_size()
+            model_batch = 1 if model_batch is None else model_batch
+            self._batch = self.config.get('batch', model_batch)
+            self._set_batch_size(self._batch)
+            self.try_to_set_default_layout()
             if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
                 self.exec_network = self.ie_core.compile_model(self.network, self._device)
                 self.infer_request = self.exec_network.create_infer_request()
@@ -715,7 +720,9 @@ class OpenVINOLauncher(Launcher):
             network = self.ie_core.read_model(model=str(model))
         return network
 
-    def inputs_info_for_meta(self):
+    def inputs_info_for_meta(self, inputs=None):
+        if inputs:
+            return {layer_name: np.shape(data) for layer_name, data in inputs.items()}
         return {
             layer_name: parse_partial_shape(layer.get_partial_shape()) for layer_name, layer in self.inputs.items()
             if layer_name not in self.const_inputs + self.image_info_inputs
@@ -725,10 +732,8 @@ class OpenVINOLauncher(Launcher):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
             try:
                 if template_shapes:
-                    input_shapes = {
-                        layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in
-                        input_data[0].items()
-                    }
+                    input_shapes = {layer_name: template_shapes.get(layer_name, data.shape)
+                                    for layer_name, data in input_data[0].items()}
                     self._reshape_input(input_shapes)
                     self.load_network(self.network)
                     self.is_dynamic = True
@@ -736,8 +741,7 @@ class OpenVINOLauncher(Launcher):
                     self.is_dynamic = True
                     self.load_network(self.network)
                 self.exec_network.infer_new_request({
-                    self.input_to_tensor_name[k]: data for k, data in input_data[0].items()}
-                )
+                    self.input_to_tensor_name[k]: data for k, data in input_data[0].items()})
                 return
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
@@ -836,10 +840,8 @@ class OpenVINOLauncher(Launcher):
             return data[0]
         if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
-        if (
-                len(layer_shape) == 1 and len(data_shape) > 1 and
-                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
-        ):
+        if (len(layer_shape) == 1 and len(data_shape) > 1 and
+            len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))):
             return np.resize(data, layer_shape)
         return np.array(data)
 
@@ -865,9 +867,8 @@ class OpenVINOLauncher(Launcher):
                     make_dynamic = True
         if not input_shapes:
             return
-        orig_input_shapes = {
-            input_name: parse_partial_shape(input_info.partial_shape)
-            for input_name, input_info in self.inputs.items()}
+        orig_input_shapes = {input_name: parse_partial_shape(input_info.partial_shape)
+                             for input_name, input_info in self.inputs.items()}
         orig_input_shapes.update(input_shapes)
         self._reshape_input(orig_input_shapes, make_dynamic)
 
@@ -973,7 +974,7 @@ class OpenVINOLauncher(Launcher):
         infer_inputs = inputs[0]
         feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}
         if batch_meta is not None:
-            self._fill_meta(batch_meta)
+            self._fill_meta(batch_meta, None if not self.dyn_input_layers else infer_inputs)
         context = (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta)
         return feed_dict, context
 

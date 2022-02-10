@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,9 +17,10 @@
 #include <vector>
 
 #include <opencv2/core/core.hpp>
-#include <utils/performance_metrics.hpp>
+#include "utils/performance_metrics.hpp"
 
-class VideoFrame {  // VideoFrame can represent not a single image but the whole grid
+// VideoFrame can represent not a single image but the whole grid
+class VideoFrame {
 public:
     typedef std::shared_ptr<VideoFrame> Ptr;
 
@@ -44,6 +45,7 @@ public:
     virtual void process() = 0;
     virtual ~Task() = default;
 
+    std::string name;
     VideoFrame::Ptr sharedVideoFrame;  // it is possible that two tasks try to draw on the same cvMat
     const float priority;
 };

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "openvino/openvino.hpp"
@@ -21,7 +22,7 @@
 * @brief Get cv::Mat value in the correct format.
 */
 template <typename T>
-static const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
+const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
     switch (mat.type()) {
         case CV_8UC1:  return (T)mat.at<uchar>(h, w);
         case CV_8UC3:  return (T)mat.at<cv::Vec3b>(h, w)[c];
@@ -37,7 +38,7 @@ static const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
 * @param blob - Blob object which to be filled by an image data.
 * @param batchIndex - batch index of an image inside of the blob.
 */
-static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
+inline void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
     InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
     const size_t width = blobSize[3];
     const size_t height = blobSize[2];
@@ -86,7 +87,7 @@ static UNUSED void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Pt
 */
 static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
-    ov::Layout layout("NCHW");
+    static const ov::Layout layout{"NCHW"};
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
@@ -140,8 +141,8 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
     bool isMatFloat = matType == CV_32F;
 
     size_t channels = mat.channels();
-    size_t height = mat.size().height;
-    size_t width = mat.size().width;
+    size_t height = mat.rows;
+    size_t width = mat.cols;
 
     size_t strideH = mat.step.buf[0];
     size_t strideW = mat.step.buf[1];
@@ -170,8 +171,8 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat) {
 
 static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     const size_t channels = mat.channels();
-    const size_t height = mat.size().height;
-    const size_t width = mat.size().width;
+    const size_t height = mat.rows;
+    const size_t width = mat.cols;
 
     const size_t strideH = mat.step.buf[0];
     const size_t strideW = mat.step.buf[1];
@@ -214,7 +215,6 @@ inline void putHighlightedText(const cv::Mat& frame,
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
-
 
 class OutputTransform {
 public:

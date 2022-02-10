@@ -17,20 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-0205.xml
-    size: 1114044
-    checksum: 4e059289afa9616b823cd94a314795dfc83af8d967d459ba72f874204d62347b0f29493349909a3ff11aebc7f09e2871
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-0205/FP32/face-detection-0205.xml
+    size: 1115418
+    checksum: a2efee25f029f9df18a90de270460ca672ddf1d041435a0aa4cc5592c620057d6241b8e4887b8c9d9cdf89302a1b0b12
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP32/face-detection-0205.xml
   - name: FP32/face-detection-0205.bin
     size: 8176432
     checksum: fa502c19f01f3279c1dff1c5db135176bc4a533a14031d5e7d3f784bb7e95b660d2e5206cf11fbcd066846f357da38e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-0205/FP32/face-detection-0205.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP32/face-detection-0205.bin
   - name: FP16/face-detection-0205.xml
-    size: 1318225
-    checksum: c785ca80d320c172882b60e23f9f488ba4bf499fc438a789438d727b592b7b5335f4a826aba29057da5ea400ab912a06
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-0205/FP16/face-detection-0205.xml
+    size: 1320099
+    checksum: f73be5523b48228f83717d5bbf60a76b7ddb6402c6454548c044b5320b781f24d4b02e64c495c890b08a2d110c39a059
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP16/face-detection-0205.xml
   - name: FP16/face-detection-0205.bin
     size: 4088432
     checksum: 80e4e93a3fe591aa5e4f4a95e2e5aa7798736973d5fc03cd525a527be7ce0a567bc0f83f2a564ea93aa16481cf6d721d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/face-detection-0205/FP16/face-detection-0205.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP16/face-detection-0205.bin
+  - name: FP16-INT8/face-detection-0205.xml
+    size: 1858846
+    checksum: d844f1978e73b2be8ff0d3d6e9cc887c51ee68ccf0f445ca3314109f81978fee3a56ce64d24c29c419555ff563ebb99f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP16-INT8/face-detection-0205.xml
+  - name: FP16-INT8/face-detection-0205.bin
+    size: 2266560
+    checksum: e0cf176c7052acbd3308e62441216db9ddaf06291fc3ce685ed32ae84bbb968900d1b9a4538e300d0ad1a904bc0fa248
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-0205/FP16-INT8/face-detection-0205.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

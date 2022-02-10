@@ -1,3 +1,5 @@
 # This file can be used with the --list option of the model downloader.
 instance-segmentation-person-????
 yolact-resnet50-fpn-pytorch
+# TODO: background-matting-mobilenetv2
+# TODO: robust-video-matting

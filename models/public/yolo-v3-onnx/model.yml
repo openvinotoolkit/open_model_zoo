@@ -29,6 +29,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,3,416,416],[1,2]
   - --input=input_1,image_shape
+  - --layout=input_1(NCHW),image_shape(NC)
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --input_model=$dl_dir/yolov3-10.onnx

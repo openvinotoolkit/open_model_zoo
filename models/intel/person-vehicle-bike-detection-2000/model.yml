@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-2000.xml
-    size: 338770
-    checksum: 0ad5c9bdde917a8dc04d33ee35d3e4b376021e40a234ea610d5930231826ee365599db335ee475c9245a274afc117086
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP32/person-vehicle-bike-detection-2000.xml
+    size: 338784
+    checksum: a482f53ee2f2cad7be59b706caeb48168870491360a8d2733847cb29961689b01e871261187bffd5c751c046a490508d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP32/person-vehicle-bike-detection-2000.xml
   - name: FP32/person-vehicle-bike-detection-2000.bin
     size: 7421588
     checksum: 4e07365a725029797edc67d3d283393230b6d1ab59f71f321f0a467bb2689b32a987c20151290c03d5c3486c6690f7dd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP32/person-vehicle-bike-detection-2000.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP32/person-vehicle-bike-detection-2000.bin
   - name: FP16/person-vehicle-bike-detection-2000.xml
-    size: 472745
-    checksum: c0c67f676f27bf6988562d3696d9b92ed10b7bcc83f884066f64f25a7f5b3d4c67310c535d7681a51806b74200415a64
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP16/person-vehicle-bike-detection-2000.xml
+    size: 472759
+    checksum: c5958e94e054b3ff047622748f409b187273874eed83e3ac16606623c7ffa2d6cf3516663920b7aa413feabc10c0c192
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP16/person-vehicle-bike-detection-2000.xml
   - name: FP16/person-vehicle-bike-detection-2000.bin
     size: 3710850
     checksum: 901f85b995ff3b3c82928c53ac8a84f4afe976d298380478a89f2f7bb88e6b684cd00ed3bbb39e7bc22f2211c5d4cfab
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP16/person-vehicle-bike-detection-2000.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP16/person-vehicle-bike-detection-2000.bin
   - name: FP16-INT8/person-vehicle-bike-detection-2000.xml
-    size: 477798
-    checksum: 7acf8e39b48a8feea6cbf01e141ec6d0df46259627fa1e98b688d9dcbb94dabf96d8746664117cf3e261996cdf0623e5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP16-INT8/person-vehicle-bike-detection-2000.xml
+    size: 843832
+    checksum: ac7d2b05c577413405d4851ebacaca9a1a803e5765d63203145f4b0dc53980f4106cf6c665be57a605d84839e86d5e50
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP16-INT8/person-vehicle-bike-detection-2000.xml
   - name: FP16-INT8/person-vehicle-bike-detection-2000.bin
-    size: 2026042
-    checksum: 7a95675c8bc2464eb4a2a33bf7d4748e82c164e02000eb701e267d353efeb8eed2cde3157138a7c18106b2bc450f38c0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/person-vehicle-bike-detection-2000/FP16-INT8/person-vehicle-bike-detection-2000.bin
+    size: 2084050
+    checksum: a030c19886c2f902793d8a92e9254ca1641c18ca274e22b8bb2c68f881dcfa429f7ca686c7354067d937e4a539e1ed39
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2000/FP16-INT8/person-vehicle-bike-detection-2000.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

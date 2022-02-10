@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-simplified-chinese-recognition-0001.xml
-    size: 156686
-    checksum: 5224c056747557b90dfb2b518ac521fbc7cd26d60914d40ee0323013c1f1c36685969d14c22ba5fdb04f4f42bcf86853
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.xml
+    size: 156702
+    checksum: 22c7414eaf8c0ed11ac21776d37cacec456c97791ee534dab510cd10a0d4d86b04ebc15fa2b21048673d908ae464d506
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP32/handwritten-simplified-chinese-recognition-0001.bin
     size: 69130984
     checksum: 3ee8f70609bdcf76344310d4085f3b120325bca1c9c1dc6d49b61b21b5172a4130df4a548e963be85c0cddb6e7dda306
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16/handwritten-simplified-chinese-recognition-0001.xml
-    size: 207477
-    checksum: 0dcff3f957b4aa2d595cb14bcbc8c579f220d944bee1d946b4440fd56ba64831ff72c0be6f8ce8cb46081ea65cf8ae76
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.xml
+    size: 207493
+    checksum: 91b0a12c38a5f72eea7c4f62977487d669610247bb8f0588760e5affdb613c3ccee55669e77dcef7091c0e78be250a4d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16/handwritten-simplified-chinese-recognition-0001.bin
     size: 34565552
     checksum: 97edee3ba2f69dbd438515572fca6cc0109aa97fe6d57635991e0a74236c7b5d6b8c5cb3e419cef851f6cd945fb54f88
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
-    size: 258072
-    checksum: 5d1f43819eb79b248bd4c68e2ea4d1df8d4538e0b11739fcde6ebd310f6dafdca6b94192384bda1ab743426267ec21b1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
+    size: 340811
+    checksum: 9672045d5b73a272996a10e35b0ecfd4a54ffbc1a531142bb4053edc17cff0647a90684060ded11f05a3678511e72e7b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
-    size: 17364634
-    checksum: 51fa875c9450be8901d971e090ee0abb22c3dbbec19f5f4072cbe89ae8c4cdc12b5e9c0023403786b45316f50368abdc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
+    size: 17398059
+    checksum: a6c289c4ac768a9ee5a123ea2a86bcdabc03ac10736ab8121ab59f77986a536d271ed18c3a82f6d886913df544eb1a60
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

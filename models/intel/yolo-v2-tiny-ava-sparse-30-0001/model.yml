@@ -19,30 +19,30 @@ files:
   - name: parameters.yml
     size: 197
     checksum: f7b5c6b3bfb0204f25c69d176125263db382b95cc754740bc1483f31f05e98354b67dc1655caa3b2f102a0a2180d9987
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/parameters.yml
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/parameters.yml
   - name: FP32/yolo-v2-tiny-ava-sparse-30-0001.xml
-    size: 47707
-    checksum: cf154f826555c7e475da983477124b4b3b8b36558285df52aee23870e6259ad203edf604c935581b4af3b1e61ceb3c6e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 47739
+    checksum: e590833a274b170bfad81a9bdc89147f8bb159c487a4105f8c26bc79bd035324c80183e16071fdf19d66550ae6d0ab46
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.xml
   - name: FP32/yolo-v2-tiny-ava-sparse-30-0001.bin
     size: 63434928
     checksum: e4ebab58801e0482cacda421c94c92876de64c5cb11ea0a0ff1d8f8d7cf34d64ea0d4b8991b2a089b32470e5834f3f0b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.bin
   - name: FP16/yolo-v2-tiny-ava-sparse-30-0001.xml
-    size: 62634
-    checksum: 547a4a9c230687daf6118e9bdb8c69c632669ab7a34798c6c1c958feebf912cebf6ef91a09d29889a698b8114cc9f52c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 62666
+    checksum: d22215c49b4210113bf745d1b65c20e20a2104f38ceebabf68b07b0c475c82cd41d438ee840450e1f0f7e9e672ac317c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.xml
   - name: FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
     size: 31717480
     checksum: 223991322dde3affa2daf6900e08d863da729bf8b1794e773a2c6f7a0ca224e2f065ef01028a57a56188a449e279c5b1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
-    size: 94076
-    checksum: 9007363547d019046ff2a217bda2ada0a005f3c0e0143a6d1e8cf7a9da2576e0f8f90c1abfb26f44ae527444ae63772e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 94455
+    checksum: adcfbe5404e7a6f293664c1960e3ad0bf332e89a78ee20025f5a61e375175f29968f24df06ec8e69496050db3188cafb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
     size: 15887472
     checksum: a245f27abca74a164acbe06f92accea3fc512da3c2a7999de6ddb63991600aba37ad7e8f486de305b87d39dd915ff95e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

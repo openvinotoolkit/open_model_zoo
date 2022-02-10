@@ -24,6 +24,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=input_1
+  - --layout=input_1(NHWC)
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny_voc.json

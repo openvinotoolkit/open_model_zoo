@@ -79,9 +79,8 @@ def main():
     ie = Core()
 
     # read IR
-    model_path = args.model
     log.info('Reading model {}'.format(args.model))
-    model = ie.read_model(model_path)
+    model = ie.read_model(args.model)
 
     # check number inputs and outputs
     if len(model.inputs) != 1:

@@ -57,14 +57,14 @@ class IEModel:
         """Returns an input shape of the wrapped IE model"""
         return self.model.inputs[0].shape
 
-    def load_model(self, core, model_xml, device, model_type, num_reqs=1, cpu_extension=''):
+    def load_model(self, core, model_path, device, model_type, num_reqs=1, cpu_extension=''):
         """Loads a model in the Inference Engine format"""
         # Plugin initialization for specified device and load extensions library if specified
         if cpu_extension and 'CPU' in device:
             core.add_extension(cpu_extension, 'CPU')
         # Read IR
-        log.info('Reading {} model {}'.format(model_type, model_xml))
-        self.model = core.read_model(model_xml)
+        log.info('Reading {} model {}'.format(model_type, model_path))
+        self.model = core.read_model(model_path)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():
             raise RuntimeError("Supports topologies with only {} inputs, but got {}"
@@ -79,4 +79,4 @@ class IEModel:
         compiled_model = core.compile_model(self.model, device)
         self.infer_queue = AsyncInferQueue(compiled_model, num_reqs)
         self.infer_queue.set_callback(self.completion_callback)
-        log.info('The {} model {} is loaded to {}'.format(model_type, model_xml, device))
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path, device))

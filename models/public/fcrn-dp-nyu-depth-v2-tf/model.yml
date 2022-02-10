@@ -35,6 +35,7 @@ model_optimizer_args:
   - --input=Placeholder
   - --reverse_input_channels
   - --input_shape=[1,228,304,3]
+  - --layout=Placeholder(NHWC)
   - --output=ConvPred/ConvPred
   - --input_meta=$dl_dir/NYU_FCRN.ckpt.meta
 quantizable: true

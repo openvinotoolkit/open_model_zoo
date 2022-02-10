@@ -59,5 +59,6 @@ postprocessing:
     replacement: 'tf'
 model_optimizer_args:
   - --input_shape=[1,256,256,2]
+  - --layout=NHWC
   - --saved_model_dir=$conv_dir/saved_model
 license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE

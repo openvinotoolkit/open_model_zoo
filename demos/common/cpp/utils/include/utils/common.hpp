@@ -28,16 +28,30 @@
 #include "utils/args_helper.hpp"
 
 #ifndef UNUSED
-  #ifdef _WIN32
-    #define UNUSED
-  #else
-    #define UNUSED  __attribute__((unused))
-  #endif
+#ifdef _WIN32
+#define UNUSED
+#else
+#define UNUSED  __attribute__((unused))
+#endif
 #endif
 
 template <typename T, std::size_t N>
 constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
+}
+
+static inline void catcher() noexcept {
+    if (std::current_exception()) {
+        try {
+            std::rethrow_exception(std::current_exception());
+        } catch (const std::exception& error) {
+            slog::err << error.what() << slog::endl;
+        } catch (...) {
+            slog::err << "Non-exception object thrown" << slog::endl;
+        }
+        std::exit(1);
+    }
+    std::abort();
 }
 
 template <typename T>
@@ -52,6 +66,12 @@ inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::V
     os << "\tbuild: " << version.buildNumber;
 
     return os;
+}
+
+inline slog::LogStream& operator<<(slog::LogStream& os, const ov::Version& version) {
+    return os << "OpenVINO" << slog::endl
+        << "\tversion: " << OPENVINO_VERSION_MAJOR << "." << OPENVINO_VERSION_MINOR << "." << OPENVINO_VERSION_PATCH << slog::endl
+        << "\tbuild: " << version.buildNumber;
 }
 
 /**
@@ -72,8 +92,8 @@ public:
      * @param b - value for blue channel
      */
     Color(unsigned char r,
-          unsigned char g,
-          unsigned char b) : _r(r), _g(g), _b(b) {}
+        unsigned char g,
+        unsigned char b) : _r(r), _g(g), _b(b) {}
 
     inline unsigned char red() const {
         return _r;
@@ -118,16 +138,17 @@ inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
     if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
+        (layout == InferenceEngine::Layout::NCHW ||
+            layout == InferenceEngine::Layout::NHWC ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC ||
+            layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW)) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.back();
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have width dimension");
     }
     return 0;
@@ -138,16 +159,17 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
     if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
+        (layout == InferenceEngine::Layout::NCHW ||
+            layout == InferenceEngine::Layout::NHWC ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC ||
+            layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW)) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.at(size - 2);
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have height dimension");
     }
     return 0;
@@ -155,28 +177,29 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
 
 inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
-    if (layout == InferenceEngine::Layout::NCHW  ||
-        layout == InferenceEngine::Layout::NHWC  ||
+    if (layout == InferenceEngine::Layout::NCHW ||
+        layout == InferenceEngine::Layout::NHWC ||
         layout == InferenceEngine::Layout::NCDHW ||
         layout == InferenceEngine::Layout::NDHWC ||
-        layout == InferenceEngine::Layout::C     ||
-        layout == InferenceEngine::Layout::CHW   ||
-        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::C ||
+        layout == InferenceEngine::Layout::CHW ||
+        layout == InferenceEngine::Layout::NC ||
         layout == InferenceEngine::Layout::CN) {
         // Regardless of layout, dimensions are stored in fixed order
         const auto& dims = desc.getDims();
         switch (desc.getLayoutByDims(dims)) {
-            case InferenceEngine::Layout::C:     return dims.at(0);
-            case InferenceEngine::Layout::NC:    return dims.at(1);
-            case InferenceEngine::Layout::CHW:   return dims.at(0);
-            case InferenceEngine::Layout::NCHW:  return dims.at(1);
-            case InferenceEngine::Layout::NCDHW: return dims.at(1);
-            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
-            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
-            default:
-                throw std::runtime_error("Tensor does not have channels dimension");
+        case InferenceEngine::Layout::C:     return dims.at(0);
+        case InferenceEngine::Layout::NC:    return dims.at(1);
+        case InferenceEngine::Layout::CHW:   return dims.at(0);
+        case InferenceEngine::Layout::NCHW:  return dims.at(1);
+        case InferenceEngine::Layout::NCDHW: return dims.at(1);
+        case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+        case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+        default:
+            throw std::runtime_error("Tensor does not have channels dimension");
         }
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have channels dimension");
     }
     return 0;
@@ -184,26 +207,27 @@ inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
 
 inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
-    if (layout == InferenceEngine::Layout::NCHW  ||
-        layout == InferenceEngine::Layout::NHWC  ||
+    if (layout == InferenceEngine::Layout::NCHW ||
+        layout == InferenceEngine::Layout::NHWC ||
         layout == InferenceEngine::Layout::NCDHW ||
         layout == InferenceEngine::Layout::NDHWC ||
-        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::NC ||
         layout == InferenceEngine::Layout::CN) {
         // Regardless of layout, dimensions are stored in fixed order
         const auto& dims = desc.getDims();
         switch (desc.getLayoutByDims(dims)) {
-            case InferenceEngine::Layout::NC:    return dims.at(0);
-            case InferenceEngine::Layout::NCHW:  return dims.at(0);
-            case InferenceEngine::Layout::NCDHW: return dims.at(0);
-            case InferenceEngine::Layout::CHW:      // [[fallthrough]]
-            case InferenceEngine::Layout::C:        // [[fallthrough]]
-            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
-            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
-            default:
-                throw std::runtime_error("Tensor does not have channels dimension");
+        case InferenceEngine::Layout::NC:    return dims.at(0);
+        case InferenceEngine::Layout::NCHW:  return dims.at(0);
+        case InferenceEngine::Layout::NCDHW: return dims.at(0);
+        case InferenceEngine::Layout::CHW:      // [[fallthrough]]
+        case InferenceEngine::Layout::C:        // [[fallthrough]]
+        case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+        case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+        default:
+            throw std::runtime_error("Tensor does not have channels dimension");
         }
-    } else {
+    }
+    else {
         throw std::runtime_error("Tensor does not have channels dimension");
     }
     return 0;
@@ -218,10 +242,9 @@ inline void showAvailableDevices() {
     std::vector<std::string> devices = ie.GetAvailableDevices();
 #endif
 
-    std::cout << std::endl;
-    std::cout << "Available target devices:";
+    std::cout << "Available devices:";
     for (const auto& device : devices) {
-        std::cout << "  " << device;
+        std::cout << ' ' << device;
     }
     std::cout << std::endl;
 }
@@ -294,23 +317,23 @@ void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     ov::OutputVector outputs = model->outputs();
 
     slog::info << "inputs: " << slog::endl;
-    for (const ov::Output<ov::Node> input : inputs)
-    {
+    for (const ov::Output<ov::Node>& input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(input);
 
-        slog::info << name << ", " << type << ", " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
     }
 
     slog::info << "outputs: " << slog::endl;
-    for (const ov::Output<ov::Node> output : outputs)
-    {
+    for (const ov::Output<ov::Node>& output : outputs) {
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(output);
 
-        slog::info << name << ", " << type << ", " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
     }
 
     return;

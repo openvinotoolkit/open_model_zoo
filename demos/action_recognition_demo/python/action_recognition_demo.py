@@ -88,7 +88,7 @@ def main():
     core = Core()
 
     if 'MYRIAD' in args.device:
-        myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
+        myriad_config = {'MYRIAD_ENABLE_HW_ACCELERATION': 'YES'}
         core.set_property('MYRIAD', myriad_config)
 
     decoder_target_device = 'CPU'
