@@ -89,7 +89,7 @@ public:
         }
     }
 
-    void Show(size_t framesProcessed) {
+    void Show() {
         if (enabled_) {
             cv::imshow(main_window_name_, frame_);
         }
@@ -909,7 +909,7 @@ int main(int argc, char* argv[]) {
 
             ++total_num_frames;
 
-            sc_visualizer.Show(total_num_frames);
+            sc_visualizer.Show();
 
             logger.FinalizeFrameRecord();
         }

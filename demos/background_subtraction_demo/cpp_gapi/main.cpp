@@ -164,12 +164,10 @@ int main(int argc, char *argv[]) {
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         bool isStart = true;
-        uint64_t curr_frame_num = 0;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
 
         while(pipeline.pull(cv::gout(output))) {
-            ++curr_frame_num;
             presenter.drawGraphs(output);
             if (isStart) {
                 metrics.update(startTime, output, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,

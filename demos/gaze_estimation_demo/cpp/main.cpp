@@ -113,7 +113,6 @@ int main(int argc, char* argv[]) {
         }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
-        uint32_t framesProcessed = 0;
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
@@ -143,7 +142,6 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            framesProcessed++;
             videoWriter.write(frame);
             if (!FLAGS_no_show) {
                 cv::imshow(windowName, frame);

@@ -180,7 +180,6 @@ int main(int argc, char **argv) {
         cv::Size firstFrameSize = frame.size();
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
-        uint32_t framesProcessed = 0;
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
 
@@ -266,7 +265,6 @@ int main(int argc, char **argv) {
             presenter.drawGraphs(frame);
             metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            framesProcessed++;
             videoWriter.write(frame);
             if (should_show) {
                 cv::imshow("dbg", frame);

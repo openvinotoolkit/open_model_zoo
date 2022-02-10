@@ -196,7 +196,6 @@ int main(int argc, char *argv[]) {
         }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
-        uint32_t framesProcessed = 0;
         cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
         Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
@@ -334,7 +333,6 @@ int main(int argc, char *argv[]) {
             presenter.drawGraphs(demoImage);
             metrics.update(startTime, demoImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            framesProcessed++;
             videoWriter.write(demoImage);
             if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", demoImage);

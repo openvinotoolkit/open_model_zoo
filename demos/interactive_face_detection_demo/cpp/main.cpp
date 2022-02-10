@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
                 visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
         }
 
-        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+        LazyVideoWriter videoWriter{FLAGS_o, FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), FLAGS_limit};
 
         // Detecting all faces on the first frame and reading the next one
         faceDetector.submitRequest(frame);
