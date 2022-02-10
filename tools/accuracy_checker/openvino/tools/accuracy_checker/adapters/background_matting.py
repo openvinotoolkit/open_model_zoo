@@ -26,6 +26,8 @@ class ImageBackgroundMattingAdapter(Adapter):
     __provider__ = 'background_matting_with_pha_and_fgr'
 
     def process(self, raw, identifiers, frame_meta):
+        if not self.output_verified:
+            self.select_output_blob(raw)
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -69,6 +71,12 @@ class ImageBackgroundMattingAdapter(Adapter):
 
         return parameters
 
+    def select_output_blob(self, outputs):
+        self.pha = self.check_output_name(self.pha, outputs)
+        self.fgr = self.check_output_name(self.fgr, outputs)
+        self.output_verified = True
+
     def configure(self):
         self.pha = self.get_value_from_config('alpha_out')
         self.fgr = self.get_value_from_config('foreground_out')
+        self.output_verified = False
