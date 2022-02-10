@@ -24,7 +24,7 @@ support the `reshape` function.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| PSNR                            | 21.64 dB                                  |
+| PSNR                            | 20.318 dB                                 |
 | GFlops                          | 1.379                                     |
 | MParams                         | 0.003                                     |
 | Source framework                | PyTorch\*                                 |
