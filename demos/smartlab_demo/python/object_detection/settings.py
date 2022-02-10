@@ -49,12 +49,10 @@ class MwGlobalExp:
     def __init__(self, num_classes, fp_model, nms_thresh, conf_thresh, ie, device):
         if num_classes == 10:
             self.mw_classes = mw_glb1cls10
-        elif num_classes == 6:
-            self.mw_classes = mw_glb2acls6
         elif num_classes == 3:
             self.mw_classes = mw_glb2bcls3
         else:
-            raise ValueError
+            raise ValueError(f'num_classes={num_classes} is not supported, use 10 or 3')
         # define model file
         self.fp_model = fp_model
         self.conf_thresh = conf_thresh

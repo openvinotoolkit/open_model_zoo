@@ -56,7 +56,6 @@ class SubDetector(object):
         image_id = img_info['id']
         if output is None:
             return img
-        output = output.cpu()
         bboxes = output[:, 0:4]
         # preprocessing: resize
         bboxes /= ratio # [[x0,y0,x1,y1], ...]

@@ -149,9 +149,7 @@ class Detector(object):
             n_res = len(res[cls])
             if n_res < ulimits[cls]:
                 res[cls].append(pred) # max reserve <= ulimit
-        clean_preds = []
-        [clean_preds.extend(v) for v in res]
-        clean_preds = np.vstack(clean_preds)
+        clean_preds = np.reshape(res, (-1, 1))
 
         return clean_preds
 

@@ -17,16 +17,10 @@
 import numpy as np
 import cv2
 
-class Display(object):
-    def _init_(self):
+
+class Display:
+    def __init__(self):
         '''Score Evaluation Variables'''
-        self.video_eval_box = None
-        self.eval_vars = None
-        self.eval_cbs = None
-        self.front_scores_df = None
-        self.top_scores_df = None
-        # blank page to display score
-        self.score_board = np.zeros([200, 1920, 3], dtype=np.uint8)
 
     def display_result(self, frame_top, frame_front, front_seg_results, top_seg_results, top_det_results, front_det_results, scoring, state, frame_counter, fps):
         #renew score board so that when put cv2.puttext text will not overlap
@@ -37,12 +31,11 @@ class Display(object):
         cv2.putText(frame_front, top_seg_results, (700, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
 
         #display frame_number at top left corner
-        cv2.putText(frame_front, "frame"+str(frame_counter).zfill(6), (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
+        cv2.putText(frame_front, f"frame{frame_counter: 6d}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
 
         #display FPS at top left corner
-        cv2.putText(frame_top, "FPS: "+str(round(fps, 2)), (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
-        cv2.putText(frame_front, "FPS: "+str(round(fps, 2)), (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
-
+        cv2.putText(frame_top, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
+        cv2.putText(frame_front, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
 
         # show current state for troubleshooting purpose
         cv2.putText(frame_top, state, (1500, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255), fontScale=1.5, thickness=3)
@@ -79,13 +72,26 @@ class Display(object):
         m_weights_order = scoring['measuring_score_weights_order']
         e_tidy = scoring['end_score_tidy']
 
-        cv2.putText(self.score_board, f"Initial : rider[{i_rider}] balance[{i_balance}]", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), fontScale=0.9, thickness=2)
-        cv2.putText(self.score_board, f"Measuring : object[{m_object_left}] weights_t[{m_weights_right_tweezers}] order[{m_weights_order}] rider_t[{m_rider_tweezers}] balance[{m_balance}]", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), fontScale=0.9, thickness=2)
-        cv2.putText(self.score_board, f"End : tidy[{e_tidy}]", (30, 150), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), fontScale=0.9, thickness=2)
+        cv2.putText(self.score_board, \
+            f"Initial : rider[{i_rider}] balance[{i_balance}]", \
+            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+            fontScale=0.9, thickness=2)
+
+        cv2.putText(self.score_board, \
+            f"Measuring : object[{m_object_left}] weights_t[{m_weights_right_tweezers}] \
+            order[{m_weights_order}] rider_t[{m_rider_tweezers}] balance[{m_balance}]", \
+            (30, 100), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+            fontScale=0.9, thickness=2)
+
+        cv2.putText(self.score_board, f"End : tidy[{e_tidy}]", \
+            (30, 150), cv2.FONT_HERSHEY_SIMPLEX, color=(255, 255, 255), \
+            fontScale=0.9, thickness=2)
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks
-        frame_top = cv2.resize(frame_top, (int(frame_top.shape[1]/2), int(frame_top.shape[0]/2)))
-        frame_front = cv2.resize(frame_front, (int(frame_front.shape[1]/2), int(frame_front.shape[0]/2)))
+        frame_top = cv2.resize( \
+            frame_top, (int(frame_top.shape[1]/2), int(frame_top.shape[0]/2)))
+        frame_front = cv2.resize( \
+            frame_front, (int(frame_front.shape[1]/2), int(frame_front.shape[0]/2)))
 
         result_image = np.concatenate((frame_top, frame_front), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)

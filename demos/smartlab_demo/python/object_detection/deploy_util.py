@@ -31,7 +31,6 @@ def nms(boxes, scores, nms_thr):
 
     return keep
 
-
 def multiclass_nms(boxes, scores, nms_thr, score_thr, class_agnostic=True):
     """Multiclass NMS implemented in Numpy"""
     if class_agnostic:
@@ -39,7 +38,6 @@ def multiclass_nms(boxes, scores, nms_thr, score_thr, class_agnostic=True):
     else:
         nms_method = multiclass_nms_class_aware
     return nms_method(boxes, scores, nms_thr, score_thr)
-
 
 def multiclass_nms_class_aware(boxes, scores, nms_thr, score_thr):
     """Multiclass NMS implemented in Numpy. Class-aware version."""
@@ -64,7 +62,6 @@ def multiclass_nms_class_aware(boxes, scores, nms_thr, score_thr):
         return None
     return np.concatenate(final_dets, 0)
 
-
 def multiclass_nms_class_agnostic(boxes, scores, nms_thr, score_thr):
     """Multiclass NMS implemented in Numpy. Class-agnostic version."""
     cls_inds = scores.argmax(1)
@@ -82,7 +79,6 @@ def multiclass_nms_class_agnostic(boxes, scores, nms_thr, score_thr):
             [valid_boxes[keep], valid_scores[keep, None], valid_cls_inds[keep, None]], 1
         )
     return dets
-
 
 def demo_postprocess(outputs, img_size, p6=False):
     grids = []
