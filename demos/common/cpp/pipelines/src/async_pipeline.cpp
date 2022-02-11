@@ -29,10 +29,10 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const M
     if (nireq == 0) {
         try {
             // +1 to use it as a buffer of the pipeline
-            nireq = compiledModel.get_property(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
+            nireq = compiledModel.get_property(ov::optimal_number_of_infer_requests) + 1;
         } catch (const ov::Exception& ex) {
             throw std::runtime_error(std::string("Every device used with the demo should support compiled model's property "
-                "\"OPTIMAL_NUMBER_OF_INFER_REQUESTS\". Failed to query the property with error: ") + ex.what());
+                "'OPTIMAL_NUMBER_OF_INFER_REQUESTS'. Failed to query the property with error: ") + ex.what());
         }
     }
     slog::info << "\tNumber of inference requests: " << nireq << slog::endl;

@@ -17,6 +17,7 @@
 
 #include <set>
 #include <string>
+#include <openvino/runtime/intel_gpu/properties.hpp>
 #include "utils/args_helper.hpp"
 #include "utils/common.hpp"
 #include "utils/config_factory.h"
@@ -40,20 +41,21 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (flags_nthreads != 0)
-                config.compiledModelConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
+                config.compiledModelConfig.emplace(ov::inference_num_threads.name(), flags_nthreads);
 
-            config.compiledModelConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
+            config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
         }
         else if (device == "GPU") {
-            config.compiledModelConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                    : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)));
+            config.compiledModelConfig.emplace(ov::streams::num.name(),
+                (deviceNstreams.count(device) > 0 ? deviceNstreams.at(device)
+                    : ov::streams::AUTO));
 
             if (flags_d.find("MULTI") != std::string::npos
                 && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config.compiledModelConfig.emplace(GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1");
+                config.compiledModelConfig.emplace(ov::intel_gpu::hint::queue_throttle.name(),
+                    ov::intel_gpu::hint::ThrottleLevel(1));
             }
         }
     }
@@ -64,10 +66,10 @@ ModelConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, uint3
     auto config = getCommonConfig(flags_d, flags_nireq);
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
-            config.compiledModelConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
+            config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
         }
         else if (device == "GPU") {
-            config.compiledModelConfig.emplace(CONFIG_KEY(GPU_THROUGHPUT_STREAMS), "1");
+            config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
         }
     }
     return config;

@@ -36,9 +36,10 @@ class SharedTensorAllocator : public ov::AllocatorImpl {
 public:
     SharedTensorAllocator(const cv::Mat& img) : img(img) {}
 
-    ~SharedTensorAllocator() {}
+    ~SharedTensorAllocator() = default;
+
     void* allocate(const size_t bytes, const size_t) override {
-        return bytes <= img.rows*img.step[0] ? img.data : nullptr;
+        return bytes <= img.rows * img.step[0] ? img.data : nullptr;
     }
 
     void deallocate(void* handle, const size_t bytes, const size_t) override {}
