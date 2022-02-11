@@ -1,4 +1,3 @@
-import numpy as np
 from .preprocess import preprocess
 from .postprocess import postprocess
 from .settings import MwGlobalExp
