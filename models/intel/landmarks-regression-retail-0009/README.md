@@ -41,5 +41,13 @@ The net outputs a blob with the shape: `1, 10`, containing a row-vector of 10 fl
 for five landmarks coordinates in the form (x0, y0, x1, y1, ..., x4, y4).
 All the coordinates are normalized to be in range [0, 1].
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

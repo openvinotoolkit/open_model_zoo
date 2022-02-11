@@ -50,6 +50,7 @@ omz_converter --list models.lst
 * face-detection-adas-0001
 * face-recognition-resnet100-arcface-onnx
 * face-reidentification-retail-0095
+* facenet-20180408-102900
 * landmarks-regression-retail-0009
 * person-detection-action-recognition-0005
 * person-detection-action-recognition-0006
@@ -81,9 +82,6 @@ Options:
     -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
     -m_lm '<path>'                 Optional. Path to the Facial Landmarks Regression Retail model (.xml) file.
     -m_reid '<path>'               Optional. Path to the Face Reidentification Retail model (.xml) file.
-    -l '<absolute_path>'           Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
-          Or
-    -c '<absolute_path>'           Optional. For GPU custom kernels, if any. Absolute path to an .xml file with the kernels description.
     -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.

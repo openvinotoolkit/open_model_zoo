@@ -57,6 +57,7 @@ omz_converter --list models.lst
 
 ### Supported Models
 
+* instance-segmentation-person-0007
 * instance-segmentation-security-0002
 * instance-segmentation-security-0091
 * instance-segmentation-security-0228

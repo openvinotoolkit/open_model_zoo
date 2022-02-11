@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Cross-domain correspondence network is a exemplar-based image translation model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
+Cross-domain correspondence network is an exemplar-based image translation model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
 For details see [paper](https://arxiv.org/abs/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
 
 ## Specification
@@ -77,6 +77,12 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Translation Demo](../../../demos/image_translation_demo/python/README.md)
 
 ## Legal Information
 

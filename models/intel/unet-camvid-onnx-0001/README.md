@@ -61,5 +61,12 @@ Semantic segmentation class probabilities map, shape -`1, 12, 368, 480`, output 
 - `H` - horizontal coordinate of the input pixel
 - `W` - vertical coordinate of the input pixel
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

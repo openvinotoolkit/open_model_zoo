@@ -50,5 +50,14 @@ Each output contains one float value that represents value in Tait-Bryan angles
 2. name: `angle_p_fc`, shape: `1, 1` - Estimated pitch (in degrees).
 3. name: `angle_r_fc`, shape: `1, 1` - Estimated roll (in degrees).
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
+* [G-API Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp_gapi/README.md)
+* [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
+* [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

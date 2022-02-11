@@ -41,5 +41,11 @@ The net outputs a blob with the shape `16, 1, 13` in the format `W, B, L`, where
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
