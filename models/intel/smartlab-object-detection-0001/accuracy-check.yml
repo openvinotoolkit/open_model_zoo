@@ -3,17 +3,19 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
         adapter:
           type: yolox
           anchors: yolox
           classes: 10
 
     datasets:
-      - name: DSI1867
-        data_source: ..\..\..\DSI-1867\object_detection\streams_1\top\images
-        annotation: dir_conv_top\mscoco_detection_top.pickle
-        dataset_meta: dir_conv_top\mscoco_detection_top.json
+      - name: smartlab
+        data_source: object_detection\streams_1\top\images
+        annotation_conversion:
+          converter: mscoco_detection
+          annotation_file: object_detection\streams_1\top\annotations\instances_glb1cls10.json
+        annotation: mscoco_detection_top_10cls.pickle
+        dataset_meta: mscoco_detection_top_10cls.json
 
         preprocessing:
           - type: resize

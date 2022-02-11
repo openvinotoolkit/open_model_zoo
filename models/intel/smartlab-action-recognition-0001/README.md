@@ -17,13 +17,13 @@ The model is classfier for 3 class actions.
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the DSI1867                        | TODO               |
+| Accuracy (internal test set)                   | TODO               |
 | Source framework                               | PyTorch\*          |
 
 
 ## Encoder model specification
-
-The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone with convolutional encoder part of the action recognition.
+with convolutional encoder part of the action re
+The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone cognition.
 
 | Metric  | Value |
 | ------- | ----- |
@@ -32,12 +32,14 @@ The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone wit
 
 ### Inputs
 
-Image, name: `input_image`, shape: `1, 1, 224, 224` in the `1, C, H, W` format, where:
+Image, name: `input_image`, shape: `1, 3, 224, 224` in the `B, C, H, W` format, where:
 
+- `B` - batch size
 - `C` - number of channels
 - `H` - image height
 - `W` - image width
 
+Expected color order is `BGR`
 
 ### Outputs
 
@@ -45,7 +47,7 @@ Image, name: `input_image`, shape: `1, 1, 224, 224` in the `1, C, H, W` format, 
 
 ## Decoder model specification
 
-The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
+The smartlab-action-recognition-decoder-0001 is a fully connected decoder part which accepts features from top and front views, computed by encoder and predicts score for action across following label list: `no_action`, `noise_action`,  `adjust_rider`
 
 | Metric  | Value |
 | ------- | ----- |
@@ -55,7 +57,7 @@ The smartlab-action-recognition-decoder-0001 is a fully connected layer module.
 ### Inputs
 
 1.	Name: `input_feature_1`, shape: `1, 1280`. Encoded features from topview.
-2.	Name: `input_feature_1`, shape: `1, 1280`. Encoded features from frontview.
+2.	Name: `input_feature_2`, shape: `1, 1280`. Encoded features from frontview.
 
 ### Outputs
 

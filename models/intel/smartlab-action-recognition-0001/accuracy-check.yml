@@ -15,8 +15,8 @@ evaluations:
         - framework: dlsdk
 
       datasets:
-        - name: DSI1867
-          data_source: .\DSI-1867_small\action_recognition\streams_1\high
+        - name: internal dataset
+          data_source: .\internal dataset\action_recognition\streams_1\high
           # Default batch size is 1
           batch: 1
 

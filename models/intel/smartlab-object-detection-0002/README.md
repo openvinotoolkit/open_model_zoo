@@ -31,14 +31,17 @@ Expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs blob with shape: `1, 1, 200, 7` in the format `1, 1, N, 7`, where `N` is the number of detected
-bounding boxes. Each detection has the format [`x_min`, `y_min`, `x_max`, `y_max`, `conf1`, `conf2`, `label`], where:
+The array of detection summary info, name - output, shape - 1, 3549, 3, format is B, N, 3, where:
 
-- (`x_min`, `y_min`) - coordinates of the top left bounding box corner
-- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
-- `conf1` - confidence for the predicted class global?
-- `conf2` - confidence for the predicted class local?
-- `label` - predicted class ID (0 - weights, 1 - tweezers, 2a - battery)
+- B - batch size
+- N - number of detection boxes
+
+Detection box has format [x, y, h, w, box_score, class_no_1, ..., class_no_3], where:
+
+- (`x`, `y`) - raw coordinates of box center
+- `h`, `w` - raw height and width of box
+- `box_score` - confidence of detection box
+- `class_no_1, ..., class_no_3` - probability distribution over the classes in logits format.
 
 ## Legal Information
 
