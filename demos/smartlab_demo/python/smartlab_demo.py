@@ -22,7 +22,8 @@ from object_detection.detector import Detector
 from segmentor import Segmentor, SegmentorMstcn
 from evaluator import Evaluator
 from display import Display
-from openvino.runtime import Core
+# from openvino.runtime import Core
+from openvino.inference_engine import IECore as Core
 
 
 def build_argparser():
@@ -67,8 +68,7 @@ def main():
             ie,
             args.device,
             [args.m_topall, args.m_topmove],
-            [args.m_frontall, args.m_frontmove],
-            False)
+            [args.m_frontall, args.m_frontmove])
 
     '''Video Segmentation Variables'''
     if(args.mode == "multiview"):

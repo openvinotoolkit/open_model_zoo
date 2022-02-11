@@ -3,7 +3,6 @@ from .preprocess import preprocess
 from .postprocess import postprocess
 from .settings import MwGlobalExp
 from .deploy_util import demo_postprocess
-from .vis import vis
 
 
 class SubDetector:
@@ -31,25 +30,6 @@ class SubDetector:
             self.nms_thresh, class_agnostic=True)
 
         return outputs, img_info
-
-    def visual(self, output, img_info, cls_conf=0.35):
-        ratio = img_info["ratio"]
-        img = img_info["raw_img"]
-        if output is None:
-            return img
-        if isinstance(output, list):
-            if output[0] is None:
-                return img
-            else:
-                output = np.cat(output)
-
-        bboxes = output[:, 0:4]
-        # preprocessing: resize
-        bboxes /= ratio
-        cls = output[:, 6]
-        scores = output[:, 4] * output[:, 5]
-        vis_res = vis(img, bboxes, scores, cls, cls_conf, self.cls_names)
-        return vis_res
 
     def pseudolabel(self, output, img_info, idx_offset, cls_conf=0.35):
         ratio = img_info["ratio"]

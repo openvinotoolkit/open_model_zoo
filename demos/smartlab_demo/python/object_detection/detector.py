@@ -19,7 +19,6 @@ from .preprocess import preprocess
 from .settings import MwGlobalExp
 from .deploy_util import multiclass_nms, demo_postprocess
 from .subdetectors import SubDetector
-from .vis import vis
 
 
 class Detector:
@@ -28,7 +27,6 @@ class Detector:
         device,
         fp_top_models: list,
         fp_front_models: list,
-        is_show: bool,
         backend: str='openvino'):
 
         '''Object Detection Variables'''
@@ -38,7 +36,6 @@ class Detector:
 
         '''configure output/preview'''
         self.save_result = False
-        self.is_show = is_show
         self.backend = backend
 
         '''configure settings for 2 models in top view'''
@@ -133,26 +130,6 @@ class Detector:
         self.front1_subdetector = SubDetector(self.front1_exp, self.backend)
         self.front2_subdetector = SubDetector(self.front2_exp, self.backend)
 
-    def _apply_detection_constraints(self, predictions: np.ndarray, nmsthre=0.3):
-        ### sort by conf_score * cls_score
-        sorted_preds = sorted(
-            predictions,
-            key=lambda x: x[4]*x[5],
-            reverse=True)
-        sorted_preds = np.vstack(sorted_preds)
-        ### reserve indicated number foreach cls
-        classes = list(self.max_nums.keys())
-        ulimits = list(self.max_nums.values())
-        res = [[] for _ in classes]
-        for pred in sorted_preds:
-            cls = int(pred[-1]) # index by class
-            n_res = len(res[cls])
-            if n_res < ulimits[cls]:
-                res[cls].append(pred) # max reserve <= ulimit
-        clean_preds = np.reshape(res, (-1, 1))
-
-        return clean_preds
-
     def _detect_one(self, img, view='top'):
         if view == 'top': # top view
             sub_detector1 = self.top1_subdetector
@@ -160,7 +137,7 @@ class Detector:
         else: # front view
             sub_detector1 = self.front1_subdetector
             sub_detector2 = self.front2_subdetector
-        all_preds = []
+
         for i, sub_detector in enumerate([sub_detector1, sub_detector2]):
             outputs, img_info = sub_detector.inference(img)
             if outputs[0] is not None:
@@ -168,12 +145,11 @@ class Detector:
             else:
                 continue
             preds[:, 6] += self.offset_cls_idx[i]
-            all_preds.append(preds)
 
-        if len(all_preds) > 0:
-            all_preds = np.concatenate(all_preds)
-        else:# in case of no obj detected
-            all_preds = np.zeros((1, 7))
+            if i == 0:
+                all_preds = np.array(preds)
+            else:
+                np.vstack((all_preds, preds))
 
         # merge same classes from model 2
         for r, pred in enumerate(all_preds):
@@ -181,11 +157,8 @@ class Detector:
             if cls_id in self.repeat_cls2_ids:
                 all_preds[r, -1] = self.cls2tocls1[cls_id]
 
-        # restrict object number for each class
-        all_preds = self._apply_detection_constraints(all_preds)
-
         # remap to original image scale
-        ratio = img_info['ratio']
+        ratio = np.array(img_info['ratio'])
         bboxes = all_preds[:, :4] / ratio
         cls = all_preds[:, 6]
         scores = all_preds[:, 4] * all_preds[:, 5]
@@ -235,21 +208,4 @@ class Detector:
         top_cls_ids = [ self.classes[int(x)] for x in top_cls_ids ]
         front_cls_ids = [ self.classes[int(x)] for x in front_cls_ids ]
 
-        if self.is_show:
-            vis_top = vis(
-                img_top,
-                top_bboxes,
-                top_scores,
-                top_cls_ids,
-                self.top1_exp.conf_thresh,
-                self.classes)
-            vis_front = vis(
-                img_front,
-                front_bboxes,
-                front_scores,
-                front_cls_ids,
-                self.front1_exp.conf_thresh,
-                self.classes)
-            return vis_top, vis_front
-        else:
-            return [top_bboxes, top_cls_ids, top_scores], [front_bboxes, front_cls_ids, front_scores]
+        return [top_bboxes, top_cls_ids, top_scores], [front_bboxes, front_cls_ids, front_scores]
