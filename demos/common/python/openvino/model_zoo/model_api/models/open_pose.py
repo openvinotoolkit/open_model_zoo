@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -122,16 +122,17 @@ class OpenPose(ImageModel):
                      mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img[None]
-        return {self.image_blob_name: img}, resize_img_scale
+        meta = {'resize_img_scale': resize_img_scale}
+        return {self.image_blob_name: img}, meta
 
-    def postprocess(self, outputs, resize_img_scale):
+    def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
         pafs = outputs[self.pafs_blob_name]
         pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
         nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
         poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
         # Rescale poses to the original image.
-        poses[:, :, :2] *= resize_img_scale * self.output_scale
+        poses[:, :, :2] *= meta['resize_img_scale'] * self.output_scale
         return poses, scores
 
 

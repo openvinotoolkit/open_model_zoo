@@ -49,9 +49,7 @@ class Layout:
         for input_name in input_names:
             if input_name in user_layouts:
                 return user_layouts[input_name]
-        if '' in user_layouts:
-            return user_layouts['']
-        return ''
+        return user_layouts.get('', '')
 
 
     @staticmethod
