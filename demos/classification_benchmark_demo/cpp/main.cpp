@@ -141,6 +141,7 @@ int main(int argc, char *argv[]) {
                 i--;
             } else {
                 readerMetrics.update(readingStart);
+                // Clone cropped image to keep memory layout dense to enable openvino auto resize
                 inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
                 if (lastSlashIdx != std::string::npos) {
@@ -198,7 +199,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels, FLAGS_layout)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);

@@ -26,20 +26,18 @@
 ///
 class RequestsPool {
 public:
-    using InferRequestPtr = std::shared_ptr<ov::runtime::InferRequest>;
-
     RequestsPool(ov::runtime::CompiledModel& compiledModel, unsigned int size);
     ~RequestsPool();
 
     /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
     /// This function is thread safe as long as request is used only until setRequestIdle call
     /// @returns pointer to request with idle state or nullptr if all requests are in use.
-    InferRequestPtr getIdleRequest();
+    ov::InferRequest getIdleRequest();
 
     /// Sets particular request to Idle state
     /// This function is thread safe as long as request provided is not used after call to this function
     /// @param request - request to be returned to idle state
-    void setRequestIdle(const InferRequestPtr& request);
+    void setRequestIdle(const ov::InferRequest& request);
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
@@ -56,10 +54,10 @@ public:
 
     /// Returns list of all infer requests in the pool.
     /// @returns list of all infer requests in the pool.
-    std::vector<InferRequestPtr> getInferRequestsList();
+    std::vector<ov::InferRequest> getInferRequestsList();
 
 private:
-    std::map<InferRequestPtr, bool> requests;
+    std::vector<std::pair<ov::InferRequest, bool>> requests;
     size_t numRequestsInUse;
     std::mutex mtx;
 };

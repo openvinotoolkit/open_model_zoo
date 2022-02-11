@@ -33,7 +33,7 @@ public:
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
     virtual ov::CompiledModel compileModel(const ModelConfig& config, ov::Core& core);
-    virtual void onLoadCompleted(const std::vector<std::shared_ptr<ov::InferRequest>>& requests) {}
+    virtual void onLoadCompleted(const std::vector<ov::InferRequest>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
 
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }

@@ -18,26 +18,27 @@
 #include <openvino/openvino.hpp>
 #include "pipelines/requests_pool.h"
 
-RequestsPool::RequestsPool(ov::runtime::CompiledModel& compiledModel, unsigned int size) :
+RequestsPool::RequestsPool(ov::CompiledModel& compiledModel, unsigned int size) :
     numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
-        requests.emplace(std::make_shared<ov::runtime::InferRequest>(compiledModel.create_infer_request()), false);
+        requests.emplace_back(compiledModel.create_infer_request(), false);
     }
 }
 
 RequestsPool::~RequestsPool() {
     // Setting empty callback to free resources allocated for previously assigned lambdas
     for (auto& pair : requests) {
-        pair.first->set_callback([](const std::exception_ptr& e) {});
+        pair.first.set_callback([](std::exception_ptr e) {});
     }
 }
 
-RequestsPool::InferRequestPtr RequestsPool::getIdleRequest() {
+ov::InferRequest RequestsPool::getIdleRequest() {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = std::find_if(requests.begin(), requests.end(), [](std::pair<const InferRequestPtr, bool>& x) {return !x.second; });
+    const auto& it = std::find_if(requests.begin(), requests.end(),
+        [](const std::pair<ov::InferRequest, bool>& x) {return !x.second; });
     if (it == requests.end()) {
-        return std::make_shared<ov::runtime::InferRequest>(ov::runtime::InferRequest());
+        return ov::InferRequest();
     }
     else {
         it->second = true;
@@ -46,9 +47,11 @@ RequestsPool::InferRequestPtr RequestsPool::getIdleRequest() {
     }
 }
 
-void RequestsPool::setRequestIdle(const InferRequestPtr& request) {
+void RequestsPool::setRequestIdle(const ov::InferRequest& request) {
     std::lock_guard<std::mutex> lock(mtx);
-    this->requests.at(request) = false;
+    const auto& it = std::find_if(this->requests.begin(), this->requests.end(),
+        [&request](const std::pair<ov::InferRequest, bool>& x) {return x.first == request; });
+    it->second = false;
     numRequestsInUse--;
 }
 
@@ -66,16 +69,16 @@ void RequestsPool::waitForTotalCompletion() {
     // Do not synchronize here to avoid deadlock (despite synchronization in other functions)
     // Request status will be changed to idle in callback,
     // upon completion of request we're waiting for. Synchronization is applied there
-    for (auto& pair : requests) {
+    for (auto pair : requests) {
         if (pair.second) {
-            pair.first->wait();
+            pair.first.wait();
         }
     }
 }
 
-std::vector<RequestsPool::InferRequestPtr> RequestsPool::getInferRequestsList() {
+std::vector<ov::InferRequest> RequestsPool::getInferRequestsList() {
     std::lock_guard<std::mutex> lock(mtx);
-    std::vector<InferRequestPtr> retVal;
+    std::vector<ov::InferRequest> retVal;
     retVal.reserve(requests.size());
     for (auto& pair : requests) {
         retVal.push_back(pair.first);

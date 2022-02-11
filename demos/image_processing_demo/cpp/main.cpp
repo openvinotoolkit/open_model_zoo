@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
         AsyncPipeline pipeline(std::move(model),

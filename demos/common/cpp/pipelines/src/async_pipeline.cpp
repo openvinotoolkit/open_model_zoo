@@ -21,7 +21,7 @@
 #include <utils/slog.hpp>
 #include "pipelines/async_pipeline.h"
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::runtime::Core& core) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core) :
     model(std::move(modelInstance)) {
     compiledModel = model->compileModel(config, core);
     // --------------------------- Create infer requests ------------------------------------------------
@@ -73,11 +73,11 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     }
 
     auto startTime = std::chrono::steady_clock::now();
-    auto internalModelData = model->preprocess(inputData, *request);
+    auto internalModelData = model->preprocess(inputData, request);
     preprocessMetrics.update(startTime);
 
-    request->set_callback(
-        [this, frameID, request, internalModelData, metaData, startTime](const std::exception_ptr& e) {
+    request.set_callback(
+        [this, request, frameID,internalModelData, metaData, startTime](std::exception_ptr e) mutable {
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
@@ -89,7 +89,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.internalModelData = std::move(internalModelData);
 
                     for (const auto& outName : model->getOutputsNames()) {
-                        auto tensor = request->get_tensor(outName);
+                        auto tensor = request.get_tensor(outName);
                         result.outputsData.emplace(outName, tensor);
                     }
 
@@ -109,7 +109,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     if (inputFrameId < 0)
         inputFrameId = 0;
 
-    request->start_async();
+    request.start_async();
 
     return frameID;
 }

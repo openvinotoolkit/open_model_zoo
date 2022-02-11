@@ -58,5 +58,6 @@ ov::Layout ModelBase::getInputLayout(const ov::Output<ov::Node>& input) {
             layout = inputsLayouts[input.get_any_name()];
         }
     }
+
     return layout;
 }

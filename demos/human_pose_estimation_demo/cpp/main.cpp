@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << ov::get_openvino_version() << slog::endl;
-        ov::runtime::Core core;
+        ov::Core core;
 
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
