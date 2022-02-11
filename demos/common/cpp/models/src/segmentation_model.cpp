@@ -53,8 +53,8 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
-    ov::Layout inputLayout = getInputLayout(input);
 
+    const ov::Layout& inputLayout = getInputLayout(input);
     const ov::Shape& inputShape = input.get_shape();
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");

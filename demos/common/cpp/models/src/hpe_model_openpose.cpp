@@ -48,7 +48,7 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     inputsNames.push_back(model->input().get_any_name());
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
@@ -63,9 +63,11 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
-    if (outputs.size() != 2)
+    if (outputs.size() != 2) {
         throw std::runtime_error("HPE OpenPose supports topologies with only 2 outputs");
-    ov::Layout outputLayout("NCHW");
+    }
+
+    const ov::Layout outputLayout("NCHW");
     for (const auto& output : model->outputs()) {
         const auto& outTensorName = output.get_any_name();
         ppp.output(outTensorName).tensor().
@@ -75,10 +77,10 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
     model = ppp.build();
 
-    size_t batchId = ov::layout::batch_idx(outputLayout);
-    size_t channelsId = ov::layout::channels_idx(outputLayout);
-    size_t widthId = ov::layout::width_idx(outputLayout);
-    size_t heightId = ov::layout::height_idx(outputLayout);
+    const size_t batchId = ov::layout::batch_idx(outputLayout);
+    const size_t channelsId = ov::layout::channels_idx(outputLayout);
+    const size_t widthId = ov::layout::width_idx(outputLayout);
+    const size_t heightId = ov::layout::height_idx(outputLayout);
 
     ov::Shape heatmapsOutputShape = model->outputs().front().get_shape();
     ov::Shape pafsOutputShape = model->outputs().back().get_shape();
@@ -104,12 +106,11 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 }
 
 void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
-    auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
-    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
-    auto batchId = ov::layout::batch_idx(layout);
-    auto heightId = ov::layout::height_idx(layout);
-    auto widthId = ov::layout::width_idx(layout);
+    const ov::Layout& layout = ov::layout::get_layout(model->inputs().front());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
 
     if (!targetSize) {
         targetSize = inputShape[heightId];
@@ -121,9 +122,7 @@ void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
     inputShape[heightId] = height;
     inputShape[widthId] = width;
     inputLayerSize = cv::Size(width, height);
-    std::map<std::string, ov::PartialShape> shapes;
-    shapes[inTensorName] = ov::PartialShape(inputShape);
-    model->reshape(shapes);
+    model->reshape(inputShape);
 }
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, ov::InferRequest& request) {
@@ -145,14 +144,14 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    auto heatMapsMapped = infResult.outputsData[outputsNames[0]];
-    auto outputMapped = infResult.outputsData[outputsNames[1]];
+    const auto& heatMapsMapped = infResult.outputsData[outputsNames[0]];
+    const auto& outputMapped = infResult.outputsData[outputsNames[1]];
 
     const ov::Shape& outputShape = outputMapped.get_shape();
     const ov::Shape& heatMapShape = heatMapsMapped.get_shape();
 
-    float* predictions = outputMapped.data<float>();
-    float* heats = heatMapsMapped.data<float>();
+    float* const predictions = outputMapped.data<float>();
+    float* const heats = heatMapsMapped.data<float>();
 
     std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {

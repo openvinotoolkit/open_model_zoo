@@ -32,7 +32,7 @@ class AsyncPipeline {
 public:
     /// Loads model and performs required initialization
     /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.
-    /// @param ModelConfig - fine tuning configuration for model
+    /// @param config - fine tuning configuration for model
     /// @param core - reference to ov::Core instance to use.
     /// If it is omitted, new instance of  ov::Core will be created inside.
     AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core);

@@ -41,7 +41,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
         inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -61,7 +61,7 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
         throw std::logic_error("The JPEG Restoration model wrapper supports topologies with only 1 output");
     }
     const ov::Shape& outputShape = model->output().get_shape();
-    ov::Layout outputLayout{ "NCHW" };
+    const ov::Layout outputLayout{ "NCHW" };
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
         || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
@@ -75,13 +75,12 @@ void JPEGRestorationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 }
 
 void JPEGRestorationModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
-    auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
-    ov::Layout layout = ov::layout::get_layout(model->input());
+    const ov::Layout& layout = ov::layout::get_layout(model->input());
 
-    auto batchId = ov::layout::batch_idx(layout);
-    auto heightId = ov::layout::height_idx(layout);
-    auto widthId = ov::layout::width_idx(layout);
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
         throw std::logic_error("The shape of the model input must be divisible by stride");
@@ -94,15 +93,13 @@ void JPEGRestorationModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     inputShape[heightId] = netInputHeight;
     inputShape[widthId] = netInputWidth;
 
-    std::map<std::string, ov::PartialShape> shapes;
-    shapes[inTensorName] = ov::PartialShape(inputShape);
-    model->reshape(shapes);
+    model->reshape(inputShape);
 }
 
 std::shared_ptr<InternalModelData> JPEGRestorationModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     cv::Mat image = inputData.asRef<ImageInputData>().inputImage;
-    size_t h = image.rows;
-    size_t w = image.cols;
+    const size_t h = image.rows;
+    const size_t w = image.cols;
     cv::Mat resizedImage;
     if (jpegCompression) {
         std::vector<uchar> encimg;
@@ -135,9 +132,9 @@ std::unique_ptr<ResultBase> JPEGRestorationModel::postprocess(InferenceResult& i
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outputShape = infResult.getFirstOutputTensor().get_shape();
-    size_t outHeight = (int)(outputShape[2]);
-    size_t outWidth = (int)(outputShape[3]);
-    size_t numOfPixels = outWidth * outHeight;
+    const size_t outHeight = (int)(outputShape[2]);
+    const size_t outWidth = (int)(outputShape[3]);
+    const size_t numOfPixels = outWidth * outHeight;
     imgPlanes = std::vector<cv::Mat>{
           cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
           cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),

@@ -35,7 +35,7 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");
@@ -63,14 +63,14 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("FaceBoxes model wrapper expects models that have 2 outputs");
     }
 
-    ov::Layout outLayout{ "CHW" };
-    maxProposalsCount = model->outputs().front().get_shape()[ov::layout::height_idx(outLayout)];
+    const ov::Layout outputLayout{ "CHW" };
+    maxProposalsCount = model->outputs().front().get_shape()[ov::layout::height_idx(outputLayout)];
     for (const auto& output : model->outputs()) {
         const auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32).
-            set_layout(outLayout);
+            set_layout(outputLayout);
     }
     std::sort(outputsNames.begin(), outputsNames.end());
     model = ppp.build();
@@ -82,7 +82,6 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     priorBoxes(featureMaps);
-
 }
 
 void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::vector<float>& vx, const std::vector<float>& vy,
@@ -205,21 +204,21 @@ std::vector<ModelFaceBoxes::Anchor> filterBoxes(const ov::Tensor& boxesTensor, c
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter scores and get valid indices for bounding boxes----------------------------------
     const auto scoresTensor = infResult.outputsData[outputsNames[1]];
-    auto scores = filterScores(scoresTensor, confidenceThreshold);
+    const auto scores = filterScores(scoresTensor, confidenceThreshold);
 
     // --------------------------- Filter bounding boxes on indices -------------------------------------------------------
     auto boxesTensor = infResult.outputsData[outputsNames[0]];
     std::vector<Anchor> boxes = filterBoxes(boxesTensor, anchors, scores.first, variance);
 
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    std::vector<int> keep = nms(boxes, scores.second, boxIOUThreshold);
+    const std::vector<int> keep = nms(boxes, scores.second, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    float scaleX = static_cast<float>(netInputWidth) / imgWidth;
-    float scaleY = static_cast<float>(netInputHeight) / imgHeight;
+    const auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    const auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
+    const float scaleX = static_cast<float>(netInputWidth) / imgWidth;
+    const float scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     for (auto i : keep) {

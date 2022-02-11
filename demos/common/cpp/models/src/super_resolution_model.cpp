@@ -95,18 +95,18 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     const ov::Shape& outShape = model->output().get_shape();
 
-    ov::Layout outputLayout("NCHW");
-    auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
-    auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
+    const ov::Layout outputLayout("NCHW");
+    const auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    const auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
     changeInputSize(model, static_cast<int>(outWidth / inWidth));
 }
 
 void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, int coeff) {
     std::map<std::string, ov::PartialShape> shapes;
-    ov::Layout layout = ov::layout::get_layout(model->inputs().front());
-    auto batchId = ov::layout::batch_idx(layout);
-    auto heightId = ov::layout::height_idx(layout);
-    auto widthId = ov::layout::width_idx(layout);
+    const ov::Layout& layout = ov::layout::get_layout(model->inputs().front());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
 
     const ov::OutputVector& inputs = model->inputs();
     std::string lrInputTensorName = inputs.begin()->get_any_name();
@@ -137,8 +137,8 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
-    ov::Layout layout("NHWC");
+    const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
+    const ov::Layout layout("NHWC");
 
     if (img.channels() != (int)lrInputTensor.get_shape()[ov::layout::channels_idx(layout)]) {
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
@@ -153,9 +153,9 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
 
     if (inputsNames.size() == 2) {
-        ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
-        int h = (int)bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
-        int w = (int)bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
+        const ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
+        const int h = (int)bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
+        const int w = (int)bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
         request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
@@ -171,10 +171,10 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outShape = infResult.getFirstOutputTensor().get_shape();
-    size_t outChannels = (int)(outShape[1]);
-    size_t outHeight = (int)(outShape[2]);
-    size_t outWidth = (int)(outShape[3]);
-    size_t numOfPixels = outWidth * outHeight;
+    const size_t outChannels = (int)(outShape[1]);
+    const size_t outHeight = (int)(outShape[2]);
+    const size_t outWidth = (int)(outShape[3]);
+    const size_t numOfPixels = outWidth * outHeight;
     if (outChannels == 3) {
         imgPlanes = std::vector<cv::Mat>{
               cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
@@ -185,9 +185,10 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
         // Post-processing for text-image-super-resolution models
         cv::threshold(imgPlanes[0], imgPlanes[0], 0.5f, 1.0f, cv::THRESH_BINARY);
     }
-    for (auto & img : imgPlanes)
-        img.convertTo(img, CV_8UC1, 255);
 
+    for (auto& img : imgPlanes) {
+        img.convertTo(img, CV_8UC1, 255);
+    }
     cv::Mat resultImg;
     cv::merge(imgPlanes, resultImg);
     result->resultImage = resultImg;

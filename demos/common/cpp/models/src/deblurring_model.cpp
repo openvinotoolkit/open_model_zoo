@@ -38,7 +38,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -60,7 +60,7 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
-    ov::Layout outputLayout("NCHW");
+    const ov::Layout outputLayout("NCHW");
     if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
         || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
@@ -73,13 +73,12 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 }
 
 void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
-    auto inTensorName = model->input().get_any_name();
+    const ov::Layout& layout = ov::layout::get_layout(model->input());
     ov::Shape inputShape = model->input().get_shape();
-    ov::Layout layout = ov::layout::get_layout(model->input());
 
-    auto batchId = ov::layout::batch_idx(layout);
-    auto heightId = ov::layout::height_idx(layout);
-    auto widthId = ov::layout::width_idx(layout);
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
         throw std::logic_error("Model input shape HxW = "
@@ -94,9 +93,7 @@ void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     inputShape[heightId] = netInputHeight;
     inputShape[widthId] = netInputWidth;
 
-    std::map<std::string, ov::PartialShape> shapes;
-    shapes[inTensorName] = ov::PartialShape(inputShape);
-    model->reshape(shapes);
+    model->reshape(inputShape);
 }
 
 std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
@@ -129,7 +126,7 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outputShape= infResult.getFirstOutputTensor().get_shape();
-    ov::Layout outputLayout("NCHW");
+    const ov::Layout outputLayout("NCHW");
     size_t outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
     size_t outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
     size_t numOfPixels = outWidth * outHeight;

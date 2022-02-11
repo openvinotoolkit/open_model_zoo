@@ -30,8 +30,8 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
     if (inputsNames.size() > 1) {
-        auto imageInfoTensor = request.get_tensor(inputsNames[1]);
-        auto info = imageInfoTensor.data<float>();
+        const auto& imageInfoTensor = request.get_tensor(inputsNames[1]);
+        const auto info = imageInfoTensor.data<float>();
         info[0] = static_cast<float>(netInputHeight);
         info[1] = static_cast<float>(netInputWidth);
         info[2] = 1;
@@ -191,8 +191,8 @@ void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
     const auto& output = model->output();
     outputsNames.push_back(output.get_any_name());
 
-    ov::Shape shape = output.get_shape();
-    ov::Layout layout("NCHW");
+    const ov::Shape& shape = output.get_shape();
+    const ov::Layout& layout("NCHW");
     if (shape.size() != 4) {
         throw std::logic_error("SSD single output must have 4 dimensions, but had " + std::to_string(shape.size()));
     }
@@ -260,6 +260,7 @@ void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
 
     ppp.output(outputsNames[0]).tensor().
         set_layout(boxesLayout);
+
     for (const auto& outName : outputsNames) {
         ppp.output(outName).tensor().
             set_element_type(ov::element::f32);

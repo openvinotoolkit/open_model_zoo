@@ -33,7 +33,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");
@@ -56,7 +56,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("CenterNet model wrapper expects models that have 3 outputs");
     }
 
-    ov::Layout outLayout{ "NCHW" };
+    const ov::Layout outLayout{ "NCHW" };
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
@@ -232,26 +232,26 @@ void transform(std::vector<ModelCenterNet::BBox>& boxes, const ov::Shape& shape,
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter data and get valid indices ---------------------------------
-    auto heatmapTensor = infResult.outputsData[outputsNames[0]];
-    auto heatmapTensorShape = heatmapTensor.get_shape();
-    auto chSize = heatmapTensorShape[2] * heatmapTensorShape[3];
-    auto scores = filterScores(heatmapTensor, confidenceThreshold);
+    const auto& heatmapTensor = infResult.outputsData[outputsNames[0]];
+    const auto& heatmapTensorShape = heatmapTensor.get_shape();
+    const auto chSize = heatmapTensorShape[2] * heatmapTensorShape[3];
+    const auto scores = filterScores(heatmapTensor, confidenceThreshold);
 
-    auto regressionTensor = infResult.outputsData[outputsNames[1]];
-    auto reg = filterReg(regressionTensor, scores, chSize);
+    const auto& regressionTensor = infResult.outputsData[outputsNames[1]];
+    const auto reg = filterReg(regressionTensor, scores, chSize);
 
-    auto whTensor = infResult.outputsData[outputsNames[2]];
-    auto wh = filterWH(whTensor, scores, chSize);
+    const auto& whTensor = infResult.outputsData[outputsNames[2]];
+    const auto wh = filterWH(whTensor, scores, chSize);
 
 
     // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
     auto boxes = calcBoxes(scores, reg, wh, heatmapTensorShape);
 
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    auto scale = std::max(imgWidth, imgHeight);
-    float centerX = imgWidth / 2.0f;
-    float centerY = imgHeight / 2.0f;
+    const auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    const auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
+    const auto scale = std::max(imgWidth, imgHeight);
+    const float centerX = imgWidth / 2.0f;
+    const float centerY = imgHeight / 2.0f;
 
     transform(boxes, heatmapTensorShape, scale, centerX, centerY);
 

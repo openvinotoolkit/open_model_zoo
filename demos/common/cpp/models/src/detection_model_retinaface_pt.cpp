@@ -38,7 +38,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");
@@ -70,8 +70,8 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     outputsNames.resize(2);
     std::vector<uint32_t> outputsSizes[OUT_MAX];
-    ov::Layout chw("CHW");
-    ov::Layout nchw("NCHW");
+    const ov::Layout chw("CHW");
+    const ov::Layout nchw("NCHW");
     for (auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
@@ -108,12 +108,12 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
 std::vector<size_t> ModelRetinaFacePT::filterByScore(const ov::Tensor& scoresTensor, const float confidenceThreshold) {
     std::vector<size_t> indicies;
-    auto shape = scoresTensor.get_shape();
+    const auto& shape = scoresTensor.get_shape();
     const float* scoresPtr = scoresTensor.data<float>();
 
     for (size_t x = 0; x < shape[1]; ++x) {
-        auto idx = (x * shape[2] + 1);
-        auto score = scoresPtr[idx];
+        const auto idx = (x * shape[2] + 1);
+        const auto score = scoresPtr[idx];
         if (score >= confidenceThreshold) {
             indicies.push_back(x);
         }
@@ -123,7 +123,7 @@ std::vector<size_t> ModelRetinaFacePT::filterByScore(const ov::Tensor& scoresTen
 }
 
 std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scoresTensor, const std::vector<size_t>& indicies) {
-    auto shape = scoresTensor.get_shape();
+    const auto& shape = scoresTensor.get_shape();
     const float* scoresPtr = scoresTensor.data<float>();
 
     std::vector<float> scores;
@@ -137,14 +137,14 @@ std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scores
 
 std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tensor& landmarksTensor,
     const std::vector<size_t>& indicies, int imgWidth, int imgHeight) {
-    auto shape = landmarksTensor.get_shape();
+    const auto& shape = landmarksTensor.get_shape();
     const float* landmarksPtr = landmarksTensor.data<float>();
 
     std::vector<cv::Point2f> landmarks(landmarksNum*indicies.size());
 
     for (size_t i = 0; i < indicies.size(); i++) {
-        size_t idx = indicies[i];
-        auto& prior = priors[idx];
+        const size_t idx = indicies[i];
+        const auto& prior = priors[idx];
         for (size_t j = 0; j < landmarksNum; j++) {
             landmarks[i*landmarksNum + j].x =
                 clamp(prior.cX + landmarksPtr[idx*shape[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
@@ -156,21 +156,21 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tenso
 }
 
 std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
-    float globalMinSizes[][2] = { {16, 32}, {64, 128}, {256, 512} };
-    float steps[] = { 8., 16., 32. };
+    const float globalMinSizes[][2] = { {16, 32}, {64, 128}, {256, 512} };
+    const float steps[] = { 8., 16., 32. };
     std::vector<ModelRetinaFacePT::Box> anchors;
     for (size_t stepNum = 0; stepNum < arraySize(steps); stepNum++) {
         const int featureW = (int)std::round(netInputWidth / steps[stepNum]);
         const int featureH = (int)std::round(netInputHeight / steps[stepNum]);
 
-        auto& minSizes = globalMinSizes[stepNum];
+        const auto& minSizes = globalMinSizes[stepNum];
         for (int i = 0; i < featureH; i++) {
             for (int j = 0; j < featureW; j++) {
                 for (auto minSize : minSizes) {
-                    float sKX = minSize / netInputWidth;
-                    float sKY = minSize / netInputHeight;
-                    float denseCY = (i + 0.5f) * steps[stepNum] / netInputHeight;
-                    float denseCX = (j + 0.5f) * steps[stepNum] / netInputWidth;
+                    const float sKX = minSize / netInputWidth;
+                    const float sKY = minSize / netInputHeight;
+                    const float denseCY = (i + 0.5f) * steps[stepNum] / netInputHeight;
+                    const float denseCX = (j + 0.5f) * steps[stepNum] / netInputWidth;
                     anchors.push_back(ModelRetinaFacePT::Box{denseCX, denseCY, sKX, sKY});
                 }
             }
@@ -184,7 +184,7 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
     std::vector<ModelRetinaFacePT::Rect> rects;
     rects.reserve(indicies.size());
 
-    auto shape = boxesTensor.get_shape();
+    const auto& shape = boxesTensor.get_shape();
     const float* boxesPtr = boxesTensor.data<float>();
 
 
@@ -193,12 +193,12 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
     }
 
     for (auto i : indicies) {
-        auto pRawBox = reinterpret_cast<const Box*>(boxesPtr + i*shape[2]);
-        auto& prior = priors[i];
-        float cX = priors[i].cX + pRawBox->cX * variance[0] * prior.width;
-        float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
-        float width = prior.width * exp(pRawBox->width * variance[1]);
-        float height = prior.height * exp(pRawBox->height * variance[1]);
+        const auto pRawBox = reinterpret_cast<const Box*>(boxesPtr + i * shape[2]);
+        const auto& prior = priors[i];
+        const float cX = priors[i].cX + pRawBox->cX * variance[0] * prior.width;
+        const float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
+        const float width = prior.width * exp(pRawBox->width * variance[1]);
+        const float height = prior.height * exp(pRawBox->height * variance[1]);
         rects.push_back(Rect{
             clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
             clamp(cY - height / 2, 0.f, 1.f) * imgHeight,

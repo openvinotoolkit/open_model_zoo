@@ -47,7 +47,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -100,12 +100,11 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
 }
 
 void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model) {
-    auto inTensorName = model->input().get_any_name();
     ov::Shape inputShape = model->input().get_shape();
-    ov::Layout layout = ov::layout::get_layout(model->input());
-    auto batchId = ov::layout::batch_idx(layout);
-    auto heightId = ov::layout::height_idx(layout);
-    auto widthId = ov::layout::width_idx(layout);
+    const ov::Layout& layout = ov::layout::get_layout(model->input());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
 
     if (!targetSize) {
         targetSize =  static_cast<int>(std::min(inputShape[heightId], inputShape[widthId]));
@@ -119,9 +118,7 @@ void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model)
     inputShape[widthId] = width;
     inputLayerSize = cv::Size(width, height);
 
-    std::map<std::string, ov::PartialShape> shapes;
-    shapes[inTensorName] = ov::PartialShape(inputShape);
-    model->reshape(shapes);
+    model->reshape(inputShape);
 }
 
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, ov::InferRequest& request) {
@@ -141,28 +138,28 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    auto aembds = infResult.outputsData[embeddingsTensorName];
+    const auto& aembds = infResult.outputsData[embeddingsTensorName];
     const ov::Shape& aembdsShape = aembds.get_shape();
-    float* aembdsMapped = aembds.data<float>();
+    float* const aembdsMapped = aembds.data<float>();
     std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsShape);
 
-    auto heats = infResult.outputsData[heatmapsTensorName];
+    const auto& heats = infResult.outputsData[heatmapsTensorName];
     const ov::Shape& heatMapsShape = heats.get_shape();
-    float* heatMapsMapped = heats.data<float>();
+    float* const heatMapsMapped = heats.data<float>();
     std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsShape);
 
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
     if (nmsHeatmapsTensorName != heatmapsTensorName) {
-        auto nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
+        const auto& nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
         const ov::Shape& nmsHeatMapsShape = nmsHeats.get_shape();
-        float* nmsHeatMapsMapped = nmsHeats.data<float>();
+        float* const nmsHeatMapsMapped = nmsHeats.data<float>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsShape);
     }
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
     // Rescale poses to the original image
     const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
-    float outputScale = inputLayerSize.width / static_cast<float>(heatMapsShape[3]);
+    const float outputScale = inputLayerSize.width / static_cast<float>(heatMapsShape[3]);
     float shiftX = 0.0, shiftY = 0.0;
     float scaleX = 1.0, scaleY = 1.0;
 

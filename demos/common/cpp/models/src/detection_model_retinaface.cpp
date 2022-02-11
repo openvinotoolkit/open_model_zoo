@@ -36,7 +36,7 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("RetinaFace model wrapper expects models that have only 1 input");
     }
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout = getInputLayout(model->input());
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -67,14 +67,14 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("RetinaFace model wrapper expects models that have 6, 9 or 12 outputs");
     }
 
-    ov::Layout outLayout{ "NCHW" };
+    const ov::Layout outputLayout{ "NCHW" };
     std::vector<size_t> outputsSizes[OUT_MAX];
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
         ppp.output(outTensorName).tensor().
             set_element_type(ov::element::f32).
-            set_layout(outLayout);
+            set_layout(outputLayout);
 
         OutputType type = OUT_MAX;
         if (outTensorName.find("box") != std::string::npos) {
@@ -99,7 +99,7 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             continue;
         }
 
-        size_t num = output.get_shape()[ov::layout::height_idx(outLayout)];
+        size_t num = output.get_shape()[ov::layout::height_idx(outputLayout)];
         size_t i = 0;
         for (; i < outputsSizes[type].size(); ++i) {
             if (num < outputsSizes[type][i]) {
@@ -137,16 +137,16 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
 std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
     std::vector<ModelRetinaFace::Anchor> retVal;
-    auto w = anchor.getWidth();
-    auto h = anchor.getHeight();
-    auto xCtr = anchor.getXCenter();
-    auto yCtr = anchor.getYCenter();
+    const auto w = anchor.getWidth();
+    const auto h = anchor.getHeight();
+    const auto xCtr = anchor.getXCenter();
+    const auto yCtr = anchor.getYCenter();
 
-    for (auto ratio : ratios) {
-        auto size = w * h;
-        auto sizeRatio = static_cast<float>(size) / ratio;
-        auto ws = sqrt(sizeRatio);
-        auto hs = ws * ratio;
+    for (const auto ratio : ratios) {
+        const auto size = w * h;
+        const auto sizeRatio = static_cast<float>(size) / ratio;
+        const auto ws = sqrt(sizeRatio);
+        const auto hs = ws * ratio;
         retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)), static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
             static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
@@ -155,14 +155,14 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
 
 std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& scales) {
     std::vector<ModelRetinaFace::Anchor> retVal;
-    auto w = anchor.getWidth();
-    auto h = anchor.getHeight();
-    auto xCtr = anchor.getXCenter();
-    auto yCtr = anchor.getYCenter();
+    const auto w = anchor.getWidth();
+    const auto h = anchor.getHeight();
+    const auto xCtr = anchor.getXCenter();
+    const auto yCtr = anchor.getYCenter();
 
     for (auto scale : scales) {
-        auto ws = w * scale;
-        auto hs = h * scale;
+        const auto ws = w * scale;
+        const auto hs = h * scale;
         retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)),  static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
             static_cast<float>(xCtr + 0.5f * (ws - 1.0f)),  static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
@@ -214,9 +214,9 @@ std::vector<size_t> thresholding(const ov::Tensor& scoresTensor, const int ancho
 }
 
 void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices, const ov::Tensor& scoresTensor, const int anchorNum) {
-    auto shape = scoresTensor.get_shape();
+    const auto& shape = scoresTensor.get_shape();
     const float* scoresPtr = scoresTensor.data<float>();
-    auto start = shape[2] * shape[3] * anchorNum;
+    const auto start = shape[2] * shape[3] * anchorNum;
 
     for (auto i : indices) {
         auto offset = (i % anchorNum) * shape[2] * shape[3] + i / anchorNum;
@@ -226,24 +226,24 @@ void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices
 
 void filterBoxes(std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<size_t>& indices, const ov::Tensor& boxesTensor,
     int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors) {
-    auto shape = boxesTensor.get_shape();
+    const auto& shape = boxesTensor.get_shape();
     const float* boxesPtr = boxesTensor.data<float>();
-    auto boxPredLen = shape[1] / anchorNum;
-    auto blockWidth = shape[2] * shape[3];
+    const auto boxPredLen = shape[1] / anchorNum;
+    const auto blockWidth = shape[2] * shape[3];
 
 
     for (auto i : indices) {
         auto offset = blockWidth * boxPredLen * (i % anchorNum) + (i / anchorNum);
 
-        auto dx = boxesPtr[offset];
-        auto dy = boxesPtr[offset + blockWidth];
-        auto dw = boxesPtr[offset + blockWidth * 2];
-        auto dh = boxesPtr[offset + blockWidth * 3];
+        const auto dx = boxesPtr[offset];
+        const auto dy = boxesPtr[offset + blockWidth];
+        const auto dw = boxesPtr[offset + blockWidth * 2];
+        const auto dh = boxesPtr[offset + blockWidth * 3];
 
-        auto predCtrX = dx * anchors[i].getWidth() + anchors[i].getXCenter();
-        auto predCtrY = dy * anchors[i].getHeight() + anchors[i].getYCenter();
-        auto predW = exp(dw) * anchors[i].getWidth();
-        auto predH = exp(dh) * anchors[i].getHeight();
+        const auto predCtrX = dx * anchors[i].getWidth() + anchors[i].getXCenter();
+        const auto predCtrY = dy * anchors[i].getHeight() + anchors[i].getYCenter();
+        const auto predW = exp(dw) * anchors[i].getWidth();
+        const auto predH = exp(dh) * anchors[i].getHeight();
 
         boxes.push_back({ static_cast<float>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY - 0.5f * (predH - 1.0f)),
            static_cast<float>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY + 0.5f * (predH - 1.0f)) });
@@ -253,10 +253,10 @@ void filterBoxes(std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<
 
 void filterLandmarks(std::vector<cv::Point2f>& landmarks, const std::vector<size_t>& indices, const ov::Tensor& landmarksTensor,
         int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors, const float landmarkStd) {
-    auto shape = landmarksTensor.get_shape();
+    const auto& shape = landmarksTensor.get_shape();
     const float* landmarksPtr = landmarksTensor.data<float>();
-    auto landmarkPredLen = shape[1] / anchorNum;
-    auto blockWidth = shape[2] * shape[3];
+    const auto landmarkPredLen = shape[1] / anchorNum;
+    const auto blockWidth = shape[2] * shape[3];
 
     for (auto i : indices) {
         for (int j = 0; j < ModelRetinaFace::LANDMARKS_NUM; ++j) {
@@ -316,15 +316,15 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
     // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation
-    auto keep = nms(boxes, scores, boxIOUThreshold, !shouldDetectLandmarks);
+    const auto keep = nms(boxes, scores, boxIOUThreshold, !shouldDetectLandmarks);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
 
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    auto scaleX = static_cast<float>(netInputWidth) / imgWidth;
-    auto scaleY = static_cast<float>(netInputHeight) / imgHeight;
+    const auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    const auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
+    const auto scaleX = static_cast<float>(netInputWidth) / imgWidth;
+    const auto scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     result->landmarks.reserve(keep.size() * ModelRetinaFace::LANDMARKS_NUM);

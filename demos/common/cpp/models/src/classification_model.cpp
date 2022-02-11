@@ -31,9 +31,9 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName, size_
     labels(labels) {}
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
-    ov::Tensor scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
+    const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
     const float* scoresPtr = scoresTensor.data<float>();
-    ov::Tensor indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
+    const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
     const int* indicesPtr = indicesTensor.data<int>();
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
@@ -79,11 +79,12 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     inputsNames.push_back(input.get_any_name());
 
     const ov::Shape& inputShape = input.get_shape();
-    ov::Layout inputLayout = getInputLayout(input);
+    const ov::Layout& inputLayout = getInputLayout(input);
 
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
+
     const auto width = inputShape[ov::layout::width_idx(inputLayout)];
     const auto height = inputShape[ov::layout::height_idx(inputLayout)];
     if (height != width) {
@@ -115,18 +116,19 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         throw std::logic_error("Classification model wrapper supports topologies only with"
             " 2-dimensional or 4-dimensional output");
     }
-    const ov::Layout outputLayout4D("NCHW");
-    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout4D)] != 1
-        || outputShape[ov::layout::width_idx(outputLayout4D)] != 1)) {
+
+    const ov::Layout outputLayout("NC...");
+    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout)] != 1
+        || outputShape[ov::layout::width_idx(outputLayout)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only"
             " with 4-dimensional output which has last two dimensions of size 1");
     }
-    size_t classesNum = outputShape[ov::layout::channels_idx(outputLayout4D)];
+
+    size_t classesNum = outputShape[ov::layout::channels_idx(outputLayout)];
     if (nTop > classesNum) {
         throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but "
             + std::to_string(nTop) + " labels are requested to be predicted");
     }
-
     if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
         slog::warn << "\tInserted 'other' label as first." << slog::endl;
@@ -135,6 +137,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         throw std::logic_error("Model's number of classes and parsed labels must match ("
             + std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
     }
+
     ppp.output().tensor().set_element_type(ov::element::f32);
     model = ppp.build();
 

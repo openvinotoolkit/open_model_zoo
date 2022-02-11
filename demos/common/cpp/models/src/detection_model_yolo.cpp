@@ -58,6 +58,7 @@ const std::vector<int64_t> defaultMasks[] = {
 static inline float sigmoid(float x) {
     return 1.f / (1.f + exp(-x));
 }
+
 static inline float linear(float x) {
     return x;
 }
