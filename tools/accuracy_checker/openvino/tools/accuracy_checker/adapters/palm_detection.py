@@ -76,7 +76,7 @@ class PalmDetectionAdapter(Adapter):
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.outputs_verified = False
 
-        self.num_layers = self.get_value_from_config('num_layers')
+        self.num_anchor_layers = self.get_value_from_config('num_anchor_layers')
         self.min_scale = self.get_value_from_config('min_scale')
         self.max_scale = self.get_value_from_config('max_scale')
         self.input_size_height = self.get_value_from_config('input_size_height')
@@ -148,23 +148,10 @@ class PalmDetectionAdapter(Adapter):
             detection_classes = detection_classes[cond]
             detection_scores = detection_scores[cond]
 
-            num_boxes, _ = boxes.shape
+            y_mins, x_mins, y_maxs, x_maxs = boxes.T[:4, :]
 
-            x_mins = []
-            y_mins = []
-            x_maxs = []
-            y_maxs = []
-            labels = []
-            det_scores = []
-            for i in range(num_boxes):
-                x_mins.append(boxes[i, 1])
-                y_mins.append(boxes[i, 0])
-                x_maxs.append(boxes[i, 3])
-                y_maxs.append(boxes[i, 2])
-                labels.append(detection_classes[i])
-                det_scores.append(detection_scores[i])
-
-            result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
+            result.append(DetectionPrediction(identifier, detection_classes, detection_scores,
+                                              x_mins, y_mins, x_maxs, y_maxs))
 
         return result
 
@@ -177,7 +164,7 @@ class PalmDetectionAdapter(Adapter):
     def generate_anchors(self):
         anchors = []
         layer_id = 0
-        while layer_id < self.num_layers:
+        while layer_id < self.num_anchor_layers:
             anchor_height = []
             anchor_width = []
             aspect_ratios = []
