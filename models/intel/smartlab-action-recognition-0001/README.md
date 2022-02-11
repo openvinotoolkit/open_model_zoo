@@ -68,7 +68,6 @@ The smartlab-action-recognition-decoder-0001 is a fully connected decoder part w
 - `adjust_rider` - confidence for the adjust_rider class
 
 Classification confidence scores in the [0, 1] range
-    for every smartlab actions.
 
 For more information, please, see documentation of the demo.
 ## Legal Information
