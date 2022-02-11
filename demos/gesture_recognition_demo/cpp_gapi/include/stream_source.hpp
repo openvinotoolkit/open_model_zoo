@@ -116,16 +116,18 @@ public:
             slog::warn << "Got a non-positive value as FPS of the input. Interpret it as 30 FPS" << slog::endl;
         }
         /** Create and get first image for batch **/
-        GAPI_Assert(first_batch.empty());
+        if (!first_batch.empty()) {
+            throw std::runtime_error("first_batch must be empty");
+        }
         if (batch_size == 0 || batch_size == 1) {
-            GAPI_Assert(false && "Batch must contain more than one image");
+            throw std::runtime_error("Batch must contain more than one image");
         }
 
         /** Reading of frame with ImagesCapture class **/
         read_time = std::chrono::steady_clock::now();
         cv::Mat fast_frame = cap->read();
-        if (!fast_frame.data) {
-            GAPI_Assert(false && "Couldn't grab the frame");
+        if (batch_size == 0 || batch_size == 1) {
+            throw std::runtime_error("Couldn't grab the frame");
         }
         producer.fillFastFrame(fast_frame);
         fast_frame.copyTo(thread_frame);
@@ -154,7 +156,9 @@ protected:
     virtual bool pull(cv::gapi::wip::Data& data) override {
         /** Is first already pulled **/
         if (!first_pulled) {
-            GAPI_Assert(!first_batch.empty());
+            if (first_batch.empty()) {
+                throw std::runtime_error("pull() have got empty first_batch");
+            }
             first_pulled = true;
             cv::detail::VectorRef ref(std::move(first_batch));
             data = std::move(ref);
@@ -164,6 +168,11 @@ protected:
         /** Frame reading with ImagesCapture class **/
         read_time = std::chrono::steady_clock::now();
         cv::Mat fast_frame = cap->read();
+
+        /** Check size of captured frame **/
+        if (fast_frame.size() != first_batch[first_batch.size() - 2].size()) {
+            throw std::runtime_error("Frames of source must have the same sizes");
+        }
 
         if (!fast_frame.data) {
             is_filling_possible = false;
@@ -192,7 +201,9 @@ protected:
     }
 
     virtual cv::GMetaArg descr_of() const override {
-        GAPI_Assert(!first_batch.empty());
+        if (first_batch.empty()) {
+            throw std::runtime_error("descr_of() have got empty first_batch");
+        }
         return cv::GMetaArg{ cv::empty_array_desc() };
     }
 };
