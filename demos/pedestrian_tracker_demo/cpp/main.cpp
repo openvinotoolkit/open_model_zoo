@@ -139,13 +139,13 @@ int main(int argc, char **argv) {
 
         std::unique_ptr<ModelBase> detectionModel;
         if (FLAGS_at == "centernet") {
-            detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels));
+            detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "ssd") {
-            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, labels));
+            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "yolo") {
-            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, {}, {}, FLAGS_layout_det));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -182,7 +182,6 @@ int main(int argc, char **argv) {
         Presenter presenter(FLAGS_u, 10, graphSize);
 
         for (unsigned frameIdx = 0; ; ++frameIdx) {
-
             detectionModel->preprocess(ImageInputData(frame), req);
 
             req.infer();
@@ -194,7 +193,6 @@ int main(int argc, char **argv) {
             res.metaData = std::make_shared<ImageMetaData>(frame, std::chrono::steady_clock::now());
 
             for (const auto& outName : detectionModel->getOutputsNames()) {
-
                 const auto& outTensor = req.get_tensor(outName);
 
                 if (ov::element::i32 == outTensor.get_element_type()) {
