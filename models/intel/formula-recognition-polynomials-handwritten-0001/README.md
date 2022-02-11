@@ -78,5 +78,11 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 4.	Name: `logit`, shape: `1, N`, where `N` is a vocabulary size. Classification confidence scores in the [0, 1] range
     for every token.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Formula Recognition Python\* Demo](../../../demos/formula_recognition_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

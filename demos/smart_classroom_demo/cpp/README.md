@@ -50,6 +50,7 @@ omz_converter --list models.lst
 * face-detection-adas-0001
 * face-recognition-resnet100-arcface-onnx
 * face-reidentification-retail-0095
+* facenet-20180408-102900
 * landmarks-regression-retail-0009
 * person-detection-action-recognition-0005
 * person-detection-action-recognition-0006

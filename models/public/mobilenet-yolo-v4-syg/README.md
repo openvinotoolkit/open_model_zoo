@@ -86,11 +86,25 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `class_no_1`,...,`class_no_4` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
 ## Download a Model and Convert it into Inference Engine Format
-You can download models and if necessary convert them into Inference Engine format using the Model Downloader and other automation tools as shown in the examples below.
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+
 An example of using the Model Downloader:
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+omz_downloader --name <model_name>
+```
+
 An example of using the Model Converter:
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+omz_converter --name <model_name>
+```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

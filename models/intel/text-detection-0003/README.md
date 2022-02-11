@@ -36,5 +36,11 @@ Expected color order: `BGR`.
 
 Refer to [PixelLink](https://arxiv.org/abs/1801.01315) and demos for details.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -55,5 +55,11 @@ The expected color order is `BGR`.
 2.  The net outputs a blob named `456` with shape: `1, 2, 1, 1`. It is location of point with top color.
 3.  The net outputs a blob named `459` with shape: `1, 2, 1, 1`. It is location of point with bottom color.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Crossroad Camera C++ Demo](../../../demos/crossroad_camera_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

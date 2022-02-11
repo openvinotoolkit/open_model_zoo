@@ -47,5 +47,11 @@ The net output is a blob named `attributes` with shape `1, 7` across seven attri
  `has_coat_jacket`].
 Value > 0.5 means that the corresponding attribute is present.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Crossroad Camera C++ Demo](../../../demos/crossroad_camera_demo/cpp/README.md)
+
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.
