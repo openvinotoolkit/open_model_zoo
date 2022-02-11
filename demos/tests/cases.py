@@ -1172,13 +1172,13 @@ PYTHON_DEMOS = [
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'detr'}), # TODO detr-resnet50 model fails to convert on 2022.1 package
+                TestCase(options={'--architecture_type': 'detr'}),
                 [
-                    #TestCase(options={'-m': ModelArg('detr-resnet50')}),
-                    #TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
-                    #                 '--reverse_input_channels': None,
-                    #                  '--mean_values': ['123.675', '116.28', '103.53'],
-                    #                  '--scale_values': ['58.395', '57.12', '57.375']}),
+                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                                     '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
