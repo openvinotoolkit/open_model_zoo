@@ -1,28 +1,30 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <chrono>  // NOLINT
 
-#include <gflags/gflags.h>
-#include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
-#include <utils/images_capture.h>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include <string>
-#include <memory>
-#include <limits>
-#include <vector>
+#include <algorithm>
 #include <deque>
 #include <map>
+#include <memory>
+#include <limits>
 #include <set>
-#include <algorithm>
+#include <string>
+#include <vector>
 #include <utility>
 
+#include "openvino/openvino.hpp"
+
+#include "gflags/gflags.h"
+#include "monitors/presenter.h"
+#include "utils/args_helper.hpp"
+#include "utils/images_capture.h"
+#include "utils/ocv_common.hpp"
+#include "utils/slog.hpp"
+#include "cnn.hpp"
 #include "actions.hpp"
 #include "action_detector.hpp"
-#include "cnn.hpp"
 #include "detector.hpp"
 #include "face_reid.hpp"
 #include "tracker.hpp"
@@ -33,33 +35,32 @@ namespace {
 
 class Visualizer {
 private:
-    cv::Mat frame_;
-    cv::Mat top_persons_;
-    const bool enabled_;
-    const int num_top_persons_;
-    cv::VideoWriter& writer_;
-    uint32_t limit_;
-    float rect_scale_x_;
-    float rect_scale_y_;
-    static int const max_input_width_ = 1920;
-    std::string const main_window_name_ = "Smart classroom demo";
-    std::string const top_window_name_ = "Top-k students";
-    static int const crop_width_ = 128;
-    static int const crop_height_ = 320;
-    static int const header_size_ = 80;
-    static int const margin_size_ = 5;
+    cv::Mat m_frame;
+    cv::Mat m_top_persons;
+    const bool m_enabled;
+    const int m_num_top_persons;
+    LazyVideoWriter m_writer;
+    float m_rect_scale_x;
+    float m_rect_scale_y;
+    static int const m_max_input_width = 1920;
+    std::string const m_main_window_name = "Smart classroom demo";
+    std::string const m_top_window_name = "Top-k students";
+    static int const m_crop_width = 128;
+    static int const m_crop_height = 320;
+    static int const m_header_size = 80;
+    static int const m_margin_size = 5;
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer, uint32_t limit, int num_top_persons) :
-        enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), limit_(limit), rect_scale_x_(0), rect_scale_y_(0) {
-        if (!enabled_) {
+    Visualizer(bool enabled, const LazyVideoWriter& writer, int num_top_persons) :
+        m_enabled(enabled), m_num_top_persons(num_top_persons), m_writer(writer), m_rect_scale_x(0), m_rect_scale_y(0) {
+        if (!m_enabled) {
             return;
         }
 
-        cv::namedWindow(main_window_name_);
+        cv::namedWindow(m_main_window_name);
 
-        if (num_top_persons_ > 0) {
-            cv::namedWindow(top_window_name_);
+        if (m_num_top_persons > 0) {
+            cv::namedWindow(m_top_window_name);
 
             CreateTopWindow();
             ClearTopWindow();
@@ -67,150 +68,144 @@ public:
     }
 
     static cv::Size GetOutputSize(const cv::Size& input_size) {
-        if (input_size.width > max_input_width_) {
+        if (input_size.width > m_max_input_width) {
             float ratio = static_cast<float>(input_size.height) / input_size.width;
-            return cv::Size(max_input_width_, cvRound(ratio*max_input_width_));
+            return cv::Size(m_max_input_width, cvRound(ratio*m_max_input_width));
         }
         return input_size;
     }
 
     void SetFrame(const cv::Mat& frame) {
-        if (!enabled_ && !writer_.isOpened()) {
+        if (!m_enabled) {
             return;
         }
 
-        frame_ = frame.clone();
-        rect_scale_x_ = 1;
-        rect_scale_y_ = 1;
-        cv::Size new_size = GetOutputSize(frame_.size());
-        if (new_size != frame_.size()) {
-            rect_scale_x_ = static_cast<float>(new_size.height) / frame_.size().height;
-            rect_scale_y_ = static_cast<float>(new_size.width) / frame_.size().width;
-            cv::resize(frame_, frame_, new_size);
+        m_frame = frame.clone();
+        m_rect_scale_x = 1;
+        m_rect_scale_y = 1;
+        cv::Size new_size = GetOutputSize(m_frame.size());
+        if (new_size != m_frame.size()) {
+            m_rect_scale_x = static_cast<float>(new_size.height) / m_frame.size().height;
+            m_rect_scale_y = static_cast<float>(new_size.width) / m_frame.size().width;
+            cv::resize(m_frame, m_frame, new_size);
         }
     }
 
-    void Show(size_t framesProcessed) const {
-        if (enabled_) {
-            cv::imshow(main_window_name_, frame_);
+    void Show() {
+        if (m_enabled) {
+            cv::imshow(m_main_window_name, m_frame);
         }
 
-        if (writer_.isOpened() && (limit_ == 0 || framesProcessed <= limit_)) {
-            writer_ << frame_;
-        }
+        m_writer.write(m_frame);
     }
 
     void DrawCrop(cv::Rect roi, int id, const cv::Scalar& color) const {
-        if (!enabled_ || num_top_persons_ <= 0) {
+        if (!m_enabled || m_num_top_persons <= 0) {
             return;
         }
 
-        if (id < 0 || id >= num_top_persons_) {
+        if (id < 0 || id >= m_num_top_persons) {
             return;
         }
 
-        if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
-            roi.x = cvRound(roi.x * rect_scale_x_);
-            roi.y = cvRound(roi.y * rect_scale_y_);
+        if (m_rect_scale_x != 1 || m_rect_scale_y != 1) {
+            roi.x = cvRound(roi.x * m_rect_scale_x);
+            roi.y = cvRound(roi.y * m_rect_scale_y);
 
-            roi.height = cvRound(roi.height * rect_scale_y_);
-            roi.width = cvRound(roi.width * rect_scale_x_);
+            roi.height = cvRound(roi.height * m_rect_scale_y);
+            roi.width = cvRound(roi.width * m_rect_scale_x);
         }
 
         roi.x = std::max(0, roi.x);
         roi.y = std::max(0, roi.y);
-        roi.width = std::min(roi.width, frame_.cols - roi.x);
-        roi.height = std::min(roi.height, frame_.rows - roi.y);
+        roi.width = std::min(roi.width, m_frame.cols - roi.x);
+        roi.height = std::min(roi.height, m_frame.rows - roi.y);
 
         const auto crop_label = std::to_string(id + 1);
 
-        auto frame_crop = frame_(roi).clone();
-        cv::resize(frame_crop, frame_crop, cv::Size(crop_width_, crop_height_));
+        auto frame_crop = m_frame(roi).clone();
+        cv::resize(frame_crop, frame_crop, cv::Size(m_crop_width, m_crop_height));
 
-        const int shift = (id + 1) * margin_size_ + id * crop_width_;
-        frame_crop.copyTo(top_persons_(cv::Rect(shift, header_size_, crop_width_, crop_height_)));
+        const int shift = (id + 1) * m_margin_size + id * m_crop_width;
+        frame_crop.copyTo(m_top_persons(cv::Rect(shift, m_header_size, m_crop_width, m_crop_height)));
 
-        cv::imshow(top_window_name_, top_persons_);
+        cv::imshow(m_top_window_name, m_top_persons);
     }
 
     void DrawObject(cv::Rect rect, const std::string& label_to_draw,
                     const cv::Scalar& text_color, const cv::Scalar& bbox_color, bool plot_bg) {
-        if (!enabled_ && !writer_.isOpened()) {
+        if (!m_enabled) {
             return;
         }
 
-        if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
-            rect.x = cvRound(rect.x * rect_scale_x_);
-            rect.y = cvRound(rect.y * rect_scale_y_);
+        if (m_rect_scale_x != 1 || m_rect_scale_y != 1) {
+            rect.x = cvRound(rect.x * m_rect_scale_x);
+            rect.y = cvRound(rect.y * m_rect_scale_y);
 
-            rect.height = cvRound(rect.height * rect_scale_y_);
-            rect.width = cvRound(rect.width * rect_scale_x_);
+            rect.height = cvRound(rect.height * m_rect_scale_y);
+            rect.width = cvRound(rect.width * m_rect_scale_x);
         }
-        cv::rectangle(frame_, rect, bbox_color);
+        cv::rectangle(m_frame, rect, bbox_color);
 
         if (plot_bg && !label_to_draw.empty()) {
             int baseLine = 0;
-            const cv::Size label_size =
-                cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
-            cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
-                            cv::Point(rect.x + label_size.width, rect.y + baseLine),
-                            bbox_color, cv::FILLED);
+            const cv::Size label_size = cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
+            cv::rectangle(
+                m_frame,
+                cv::Point(rect.x, rect.y - label_size.height),
+                cv::Point(rect.x + label_size.width, rect.y + baseLine),
+                bbox_color, cv::FILLED);
         }
         if (!label_to_draw.empty()) {
-            cv::putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
+            cv::putText(m_frame, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
                         text_color, 1, cv::LINE_AA);
         }
     }
 
     void CreateTopWindow() {
-        if (!enabled_ || num_top_persons_ <= 0) {
+        if (!m_enabled || m_num_top_persons <= 0) {
             return;
         }
 
-        const int width = margin_size_ * (num_top_persons_ + 1) + crop_width_ * num_top_persons_;
-        const int height = header_size_ + crop_height_ + margin_size_;
+        const int width = m_margin_size * (m_num_top_persons + 1) + m_crop_width * m_num_top_persons;
+        const int height = m_header_size + m_crop_height + m_margin_size;
 
-        top_persons_.create(height, width, CV_8UC3);
+        m_top_persons.create(height, width, CV_8UC3);
     }
 
     void ClearTopWindow() {
-        if (!enabled_ || num_top_persons_ <= 0) {
+        if (!m_enabled || m_num_top_persons <= 0) {
             return;
         }
 
-        top_persons_.setTo(cv::Scalar(255, 255, 255));
+        m_top_persons.setTo(cv::Scalar(255, 255, 255));
 
-        for (int i = 0; i < num_top_persons_; ++i) {
-            const int shift = (i + 1) * margin_size_ + i * crop_width_;
+        for (int i = 0; i < m_num_top_persons; ++i) {
+            const int shift = (i + 1) * m_margin_size + i * m_crop_width;
 
-            cv::rectangle(top_persons_, cv::Point(shift, header_size_),
-                          cv::Point(shift + crop_width_, header_size_ + crop_height_),
+            cv::rectangle(m_top_persons, cv::Point(shift, m_header_size),
+                          cv::Point(shift + m_crop_width, m_header_size + m_crop_height),
                           cv::Scalar(128, 128, 128), cv::FILLED);
 
             const auto label_to_draw = "#" + std::to_string(i + 1);
             int baseLine = 0;
-            const auto label_size =
-                cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_SIMPLEX, 2, 2, &baseLine);
-            const int text_shift = (crop_width_ - label_size.width) / 2;
-            cv::putText(top_persons_, label_to_draw,
+            const auto label_size = cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_SIMPLEX, 2, 2, &baseLine);
+            const int text_shift = (m_crop_width - label_size.width) / 2;
+            cv::putText(m_top_persons, label_to_draw,
                         cv::Point(shift + text_shift, label_size.height + baseLine / 2),
                         cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
         }
 
-        cv::imshow(top_window_name_, top_persons_);
+        cv::imshow(m_top_window_name, m_top_persons);
     }
 
     void Finalize() const {
-        if (enabled_) {
-            cv::destroyWindow(main_window_name_);
+        if (m_enabled) {
+            cv::destroyWindow(m_main_window_name);
 
-            if (num_top_persons_ > 0) {
-                cv::destroyWindow(top_window_name_);
+            if (m_num_top_persons > 0) {
+                cv::destroyWindow(m_top_window_name);
             }
-        }
-
-        if (writer_.isOpened()) {
-            writer_.release();
         }
     }
 };
@@ -395,22 +390,11 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     return face_track_id_to_label;
 }
 
-bool checkDynamicBatchSupport(const InferenceEngine::Core& ie, const std::string& device)  {
-    try  {
-        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
-            return false;
-    }
-    catch(const std::exception&)  {
-        return false;
-    }
-    return true;
-}
-
 class FaceRecognizer {
 public:
     virtual ~FaceRecognizer() = default;
 
-    virtual bool LabelExists(const std::string &label) const = 0;
+    virtual bool LabelExists(const std::string& label) const = 0;
     virtual std::string GetLabelByID(int id) const = 0;
     virtual std::vector<std::string> GetIDToLabelMap() const = 0;
 
@@ -419,7 +403,7 @@ public:
 
 class FaceRecognizerNull : public FaceRecognizer {
 public:
-    bool LabelExists(const std::string &) const override { return false; }
+    bool LabelExists(const std::string&) const override { return false; }
 
     std::string GetLabelByID(int) const override {
         return EmbeddingsGallery::unknown_label;
@@ -442,13 +426,12 @@ public:
             double reid_threshold,
             int min_size_fr,
             bool crop_gallery,
-            bool greedy_reid_matching
-    )
-        : landmarks_detector(landmarks_detector_config),
-          face_reid(reid_config),
-          face_gallery(face_gallery_path, reid_threshold, min_size_fr, crop_gallery,
-                       face_registration_det_config, landmarks_detector, face_reid,
-                       greedy_reid_matching)
+            bool greedy_reid_matching) :
+        landmarks_detector(landmarks_detector_config),
+        face_reid(reid_config),
+        face_gallery(face_gallery_path, reid_threshold, min_size_fr, crop_gallery,
+                     face_registration_det_config, landmarks_detector, face_reid,
+                     greedy_reid_matching)
     {
         if (face_gallery.size() == 0) {
             slog::warn << "Face reid gallery is empty!" << slog::endl;
@@ -457,7 +440,7 @@ public:
         }
     }
 
-    bool LabelExists(const std::string &label) const override {
+    bool LabelExists(const std::string& label) const override {
         return face_gallery.LabelExists(label);
     }
 
@@ -470,17 +453,40 @@ public:
     }
 
     std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) override {
+        const int maxLandmarksBatch = landmarks_detector.maxBatchSize();
+        int numFaces = (int)faces.size();
+
+        std::vector<cv::Mat> landmarks;
+        std::vector<cv::Mat> embeddings;
         std::vector<cv::Mat> face_rois;
 
-        for (const auto& face : faces) {
-            face_rois.push_back(frame(face.rect));
+        auto face_roi = [&](const detection::DetectedObject& face) {
+            return frame(face.rect);
+        };
+        if (numFaces < maxLandmarksBatch) {
+            std::transform(faces.begin(), faces.end(), std::back_inserter(face_rois), face_roi);
+            landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+            AlignFaces(&face_rois, &landmarks);
+            face_reid.Compute(face_rois, &embeddings);
+        } else {
+            auto embedding = [&](cv::Mat& emb) { return emb; };
+            for (int n = numFaces; n > 0; n -= maxLandmarksBatch) {
+                landmarks.clear();
+                face_rois.clear();
+                size_t start_idx = size_t(numFaces) - n;
+                size_t end_idx = start_idx + std::min(numFaces, maxLandmarksBatch);
+                std::transform(faces.begin() + start_idx, faces.begin() + end_idx, std::back_inserter(face_rois), face_roi);
+
+                landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+
+                AlignFaces(&face_rois, &landmarks);
+
+                std::vector<cv::Mat> batch_embeddings;
+                face_reid.Compute(face_rois, &batch_embeddings);
+                std::transform(batch_embeddings.begin(), batch_embeddings.end(), std::back_inserter(embeddings), embedding);
+            }
         }
 
-        std::vector<cv::Mat> landmarks, embeddings;
-
-        landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
-        AlignFaces(&face_rois, &landmarks);
-        face_reid.Compute(face_rois, &embeddings);
         return face_gallery.GetIDsByEmbeddings(embeddings);
     }
 
@@ -490,8 +496,8 @@ private:
     EmbeddingsGallery face_gallery;
 };
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
+    // Parsing and validation of input args
 
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -510,13 +516,13 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-}  // namespace
+} // namespace
 
 int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        /** This demo covers 4 certain topologies and cannot be generalized **/
+        // This demo covers 4 certain topologies and cannot be generalized
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -533,64 +539,30 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        const auto actions_type = FLAGS_teacher_id.empty()
-                                      ? FLAGS_a_top > 0 ? TOP_K : STUDENT
-                                      : TEACHER;
-        const auto actions_map = actions_type == STUDENT
-                                     ? split(FLAGS_student_ac, ',')
-                                     : actions_type == TOP_K
-                                         ? split(FLAGS_top_ac, ',')
-                                         : split(FLAGS_teacher_ac, ',');
+        const auto actions_type = FLAGS_teacher_id.empty() ?
+            (FLAGS_a_top > 0 ? TOP_K : STUDENT) :
+            TEACHER;
+        const auto actions_map = actions_type == STUDENT ?
+            split(FLAGS_student_ac, ',') : actions_type == TOP_K ?
+            split(FLAGS_top_ac, ',') :
+            split(FLAGS_teacher_ac, ',');
         const auto num_top_persons = actions_type == TOP_K ? FLAGS_a_top : -1;
-        const auto top_action_id = actions_type == TOP_K
-                                   ? std::distance(actions_map.begin(), find(actions_map.begin(), actions_map.end(), FLAGS_top_id))
-                                   : -1;
+        const auto top_action_id = actions_type == TOP_K ?
+            std::distance(actions_map.begin(), find(actions_map.begin(), actions_map.end(), FLAGS_top_id)) : -1;
         if (actions_type == TOP_K && (top_action_id < 0 || top_action_id >= static_cast<int>(actions_map.size()))) {
             slog::err << "Cannot find target action: " << FLAGS_top_id << slog::endl;
             return 1;
         }
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
-
-        std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
-                                            FLAGS_d_reid};
-        std::set<std::string> loadedDevices;
-
-        for (const auto &device : devices) {
-            if (loadedDevices.find(device) != loadedDevices.end())
-                continue;
-
-            /** Load extensions for the CPU device **/
-            if ((device.find("CPU") != std::string::npos)) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-            } else if (!FLAGS_c.empty()) {
-                // Load Extensions for other plugins not CPU
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            }
-
-            if (device.find("CPU") != std::string::npos) {
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
-                    InferenceEngine::PluginConfigParams::YES}}, "CPU");
-            } else if (device.find("GPU") != std::string::npos) {
-                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
-                    InferenceEngine::PluginConfigParams::YES}}, "GPU");
-            }
-
-            loadedDevices.insert(device);
-        }
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
 
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
             ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
-            action_config.deviceName = FLAGS_d_act;
-            action_config.ie = ie;
+            action_config.m_deviceName = FLAGS_d_act;
+            action_config.m_core = core;
             action_config.is_async = true;
             action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
             action_config.action_confidence_threshold = static_cast<float>(FLAGS_t_ar);
@@ -605,8 +577,8 @@ int main(int argc, char* argv[]) {
         if (!fd_model_path.empty()) {
             // Load face detector
             detection::DetectorConfig face_config(fd_model_path);
-            face_config.deviceName = FLAGS_d_fd;
-            face_config.ie = ie;
+            face_config.m_deviceName = FLAGS_d_fd;
+            face_config.m_core = core;
             face_config.is_async = true;
             face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
             face_config.input_h = FLAGS_inh_fd;
@@ -622,31 +594,23 @@ int main(int argc, char* argv[]) {
 
         if (!fd_model_path.empty() && !fr_model_path.empty() && !lm_model_path.empty()) {
             // Create face recognizer
-
             detection::DetectorConfig face_registration_det_config(fd_model_path);
-            face_registration_det_config.deviceName = FLAGS_d_fd;
-            face_registration_det_config.ie = ie;
+            face_registration_det_config.m_deviceName = FLAGS_d_fd;
+            face_registration_det_config.m_core = core;
             face_registration_det_config.is_async = false;
             face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
             CnnConfig reid_config(fr_model_path, "Face Re-Identification");
-            reid_config.deviceName = FLAGS_d_reid;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
-                reid_config.max_batch_size = 16;
-            else
-                reid_config.max_batch_size = 1;
-            reid_config.ie = ie;
+            reid_config.m_deviceName = FLAGS_d_reid;
+            reid_config.m_max_batch_size = 16;
+            reid_config.m_core = core;
 
             CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
-            landmarks_config.deviceName = FLAGS_d_lm;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
-                landmarks_config.max_batch_size = 16;
-            else
-                landmarks_config.max_batch_size = 1;
-            landmarks_config.ie = ie;
-
+            landmarks_config.m_deviceName = FLAGS_d_lm;
+            landmarks_config.m_max_batch_size = 16;
+            landmarks_config.m_core = core;
             face_recognizer.reset(new FaceRecognizerDefault(
                 landmarks_config, reid_config,
                 face_registration_det_config,
@@ -686,9 +650,8 @@ int main(int argc, char* argv[]) {
         tracker_action_params.forget_delay = 150;
         tracker_action_params.affinity_thr = 0.9f;
         tracker_action_params.averaging_window_size_for_rects = 5;
-        tracker_action_params.averaging_window_size_for_labels = FLAGS_ss_t > 0
-                                                                 ? FLAGS_ss_t
-                                                                 : actions_type == TOP_K ? 5 : 1;
+        tracker_action_params.averaging_window_size_for_labels = FLAGS_ss_t > 0 ?
+            FLAGS_ss_t : actions_type == TOP_K ? 5 : 1;
         tracker_action_params.bbox_heights_range = cv::Vec2f(10, 2160);
         tracker_action_params.drop_forgotten_tracks = false;
         tracker_action_params.max_num_objects_in_track = std::numeric_limits<int>::max();
@@ -715,14 +678,9 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame.size())) {
-            throw std::runtime_error("Can't open video writer");
-        }
-        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, num_top_persons);
         DetectionsLogger logger(slog::debug, FLAGS_r, FLAGS_ad, FLAGS_al);
-
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
             action_detector->submitRequest();
@@ -743,7 +701,6 @@ int main(int argc, char* argv[]) {
             is_last_frame = !frame.data;
 
             logger.CreateNextFrameRecord(FLAGS_i, work_num_frames, prev_frame.cols, prev_frame.rows);
-
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
                 break;
@@ -753,10 +710,8 @@ int main(int argc, char* argv[]) {
             presenter.drawGraphs(prev_frame);
 
             sc_visualizer.SetFrame(prev_frame);
-
             if (actions_type == TOP_K) {
-                if ( (is_monitoring_enabled && key == SPACE_KEY) ||
-                     (!is_monitoring_enabled && key != SPACE_KEY) ) {
+                if ( (is_monitoring_enabled && key == SPACE_KEY) || (!is_monitoring_enabled && key != SPACE_KEY) ) {
                     if (key == SPACE_KEY) {
                         action_detector->wait();
                         action_detector->fetchResults();
@@ -810,7 +765,6 @@ int main(int argc, char* argv[]) {
                         }
                     }
 
-
                     for (const auto& action : tracked_actions) {
                         auto box_color = white_color;
                         std::string box_caption = "";
@@ -828,33 +782,27 @@ int main(int argc, char* argv[]) {
             } else {
                 face_detector->wait();
                 detection::DetectedObjects faces = face_detector->fetchResults();
-
                 action_detector->wait();
                 DetectedActions actions = action_detector->fetchResults();
-
                 if (!is_last_frame) {
                     face_detector->enqueue(frame);
                     face_detector->submitRequest();
                     action_detector->enqueue(frame);
                     action_detector->submitRequest();
                 }
-
                 auto ids = face_recognizer->Recognize(prev_frame, faces);
-
                 TrackedObjects tracked_face_objects;
 
                 for (size_t i = 0; i < faces.size(); i++) {
                     tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, ids[i]);
                 }
                 tracker_reid.Process(prev_frame, tracked_face_objects, work_num_frames);
-
                 const auto tracked_faces = tracker_reid.TrackedDetectionsWithLabels();
 
                 TrackedObjects tracked_action_objects;
                 for (const auto& action : actions) {
                     tracked_action_objects.emplace_back(action.rect, action.detection_conf, action.label);
                 }
-
                 tracker_action.Process(prev_frame, tracked_action_objects, work_num_frames);
                 const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
 
@@ -917,7 +865,7 @@ int main(int argc, char* argv[]) {
 
             ++total_num_frames;
 
-            sc_visualizer.Show(total_num_frames);
+            sc_visualizer.Show();
 
             logger.FinalizeFrameRecord();
         }

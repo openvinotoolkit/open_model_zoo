@@ -251,7 +251,7 @@ int main(int argc, char* argv[]) {
         int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
@@ -289,14 +289,6 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // Preparing video writer if needed
-            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    cap->fps(), outputResolution)) {
-                    throw std::runtime_error("Can't open video writer");
-                }
-            }
-
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
@@ -314,9 +306,7 @@ int main(int argc, char* argv[]) {
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Segmentation Results", outFrame);
@@ -348,9 +338,7 @@ int main(int argc, char* argv[]) {
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     cv::imshow("Segmentation Results", outFrame);
                     //--- Updating output window

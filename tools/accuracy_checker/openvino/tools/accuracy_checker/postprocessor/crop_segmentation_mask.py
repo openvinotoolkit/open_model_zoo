@@ -161,6 +161,8 @@ class CropPaddingSegmentationMask(Postprocessor):
             "Postprocessing step `crop_padded_prediction` cannot work without metadata with `padding` field")
 
         top, left, bottom, right = image_metadata.get('padding', (0, 0, 0, 0))
+        if self.deprocessing_mode:
+            image_metadata['padding_disabled'] = True
         for pred in prediction:
             mask = pred.mask
             if mask.ndim == 2:

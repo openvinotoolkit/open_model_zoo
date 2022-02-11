@@ -45,6 +45,7 @@ omz_converter --list models.lst
 * googlenet-v1
 * googlenet-v1-tf
 * googlenet-v2
+* googlenet-v2-tf
 * googlenet-v3
 * googlenet-v3-pytorch
 * googlenet-v4-tf
@@ -59,6 +60,8 @@ omz_converter --list models.lst
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
+* mobilenet-v3-large-1.0-224-tf
+* mobilenet-v3-small-1.0-224-tf
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf
@@ -67,6 +70,7 @@ omz_converter --list models.lst
 * repvgg-b3
 * resnest-50-pytorch
 * resnet-18-pytorch
+* resnet-34-pytorch
 * resnet-50-pytorch
 * resnet-50-tf
 * resnet18-xnor-binary-onnx-0001

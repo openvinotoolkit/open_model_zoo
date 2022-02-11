@@ -253,12 +253,7 @@ int main(int argc, char* argv[]) {
         /** Presenter for rendering system parameters **/
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Create VideoWriter **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         /** Result containers associated with graph output **/
         cv::Mat out_frame, proc, top_k;
@@ -343,17 +338,12 @@ int main(int argc, char* argv[]) {
                 }
                 const_params.draw_ptr->Show(proc);
             }
-            if (videoWriter.isOpened()) {
-                videoWriter << proc;
-            };
+            videoWriter.write(proc);
             /** Console log, if exists **/
             if (!stream_log.empty()) {
                 slog::debug << stream_log << slog::endl;
             }
         }
-        if (videoWriter.isOpened()) {
-            videoWriter.release();
-        };
         const_params.draw_ptr->Finalize();
 
         /** Print logs to files **/

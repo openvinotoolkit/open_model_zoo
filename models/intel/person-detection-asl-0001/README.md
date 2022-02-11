@@ -39,5 +39,12 @@ bounding boxes. For each detection, the description has the format: [`x_min`, `y
  - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
  - `conf` - confidence for the predicted class
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [G-API Gesture Recognition Demo](../../../demos/gesture_recognition_demo/cpp_gapi/README.md)
+* [Gesture Recognition Python\* Demo](../../../demos/gesture_recognition_demo/python/README.md)
+
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

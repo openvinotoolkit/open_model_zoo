@@ -46,6 +46,12 @@ Expected color order is `BGR`.
 2. The `labels` is a blob with the shape `100` in the format `N`, where `N` is the number of detected
    bounding boxes. In case of person detection, it is equal to `1` for each detected box with person in it and `0` for the background.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

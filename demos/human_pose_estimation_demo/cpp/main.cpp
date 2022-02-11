@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
 
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         OutputTransform outputTransform = OutputTransform();
         cv::Size outputResolution = curr_frame.size();
@@ -232,10 +232,6 @@ int main(int argc, char *argv[]) {
             };
             outputTransform = OutputTransform(curr_frame.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
-        }
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), outputResolution)) {
-            throw std::runtime_error("Can't open video writer");
         }
 
         //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
@@ -299,9 +295,7 @@ int main(int argc, char *argv[]) {
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Human Pose Estimation Results", outFrame);
@@ -328,9 +322,7 @@ int main(int argc, char *argv[]) {
             renderMetrics.update(renderingStart);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
+            videoWriter.write(outFrame);
             if (!FLAGS_no_show) {
                 cv::imshow("Human Pose Estimation Results", outFrame);
                 //--- Updating output window

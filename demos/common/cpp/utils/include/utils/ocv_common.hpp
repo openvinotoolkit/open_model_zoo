@@ -87,7 +87,7 @@ inline void matToBlob(const cv::Mat& mat, const InferenceEngine::Blob::Ptr& blob
 */
 static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
-    ov::Layout layout("NCHW");
+    static const ov::Layout layout{"NCHW"};
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
@@ -314,4 +314,29 @@ private:
     bool isTrivial;
     cv::Scalar means;
     cv::Scalar stdScales;
+};
+
+class LazyVideoWriter {
+    cv::VideoWriter writer;
+    unsigned nwritten;
+public:
+    const std::string filenames;
+    const double fps;
+    const unsigned lim;
+
+    LazyVideoWriter(const std::string& filenames, double fps, unsigned lim) :
+        nwritten{1}, filenames{filenames}, fps{fps}, lim{lim} {}
+    void write(cv::InputArray im) {
+        if (writer.isOpened() && (nwritten < lim || 0 == lim)) {
+            writer.write(im);
+            ++nwritten;
+            return;
+        }
+        if (!writer.isOpened() && !filenames.empty()) {
+            if (!writer.open(filenames, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, im.size())) {
+                throw std::runtime_error("Can't open video writer");
+            }
+            writer.write(im);
+        }
+    }
 };
