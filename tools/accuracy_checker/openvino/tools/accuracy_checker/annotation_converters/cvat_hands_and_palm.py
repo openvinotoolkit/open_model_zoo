@@ -62,6 +62,8 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
                                         description='acquire bounding box data from landmarks'),
             'padding': NumberField(optional=True, default=10, value_type=int,
                                    description='additional padding while acquiring bounding box data from landmarks'),
+            'num_keypoints': NumberField(optional=True, default=21, value_type=int,
+                                   description='Number of keypoints in dataset annotation'),
         })
         return configuration_parameters
 
@@ -71,6 +73,7 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
         self.bbox_file = self.get_value_from_config('bbox_file')
         self.from_landmarks = self.get_value_from_config('from_landmarks')
         self.padding = self.get_value_from_config('padding')
+        self.num_keypoints = self.get_value_from_config('num_keypoints')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_json(self.annotation_file)
@@ -81,11 +84,21 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
         content_errors = None if not check_content else []
         for image_id, image in enumerate(annotation['images']):
             keypoints = [t for t in annotation['annotations'] if t['image_id'] == image['id']]
-            assert len(keypoints) == 21
+            if len(keypoints) != self.num_keypoints:
+                if check_content:
+                    content_errors.append('Invalid number of keypoints in annotation: {}', len(keypoints))
+                continue
             bb_images = [t for t in annotation['images'] if t['file_name'] == image['file_name']]
-            assert len(bb_images) == 1
+            if len(bb_images) != 1:
+                if check_content:
+                    content_errors.append('Invalid number of annotations for image {}', image['file_name'])
+                continue
             bbs = [t for t in bboxes['annotations'] if t['image_id'] == bb_images[0]['id']]
-            assert len(bbs) == 1
+            if len(bbs) != 1:
+                if check_content:
+                    content_errors.append('Invalid number of bounding box in annotation for image {}',
+                                          image['file_name'])
+                continue
             bbox = bbs[0]['bbox']
 
             identifier = image['file_name'].split('/')[-1]
@@ -147,7 +160,8 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
         content_errors = None if not check_content else []
         for ann_id, ann in enumerate(annotation['annotations']):
             images = [t for t in annotation['images'] if t['id'] == ann['image_id']]
-            assert len(images) == 1
+            if len(images) != 1:
+                raise ValueError('Invalid annotation for image: {}', ann['image_id'])
             image = images[0]
             identifier = image['file_name'].split('/')[-1]
             if check_content:
