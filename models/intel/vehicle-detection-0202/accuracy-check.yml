@@ -2,7 +2,7 @@ models:
   - name: vehicle-detection-0202
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

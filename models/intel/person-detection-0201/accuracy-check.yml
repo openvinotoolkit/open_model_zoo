@@ -2,7 +2,7 @@ models:
   - name: person-detection-0201
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

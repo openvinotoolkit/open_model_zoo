@@ -2,7 +2,7 @@ models:
   - name: vehicle-license-plate-detection-barrier-0106
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

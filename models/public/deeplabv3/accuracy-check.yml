@@ -1,7 +1,7 @@
 models:
   - name: deeplabv3
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
 
     datasets:

@@ -28,7 +28,7 @@ models:
 
   - name: detr-resnet50
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: detr
           scores_out: "scores"

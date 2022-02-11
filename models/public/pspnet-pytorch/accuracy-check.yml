@@ -1,7 +1,7 @@
 models:
   - name: pspnet-pytorch
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
     datasets:
       - name: VOC2012_Segmentation

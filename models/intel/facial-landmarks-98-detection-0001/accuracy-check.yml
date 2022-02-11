@@ -2,7 +2,7 @@ models:
   - name: facial-landmarks-98-detection-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: facial_landmarks_detection
           output_blob: 3851

@@ -1,7 +1,7 @@
 models:
   - name: person-vehicle-bike-detection-crossroad-yolov3-1020
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"

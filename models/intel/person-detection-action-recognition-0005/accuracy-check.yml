@@ -2,7 +2,7 @@ models:
   - name: person-detection-action-recognition-0005
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox

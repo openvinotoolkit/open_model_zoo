@@ -31,7 +31,7 @@ models:
 
   - name: resnet-50-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

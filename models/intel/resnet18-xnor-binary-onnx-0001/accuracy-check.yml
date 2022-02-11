@@ -2,7 +2,7 @@ models:
   - name: resnet18-xnor-binary-onnx-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

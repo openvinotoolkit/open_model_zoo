@@ -2,7 +2,7 @@ models:
   - name: person-vehicle-bike-detection-2001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

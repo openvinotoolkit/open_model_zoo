@@ -2,7 +2,7 @@ models:
   - name: human-pose-estimation-0006
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_ae

@@ -43,7 +43,7 @@ models:
   - name: resnet-34-pytorch
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
