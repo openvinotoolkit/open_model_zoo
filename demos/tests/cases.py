@@ -406,8 +406,8 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         # ModelArg('face-detection-retail-0005'),  # TODO: INT8
@@ -613,7 +613,7 @@ NATIVE_DEMOS = [
             # ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
+            # ModelArg('person-reidentification-retail-0277'),  # TODO
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -1088,8 +1088,8 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1104,8 +1104,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'),
-                        ModelArg('person-vehicle-bike-detection-2004'),
+                        # ModelArg('person-vehicle-bike-detection-2003'), # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -1121,7 +1121,7 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106'),
-                        ModelArg('person-detection-0106')),
+                        # ModelArg('person-detection-0106')),  # TODO
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
@@ -1166,8 +1166,8 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
-            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
