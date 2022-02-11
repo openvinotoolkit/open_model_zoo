@@ -11,6 +11,7 @@ models:
     datasets:
       - name: smartlab
         data_source: object_detection\streams_1\top\images
+
         annotation_conversion:
           converter: mscoco_detection
           annotation_file: object_detection\streams_1\top\annotations\instances_glb1cls10.json
