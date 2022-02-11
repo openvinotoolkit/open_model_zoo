@@ -25,14 +25,57 @@ from .base_models import (
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import contains_all, extract_image_representations, parse_partial_shape
+from ...dataset import DataProvider
+
+class MultiviewDataProvider(DataProvider):
+    def __init__(self,
+    data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
+    batch=None, subdirs=None
+    ):
+        super().__init__(data_reader, annotation_provider, tag, dataset_config, data_list, subset, batch)
+        self.subdirs = subdirs
+
+    def __getitem__(self, item):
+        if self.batch is None or self._batch <= 0:
+            self.batch = 1
+        if self.size <= item * self.batch:
+            raise IndexError
+        batch_annotation = []
+        batch_start = item * self.batch
+        batch_end = min(self.size, batch_start + self.batch)
+        batch_input_ids = self.subset[batch_start:batch_end] if self.subset else range(batch_start, batch_end)
+        batch_identifiers = [self._data_list[idx] for idx in batch_input_ids]
+        batch_input = [self.read_data(identifier=identifier) for identifier in batch_identifiers]
+        if self.annotation_provider:
+            batch_annotation = [self.annotation_provider[idx] for idx in batch_identifiers]
+
+        return batch_input_ids, batch_annotation, batch_input, batch_identifiers
+
+    def read_data(self, identifier):
+        multi_idx = [f'{subdir}/{identifier}' for subdir in self.subdirs]
+        data = self.data_reader(identifier=multi_idx)
+        data.identfier = multi_idx
+        return data
 
 
 class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
-    def __init__(self, dataset_config, launcher, model, orig_config):
+    def __init__(self, dataset_config, launcher, model, orig_config, view_subdirs=None):
         super().__init__(dataset_config, launcher, orig_config)
         self.model = model
         if hasattr(self.model.decoder, 'adapter'):
             self.adapter_type = self.model.decoder.adapter.__provider__
+        self.view_subdirs = view_subdirs
+
+    def select_dataset(self, dataset_tag):
+        super().select_dataset(dataset_tag)
+        self.dataset = MultiviewDataProvider(
+            self.dataset.data_reader,
+            self.dataset.annotation_provider,
+            self.dataset.tag,
+            self.dataset.dataset_config,
+            batch=self.dataset.batch,
+            subset=self.dataset.subset,
+            subdirs=self.view_subdirs)
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
@@ -41,7 +84,8 @@ class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model, orig_config)
+        view_subdirs = config.get('view_subdirs', [])
+        return cls(dataset_config, launcher, model, orig_config, view_subdirs)
 
     def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
@@ -92,6 +136,7 @@ class SequentialModel(BaseCascadeModel):
         predictions = []
         if len(np.shape(input_data)) == 5:
             input_data = input_data[0]
+        encoder_preds = []
         for data in input_data:
             encoder_prediction = self.encoder.predict(identifiers, [data])
             if isinstance(encoder_prediction, tuple):
@@ -100,11 +145,10 @@ class SequentialModel(BaseCascadeModel):
                 raw_encoder_prediction = encoder_prediction
             if encoder_callback:
                 encoder_callback(raw_encoder_prediction)
-            if len(self.processing_frames_buffer) == self.num_processing_frames:
-                raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
-                raw_outputs.append(raw_output)
-                predictions.append(prediction)
-                self.processing_frames_buffer = []
+            encoder_preds.append(encoder_prediction)
+        raw_output, prediction = self.decoder.predict(identifiers, encoder_preds)
+        raw_outputs.append(raw_output)
+        predictions.append(prediction)
 
         return raw_outputs, predictions
 
@@ -148,7 +192,6 @@ class EncoderOpenVINO(BaseOpenVINOModel):
 class DecoderDLSDKModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.adapter = create_adapter(network_info.get('adapter', 'classification'))
-        self.num_processing_frames = network_info.get('num_processing_frames', 16)
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.adapter.output_blob = self.output_blob
 
@@ -163,19 +206,22 @@ class DecoderDLSDKModel(BaseDLSDKModel):
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
+        inputs = {}
         input_info = (
-            self.exec_network.input_info[self.input_blob].input_data
-            if has_info else self.exec_network.inputs[self.input_blob]
+            self.exec_network.input_info
+            if has_info else self.exec_network.inputs
         )
-        if not input_info.is_dynamic:
-            input_data = np.reshape(input_data, input_info.shape)
-        return {self.input_blob: np.array(input_data)}
+        for input_name, data in zip(input_info, input_data):
+            info = input_info[input_name] if not has_info else input_info[input_name].input_data
+            if not info.is_dynamic:
+                data = np.reshape(data, input_info.shape)
+                inputs[input_name] = data
+        return inputs
 
 
 class DecoderOpenVINOModel(BaseOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.adapter = create_adapter(network_info.get('adapter', 'classification'))
-        self.num_processing_frames = network_info.get('num_processing_frames', 16)
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.adapter.output_blob = self.output_blob
 
@@ -189,7 +235,9 @@ class DecoderOpenVINOModel(BaseOpenVINOModel):
         return raw_node_result, result
 
     def fit_to_input(self, input_data):
-        input_info = self.inputs[self.input_blob]
-        if not input_info.get_partial_shape().is_dynamic:
-            input_data = np.reshape(input_data, input_info.shape)
-        return {self.input_blob: np.array(input_data)}
+        inputs = {}
+        for (input_name, input_info), data in zip(self.inputs.items(), input_data):
+            if not input_info.get_partial_shape().is_dynamic:
+                data = np.reshape(data, input_info.shape)
+                inputs[input_name] = data
+        return inputs
