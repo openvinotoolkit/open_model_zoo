@@ -33,7 +33,7 @@ from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, 
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_latency_per_stage
-from drawing_utils import ColorPalette
+from visualizers import ColorPalette
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

@@ -32,7 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
-from drawing_utils import InstanceSegmentationVisualizer
+from visualizers import InstanceSegmentationVisualizer
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
