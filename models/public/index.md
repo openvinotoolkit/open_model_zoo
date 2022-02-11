@@ -199,7 +199,7 @@ The task of action recognition is to predict action that is being performed on a
 
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 65.96%/86.01% | 278.9815 | 12.6900|
+| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 64.83%/84.58% | 278.9815 | 12.6900|
 | common-sign-language-0001         | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Colorization
