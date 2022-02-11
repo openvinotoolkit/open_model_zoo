@@ -25,9 +25,7 @@
 class ModelBase {
 public:
     ModelBase(const std::string& modelFileName, const std::string& layout = "")
-        : modelFileName(modelFileName) {
-        inputsLayouts = parseLayoutString(layout);
-    }
+        : modelFileName(modelFileName), inputsLayouts(parseLayoutString(layout)) {}
 
     virtual ~ModelBase() {}
 

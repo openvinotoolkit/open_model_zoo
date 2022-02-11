@@ -103,7 +103,6 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
         convert_element_type(ov::element::f32).
         resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
 
-
     ppp.input().model().set_layout(inputLayout);
 
     // --------------------------- Prepare output  -----------------------------------------------------
