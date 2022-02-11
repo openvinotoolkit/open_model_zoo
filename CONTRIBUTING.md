@@ -214,7 +214,7 @@ This example uses validation configuration file for [DenseNet-121](models/public
 models:
   - name: densenet-121-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
