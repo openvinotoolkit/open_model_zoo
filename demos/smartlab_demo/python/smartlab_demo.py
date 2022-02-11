@@ -44,13 +44,8 @@ def build_argparser():
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
     args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
-    subparsers = parser.add_subparsers(help='add sub-command parser for multiview mode and mstcn mode')
-    args_mutiview = subparsers.add_parser('multiview', help='sub-command for multiview action recognition mode')
-    args_mutiview.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
-    args_mutiview.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
-    args_mstcn = subparsers.add_parser('mstcn', help='sub-command for mstcn action recognition mode')
-    args_mstcn.add_argument('-m_i3d', '--m_i3d', help='Required. Path to i3d model.', required=True, type=str)
-    args_mstcn.add_argument('-m_mstcn', '--m_mstcn', help='Required. Path to mstcn model.', required=True, type=str)
+    args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
+    args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
 
     return parser
 
@@ -74,7 +69,7 @@ def main():
     if(args.mode == "multiview"):
         segmentor = Segmentor(ie, args.device, args.m_encoder, args.m_decoder)
     elif(args.mode == "mstcn"):
-        segmentor = SegmentorMstcn(ie, args.device, args.m_i3d, args.m_mstcn)
+        segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()

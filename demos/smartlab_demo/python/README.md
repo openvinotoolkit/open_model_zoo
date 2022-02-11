@@ -44,14 +44,14 @@ omz_converter --list models.lst
 ```
 
 ### Supported Models
-smartlab-action-recognition-encoder-0001
-smartlab-action-recognition-decoder-0001
-smartlab-object-detection-0001
-smartlab-object-detection-0002
-smartlab-object-detection-0003
-smartlab-object-detection-0004
-smartlab-sequence-modelling-0001
-i3d-rgb-tf
+* smartlab-action-recognition-encoder-0001
+* smartlab-action-recognition-decoder-0001
+* smartlab-object-detection-0001
+* smartlab-object-detection-0002
+* smartlab-object-detection-0003
+* smartlab-object-detection-0004
+* smartlab-sequence-modelling-0001
+* i3d-rgb-tf
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -70,7 +70,6 @@ python3 smartlab_demo.py
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
     -m multiview
-    multiview
     -m_en "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-encoder-0001/FP32/smartlab-action-recognition-encoder-0001.xml"
     -m_de "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-decoder-0001/FP32/smartlab-action-recognition-decoder-0001.xml"
 ```
