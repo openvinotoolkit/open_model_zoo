@@ -4,6 +4,7 @@ datasets:
       converter: background_matting_sequential
       images_dir: HumanMattingClips120
       masks_dir: HumanMattingClips120
+      backgrounds_dir: HumanMattingClips120
       image_prefix: com/
       mask_prefix: fgr/
       background_prefix: bgr/

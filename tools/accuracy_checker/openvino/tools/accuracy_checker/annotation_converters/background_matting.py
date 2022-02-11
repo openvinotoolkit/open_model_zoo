@@ -135,6 +135,29 @@ class VideoBackgroundMatting(BackgroundMattingConverter):
 class BackgroundMattingSequential(BackgroundMattingConverter):
     __provider__ = 'background_matting_sequential'
 
+    @classmethod
+    def parameters(cls):
+        configuration_parameters = super().parameters()
+        configuration_parameters.update(
+            {
+                'backgrounds_dir': PathField(description='path to input backgrounds directory', is_directory=True),
+                'background_prefix': StringField(optional=True, default='', description='prefix for gt backgrounds'),
+                'background_postfix': StringField(optional=True, default='.png', description='prefix for backgrounds'),
+                'with_background': BoolField(optional=True, default=False, description='load backgrounds'),
+                'with_alpha': BoolField(optional=True, default=False,
+                                        description='load images with mask including alpha channel'),
+            }
+        )
+        return configuration_parameters
+
+    def configure(self):
+        super().configure()
+        self.backgrounds_dir = self.get_value_from_config('backgrounds_dir')
+        self.background_prefix = self.get_value_from_config('background_prefix')
+        self.background_postfix = self.get_value_from_config('background_postfix')
+        self.with_background = self.get_value_from_config('with_background')
+        self.with_alpha = self.get_value_from_config('with_alpha')
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
         image_name = '{prefix}{clip}/{base}{postfix}'.format(
@@ -172,7 +195,7 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                     bgr_name = '{prefix}{clip}/{base}{postfix}'.format(
                         prefix=self.background_prefix, clip=clip_name, base=base_name, postfix=self.background_postfix
                     )
-                    bgr_file = self.images_dir / bgr_name
+                    bgr_file = self.backgrounds_dir / bgr_name
                     if not bgr_file.exists():
                         continue
                     identifier = [identifier, bgr_name]
