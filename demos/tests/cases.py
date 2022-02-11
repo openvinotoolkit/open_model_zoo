@@ -423,8 +423,8 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'),
-                        ModelArg('person-vehicle-bike-detection-2004'),
+                        # ModelArg('person-vehicle-bike-detection-2003'),  # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
                         # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
@@ -675,7 +675,7 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
+            # ModelArg('instance-segmentation-person-0007'),  # TODO
             ModelArg('instance-segmentation-security-0091')),
     ))
 
