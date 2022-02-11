@@ -204,11 +204,15 @@ static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
 
 static inline ov::Layout getLayoutFromShape(const ov::Shape& shape) {
     if (shape.size() == 2) {
-        return { "NC" };
+        return "NC";
+    }
+    else if (shape.size() == 3) {
+        return (shape[0] >= 1 && shape[0] <= 4) ? "CHW" :
+                                                  "HWC";
     }
     else if (shape.size() == 4) {
-        return (shape[1] >= 1 && shape[1] <= 4) ? ov::Layout{"NCHW"} :
-                                                  ov::Layout{"NHWC"};
+        return (shape[1] >= 1 && shape[1] <= 4) ? "NCHW" :
+                                                  "NHWC";
     }
     else {
         throw std::runtime_error("Usupported " + std::to_string(shape.size()) + "D shape");

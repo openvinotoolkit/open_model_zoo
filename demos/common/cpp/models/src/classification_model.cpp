@@ -116,7 +116,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
             " 2-dimensional or 4-dimensional output");
     }
 
-    const ov::Layout outputLayout("NC...");
+    const ov::Layout outputLayout("NCHW");
     if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout)] != 1
         || outputShape[ov::layout::width_idx(outputLayout)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only"
