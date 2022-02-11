@@ -139,21 +139,7 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     for (const auto& input : model->inputs()) {
         auto inputTensorName = input.get_any_name();
         const ov::Shape& shape = input.get_shape();
-
-        ov::Layout inputLayout;
-        if (!layouts.empty()) {
-            if (layouts.size() == 1) {
-                inputLayout = layouts.begin()->second;
-            }
-            else {
-                inputLayout = layouts[inputTensorName];
-            }
-        }
-        else {
-            inputLayout = getLayoutFromShape(shape);
-            slog::warn << "Layout for input \"" << input.get_any_name() << "\" was not set explicitly. "
-                << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-        }
+        ov::Layout inputLayout = getInputLayout(input);
 
         if (shape.size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {

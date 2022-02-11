@@ -44,16 +44,8 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     if (lrShape.size() != 4) {
         throw std::logic_error("Number of dimensions for an input must be 4");
     }
-
-    ov::Layout inputLayout;
-    if (!layouts.empty()) {
-        inputLayout = layouts.begin()->second;
-    }
-    else {
-        inputLayout = getLayoutFromShape(model->inputs().front().get_shape());
-        slog::warn << "Layout for input \"" << model->inputs().front().get_any_name() << "\" was not set explicitly. "
-            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-    }
+    // in case of 2 inputs they have same layouts
+    ov::Layout inputLayout = getInputLayout(model->input());
 
     auto channelsId = ov::layout::channels_idx(inputLayout);
     auto heightId = ov::layout::height_idx(inputLayout);

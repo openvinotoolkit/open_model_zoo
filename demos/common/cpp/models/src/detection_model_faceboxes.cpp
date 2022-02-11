@@ -35,15 +35,7 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout;
-    if (!layouts.empty()) {
-        inputLayout = layouts.begin()->second;
-    }
-    else {
-        inputLayout = getLayoutFromShape(model->input().get_shape());
-        slog::warn << "Layout for input \"" << model->input().get_any_name() << "\" was not set explicitly. "
-            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-    }
+    ov::Layout inputLayout = getInputLayout(model->input());
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("Expected 3-channel input");

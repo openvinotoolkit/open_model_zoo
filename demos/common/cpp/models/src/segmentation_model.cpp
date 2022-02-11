@@ -53,15 +53,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
-    ov::Layout inputLayout;
-    if (!layouts.empty()) {
-        inputLayout = layouts.begin()->second;
-    }
-    else {
-        inputLayout = getLayoutFromShape(input.get_shape());
-        slog::warn << "Layout for input \"" << input.get_any_name() << "\" was not set explicitly. "
-            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-    }
+    ov::Layout inputLayout = getInputLayout(input);
 
     const ov::Shape& inputShape = input.get_shape();
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {

@@ -26,7 +26,7 @@ class ModelBase {
 public:
     ModelBase(const std::string& modelFileName, const std::string& layout = "")
         : modelFileName(modelFileName) {
-        layouts = parseLayoutString(layout);
+        inputsLayouts = parseLayoutString(layout);
     }
 
     virtual ~ModelBase() {}
@@ -56,5 +56,6 @@ protected:
     ov::CompiledModel compiledModel;
     std::string modelFileName;
     ModelConfig config = {};
-    std::map<std::string, ov::Layout> layouts;
+    std::map<std::string, ov::Layout> inputsLayouts;
+    ov::Layout getInputLayout(const ov::Output<ov::Node>& input);
 };

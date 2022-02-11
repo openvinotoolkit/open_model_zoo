@@ -79,15 +79,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     inputsNames.push_back(input.get_any_name());
 
     const ov::Shape& inputShape = input.get_shape();
-    ov::Layout inputLayout;
-    if (!layouts.empty()) {
-        inputLayout = layouts.begin()->second;
-    }
-    else {
-        inputLayout = getLayoutFromShape(inputShape);
-        slog::warn << "Layout for input \"" << input.get_any_name() << "\" was not set explicitly. "
-            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-    }
+    ov::Layout inputLayout = getInputLayout(input);
 
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");

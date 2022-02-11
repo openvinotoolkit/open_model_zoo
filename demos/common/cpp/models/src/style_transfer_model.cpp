@@ -39,15 +39,7 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     inputsNames.push_back(model->input().get_any_name());
 
     const ov::Shape& inputShape = model->input().get_shape();
-    ov::Layout inputLayout;
-    if (!layouts.empty()) {
-        inputLayout = layouts.begin()->second;
-    }
-    else {
-        inputLayout = getLayoutFromShape(inputShape);
-        slog::warn << "Layout for input \"" << model->input().get_any_name() << "\" was not set explicitly. "
-            << "Automatically detected layout \"" << inputLayout.to_string() << "\" will be used." << slog::endl;
-    }
+    ov::Layout inputLayout = getInputLayout(model->input());
 
     if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
         || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
