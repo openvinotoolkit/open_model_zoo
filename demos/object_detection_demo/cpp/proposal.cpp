@@ -3,7 +3,12 @@
 //
 
 #include "proposal_common.hpp"
+#include <models/detection_model_centernet.h>
+#include <models/detection_model_faceboxes.h>
+#include <models/detection_model_retinaface.h>
+#include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
+#include <models/detection_model_yolo.h>
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
 
@@ -83,6 +88,13 @@ DEFINE_double(t, 0.5, t_msg);
 constexpr char u_msg[] = "Resource [U]tilization graphs: -u cdm. "
     "c - average [C]PU load, d - load [D]istrobution over cores, m - [M]emory usage";
 DEFINE_string(u, "cdm", u_msg);
+static const char layout_message[] = "Optional. Model inputs layouts. "
+"Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";;
+DEFINE_string(layout, "", layout_message);
+DEFINE_double(iou_t, 0.5, "");
+DEFINE_bool(yolo_af, true, "");
+DEFINE_string(anchors, "", "");
+DEFINE_string(masks, "", "");
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
@@ -109,6 +121,7 @@ void parse(int argc, char *argv[]) {
              << "\n\t[--scale_values] <1.0 1.0 1.0>         " << scale_values_msg
              << "\n\t[ -t] <0.5>                            " << t_msg
              << "\n\t[ -u] <cdm>                            " << u_msg
+             << "    -layout \"<string>\"        " << layout_message
              << "\n\tKey bindings:"
                 "\n\t\tQ, Esc - [Q]uit"
                 "\n\t\tP, 0, spacebar - [P]ause"
@@ -127,7 +140,45 @@ void parse(int argc, char *argv[]) {
 unique_ptr<Processor> create(const string& aarchitecture_type, const string& weights,
         double confidence_threshold, const vector<string>& labels,
         bool reverse_nput_channels, const string &mean_values, const string &scale_values) {
-    return unique_ptr<Processor>(new SSD(weights, float(confidence_threshold), labels));
+    std::unique_ptr<ModelBase> processor;
+    if (FLAGS_at == "centernet") {
+        processor.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels, FLAGS_layout));
+    } else if (FLAGS_at == "faceboxes") {
+        processor.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
+    } else if (FLAGS_at == "retinaface") {
+        processor.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
+    } else if (FLAGS_at == "retinaface-pytorch") {
+        processor.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, (float)FLAGS_iou_t, FLAGS_layout));
+    } else if (FLAGS_at == "ssd") {
+        processor.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, labels, FLAGS_layout));
+    } else if (FLAGS_at == "yolo") {
+        const auto& strAnchors = split(FLAGS_anchors, ',');
+        const auto& strMasks = split(FLAGS_masks, ',');
+
+        std::vector<float> anchors;
+        std::vector<int64_t> masks;
+        try {
+            for (auto& str : strAnchors) {
+                anchors.push_back(std::stof(str));
+            }
+        } catch(...) {
+            throw std::runtime_error("Invalid anchors list is provided.");
+        }
+
+        try {
+            for (auto& str : strMasks) {
+                masks.push_back(std::stoll(str));
+            }
+        }
+        catch (...) {
+            throw std::runtime_error("Invalid masks list is provided.");
+        }
+        processor.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks, FLAGS_layout));
+    } else {
+        throw std::runtime_error("No model type or invalid model type (-at) provided: " + FLAGS_at);
+    }
+    processor->setInputsPreprocessing(reverse_nput_channels, mean_values, scale_values);
+    return processor;
 }
 
 // Input image is stored inside metadata, as we put it there during submission stage
@@ -178,18 +229,17 @@ cv::Mat render_detection_data(DetectionResult& result, const ColorPalette& palet
 
     return outputImg;
 }
-}  // namespace
 
 struct TimedMat {
     cv::Mat mat;
     chrono::steady_clock::time_point start;
 };
+}  // namespace
 
 int main(int argc, char *argv[]) {
     set_terminate(catcher);
     parse(argc, argv);
     OutputTransform output_transform;
-    LazyVideoWriter video_writer;
     Presenter presenter(FLAGS_u);
     PerformanceMetrics render_metrics;
     PerformanceMetrics metrics;
@@ -198,12 +248,11 @@ int main(int argc, char *argv[]) {
         labels = DetectionModel::loadLabels(FLAGS_l);
     }
     ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
-    unique_ptr<Processor> ssd = create(FLAGS_at, FLAGS_m, FLAGS_t, labels,
+    unique_ptr<Processor> processor = create(FLAGS_at, FLAGS_m, FLAGS_t, labels,
             FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
-    ssd->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
     ov::Core core;
     auto cnnConfig = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
-    auto cml = ssd->compileModel(cnnConfig, core);
+    auto cml = processor->compileModel(cnnConfig, core);
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
         try {
@@ -214,21 +263,22 @@ int main(int argc, char *argv[]) {
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
-    vector<ov::InferRequest> ireqs;
+    vector<ov::InferRequest> ireqs;  // TODO: factory
     while (ireqs.size() < nireq) {
         ireqs.push_back(cml.create_infer_request());
     }
-    OVAdapter<TimedMat> inferer(ireqs);
-    shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, nireq > 1);
+    OvInferer<TimedMat> inferer(ireqs);
+    unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+    LazyVideoWriter video_writer{FLAGS_o, cap->fps(), FLAGS_lim};
 
-    for (auto state : inferer.iterate) {
+    for (const auto& state : OvInferer<TimedMat>::Iterate{inferer}) {
         TimedMat* timed_mat = state->data();
         if (nullptr == timed_mat) {
             auto start = chrono::steady_clock::now();
             const cv::Mat& mat = cap->read();
             if (mat.data) {
-                ssd->preprocess(ImageInputData{mat}, state->ireq);
-                inferer.submit(std::move(state->ireq), {std::move(mat), start});
+                processor->preprocess(ImageInputData{mat}, state->ireq);
+                inferer.submit(std::move(state->ireq), {mat, start});
             } else {
                 inferer.end();
             }
@@ -239,16 +289,16 @@ int main(int argc, char *argv[]) {
         inf_res.metaData = std::make_shared<ImageMetaData>(timed_mat->mat, timed_mat->start);  // TODO align order time and mat args in my meta and theirs
         inf_res.internalModelData = make_shared<InternalImageModelData>(timed_mat->mat.cols, timed_mat->mat.rows);
         inf_res.outputsData = {{"", state->ireq.get_output_tensor()}};
-        std::unique_ptr<ResultBase> result = ssd->postprocess(inf_res);  // TODO process req and timed_mat inhere
+        std::unique_ptr<ResultBase> result = processor->postprocess(inf_res);  // TODO process req and timed_mat inhere
         auto render_start = chrono::steady_clock::now();
         const cv::Mat& out_im = render_detection_data(result->asRef<DetectionResult>(), palette, output_transform);
         presenter.drawGraphs(out_im);
         render_metrics.update(render_start);
         metrics.update(timed_mat->start,
-            timed_mat->mat, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            out_im, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
         video_writer.write(out_im);
         if (FLAGS_s) {
-            cv::imshow(argv[0], timed_mat->mat);
+            cv::imshow(argv[0], out_im);
             int key = cv::pollKey();
             if ('P' == key || 'p' == key || '0' == key || ' ' == key) {
                 key = cv::waitKey(0);
@@ -258,9 +308,13 @@ int main(int argc, char *argv[]) {
             }
             presenter.handleKey(key);
         }
+        timed_mat->mat = cv::Mat();  // TODO: mem leak
     }
-    // logLatencyPerStage(cap->getMetrics().getTotal().latency, inferer.getPreprocessMetrics().getTotal().latency,
-    //     inferer.getInferenceMetircs().getTotal().latency, inferer.getPostprocessMetrics().getTotal().latency,
-    //     render_metrics.getTotal().latency);
+    slog::info << "Metrics report:" << slog::endl;
+    metrics.logTotal();
+    logLatencyPerStage(cap->getMetrics().getTotal().latency, cap->getMetrics().getTotal().latency,  // TODO
+        render_metrics.getTotal().latency, render_metrics.getTotal().latency,
+        render_metrics.getTotal().latency);
+    slog::info << presenter.reportMeans() << slog::endl;
     return 0;
 }

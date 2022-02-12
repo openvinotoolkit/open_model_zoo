@@ -85,12 +85,6 @@ public:
     }
 };
 
-struct LazyVideoWriter {
-    void write(const cv::Mat&) {
-        // Opens cv::VideoWriter at first write
-    }
-};
-
 struct LockedExceptions {
     std::forward_list<std::exception_ptr> exceptions;
     std::mutex mtx;
@@ -99,8 +93,8 @@ struct LockedExceptions {
         const std::lock_guard<std::mutex> lock{mtx};
         exceptions.push_front(exception);
     }
-    bool empty() {  // TODO: atomic
-        // const std::lock_guard<std::mutex> lock{mtx};
+    bool empty() {  // TODO: need atomic?
+        const std::lock_guard<std::mutex> lock{mtx};
         return exceptions.empty();
     }
     void may_rethrow() {
@@ -114,8 +108,9 @@ struct LockedExceptions {
         }
     }
 };
+
 template<typename Meta>
-struct OVAdapter {
+struct OvInferer {
     struct State {
         State(ov::InferRequest&& ireq): ireq{std::move(ireq)} {}
         ov::InferRequest ireq;
@@ -126,12 +121,12 @@ struct OVAdapter {
         Meta meta;
         Meta* data() override {return &meta;}
     };
-    struct {
-        OVAdapter& inferer;
+    struct Iterate {
+        OvInferer& inferer;
         struct InputIt {
-            OVAdapter& inferer;
+            OvInferer& inferer;
 
-            InputIt(OVAdapter& inferer) : inferer{inferer} {}
+            InputIt(OvInferer& inferer) : inferer{inferer} {}
 
             bool operator!=(InputIt) const noexcept {return !inferer.stop_submit || inferer.nbusy;};
             InputIt& operator++() {return *this;}
@@ -139,7 +134,7 @@ struct OVAdapter {
         };
         InputIt begin() {return inferer;}
         InputIt end() {return inferer;}
-    } iterate{*this};
+    };
     struct Input {
         Meta meta;
         unsigned idx;
@@ -150,17 +145,16 @@ struct OVAdapter {
     unsigned in_idx, out_idx;
     std::atomic<unsigned> nbusy;
     bool stop_submit;
-    std::mutex completed_ireqs_mutex;  // TODO: mtx
+    std::mutex completed_ireqs_mtx;
     std::condition_variable cv;
     LockedExceptions exceptions;
 public:
-    OVAdapter(std::vector<ov::InferRequest> ireqs) : in_idx{0}, out_idx{0}, nbusy{0}, stop_submit{false},
-        all_ireqs{ireqs} {
-            for (auto ireq: ireqs) {
-                empty_ireqs.push(ireq);
-            }
+    OvInferer(std::vector<ov::InferRequest> ireqs) : in_idx{0}, out_idx{0}, nbusy{0}, stop_submit{false}, all_ireqs{ireqs} {
+        for (auto ireq: ireqs) {
+            empty_ireqs.push(ireq);
         }
-    ~OVAdapter() {
+    }
+    ~OvInferer() {
         for (ov::InferRequest& ireq : all_ireqs) {
             ireq.cancel();
         }
@@ -186,14 +180,14 @@ public:
                 --nbusy;
                 std::unique_ptr<WithData> data(new WithData{std::move(ireq), std::move(meta)});
                 {
-                    const std::lock_guard<std::mutex> lock{completed_ireqs_mutex};
+                    const std::lock_guard<std::mutex> lock{completed_ireqs_mtx};
                     completed_ireqs.emplace(in_idx_copy, std::move(data));
                 }
             } catch (...) {
                 exceptions.push_front(std::current_exception());
             }
-            ireq = ov::InferRequest{};
             cv.notify_one();
+            ireq = ov::InferRequest{};
         });
         ++nbusy;
         ireq.start_async();
@@ -203,7 +197,7 @@ public:
     std::unique_ptr<State> state() {
         exceptions.may_rethrow();
         {
-            std::unique_lock<std::mutex> lock{completed_ireqs_mutex};
+            std::unique_lock<std::mutex> lock{completed_ireqs_mtx};
             auto it = completed_ireqs.find(out_idx);
             if (completed_ireqs.end() != it) {
                 std::unique_ptr<WithData> res = std::move(it->second);
@@ -220,7 +214,7 @@ public:
             return res;
         }
         {
-            std::unique_lock<std::mutex> lock{completed_ireqs_mutex};
+            std::unique_lock<std::mutex> lock{completed_ireqs_mtx};
             while (completed_ireqs.end() == completed_ireqs.find(out_idx) && exceptions.empty()) {
                 cv.wait(lock);
             }
