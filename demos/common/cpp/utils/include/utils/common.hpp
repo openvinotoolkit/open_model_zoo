@@ -290,7 +290,7 @@ inline void logCompiledModelInfo(
         for (const auto& device : devices) {
             try {
                 slog::info << "\tDevice: " << device << slog::endl;
-                int32_t nstreams = compiledModel.get_property(ov::num_streams);
+                int32_t nstreams = compiledModel.get_property(ov::streams::num);
                 slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
                 if (device == "CPU") {
                     int32_t nthreads = compiledModel.get_property(ov::inference_num_threads);

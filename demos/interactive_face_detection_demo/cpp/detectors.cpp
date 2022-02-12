@@ -207,7 +207,7 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
     }
     ov::Tensor batch = request.get_input_tensor();
     batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -259,7 +259,7 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
     }
     ov::Tensor batch = request.get_input_tensor();
     batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -317,7 +317,7 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
     }
     ov::Tensor batch = request.get_input_tensor();
     batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -374,7 +374,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
     }
     ov::Tensor batch = request.get_input_tensor();
     batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -452,7 +452,7 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
     }
     ov::Tensor batch = request.get_input_tensor();
     batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 

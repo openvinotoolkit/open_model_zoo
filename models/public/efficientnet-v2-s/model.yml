@@ -50,7 +50,6 @@ model_optimizer_args:
   - --input_shape=[1,3,384,384]
   - --input=input
   - --input_model=$conv_dir/efficientnet-v2-s.onnx
-  - --layout=input(NCHW)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5,127.5,127.5]
   - --reverse_input_channels

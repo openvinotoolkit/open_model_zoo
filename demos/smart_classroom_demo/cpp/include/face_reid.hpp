@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2022 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -25,8 +25,8 @@ struct GalleryObject {
     int id;
 
     GalleryObject(const std::vector<cv::Mat>& embeddings,
-                  const std::string& label, int id) :
-        embeddings(embeddings), label(label), id(id) {}
+                  const std::string& label, int id)
+        : embeddings(embeddings), label(label), id(id) {}
 };
 
 class EmbeddingsGallery {
@@ -34,7 +34,7 @@ public:
     static const char unknown_label[];
     static const int unknown_id;
     EmbeddingsGallery(const std::string& ids_list, double threshold, int min_size_fr,
-                      bool crop_gallery, const detection::DetectorConfig& detector_config,
+                      bool crop_gallery, const detection::DetectorConfig &detector_config,
                       const VectorCNN& landmarks_det,
                       const VectorCNN& image_reid,
                       bool use_greedy_matcher=false);
@@ -52,7 +52,7 @@ private:
                                         detection::FaceDetection& detector,
                                         const VectorCNN& landmarks_det,
                                         const VectorCNN& image_reid,
-                                        cv::Mat& embedding);
+                                        cv::Mat & embedding);
     std::vector<int> idx_to_id;
     double reid_threshold;
     std::vector<GalleryObject> identities;

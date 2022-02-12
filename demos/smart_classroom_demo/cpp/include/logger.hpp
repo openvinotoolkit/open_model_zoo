@@ -1,24 +1,30 @@
-// Copyright (C) 2018-2022 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
 #include <vector>
+#include <deque>
+#include <set>
+#include <unordered_map>
 #include <map>
+#include <string>
 #include <iostream>
-
 #include <opencv2/opencv.hpp>
-#include <utils/slog.hpp>
+#include <sstream>
+#include <details/ie_exception.hpp>
 #include "tracker.hpp"
+#include <utils/slog.hpp>
+
 #include "actions.hpp"
 
 class DetectionsLogger {
 private:
-    bool m_write_logs;
-    std::ofstream m_act_stat_log_stream;
-    cv::FileStorage m_act_det_log_stream;
-    slog::LogStream& m_log_stream;
+    bool write_logs_;
+    std::ofstream act_stat_log_stream_;
+    cv::FileStorage act_det_log_stream_;
+    slog::LogStream& log_stream_;
 
 
 public:

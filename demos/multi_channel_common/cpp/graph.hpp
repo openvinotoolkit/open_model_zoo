@@ -29,13 +29,13 @@ static inline size_t roundUp(size_t enumerator, size_t denominator) {
 
 static inline std::queue<ov::InferRequest> compile(std::shared_ptr<ov::Model>&& model, const std::string& modelPath,
         const std::string& device, size_t performanceHintNumRequests, ov::Core& core) {
-    core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
+    core.set_property("CPU", {{"CPU_BIND_THREAD", "NO"}});
     ov::CompiledModel compiled = core.compile_model(model, device, {
-        {ov::hint::performance_mode(ov::hint::PerformanceMode::THROUGHPUT)},
-        {ov::hint::num_requests(performanceHintNumRequests)}});
-    unsigned maxRequests = compiled.get_property(ov::optimal_number_of_infer_requests) + 1;
+        {"PERFORMANCE_HINT", "THROUGHPUT"},
+        {"PERFORMANCE_HINT_NUM_REQUESTS", std::to_string(performanceHintNumRequests)}});
+    unsigned maxRequests = compiled.get_property("OPTIMAL_NUMBER_OF_INFER_REQUESTS").as<unsigned>() + 1;
     logCompiledModelInfo(compiled, modelPath, device);
-    slog::info << "\tNumber of network inference requests: " << std::to_string(maxRequests) << slog::endl;
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
     std::queue<ov::InferRequest> reqQueue;
     for (unsigned i = 0; i < maxRequests; ++i) {
         reqQueue.push(compiled.create_infer_request());

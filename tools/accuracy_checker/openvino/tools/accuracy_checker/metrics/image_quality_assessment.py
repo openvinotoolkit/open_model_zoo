@@ -111,8 +111,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
-        prediction = np.squeeze(np.asarray(prediction_image)).astype(float)
-        ground_truth = np.squeeze(np.asarray(annotation_image)).astype(float)
+        prediction = np.squeeze(np.asarray(prediction_image)).astype(np.float)
+        ground_truth = np.squeeze(np.asarray(annotation_image)).astype(np.float)
 
         height, width = prediction.shape[:2]
         prediction = prediction[
@@ -123,11 +123,6 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        if np.ndim(ground_truth) == 3 and prediction.ndim == 2:
-            ground_truth = cv2.cvtColor(
-                ground_truth.astype(np.float32),
-                cv2.COLOR_BGR2GRAY if self.color_order == 'BGR' else cv2.COLOR_RGB2GRAY
-            ).astype(float)
         image_difference = (prediction - ground_truth) / self.color_scale
         if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
             r_channel_diff = image_difference[:, :, self.channel_order[0]]
