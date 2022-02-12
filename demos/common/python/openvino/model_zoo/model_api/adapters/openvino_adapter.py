@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
 """
 
 import logging as log
-from collections import deque
 from pathlib import Path
 
 try:
-    from openvino.inference_engine import IECore, get_version
-    import ngraph
+    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version
     openvino_absent = False
 except ImportError:
     openvino_absent = True
 
 from .model_adapter import ModelAdapter, Metadata
+from .utils import Layout
 from ..pipelines import parse_devices
 
 
@@ -35,7 +34,7 @@ def create_core():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    return IECore()
+    return Core()
 
 
 class OpenvinoAdapter(ModelAdapter):
@@ -43,12 +42,13 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     """
 
-    def __init__(self, ie, model_path, weights_path=None, device='CPU', plugin_config=None, max_num_requests=1):
-        self.ie = ie
+    def __init__(self, core, model_path, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
+        self.core = core
         self.model_path = model_path
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
+        self.model_parameters = model_parameters
 
         if isinstance(model_path, (str, Path)):
             if Path(model_path).suffix == ".onnx" and weights_path:
@@ -57,19 +57,17 @@ class OpenvinoAdapter(ModelAdapter):
 
         self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
         log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
-        self.net = ie.read_network(model_path, weights_path, self.model_from_buffer)
+        weights = weights_path if self.model_from_buffer else ''
+        self.model = core.read_model(model_path, weights)
 
     def load_model(self):
-        self.exec_net = self.ie.load_network(self.net, self.device,
-            self.plugin_config, self.max_num_requests)
+        self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
+        self.async_queue = AsyncInferQueue(self.compiled_model, self.max_num_requests)
         if self.max_num_requests == 0:
-            # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
             # +1 to use it as a buffer of the pipeline
-            self.exec_net = self.ie.load_network(self.net, self.device,
-                self.plugin_config, len(self.exec_net.requests) + 1)
+            self.async_queue = AsyncInferQueue(self.compiled_model, len(self.async_queue) + 1)
 
         log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
-        self.empty_requests = deque(self.exec_net.requests)
         self.log_runtime_settings()
 
     def log_runtime_settings(self):
@@ -77,64 +75,85 @@ class OpenvinoAdapter(ModelAdapter):
         if 'AUTO' not in devices:
             for device in devices:
                 try:
-                    nstreams = self.exec_net.get_config(device + '_THROUGHPUT_STREAMS')
+                    nstreams = self.compiled_model.get_property(device + '_THROUGHPUT_STREAMS')
                     log.info('\tDevice: {}'.format(device))
                     log.info('\t\tNumber of streams: {}'.format(nstreams))
                     if device == 'CPU':
-                        nthreads = self.exec_net.get_config('CPU_THREADS_NUM')
+                        nthreads = self.compiled_model.get_property('CPU_THREADS_NUM')
                         log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
                 except RuntimeError:
                     pass
-        log.info('\tNumber of network infer requests: {}'.format(len(self.exec_net.requests)))
+        log.info('\tNumber of model infer requests: {}'.format(len(self.async_queue)))
 
     def get_input_layers(self):
         inputs = {}
-        for name, layer in self.net.input_info.items():
-            inputs[name] = Metadata(layer.input_data.shape, layer.input_data.precision)
+        self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
+        for input in self.model.inputs:
+            input_layout = self.get_layout_for_input(input)
+            inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
+    def get_layout_for_input(self, input) -> str:
+        input_layout = ''
+        if self.model_parameters['input_layouts']:
+            input_layout = Layout.from_user_layouts(input.get_names(), self.model_parameters['input_layouts'])
+        if not input_layout:
+            if not layout_helpers.get_layout(input).empty:
+                input_layout = Layout.from_openvino(input)
+            elif len(input.shape) == 4:
+                input_layout = Layout.from_shape(input.shape)
+        return input_layout
+
     def get_output_layers(self):
         outputs = {}
-        for name, layer in self.net.outputs.items():
-            outputs[name] = Metadata(layer.shape, layer.precision)
+        for output in self.model.outputs:
+            output_shape = output.partial_shape.get_min_shape() if self.model.is_dynamic() else output.shape
+            outputs[output.get_any_name()] = Metadata(output.get_names(), list(output_shape), precision=output.get_element_type().get_type_name())
         outputs = self._get_meta_from_ngraph(outputs)
         return outputs
 
     def reshape_model(self, new_shape):
-        self.net.reshape(new_shape)
+        new_shape = {k: PartialShape(v) for k, v in new_shape.items()}
+        self.model.reshape(new_shape)
+
+    def get_raw_result(self, request):
+        raw_result = {key: request.get_tensor(key).data[:] for key in self.get_output_layers().keys()}
+        return raw_result
 
     def infer_sync(self, dict_data):
-        return self.exec_net.infer(dict_data)
+        self.infer_request = self.async_queue[self.async_queue.get_idle_request_id()]
+        self.infer_request.infer(dict_data)
+        return self.get_raw_result(self.infer_request)
 
-    def infer_async(self, dict_data, callback_fn, callback_data):
+    def infer_async(self, dict_data, callback_data) -> None:
+        self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))
 
-        def get_raw_result(request):
-            raw_result = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            self.empty_requests.append(request)
-            return raw_result
+    def set_callback(self, callback_fn):
+        self.async_queue.set_callback(callback_fn)
 
-        request = self.empty_requests.popleft()
-        request.set_completion_callback(py_callback=callback_fn,
-                                        py_data=(get_raw_result, request, callback_data))
-        request.async_infer(dict_data)
+    def is_ready(self) -> bool:
+        return self.async_queue.is_ready()
 
-    def is_ready(self):
-        return len(self.empty_requests) != 0
+    def await_all(self) -> None:
+        self.async_queue.wait_all()
 
-    def await_all(self):
-        for request in self.exec_net.requests:
-            request.wait()
-
-    def await_any(self):
-        self.exec_net.wait(num_requests=1)
+    def await_any(self) -> None:
+        self.async_queue.get_idle_request_id()
 
     def _get_meta_from_ngraph(self, layers_info):
-        ng_func = ngraph.function_from_cnn(self.net)
-        for node in ng_func.get_ordered_ops():
+        for node in self.model.get_ordered_ops():
             layer_name = node.get_friendly_name()
             if layer_name not in layers_info.keys():
                 continue
-            layers_info[layer_name].meta = node._get_attributes()
+            layers_info[layer_name].meta = node.get_attributes()
             layers_info[layer_name].type = node.get_type_name()
+        return layers_info
+
+    def operations_by_type(self, operation_type):
+        layers_info = {}
+        for node in self.model.get_ordered_ops():
+            if node.get_type_name() == operation_type:
+                layer_name = node.get_friendly_name()
+                layers_info[layer_name] = Metadata(type=node.get_type_name(), meta=node.get_attributes())
         return layers_info

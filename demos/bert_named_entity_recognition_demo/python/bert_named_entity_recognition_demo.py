@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -56,6 +56,11 @@ def build_argparser():
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
+    args.add_argument('--layout',
+                      help='Optional. Model inputs layouts. '
+                           'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                           'To define layout you should use only capital letters',
+                      type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
                            "Default value is CPU", default="CPU", type=str)
@@ -108,7 +113,7 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 

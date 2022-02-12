@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020-2021 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ def build_argparser():
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
+    args.add_argument('--layout_emb', type=str, default=None,
+                      help='Optional. MODEL_EMB inputs layouts. '
+                           'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                           'To define layout you should use only capital letters')
     args.add_argument("-m_qa", "--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
@@ -75,6 +79,10 @@ def build_argparser():
                       required=False, type=str)
     args.add_argument("--model_qa_squad_ver", help="Optional. SQUAD version used for QuestionAnswering model fine tuning",
                       default="1.2", required=False, type=str)
+    args.add_argument('--layout_qa', type=str, default=None,
+                      help='Optional. MODEL_QA inputs layouts. '
+                           'Format "NCHW" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                           'To define layout you should use only capital letters')
     args.add_argument("-a", "--max_answer_token_num",
                       help="Optional. Maximum number of tokens in exact answer",
                       default=15,
@@ -167,10 +175,10 @@ def main():
     visualizer = Visualizer(args.colors)
     total_latency = (perf_counter() - vocab_start_time) * 1e3
 
-    ie = create_core()
+    core = create_core()
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-    model_emb_adapter = OpenvinoAdapter(ie, args.model_emb, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+    model_emb_adapter = OpenvinoAdapter(core, args.model_emb, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout_emb})
     model_emb = BertEmbedding(model_emb_adapter, {'vocab': vocab, 'input_names': args.input_names_emb})
     model_emb.log_layers_info()
 
@@ -181,13 +189,13 @@ def main():
     for new_length in [max_len_question, max_len_context]:
         model_emb.reshape(new_length)
         if new_length == max_len_question:
-            emb_exec_net = ie.load_network(model_emb_adapter.net, args.device)
+            emb_request = core.compile_model(model_emb_adapter.model, args.device).create_infer_request()
         else:
             emb_pipeline = AsyncPipeline(model_emb)
 
     if args.model_qa:
-        model_qa_adapter = OpenvinoAdapter(ie, args.model_qa, device=args.device, plugin_config=plugin_config,
-                                           max_num_requests=args.num_infer_requests)
+        model_qa_adapter = OpenvinoAdapter(core, args.model_qa, device=args.device, plugin_config=plugin_config,
+                                           max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout_qa})
         config = {
             'vocab': vocab,
             'input_names': args.input_names_qa,
@@ -216,7 +224,8 @@ def main():
     def calc_question_embedding(tokens_id):
         num = min(max_len_question - 2, len(tokens_id))
         inputs, _ = model_emb.preprocess((tokens_id[:num], max_len_question))
-        raw_result = emb_exec_net.infer(inputs)
+        emb_request.infer(inputs)
+        raw_result = model_emb_adapter.get_raw_result(emb_request)
         return model_emb.postprocess(raw_result, None)
 
     source = ContextSource(paragraphs, vocab, c_window_len)
