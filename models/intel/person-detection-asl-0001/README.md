@@ -12,7 +12,7 @@ This is a person detector for the ASL Recognition scenario. It is based on Shuff
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Persons AP on COCO              | 80.0%                                     |
+| Persons AP on COCO              | 79.35%                                    |
 | Minimal person height           | 100 pixel                                 |
 | GFlops                          | 0.986                                     |
 | MParams                         | 1.338                                     |

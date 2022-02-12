@@ -1,13 +1,14 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-
-#include "face_reid.hpp"
 
 #include <algorithm>
 #include <vector>
 #include <limits>
+
 #include <opencv2/imgproc.hpp>
+
+#include "face_reid.hpp"
 
 static const float h = 112.;
 static const float w = 96.;
@@ -48,8 +49,7 @@ cv::Mat GetTransform(cv::Mat* src, cv::Mat* dst) {
     return m;
 }
 
-void AlignFaces(std::vector<cv::Mat>* face_images,
-                std::vector<cv::Mat>* landmarks_vec) {
+void AlignFaces(std::vector<cv::Mat>* face_images, std::vector<cv::Mat>* landmarks_vec) {
     if (landmarks_vec->size() == 0) {
         return;
     }
