@@ -31,4 +31,3 @@ private:
         const std::vector<float>& link_data, const ov::Shape& link_data_shape,
         float cls_conf_threshold, float link_conf_threshold);
 };
-
