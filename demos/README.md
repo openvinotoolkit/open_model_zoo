@@ -2,7 +2,7 @@
 
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 
-The demos can be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
+Source code of the demos can be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
 
 ```sh
 git clone https://github.com/openvinotoolkit/open_model_zoo.git
@@ -84,14 +84,14 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** OpenVINO™ Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** OpenVINO™ Runtime HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/model_tools/README.md).
 
 ## Build the Demo Applications
 
-To be able to build demos you need to source OpenVINO™ and OpenCV environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
-Please run the following command before the demos build (assuming that the binary package was installed to `<INSTALL_DIR>`):
+To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
+For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download OpenCV and set environment variables before building the demos:
 
 ```sh
 <INSTALL_DIR>/extras/scripts/download_opencv.sh
@@ -103,9 +103,14 @@ source <INSTALL_DIR>/setupvars.sh
 > pip install openvino
 > ```
 
-You can also build demos manually using OpenVINO™ built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake`, `OpenVINO_DIR` to a folder containing `OpenVINOConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for OpenVINO™ and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
-Please refer to the OpenVINO™ [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
-for details. Please also add path to built OpenVINO™ libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
+For the open-source version of OpenVINO, set the following variables:
+* `InferenceEngine_DIR` pointing to a folder containing `InferenceEngineConfig.cmake` 
+* `OpenVINO_DIR` pointing to a folder containing `OpenVINOConfig.cmake`
+* `ngraph_DIR` pointing to a folder containing `ngraphConfig.cmake` . 
+* `OpenCV_DIR` pointing to OpenCV. The same OpenCV version should be used both for OpenVINO and demos build.
+
+Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
+Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
 
@@ -327,7 +332,7 @@ list above.
 
 Before running compiled binary files, make sure your application can find the OpenVINO™ and OpenCV libraries.
 Optionally, download the OpenCV community FFmpeg plugin using the downloader script in the OpenVINO package: `<INSTALL_DIR>\extras\opencv\ffmpeg-download.ps1`.
-If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
+If you use the [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/overview.html) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 
 ```bat

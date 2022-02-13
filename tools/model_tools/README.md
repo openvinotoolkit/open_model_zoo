@@ -31,8 +31,10 @@ future releases.
 
 ## Installation
 
-Model Downloader and other automation tools can be installed as part of the [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package or from source.
-Installation from source is as follows:
+Model Downloader and other automation tools can be installed as part of the OpenVINO™ Development Tools  Python package or from source.
+To install the tools from the package, go to the [OpenVINO™ Development Tools PyPI page] (https://pypi.org/project/openvino-dev/) and follow the instructions.
+
+To install the tools from source:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
