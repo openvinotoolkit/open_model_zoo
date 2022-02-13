@@ -195,7 +195,6 @@ cv::Mat render_detection_data(DetectionResult& result, const ColorPalette& palet
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
         slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
@@ -267,20 +266,20 @@ int main(int argc, char *argv[]) {
     while (ireqs.size() < nireq) {
         ireqs.push_back(cml.create_infer_request());
     }
-    OvInferer<TimedMat> inferer(ireqs);
+    OvInferrer<TimedMat> inferrer(ireqs);
     unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
     LazyVideoWriter video_writer{FLAGS_o, cap->fps(), FLAGS_lim};
 
-    for (const auto& state : OvInferer<TimedMat>::Iterate{inferer}) {
+    for (const auto& state : OvInferrer<TimedMat>::Iterate{inferrer}) {
         TimedMat* timed_mat = state->data();
         if (nullptr == timed_mat) {
             auto start = chrono::steady_clock::now();
             const cv::Mat& mat = cap->read();
             if (mat.data) {
                 processor->preprocess(ImageInputData{mat}, state->ireq);
-                inferer.submit(std::move(state->ireq), {mat, start});
+                inferrer.submit(std::move(state->ireq), {mat, start});
             } else {
-                inferer.end();
+                inferrer.end();
             }
             continue;
         }

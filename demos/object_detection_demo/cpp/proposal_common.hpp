@@ -110,7 +110,7 @@ struct LockedExceptions {
 };
 
 template<typename Meta>
-struct OvInferer {
+struct OvInferrer {
     struct State {
         State(ov::InferRequest&& ireq): ireq{std::move(ireq)} {}
         ov::InferRequest ireq;
@@ -122,47 +122,39 @@ struct OvInferer {
         Meta* data() override {return &meta;}
     };
     struct Iterate {
-        OvInferer& inferer;
+        OvInferrer& inferrer;
         struct InputIt {
-            OvInferer& inferer;
+            OvInferrer& inferrer;
 
-            InputIt(OvInferer& inferer) : inferer{inferer} {}
+            InputIt(OvInferrer& inferrer) : inferrer{inferrer} {}
 
-            bool operator!=(InputIt) const noexcept {return !inferer.stop_submit || inferer.nbusy;};
+            bool operator!=(InputIt) const noexcept {return !inferrer.stop_submit || !inferrer.busy_ireqs.empty();};
             InputIt& operator++() {return *this;}
-            std::unique_ptr<State> operator*() {return inferer.state();}
+            std::unique_ptr<State> operator*() {return inferrer.state();}
         };
-        InputIt begin() {return inferer;}
-        InputIt end() {return inferer;}
+        InputIt begin() {return inferrer;}
+        InputIt end() {return inferrer;}
     };
-    struct Input {
-        Meta meta;
-        unsigned idx;
-    };
-    std::vector<ov::InferRequest> all_ireqs;
-    std::stack<ov::InferRequest> empty_ireqs;  // For Python there must be maxsize=nireq
-    std::unordered_map<unsigned, std::unique_ptr<WithData>> completed_ireqs;  // For Python there must be maxsize=nireq
-    unsigned in_idx, out_idx;
-    std::atomic<unsigned> nbusy;
+
+    std::vector<ov::InferRequest> empty_ireqs;
+    std::deque<std::pair<ov::InferRequest, Meta>> busy_ireqs;
     bool stop_submit;
-    std::mutex completed_ireqs_mtx;
-    std::condition_variable cv;
-    LockedExceptions exceptions;
-public:
-    OvInferer(std::vector<ov::InferRequest> ireqs) : in_idx{0}, out_idx{0}, nbusy{0}, stop_submit{false}, all_ireqs{ireqs} {
+
+    OvInferrer(std::vector<ov::InferRequest> ireqs) : stop_submit{false} {
         for (auto ireq: ireqs) {
-            empty_ireqs.push(ireq);
+            empty_ireqs.push_back(ireq);
         }
     }
-    ~OvInferer() {
-        for (ov::InferRequest& ireq : all_ireqs) {
-            ireq.cancel();
+
+    ~OvInferrer() {
+        for (auto& ireq : busy_ireqs) {
+            ireq.first.cancel();
         }
     }
 
     void end() {
         if (stop_submit) {
-            throw runtime_error("Input was over. Unexpected submit");
+            throw runtime_error("Input was over. Unexpected end");
         }
         stop_submit = true;
     }
@@ -171,62 +163,27 @@ public:
         if (stop_submit) {
             throw runtime_error("Input was over. Unexpected submit");
         }
-        unsigned in_idx_copy = in_idx;
-        ireq.set_callback([in_idx_copy, ireq, meta, this](std::exception_ptr exception) mutable {
-            try {
-                if (exception) {
-                    std::rethrow_exception(exception);
-                }
-                --nbusy;
-                std::unique_ptr<WithData> data(new WithData{std::move(ireq), std::move(meta)});
-                {
-                    const std::lock_guard<std::mutex> lock{completed_ireqs_mtx};
-                    completed_ireqs.emplace(in_idx_copy, std::move(data));
-                }
-            } catch (...) {
-                exceptions.push_front(std::current_exception());
-            }
-            cv.notify_one();
-            ireq = ov::InferRequest{};
-        });
-        ++nbusy;
         ireq.start_async();
-        ++in_idx;
+        busy_ireqs.emplace_back(std::move(ireq), std::move(meta));
     }
 
     std::unique_ptr<State> state() {
-        exceptions.may_rethrow();
-        {
-            std::unique_lock<std::mutex> lock{completed_ireqs_mtx};
-            auto it = completed_ireqs.find(out_idx);
-            if (completed_ireqs.end() != it) {
-                std::unique_ptr<WithData> res = std::move(it->second);
-                completed_ireqs.erase(it);
-                lock.unlock();
-                ++out_idx;
-                empty_ireqs.push(res->ireq);
-                return res;
-            }
+        if (!busy_ireqs.empty() && busy_ireqs.front().first.wait_for(std::chrono::milliseconds{0})) {
+            auto pair = std::move(busy_ireqs.front());
+            busy_ireqs.pop_front();
+            empty_ireqs.push_back(pair.first);
+            return std::unique_ptr<WithData>(new WithData{std::move(pair.first), std::move(pair.second)});
         }
         if (!(stop_submit || empty_ireqs.empty())) {
-            std::unique_ptr<State> res{new State{std::move(empty_ireqs.top())}};
-            empty_ireqs.pop();
+            std::unique_ptr<State> res{new State{std::move(empty_ireqs.back())}};
+            empty_ireqs.pop_back();
             return res;
         }
-        {
-            std::unique_lock<std::mutex> lock{completed_ireqs_mtx};
-            while (completed_ireqs.end() == completed_ireqs.find(out_idx) && exceptions.empty()) {
-                cv.wait(lock);
-            }
-            exceptions.may_rethrow();
-            auto it = completed_ireqs.find(out_idx);  // TODO: this is the same as start of func
-            std::unique_ptr<WithData> res = std::move(it->second);
-            completed_ireqs.erase(it);
-            lock.unlock();
-            ++out_idx;
-            empty_ireqs.push(res->ireq);
-            return res;
-        }
+        auto pair = std::move(busy_ireqs.front());
+        busy_ireqs.pop_front();
+        empty_ireqs.push_back(pair.first);
+        pair.first.wait();
+        return std::unique_ptr<WithData>(new WithData{std::move(pair.first), std::move(pair.second)});
     }
 
     PerformanceMetrics getInferenceMetircs() {return {};}
