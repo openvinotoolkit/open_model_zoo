@@ -267,6 +267,229 @@ class SequentialModel(BaseCascadeModel):
         self.with_prefix = with_prefix
 
 
+class TextToSpeechEvaluatorGan(BaseCustomEvaluator):
+    def __init__(self, dataset_config, launcher, model, orig_config):
+        super().__init__(dataset_config, launcher, orig_config)
+        self.model = model
+        if hasattr(self.model, 'adapter'):
+            self.adapter_type = self.model.adapter.__provider__
+
+    @classmethod
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+        dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
+        adapter_info = config['adapter']
+
+        model = SequentialModelGAN(
+            config.get('network_info', {}), launcher, config.get('_models', []), adapter_info,
+            config.get('_model_is_blob'), delayed_model_loading
+        )
+        return cls(dataset_config, launcher, model, orig_config)
+
+    def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
+            batch_data, batch_meta = extract_image_representations(batch_inputs)
+            input_names = ['{}{}'.format(s.split('.')[-1]) for s in batch_inputs[0].identifier]
+            temporal_output_callback = None
+            if output_callback:
+                temporal_output_callback = partial(output_callback, metrics_result=None,
+                                                   element_identifiers=batch_identifiers,
+                                                   dataset_indices=batch_input_ids)
+            batch_raw_prediction, batch_prediction = self.model.predict(
+                batch_identifiers, batch_data, batch_meta, input_names, callback=temporal_output_callback
+            )
+            batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
+            metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
+                                                      calculate_metrics)
+            if output_callback:
+                output_callback(batch_raw_prediction, metrics_result=metrics_result,
+                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
+            self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
+
+
+class SequentialModelGAN(BaseCascadeModel):
+    def __init__(self, network_info, launcher, models_args, adapter_info, is_blob=None,
+                 delayed_model_loading=False):
+        super().__init__(network_info, launcher)
+        parts = ['encoder', 'decoder']
+        network_info = self.fill_part_with_model(network_info, parts, models_args, is_blob, delayed_model_loading)
+        if not contains_all(network_info, parts) and not delayed_model_loading:
+            raise ConfigError('network_info should contain forward_tacotron_duration,'
+                              'forward_tacotron_regression and melgan fields')
+        self._encoder_mapping = {
+            'dlsdk': TTSDLSDKModel,
+            'openvino': TTSOVModel
+        }
+        self._decoder_mapping = {
+            'dlsdk': RegressionDLSDKModel,
+            'openvino': RegressionOVModel
+        }
+
+        self.encoder = create_model(
+            network_info.get('encoder', {}), launcher, self._encoder_mapping,
+            'encoder', delayed_model_loading
+        )
+        self.decoder = create_model(
+            network_info.get('decoder', {}), launcher, self._decoder_mapping,
+            'encoder', delayed_model_loading
+        )
+
+        if not delayed_model_loading:
+            self.encoder_input = next(iter(self.encoder.inputs))
+        else:
+            self.encoder_input = None
+
+        self.encoder_output_for_decoder = 'x_res'
+        self.encoder_output_for_attention = 'x_m'
+        self.encoder_output_for_duration = 'logw'
+        self.encoder_output_mask = 'x_mask'
+
+        self.decoder_output = 'mel'
+
+        self.adapter = create_adapter(adapter_info)
+        self.adapter.output_blob = self.decoder_output
+
+        self.with_prefix = False
+        self._part_by_name = {
+            'encoder': self.encoder,
+            'decoder': self.decoder,
+        }
+
+    @property
+    def decoder_input(self):
+        return self.decoder.regression_input
+
+    @staticmethod
+    def compute_train_attention_map(x_m: np.ndarray, mel: np.ndarray, attn_mask: np.ndarray) -> np.ndarray:
+        mul = np.ones_like(x_m)  # [b, d, t]
+        x_2 = np.sum(-x_m ** 2, 1)  # np.expand_dims(np.sum(-x_m ** 2, 1), axis=-1)  # [b, t, 1]
+        z_2 = np.matmul(mul.transpose((0, 2, 1)), -mel ** 2)  # [b, t, t']
+        xz2 = np.matmul(x_m.transpose((0, 2, 1)), mel)  # [b, t, d] * [b, d, t'] = [b, t, t']
+
+        corr_coeff = z_2 + x_2[:, :, np.newaxis]
+        corr_coeff = corr_coeff + 2 * xz2
+
+        attn = SequentialModelGAN.maximum_path_np(corr_coeff, np.squeeze(attn_mask, 1)).astype(x_m.dtype)
+        return attn
+
+    @staticmethod
+    def maximum_path_np(map: np.ndarray, mask: np.ndarray) -> np.ndarray:
+        """
+        map: [b, t_text, t_mel]
+        mask: [b, t_text, t_mel]
+        """
+        map = map * mask
+
+        path = np.zeros_like(map).astype(np.int32)
+
+        t_text_max = mask.sum(1)[:, 0].astype(np.int32)
+        t_mel_max = mask.sum(2)[:, 0].astype(np.int32)
+
+        for b in range(map.shape[0]):
+            min_val = -1e9
+            t_text, t_mel = t_text_max[b], t_mel_max[b]
+            index = t_text - 1
+
+            for x in range(t_mel):
+                for y in range(max(0, t_text + x - t_mel), min(t_text, x + 1)):
+                    if x == y:
+                        v_cur = min_val
+                    else:
+                        v_cur = map[b, y, x - 1]
+                    if y == 0:
+                        if x == 0:
+                            v_prev = 0.
+                        else:
+                            v_prev = min_val
+                    else:
+                        v_prev = map[b, y - 1, x - 1]
+                    map[b, y, x] = max(v_cur, v_prev) + map[b, y, x]
+
+            for x in range(t_mel - 1, -1, -1):
+                path[b, index, x] = 1
+                if index != 0 and (index == x or map[b, index, x - 1] < map[b, index - 1, x - 1]):
+                    index = index - 1
+
+        return path
+
+    @staticmethod
+    def sequence_mask(length, max_length=None):
+        if max_length is None:
+            max_length = np.max(length)
+        x = np.arange(max_length, dtype=length.dtype)
+        x = np.expand_dims(x, axis=(0))
+        length = np.expand_dims(length, axis=(1))
+        return x < length
+
+    def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
+        assert len(identifiers) == 1
+
+        encoder_input = dict(zip(input_names, input_data[0]))
+        encoder_output = self.encoder.predict(identifiers, encoder_input)
+        if isinstance(encoder_output, tuple):
+            encoder_output, raw_encoder_output = encoder_output
+        else:
+            raw_encoder_output = encoder_output
+
+        if callback:
+            callback(raw_encoder_output)
+
+        x_mask = encoder_output[self.encoder_output_mask]
+        x_m = encoder_output[self.encoder_output_for_attention]
+        x_res = encoder_output[self.encoder_output_for_decoder]
+        # next line could be used for comparison between predicted duration and real one
+        #logw = encoder_output[self.encoder_output_for_duration]
+
+        mel = input_data[1]
+        mel_max_length = mel.shape[-1]
+
+        z_mask = SequentialModelGAN.sequence_mask(np.array([mel_max_length]), mel_max_length)
+        z_mask = np.expand_dims(z_mask, axis=[1, 2])
+        x_mask = np.expand_dims(x_mask, axis=[-1])
+        attn_mask = x_mask * z_mask
+        z_mask = np.squeeze(z_mask, 2)
+
+        attn = SequentialModelGAN.compute_train_attention_map(x_m, mel, attn_mask)
+        z = np.matmul(attn.transpose((0, 2, 1)), x_res.transpose((0, 2, 1))).transpose((0, 2, 1))
+
+        input_to_decoder = {
+            self.decoder_input['z']: z,
+            self.decoder_input['z_mask']: z_mask}
+
+        mels = self.decoder.predict(identifiers, input_to_decoder)
+
+        if isinstance(mels, tuple):
+            mels, raw_mels = mels
+        else:
+            raw_mels = mels
+        if callback:
+            callback(raw_mels)
+
+        return raw_mels, self.adapter.process(mels, identifiers, input_meta)
+
+    def load_model(self, network_list, launcher):
+        super().load_model(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def load_network(self, network_list, launcher):
+        super().load_network(network_list, launcher)
+        self.update_inputs_outputs_info()
+
+    def update_inputs_outputs_info(self):
+        if hasattr(self.encoder, 'outputs'):
+            self.encoder_output_for_decoder = postprocess_output_name(
+                self.encoder_output_for_decoder, self.encoder.outputs, raise_error=False)
+            self.encoder_output_for_attention = postprocess_output_name(
+                self.encoder_output_for_attention, self.encoder.outputs, raise_error=False)
+            self.encoder_output_for_duration = postprocess_output_name(
+                self.encoder_output_for_duration, self.encoder.outputs, raise_error=False)
+            self.encoder_output_mask = postprocess_output_name(
+                self.encoder_output_mask, self.encoder.outputs, raise_error=False)
+
+            self.decoder_output = postprocess_output_name(
+                self.decoder_output, self.decoder.outputs, raise_error=False)
+            self.adapter.output_blob = self.decoder_output
+
 class TTSDLSDKModel(BaseDLSDKModel):
     def predict(self, identifiers, input_data):
         if not self.is_dynamic and self.dynamic_inputs:
