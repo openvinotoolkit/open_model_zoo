@@ -37,8 +37,8 @@ class IEModel:
 
     def forward(self, img):
         """Performs forward pass of the wrapped IE model"""
-        res = self.infer_request.infer(inputs={self.input_tensor_name: self._preprocess(img)})
-        return next(iter(res.values()))
+        input_data = {self.input_tensor_name: self._preprocess(img)}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
     def get_detections(self, input):
         raise NotImplementedError
@@ -71,4 +71,5 @@ class IEModel:
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         # Loading model to the plugin
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
