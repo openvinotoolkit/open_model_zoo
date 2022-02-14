@@ -47,8 +47,8 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
         }
         else if (device == "GPU") {
             config.compiledModelConfig.emplace(ov::num_streams.name(),
-                (deviceNstreams.count(device) > 0 ? deviceNstreams.at(device)
-                    : ov::NumStreams::AUTO));
+                (deviceNstreams.count(device) > 0 ? ov::Any(deviceNstreams.at(device))
+                    : ov::Any(ov::NumStreams::AUTO)));
 
             if (flags_d.find("MULTI") != std::string::npos
                 && config.getDevices().find("CPU") != config.getDevices().end()) {
