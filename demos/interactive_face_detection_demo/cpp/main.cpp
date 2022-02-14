@@ -7,111 +7,110 @@
 #include "visualizer.hpp"
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
 
 #include <gflags/gflags.h>
 #include <iostream>
 #include <limits>
 
 namespace {
-constexpr char input_msg[] = "An input to process. The input must be a single image, a folder of images, video file or camera id";
-DEFINE_string(i, "", input_msg);
+constexpr char h_msg[] = "print a [H]elp message";
+DEFINE_bool(h, false, h_msg);
 
-constexpr char loop_msg[] = "Enable reading the input in a loop";
+constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", i_msg);
+
+constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
+DEFINE_string(m, "", m_msg);
+
+constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
+DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
+
+constexpr char d_msg[] =
+    "specify a device to infer on (the list of available devices is shown below). "
+    "Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. "
+    "Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. "
+    "Default is CPU";
+DEFINE_string(d, "CPU", d_msg);
+
+constexpr char dx_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
+DEFINE_double(dx_coef, 1, dx_coef_msg);
+
+constexpr char dy_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Oy axis";
+DEFINE_double(dy_coef, 1, dy_coef_msg);
+
+constexpr char fps_msg[] = "maximum FPS for playing video";
+DEFINE_double(fps, -std::numeric_limits<double>::infinity(), fps_msg);
+
+constexpr char lim_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+DEFINE_uint32(lim, 1000, lim_msg);
+
+constexpr char loop_msg[] = "enable reading the input in a loop";
 DEFINE_bool(loop, false, loop_msg);
 
-constexpr char output_msg[] = "Name of the output file(s) to save";
-DEFINE_string(o, "", output_msg);
+constexpr char m_ag_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
+DEFINE_string(m_ag, "", m_ag_msg);
 
-constexpr char limit_msg[] = "Number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
-DEFINE_uint32(limit, 1000, limit_msg);
+constexpr char m_am_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
+DEFINE_string(m_am, "", m_am_msg);
 
-constexpr char help_msg[] = "show this help message and exit";
-DEFINE_bool(h, false, help_msg);
+constexpr char m_em_msg[] = "path to an .xml file with a trained Emotions Recognition model";
+DEFINE_string(m_em, "", m_em_msg);
 
-constexpr char face_detection_model_msg[] = "Path to an .xml file with a trained Face Detection model";
-DEFINE_string(m, "", face_detection_model_msg);
+constexpr char m_hp_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
+DEFINE_string(m_hp, "", m_hp_msg);
 
-constexpr char age_gender_model_msg[] = "Path to an .xml file with a trained Age/Gender Recognition model";
-DEFINE_string(m_ag, "", age_gender_model_msg);
+constexpr char m_lm_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
+DEFINE_string(m_lm, "", m_lm_msg);
 
-constexpr char head_pose_model_msg[] = "Path to an .xml file with a trained Head Pose Estimation model";
-DEFINE_string(m_hp, "", head_pose_model_msg);
+constexpr char o_msg[] = "name of the output file(s) to save";
+DEFINE_string(o, "", o_msg);
 
-constexpr char emotions_model_msg[] = "Path to an .xml file with a trained Emotions Recognition model";
-DEFINE_string(m_em, "", emotions_model_msg);
+constexpr char r_msg[] = "output inference results as raw values";
+DEFINE_bool(r, false, r_msg);
 
-constexpr char facial_landmarks_model_msg[] = "Path to an .xml file with a trained Facial Landmarks Estimation model";
-DEFINE_string(m_lm, "", facial_landmarks_model_msg);
+constexpr char show_msg[] = "(don't) show output";
+DEFINE_bool(show, false, show_msg);
 
-constexpr char antispoofing_model_msg[] = "Path to an .xml file with a trained Antispoofing Classification model";
-DEFINE_string(m_am, "", antispoofing_model_msg);
+constexpr char show_emotion_bar_msg[] = "(don't) show emotion bar";
+DEFINE_bool(show_emotion_bar, false, show_emotion_bar_msg);
 
-constexpr char device_msg[] =
-    "Specify a target device to infer on (the list of available devices is shown below). "
-    "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify "
-    "HETERO plugin. "
-    "Use \"-d MULTI:<comma-separated_devices_list>\" format to specify MULTI plugin. "
-    "The application looks for a suitable plugin for the specified device."
-    "Default is CPU";
-DEFINE_string(d, "CPU", device_msg);
+constexpr char smooth_msg[] = "(don't) smooth person attributes";
+DEFINE_bool(smooth, false, smooth_msg);
 
-constexpr char thresh_output_msg[] = "Probability threshold for detections. Default is 0.5";
-DEFINE_double(t, 0.5, thresh_output_msg);
+constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
+DEFINE_double(t, 0.5, t_msg);
 
-constexpr char bb_enlarge_coef_output_msg[] = "Coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
-DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_msg);
-
-constexpr char raw_output_msg[] = "Output inference results as raw values";
-DEFINE_bool(r, false, raw_output_msg);
-
-constexpr char no_show_msg[] = "Don't show output";
-DEFINE_bool(no_show, false, no_show_msg);
-
-constexpr char dx_coef_output_msg[] = "Coefficient to shift the bounding box around the detected face along the Ox axis";
-DEFINE_double(dx_coef, 1, dx_coef_output_msg);
-
-constexpr char dy_coef_output_msg[] = "Coefficient to shift the bounding box around the detected face along the Oy axis";
-DEFINE_double(dy_coef, 1, dy_coef_output_msg);
-
-constexpr char fps_output_msg[] = "Maximum FPS for playing video";
-DEFINE_double(fps, -std::numeric_limits<double>::infinity(), fps_output_msg);
-
-constexpr char no_smooth_output_msg[] = "Do not smooth person attributes";
-DEFINE_bool(no_smooth, false, no_smooth_output_msg);
-
-constexpr char no_show_emotion_bar_msg[] = "Do not show emotion bar";
-DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_msg);
-
-constexpr char utilization_monitors_msg[] = "List of monitors to show initially";
-DEFINE_string(u, "", utilization_monitors_msg);
+constexpr char u_msg[] = "resource [U]tilization graphs: -u cdm. "
+    "c - average [C]PU load, d - load [D]istrobution over cores, m - [M]emory usage";
+DEFINE_string(u, "", u_msg);
 
 void parse(int argc, char *argv[]) {
-    // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t-h                         " << help_msg
-                  << "\n\t-i                         " << input_msg
-                  << "\n\t-loop                      " << loop_msg
-                  << "\n\t-o \"<path>\"              " << output_msg
-                  << "\n\t-limit \"<num>\"           " << limit_msg
-                  << "\n\t-m \"<path>\"              " << face_detection_model_msg
-                  << "\n\t[-m_ag] \"<path>\"         " << age_gender_model_msg
-                  << "\n\t[-m_hp] \"<path>\"         " << head_pose_model_msg
-                  << "\n\t[-m_em] \"<path>\"         " << emotions_model_msg
-                  << "\n\t[-m_lm] \"<path>\"         " << facial_landmarks_model_msg
-                  << "\n\t[-m_am] \"<path>\"         " << antispoofing_model_msg
-                  << "\n\t-d <device>                " << device_msg
-                  << "\n\t[-no_show]                 " << no_show_msg
-                  << "\n\t[-r]                       " << raw_output_msg
-                  << "\n\t[-t]                       " << thresh_output_msg
-                  << "\n\t[-bb_enlarge_coef]         " << bb_enlarge_coef_output_msg
-                  << "\n\t[-dx_coef]                 " << dx_coef_output_msg
-                  << "\n\t[-dy_coef]                 " << dy_coef_output_msg
-                  << "\n\t[-fps]                     " << fps_output_msg
-                  << "\n\t[-no_smooth]               " << no_smooth_output_msg
-                  << "\n\t[-no_show_emotion_bar]     " << no_show_emotion_bar_msg
-                  << "\n\t[-u]                       " << utilization_monitors_msg << '\n';
+        std::cout << "  \t [-h]                                        " << h_msg
+                  << "\n\t[--help]                   print help on all arguments"
+                  << "\n\t  -i <INPUT>                                 " << i_msg
+                  << "\n\t  -m <MODEL FILE>                            " << m_msg
+                  << "\n\t[--bb_enlarge_coef <NUMBER>]                 " << bb_enlarge_coef_msg
+                  << "\n\t [-d <DEVICE>]                               " << d_msg
+                  << "\n\t[--dx_coef <NUMBER>]                         " << dx_coef_msg
+                  << "\n\t[--dy_coef <NUMBER>]                         " << dy_coef_msg
+                  << "\n\t[--fps <NUMBER>]                             " << fps_msg
+                  << "\n\t[--limit <NUMBER>]                           " << lim_msg
+                  << "\n\t[--loop <LOOP>]                              " << loop_msg
+                  << "\n\t[--mag <MODEL FILE>]                         " << m_ag_msg
+                  << "\n\t[--mam <MODEL FILE>]                         " << m_am_msg
+                  << "\n\t[--mem <MODEL FILE>]                         " << m_em_msg
+                  << "\n\t[--mhp <MODEL FILE>]                         " << m_hp_msg
+                  << "\n\t[--mlm <MODEL FILE>]                         " << m_lm_msg
+                  << "\n\t[ -o <OUTPUT>]                               " << o_msg
+                  << "\n\t [-r]                                        " << r_msg
+                  << "\n\t[--show] ([--noshow])                        " << show_msg
+                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar])" << show_emotion_bar_msg
+                  << "\n\t[--smooth] ([--nosmooth])                    " << smooth_msg
+                  << "\n\t [-t <THRESHOLD>]                            " << t_msg
+                  << "\n\t [-u <DEVICE>]                               " << u_msg
+                  << "\n\tKey bindings: P, 0, spacebar - pause keys    " << '\n';
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
@@ -125,9 +124,9 @@ void parse(int argc, char *argv[]) {
 } // namespace
 
 int main(int argc, char *argv[]) {
-    PerformanceMetrics metrics;
     std::set_terminate(catcher);
     parse(argc, argv);
+    PerformanceMetrics metrics;
 
     // --------------------------- 1. Loading Inference Engine -----------------------------
     slog::info << ov::get_openvino_version() << slog::endl;
@@ -295,7 +294,7 @@ int main(int argc, char *argv[]) {
 
         int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
         if (!FLAGS_no_show) {
-            cv::imshow("Detection results", prevFrame);
+            cv::imshow(argv[0], prevFrame);
             int key = cv::waitKey(delay);
             if (27 == key || 'Q' == key || 'q' == key) {
                 break;

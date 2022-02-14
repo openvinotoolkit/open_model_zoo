@@ -26,122 +26,121 @@
 #include "visualizer.hpp"
 
 namespace {
-constexpr char help_msg[] = "Print a usage message";
+constexpr char help_msg[] = "print a [H]elp message";
 DEFINE_bool(h, false, help_msg);
 
-constexpr char input_video_msg[] = "An input to process. The input must be a single image, a folder of images, video file or camera id";
-DEFINE_string(i, "", input_video_msg);
+constexpr char input_video_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", input_video_msg);
 
-constexpr char output_msg[] = "Name of the output file(s) to save";
+constexpr char output_msg[] = "name of the output file(s) to save";
 DEFINE_string(o, "", output_msg);
 
-constexpr char limit_msg[] = "Number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+constexpr char limit_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
 DEFINE_uint32(limit, 1000, limit_msg);
 
-constexpr char face_detection_model_msg[] = "Path to an .xml file with a trained Face Detection model";
+constexpr char face_detection_model_msg[] = "path to an .xml file with a trained Face Detection model";
 DEFINE_string(m, "", face_detection_model_msg);
 
-constexpr char age_gender_model_msg[] = "Path to an .xml file with a trained Age/Gender Recognition model";
+constexpr char age_gender_model_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
 DEFINE_string(m_ag, "", age_gender_model_msg);
 
-constexpr char head_pose_model_msg[] = "Path to an .xml file with a trained Head Pose Estimation model";
+constexpr char head_pose_model_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
 DEFINE_string(m_hp, "", head_pose_model_msg);
 
-constexpr char emotions_model_msg[] = "Path to an .xml file with a trained Emotions Recognition model";
+constexpr char emotions_model_msg[] = "path to an .xml file with a trained Emotions Recognition model";
 DEFINE_string(m_em, "", emotions_model_msg);
 
-constexpr char facial_landmarks_model_msg[] = "Path to an .xml file with a trained Facial Landmarks Estimation model";
+constexpr char facial_landmarks_model_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
 DEFINE_string(m_lm, "", facial_landmarks_model_msg);
 
-constexpr char antispoofing_model_msg[] = "Path to an .xml file with a trained Antispoofing Classification model";
+constexpr char antispoofing_model_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
 DEFINE_string(m_am, "", antispoofing_model_msg);
 
-constexpr char target_device_msg[] = "Target device for Face Detection network (the list of available devices is shown below). "
+constexpr char target_device_msg[] = "target device for Face Detection network (the list of available devices is shown below). "
                                             "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d, "CPU", target_device_msg);
 
-constexpr char target_device_msg_ag[] = "Target device for Age/Gender Recognition network (the list of available devices is shown below). "
+constexpr char target_device_msg_ag[] = "target device for Age/Gender Recognition network (the list of available devices is shown below). "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d_ag, "CPU", target_device_msg_ag);
 
-constexpr char target_device_msg_hp[] = "Target device for Head Pose Estimation network (the list of available devices is shown below). "
+constexpr char target_device_msg_hp[] = "target device for Head Pose Estimation network (the list of available devices is shown below). "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d_hp, "CPU", target_device_msg_hp);
 
-constexpr char target_device_msg_em[] = "Target device for Emotions Recognition network (the list of available devices is shown below). "
+constexpr char target_device_msg_em[] = "target device for Emotions Recognition network (the list of available devices is shown below). "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d_em, "CPU", target_device_msg_em);
 
-constexpr char target_device_msg_lm[] = "Target device for Facial Landmarks Estimation network "
+constexpr char target_device_msg_lm[] = "target device for Facial Landmarks Estimation network "
                                                "(the list of available devices is shown below). The demo will look for a suitable plugin for device specified. Default is CPU";
 DEFINE_string(d_lm, "CPU", target_device_msg_lm);
 
-constexpr char target_device_msg_am[] = "Target device for Antispoofing Classification network (the list of available devices is shown below). "
+constexpr char target_device_msg_am[] = "target device for Antispoofing Classification network (the list of available devices is shown below). "
                                                "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d_am, "CPU", target_device_msg_am);
 
-constexpr char thresh_output_msg[] = "Probability threshold for detections. Default is 0.5";
+constexpr char thresh_output_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, thresh_output_msg);
 
-constexpr char bb_enlarge_coef_output_msg[] = "Coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
+constexpr char bb_enlarge_coef_output_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_msg);
 
-constexpr char raw_output_msg[] = "Output inference results as raw values";
+constexpr char raw_output_msg[] = "output inference results as raw values";
 DEFINE_bool(r, false, raw_output_msg);
 
-constexpr char no_show_msg[] = "Don't show output";
+constexpr char no_show_msg[] = "don't show output";
 DEFINE_bool(no_show, false, no_show_msg);
 
-constexpr char dx_coef_output_msg[] = "Coefficient to shift the bounding box around the detected face along the Ox axis";
+constexpr char dx_coef_output_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
 DEFINE_double(dx_coef, 1, dx_coef_output_msg);
 
-constexpr char dy_coef_output_msg[] = "Coefficient to shift the bounding box around the detected face along the Oy axis";
+constexpr char dy_coef_output_msg[] = "coefficient to shift the bounding box around the detected face along the Oy axis";
 DEFINE_double(dy_coef, 1, dy_coef_output_msg);
 
 // TODO: Make this option valid for single image case
-constexpr char loop_output_msg[] = "Enable playing video on a loop";
+constexpr char loop_output_msg[] = "enable playing video on a loop";
 DEFINE_bool(loop, false, loop_output_msg);
 
-constexpr char no_smooth_output_msg[] = "Do not smooth person attributes";
+constexpr char no_smooth_output_msg[] = "do not smooth person attributes";
 DEFINE_bool(no_smooth, false, no_smooth_output_msg);
 
-constexpr char no_show_emotion_bar_msg[] = "Do not show emotion bar";
+constexpr char no_show_emotion_bar_msg[] = "do not show emotion bar";
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_msg);
 
-constexpr char utilization_monitors_msg[] = "List of monitors to show initially";
+constexpr char utilization_monitors_msg[] = "list of monitors to show initially";
 DEFINE_string(u, "", utilization_monitors_msg);
 
 void parse(int argc, char *argv[]) {
-    // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t-h                         " << help_msg
-                  << "\n\t-i \"<path>\"              " << input_video_msg
-                  << "\n\t-o \"<path>\"              " << output_msg
-                  << "\n\t-limit \"<num>\"           " << limit_msg
-                  << "\n\t-m \"<path>\"              " << face_detection_model_msg
-                  << "\n\t[-m_ag] \"<path>\"         " << age_gender_model_msg
-                  << "\n\t[-m_hp] \"<path>\"         " << head_pose_model_msg
-                  << "\n\t[-m_em] \"<path>\"         " << emotions_model_msg
-                  << "\n\t[-m_lm] \"<path>\"         " << facial_landmarks_model_msg
-                  << "\n\t[-m_am] \"<path>\"         " << antispoofing_model_msg
-                  << "\n\t[-d] \"<device>\"          " << target_device_msg
-                  << "\n\t[-d_ag] \"<device>\"       " << target_device_msg_ag
-                  << "\n\t[-d_hp] \"<device>\"       " << target_device_msg_hp
-                  << "\n\t[-d_em] \"<device>\"       " << target_device_msg_em
-                  << "\n\t[-d_lm] \"<device>\"       " << target_device_msg_lm
-                  << "\n\t[-d_am] \"<device>\"       " << target_device_msg_am
-                  << "\n\t[-no_show]                 " << no_show_msg
-                  << "\n\t[-r]                       " << raw_output_msg
-                  << "\n\t[-t]                       " << thresh_output_msg
-                  << "\n\t[-bb_enlarge_coef]         " << bb_enlarge_coef_output_msg
-                  << "\n\t[-dx_coef]                 " << dx_coef_output_msg
-                  << "\n\t[-dy_coef]                 " << dy_coef_output_msg
-                  << "\n\t[-loop]                    " << loop_output_msg
-                  << "\n\t[-no_smooth]               " << no_smooth_output_msg
-                  << "\n\t[-no_show_emotion_bar]     " << no_show_emotion_bar_msg
-                  << "\n\t[-u]                       " << utilization_monitors_msg << '\n';
+        std::cout << "  \t -h                         " << help_msg
+                  << "\n\t -i \"<path>\"              " << input_video_msg
+                  << "\n\t -o \"<path>\"              " << output_msg
+                  << "\n\t -limit \"<num>\"           " << limit_msg
+                  << "\n\t -m \"<path>\"              " << face_detection_model_msg
+                  << "\n\t[-mag] \"<path>\"           " << age_gender_model_msg
+                  << "\n\t[-mhp] \"<path>\"           " << head_pose_model_msg
+                  << "\n\t[-mem] \"<path>\"           " << emotions_model_msg
+                  << "\n\t[-mlm] \"<path>\"           " << facial_landmarks_model_msg
+                  << "\n\t[-mam] \"<path>\"           " << antispoofing_model_msg
+                  << "\n\t[-d] \"<device>\"           " << target_device_msg
+                  << "\n\t[-d_ag] \"<device>\"        " << target_device_msg_ag
+                  << "\n\t[-d_hp] \"<device>\"        " << target_device_msg_hp
+                  << "\n\t[-d_em] \"<device>\"        " << target_device_msg_em
+                  << "\n\t[-d_lm] \"<device>\"        " << target_device_msg_lm
+                  << "\n\t[-d_am] \"<device>\"        " << target_device_msg_am
+                  << "\n\t[-no_show]                  " << no_show_msg
+                  << "\n\t[-r]                        " << raw_output_msg
+                  << "\n\t[-t]                        " << thresh_output_msg
+                  << "\n\t[-bb_enlarge_coef]          " << bb_enlarge_coef_output_msg
+                  << "\n\t[-dx_coef]                  " << dx_coef_output_msg
+                  << "\n\t[-dy_coef]                  " << dy_coef_output_msg
+                  << "\n\t[-loop]                     " << loop_output_msg
+                  << "\n\t[-no_smooth]                " << no_smooth_output_msg
+                  << "\n\t[-no_show_emotion_bar]      " << no_show_emotion_bar_msg
+                  << "\n\t[-u]                        " << utilization_monitors_msg << '\n';
         showAvailableDevices();
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         exit(0);
@@ -389,9 +388,9 @@ void ASpoofDataUpdate(const Face::Ptr& face, const cv::Mat& out_a_spoof) {
 } // namespace
 
 int main(int argc, char *argv[]) {
-    PerformanceMetrics metrics;
     std::set_terminate(catcher);
     parse(argc, argv);
+    PerformanceMetrics metrics;
     /** ---------------- Graph of demo ---------------- **/
     cv::GMat in;
 
