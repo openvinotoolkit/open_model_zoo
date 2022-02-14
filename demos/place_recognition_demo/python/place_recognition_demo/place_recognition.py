@@ -28,12 +28,10 @@ from openvino.runtime import Core, get_version
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
-        if cpu_extension and device == 'CPU':
-            core.add_extension(cpu_extension, 'CPU')
 
         log.info('Reading model {}'.format(model_path))
         self.model = core.read_model(model_path)
@@ -57,9 +55,9 @@ class IEModel: # pylint: disable=too-few-public-methods
 class PlaceRecognition:
     """ Class representing Place Recognition algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
+    def __init__(self, model_path, device, gallery_path, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device)
         if self.model.nchw_layout:
             self.input_size = self.model.input_size[2], self.model.input_size[3]
         else:

@@ -28,9 +28,9 @@ class Module:
         self.active_requests = 0
         self.clear()
 
-    def deploy(self, device, plugin_config, max_requests=1):
+    def deploy(self, device, max_requests=1):
         self.max_requests = max_requests
-        compiled_model = self.core.compile_model(self.model, device, config=plugin_config)
+        compiled_model = self.core.compile_model(self.model, device)
         self.output_tensor = compiled_model.outputs[0]
         self.infer_queue = AsyncInferQueue(compiled_model, self.max_requests)
         self.infer_queue.set_callback(self.completion_callback)
