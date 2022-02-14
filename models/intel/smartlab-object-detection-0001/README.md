@@ -32,17 +32,17 @@ Expected color order is `BGR`.
 
 ## Outputs
 
-The array of detection summary info, name - output, shape - 1, 3549, 10, format is B, N, 10, where:
+The array of detection summary info, name - `output`, shape - `1, 3549, 10`, format is `B, N, 10`, where:
 
-- B - batch size
-- N - number of detection boxes
+- `B` - batch size
+- `N` - number of detection boxes
 
-Detection box has format [x, y, h, w, box_score, class_no_1, ..., class_no_10], where:
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_10`], where:
 
 - (`x`, `y`) - raw coordinates of box center
 - `h`, `w` - raw height and width of box
 - `box_score` - confidence of detection box
-- `class_no_1, ..., class_no_10` - probability distribution over the classes in logits format.
+- `class_no_1`, ..., `class_no_10` - probability distribution over the classes in logits format.
 
 ## Legal Information
 

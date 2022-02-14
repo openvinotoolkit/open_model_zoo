@@ -25,7 +25,7 @@ curve.
 
 ## Inputs
 
-Image, name: `images`, shape: `1, 1, 416, 416` in the format `B, C, H, W`, where:
+Image, name: `images`, shape: `1, 3, 416, 416` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -36,17 +36,17 @@ Expected color order is `BGR`.
 
 ## Outputs
 
-The array of detection summary info, name - output, shape - 1, 3549, 3, format is B, N, 3, where:
+The array of detection summary info, name - `output`, shape - `1, 3549, 3`, format is `B, N, 3`, where:
 
-- B - batch size
-- N - number of detection boxes
+- `B` - batch size
+- `N` - number of detection boxes
 
-Detection box has format [x, y, h, w, box_score, class_no_1, ..., class_no_3], where:
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_3`], where:
 
 - (`x`, `y`) - raw coordinates of box center
 - `h`, `w` - raw height and width of box
 - `box_score` - confidence of detection box
-- `class_no_1, ..., class_no_3` - probability distribution over the classes in logits format.
+- `class_no_1`, ..., `class_no_3` - probability distribution over the classes in logits format.
 
 ## Legal Information
 

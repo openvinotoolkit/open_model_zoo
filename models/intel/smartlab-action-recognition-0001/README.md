@@ -22,8 +22,7 @@ The model is classfier for 3 class actions.
 
 
 ## Encoder model specification
-with convolutional encoder part of the action re
-The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone cognition.
+The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone with convolutional encoder part of the action recognition.
 
 | Metric  | Value |
 | ------- | ----- |
