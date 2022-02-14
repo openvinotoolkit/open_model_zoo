@@ -1285,20 +1285,19 @@ PYTHON_DEMOS = [
         single_option_cases('-m', ModelArg('wav2vec2-base'))
     )),
 
-    # TODO: Demo supports only topologies with the following input tensor name: image
-    # PythonDemo(name='text_spotting_demo', device_keys=['-d'],
-    #            model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
-    #                       '-i': DataPatternArg('text-detection')}),
-    #     [
-    #         TestCase(options={
-    #             '-m_m': ModelArg('text-spotting-0005-detector'),
-    #             '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
-    #             '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
-    #             '--no_track': None
-    #         }),
-    #     ]
-    # )),
+    PythonDemo(name='text_spotting_demo', device_keys=['-d'],
+               model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0005-detector'),
+                '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 
     PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
                model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
