@@ -75,10 +75,6 @@ def build_argparser():
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
                            'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
                       help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
@@ -166,12 +162,10 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    # Plugin initialization for specified device and load extensions library if specified.
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
-    if args.cpu_extension and 'CPU' in args.device:
-        core.add_extension(args.cpu_extension, 'CPU')
+
     # Read IR
     log.info('Reading Mask-RCNN model {}'.format(args.mask_rcnn_model))
     mask_rcnn_model = core.read_model(args.mask_rcnn_model)
