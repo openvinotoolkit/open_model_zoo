@@ -697,9 +697,7 @@ int main(int argc, char* argv[]) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
-                core.set_property("CPU", { { CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (deviceNStreams.count("CPU") > 0 ? std::to_string(deviceNStreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }});
+                core.set_property("CPU", ov::streams::num((deviceNStreams.count("CPU") > 0 ? deviceNStreams.at("CPU") : ov::streams::AUTO)));
                 deviceNStreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
