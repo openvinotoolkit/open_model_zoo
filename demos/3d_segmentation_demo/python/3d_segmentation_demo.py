@@ -278,6 +278,7 @@ def main():
     n, c, d, h, w = model.inputs[0].shape
 
     compiled_model = core.compile_model(model, args.target_device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.path_to_model, args.target_device))
 
@@ -308,8 +309,8 @@ def main():
         original_data = data_crop
         original_size = original_data.shape[-3:]
 
-    result = infer_request.infer({input_tensor_name: data_crop})
-    result = next(iter(result.values()))
+    input_data = {input_tensor_name: data_crop}
+    result = infer_request.infer(input_data)[output_tensor]
     batch, channels, out_d, out_h, out_w = result.shape
 
     list_img = []

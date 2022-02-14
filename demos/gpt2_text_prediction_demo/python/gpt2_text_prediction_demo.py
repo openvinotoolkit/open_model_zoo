@@ -99,6 +99,7 @@ def main():
 
     # load model to the device
     compiled_model = ie.compile_model(model, args.device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
@@ -148,13 +149,12 @@ def main():
 
             # infer by IE
             t_start = time.perf_counter()
-            res = infer_request.infer(inputs)
+            outputs = infer_request.infer(inputs)[output_tensor]
             t_end = time.perf_counter()
             t_count += 1
             log.info("Sequence of length {} is processed with {:0.2f} requests/sec ({:0.2} sec per request)".format(
                 model_input.shape[1], 1 / (t_end - t_start), t_end - t_start))
 
-            outputs = next(iter(res.values()))
             next_token_logits = outputs[:, cur_input_len-1, :]
 
             # pre-process distribution
