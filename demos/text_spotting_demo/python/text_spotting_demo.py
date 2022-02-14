@@ -184,7 +184,7 @@ def main():
     except RuntimeError:
         raise RuntimeError('Demo supports only topologies with the following input tensor name: {}'.format(input_tensor_name))
 
-    required_output_names = {'boxes', 'labels', 'masks', 'text_features.0'}
+    required_output_names = {'boxes', 'labels', 'masks', 'text_features'}
     for output_tensor_name in required_output_names:
         try:
             mask_rcnn_model.output(output_tensor_name)
@@ -269,7 +269,7 @@ def main():
         scores = outputs['boxes'][:, 4]
         classes = outputs['labels'].astype(np.uint32)
         raw_masks = outputs['masks']
-        text_features = outputs['text_features.0']
+        text_features = outputs['text_features']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
