@@ -15,9 +15,9 @@
 #include <string>
 
 #include "openvino/openvino.hpp"
+#include "openvino/runtime/intel_gpu/properties.hpp"
+#include "openvino/runtime/intel_myriad/hddl_properties.hpp"
 
-#include "gpu/gpu_config.hpp"
-#include "vpu/hddl_config.hpp"
 #include "monitors/presenter.h"
 #include "utils/args_helper.hpp"
 #include "utils/grid_mat.hpp"
@@ -694,24 +694,21 @@ int main(int argc, char* argv[]) {
         for (const std::string& device : devices) {
             if ("CPU" == device) {
                 if (FLAGS_nthreads != 0) {
-                    core.set_property("CPU", { { CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }});
+                    core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
-                core.set_property("CPU", { { CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }});
-                core.set_property("CPU", { { CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (deviceNStreams.count("CPU") > 0 ? std::to_string(deviceNStreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }});
-                deviceNStreams["CPU"] = std::stoi(core.get_property("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
+                core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
+                core.set_property("CPU", ov::streams::num((deviceNStreams.count("CPU") > 0 ? deviceNStreams.at("CPU") : ov::streams::AUTO)));
+                deviceNStreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
             if ("GPU" == device) {
-                core.set_property("GPU", { { CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                                (deviceNStreams.count("GPU") > 0 ? std::to_string(deviceNStreams.at("GPU")) :
-                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }});
-                deviceNStreams["GPU"] = std::stoi(core.get_property("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                core.set_property("GPU", ov::streams::num(deviceNStreams.count("GPU") > 0 ? deviceNStreams.at("GPU") : ov::streams::AUTO));
+
+                deviceNStreams["GPU"] = core.get_property("GPU", ov::streams::num);
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    core.set_property("GPU", { { GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }});
+                    core.set_property("GPU", ov::intel_gpu::hint::queue_throttle(ov::intel_gpu::hint::ThrottleLevel(1)));
                 }
             }
         }
@@ -720,7 +717,7 @@ int main(int argc, char* argv[]) {
         auto makeTagConfig = [&](const std::string& deviceName, const std::string& suffix) {
             ov::AnyMap config;
             if (FLAGS_tag && deviceName == "HDDL") {
-                config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
+                config["HDDL"] = ov::intel_myriad::hddl::graph_tag("tag" + suffix);
             }
             return config;
         };

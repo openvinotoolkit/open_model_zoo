@@ -81,12 +81,7 @@ int main(int argc, char *argv[]) {
                 visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
         }
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  !FLAGS_no_show && FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(),
-                                                  frame.size())) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), FLAGS_limit};
 
         // Detecting all faces on the first frame and reading the next one
         faceDetector.submitRequest(frame);
@@ -204,9 +199,7 @@ int main(int argc, char *argv[]) {
 
             timer.finish("total");
 
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
-                videoWriter.write(prevFrame);
-            }
+            videoWriter.write(prevFrame);
 
             int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
             if (!FLAGS_no_show) {

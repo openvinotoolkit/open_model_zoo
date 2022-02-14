@@ -32,5 +32,11 @@ Expected color order: `BGR`.
 
 Tensor with name `model/tf_op_layer_l2_normalize/l2_normalize` and the shape `1, 256` — image embedding vector.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Retrieval Python\* Demo](../../../demos/image_retrieval_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

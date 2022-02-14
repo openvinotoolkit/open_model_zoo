@@ -1,7 +1,7 @@
 models:
   - name:  ssd-resnet34-1200-onnx
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ssd_onnx
           scores_out: '.*scores*'

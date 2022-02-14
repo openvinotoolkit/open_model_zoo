@@ -35,7 +35,7 @@ models:
   - name: mixnet-l
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

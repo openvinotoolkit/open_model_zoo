@@ -1,7 +1,7 @@
 models:
   - name: bert-small-uncased-whole-word-masking-squad-emb-int8-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: bert_question_answering_embedding

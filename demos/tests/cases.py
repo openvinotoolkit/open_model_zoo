@@ -406,8 +406,8 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         # ModelArg('face-detection-retail-0005'),  # TODO: INT8
@@ -423,8 +423,8 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'),
-                        ModelArg('person-vehicle-bike-detection-2004'),
+                        # ModelArg('person-vehicle-bike-detection-2003'),  # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
                         # ModelArg('product-detection-0001'),  # TODO
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
@@ -531,41 +531,40 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: Dynamic batch is not enabled.
-    # CppDemo(name='smart_classroom_demo',
-    #         model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
-    #         device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
-    #         test_cases=combine_cases(
-    #     TestCase(options={'-no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('smart-classroom-demo'),
-    #         '-m_fd': ModelArg('face-detection-adas-0001')}),
-    #     [
-    #         *combine_cases(
-    #             [
-    #                 TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
-    #                 TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
-    #                     '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
-    #                 # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
-    #                 # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
-    #                 # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
-    #                 TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
-    #             ],
-    #             [
-    #                 TestCase(options={}),
-    #                 TestCase(options={
-    #                     '-m_lm': ModelArg('landmarks-regression-retail-0009'),
-    #                     '-m_reid': ModelArg('Sphereface'),
-    #                 }),
-    #                 TestCase(options={
-    #                     '-m_lm': ModelArg('landmarks-regression-retail-0009'),
-    #                     '-m_reid': ModelArg('face-recognition-resnet100-arcface-onnx'),
-    #                 }),
-    #             ],
-    #         ),
-    #         TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
-    #     ],
-    # )),
+    CppDemo(name='smart_classroom_demo',
+            model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
+            device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('smart-classroom-demo'),
+            '-m_fd': ModelArg('face-detection-adas-0001')}),
+        [
+            *combine_cases(
+                [
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
+                        '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
+                    # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
+                    # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
+                    # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
+                ],
+                [
+                    TestCase(options={}),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('Sphereface'),
+                    }),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('face-recognition-resnet100-arcface-onnx'),
+                    }),
+                ],
+            ),
+            TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
+        ],
+    )),
 
     CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
@@ -614,7 +613,7 @@ NATIVE_DEMOS = [
             # ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
+            # ModelArg('person-reidentification-retail-0277'),  # TODO
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -676,7 +675,7 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
+            # ModelArg('instance-segmentation-person-0007'),  # TODO
             ModelArg('instance-segmentation-security-0091')),
     ))
 
@@ -1089,8 +1088,8 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1105,8 +1104,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'),
-                        ModelArg('person-vehicle-bike-detection-2004'),
+                        # ModelArg('person-vehicle-bike-detection-2003'), # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -1121,8 +1120,8 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
-                        ModelArg('vehicle-license-plate-detection-barrier-0106'),
-                        ModelArg('person-detection-0106')),
+                        ModelArg('vehicle-license-plate-detection-barrier-0106')),
+                        # ModelArg('person-detection-0106')),  # TODO
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
@@ -1167,8 +1166,8 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),

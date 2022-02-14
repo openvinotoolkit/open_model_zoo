@@ -67,6 +67,13 @@ Start position is floating point-valued logit scores for start position.
 2. End position: name: `output_e`, shape: `1, 384`.
 End position is floating point-valued logit scores for end position.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [BERT Question Answering Embedding Python\* Demo](../../../demos/bert_question_answering_embedding_demo/python/README.md)
+* [BERT Question Answering Python\* Demo](../../../demos/bert_question_answering_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
 

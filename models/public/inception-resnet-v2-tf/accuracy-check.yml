@@ -29,7 +29,7 @@ models:
 
   - name: inception-resnet-v2-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

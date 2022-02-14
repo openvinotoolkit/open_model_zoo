@@ -44,5 +44,11 @@ Name - `output`, shape - `186, 1, 4442`, format is `W, B, L`, where:
 
 The network output can be decoded by CTC Greedy Decoder.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Handwritten Text Recognition Demo](../../../demos/handwritten_text_recognition_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -2,7 +2,7 @@ models:
   - name: person-reidentification-retail-0288
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: reid
 
     datasets:

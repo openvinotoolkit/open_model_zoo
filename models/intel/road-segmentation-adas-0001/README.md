@@ -50,5 +50,12 @@ A blob with a `BGR` image and the shape `1, 3, 512, 896` in the format `B, C, H,
 
 The output is a blob with the shape `1, 4, 512, 896` in the format `B, C, H, W`. It can be treated as a four-channel feature map, where each channel is a probability of one of the classes: BG, road, curb, mark.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

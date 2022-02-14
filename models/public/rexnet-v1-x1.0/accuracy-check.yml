@@ -39,7 +39,7 @@ models:
   - name: rexnet-v1-x1.0
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

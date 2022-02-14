@@ -6,7 +6,7 @@ models:
         model:   model/model.pb.frozen
         adapter: ssd
 
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

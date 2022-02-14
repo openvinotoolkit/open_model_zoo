@@ -42,7 +42,7 @@ class QuantilesPredictorAdapter(Adapter):
     def select_output_blob(self, outputs):
         self.output_verified = True
         if self.output_name:
-            self.check_output_name(self.output_name, outputs)
+            self.output_name = self.check_output_name(self.output_name, outputs)
             return
         super().select_output_blob(outputs)
         self.output_name = self.output_blob

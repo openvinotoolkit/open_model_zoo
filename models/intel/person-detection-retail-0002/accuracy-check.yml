@@ -2,7 +2,7 @@ models:
   - name: person-detection-retail-0002
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
         inputs:
           - name: im_info

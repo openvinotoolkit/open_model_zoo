@@ -2,7 +2,7 @@ models:
   - name: facenet-20180408-102900
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: reid
           joining_method: concatenation

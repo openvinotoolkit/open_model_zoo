@@ -48,5 +48,14 @@ The net outputs a blob with the `1, 256` shape named `descriptor` which can be
 compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Crossroad Camera C++ Demo](../../../demos/crossroad_camera_demo/cpp/README.md)
+* [Multi Camera Multi Target Python\* Demo](../../../demos/multi_camera_multi_target_tracking_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+* [Social Distance C++ Demo](../../../demos/social_distance_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

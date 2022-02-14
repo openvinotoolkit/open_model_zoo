@@ -408,8 +408,8 @@ class RetinaNetTF2(Adapter):
     def select_output_blob(self, outputs):
         def generate_out_names(list_names, outputs):
             return [self.check_output_name(out, outputs) for out in list_names]
-        self.boxes_outs = generate_out_names(self.boxes_outs, outputs)
-        self.class_outs = generate_out_names(self.class_outs, outputs)
+        self.loc_out = generate_out_names(self.loc_out, outputs)
+        self.cls_out = generate_out_names(self.cls_out, outputs)
         self.outputs_verified = True
 
     def _generate_anchor_boxes(self, image_size):

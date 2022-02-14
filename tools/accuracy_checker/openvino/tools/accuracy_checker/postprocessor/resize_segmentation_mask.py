@@ -170,6 +170,8 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
     @staticmethod
     def _deprocess_prediction_with_padding(prediction, image_metadata):
+        if image_metadata.get('padding_disabled', False):
+            return
         top, left, bottom, right = image_metadata['padding']
         for pred in prediction:
             mask = pred.mask

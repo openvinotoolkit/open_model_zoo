@@ -1,7 +1,7 @@
 models:
   - name: machine-translation-nar-ru-en-0002
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: narnmt
           vocabulary_file: tokenizer_tgt/vocab.json

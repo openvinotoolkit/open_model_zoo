@@ -42,7 +42,7 @@ models:
   - name: efficientnet-b0-pytorch
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -1,7 +1,7 @@
 models:
   - name:  ssdlite_mobilenet_v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

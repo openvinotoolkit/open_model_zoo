@@ -1,7 +1,7 @@
 models:
   - name: face-reidentification-retail-0095
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: reid
 
     datasets:

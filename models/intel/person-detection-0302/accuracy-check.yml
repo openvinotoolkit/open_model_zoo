@@ -2,7 +2,7 @@ models:
   - name: person-detection-0302
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
 
           type: class_agnostic_detection

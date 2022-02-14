@@ -70,7 +70,7 @@ models:
 
   - name: vitstr-small-patch16-224
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: simple_decoder
           eos_label: '[s]'

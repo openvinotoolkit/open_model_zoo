@@ -85,6 +85,12 @@ An example of using the Model Converter:
 omz_converter --name <model_name>
 ```
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Processing C++ Demo](../../../demos/image_processing_demo/cpp/README.md)
+
 ## Legal Information
 
 The original model is distributed under the following
