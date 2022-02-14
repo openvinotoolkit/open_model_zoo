@@ -30,13 +30,12 @@ class Segmentor:
 
         net = ie.read_model(backbone_path)
         self.backbone = ie.compile_model(network=net, device_name=device)
-        self.backbone_input_keys = list(self.backbone.input_info.keys())
-        self.backbone_output_key = list(self.backbone.outputs.keys())
+        self.backbone_input_keys = list(self.backbone.input_info.items())
+        self.backbone_output_key = list(self.backbone.outputs.items())
         net = ie.read_model(classifier_path)
         self.classifier = ie.compile_model(network=net, device_name=device)
-        self.classifier_input_keys = list(self.classifier.input_info.keys())
-        self.classifier_output_key = list(self.classifier.outputs.keys())
-
+        self.classifier_input_keys = list(self.classifier.input_info.items())
+        self.classifier_output_key = list(self.classifier.outputs.items())
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -75,7 +74,6 @@ class Segmentor:
         predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
         return self.terms[predicted], self.terms[predicted]
-
 
 class SegmentorMstcn:
     def __init__(self, ie, device, i3d_path, mstcn_path):
@@ -116,13 +114,13 @@ class SegmentorMstcn:
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
         self.i3d = ie.load_network(network=net, device_name=device)
-        self.i3d_input_keys = list(self.i3d.input_info.keys())
-        self.i3d_output_key = list(self.i3d.outputs.keys())
+        self.i3d_input_keys = list(self.i3d.input_info.items())
+        self.i3d_output_key = list(self.i3d.outputs.items())
 
         self.mstcn_net = ie.read_network(mstcn_path)
         self.mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
-        self.mstcn_input_keys = list(self.mstcn.input_info.keys())
-        self.mstcn_output_key = list(self.mstcn.outputs.keys())
+        self.mstcn_input_keys = list(self.mstcn.input_info.items())
+        self.mstcn_output_key = list(self.mstcn.outputs.items())
         self.mstcn_net.reshape({'input': (1, 2048, 1)})
         self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')

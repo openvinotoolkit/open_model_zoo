@@ -55,8 +55,9 @@ class MwGlobalExp:
     def get_openvino_model(self):
         net = self.ie.read_model(self.fp_model)
 
-        input_name = next(iter(net.input_info))
-        output_name = next(iter(net.outputs))
+        input_name = list(net.input_info.items())[0]
+        output_name = list(net.outputs.items())[0]
+
         net.input_info[input_name].precision = 'FP32'
         _, _, h, w = net.input_info[input_name].input_data.shape
         net.outputs[output_name].precision = 'FP32'
