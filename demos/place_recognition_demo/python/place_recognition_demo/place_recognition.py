@@ -39,17 +39,17 @@ class IEModel: # pylint: disable=too-few-public-methods
         self.input_size = self.model.input(self.input_tensor_name).shape
         self.nchw_layout = self.input_size[1] == 3
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
         if self.nchw_layout:
             image = np.transpose(image, (0, 3, 1, 2))
-        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
-        return out
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class PlaceRecognition:
