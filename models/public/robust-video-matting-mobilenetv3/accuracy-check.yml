@@ -4,7 +4,7 @@ evaluations:
     module_config:
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
           adapter:
             type: background_matting_with_pha_and_fgr
             alpha_out: pha
