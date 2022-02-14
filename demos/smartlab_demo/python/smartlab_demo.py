@@ -48,7 +48,6 @@ def build_argparser():
 
     return parser
 
-
 def main():
     args = build_argparser().parse_args()
 

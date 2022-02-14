@@ -30,12 +30,12 @@ class Segmentor:
 
         net = ie.read_model(backbone_path)
         self.backbone = ie.compile_model(network=net, device_name=device)
-        self.backbone_input_keys = list(self.backbone.input_info.items())
-        self.backbone_output_key = list(self.backbone.outputs.items())
+        self.backbone_input_keys = self.backbone.inputs
+        self.backbone_output_key = self.backbone.outputs
         net = ie.read_model(classifier_path)
         self.classifier = ie.compile_model(network=net, device_name=device)
-        self.classifier_input_keys = list(self.classifier.input_info.items())
-        self.classifier_output_key = list(self.classifier.outputs.items())
+        self.classifier_input_keys = self.classifier.inputs
+        self.classifier_output_key = self.classifier.outputs
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
