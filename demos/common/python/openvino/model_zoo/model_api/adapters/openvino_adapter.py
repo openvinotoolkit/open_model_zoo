@@ -101,7 +101,7 @@ class OpenvinoAdapter(ModelAdapter):
         if not input_layout:
             if not layout_helpers.get_layout(input).empty:
                 input_layout = Layout.from_openvino(input)
-            elif len(input.shape) == 4:
+            else:
                 input_layout = Layout.from_shape(input.shape)
         return input_layout
 

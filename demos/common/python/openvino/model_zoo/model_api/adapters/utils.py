@@ -28,11 +28,15 @@ class Layout:
         '''
         Create Layout from given shape
         '''
-        if len(shape) != 4:
-            raise RuntimeError('Get layout from shape method supports only 4D input shape')
+        if len(shape) == 2:
+            return 'NC'
+        if len(shape) == 3:
+            return 'CHW' if shape[0] in range(1, 5) else 'HWC'
+        if len(shape) == 4:
+            return 'NCHW' if shape[1] in range(1, 5) else 'NHWC'
 
-        layout = 'NCHW' if shape[1] in range(1, 4) else 'NHWC'
-        return layout
+        raise RuntimeError("Get layout from shape method doesn't support {}D shape".format(len(shape)))
+
 
     @staticmethod
     def from_openvino(input):
