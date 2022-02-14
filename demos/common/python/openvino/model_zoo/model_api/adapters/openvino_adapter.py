@@ -49,6 +49,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
         self.model_parameters = model_parameters
+        self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
         if isinstance(model_path, (str, Path)):
             if Path(model_path).suffix == ".onnx" and weights_path:
@@ -87,7 +88,6 @@ class OpenvinoAdapter(ModelAdapter):
 
     def get_input_layers(self):
         inputs = {}
-        self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
         for input in self.model.inputs:
             input_layout = self.get_layout_for_input(input)
             inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())

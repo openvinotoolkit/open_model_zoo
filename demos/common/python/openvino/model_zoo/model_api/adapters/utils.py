@@ -55,21 +55,17 @@ class Layout:
     @staticmethod
     def parse_layouts(layout_regex: str) -> Optional[dict]:
         '''
-        Parse layout parameter in format "input0:NCHW,input1:NC" or "NCHW" (applied to all inputs)
+        Parse layout parameter in format "input0[NCHW],input1[NC]" or "[NCHW]" (applied to all inputs)
         '''
         if not layout_regex:
             return None
         inputs_layouts = layout_regex.split(',')
         user_layouts = {}
         for layout in inputs_layouts:
-            layout_list = layout.split(':')
-            if len(layout_list) == 2:
-                input_name, input_layout = layout_list
-            else:
-                input_name = ''
-                input_layout = layout_list[0]
-            if re.fullmatch(r"[A-Z]+", input_layout):
-                user_layouts[input_name] = input_layout
-            else:
+            if not re.fullmatch(r"[^\[\]]*\[[A-Z]+\]", layout):
                 raise ValueError("invalid --layout option format")
+            layout_list = layout.split('[')
+            input_name = layout_list[0]
+            input_layout = layout_list[1].strip('[]')
+            user_layouts[input_name] = input_layout
         return user_layouts
