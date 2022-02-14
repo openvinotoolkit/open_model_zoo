@@ -26,6 +26,7 @@ class ImageInpainting:
         self.image_input_layer, self.mask_input_layer = sorted([node.get_any_name() for node in model.inputs])
 
         compiled_model = core.compile_model(model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
 
         self.nchw_layout = model.input(self.image_input_layer).shape[1] == 3
@@ -44,11 +45,9 @@ class ImageInpainting:
         self.input_height = input_height
         self.input_width = input_width
 
-
     def infer(self, image, mask):
-        output = self.infer_request.infer(inputs={self.image_input_layer: image, self.mask_input_layer: mask})
-        return next(iter(output.values()))
-
+        input_data = {self.image_input_layer: image, self.mask_input_layer: mask}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
     def process(self, image, mask):
         if self.nchw_layout:

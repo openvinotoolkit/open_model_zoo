@@ -2,7 +2,7 @@ models:
   - name: person-vehicle-bike-detection-crossroad-0078
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

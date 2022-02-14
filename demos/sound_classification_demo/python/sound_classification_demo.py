@@ -163,6 +163,7 @@ def main():
         sys.exit(1)
 
     compiled_model = ie.compile_model(model, args.device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
@@ -178,7 +179,7 @@ def main():
     clips = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk = np.reshape(chunk, model.inputs[0].shape)
-        output = next(iter(infer_request.infer({input_tensor_name: chunk}).values()))
+        output = infer_request.infer({input_tensor_name: chunk})[output_tensor]
         clips += batch_size
         for batch, data in enumerate(output):
             chunk_start_time = (idx*batch_size + batch)*hop / audio.samplerate

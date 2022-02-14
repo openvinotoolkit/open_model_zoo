@@ -2,7 +2,7 @@ models:
   - name: vehicle-detection-0201
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -18,4 +18,4 @@ models:
         metrics:
           - type: coco_orig_precision
             include_boundaries: false
-            reference: 0.323
+            reference: 0.322

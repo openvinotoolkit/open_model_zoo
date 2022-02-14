@@ -27,7 +27,7 @@ models:
 
   - name: se-resnet-50
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

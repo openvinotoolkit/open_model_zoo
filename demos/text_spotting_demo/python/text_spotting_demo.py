@@ -202,11 +202,12 @@ def main():
     mask_rcnn_infer_request = mask_rcnn_compiled_model.create_infer_request()
     log.info('The Mask-RCNN model {} is loaded to {}'.format(args.mask_rcnn_model, args.device))
 
-    text_enc_compiled_model =  core.compile_model(text_enc_model, args.device)
+    text_enc_compiled_model = core.compile_model(text_enc_model, args.device)
+    text_enc_output_tensor = text_enc_compiled_model.outputs[0]
     text_enc_infer_request = text_enc_compiled_model.create_infer_request()
     log.info('The Text Recognition Encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
 
-    text_dec_compiled_model =  core.compile_model(text_dec_model, args.device)
+    text_dec_compiled_model = core.compile_model(text_dec_model, args.device)
     text_dec_infer_request = text_dec_compiled_model.create_infer_request()
     log.info('The Text Recognition Decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
 
@@ -288,7 +289,8 @@ def main():
 
         texts = []
         for feature in text_features:
-            feature = next(iter(text_enc_infer_request.infer({'input': np.expand_dims(feature, axis=0)}).values()))
+            input_data = {'input': np.expand_dims(feature, axis=0)}
+            feature = text_enc_infer_request.infer(input_data)[text_enc_output_tensor]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 

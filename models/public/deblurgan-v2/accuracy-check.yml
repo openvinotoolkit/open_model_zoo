@@ -37,7 +37,7 @@ models:
   - name: deblurgan-v2
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           reverse_channels: True

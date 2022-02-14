@@ -2,7 +2,7 @@ models:
   - name: aclnet
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

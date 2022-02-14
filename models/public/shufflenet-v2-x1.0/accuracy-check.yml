@@ -2,7 +2,7 @@ models:
   - name: shufflenet-v2-x1.0
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -1,7 +1,7 @@
 models:
   - name: forward-tacotron-duration-prediction
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:

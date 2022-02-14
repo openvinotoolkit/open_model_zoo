@@ -40,16 +40,16 @@ class IEModel(): # pylint: disable=too-few-public-methods
         self.model = core.read_model(model_path)
         self.input_tensor_name = "Placeholder"
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
-        return out
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class ImageRetrieval:

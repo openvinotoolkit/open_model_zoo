@@ -1,7 +1,7 @@
 models:
   - name: ctpn
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ctpn_text_detection
           cls_prob_out: 'Reshape_2'

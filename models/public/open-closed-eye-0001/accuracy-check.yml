@@ -18,7 +18,7 @@ models:
 
   - name: open-closed-eye-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
     datasets:
       - name: mrlEyes_2018_01

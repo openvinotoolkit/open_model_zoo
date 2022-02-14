@@ -64,12 +64,13 @@ class QuartzNet:
             raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
         model.reshape({self.input_tensor_name: PartialShape(input_shape)})
         compiled_model = core.compile_model(model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def infer(self, melspectrogram):
         input_data = {self.input_tensor_name: melspectrogram}
-        return next(iter(self.infer_request.infer(input_data).values()))
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
     @classmethod
     def audio_to_melspectrum(cls, audio, sampling_rate):

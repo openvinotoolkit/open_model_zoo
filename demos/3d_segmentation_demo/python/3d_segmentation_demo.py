@@ -253,10 +253,10 @@ def main():
         if args.path_to_extension:
             core.add_extension(args.path_to_extension, "CPU")
         if args.number_threads is not None:
-            core.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
+            core.set_property("CPU", {'CPU_THREADS_NUM': str(args.number_threads)})
     elif 'GPU' in args.target_device:
         if args.path_to_cldnn_config:
-            core.set_config({'CONFIG_FILE': args.path_to_cldnn_config}, "GPU")
+            core.set_property("GPU", {'CONFIG_FILE': args.path_to_cldnn_config})
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "
                              "Please use CPU, GPU or HETERO:*CPU*, HETERO:*GPU*")
@@ -278,6 +278,7 @@ def main():
     n, c, d, h, w = model.inputs[0].shape
 
     compiled_model = core.compile_model(model, args.target_device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.path_to_model, args.target_device))
 
@@ -308,8 +309,8 @@ def main():
         original_data = data_crop
         original_size = original_data.shape[-3:]
 
-    result = infer_request.infer({input_tensor_name: data_crop})
-    result = next(iter(result.values()))
+    input_data = {input_tensor_name: data_crop}
+    result = infer_request.infer(input_data)[output_tensor]
     batch, channels, out_d, out_h, out_w = result.shape
 
     list_img = []

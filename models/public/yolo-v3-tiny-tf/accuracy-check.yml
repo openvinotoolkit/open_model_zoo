@@ -59,7 +59,7 @@ models:
   - name: yolo-v3-tiny-tf
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           anchors: tiny_yolo_v3

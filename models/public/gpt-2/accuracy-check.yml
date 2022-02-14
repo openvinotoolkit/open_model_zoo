@@ -25,7 +25,7 @@ models:
 
   - name: gpt-2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: common_language_modeling
           logits_output: "output"

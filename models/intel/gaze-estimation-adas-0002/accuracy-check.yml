@@ -2,7 +2,7 @@ models:
   - name: gaze-estimation-adas-0002
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         inputs:
           - name: left_eye_image
             type: INPUT
