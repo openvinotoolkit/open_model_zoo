@@ -142,10 +142,10 @@ int main(int argc, char **argv) {
             detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "ssd") {
-            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
+            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, FLAGS_auto_resize, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "yolo") {
-            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, {}, {}, FLAGS_layout_det));
+            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, {}, {}, FLAGS_layout_det));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

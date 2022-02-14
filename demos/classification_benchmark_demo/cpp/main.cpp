@@ -42,6 +42,7 @@ static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
+static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
@@ -59,6 +60,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
+DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -71,6 +73,7 @@ static void showUsage() {
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
@@ -141,7 +144,7 @@ int main(int argc, char *argv[]) {
                 i--;
             } else {
                 readerMetrics.update(readingStart);
-                // Clone cropped image to keep memory layout dense to enable openvino auto resize
+                // Clone cropped image to keep memory layout dense to enable -auto_resize
                 inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
                 if (lastSlashIdx != std::string::npos) {
@@ -201,7 +204,7 @@ int main(int argc, char *argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
-        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, labels, FLAGS_layout)),
+        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels, FLAGS_layout)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
 
         Presenter presenter(FLAGS_u, 0);

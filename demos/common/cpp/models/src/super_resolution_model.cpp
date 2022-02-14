@@ -25,7 +25,7 @@
 #include "models/results.h"
 
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
-    ImageModel(modelFileName, layout) {
+    ImageModel(modelFileName, false, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
@@ -33,7 +33,6 @@ SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, con
 void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input --------------------------------------------------
-
     const ov::OutputVector& inputs = model->inputs();
     if (inputs.size() != 1 && inputs.size() != 2) {
         throw std::logic_error("Super resolution model wrapper supports topologies with 1 or 2 inputs only");

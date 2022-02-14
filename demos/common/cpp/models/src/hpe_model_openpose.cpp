@@ -34,7 +34,7 @@ const float HPEOpenPose::minSubsetScore = 0.2f;
 
 HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
     float confidenceThreshold, const std::string& layout) :
-    ImageModel(modelFileName, layout),
+    ImageModel(modelFileName, false, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {

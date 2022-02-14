@@ -21,8 +21,8 @@
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
-    float confidenceThreshold, float boxIOUThreshold, const std::string& layout)
-    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}, layout),
+    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold, const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}, layout),
       maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
       steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
@@ -44,12 +44,16 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     ov::preprocess::PrePostProcessor ppp(model);
     inputTransform.setPrecision(ppp, model->input().get_any_name());
     ppp.input().tensor().
-        set_spatial_dynamic_shape().
         set_layout({ "NHWC" });
 
-    ppp.input().preprocess().
-        convert_element_type(ov::element::f32).
-        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    if (useAutoResize) {
+        ppp.input().tensor().
+            set_spatial_dynamic_shape();
+
+        ppp.input().preprocess().
+            convert_element_type(ov::element::f32).
+            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
 
     ppp.input().model().set_layout(inputLayout);
 

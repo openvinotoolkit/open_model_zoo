@@ -23,7 +23,8 @@
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
     float confidenceThreshold, const std::vector<std::string>& labels, const std::string& layout)
-    : DetectionModel(modelFileName, confidenceThreshold, labels, layout) {}
+    : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout) {
+}
 
 void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------

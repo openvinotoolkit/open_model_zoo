@@ -23,13 +23,15 @@ class ImageModel : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
+    /// @param useAutoResize - if true, image is resized by openvino
     /// @param layout - model input layout
-    ImageModel(const std::string& modelFileName, const std::string& layout = "")
-        : ModelBase(modelFileName, layout) {}
+    ImageModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout = "");
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
 protected:
+    bool useAutoResize;
+
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
 };

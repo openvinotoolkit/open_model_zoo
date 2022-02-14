@@ -20,10 +20,10 @@
 #include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 #include <utils/image_utils.h>
-#include "models/model_base.h"
+#include "models/image_model.h"
 #include <models/results.h>
 
-class HpeAssociativeEmbedding : public ModelBase {
+class HpeAssociativeEmbedding : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load

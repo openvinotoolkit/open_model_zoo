@@ -22,10 +22,10 @@
 #include "models/results.h"
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
-    float confidenceThreshold,
+    float confidenceThreshold, bool useAutoResize,
     const std::vector<std::string>& labels,
     const std::string& layout) :
-    DetectionModel(modelFileName, confidenceThreshold, labels, layout) {
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels, layout) {
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
@@ -151,12 +151,16 @@ void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
             inputTransform.setPrecision(ppp, inputTensorName);
             ppp.input(inputTensorName).tensor().
-                set_spatial_dynamic_shape().
                 set_layout({ "NHWC" });
 
-            ppp.input(inputTensorName).preprocess().
-                convert_element_type(ov::element::f32).
-                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+            if (useAutoResize) {
+                ppp.input(inputTensorName).tensor().
+                    set_spatial_dynamic_shape();
+
+                ppp.input(inputTensorName).preprocess().
+                    convert_element_type(ov::element::f32).
+                    resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+            }
 
             ppp.input(inputTensorName).model().set_layout(inputLayout);
 

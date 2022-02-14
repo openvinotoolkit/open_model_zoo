@@ -25,8 +25,10 @@ class SegmentationModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
+    /// @param useAutoResize - if true, image will be resized by openvino.
+    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param layout - model input layout
-    SegmentationModel(const std::string& modelFileName, const std::string& layout = "");
+    SegmentationModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout = "");
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 

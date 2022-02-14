@@ -19,9 +19,9 @@
 #include <utils/nms.hpp>
 #include "models/detection_model_retinaface.h"
 
-ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, float boxIOUThreshold,
-    const std::string& layout)
-    : DetectionModel(modelFileName, confidenceThreshold, {"Face"}, layout),  // Default label is "Face"
+ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    float boxIOUThreshold, const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}, layout),  // Default label is "Face"
     shouldDetectMasks(false), shouldDetectLandmarks(false), boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
               { 16, { 8, 4 }, 16, { 1 }},
@@ -46,12 +46,16 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
         set_element_type(ov::element::u8).
-        set_spatial_dynamic_shape().
         set_layout({ "NHWC" });
 
-    ppp.input().preprocess().
-        convert_element_type(ov::element::f32).
-        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    if (useAutoResize) {
+        ppp.input().tensor().
+            set_spatial_dynamic_shape();
+
+        ppp.input().preprocess().
+            convert_element_type(ov::element::f32).
+            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
 
     ppp.input().model().set_layout(inputLayout);
 

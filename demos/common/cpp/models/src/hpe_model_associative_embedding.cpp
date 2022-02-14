@@ -31,7 +31,7 @@ const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
     int targetSize, float confidenceThreshold, const std::string& layout, float delta, RESIZE_MODE resizeMode) :
-    ModelBase(modelFileName, layout),
+    ImageModel(modelFileName, false, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold),

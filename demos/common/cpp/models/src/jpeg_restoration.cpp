@@ -25,7 +25,7 @@
 
 JPEGRestorationModel::JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize,
     bool _jpegCompression, const std::string& layout) :
-    ImageModel(modelFileName, layout) {
+    ImageModel(modelFileName, false, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
         jpegCompression = _jpegCompression;

@@ -26,7 +26,7 @@
 #include "models/results.h"
 
 StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout) :
-    ImageModel(modelFileName, layout) {
+    ImageModel(modelFileName, false, layout) {
 }
 
 void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {

@@ -24,9 +24,9 @@
 #include "models/classification_model.h"
 #include "models/results.h"
 
-ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop,
+ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize,
     const std::vector<std::string>& labels, const std::string& layout) :
-    ImageModel(modelFileName, layout),
+    ImageModel(modelFileName, useAutoResize, layout),
     nTop(nTop),
     labels(labels) {}
 
@@ -96,12 +96,16 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
         set_element_type(ov::element::u8).
-        set_spatial_dynamic_shape().
         set_layout({ "NHWC" });
 
-    ppp.input().preprocess().
-        convert_element_type(ov::element::f32).
-        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    if (useAutoResize) {
+        ppp.input().tensor().
+            set_spatial_dynamic_shape();
+
+        ppp.input().preprocess().
+            convert_element_type(ov::element::f32).
+            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
 
     ppp.input().model().set_layout(inputLayout);
 

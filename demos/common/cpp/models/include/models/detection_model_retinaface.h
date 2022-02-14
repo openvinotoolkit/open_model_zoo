@@ -42,10 +42,11 @@ public:
     /// @param model_name name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
+    /// @param useAutoResize - if true, image will be resized by openvino.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
     /// @param layout - model input layout
-    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, float boxIOUThreshold,
-        const std::string& layout = "");
+    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize,
+        float boxIOUThreshold, const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
