@@ -28,7 +28,7 @@ RequestsPool::RequestsPool(ov::CompiledModel& compiledModel, unsigned int size) 
 RequestsPool::~RequestsPool() {
     // Setting empty callback to free resources allocated for previously assigned lambdas
     for (auto& pair : requests) {
-        pair.first.set_callback([](std::exception_ptr e) {});
+        pair.first.set_callback([](std::exception_ptr) {});
     }
 }
 

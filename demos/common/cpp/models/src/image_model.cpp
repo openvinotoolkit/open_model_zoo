@@ -29,8 +29,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
 
     if (!useAutoResize) {
         // /* Resize and copy data from the image to the input tensor */
-        // ov::Tensor frameTensor = request.get_input_tensor();
-        // matToTensor(img, frameTensor);
         const ov::Tensor& frameTensor = request.get_tensor(inputsNames[0]);  // first input should be image
         const ov::Shape& tensorShape = frameTensor.get_shape();
         const ov::Layout layout("NHWC");
