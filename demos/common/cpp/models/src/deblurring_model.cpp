@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,63 +14,89 @@
 // limitations under the License.
 */
 
-#include "models/deblurring_model.h"
-#include "utils/ocv_common.hpp"
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include "models/deblurring_model.h"
 
-DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName, false) {
+DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
+    ImageModel(modelFileName, false, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
 
-void DeblurringModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Prepare input ------------------------------------------------------
+    if (model->inputs().size() != 1) {
+        throw std::logic_error("Deblurring model wrapper supports topologies with only 1 input");
+    }
 
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(InferenceEngine::Precision::U8);
+    inputsNames.push_back(model->input().get_any_name());
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 output");
+    const ov::Shape& inputShape = model->input().get_shape();
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
-    outputsNames.push_back(outputInfo.begin()->first);
-    InferenceEngine::Data& data = *outputInfo.begin()->second;
-    data.setPrecision(InferenceEngine::Precision::FP32);
-    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
+    }
 
-    changeInputSize(cnnNetwork);
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout("NHWC");
+
+    ppp.input().model().set_layout(inputLayout);
+
+    // --------------------------- Prepare output  -----------------------------------------------------
+    if (model->outputs().size() != 1) {
+        throw std::logic_error("Deblurring model wrapper supports topologies with only 1 output");
+    }
+
+    outputsNames.push_back(model->output().get_any_name());
+
+    const ov::Shape& outputShape = model->output().get_shape();
+    const ov::Layout outputLayout("NCHW");
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
+        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's output is expected");
+    }
+
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
+
+    changeInputSize(model);
 }
 
-void DeblurringModel::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
+void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
+    const ov::Layout& layout = ov::layout::get_layout(model->input());
+    ov::Shape inputShape = model->input().get_shape();
 
-    if (inputDims[2] % stride || inputDims[3] % stride)
-        throw std::runtime_error("The shape of the model input must be divisible by stride");
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
+
+    if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
+        throw std::logic_error("Model input shape HxW = "
+            + std::to_string(inputShape[heightId]) + "x" + std::to_string(inputShape[widthId])
+            + "must be divisible by stride " + std::to_string(stride));
+    }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
     netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
 
-    inputDims[0] = 1;
-    inputDims[2] = netInputHeight;
-    inputDims[3] = netInputWidth;
+    inputShape[batchId] = 1;
+    inputShape[heightId] = netInputHeight;
+    inputShape[widthId] = netInputWidth;
 
-    cnnNetwork.reshape(inputShapes);
+    model->reshape(inputShape);
 }
 
-std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     size_t h = image.rows;
     size_t w = image.cols;
@@ -86,8 +112,7 @@ std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& 
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
         cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
     }
-    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matToBlob(resizedImage, frameBlob);
+    request.set_input_tensor(wrapMat2Tensor(resizedImage));
 
     return std::make_shared<InternalImageModelData>(image.cols, image.rows);
 }
@@ -97,14 +122,13 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
-
-    InferenceEngine::LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-    const auto outputData = outMapped.as<float*>();
+    const auto outputData = infResult.getFirstOutputTensor().data<float>();
 
     std::vector<cv::Mat> imgPlanes;
-    const InferenceEngine::SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
-    size_t outHeight = (int)(outSizeVector[2]);
-    size_t outWidth = (int)(outSizeVector[3]);
+    const ov::Shape& outputShape= infResult.getFirstOutputTensor().get_shape();
+    const ov::Layout outputLayout("NCHW");
+    size_t outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
+    size_t outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
     size_t numOfPixels = outWidth * outHeight;
     imgPlanes = std::vector<cv::Mat>{
           cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),

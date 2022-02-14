@@ -270,10 +270,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
-            #TODO
-            #TestCase(options={'-at': 'jr',
-            #    '-m': ModelArg('fbcnn')}
-            #)
+            TestCase(options={'-at': 'jr',
+               '-m': ModelArg('fbcnn')}
+            )
         ]
     )),
 
@@ -406,11 +405,11 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        # ModelArg('face-detection-0205'),  # TODO
-                        # ModelArg('face-detection-0206'),  # TODO
+                        ModelArg('face-detection-0205'),
+                        ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
+                        ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -423,9 +422,9 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        # ModelArg('person-vehicle-bike-detection-2003'),  # TODO
-                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
-                        # ModelArg('product-detection-0001'),  # TODO
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
+                        ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -449,8 +448,7 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    # TODO: INT8: Attempt to get a name for a Tensor without names
-                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -488,10 +486,9 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
-            # TODO
-            # ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')
         ),
     )),
 

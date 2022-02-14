@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 */
 
 #pragma once
+#include <string>
 #include <vector>
-#include "detection_model.h"
-#include <utils/nms.hpp>
+#include <openvino/openvino.hpp>
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelRetinaFace
     : public DetectionModel {
@@ -40,9 +42,11 @@ public:
     /// @param model_name name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
-    /// @param useAutoResize - if true, image will be resized by IE.
+    /// @param useAutoResize - if true, image will be resized by openvino.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
-    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
+    /// @param layout - model input layout
+    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize,
+        float boxIOUThreshold, const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
@@ -59,19 +63,19 @@ protected:
     const float maskThreshold;
     float landmarkStd;
 
-    enum EOutputType {
-        OT_BBOX,
-        OT_SCORES,
-        OT_LANDMARK,
-        OT_MASKSCORES,
-        OT_MAX
+    enum OutputType {
+        OUT_BOXES,
+        OUT_SCORES,
+        OUT_LANDMARKS,
+        OUT_MASKSCORES,
+        OUT_MAX
     };
 
-    std::vector <std::string> separateOutputsNames[OT_MAX];
+    std::vector <std::string> separateOutputsNames[OUT_MAX];
     const std::vector<AnchorCfgLine> anchorCfg;
     std::map<int, std::vector <Anchor>> anchorsFpn;
     std::vector<std::vector<Anchor>> anchors;
 
     void generateAnchorsFpn();
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };
