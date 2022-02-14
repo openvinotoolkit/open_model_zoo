@@ -21,7 +21,7 @@ class SubDetector:
 
         img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
-        res = self.model.infer(inputs={self.inode: img_feed})[self.onode]
+        res = self.model.infer_new_request(inputs={self.inode: img_feed})[self.onode]
         outputs = demo_postprocess(res, self.input_shape, p6=False)
 
         outputs = postprocess(

@@ -59,12 +59,12 @@ class Segmentor:
         buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run ###
-        feature_vector_front = self.backbone.infer(
+        feature_vector_front = self.backbone.infer_new_request(
             inputs={self.backbone_input_keys[0]: buffer_front})[self.backbone_output_key[0]]
-        feature_vector_top = self.backbone.infer(
+        feature_vector_top = self.backbone.infer_new_request(
             inputs={self.backbone_input_keys[0]: buffer_top})[self.backbone_output_key[0]]
 
-        output = self.classifier.infer(inputs={
+        output = self.classifier.infer_new_request(inputs={
             self.classifier_input_keys[0]: feature_vector_front,
             self.classifier_input_keys[1]: feature_vector_top}
         )[self.classifier_output_key[0]]
