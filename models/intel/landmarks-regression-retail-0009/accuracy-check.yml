@@ -2,7 +2,7 @@ models:
   - name: landmarks-regression-retail-0009
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: landmarks_regression
 
     datasets:

@@ -51,7 +51,7 @@ models:
 
     # list of launchers for MobileNetV2.
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

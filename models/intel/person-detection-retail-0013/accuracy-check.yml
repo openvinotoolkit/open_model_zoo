@@ -2,7 +2,7 @@ models:
   - name: person-detection-retail-0013
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

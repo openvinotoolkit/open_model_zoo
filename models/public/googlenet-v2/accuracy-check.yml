@@ -27,7 +27,7 @@ models:
 
   - name: googlenet-v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -36,7 +36,7 @@ models:
   - name: nfnet-f0
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -80,6 +80,8 @@ class DLSDKLauncher(Launcher):
     def __init__(self, config_entry, model_name='', delayed_model_loading=False,
                  preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
+        if ie.get_version().split('-')[0] >= '2022.1.0':
+            warnings.warn('dlsdk launcher is deprecated. Please use openvino instead', DeprecationWarning)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')

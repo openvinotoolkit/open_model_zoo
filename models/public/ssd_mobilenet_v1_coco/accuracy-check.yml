@@ -1,7 +1,7 @@
 models:
   - name:  ssd_mobilenet_v1_coco
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

@@ -34,7 +34,7 @@ models:
   - name: swin-tiny-patch4-window7-224
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -1,7 +1,7 @@
 models:
   - name: forward-tacotron-regression
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:

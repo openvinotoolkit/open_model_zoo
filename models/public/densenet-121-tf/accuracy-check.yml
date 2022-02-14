@@ -1,7 +1,7 @@
 models:
   - name: densenet-121-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

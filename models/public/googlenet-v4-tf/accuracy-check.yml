@@ -28,7 +28,7 @@ models:
 
   - name: googlenet-v4-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

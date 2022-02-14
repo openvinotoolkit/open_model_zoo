@@ -1,7 +1,7 @@
 models:
   - name: quartznet-15x5-en
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: ctc_greedy_decoder

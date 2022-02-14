@@ -38,12 +38,12 @@ models:
 
   - name: yolo-v3-tiny-onnx
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3_onnx
-          boxes_out: yolonms_layer_1
-          scores_out: yolonms_layer_1:1
-          indices_out: yolonms_layer_1:2
+          boxes_out: yolo_evaluation_layer_1/concat_6:0_btc
+          scores_out: yolo_evaluation_layer_1/concat_7:0_btc
+          indices_out: yolonms_layer_1/ExpandDims_5:01
         inputs:
           - name: image_shape
             type: ORIG_IMAGE_INFO

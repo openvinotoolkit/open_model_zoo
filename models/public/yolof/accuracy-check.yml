@@ -1,7 +1,7 @@
 models:
   - name: yolof
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolof
           anchors: 16,16,32,32,64,64,128,128,256,256,512,512
