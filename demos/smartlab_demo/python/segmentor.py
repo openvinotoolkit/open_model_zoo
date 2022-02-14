@@ -28,12 +28,12 @@ class Segmentor:
             "adjust_rider",
         ]
 
-        net = ie.read_network(backbone_path)
-        self.backbone = ie.load_network(network=net, device_name=device)
+        net = ie.read_model(backbone_path)
+        self.backbone = ie.compile_model(network=net, device_name=device)
         self.backbone_input_keys = list(self.backbone.input_info.keys())
         self.backbone_output_key = list(self.backbone.outputs.keys())
-        net = ie.read_network(classifier_path)
-        self.classifier = ie.load_network(network=net, device_name=device)
+        net = ie.read_model(classifier_path)
+        self.classifier = ie.compile_model(network=net, device_name=device)
         self.classifier_input_keys = list(self.classifier.input_info.keys())
         self.classifier_output_key = list(self.classifier.outputs.keys())
 
