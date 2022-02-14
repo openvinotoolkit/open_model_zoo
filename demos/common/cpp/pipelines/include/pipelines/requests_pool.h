@@ -26,7 +26,7 @@
 ///
 class RequestsPool {
 public:
-    RequestsPool(ov::runtime::CompiledModel& compiledModel, unsigned int size);
+    RequestsPool(ov::CompiledModel& compiledModel, unsigned int size);
     ~RequestsPool();
 
     /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
