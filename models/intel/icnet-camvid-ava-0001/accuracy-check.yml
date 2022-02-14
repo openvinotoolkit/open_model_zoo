@@ -2,7 +2,7 @@ models:
   - name: icnet-camvid-ava-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
     datasets:
       - name: CamVid

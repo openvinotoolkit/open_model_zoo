@@ -2,7 +2,7 @@ models:
   - name: text-recognition-0012
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: beam_search_decoder
 
     datasets:

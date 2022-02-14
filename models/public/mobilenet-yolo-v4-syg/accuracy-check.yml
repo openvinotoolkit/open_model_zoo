@@ -54,7 +54,7 @@ models:
 
   - name: mobilenet-yolo-v4-syg
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           classes: 4

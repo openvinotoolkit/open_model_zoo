@@ -6,7 +6,7 @@ models:
         adapter:
           type: style_transfer
 
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: style_transfer
 

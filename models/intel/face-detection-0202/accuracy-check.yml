@@ -2,7 +2,7 @@ models:
   - name: face-detection-0202
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

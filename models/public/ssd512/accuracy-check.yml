@@ -24,7 +24,7 @@ models:
 
   - name: ssd512
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

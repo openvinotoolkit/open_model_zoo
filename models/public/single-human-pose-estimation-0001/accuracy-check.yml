@@ -2,7 +2,7 @@ models:
   - name: single-human-pose-estimation-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: single_human_pose_estimation
 

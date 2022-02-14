@@ -1,7 +1,7 @@
 models:
   - name: person-detection-action-recognition-0006
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: action_detection
           multihead_net: True

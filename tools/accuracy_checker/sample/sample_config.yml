@@ -4,8 +4,8 @@ models:
     # list of launchers for your topology.
     launchers:
       # launcher framework (e.g. caffe, openvino)
-      - framework: dlsdk
-        # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
+      - framework: openvino
+        # device for infer (e.g. for openvino cpu, gpu, hetero:cpu,gpu ...)
         device: CPU
         # model topology file (.xml, .onnx, e.t.c.)
         # path to topology is prefixed with directory, specified in "-m/--models" option

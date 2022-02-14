@@ -2,7 +2,7 @@ models:
   - name: license-plate-recognition-barrier-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: lpr
         inputs:
           - name: seq_ind
