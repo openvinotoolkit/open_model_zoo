@@ -64,12 +64,18 @@ class ResizePredictionBoxes(Postprocessor):
             h = self.image_size[0] / input_h
 
         if self.unpadding:
-            input_h, input_w, _ = image_metadata.get('image_info', self.image_size)
-            _, _, i_h, i_w = image_metadata.get('input_shape')['input']
+            padding_op = [op for op in image_metadata['geometric_operations'] if op.type == 'padding']
+            if padding_op:
+                padding_op = padding_op[0]
 
-            w = self.image_size[1] / input_w * i_w
-            h = self.image_size[0] / input_h * i_h
+                # def right_bottom_padding(dst_width, dst_height, width, height):
+                #     return [0, 0, dst_height - height, dst_width - width]
+                #
+                # def left_top_padding(dst_width, dst_height, width, height):
+                #     return [dst_height - height, dst_width - width, 0, 0]
 
+                w = padding_op.parameters['pref_width'] / padding_op.parameters['width'] * self.image_size[1]
+                h = padding_op.parameters['pref_height'] / padding_op.parameters['height'] * self.image_size[0]
 
         for pred in prediction:
             pred.x_mins *= w
