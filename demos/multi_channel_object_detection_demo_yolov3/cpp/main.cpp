@@ -23,7 +23,7 @@
 #endif
 
 #include <opencv2/opencv.hpp>
-#include <ngraph/ngraph.hpp>
+#include <openvino/op/region_yolo.hpp>
 
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>

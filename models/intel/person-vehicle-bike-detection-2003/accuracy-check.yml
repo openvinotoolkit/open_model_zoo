@@ -2,7 +2,7 @@ models:
   - name: person-vehicle-bike-detection-2003
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: faster_rcnn_onnx
           labels_out: 'labels'

@@ -54,5 +54,12 @@ Where:
 - `b` - batch size
 - `num_priors` -  number of priors in SSD format (equal to 50x85x1+25x43x4=8550)
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -44,7 +44,7 @@ models:
 
   - name: yolox-tiny
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: yolox
     datasets:
       - name: ms_coco_detection_80_class_without_background

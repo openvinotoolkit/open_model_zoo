@@ -1,7 +1,7 @@
 models:
   - name:  faster_rcnn_resnet50_coco
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
         inputs:
           - name: image_info

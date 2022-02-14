@@ -1,7 +1,7 @@
 models:
   - name: retinanet-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

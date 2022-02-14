@@ -2,7 +2,7 @@ models:
   - name: person-detection-raisinghand-recognition-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox

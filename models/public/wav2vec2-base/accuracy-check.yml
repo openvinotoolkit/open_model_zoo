@@ -1,7 +1,7 @@
 models:
   - name: wav2vec2-base
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: true
         adapter:
           type: wav2vec

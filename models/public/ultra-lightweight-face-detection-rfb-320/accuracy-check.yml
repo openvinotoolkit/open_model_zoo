@@ -40,7 +40,7 @@ models:
   - name: ultra-lightweight-face-detection-rfb-320
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ultra_lightweight_face_detection
           boxes_out: "boxes"

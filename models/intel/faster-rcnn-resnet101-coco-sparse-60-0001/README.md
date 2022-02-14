@@ -40,6 +40,14 @@ The net outputs a blob with the shape `1, 1, 100, 7`, where each row consists of
 - (`x0`, `y0`) - normalized coordinates of the top left bounding box corner, in the [0, 1] range
 - (`x1`, `y1`) - normalized coordinates of the bottom right bounding box corner, in the [0, 1] range
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.
 

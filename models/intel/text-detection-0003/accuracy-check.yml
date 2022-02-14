@@ -2,7 +2,7 @@ models:
   - name: text-detection-0003
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add

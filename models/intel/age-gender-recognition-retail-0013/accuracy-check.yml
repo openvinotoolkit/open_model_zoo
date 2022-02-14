@@ -2,11 +2,11 @@ models:
   - name: age-gender-recognition-retail-0013
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: age_gender
           gender_out: prob
-          age_out: age_conv3
+          age_out: fc3_a
 
     datasets:
       - name: age_gender

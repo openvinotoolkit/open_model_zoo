@@ -1,7 +1,7 @@
 models:
   - name: googlenet-v2-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

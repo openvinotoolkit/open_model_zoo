@@ -68,6 +68,13 @@ An example of using the Model Converter:
 omz_converter --name <model_name>
 ```
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [MRI Reconstruction C++ Demo](../../../demos/mri_reconstruction_demo/cpp/README.md)
+* [MRI Reconstruction Python\* Demo](../../../demos/mri_reconstruction_demo/python/README.md)
+
 ## Legal Information
 
 The original model is distributed under the following
