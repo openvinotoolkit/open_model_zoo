@@ -57,6 +57,5 @@ class MwGlobalExp:
         compiled_model = self.ie.compile_model(model=net, device_name=self.device)
         input_name = compiled_model.inputs[0]
         output_name = compiled_model.outputs[0]
-        _, _, h, w = compiled_model.inputs[0].get_shape
 
-        return (input_name, output_name, (h, w), compiled_model)
+        return (input_name, output_name, (416, 416), compiled_model)
