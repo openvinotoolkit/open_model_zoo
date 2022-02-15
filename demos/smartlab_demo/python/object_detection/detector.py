@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+from ssl import ALERT_DESCRIPTION_ILLEGAL_PARAMETER
 import numpy as np
 from .preprocess import preprocess
 from .settings import MwGlobalExp
@@ -138,6 +139,7 @@ class Detector:
             sub_detector1 = self.front1_subdetector
             sub_detector2 = self.front2_subdetector
 
+        all_preds = []
         for i, sub_detector in enumerate([sub_detector1, sub_detector2]):
             outputs, img_info = sub_detector.inference(img)
             if outputs[0] is not None:
@@ -147,7 +149,9 @@ class Detector:
             preds[:, 6] += self.offset_cls_idx[i]
 
             if i == 0:
-                all_preds = np.array(preds)
+                all_preds
+            elif len(all_preds) == 0:
+                all_preds = np.zeros((1, 7))
             else:
                 np.vstack((all_preds, preds))
 
