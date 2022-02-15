@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-from ssl import ALERT_DESCRIPTION_ILLEGAL_PARAMETER
 import numpy as np
 from .preprocess import preprocess
 from .settings import MwGlobalExp
