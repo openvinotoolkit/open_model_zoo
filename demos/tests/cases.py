@@ -391,7 +391,7 @@ DEMOS = [
             device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('375x500')}),
+            '-i': 'C:/videos/girl.mp4'}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
