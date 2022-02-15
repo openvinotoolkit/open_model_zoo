@@ -1,4 +1,0 @@
-[console_scripts]
-accuracy_check = openvino.tools.accuracy_checker.main:main
-convert_annotation = openvino.tools.accuracy_checker.annotation_converters.convert:main
-
