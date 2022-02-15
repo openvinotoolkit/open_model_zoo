@@ -169,7 +169,7 @@ DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            # ModelArg('instance-segmentation-person-0007'),  # TODO
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
     )),
 
@@ -200,8 +200,7 @@ DEMOS = [
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
                           '-m_d': ModelArg('person-detection-asl-0001')}),
         [
-            # TODO: nothing
-            # TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
                               '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
@@ -312,7 +311,7 @@ DEMOS = [
             None,
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
+            ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -984,13 +983,12 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    #TODO ImportError: cannot import name 'extract_poses' from 'pose_extractor' (unknown location)
-    # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #                      **MONITORS,
-    #                      '-i': DataPatternArg('human-pose-estimation')}),
-    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # )),
+    PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None,
+                         **MONITORS,
+                         '-i': DataPatternArg('human-pose-estimation')}),
+       TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1077,7 +1075,7 @@ PYTHON_DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            #ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
+            ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -1313,28 +1311,28 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: No module named 'ctcdecode_numpy'
-    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     [
-    #         TestCase(options={'-p': 'mds08x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-    #         TestCase(options={'-p': 'mds06x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-    #                           # lm.binary is really in dl_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-    #                           '--realtime': None}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-    #     ],
-    # )),
+    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        [
+            TestCase(options={'-p': 'mds08x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+            TestCase(options={'-p': 'mds06x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+                              # lm.binary is really in dl_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+            TestCase(options={'-p': 'mds08x_en',  # test online mode
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+                              '--realtime': None}),
+            TestCase(options={'-p': 'mds08x_en',  # test without LM
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+        ],
+    )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
