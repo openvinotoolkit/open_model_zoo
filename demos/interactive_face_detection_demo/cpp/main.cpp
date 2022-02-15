@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <iostream>
+#include <limits>
+
+#include <gflags/gflags.h>
+#include <utils/images_capture.h>
+#include <monitors/presenter.h>
+
 #include "detectors.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
-#include <monitors/presenter.h>
-#include <utils/images_capture.h>
-
-#include <gflags/gflags.h>
-#include <iostream>
-#include <limits>
 
 namespace {
 constexpr char h_msg[] = "print a [H]elp message";
@@ -47,20 +48,20 @@ DEFINE_uint32(lim, 1000, lim_msg);
 constexpr char loop_msg[] = "enable reading the input in a loop";
 DEFINE_bool(loop, false, loop_msg);
 
-constexpr char m_ag_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
-DEFINE_string(m_ag, "", m_ag_msg);
+constexpr char mag_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
+DEFINE_string(mag, "", mag_msg);
 
-constexpr char m_am_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
-DEFINE_string(m_am, "", m_am_msg);
+constexpr char mam_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
+DEFINE_string(mam, "", mam_msg);
 
-constexpr char m_em_msg[] = "path to an .xml file with a trained Emotions Recognition model";
-DEFINE_string(m_em, "", m_em_msg);
+constexpr char mem_msg[] = "path to an .xml file with a trained Emotions Recognition model";
+DEFINE_string(mem, "", mem_msg);
 
-constexpr char m_hp_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
-DEFINE_string(m_hp, "", m_hp_msg);
+constexpr char mhp_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
+DEFINE_string(mhp, "", mhp_msg);
 
-constexpr char m_lm_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
-DEFINE_string(m_lm, "", m_lm_msg);
+constexpr char mlm_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
+DEFINE_string(mlm, "", mlm_msg);
 
 constexpr char o_msg[] = "name of the output file(s) to save";
 DEFINE_string(o, "", o_msg);
@@ -88,7 +89,7 @@ void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
         std::cout << "  \t [-h]                                        " << h_msg
-                  << "\n\t[--help]                   print help on all arguments"
+                  << "\n\t[--help]          print help on all arguments"
                   << "\n\t  -i <INPUT>                                 " << i_msg
                   << "\n\t  -m <MODEL FILE>                            " << m_msg
                   << "\n\t[--bb_enlarge_coef <NUMBER>]                 " << bb_enlarge_coef_msg
@@ -97,18 +98,18 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--dy_coef <NUMBER>]                         " << dy_coef_msg
                   << "\n\t[--fps <NUMBER>]                             " << fps_msg
                   << "\n\t[--limit <NUMBER>]                           " << lim_msg
-                  << "\n\t[--loop <LOOP>]                              " << loop_msg
-                  << "\n\t[--mag <MODEL FILE>]                         " << m_ag_msg
-                  << "\n\t[--mam <MODEL FILE>]                         " << m_am_msg
-                  << "\n\t[--mem <MODEL FILE>]                         " << m_em_msg
-                  << "\n\t[--mhp <MODEL FILE>]                         " << m_hp_msg
-                  << "\n\t[--mlm <MODEL FILE>]                         " << m_lm_msg
+                  << "\n\t[--loop]                                     " << loop_msg
+                  << "\n\t[--mag <MODEL FILE>]                         " << mag_msg
+                  << "\n\t[--mam <MODEL FILE>]                         " << mam_msg
+                  << "\n\t[--mem <MODEL FILE>]                         " << mem_msg
+                  << "\n\t[--mhp <MODEL FILE>]                         " << mhp_msg
+                  << "\n\t[--mlm <MODEL FILE>]                         " << mlm_msg
                   << "\n\t[ -o <OUTPUT>]                               " << o_msg
                   << "\n\t [-r]                                        " << r_msg
                   << "\n\t[--show] ([--noshow])                        " << show_msg
                   << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar])" << show_emotion_bar_msg
                   << "\n\t[--smooth] ([--nosmooth])                    " << smooth_msg
-                  << "\n\t [-t <THRESHOLD>]                            " << t_msg
+                  << "\n\t [-t <NUMBER>]                               " << t_msg
                   << "\n\t [-u <DEVICE>]                               " << u_msg
                   << "\n\tKey bindings: P, 0, spacebar - pause keys    " << '\n';
         showAvailableDevices();
@@ -134,11 +135,11 @@ int main(int argc, char *argv[]) {
 
     FaceDetection faceDetector(FLAGS_m, FLAGS_t, FLAGS_r,
                                 static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
-    AgeGenderDetection ageGenderDetector(FLAGS_m_ag, FLAGS_r);
-    HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_r);
-    EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_r);
-    FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_r);
-    AntispoofingClassifier antispoofingClassifier(FLAGS_m_am, FLAGS_r);
+    AgeGenderDetection ageGenderDetector(FLAGS_mag, FLAGS_r);
+    HeadPoseDetection headPoseDetector(FLAGS_mhp, FLAGS_r);
+    EmotionsDetection emotionsDetector(FLAGS_mem, FLAGS_r);
+    FacialLandmarksDetection facialLandmarksDetector(FLAGS_mlm, FLAGS_r);
+    AntispoofingClassifier antispoofingClassifier(FLAGS_mam, FLAGS_r);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- 2. Reading IR models and loading them to plugins ----------------------
@@ -168,11 +169,11 @@ int main(int argc, char *argv[]) {
     Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 
     Visualizer visualizer{frame.size()};
-    if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
+    if (!FLAGS_show_emotion_bar && emotionsDetector.enabled()) {
             visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
     }
 
-    LazyVideoWriter videoWriter{FLAGS_o, FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), FLAGS_limit};
+    LazyVideoWriter videoWriter{FLAGS_o, FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), FLAGS_lim};
 
     // Detecting all faces on the first frame and reading the next one
     faceDetector.submitRequest(frame);
@@ -223,7 +224,7 @@ int main(int argc, char *argv[]) {
         //  Postprocessing
         std::list<Face::Ptr> prev_faces;
 
-        if (!FLAGS_no_smooth) {
+        if (!FLAGS_smooth) {
             prev_faces.insert(prev_faces.begin(), faces.begin(), faces.end());
         }
 
@@ -235,7 +236,7 @@ int main(int argc, char *argv[]) {
             cv::Rect rect = result.location & cv::Rect({0, 0}, prevFrame.size());
 
             Face::Ptr face;
-            if (!FLAGS_no_smooth) {
+            if (!FLAGS_smooth) {
                 face = matchFace(rect, prev_faces);
                 float intensity_mean = calcMean(prevFrame(rect));
 
@@ -293,7 +294,7 @@ int main(int argc, char *argv[]) {
         videoWriter.write(prevFrame);
 
         int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
-        if (!FLAGS_no_show) {
+        if (!FLAGS_show) {
             cv::imshow(argv[0], prevFrame);
             int key = cv::waitKey(delay);
             if (27 == key || 'Q' == key || 'q' == key) {

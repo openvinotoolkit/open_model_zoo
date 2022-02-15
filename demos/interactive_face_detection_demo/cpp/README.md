@@ -69,42 +69,12 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-interactive_face_detection_demo [OPTION]
-Options:
-
-    -h                         Print a usage message
-    -i                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                      Optional. Enable reading the input in a loop.
-    -o "<path>"                Optional. Name of the output file(s) to save.
-    -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
-    -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
-    -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
-    -m_em "<path>"             Optional. Path to an .xml file with a trained Emotions Recognition model.
-    -m_lm "<path>"             Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.
-    -m_am "<path>"             Optional. Path to an .xml file with a trained Antispoofing Classification model.
-    -d <device>                Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. Use "-d MULTI:<comma-separated_devices_list>" format to specify MULTI plugin. The application looks for a suitable plugin for the specified device.
-    -no_show                   Optional. Don't show output.
-    -r                         Optional. Output inference results as raw values
-    -t                         Optional. Probability threshold for detections
-    -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face
-    -dx_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Ox axis
-    -dy_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Oy axis
-    -fps                       Optional. Maximum FPS for playing video
-    -no_smooth                 Optional. Do not smooth person attributes
-    -no_show_emotion_bar       Optional. Do not show emotion bar
-    -u                         Optional. List of monitors to show initially.
-```
-
-Running the application with an empty list of options yields the usage message given above and an error message.
+Running the application with an empty list of options yields the usage message and an error message.
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_em <path_to_model>/emotions-recognition-retail-0003.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml -m_am <path_to_model>/anti-spoof-mn3.xml -d GPU
+./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml -mag <path_to_model>/age-gender-recognition-retail-0013.xml -mhp <path_to_model>/head-pose-estimation-adas-0001.xml -mem <path_to_model>/emotions-recognition-retail-0003.xml -mlm <path_to_model>/facial-landmarks-35-adas-0002.xml -mam <path_to_model>/anti-spoof-mn3.xml -d GPU
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -113,7 +83,7 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
 * To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `lim` option. The default value is 1000. To change it, you can apply the `-lim N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 

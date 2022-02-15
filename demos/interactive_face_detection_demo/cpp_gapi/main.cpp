@@ -8,7 +8,6 @@
 * \example interactive_face_detection_demo_gapi/main.cpp
 */
 #include <gflags/gflags.h>
-#include <utils/default_flags.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
@@ -26,121 +25,124 @@
 #include "visualizer.hpp"
 
 namespace {
-constexpr char help_msg[] = "print a [H]elp message";
-DEFINE_bool(h, false, help_msg);
+constexpr char h_msg[] = "print a [H]elp message";
+DEFINE_bool(h, false, h_msg);
 
-constexpr char input_video_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
-DEFINE_string(i, "0", input_video_msg);
+constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", i_msg);
 
-constexpr char output_msg[] = "name of the output file(s) to save";
-DEFINE_string(o, "", output_msg);
+constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
+DEFINE_string(m, "", m_msg);
 
-constexpr char limit_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
-DEFINE_uint32(limit, 1000, limit_msg);
+constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
+DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
 
-constexpr char face_detection_model_msg[] = "path to an .xml file with a trained Face Detection model";
-DEFINE_string(m, "", face_detection_model_msg);
-
-constexpr char age_gender_model_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
-DEFINE_string(m_ag, "", age_gender_model_msg);
-
-constexpr char head_pose_model_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
-DEFINE_string(m_hp, "", head_pose_model_msg);
-
-constexpr char emotions_model_msg[] = "path to an .xml file with a trained Emotions Recognition model";
-DEFINE_string(m_em, "", emotions_model_msg);
-
-constexpr char facial_landmarks_model_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
-DEFINE_string(m_lm, "", facial_landmarks_model_msg);
-
-constexpr char antispoofing_model_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
-DEFINE_string(m_am, "", antispoofing_model_msg);
-
-constexpr char target_device_msg[] = "target device for Face Detection network (the list of available devices is shown below). "
+constexpr char d_msg[] = "target device for Face Detection network (the list of available devices is shown below). "
                                             "The demo will look for a suitable plugin for a specified device. Default is CPU";
-DEFINE_string(d, "CPU", target_device_msg);
+DEFINE_string(d, "CPU", d_msg);
 
-constexpr char target_device_msg_ag[] = "target device for Age/Gender Recognition network (the list of available devices is shown below). "
+constexpr char dag_msg[] = "target device for Age/Gender Recognition network (the list of available devices is shown below). "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
-DEFINE_string(d_ag, "CPU", target_device_msg_ag);
+DEFINE_string(dag, "CPU", dag_msg);
 
-constexpr char target_device_msg_hp[] = "target device for Head Pose Estimation network (the list of available devices is shown below). "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
-DEFINE_string(d_hp, "CPU", target_device_msg_hp);
-
-constexpr char target_device_msg_em[] = "target device for Emotions Recognition network (the list of available devices is shown below). "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
-DEFINE_string(d_em, "CPU", target_device_msg_em);
-
-constexpr char target_device_msg_lm[] = "target device for Facial Landmarks Estimation network "
-                                               "(the list of available devices is shown below). The demo will look for a suitable plugin for device specified. Default is CPU";
-DEFINE_string(d_lm, "CPU", target_device_msg_lm);
-
-constexpr char target_device_msg_am[] = "target device for Antispoofing Classification network (the list of available devices is shown below). "
+constexpr char dam_msg[] = "target device for Antispoofing Classification network (the list of available devices is shown below). "
                                                "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device. Default is CPU";
-DEFINE_string(d_am, "CPU", target_device_msg_am);
+DEFINE_string(dam, "CPU", dam_msg);
 
-constexpr char thresh_output_msg[] = "probability threshold for detections. Default is 0.5";
-DEFINE_double(t, 0.5, thresh_output_msg);
+constexpr char dem_msg[] = "target device for Emotions Recognition network (the list of available devices is shown below). "
+                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+DEFINE_string(dem, "CPU", dem_msg);
 
-constexpr char bb_enlarge_coef_output_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
-DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_msg);
+constexpr char dhp_msg[] = "target device for Head Pose Estimation network (the list of available devices is shown below). "
+                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+DEFINE_string(dhp, "CPU", dhp_msg);
 
-constexpr char raw_output_msg[] = "output inference results as raw values";
-DEFINE_bool(r, false, raw_output_msg);
+constexpr char dlm_msg[] = "target device for Facial Landmarks Estimation network "
+                                               "(the list of available devices is shown below). The demo will look for a suitable plugin for device specified. Default is CPU";
+DEFINE_string(dlm, "CPU", dlm_msg);
 
-constexpr char no_show_msg[] = "don't show output";
-DEFINE_bool(no_show, false, no_show_msg);
+constexpr char dx_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
+DEFINE_double(dx_coef, 1, dx_coef_msg);
 
-constexpr char dx_coef_output_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
-DEFINE_double(dx_coef, 1, dx_coef_output_msg);
+constexpr char dy_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Oy axis";
+DEFINE_double(dy_coef, 1, dy_coef_msg);
 
-constexpr char dy_coef_output_msg[] = "coefficient to shift the bounding box around the detected face along the Oy axis";
-DEFINE_double(dy_coef, 1, dy_coef_output_msg);
+constexpr char lim_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+DEFINE_uint32(lim, 1000, lim_msg);
 
 // TODO: Make this option valid for single image case
-constexpr char loop_output_msg[] = "enable playing video on a loop";
-DEFINE_bool(loop, false, loop_output_msg);
+constexpr char loop_msg[] = "enable playing video on a loop";
+DEFINE_bool(loop, false, loop_msg);
 
-constexpr char no_smooth_output_msg[] = "do not smooth person attributes";
-DEFINE_bool(no_smooth, false, no_smooth_output_msg);
+constexpr char mag_msg[] = "path to an .xml file with a trained Age/Gender Recognition model";
+DEFINE_string(mag, "", mag_msg);
 
-constexpr char no_show_emotion_bar_msg[] = "do not show emotion bar";
-DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_msg);
+constexpr char mam_msg[] = "path to an .xml file with a trained Antispoofing Classification model";
+DEFINE_string(mam, "", mam_msg);
 
-constexpr char utilization_monitors_msg[] = "list of monitors to show initially";
-DEFINE_string(u, "", utilization_monitors_msg);
+constexpr char mem_msg[] = "path to an .xml file with a trained Emotions Recognition model";
+DEFINE_string(mem, "", mem_msg);
+
+constexpr char mhp_msg[] = "path to an .xml file with a trained Head Pose Estimation model";
+DEFINE_string(mhp, "", mhp_msg);
+
+constexpr char mlm_msg[] = "path to an .xml file with a trained Facial Landmarks Estimation model";
+DEFINE_string(mlm, "", mlm_msg);
+
+constexpr char o_msg[] = "name of the output file(s) to save";
+DEFINE_string(o, "", o_msg);
+
+constexpr char r_msg[] = "output inference results as raw values";
+DEFINE_bool(r, false, r_msg);
+
+constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
+DEFINE_double(t, 0.5, t_msg);
+
+constexpr char show_msg[] = "(don't) show output";
+DEFINE_bool(show, false, show_msg);
+
+constexpr char show_emotion_bar_msg[] = "(don't) show emotion bar";
+DEFINE_bool(show_emotion_bar, false, show_emotion_bar_msg);
+
+constexpr char smooth_msg[] = "(don't) smooth person attributes";
+DEFINE_bool(smooth, false, smooth_msg);
+
+constexpr char u_msg[] = "resource [U]tilization graphs: -u cdm. "
+    "c - average [C]PU load, d - load [D]istrobution over cores, m - [M]emory usage";
+DEFINE_string(u, "", u_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t -h                         " << help_msg
-                  << "\n\t -i \"<path>\"              " << input_video_msg
-                  << "\n\t -o \"<path>\"              " << output_msg
-                  << "\n\t -limit \"<num>\"           " << limit_msg
-                  << "\n\t -m \"<path>\"              " << face_detection_model_msg
-                  << "\n\t[-mag] \"<path>\"           " << age_gender_model_msg
-                  << "\n\t[-mhp] \"<path>\"           " << head_pose_model_msg
-                  << "\n\t[-mem] \"<path>\"           " << emotions_model_msg
-                  << "\n\t[-mlm] \"<path>\"           " << facial_landmarks_model_msg
-                  << "\n\t[-mam] \"<path>\"           " << antispoofing_model_msg
-                  << "\n\t[-d] \"<device>\"           " << target_device_msg
-                  << "\n\t[-d_ag] \"<device>\"        " << target_device_msg_ag
-                  << "\n\t[-d_hp] \"<device>\"        " << target_device_msg_hp
-                  << "\n\t[-d_em] \"<device>\"        " << target_device_msg_em
-                  << "\n\t[-d_lm] \"<device>\"        " << target_device_msg_lm
-                  << "\n\t[-d_am] \"<device>\"        " << target_device_msg_am
-                  << "\n\t[-no_show]                  " << no_show_msg
-                  << "\n\t[-r]                        " << raw_output_msg
-                  << "\n\t[-t]                        " << thresh_output_msg
-                  << "\n\t[-bb_enlarge_coef]          " << bb_enlarge_coef_output_msg
-                  << "\n\t[-dx_coef]                  " << dx_coef_output_msg
-                  << "\n\t[-dy_coef]                  " << dy_coef_output_msg
-                  << "\n\t[-loop]                     " << loop_output_msg
-                  << "\n\t[-no_smooth]                " << no_smooth_output_msg
-                  << "\n\t[-no_show_emotion_bar]      " << no_show_emotion_bar_msg
-                  << "\n\t[-u]                        " << utilization_monitors_msg << '\n';
+        std::cout << "  \t [-h]                                        " << h_msg
+                  << "\n\t[--help]          print help on all arguments"
+                  << "\n\t  -i <INPUT>                                 " << i_msg
+                  << "\n\t  -m <MODEL FILE>                            " << m_msg
+                  << "\n\t[--bb_enlarge_coef <NUMBER>]                 " << bb_enlarge_coef_msg
+                  << "\n\t [-d <DEVICE>]                               " << d_msg
+                  << "\n\t[--dag <DEVICE>]                             " << dag_msg
+                  << "\n\t[--dam <DEVICE>]                             " << dam_msg
+                  << "\n\t[--dem <DEVICE>]                             " << dem_msg
+                  << "\n\t[--dhp <DEVICE>]                             " << dhp_msg
+                  << "\n\t[--dlm <DEVICE>]                             " << dlm_msg
+                  << "\n\t[--dx_coef <NUMBER>]                         " << dx_coef_msg
+                  << "\n\t[--dy_coef <NUMBER>]                         " << dy_coef_msg
+                  << "\n\t[--lim <NUMBER>]                             " << lim_msg
+                  << "\n\t[--loop]                                     " << loop_msg
+                  << "\n\t[--mag <MODEL FILE>]                         " << mag_msg
+                  << "\n\t[--mam <MODEL FILE>]                         " << mam_msg
+                  << "\n\t[--mem <MODEL FILE>]                         " << mem_msg
+                  << "\n\t[--mhp <MODEL FILE>]                         " << mhp_msg
+                  << "\n\t[--mlm <MODEL FILE>]                         " << mlm_msg
+                  << "\n\t [-o <OUTPUT>]                               " << o_msg
+                  << "\n\t [-r]                                        " << r_msg
+                  << "\n\t[--show] ([--noshow])                        " << show_msg
+                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar])" << show_emotion_bar_msg
+                  << "\n\t[--smooth] ([--nosmooth])                    " << smooth_msg
+                  << "\n\t [-t <NUMBER>]                               " << t_msg
+                  << "\n\t [-u <DEVICE>]                               " << u_msg
+                  << "\n\tKey bindings: P, 0, spacebar - pause keys    " << '\n';
         showAvailableDevices();
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         exit(0);
@@ -406,31 +408,31 @@ int main(int argc, char *argv[]) {
     auto outs = GOut(cv::gapi::copy(in), detections, faces);
 
     cv::GArray<cv::GMat> ages, genders;
-    if (!FLAGS_m_ag.empty()) {
+    if (!FLAGS_mag.empty()) {
         std::tie(ages, genders) = cv::gapi::infer<AgeGender>(faces, in);
         outs += GOut(ages, genders);
     }
 
     cv::GArray<cv::GMat> y_fc, p_fc, r_fc;
-    if (!FLAGS_m_hp.empty()) {
+    if (!FLAGS_mhp.empty()) {
         std::tie(y_fc, p_fc, r_fc) = cv::gapi::infer<HeadPose>(faces, in);
         outs += GOut(y_fc, p_fc, r_fc);
     }
 
     cv::GArray<cv::GMat> emotions;
-    if (!FLAGS_m_em.empty()) {
+    if (!FLAGS_mem.empty()) {
         emotions = cv::gapi::infer<Emotions>(faces, in);
         outs += GOut(emotions);
     }
 
     cv::GArray<cv::GMat> landmarks;
-    if (!FLAGS_m_lm.empty()) {
+    if (!FLAGS_mlm.empty()) {
         landmarks = cv::gapi::infer<FacialLandmark>(faces, in);
         outs += GOut(landmarks);
     }
 
     cv::GArray<cv::GMat> a_spoof;
-    if (!FLAGS_m_am.empty()) {
+    if (!FLAGS_mam.empty()) {
         a_spoof = cv::gapi::infer<ASpoof>(faces, in);
         outs += GOut(a_spoof);
     }
@@ -445,56 +447,56 @@ int main(int argc, char *argv[]) {
     slog::info << "The Face Detection model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
     auto age_net = cv::gapi::ie::Params<AgeGender> {
-        FLAGS_m_ag,                         // path to model
-        fileNameNoExt(FLAGS_m_ag) + ".bin", // path to weights
-        FLAGS_d_ag                          // device to use
+        FLAGS_mag,                         // path to model
+        fileNameNoExt(FLAGS_mag) + ".bin", // path to weights
+        FLAGS_dag                          // device to use
     }.cfgOutputLayers({ "age_conv3", "prob" });
     if (!FLAGS_m_ag.empty()) {
-        slog::info << "The Age/Gender Recognition model " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
+        slog::info << "The Age/Gender Recognition model " << FLAGS_mag << " is loaded to " << FLAGS_dag << " device." << slog::endl;
     } else {
         slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
     }
 
     auto hp_net = cv::gapi::ie::Params<HeadPose> {
-        FLAGS_m_hp,                         // path to model
-        fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
+        FLAGS_mhp,                         // path to model
+        fileNameNoExt(FLAGS_mhp) + ".bin", // path to weights
         FLAGS_d_hp                          // device to use
     }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
-    if (!FLAGS_m_hp.empty()) {
-        slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
+    if (!FLAGS_mhp.empty()) {
+        slog::info << "The Head Pose Estimation model " << FLAGS_mhp << " is loaded to " << FLAGS_dhp << " device." << slog::endl;
     } else {
         slog::info << "Head Pose Estimation DISABLED." << slog::endl;
     }
 
     auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
-        FLAGS_m_lm,                         // path to model
-        fileNameNoExt(FLAGS_m_lm) + ".bin", // path to weights
-        FLAGS_d_lm                          // device to use
+        FLAGS_mlm,                         // path to model
+        fileNameNoExt(FLAGS_mlm) + ".bin", // path to weights
+        FLAGS_dlm                          // device to use
     }.cfgOutputLayers({ "align_fc3" });
-    if (!FLAGS_m_lm.empty()) {
-        slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
+    if (!FLAGS_mlm.empty()) {
+        slog::info << "The Facial Landmarks Estimation model " << FLAGS_mlm << " is loaded to " << FLAGS_dlm << " device." << slog::endl;
     } else {
         slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
     }
 
     auto am_net = cv::gapi::ie::Params<ASpoof> {
-        FLAGS_m_am,                         // path to model
-        fileNameNoExt(FLAGS_m_am) + ".bin", // path to weights
-        FLAGS_d_am                          // device to use
+        FLAGS_mam,                         // path to model
+        fileNameNoExt(FLAGS_mam) + ".bin", // path to weights
+        FLAGS_dam                          // device to use
     };
-    if (!FLAGS_m_am.empty()) {
-        slog::info << "The Anti Spoof model " << FLAGS_m_am << " is loaded to " << FLAGS_d_am << " device." << slog::endl;
+    if (!FLAGS_mam.empty()) {
+        slog::info << "The Anti Spoof model " << FLAGS_mam << " is loaded to " << FLAGS_dam << " device." << slog::endl;
     } else {
         slog::info << "Anti Spoof DISABLED." << slog::endl;
     }
 
     auto emo_net = cv::gapi::ie::Params<Emotions> {
-        FLAGS_m_em,                         // path to model
-        fileNameNoExt(FLAGS_m_em) + ".bin", // path to weights
-        FLAGS_d_em                          // device to use
+        FLAGS_mem,                         // path to model
+        fileNameNoExt(FLAGS_mem) + ".bin", // path to weights
+        FLAGS_dem                          // device to use
     };
-    if (!FLAGS_m_em.empty()) {
-        slog::info << "The Emotions Recognition model " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
+    if (!FLAGS_mem.empty()) {
+        slog::info << "The Emotions Recognition model " << FLAGS_mem << " is loaded to " << FLAGS_dem << " device." << slog::endl;
     } else {
         slog::info << "Emotions Recognition DISABLED." << slog::endl;
     }
@@ -510,25 +512,25 @@ int main(int argc, char *argv[]) {
     auto out_vector = cv::gout(frame, ssd_res, face_hub);
 
     std::vector<cv::Mat> out_ages, out_genders;
-    if (!FLAGS_m_ag.empty()) out_vector += cv::gout(out_ages, out_genders);
+    if (!FLAGS_mag.empty()) out_vector += cv::gout(out_ages, out_genders);
 
     std::vector<cv::Mat> out_y_fc, out_p_fc, out_r_fc;
-    if (!FLAGS_m_hp.empty()) out_vector += cv::gout(out_y_fc, out_p_fc, out_r_fc);
+    if (!FLAGS_mhp.empty()) out_vector += cv::gout(out_y_fc, out_p_fc, out_r_fc);
 
     std::vector<cv::Mat> out_emotions;
-    if (!FLAGS_m_em.empty()) out_vector += cv::gout(out_emotions);
+    if (!FLAGS_mem.empty()) out_vector += cv::gout(out_emotions);
 
     std::vector<cv::Mat> out_landmarks;
-    if (!FLAGS_m_lm.empty()) out_vector += cv::gout(out_landmarks);
+    if (!FLAGS_mlm.empty()) out_vector += cv::gout(out_landmarks);
 
     std::vector<cv::Mat> out_a_spoof;
-    if (!FLAGS_m_am.empty()) out_vector += cv::gout(out_a_spoof);
+    if (!FLAGS_mam.empty()) out_vector += cv::gout(out_a_spoof);
 
-    Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(),
-                                                                !FLAGS_m_em.empty(),
-                                                                !FLAGS_m_hp.empty(),
-                                                                !FLAGS_m_lm.empty(),
-                                                                !FLAGS_m_am.empty());
+    Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_mag.empty(),
+                                                                !FLAGS_mem.empty(),
+                                                                !FLAGS_mhp.empty(),
+                                                                !FLAGS_mlm.empty(),
+                                                                !FLAGS_mam.empty());
 
     std::list<Face::Ptr> out_faces;
     std::ostringstream out;
@@ -539,25 +541,25 @@ int main(int argc, char *argv[]) {
 
         /** Get information about frame **/
     std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
-        FLAGS_limit);
+        FLAGS_lim);
     const auto tmp = cap->read();
     cap.reset();
     if (!tmp.data) {
         throw std::runtime_error("Couldn't grab first frame");
     }
     cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-    cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+    cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_lim);
     /** ---------------- The execution part ---------------- **/
     stream.setSource<custom::CommonCapSrc>(cap);
 
     /** Save output result **/
-    LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+    LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_lim};
 
     bool isStart = true;
     const auto startTime = std::chrono::steady_clock::now();
     stream.start();
     while (stream.pull(cv::GRunArgsP(out_vector))) {
-        if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
+        if (!FLAGS_mem.empty() && !FLAGS_show_emotion_bar) {
             visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
         }
 
@@ -570,7 +572,7 @@ int main(int argc, char *argv[]) {
         /**  Postprocessing **/
         std::list<Face::Ptr> prev_faces;
 
-        if (!FLAGS_no_smooth) {
+        if (!FLAGS_smooth) {
             prev_faces.insert(prev_faces.begin(), out_faces.begin(), out_faces.end());
         }
 
@@ -588,33 +590,33 @@ int main(int argc, char *argv[]) {
             cv::Rect rect = face_hub[i] & cv::Rect({0, 0}, frame.size());
             faceDataUpdate(frame, face, rect,
                             prev_faces, face_hub,
-                            id, FLAGS_no_smooth);
+                            id, FLAGS_smooth);
 
-            if (!FLAGS_m_ag.empty()) {
+            if (!FLAGS_mag.empty()) {
                 ageGenderDataUpdate(face, out_ages[i], out_genders[i]);
                 if (FLAGS_r)
                     rawOutputAgeGender(i, out_ages[i], out_genders[i]);
             }
 
-            if (!FLAGS_m_em.empty()) {
+            if (!FLAGS_mem.empty()) {
                 emotionsDataUpdate(face, out_emotions[i]);
                 if (FLAGS_r)
                     rawOutputEmotions(i, out_emotions[i]);
             }
 
-            if (!FLAGS_m_hp.empty()) {
+            if (!FLAGS_mhp.empty()) {
                 headPoseDataUpdate(face, out_y_fc[i], out_p_fc[i], out_r_fc[i]);
                 if (FLAGS_r)
                     rawOutputHeadpose(i, out_y_fc[i], out_p_fc[i], out_r_fc[i]);
             }
 
-            if (!FLAGS_m_lm.empty()) {
+            if (!FLAGS_mlm.empty()) {
                 landmarksDataUpdate(face, out_landmarks[i]);
                 if (FLAGS_r)
                     rawOutputLandmarks(i, out_landmarks[i]);
             }
 
-            if (!FLAGS_m_am.empty()) {
+            if (!FLAGS_mam.empty()) {
                 ASpoofDataUpdate(face, out_a_spoof[i]);
                 if (FLAGS_r)
                     rawOutputSpoof(i, out_a_spoof[i]);
@@ -638,8 +640,8 @@ int main(int argc, char *argv[]) {
         }
 
         /** Visualizing results **/
-        if (!FLAGS_no_show) {
-            cv::imshow("Detection results", frame);
+        if (!FLAGS_show) {
+            cv::imshow(argv[0], frame);
 
             int key = cv::waitKey(1);
             if (27 == key || 'Q' == key || 'q' == key) {
