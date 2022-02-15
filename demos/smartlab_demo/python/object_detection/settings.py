@@ -58,8 +58,8 @@ class MwGlobalExp:
         input_name = compiled_model.inputs
         output_name = compiled_model.outputs
 
-        net.input_info[input_name].precision = 'FP32'
-        _, _, h, w = net.input_info[input_name].input_data.shape
-        net.outputs[output_name].precision = 'FP32'
+        compiled_model.inputs[input_name].precision = 'FP32'
+        _, _, h, w = compiled_model.inputs[input_name].input_data.shape
+        compiled_model.inputs[output_name].precision = 'FP32'
 
         return (input_name, output_name, (h, w), compiled_model)
