@@ -55,7 +55,7 @@ evaluations:
               prediction_source: pha
               process_type: alpha
               use_mask: False
-              reference: 15.1
+              reference: 15.11
 
             - name: foreground_MSE
               type: mse_with_mask
