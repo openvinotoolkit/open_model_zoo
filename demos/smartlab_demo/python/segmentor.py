@@ -29,11 +29,11 @@ class Segmentor:
         ]
 
         net = ie.read_model(backbone_path)
-        self.backbone = ie.compile_model(network=net, device_name=device)
+        self.backbone = ie.compile_model(model=net, device_name=device)
         self.backbone_input_keys = self.backbone.inputs
         self.backbone_output_key = self.backbone.outputs
         net = ie.read_model(classifier_path)
-        self.classifier = ie.compile_model(network=net, device_name=device)
+        self.classifier = ie.compile_model(model=net, device_name=device)
         self.classifier_input_keys = self.classifier.inputs
         self.classifier_output_key = self.classifier.outputs
 

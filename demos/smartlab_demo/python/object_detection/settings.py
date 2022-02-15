@@ -54,7 +54,7 @@ class MwGlobalExp:
 
     def get_openvino_model(self):
         net = self.ie.read_model(self.fp_model)
-        compiled_model = self.ie.compile_model(network=net, device_name=self.device)
+        compiled_model = self.ie.compile_model(model=net, device_name=self.device)
         input_name = compiled_model.inputs
         output_name = compiled_model.outputs
 
