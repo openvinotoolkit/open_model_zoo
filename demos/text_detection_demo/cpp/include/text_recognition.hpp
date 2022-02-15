@@ -15,9 +15,6 @@ std::string CTCGreedyDecoder(const std::vector<float>& data, const std::string& 
 std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::string& alphabet, char pad_symbol, double* conf, int bandwidth);
 std::string SimpleDecoder(const std::vector<float>& data, const std::string& alphabet, char pad_symbol, double* conf, int start_index);
 
-
-class DecoderNotFound {};
-
 class TextRecognizer : public Cnn {
 public:
     TextRecognizer(
