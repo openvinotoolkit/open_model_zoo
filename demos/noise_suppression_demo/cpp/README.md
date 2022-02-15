@@ -34,7 +34,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields an error message.
+Running the demo with the `-h` option yields a usage message.
 
 For example, to do inference on a CPU, run the following command:
 

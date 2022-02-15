@@ -25,14 +25,14 @@
 #include "visualizer.hpp"
 
 namespace {
-constexpr char h_msg[] = "print a [H]elp message";
+constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
-
-constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
-DEFINE_string(i, "0", i_msg);
 
 constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
 DEFINE_string(m, "", m_msg);
+
+constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", i_msg);
 
 constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
@@ -96,9 +96,6 @@ DEFINE_string(o, "", o_msg);
 constexpr char r_msg[] = "output inference results as raw values";
 DEFINE_bool(r, false, r_msg);
 
-constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
-DEFINE_double(t, 0.5, t_msg);
-
 constexpr char show_msg[] = "(don't) show output";
 DEFINE_bool(show, false, show_msg);
 
@@ -108,41 +105,46 @@ DEFINE_bool(show_emotion_bar, false, show_emotion_bar_msg);
 constexpr char smooth_msg[] = "(don't) smooth person attributes";
 DEFINE_bool(smooth, false, smooth_msg);
 
-constexpr char u_msg[] = "resource [U]tilization graphs: -u cdm. "
-    "c - average [C]PU load, d - load [D]istrobution over cores, m - [M]emory usage";
+constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
+DEFINE_double(t, 0.5, t_msg);
+
+constexpr char u_msg[] = "resource utilization graphs: -u cdm. "
+    "c - average CPU load, d - load distrobution over cores, m - memory usage";
 DEFINE_string(u, "", u_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t [-h]                                        " << h_msg
-                  << "\n\t[--help]          print help on all arguments"
-                  << "\n\t  -i <INPUT>                                 " << i_msg
-                  << "\n\t  -m <MODEL FILE>                            " << m_msg
-                  << "\n\t[--bb_enlarge_coef <NUMBER>]                 " << bb_enlarge_coef_msg
-                  << "\n\t [-d <DEVICE>]                               " << d_msg
-                  << "\n\t[--dag <DEVICE>]                             " << dag_msg
-                  << "\n\t[--dam <DEVICE>]                             " << dam_msg
-                  << "\n\t[--dem <DEVICE>]                             " << dem_msg
-                  << "\n\t[--dhp <DEVICE>]                             " << dhp_msg
-                  << "\n\t[--dlm <DEVICE>]                             " << dlm_msg
-                  << "\n\t[--dx_coef <NUMBER>]                         " << dx_coef_msg
-                  << "\n\t[--dy_coef <NUMBER>]                         " << dy_coef_msg
-                  << "\n\t[--lim <NUMBER>]                             " << lim_msg
-                  << "\n\t[--loop]                                     " << loop_msg
-                  << "\n\t[--mag <MODEL FILE>]                         " << mag_msg
-                  << "\n\t[--mam <MODEL FILE>]                         " << mam_msg
-                  << "\n\t[--mem <MODEL FILE>]                         " << mem_msg
-                  << "\n\t[--mhp <MODEL FILE>]                         " << mhp_msg
-                  << "\n\t[--mlm <MODEL FILE>]                         " << mlm_msg
-                  << "\n\t [-o <OUTPUT>]                               " << o_msg
-                  << "\n\t [-r]                                        " << r_msg
-                  << "\n\t[--show] ([--noshow])                        " << show_msg
-                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar])" << show_emotion_bar_msg
-                  << "\n\t[--smooth] ([--nosmooth])                    " << smooth_msg
-                  << "\n\t [-t <NUMBER>]                               " << t_msg
-                  << "\n\t [-u <DEVICE>]                               " << u_msg
-                  << "\n\tKey bindings: P, 0, spacebar - pause keys    " << '\n';
+        std::cout << "  \t[ -h]                                         " << h_msg
+                  << "\n\t[--help]                                           print help on all arguments"
+                  << "\n\t  -m <MODEL FILE>                             " << m_msg
+                  << "\n\t  -i <INPUT>                                  " << i_msg
+                  << "\n\t[--bb_enlarge_coef <NUMBER>]                  " << bb_enlarge_coef_msg
+                  << "\n\t[ -d <DEVICE>]                                " << d_msg
+                  << "\n\t[--dag <DEVICE>]                              " << dag_msg
+                  << "\n\t[--dam <DEVICE>]                              " << dam_msg
+                  << "\n\t[--dem <DEVICE>]                              " << dem_msg
+                  << "\n\t[--dhp <DEVICE>]                              " << dhp_msg
+                  << "\n\t[--dlm <DEVICE>]                              " << dlm_msg
+                  << "\n\t[--dx_coef <NUMBER>]                          " << dx_coef_msg
+                  << "\n\t[--dy_coef <NUMBER>]                          " << dy_coef_msg
+                  << "\n\t[--lim <NUMBER>]                              " << lim_msg
+                  << "\n\t[--loop]                                      " << loop_msg
+                  << "\n\t[--mag <MODEL FILE>]                          " << mag_msg
+                  << "\n\t[--mam <MODEL FILE>]                          " << mam_msg
+                  << "\n\t[--mem <MODEL FILE>]                          " << mem_msg
+                  << "\n\t[--mhp <MODEL FILE>]                          " << mhp_msg
+                  << "\n\t[--mlm <MODEL FILE>]                          " << mlm_msg
+                  << "\n\t[ -o <OUTPUT>]                                " << o_msg
+                  << "\n\t[ -r]                                         " << r_msg
+                  << "\n\t[--show] ([--noshow])                         " << show_msg
+                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar]) " << show_emotion_bar_msg
+                  << "\n\t[--smooth] ([--nosmooth])                     " << smooth_msg
+                  << "\n\t[ -t <NUMBER>]                                " << t_msg
+                  << "\n\t[ -u <DEVICE>]                                " << u_msg
+                  << "\n\tKey bindings:"
+                     "\n\t\tQ, q, Esc - Quit"
+                     "\n\t\tP, p, 0, spacebar - Pause" << '\n';
         showAvailableDevices();
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         exit(0);
@@ -451,7 +453,7 @@ int main(int argc, char *argv[]) {
         fileNameNoExt(FLAGS_mag) + ".bin", // path to weights
         FLAGS_dag                          // device to use
     }.cfgOutputLayers({ "age_conv3", "prob" });
-    if (!FLAGS_m_ag.empty()) {
+    if (!FLAGS_mag.empty()) {
         slog::info << "The Age/Gender Recognition model " << FLAGS_mag << " is loaded to " << FLAGS_dag << " device." << slog::endl;
     } else {
         slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
@@ -460,7 +462,7 @@ int main(int argc, char *argv[]) {
     auto hp_net = cv::gapi::ie::Params<HeadPose> {
         FLAGS_mhp,                         // path to model
         fileNameNoExt(FLAGS_mhp) + ".bin", // path to weights
-        FLAGS_d_hp                          // device to use
+        FLAGS_dhp                          // device to use
     }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
     if (!FLAGS_mhp.empty()) {
         slog::info << "The Head Pose Estimation model " << FLAGS_mhp << " is loaded to " << FLAGS_dhp << " device." << slog::endl;
@@ -559,7 +561,7 @@ int main(int argc, char *argv[]) {
     const auto startTime = std::chrono::steady_clock::now();
     stream.start();
     while (stream.pull(cv::GRunArgsP(out_vector))) {
-        if (!FLAGS_mem.empty() && !FLAGS_show_emotion_bar) {
+        if (!FLAGS_mem.empty() && FLAGS_show_emotion_bar) {
             visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
         }
 
@@ -640,10 +642,13 @@ int main(int argc, char *argv[]) {
         }
 
         /** Visualizing results **/
-        if (!FLAGS_show) {
+        if (FLAGS_show) {
             cv::imshow(argv[0], frame);
 
             int key = cv::waitKey(1);
+            if ('P' == key || 'p' == key || '0' == key || ' ' == key) {
+                key = cv::waitKey(0);
+            }
             if (27 == key || 'Q' == key || 'q' == key) {
                 stream.stop();
             } else {

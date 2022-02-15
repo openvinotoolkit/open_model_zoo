@@ -69,7 +69,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields the usage message and an error message.
+Running the demo with the `-h` option yields a usage message.
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 

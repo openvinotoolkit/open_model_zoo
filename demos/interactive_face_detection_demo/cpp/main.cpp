@@ -14,14 +14,14 @@
 #include "visualizer.hpp"
 
 namespace {
-constexpr char h_msg[] = "print a [H]elp message";
+constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
-
-constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
-DEFINE_string(i, "0", i_msg);
 
 constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
 DEFINE_string(m, "", m_msg);
+
+constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", i_msg);
 
 constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
@@ -81,37 +81,39 @@ DEFINE_bool(smooth, false, smooth_msg);
 constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, t_msg);
 
-constexpr char u_msg[] = "resource [U]tilization graphs: -u cdm. "
-    "c - average [C]PU load, d - load [D]istrobution over cores, m - [M]emory usage";
+constexpr char u_msg[] = "resource utilization graphs: -u cdm. "
+    "c - average CPU load, d - load distrobution over cores, m - memory usage";
 DEFINE_string(u, "", u_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t [-h]                                        " << h_msg
-                  << "\n\t[--help]          print help on all arguments"
-                  << "\n\t  -i <INPUT>                                 " << i_msg
-                  << "\n\t  -m <MODEL FILE>                            " << m_msg
-                  << "\n\t[--bb_enlarge_coef <NUMBER>]                 " << bb_enlarge_coef_msg
-                  << "\n\t [-d <DEVICE>]                               " << d_msg
-                  << "\n\t[--dx_coef <NUMBER>]                         " << dx_coef_msg
-                  << "\n\t[--dy_coef <NUMBER>]                         " << dy_coef_msg
-                  << "\n\t[--fps <NUMBER>]                             " << fps_msg
-                  << "\n\t[--limit <NUMBER>]                           " << lim_msg
-                  << "\n\t[--loop]                                     " << loop_msg
-                  << "\n\t[--mag <MODEL FILE>]                         " << mag_msg
-                  << "\n\t[--mam <MODEL FILE>]                         " << mam_msg
-                  << "\n\t[--mem <MODEL FILE>]                         " << mem_msg
-                  << "\n\t[--mhp <MODEL FILE>]                         " << mhp_msg
-                  << "\n\t[--mlm <MODEL FILE>]                         " << mlm_msg
-                  << "\n\t[ -o <OUTPUT>]                               " << o_msg
-                  << "\n\t [-r]                                        " << r_msg
-                  << "\n\t[--show] ([--noshow])                        " << show_msg
-                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar])" << show_emotion_bar_msg
-                  << "\n\t[--smooth] ([--nosmooth])                    " << smooth_msg
-                  << "\n\t [-t <NUMBER>]                               " << t_msg
-                  << "\n\t [-u <DEVICE>]                               " << u_msg
-                  << "\n\tKey bindings: P, 0, spacebar - pause keys    " << '\n';
+        std::cout << "  \t[ -h]                                         " << h_msg
+                  << "\n\t[--help]                                           print help on all arguments"
+                  << "\n\t  -m <MODEL FILE>                             " << m_msg
+                  << "\n\t  -i <INPUT>                                  " << i_msg
+                  << "\n\t[--bb_enlarge_coef <NUMBER>]                  " << bb_enlarge_coef_msg
+                  << "\n\t[ -d <DEVICE>]                                " << d_msg
+                  << "\n\t[--dx_coef <NUMBER>]                          " << dx_coef_msg
+                  << "\n\t[--dy_coef <NUMBER>]                          " << dy_coef_msg
+                  << "\n\t[--fps <NUMBER>]                              " << fps_msg
+                  << "\n\t[--limit <NUMBER>]                            " << lim_msg
+                  << "\n\t[--loop]                                      " << loop_msg
+                  << "\n\t[--mag <MODEL FILE>]                          " << mag_msg
+                  << "\n\t[--mam <MODEL FILE>]                          " << mam_msg
+                  << "\n\t[--mem <MODEL FILE>]                          " << mem_msg
+                  << "\n\t[--mhp <MODEL FILE>]                          " << mhp_msg
+                  << "\n\t[--mlm <MODEL FILE>]                          " << mlm_msg
+                  << "\n\t[ -o <OUTPUT>]                                " << o_msg
+                  << "\n\t[ -r]                                         " << r_msg
+                  << "\n\t[--show] ([--noshow])                         " << show_msg
+                  << "\n\t[--show_emotion_bar] ([--noshow_emotion_bar]) " << show_emotion_bar_msg
+                  << "\n\t[--smooth] ([--nosmooth])                     " << smooth_msg
+                  << "\n\t[ -t <NUMBER>]                                " << t_msg
+                  << "\n\t[ -u <DEVICE>]                                " << u_msg
+                  << "\n\tKey bindings:"
+                     "\n\t\tQ, q, Esc - Quit"
+                     "\n\t\tP, p, 0, spacebar - Pause" << '\n';
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
@@ -169,7 +171,7 @@ int main(int argc, char *argv[]) {
     Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 
     Visualizer visualizer{frame.size()};
-    if (!FLAGS_show_emotion_bar && emotionsDetector.enabled()) {
+    if (FLAGS_show_emotion_bar && emotionsDetector.enabled()) {
             visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
     }
 
@@ -294,9 +296,12 @@ int main(int argc, char *argv[]) {
         videoWriter.write(prevFrame);
 
         int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
-        if (!FLAGS_show) {
+        if (FLAGS_show) {
             cv::imshow(argv[0], prevFrame);
             int key = cv::waitKey(delay);
+            if ('P' == key || 'p' == key || '0' == key || ' ' == key) {
+                key = cv::waitKey(0);
+            }
             if (27 == key || 'Q' == key || 'q' == key) {
                 break;
             }
