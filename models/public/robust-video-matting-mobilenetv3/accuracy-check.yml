@@ -62,4 +62,4 @@ evaluations:
               prediction_source: fgr
               process_type: image
               use_mask: True
-              reference: 4.05
+              reference: 4.06
