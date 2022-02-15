@@ -1,12 +1,12 @@
 models:
   - name: i3d-rgb-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
         inputs:
           - name: Placeholder
             type: INPUT
-            layout: NCDHW
+            layout: NDHWC
 
     datasets:
       - name: kinetics-400-frames-79-400

@@ -18,14 +18,10 @@ import logging as log
 from openvino.runtime import Core, get_version, AsyncInferQueue
 
 
-def load_core(device, cpu_extension=None):
+def load_core():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    core = Core()
-    if device == "CPU" and cpu_extension:
-        core.add_extension(cpu_extension, "CPU")
-
-    return core
+    return Core()
 
 
 class IEModel:  # pylint: disable=too-few-public-methods

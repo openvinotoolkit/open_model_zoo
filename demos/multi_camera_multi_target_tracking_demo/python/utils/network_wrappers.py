@@ -37,8 +37,8 @@ class Detector(IEModel, DetectorInterface):
     """Wrapper class for detector"""
 
     def __init__(self, core, model_path, trg_classes, conf=.6,
-                 device='CPU', ext_path='', max_num_frames=1):
-        super().__init__(core, model_path, device, 'Object Detection', max_num_frames, ext_path)
+                 device='CPU', max_num_frames=1):
+        super().__init__(core, model_path, device, 'Object Detection', max_num_frames)
 
         self.trg_classes = trg_classes
         self.confidence = conf
@@ -102,9 +102,9 @@ class Detector(IEModel, DetectorInterface):
 class VectorCNN(IEModel):
     """Wrapper class for a network returning a vector"""
 
-    def __init__(self, core, model_path, device='CPU', ext_path='', max_reqs=100):
+    def __init__(self, core, model_path, device='CPU', max_reqs=100):
         self.max_reqs = max_reqs
-        super().__init__(core, model_path, device, 'Object Reidentification', self.max_reqs, ext_path)
+        super().__init__(core, model_path, device, 'Object Reidentification', self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -129,11 +129,11 @@ class MaskRCNN(DetectorInterface):
     """Wrapper class for a network returning masks of objects"""
 
     def __init__(self, core, model_path, trg_classes, conf=.6,
-                 device='CPU', ext_path='', max_reqs=100):
+                 device='CPU', max_reqs=100):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        super().__init__(core, model_path, device, 'Instance Segmentation', self.max_reqs, ext_path)
+        super().__init__(core, model_path, device, 'Instance Segmentation', self.max_reqs)
 
         self.input_keys = {'image'}
         self.output_keys = {'boxes', 'labels', 'masks'}

@@ -2,7 +2,7 @@ models:
   - name: pelee-coco
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

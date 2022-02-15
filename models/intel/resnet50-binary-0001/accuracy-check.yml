@@ -2,7 +2,7 @@ models:
   - name: resnet50-binary-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

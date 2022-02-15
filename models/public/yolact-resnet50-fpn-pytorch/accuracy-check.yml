@@ -30,7 +30,7 @@ models:
 
   - name: yolact-resnet50-fpn-pytorch
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolact
           boxes_out: "boxes"

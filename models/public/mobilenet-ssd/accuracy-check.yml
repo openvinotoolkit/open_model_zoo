@@ -24,7 +24,7 @@ models:
 
   - name: mobilenet-ssd
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

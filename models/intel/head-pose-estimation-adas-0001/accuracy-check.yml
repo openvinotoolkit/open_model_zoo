@@ -2,7 +2,7 @@ models:
   - name: head-pose-estimation-adas-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: head_pose
           angle_yaw: angle_y_fc

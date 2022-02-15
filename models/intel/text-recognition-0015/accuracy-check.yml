@@ -77,7 +77,7 @@ evaluations:
         65: "Z"
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: SVT_recognition

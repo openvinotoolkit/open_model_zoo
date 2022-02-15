@@ -27,7 +27,7 @@ models:
 
   - name: se-inception
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
