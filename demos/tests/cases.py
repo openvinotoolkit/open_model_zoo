@@ -324,7 +324,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': 'C:/videos/portret1.jpg'}),
+            '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
@@ -393,7 +393,7 @@ DEMOS = [
             device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': 'C:/videos/girl.mp4'}),
+            '-i': DataPatternArg('375x500')}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
@@ -443,10 +443,10 @@ DEMOS = [
         [
             # TODO: INT8: Attempt to get a name for a Tensor without names
             TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
-            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
-                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
-            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
-                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+            # TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+            #     '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            # TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+            #     '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
         ]
     )),
 
