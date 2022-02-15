@@ -254,8 +254,6 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
         Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
-        uint32_t framesProcessed = 0;
-
         do {
             cv::Mat demoImage = image.clone();
 

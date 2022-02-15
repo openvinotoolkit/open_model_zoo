@@ -277,7 +277,6 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
         const float* output_data_decoder = m_infer_request_decoder.get_tensor(m_out_dec_symbol_name).data<float>();
 
         auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
-        float a = *max_elem_vector;
         auto argmax = static_cast<size_t>(std::distance(output_data_decoder, max_elem_vector));
         for (size_t i = 0; i < num_classes; i++)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
