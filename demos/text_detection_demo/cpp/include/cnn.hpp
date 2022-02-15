@@ -1,65 +1,43 @@
-// Copyright (C) 2019 Intel Corporation
+// Copyright (C) 2019-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
-#include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
-#include <utils/ocv_common.hpp>
+
+#include "openvino/openvino.hpp"
+
 
 class Cnn {
-  public:
-    Cnn(const std::string &model_path, const  std::string& model_type, InferenceEngine::Core & ie, const std::string & deviceName,
-              const cv::Size &new_input_resolution = cv::Size());
+public:
+    Cnn(const std::string& modelPath, const std::string& modelType, const std::string& deviceName,
+        ov::Core& core, const cv::Size& new_input_resolution = cv::Size());
 
-    virtual InferenceEngine::BlobMap Infer(const cv::Mat &frame);
+    virtual std::map<std::string, ov::Tensor> Infer(const cv::Mat& frame) = 0;
 
-    size_t ncalls() const {return ncalls_;}
-    double time_elapsed() const {return time_elapsed_;}
-    const cv::Size& input_size() const {return input_size_;}
-    const std::string model_type;
-  protected:
-    cv::Size input_size_;
-    int channels_;
-    std::string input_name_;
-    InferenceEngine::InferRequest infer_request_;
-    std::vector<std::string> output_names_;
+    size_t ncalls() const { return m_ncalls; }
+    double time_elapsed() const { return m_time_elapsed; }
+    const cv::Size& input_size() const { return m_input_size; }
 
-    double time_elapsed_;
-    size_t ncalls_;
+protected:
+    int m_channels;
+    cv::Size m_input_size;
+    cv::Size m_new_input_resolution;
+    const std::string m_modelPath;
+    const std::string m_modelType;
+    const std::string m_deviceName;
+    std::string m_input_name;
+    std::vector<std::string> m_output_names;
+    ov::Layout m_modelLayout;
+    ov::Core& m_core;
+    ov::InferRequest m_infer_request;
+    std::shared_ptr<ov::Model> m_model;
+
+    double m_time_elapsed;
+    size_t m_ncalls;
 };
-
-class EncoderDecoderCNN : public Cnn {
-  public:
-    EncoderDecoderCNN(std::string model_path, std::string model_type,
-                      InferenceEngine::Core &ie, const std::string &deviceName,
-                      const std::string &out_enc_hidden_name,
-                      const std::string &out_dec_hidden_name,
-                      const std::string &in_dec_hidden_name,
-                      const std::string &features_name,
-                      const std::string &in_dec_symbol_name,
-                      const std::string &out_dec_symbol_name,
-                      const std::string &logits_name,
-                      size_t end_token
-                      );
-    InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
-  private:
-    InferenceEngine::InferRequest infer_request_decoder_;
-    std::string features_name_;
-    std::string out_enc_hidden_name_;
-    std::string out_dec_hidden_name_;
-    std::string in_dec_hidden_name_;
-    std::string in_dec_symbol_name_;
-    std::string out_dec_symbol_name_;
-    std::string logits_name_;
-    size_t end_token_;
-    void check_net_names(const InferenceEngine::OutputsDataMap &output_info_decoder,
-                         const InferenceEngine::InputsDataMap &input_info_decoder
-                         ) const;
-};
-
-class DecoderNotFound {};
