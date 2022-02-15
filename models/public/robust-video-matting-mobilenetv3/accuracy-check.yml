@@ -48,7 +48,7 @@ evaluations:
               type: spatial_gradient
               prediction_source: pha
               process_type: alpha
-              reference: 4.44
+              reference: 4.47
 
             - name: alpha_MSE
               type: mse_with_mask
