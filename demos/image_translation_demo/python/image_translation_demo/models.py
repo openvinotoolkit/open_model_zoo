@@ -25,6 +25,7 @@ class CocosnetModel:
         self.input_image_size = model.input(self.reference_image).shape
 
         compiled_model = core.compile_model(model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
 
     def infer(self, input_semantics, reference_image, reference_semantics):
@@ -33,8 +34,7 @@ class CocosnetModel:
             self.reference_image: reference_image,
             self.reference_semantics: reference_semantics
         }
-        result = self.infer_request.infer(input_data)
-        return next(iter(result.values()))
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class SegmentationModel:
@@ -49,9 +49,9 @@ class SegmentationModel:
         self.input_size = model.inputs[0].shape
 
         compiled_model = core.compile_model(model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
 
     def infer(self, input):
         input_data = {self.input_tensor_name: input}
-        result = self.infer_request.infer(input_data)
-        return next(iter(result.values()))
+        return self.infer_request.infer(input_data)[self.output_tensor]

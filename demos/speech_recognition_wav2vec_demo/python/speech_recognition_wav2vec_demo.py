@@ -69,6 +69,7 @@ class Wav2Vec:
             raise RuntimeError(f'Wav2Vec output third dimension size must be {len(self.alphabet)}')
         model.reshape({self.input_tensor_name: PartialShape(input_shape)})
         compiled_model = core.compile_model(model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
         self._init_vocab(vocab_file)
@@ -93,7 +94,7 @@ class Wav2Vec:
 
     def infer(self, audio):
         input_data = {self.input_tensor_name: audio}
-        return next(iter(self.infer_request.infer(input_data).values()))
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
     def decode(self, logits):
         token_ids = np.squeeze(np.argmax(logits, -1))

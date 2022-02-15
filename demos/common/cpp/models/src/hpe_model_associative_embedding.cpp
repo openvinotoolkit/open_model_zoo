@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,88 +17,111 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-
 #include <opencv2/imgproc/imgproc.hpp>
-
-#include "models/associative_embedding_decoder.h"
-#include "models/hpe_model_associative_embedding.h"
-
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-#include <ngraph/ngraph.hpp>
+#include "models/associative_embedding_decoder.h"
+#include "models/hpe_model_associative_embedding.h"
 
 const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, float delta, RESIZE_MODE resizeMode) :
-    ModelBase(modelFileName),
+    int targetSize, float confidenceThreshold, const std::string& layout, float delta, RESIZE_MODE resizeMode) :
+    ImageModel(modelFileName, false, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold),
     delta(delta),
-    resizeMode(resizeMode) {
-}
+    resizeMode(resizeMode) {}
 
-void HpeAssociativeEmbedding::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    changeInputSize(cnnNetwork);
-
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(InferenceEngine::Precision::U8);
-    inputInfo.getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 2 && outputInfo.size() != 3)
-        throw std::runtime_error("Demo supports topologies only with 2 or 3 outputs");
-    for (const auto& outputLayer: outputInfo) {
-        outputLayer.second->setPrecision(InferenceEngine::Precision::FP32);
-        outputsNames.push_back(outputLayer.first);
-        const InferenceEngine::SizeVector& outputLayerDims = outputLayer.second->getTensorDesc().getDims();
-        if (outputLayerDims.size() != 4 && outputLayerDims.size() != 5)
-                throw std::runtime_error("output layers are expected to be 4-dimensional or 5-dimensional");
-        if (outputLayerDims[0] != 1 || outputLayerDims[1] != 17)
-                throw std::runtime_error("output layers are expected to have 1 batch size and 17 channels");
+    // --------------------------- Prepare input Tensors ------------------------------------------------------
+    if (model->inputs().size() != 1) {
+        throw std::logic_error("HPE AE model wrapper supports topologies with only 1 input.");
     }
-    embeddingsBlobName = findLayerByName("embeddings", outputsNames);
-    heatmapsBlobName = findLayerByName("heatmaps", outputsNames);
+    inputsNames.push_back(model->input().get_any_name());
+
+    const ov::Shape& inputShape = model->input().get_shape();
+    const ov::Layout& inputLayout = getInputLayout(model->input());
+
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
+    }
+
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout({ "NHWC" });
+
+    ppp.input().model().set_layout(inputLayout);
+
+    // --------------------------- Prepare output Tensors -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 2 && outputs.size() != 3) {
+        throw std::logic_error("HPE AE model model wrapper supports topologies only with 2 or 3 outputs");
+    }
+
+    for (const auto& output : model->outputs()) {
+        const auto& outTensorName = output.get_any_name();
+        ppp.output(outTensorName).tensor().
+            set_element_type(ov::element::f32);
+
+        for (const auto& name : output.get_names()) {
+            outputsNames.push_back(name);
+        }
+
+        const ov::Shape& outputShape = output.get_shape();
+        if (outputShape.size() != 4 && outputShape.size() != 5) {
+            throw std::logic_error("output tensors are expected to be 4-dimensional or 5-dimensional");
+        }
+        if (outputShape[ov::layout::batch_idx("NC...")] != 1
+            || outputShape[ov::layout::channels_idx("NC...")] != 17) {
+            throw std::logic_error("output tensors are expected to have 1 batch size and 17 channels");
+        }
+    }
+    model = ppp.build();
+
+    embeddingsTensorName = findTensorByName("embeddings", outputsNames);
+    heatmapsTensorName = findTensorByName("heatmaps", outputsNames);
     try {
-        nmsHeatmapsBlobName = findLayerByName("nms_heatmaps", outputsNames);
+        nmsHeatmapsTensorName = findTensorByName("nms_heatmaps", outputsNames);
     }
     catch (const std::runtime_error&) {
-        nmsHeatmapsBlobName = heatmapsBlobName;
+        nmsHeatmapsTensorName = heatmapsTensorName;
     }
+
+    changeInputSize(model);
 }
 
-void HpeAssociativeEmbedding::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
+void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model) {
+    ov::Shape inputShape = model->input().get_shape();
+    const ov::Layout& layout = ov::layout::get_layout(model->input());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
+
     if (!targetSize) {
-        targetSize =  static_cast<int>(std::min(inputDims[2], inputDims[3]));
+        targetSize =  static_cast<int>(std::min(inputShape[heightId], inputShape[widthId]));
     }
     int inputHeight = aspectRatio >= 1.0 ? targetSize : static_cast<int>(std::round(targetSize / aspectRatio));
     int inputWidth = aspectRatio >= 1.0 ? static_cast<int>(std::round(targetSize * aspectRatio)) : targetSize;
     int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    inputDims[0] = 1;
-    inputDims[2] = height;
-    inputDims[3] = width;
-    inputLayerSize = cv::Size(inputDims[3], inputDims[2]);
-    cnnNetwork.reshape(inputShapes);
+    inputShape[batchId] = 1;
+    inputShape[heightId] = height;
+    inputShape[widthId] = width;
+    inputLayerSize = cv::Size(width, height);
+
+    model->reshape(inputShape);
 }
 
-std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
@@ -106,7 +129,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
         || inputLayerSize.width - stride >= roi.width) {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
-    request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
+    request.set_input_tensor(wrapMat2Tensor(paddedImage));
 
     return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
         image.size().width / static_cast<float>(roi.width), image.size().height / static_cast<float>(roi.height));
@@ -115,28 +138,28 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    auto aembds = infResult.outputsData[embeddingsBlobName];
-    const InferenceEngine::SizeVector& aembdsDims = aembds->getTensorDesc().getDims();
-    float* aembdsMapped = aembds->rmap().as<float*>();
-    std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsDims);
+    const auto& aembds = infResult.outputsData[embeddingsTensorName];
+    const ov::Shape& aembdsShape = aembds.get_shape();
+    float* const aembdsMapped = aembds.data<float>();
+    std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsShape);
 
-    auto heats = infResult.outputsData[heatmapsBlobName];
-    const InferenceEngine::SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
-    float* heatMapsMapped = heats->rmap().as<float*>();
-    std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsDims);
+    const auto& heats = infResult.outputsData[heatmapsTensorName];
+    const ov::Shape& heatMapsShape = heats.get_shape();
+    float* const heatMapsMapped = heats.data<float>();
+    std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsShape);
 
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
-    if (nmsHeatmapsBlobName != heatmapsBlobName) {
-        auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
-        const InferenceEngine::SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
-        float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
-        nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
+    if (nmsHeatmapsTensorName != heatmapsTensorName) {
+        const auto& nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
+        const ov::Shape& nmsHeatMapsShape = nmsHeats.get_shape();
+        float* const nmsHeatMapsMapped = nmsHeats.data<float>();
+        nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsShape);
     }
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
     // Rescale poses to the original image
     const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
-    float outputScale = inputLayerSize.width / static_cast<float>(heatMapsDims[3]);
+    const float outputScale = inputLayerSize.width / static_cast<float>(heatMapsShape[3]);
     float shiftX = 0.0, shiftY = 0.0;
     float scaleX = 1.0, scaleY = 1.0;
 
@@ -165,22 +188,24 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     return std::unique_ptr<ResultBase>(result);
 }
 
-std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName,
+std::string HpeAssociativeEmbedding::findTensorByName(const std::string& tensorName,
                                                      const std::vector<std::string>& outputsNames) {
     std::vector<std::string> suitableLayers;
     for (auto& outputName: outputsNames) {
-        if (outputName.rfind(layerName, 0) == 0) {
+        if (outputName.rfind(tensorName, 0) == 0) {
            suitableLayers.push_back(outputName);
         }
     }
-    if (suitableLayers.empty())
-        throw std::runtime_error("Suitable layer for " + layerName + " output is not found");
-    else if (suitableLayers.size() > 1)
-        throw std::runtime_error("More than 1 layer matched to " + layerName + " output");
+    if (suitableLayers.empty()) {
+        throw std::runtime_error("Suitable tensor for " + tensorName + " output is not found");
+    }
+    else if (suitableLayers.size() > 1) {
+        throw std::runtime_error("More than 1 tensor matched to " + tensorName + " output");
+    }
     return suitableLayers[0];
 }
 
-std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const InferenceEngine::SizeVector& shape) {
+std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const ov::Shape& shape) {
     std::vector<cv::Mat> flattenData(shape[1]);
     for (size_t i = 0; i < flattenData.size(); i++) {
         flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, data + i * shape[2] * shape[3]);

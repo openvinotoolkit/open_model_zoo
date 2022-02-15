@@ -28,12 +28,10 @@ from openvino.runtime import Core, get_version
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
-        if cpu_extension and device == 'CPU':
-            core.add_extension(cpu_extension, 'CPU')
 
         log.info('Reading model {}'.format(model_path))
         self.model = core.read_model(model_path)
@@ -41,25 +39,25 @@ class IEModel: # pylint: disable=too-few-public-methods
         self.input_size = self.model.input(self.input_tensor_name).shape
         self.nchw_layout = self.input_size[1] == 3
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
         if self.nchw_layout:
             image = np.transpose(image, (0, 3, 1, 2))
-        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
-        return out
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class PlaceRecognition:
     """ Class representing Place Recognition algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
+    def __init__(self, model_path, device, gallery_path, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device)
         if self.model.nchw_layout:
             self.input_size = self.model.input_size[2], self.model.input_size[3]
         else:

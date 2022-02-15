@@ -234,10 +234,6 @@ def main():
     parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     parser.add_argument('-d', '--device', type=str, default='CPU')
-    parser.add_argument('-l', '--cpu_extension',
-                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
-                              path to a shared library with the kernels impl.',
-                             type=str, default=None)
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
                         help='Optional. List of monitors to show initially.')
 
@@ -265,17 +261,17 @@ def main():
         object_detector = MaskRCNN(core, args.m_segmentation,
                                    config.obj_segm.trg_classes,
                                    args.t_segmentation,
-                                   args.device, args.cpu_extension,
+                                   args.device,
                                    capture.get_num_sources())
     else:
         object_detector = Detector(core, args.m_detector,
                                    config.obj_det.trg_classes,
                                    args.t_detector,
-                                   args.device, args.cpu_extension,
+                                   args.device,
                                    capture.get_num_sources())
 
     if args.m_reid:
-        object_recognizer = VectorCNN(core, args.m_reid, args.device, args.cpu_extension)
+        object_recognizer = VectorCNN(core, args.m_reid, args.device)
     else:
         object_recognizer = None
 

@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -44,11 +44,13 @@ class ImageModel(Model):
         '''
         super().__init__(model_adapter, configuration, preload)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
-        self.image_blob_name = self.image_blob_names[0] if len(self.image_blob_names) == 1 else None
-        if self.image_blob_name:
-            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
+        self.image_blob_name = self.image_blob_names[0]
 
-        self.image_layout = 'NCHW'
+        self.nchw_layout = self.inputs[self.image_blob_name].layout == 'NCHW'
+        if self.nchw_layout:
+            self.n, self.c, self.h, self.w = self.inputs[self.image_blob_name].shape
+        else:
+            self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
         self.resize = RESIZE_TYPES[self.resize_type]
         self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
 
@@ -119,7 +121,7 @@ class ImageModel(Model):
         return dict_inputs, meta
 
     def _change_layout(self, image):
-        if self.image_layout == 'NCHW':
+        if self.nchw_layout:
             image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             image = image.reshape((1, self.c, self.h, self.w))
         else:

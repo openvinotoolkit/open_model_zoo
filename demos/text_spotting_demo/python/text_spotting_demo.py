@@ -75,10 +75,6 @@ def build_argparser():
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
                            'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
                       help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
@@ -166,12 +162,10 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    # Plugin initialization for specified device and load extensions library if specified.
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
-    if args.cpu_extension and 'CPU' in args.device:
-        core.add_extension(args.cpu_extension, 'CPU')
+
     # Read IR
     log.info('Reading Mask-RCNN model {}'.format(args.mask_rcnn_model))
     mask_rcnn_model = core.read_model(args.mask_rcnn_model)
@@ -184,7 +178,7 @@ def main():
     except RuntimeError:
         raise RuntimeError('Demo supports only topologies with the following input tensor name: {}'.format(input_tensor_name))
 
-    required_output_names = {'boxes', 'labels', 'masks', 'text_features.0'}
+    required_output_names = {'boxes', 'labels', 'masks', 'text_features'}
     for output_tensor_name in required_output_names:
         try:
             mask_rcnn_model.output(output_tensor_name)
@@ -202,11 +196,12 @@ def main():
     mask_rcnn_infer_request = mask_rcnn_compiled_model.create_infer_request()
     log.info('The Mask-RCNN model {} is loaded to {}'.format(args.mask_rcnn_model, args.device))
 
-    text_enc_compiled_model =  core.compile_model(text_enc_model, args.device)
+    text_enc_compiled_model = core.compile_model(text_enc_model, args.device)
+    text_enc_output_tensor = text_enc_compiled_model.outputs[0]
     text_enc_infer_request = text_enc_compiled_model.create_infer_request()
     log.info('The Text Recognition Encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
 
-    text_dec_compiled_model =  core.compile_model(text_dec_model, args.device)
+    text_dec_compiled_model = core.compile_model(text_dec_model, args.device)
     text_dec_infer_request = text_dec_compiled_model.create_infer_request()
     log.info('The Text Recognition Decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
 
@@ -269,7 +264,7 @@ def main():
         scores = outputs['boxes'][:, 4]
         classes = outputs['labels'].astype(np.uint32)
         raw_masks = outputs['masks']
-        text_features = outputs['text_features.0']
+        text_features = outputs['text_features']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
@@ -288,7 +283,8 @@ def main():
 
         texts = []
         for feature in text_features:
-            feature = next(iter(text_enc_infer_request.infer({'input': np.expand_dims(feature, axis=0)}).values()))
+            input_data = {'input': np.expand_dims(feature, axis=0)}
+            feature = text_enc_infer_request.infer(input_data)[text_enc_output_tensor]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
