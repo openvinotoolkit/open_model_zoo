@@ -30,7 +30,7 @@ FaceDetection::FaceDetection(const std::string &pathToModel,
 void FaceDetection::submitRequest(const cv::Mat& frame) {
     width = static_cast<float>(frame.cols);
     height = static_cast<float>(frame.rows);
-    request.set_input_tensor(wrapMat2Tensor(frame));
+    resize2tensor(frame, request.get_input_tensor());
     request.start_async();
 }
 
@@ -78,11 +78,8 @@ std::shared_ptr<ov::Model> FaceDetection::read(const ov::Core& core) {
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().tensor().
         set_element_type(ov::element::u8).
-        set_layout("NHWC").
-        set_spatial_dynamic_shape();
-    ppp.input().preprocess().
-        resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR).
-        convert_layout("NCHW");
+        set_layout("NHWC");
+    ppp.input().preprocess().convert_layout("NCHW");
     ppp.output(output).tensor().set_element_type(ov::element::f32);
     model = ppp.build();
     ov::set_batch(model, 1);
