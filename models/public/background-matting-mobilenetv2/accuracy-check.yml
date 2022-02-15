@@ -37,7 +37,7 @@ models:
             type: spatial_gradient
             prediction_source: pha
             process_type: alpha
-            reference: 2.48
+            reference: 2.49
 
           - name: alpha_MSE
             type: mse_with_mask
