@@ -51,4 +51,4 @@ models:
             prediction_source: fgr
             process_type: image
             use_mask: True
-            reference: 2.7
+            reference: 2.69
