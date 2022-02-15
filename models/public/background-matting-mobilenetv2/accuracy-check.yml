@@ -31,7 +31,7 @@ models:
             type: mad
             prediction_source: pha
             process_type: alpha
-            reference: 4.32
+            reference: 4.35
 
           - name: alpha_GRAD
             type: spatial_gradient
