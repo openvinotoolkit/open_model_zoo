@@ -401,6 +401,7 @@ DEMOS = [
                 '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+                
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
@@ -998,7 +999,7 @@ PYTHON_DEMOS = [
     #                      **MONITORS,
     #                      '-i': DataPatternArg('human-pose-estimation')}),
     #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # )),)
+    # )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
