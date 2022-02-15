@@ -57,9 +57,6 @@ class MwGlobalExp:
         compiled_model = self.ie.compile_model(model=net, device_name=self.device)
         input_name = compiled_model.inputs
         output_name = compiled_model.outputs
-
-        compiled_model.inputs[input_name].precision = 'FP32'
         _, _, h, w = compiled_model.inputs[input_name].input_data.shape
-        compiled_model.inputs[output_name].precision = 'FP32'
 
         return (input_name, output_name, (h, w), compiled_model)
