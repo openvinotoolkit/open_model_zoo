@@ -40,7 +40,7 @@ The net output is a blob with name `logits` and the shape `16, 1, 37` in the for
 
 - `W` - output sequence length
 - `B` - batch size
-- `L` - confidence distribution across alphanumeric symbols: `0123456789abcdefghijklmnopqrstuvwxyz`, where # - special blank character for CTC decoding algorithm.
+- `L` - confidence distribution across alphanumeric symbols: `#0123456789abcdefghijklmnopqrstuvwxyz`, where # - special blank character for CTC decoding algorithm.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 
@@ -48,6 +48,7 @@ The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decod
 
 Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
 ```
+  -m_tr_ss "0123456789abcdefghijklmnopqrstuvwxyz", note special symbol `#` should not be used.
   -tr_pt_first
   -tr_o_blb_nm "logits"
 ```
