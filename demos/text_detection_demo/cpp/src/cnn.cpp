@@ -16,7 +16,7 @@ Cnn::Cnn(
     ov::Core& core, const cv::Size& new_input_resolution) :
     m_modelPath(modelPath), m_modelType(modelType), m_deviceName(deviceName),
     m_core(core), m_new_input_resolution(new_input_resolution),
-    m_time_elapsed(0), m_ncalls(0)
+    m_channels(0), m_time_elapsed(0), m_ncalls(0)
 {
     slog::info << "Reading model: " << m_modelPath << slog::endl;
     m_model = m_core.read_model(m_modelPath);

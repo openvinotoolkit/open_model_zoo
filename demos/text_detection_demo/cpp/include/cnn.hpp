@@ -25,16 +25,16 @@ public:
     const cv::Size& input_size() const { return m_input_size; }
 
 protected:
-    int m_channels;
-    cv::Size m_input_size;
-    cv::Size m_new_input_resolution;
     const std::string m_modelPath;
     const std::string m_modelType;
     const std::string m_deviceName;
+    ov::Core& m_core;
+    cv::Size m_new_input_resolution;
+    int m_channels;
+    cv::Size m_input_size;
     std::string m_input_name;
     std::vector<std::string> m_output_names;
     ov::Layout m_modelLayout;
-    ov::Core& m_core;
     ov::InferRequest m_infer_request;
     std::shared_ptr<ov::Model> m_model;
 
