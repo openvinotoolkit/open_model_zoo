@@ -322,7 +322,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': 'C:/videos/portret1.jpg'}),
+            '-i': DataPatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
@@ -391,7 +391,7 @@ DEMOS = [
             device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': 'C:/videos/girl.mp4'}),
+            '-i': DataPatternArg('375x500')}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
