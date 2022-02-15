@@ -42,7 +42,7 @@ evaluations:
               type: mad
               prediction_source: pha
               process_type: alpha
-              reference: 20.79
+              reference: 20.82
 
             - name: alpha_GRAD
               type: spatial_gradient
