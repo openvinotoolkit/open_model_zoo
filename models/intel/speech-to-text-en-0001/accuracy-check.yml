@@ -11,6 +11,7 @@ models:
           eos_id: 3
           unk_id: 1
           pad_id: 0
+          remove_special_symbols: True
         inputs:
           - name: 'mel'
             type: INPUT
@@ -21,4 +22,4 @@ models:
         reader: numpy_reader
         metrics:
           - type: wer
-            reference: 0.0735
+            reference: 0.0819

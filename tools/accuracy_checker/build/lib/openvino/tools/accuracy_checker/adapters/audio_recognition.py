@@ -234,11 +234,10 @@ class CTCGreedyDecoder(Adapter):
     def configure(self):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
         self.space_symbol = self.get_value_from_config('space_symbol')
-        tok_id = lambda idx: self.get_value_from_config(idx)
-        self.pad_id = int(tok_id("pad_id")) if tok_id("pad_id") is not None else len(self.alphabet)
-        self.bos_id = int(tok_id("bos_id")) if tok_id("bos_id") is not None else len(self.alphabet)
-        self.eos_id = int(tok_id("eos_id")) if tok_id("eos_id") is not None else len(self.alphabet)
-        self.unk_id = int(tok_id("unk_id")) if tok_id("unk_id") is not None else len(self.alphabet)
+        self.pad_id = self.get_value_from_config("pad_id") or len(self.alphabet)
+        self.bos_id = self.get_value_from_config("bos_id") or len(self.alphabet)
+        self.eos_id = self.get_value_from_config("eos_id") or len(self.alphabet)
+        self.unk_id = self.get_value_from_config("unk_id") or len(self.alphabet)
         self.remove_special_symbols = self.launcher_config.get('remove_special_symbols')
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
         self.classification_out = self.get_value_from_config('classification_out')
@@ -310,7 +309,7 @@ class CTCGreedyDecoder(Adapter):
 
     def _remove_special_symbols(self, s):
         for t in [self.pad_id, self.bos_id, self.eos_id, self.unk_id]:
-            s = s.replace(self.alphabet[t], "")
+            s = s.replace(self.vocab[t], "")
         s = s.replace(self.space_symbol, " ")
         if s[0] == " ":
             s = s[1:]
