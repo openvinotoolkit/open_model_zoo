@@ -32,7 +32,6 @@ Accuracy measured on a dataset composed with foregrounds from the HumanMatting d
 * Alpha MAD - mean of absolute difference for alpha.
 * Alpha MSE - mean squared error for alpha.
 * Alpha GRAD - spatial-gradient metric for alpha.
-* Alpha dtSSD - time-differentiated sum of squared differences for alpha (shows temporal coherence).
 * Foreground MSE - mean squared error for foreground.
 
 ## Input
