@@ -319,6 +319,17 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
 
+## Background matting
+
+Background matting is a method of separating a foreground from a background in an image or video,
+wherein some pixels may belong to foreground as well as background, such pixels are called partial
+or mixed pixels. This distinguishes background matting from segmentation approaches where the result is a binary mask.
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
+
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)

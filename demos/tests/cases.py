@@ -717,8 +717,8 @@ PYTHON_DEMOS = [
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
-    #       ModelArg('robust-video-matting'),
-    #       ModelArg('background-matting-mobilenetv2'),
+            ModelArg('robust-video-matting-mobilenetv3'),
+            ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
