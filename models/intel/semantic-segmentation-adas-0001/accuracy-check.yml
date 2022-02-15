@@ -4,10 +4,6 @@ models:
     launchers:
       - framework: openvino
         adapter: segmentation
-        inputs:
-          - name: data
-            type: INPUT
-            precision: U8
 
     datasets:
       - name: semantic_segmentation_adas
