@@ -312,7 +312,7 @@ DEMOS = [
             None,
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
+            ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -668,14 +668,12 @@ DEMOS = [
             ModelArg('person-detection-0200'),
             ModelArg('person-detection-0201'),
             ModelArg('person-detection-0202'),
-            ModelArg('person-detection-retail-0013')
-            ),
+            ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
-            # ModelArg('person-reidentification-retail-0288')
-        ),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')),
     )),
 
     CppDemo(name='text_detection_demo', model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
@@ -986,13 +984,12 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    #TODO ImportError: cannot import name 'extract_poses' from 'pose_extractor' (unknown location)
-    # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #                      **MONITORS,
-    #                      '-i': DataPatternArg('human-pose-estimation')}),
-    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # )),
+    PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None,
+                         **MONITORS,
+                         '-i': DataPatternArg('human-pose-estimation')}),
+       TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1079,7 +1076,7 @@ PYTHON_DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            #ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
+            ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -1315,28 +1312,28 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: No module named 'ctcdecode_numpy'
-    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     [
-    #         TestCase(options={'-p': 'mds08x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-    #         TestCase(options={'-p': 'mds06x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-    #                           # lm.binary is really in dl_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-    #                           '--realtime': None}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-    #     ],
-    # )),
+    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        [
+            TestCase(options={'-p': 'mds08x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+            TestCase(options={'-p': 'mds06x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+                              # lm.binary is really in dl_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+            TestCase(options={'-p': 'mds08x_en',  # test online mode
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+                              '--realtime': None}),
+            TestCase(options={'-p': 'mds08x_en',  # test without LM
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+        ],
+    )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
