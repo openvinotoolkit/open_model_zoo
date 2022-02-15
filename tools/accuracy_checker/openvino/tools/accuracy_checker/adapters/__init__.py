@@ -16,7 +16,8 @@ limitations under the License.
 
 from .adapter import Adapter, AdapterField, create_adapter
 
-from .action_recognition import ActionDetection
+
+from .action_recognition import ActionDetection, ActionRecognitionWithNoAction
 from .background_matting import ImageBackgroundMattingAdapter
 from .text_detection import (
     TextDetectionAdapter,
@@ -271,6 +272,8 @@ __all__ = [
     'QuantilesPredictorAdapter',
 
     'MaskToBinaryClassification',
+
+    'ActionRecognitionWithNoAction',
 
     'ImageBackgroundMattingAdapter',
 ]
