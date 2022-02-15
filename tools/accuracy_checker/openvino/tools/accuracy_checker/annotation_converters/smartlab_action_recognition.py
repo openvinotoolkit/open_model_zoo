@@ -19,6 +19,7 @@ from ..config import NumberField, PathField
 from ..representation import ClassificationAnnotation
 from ..utils import read_txt, get_path
 
+
 class SmartLabActionRecognition(BaseFormatConverter):
     __provider__ = 'smartlab_action_recognition'
 
@@ -26,7 +27,7 @@ class SmartLabActionRecognition(BaseFormatConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'stream': NumberField(optional=False, description='currently used stream id'),
+            'stream': NumberField(optional=False, description='currently used stream id', value_type=int),
             'labels_dir': PathField(is_directory=True, optional=False, description='directory with label files')
         })
         return params

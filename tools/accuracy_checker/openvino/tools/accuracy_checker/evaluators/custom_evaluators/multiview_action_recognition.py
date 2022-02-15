@@ -58,7 +58,7 @@ class MultiviewDataProvider(DataProvider):
         return data
 
 
-class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
+class MultiViewActionRecognitionEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, model, orig_config, view_subdirs=None):
         super().__init__(dataset_config, launcher, orig_config)
         self.model = model
@@ -105,9 +105,6 @@ class SequentialActionRecognitionEvaluator(BaseCustomEvaluator):
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
-        if self.model.store_encoder_predictions:
-            self.model.save_encoder_predictions()
-
 
 class SequentialModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
@@ -145,7 +142,7 @@ class SequentialModel(BaseCascadeModel):
                 raw_encoder_prediction = encoder_prediction
             if encoder_callback:
                 encoder_callback(raw_encoder_prediction)
-            encoder_preds.append(encoder_prediction)
+            encoder_preds.append(encoder_prediction[self.encoder.output_blob])
         raw_output, prediction = self.decoder.predict(identifiers, encoder_preds)
         raw_outputs.append(raw_output)
         predictions.append(prediction)
