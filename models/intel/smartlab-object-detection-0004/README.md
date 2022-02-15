@@ -36,7 +36,7 @@ Expected color order is `BGR`.
 
 ## Outputs
 
-The array of detection summary info, name - `output`, shape - `1, 3549, 3`, format is `B, N, 8`, where:
+The array of detection summary info, name - `output`, shape - `1, 3549, 8`, format is `B, N, 8`, where:
 
 - `B` - batch size
 - `N` - number of detection boxes
