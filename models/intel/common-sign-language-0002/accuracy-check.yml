@@ -2,7 +2,7 @@ models:
   - name: common-sign-language-0002
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
         inputs:
           - type: INPUT

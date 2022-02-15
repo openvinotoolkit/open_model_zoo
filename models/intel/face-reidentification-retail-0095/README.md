@@ -47,5 +47,13 @@ Expected color order is `BGR`.
 
 The net outputs a blob with the shape `1, 256, 1, 1`, containing a row-vector of 256 floating point values. Outputs on different images are comparable in cosine distance.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

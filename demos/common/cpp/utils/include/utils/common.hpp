@@ -296,11 +296,11 @@ void logCompiledModelInfo(
         for (const auto& device : devices) {
             try {
                 slog::info << "\tDevice: " << device << slog::endl;
-                std::string nstreams = compiledModel.get_property(device + "_THROUGHPUT_STREAMS").as<std::string>();
+                int32_t nstreams = compiledModel.get_property(ov::num_streams);
                 slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
                 if (device == "CPU") {
-                    std::string nthreads = compiledModel.get_property("CPU_THREADS_NUM").as<std::string>();
-                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
+                    int32_t nthreads = compiledModel.get_property(ov::inference_num_threads);
+                    slog::info << "\t\tNumber of threads: " << (nthreads == 0 ? "AUTO" : std::to_string(nthreads)) << slog::endl;
                 }
             }
             catch (const ov::Exception&) {}
@@ -317,23 +317,23 @@ void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     ov::OutputVector outputs = model->outputs();
 
     slog::info << "inputs: " << slog::endl;
-    for (const ov::Output<ov::Node> input : inputs)
-    {
+    for (const ov::Output<ov::Node>& input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(input);
 
-        slog::info << name << ", " << type << ", " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
     }
 
     slog::info << "outputs: " << slog::endl;
-    for (const ov::Output<ov::Node> output : outputs)
-    {
+    for (const ov::Output<ov::Node>& output : outputs) {
         const std::string name = output.get_any_name();
         const ov::element::Type type = output.get_element_type();
         const ov::PartialShape shape = output.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(output);
 
-        slog::info << name << ", " << type << ", " << shape << slog::endl;
+        slog::info << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
     }
 
     return;

@@ -124,7 +124,7 @@ evaluations:
             - type: bgr_to_rgb
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: wider

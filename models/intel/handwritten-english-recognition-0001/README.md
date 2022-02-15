@@ -45,6 +45,12 @@ The network output can be decoded by CTC Greedy Decoder.
 
 The network also outputs 10 LSTM hidden states of shape `2, 1, 256`, which can be simply ignored.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Handwritten Text Recognition Demo](../../../demos/handwritten_text_recognition_demo/python/README.md)
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

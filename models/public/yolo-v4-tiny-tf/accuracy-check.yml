@@ -62,7 +62,7 @@ models:
 
   - name: yolo-v4-tiny-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           anchors: 10,14,23,27,37,58,81,82,135,169,344,319
@@ -72,9 +72,10 @@ models:
           threshold: 0.001
           anchor_masks: [[1, 2, 3], [3, 4, 5]]
           raw_output: True
+          output_format: HWB
           outputs:
-            - conv2d_20/BiasAdd/Add
-            - conv2d_17/BiasAdd/Add
+            - conv2d_20/BiasAdd
+            - conv2d_17/BiasAdd
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:

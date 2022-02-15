@@ -2,7 +2,7 @@ models:
   - name: license-plate-recognition-barrier-0007
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: lpr
 
     datasets:

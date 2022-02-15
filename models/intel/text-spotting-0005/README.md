@@ -94,6 +94,12 @@ alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols 
 
 The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/text_spotting/model_templates/alphanumeric-text-spotting/readme.md), allowing to fine-tune the model on custom dataset.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Spotting Python\* Demo](../../../demos/text_spotting_demo/python/README.md)
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

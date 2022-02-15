@@ -1,7 +1,7 @@
 models:
   - name: weld-porosity-detection-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

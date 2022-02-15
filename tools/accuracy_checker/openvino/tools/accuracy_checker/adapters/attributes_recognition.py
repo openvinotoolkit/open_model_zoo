@@ -90,9 +90,9 @@ class HeadPoseEstimatorAdapter(Adapter):
         return result
 
     def select_output_blob(self, outputs):
-        self.check_output_name(self.angle_yaw, outputs)
-        self.check_output_name(self.angle_pitch, outputs)
-        self.check_output_name(self.angle_roll, outputs)
+        self.angle_yaw = self.check_output_name(self.angle_yaw, outputs)
+        self.angle_pitch = self.check_output_name(self.angle_pitch, outputs)
+        self.angle_roll = self.check_output_name(self.angle_roll, outputs)
         self.outputs_verified = True
 
 

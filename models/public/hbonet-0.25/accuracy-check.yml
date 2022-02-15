@@ -45,7 +45,7 @@ models:
   - name: hbonet-0.25
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: classification
 

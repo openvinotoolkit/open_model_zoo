@@ -21,7 +21,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
-GOps is calculated for for `1, 384` input size that is suitable for long context
+GOps is calculated for `1, 384` input size that is suitable for long context
 
 ## Accuracy
 
@@ -66,6 +66,12 @@ Position indexes are sequence of integer values from 0 to 383 (or 31 for questio
 ## Output
 
 Embeddings, name: `embedding`, shape `1, 1024`. These vectors can be used to find better context with answer to the question by simple comparing the context embedding vector with question context embedding vector in 1024D embedding space.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [BERT Question Answering Embedding Python\* Demo](../../../demos/bert_question_answering_embedding_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

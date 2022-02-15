@@ -70,7 +70,7 @@ OpenVINO™ launcher config example:
 
 ```yml
 launchers:
-  - framework: dlsdk
+  - framework: openvino
     device: HETERO:GPU,CPU
     model: path_to_model/alexnet.xml
     weights: path_to_weights/alexnet.bin

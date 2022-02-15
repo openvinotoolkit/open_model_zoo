@@ -40,6 +40,14 @@ where each number corresponds to [`num_anchors`, `cls_reg_obj_params`, `y_loc`, 
   * Class score (20), mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 - `y_loc` and `x_loc`: spatial location of each grid
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
 ## Legal Information
 [*] Same as the original implementation.
 

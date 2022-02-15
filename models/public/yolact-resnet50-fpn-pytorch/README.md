@@ -94,6 +94,13 @@ An example of using the Model Converter:
 omz_converter --name <model_name>
 ```
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Background subtraction Python\* Demo](../../../demos/background_subtraction_demo/python/README.md)
+* [Instance Segmentation Python\* Demo](../../../demos/instance_segmentation_demo/python/README.md)
+
 ## Legal Information
 
 The original model is distributed under the

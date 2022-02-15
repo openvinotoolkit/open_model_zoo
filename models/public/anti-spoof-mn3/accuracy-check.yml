@@ -2,7 +2,7 @@ models:
   - name: anti-spoof-mn3
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

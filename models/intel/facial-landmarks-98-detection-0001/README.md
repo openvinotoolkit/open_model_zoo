@@ -38,5 +38,11 @@ Expected color order is `BGR`.
 
 The net outputs a blob `3851` with the shape: `1, 98, 16, 16`, containing location heatmaps for 98 keypoints. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

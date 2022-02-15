@@ -10,7 +10,7 @@ evaluations:
           adapter: classification
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: kinetics-400

@@ -91,5 +91,14 @@ Note that the indexes of these 3 classes are aligned with the indexes of the cla
 original [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset.
 Also note that the model returns class scores for all 80 COCO classes for backward compatibility with the original Yolo V3.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Multi-Channel Object Detection Yolov3 C++ Demo](../../../demos/multi_channel_object_detection_demo_yolov3/cpp/README.md)
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
 ## Legal information
 [\*] Other names and brands may be claimed as the property of others.

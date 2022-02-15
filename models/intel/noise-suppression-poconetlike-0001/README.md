@@ -52,5 +52,12 @@ Note: The output patch is "shifted" by 640 (40ms) samples in time. So output[0,i
 
 output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Noise Suppression C++\* Demo](../../../demos/noise_suppression_demo/cpp/README.md)
+* [Noise Suppression Python\* Demo](../../../demos/noise_suppression_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
