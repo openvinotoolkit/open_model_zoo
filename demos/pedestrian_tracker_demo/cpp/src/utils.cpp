@@ -1,18 +1,16 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "utils.hpp"
-
-#include <opencv2/imgproc.hpp>
-
 #include <algorithm>
-#include <vector>
 #include <map>
-#include <string>
-#include <set>
 #include <memory>
+#include <set>
+#include <string>
+#include <vector>
+#include <opencv2/imgproc.hpp>
 #include <utils/slog.hpp>
+#include "utils.hpp"
 
 namespace {
 template <typename StreamType, typename EndlType>
@@ -59,34 +57,4 @@ void SaveDetectionLogToTrajFile(const std::string& path,
 
 void PrintDetectionLog(const DetectionLog& log) {
     SaveDetectionLogToStream(slog::debug, slog::endl, log);
-}
-
-InferenceEngine::Core
-LoadInferenceEngine(const std::vector<std::string>& devices,
-                    const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels) {
-    std::set<std::string> loadedDevices;
-    InferenceEngine::Core ie;
-
-    for (const auto &device : devices) {
-        if (loadedDevices.find(device) != loadedDevices.end()) {
-            continue;
-        }
-
-        /** Load extensions for the CPU device **/
-        if ((device.find("CPU") != std::string::npos)) {
-            if (!custom_cpu_library.empty()) {
-                // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                auto extension_ptr = std::make_shared<InferenceEngine::Extension>(custom_cpu_library);
-                ie.AddExtension(std::static_pointer_cast<InferenceEngine::Extension>(extension_ptr), "CPU");
-            }
-        } else if (!custom_cldnn_kernels.empty()) {
-            // Load Extensions for other plugins not CPU
-            ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
-        }
-
-        loadedDevices.insert(device);
-    }
-
-    return ie;
 }

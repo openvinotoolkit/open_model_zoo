@@ -496,7 +496,7 @@ void DetectionsProcessor::process() {
                         ov::InferRequest& attributesRequest,
                         cv::Rect rect,
                         Context& context) {
-                            attributesRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                            attributesRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
 
                             const std::pair<std::string, std::string>& attributes =
                                 context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
@@ -535,7 +535,7 @@ void DetectionsProcessor::process() {
                         ov::InferRequest& lprRequest,
                         cv::Rect rect,
                         Context& context) {
-                            lprRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                            lprRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
 
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
@@ -593,7 +593,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                    inferRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
                         std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,

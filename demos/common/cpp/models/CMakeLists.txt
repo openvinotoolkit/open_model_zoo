@@ -12,4 +12,4 @@ source_group("include" FILES ${HEADERS})
 
 add_library(models STATIC ${SOURCES} ${HEADERS})
 target_include_directories(models PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(models PRIVATE ngraph::ngraph gflags ${InferenceEngine_LIBRARIES} utils opencv_core opencv_imgproc)
+target_link_libraries(models PRIVATE gflags ${InferenceEngine_LIBRARIES} utils opencv_core opencv_imgproc)

@@ -314,7 +314,7 @@ class ActionDetection(Adapter):
             self.priorbox_out = self.check_output_name(self.priorbox_out, raw_outputs)
         self.outputs_verified = True
         add_conf_outs = [self.check_output_name(layer, raw_outputs) for layer in self.add_conf_outs]
-        if contains_all(add_conf_outs):
+        if contains_all(raw_outputs, add_conf_outs):
             self.add_conf_outs = add_conf_outs
             return
 

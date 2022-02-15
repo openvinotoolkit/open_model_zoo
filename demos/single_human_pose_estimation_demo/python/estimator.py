@@ -99,6 +99,7 @@ class HumanPoseEstimator:
             raise RuntimeError("Expected model output shape [1, {}, H, W]".format(OUTPUT_CHANNELS_SIZE))
 
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         self._transform = TransformedCrop(input_shape[2], input_shape[3], output_shape[2], output_shape[3])
@@ -107,7 +108,8 @@ class HumanPoseEstimator:
         return self._transform(img, bbox)
 
     def _infer(self, prep_img):
-        output = next(iter(self.infer_request.infer({self.input_tensor_name: prep_img}).values()))
+        input_data = {self.input_tensor_name: prep_img}
+        output = self.infer_request.infer(input_data)[self.output_tensor]
         return output[0]
 
     @staticmethod

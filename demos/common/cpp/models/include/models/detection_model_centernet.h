@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
 */
 
 #pragma once
-#include "detection_model.h"
+#include <string>
+#include <vector>
+#include <openvino/openvino.hpp>
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelCenterNet : public DetectionModel {
 public:
@@ -31,11 +35,11 @@ public:
     static const int INIT_VECTOR_SIZE = 200;
 
     ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
-        const std::vector<std::string>& labels = std::vector<std::string>());
+        const std::vector<std::string>& labels = std::vector<std::string>(), const std::string& layout = "");
     std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+        const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };
