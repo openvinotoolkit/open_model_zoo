@@ -972,7 +972,6 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
-            '--delay': '1',
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0002'),
