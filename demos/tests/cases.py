@@ -441,10 +441,10 @@ DEMOS = [
              '-i': DataPatternArg('object-detection-demo')}),
         [
             TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
-            #     '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
-            #     '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
         ]
     )),
 
@@ -1014,14 +1014,13 @@ PYTHON_DEMOS = [
                           '-ar': None})
     )),
 
-    # TODO: Put image_retrieval_arg import back
-    # PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #                      **MONITORS,
-    #                      '-m': ModelArg('image-retrieval-0001')}),
-    #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-    #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    # )),
+    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None,
+                         **MONITORS,
+                         '-m': ModelArg('image-retrieval-0001')}),
+       single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
+       single_option_cases('-g', image_retrieval_arg('gallery.txt')),
+    )),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
