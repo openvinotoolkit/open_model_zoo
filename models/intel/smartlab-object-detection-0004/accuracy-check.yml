@@ -9,8 +9,7 @@ models:
           classes: 3
 
     datasets:
-      - name: smartlab_detection_3cls_high
-        data_source: object_detection\streams_1\high\images
+      - name: smartlab_detection_3cl_high
 
         preprocessing:
           - type: resize

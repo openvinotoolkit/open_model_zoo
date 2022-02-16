@@ -9,7 +9,7 @@ models:
           classes: 10
 
     datasets:
-      - name: smartlab_detection_10cls_high
+      - name: smartlab_detection_10cl_high
 
         preprocessing:
           - type: resize
