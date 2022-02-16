@@ -43,7 +43,8 @@ class SmartLabActionRecognition(BaseFormatConverter):
         num_iterations = len(stream_description)
         for idx, annotation_line in enumerate(stream_description):
             identifier, label = annotation_line.split()
-            annotations.append(ClassificationAnnotation(identifier, int(label)))
+            label = int(label) if int(label) in [1, 2] else 0
+            annotations.append(ClassificationAnnotation(identifier, label))
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
         return ConverterReturn(annotations, self.get_meta(), None)
