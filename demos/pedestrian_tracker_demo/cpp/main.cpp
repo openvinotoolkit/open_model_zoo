@@ -1,37 +1,38 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "core.hpp"
-#include "utils.hpp"
-#include "tracker.hpp"
-#include "descriptor.hpp"
-#include "distance.hpp"
-#include "pedestrian_tracker_demo.hpp"
-
-#include <monitors/presenter.h>
-#include <utils/images_capture.h>
-#include <utils/slog.hpp>
-#include <opencv2/core.hpp>
-
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <map>
 #include <memory>
+#include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
+
 #include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
+#include <monitors/presenter.h>
 #include <pipelines/metadata.h>
+#include <utils/images_capture.h>
+#include <utils/slog.hpp>
+
+#include "core.hpp"
+#include "descriptor.hpp"
+#include "distance.hpp"
+#include "pedestrian_tracker_demo.hpp"
+#include "tracker.hpp"
+#include "utils.hpp"
 
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
 CreatePedestrianTracker(const std::string& reid_model,
-                        const InferenceEngine::Core & ie,
+                        const ov::Core & core,
                         const std::string & deviceName,
                         bool should_keep_tracking_info) {
     TrackerParams params;
@@ -54,10 +55,10 @@ CreatePedestrianTracker(const std::string& reid_model,
     tracker->set_distance_fast(distance_fast);
 
     if (!reid_model.empty()) {
-        CnnConfigTracker reid_config(reid_model);
+        ModelConfigTracker reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
         std::shared_ptr<IImageDescriptor> descriptor_strong =
-            std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
+            std::make_shared<Descriptor>(reid_config, core, deviceName);
 
         if (descriptor_strong == nullptr) {
             throw std::runtime_error("[SAMPLES] internal error - invalid descriptor");
@@ -122,9 +123,6 @@ int main(int argc, char **argv) {
         auto detector_mode = FLAGS_d_det;
         auto reid_mode = FLAGS_d_reid;
 
-        auto custom_cpu_library = FLAGS_l;
-        auto path_to_custom_layers = FLAGS_c;
-
         bool should_print_out = FLAGS_r;
 
         bool should_show = !FLAGS_no_show;
@@ -141,13 +139,13 @@ int main(int argc, char **argv) {
 
         std::unique_ptr<ModelBase> detectionModel;
         if (FLAGS_at == "centernet") {
-            detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels));
+            detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "ssd") {
-            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, FLAGS_auto_resize, labels));
+            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, FLAGS_auto_resize, labels, FLAGS_layout_det));
         }
         else if (FLAGS_at == "yolo") {
-            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, {}, {}, FLAGS_layout_det));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -156,15 +154,15 @@ int main(int argc, char **argv) {
 
         std::vector<std::string> devices{detector_mode, reid_mode};
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core ie;
+        slog::info << ov::get_openvino_version()  << slog::endl;
+        ov::Core core;
 
-        auto execNet = detectionModel->loadExecutableNetwork(
-            ConfigFactory::getUserConfig(FLAGS_d_det, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
-        auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());
+        auto model = detectionModel->compileModel(
+            ConfigFactory::getUserConfig(FLAGS_d_det, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
+        auto req = model.create_infer_request();
         bool should_keep_tracking_info = should_save_det_log || should_print_out;
         std::unique_ptr<PedestrianTracker> tracker =
-            CreatePedestrianTracker(reid_model, ie, reid_mode,
+            CreatePedestrianTracker(reid_model, core, reid_mode,
                                     should_keep_tracking_info);
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_read_limit);
@@ -184,10 +182,9 @@ int main(int argc, char **argv) {
         Presenter presenter(FLAGS_u, 10, graphSize);
 
         for (unsigned frameIdx = 0; ; ++frameIdx) {
-
             detectionModel->preprocess(ImageInputData(frame), req);
 
-            req->Infer();
+            req.infer();
 
             InferenceResult res;
 
@@ -196,16 +193,13 @@ int main(int argc, char **argv) {
             res.metaData = std::make_shared<ImageMetaData>(frame, std::chrono::steady_clock::now());
 
             for (const auto& outName : detectionModel->getOutputsNames()) {
+                const auto& outTensor = req.get_tensor(outName);
 
-                auto blobPtr = req->GetBlob(outName);
-
-                if (InferenceEngine::Precision::I32 == blobPtr->getTensorDesc().getPrecision()) {
-                    res.outputsData.emplace(outName,
-                        std::make_shared<InferenceEngine::TBlob<int>>(*InferenceEngine::as<InferenceEngine::TBlob<int>>(blobPtr)));
+                if (ov::element::i32 == outTensor.get_element_type()) {
+                    res.outputsData.emplace(outName, outTensor);
                 }
                 else {
-                    res.outputsData.emplace(outName,
-                        std::make_shared<InferenceEngine::TBlob<float>>(*InferenceEngine::as<InferenceEngine::TBlob<float>>(blobPtr)));
+                    res.outputsData.emplace(outName, outTensor);
                 }
             }
 

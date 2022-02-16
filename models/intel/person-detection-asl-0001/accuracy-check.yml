@@ -2,7 +2,7 @@ models:
   - name: person-detection-asl-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: class_agnostic_detection
           scale: 0.003125

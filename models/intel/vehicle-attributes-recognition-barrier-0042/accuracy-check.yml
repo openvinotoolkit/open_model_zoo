@@ -2,7 +2,7 @@ models:
   - name: vehicle-attributes-recognition-barrier-0042
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: vehicle_attributes
           color_out: color

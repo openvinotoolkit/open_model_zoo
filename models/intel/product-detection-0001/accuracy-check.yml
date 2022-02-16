@@ -2,7 +2,7 @@ models:
   - name: product-detection-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

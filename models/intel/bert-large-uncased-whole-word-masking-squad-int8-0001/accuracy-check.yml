@@ -1,7 +1,7 @@
 models:
   - name: bert-large-uncased-whole-word-masking-squad-int8-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: bert_question_answering
           start_token_logits_output: "output_s"

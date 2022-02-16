@@ -2,7 +2,7 @@ models:
   - name: text-image-super-resolution-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: super_resolution
 

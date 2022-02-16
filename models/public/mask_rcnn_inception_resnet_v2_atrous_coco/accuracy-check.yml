@@ -2,7 +2,7 @@ models:
   - name: mask_rcnn_inception_resnet_v2_atrous_coco
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: mask_rcnn
           detection_out: reshape_do_2d

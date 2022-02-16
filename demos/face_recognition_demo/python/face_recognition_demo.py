@@ -102,14 +102,6 @@ def build_argparser():
     infer.add_argument('-d_reid', default='CPU', choices=DEVICE_KINDS,
                        help='Optional. Target device for Face Reidentification '
                             'model. Default value is CPU.')
-    infer.add_argument('-l', '--cpu_lib', metavar="PATH", default='',
-                       help='Optional. For MKLDNN (CPU)-targeted custom layers, '
-                            'if any. Path to a shared library with custom '
-                            'layers implementations.')
-    infer.add_argument('-c', '--gpu_lib', metavar="PATH", default='',
-                       help='Optional. For clDNN (GPU)-targeted custom layers, '
-                            'if any. Path to the XML file with descriptions '
-                            'of the kernels.')
     infer.add_argument('-v', '--verbose', action='store_true',
                        help='Optional. Be more verbose.')
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
@@ -126,14 +118,11 @@ class FrameProcessor:
     QUEUE_SIZE = 16
 
     def __init__(self, args):
-        self.gpu_ext = args.gpu_lib
         self.allow_grow = args.allow_grow and not args.no_show
 
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
-        if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
-            core.add_extension(args.cpu_lib, 'CPU')
 
         self.face_detector = FaceDetector(core, args.m_fd,
                                           args.fd_input_size,
@@ -144,9 +133,9 @@ class FrameProcessor:
                                               match_threshold=args.t_id,
                                               match_algo=args.match_algo)
 
-        self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
-        self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
-        self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
+        self.face_detector.deploy(args.d_fd)
+        self.landmarks_detector.deploy(args.d_lm, self.QUEUE_SIZE)
+        self.face_identifier.deploy(args.d_reid, self.QUEUE_SIZE)
 
         log.debug('Building faces database using images from {}'.format(args.fg))
         self.faces_database = FacesDatabase(args.fg, self.face_identifier,
@@ -154,12 +143,6 @@ class FrameProcessor:
                                             self.face_detector if args.run_detector else None, args.no_show)
         self.face_identifier.set_faces_database(self.faces_database)
         log.info('Database is built, registered {} identities'.format(len(self.faces_database)))
-
-    def get_config(self, device):
-        config = {}
-        if device == 'GPU' and self.gpu_ext:
-            config['CONFIG_FILE'] = self.gpu_ext
-        return config
 
     def process(self, frame):
         orig_image = frame.copy()

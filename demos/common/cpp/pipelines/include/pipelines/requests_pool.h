@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 #pragma once
 
-#include <map>
 #include <atomic>
-#include <opencv2/core.hpp>
-#include <inference_engine.hpp>
+#include <map>
+#include <openvino/openvino.hpp>
 #include <map>
 
 
@@ -27,18 +26,18 @@
 ///
 class RequestsPool {
 public:
-    RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size);
+    RequestsPool(ov::CompiledModel& compiledModel, unsigned int size);
     ~RequestsPool();
 
     /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
     /// This function is thread safe as long as request is used only until setRequestIdle call
     /// @returns pointer to request with idle state or nullptr if all requests are in use.
-    InferenceEngine::InferRequest::Ptr getIdleRequest();
+    ov::InferRequest getIdleRequest();
 
     /// Sets particular request to Idle state
     /// This function is thread safe as long as request provided is not used after call to this function
     /// @param request - request to be returned to idle state
-    void setRequestIdle(const InferenceEngine::InferRequest::Ptr& request);
+    void setRequestIdle(const ov::InferRequest& request);
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
@@ -55,10 +54,10 @@ public:
 
     /// Returns list of all infer requests in the pool.
     /// @returns list of all infer requests in the pool.
-    std::vector<InferenceEngine::InferRequest::Ptr> getInferRequestsList();
+    std::vector<ov::InferRequest> getInferRequestsList();
 
 private:
-    std::map<InferenceEngine::InferRequest::Ptr, bool> requests;
+    std::vector<std::pair<ov::InferRequest, bool>> requests;
     size_t numRequestsInUse;
     std::mutex mtx;
 };

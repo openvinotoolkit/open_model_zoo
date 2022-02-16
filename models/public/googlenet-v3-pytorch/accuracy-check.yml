@@ -41,7 +41,7 @@ models:
 
     # list of launchers
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

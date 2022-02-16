@@ -1,7 +1,7 @@
 models:
   - name: noise-suppression-denseunet-ll-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: noise_suppression
           output_blob: output

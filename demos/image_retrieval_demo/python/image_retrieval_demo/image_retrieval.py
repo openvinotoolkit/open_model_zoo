@@ -29,37 +29,35 @@ from openvino.runtime import Core, get_version
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
-        if cpu_extension and device == 'CPU':
-            core.add_extension(cpu_extension, 'CPU')
 
         log.info('Reading model {}'.format(model_path))
         self.model = core.read_model(model_path)
         self.input_tensor_name = "Placeholder"
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = next(iter(self.infer_request.infer({self.input_tensor_name: image}).values()))
-        return out
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension):
+    def __init__(self, model_path, device, gallery_path, input_size):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):

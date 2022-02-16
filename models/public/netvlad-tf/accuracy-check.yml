@@ -1,7 +1,7 @@
 models:
   - name: netvlad-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: reid
     datasets:
       - name: pitts30k_val

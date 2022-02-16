@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
 */
 
 #pragma once
-#include "detection_model.h"
-#include <utils/nms.hpp>
+#include <string>
+#include <vector>
+#include <openvino/openvino.hpp>
+#include "models/detection_model.h"
+#include "models/results.h"
 
 class ModelFaceBoxes : public DetectionModel {
 public:
@@ -33,7 +36,8 @@ public:
     };
     static const int INIT_VECTOR_SIZE = 200;
 
-    ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
+    ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+        float boxIOUThreshold, const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
@@ -43,7 +47,7 @@ protected:
     const std::vector<int> steps;
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
     void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };

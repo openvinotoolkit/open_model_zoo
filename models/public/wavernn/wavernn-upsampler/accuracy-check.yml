@@ -1,7 +1,7 @@
 models:
   - name: wavernn-upsampler
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:

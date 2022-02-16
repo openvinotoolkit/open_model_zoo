@@ -25,7 +25,7 @@ models:
 
   - name: f3net
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: salient_object_detection
     datasets:
       - name: PASCAL-S

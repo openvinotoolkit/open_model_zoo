@@ -1,7 +1,7 @@
 models:
   - name: wavernn-rnn
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:

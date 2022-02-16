@@ -76,6 +76,7 @@ KNOWN_TASK_TYPES = {
     'text_to_speech',
     'time_series',
     'token_recognition',
+    'background_matting',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}

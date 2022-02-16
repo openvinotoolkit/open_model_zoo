@@ -27,10 +27,8 @@ static const char target_device_detection_message[] = "Optional. Specify the tar
 static const char target_device_reid_message[] = "Optional. Specify the target device for pedestrian reidentification "
                                                  "(the list of available devices is shown below). Default value is CPU. "
                                                  "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin.";
-static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
-                                            "Absolute path to the .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
-                                                  "Absolute path to a shared library with the kernels implementation.";
+static const char layout_det_model_message[] = "Optional. Specify inputs layouts."
+                                               " Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char raw_output_message[] = "Optional. Output pedestrian tracking results in a raw format "
                                           "(compatible with MOTChallenge format).";
 static const char no_show_message[] = "Optional. Don't show output.";
@@ -61,8 +59,7 @@ DEFINE_string(m_det, "", pedestrian_detection_model_message);
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_detection_message);
 DEFINE_string(d_reid, "CPU", target_device_reid_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_string(layout_det, "", layout_det_model_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_int32(delay, 3, delay_message);
@@ -97,11 +94,9 @@ static void showUsage() {
     std::cout << "    -limit \"<num>\"               " << limit_message << std::endl;
     std::cout << "    -m_det \"<path>\"              " << pedestrian_detection_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << pedestrian_reid_model_message << std::endl;
-    std::cout << "    -l \"<absolute_path>\"         " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "    -c \"<absolute_path>\"         " << custom_cldnn_message << std::endl;
     std::cout << "    -d_det \"<device>\"            " << target_device_detection_message << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_reid_message << std::endl;
+    std::cout << "    -layout_det \"<string>\"       " << layout_det_model_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -delay                       " << delay_message << std::endl;

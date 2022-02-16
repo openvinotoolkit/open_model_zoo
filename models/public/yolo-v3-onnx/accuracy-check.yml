@@ -38,7 +38,7 @@ models:
 
   - name: yolo-v3-onnx
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3_onnx
           boxes_out: yolonms_layer_1/ExpandDims_1:0

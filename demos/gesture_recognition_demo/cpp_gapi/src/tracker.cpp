@@ -49,15 +49,15 @@ void Tracker::solveAssignmentProblem(
     cv::Mat dissimilarity;
     computeDissimilarityMatrix(track_ids, detections, &dissimilarity);
 
-    auto res = KuhnMunkres().Solve(dissimilarity);
+    std::vector<int> res = KuhnMunkres().Solve(dissimilarity);
 
     for (size_t i = 0; i < detections.size(); i++) {
         unmatched_detections->insert(i);
     }
 
     size_t i = 0;
-    for (auto id : track_ids) {
-        if (res[i] < detections.size()) {
+    for (size_t id : track_ids) {
+        if (res[i] < (int)detections.size()) {
             matches->emplace(id, res[i], 1 - dissimilarity.at<float>(i, res[i]));
         } else {
             unmatched_tracks->insert(id);
@@ -67,7 +67,8 @@ void Tracker::solveAssignmentProblem(
 }
 
 bool Tracker::eraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     auto c = center(tracks_.at(track_id).back().rect);
     if (frame_size_ != cv::Size() &&
             (c.x < 0 || c.y < 0 || c.x > frame_size_.width ||
