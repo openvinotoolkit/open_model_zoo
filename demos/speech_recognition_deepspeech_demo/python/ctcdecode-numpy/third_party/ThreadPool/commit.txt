@@ -1,0 +1,7 @@
+  From:
+https://github.com/progschj/ThreadPool.git
+
+  Commit:
+commit 9a42ec1329f259a5f4881a291db1dcb8f2ad9040
+Author: Jakob Progsch <jakob@progsch.net>
+Date:   Fri Sep 26 12:32:41 2014 +0200

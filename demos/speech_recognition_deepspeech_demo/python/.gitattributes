@@ -1,0 +1,6 @@
+# generated files
+/ctcdecode-numpy/ctcdecode_numpy/decoders_wrap.cpp -whitespace
+/ctcdecode-numpy/ctcdecode_numpy/impl.py -whitespace
+
+# third-party code
+/ctcdecode-numpy/third_party/** -whitespace

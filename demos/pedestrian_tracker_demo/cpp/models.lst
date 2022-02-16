@@ -1,0 +1,36 @@
+# This file can be used with the --list option of the model downloader.
+# For -at ssd
+person-detection-retail-????
+efficientdet-d0-tf
+efficientdet-d1-tf
+faster-rcnn-resnet101-coco-sparse-60-0001
+pedestrian-and-vehicle-detector-adas-????
+pedestrian-detection-adas-????
+pelee-coco
+person-detection-????
+person-vehicle-bike-detection-????
+rfcn-resnet101-coco-tf
+retinanet-tf
+ssd300
+ssd512
+ssd-resnet34-1200-onnx
+ssd_mobilenet_v1_coco
+ssd_mobilenet_v1_fpn_coco
+ssdlite_mobilenet_v2
+vehicle-detection-adas-????
+# For -at centernet
+ctdet_coco_dlav0_512
+# For -at yolo
+person-vehicle-bike-detection-crossroad-yolov3-1020
+yolo-v3-tf
+yolo-v3-tiny-tf
+yolo-v1-tiny-tf
+yolo-v2-ava-0001
+yolo-v2-ava-sparse-??-0001
+yolo-v2-tf
+yolo-v2-tiny-ava-0001
+yolo-v2-tiny-ava-sparse-??-0001
+yolo-v2-tiny-tf
+yolo-v2-tiny-vehicle-detection-0001
+# reidentification models
+person-reidentification-retail-????
