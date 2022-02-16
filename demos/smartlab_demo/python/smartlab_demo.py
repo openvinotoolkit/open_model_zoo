@@ -19,7 +19,7 @@ import time
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from object_detection.detector import Detector
-from segmentor import Segmentor, SegmentorMstcn
+from segmentor import SegmentorMstcn
 from evaluator import Evaluator
 from display import Display
 from openvino.runtime import Core
