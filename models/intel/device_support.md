@@ -6,13 +6,13 @@
 | action-recognition-0001-encoder | YES | YES | YES |
 | age-gender-recognition-retail-0013 | YES | YES | YES |
 | asl-recognition-0004 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-0001 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-emb-0001 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-int8-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-0002 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-emb-int8-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-int8-0002 | YES | YES |    |
+| bert-large-uncased-whole-word-masking-squad-0001 | YES |  |    |
+| bert-large-uncased-whole-word-masking-squad-emb-0001 | YES |  |    |
+| bert-large-uncased-whole-word-masking-squad-int8-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-0002 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-emb-int8-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-int8-0002 | YES |  |    |
 | common-sign-language-0002 | YES | YES |    |
 | driver-action-recognition-adas-0002-decoder | YES | YES | YES |
 | driver-action-recognition-adas-0002-encoder | YES | YES | YES |
