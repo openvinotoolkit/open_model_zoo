@@ -26,7 +26,7 @@ import sys
 import numpy as np
 import wave
 
-from openvino.runtime import Core, get_version
+from openvino.runtime import Core, get_version, PartialShape
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -40,6 +40,8 @@ def build_argparser():
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
                              "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
     parser.add_argument('--vocab', help='Optional. Path to an .json file with encoding vocabulary.')
+    parser.add_argument('--dynamic_shape', default=False, action='store_true',
+                        help='Optional. Using dynamic shapes for inputs and outputs of model.')
     return parser
 
 
@@ -51,12 +53,13 @@ class Wav2Vec:
     words_delimiter = '|'
     pad_token = '<pad>'
 
-    def __init__(self, core, model_path, input_shape, device, vocab_file):
+    def __init__(self, core, model_path, input_shape, device, vocab_file, dynamic_flag):
         log.info('Reading model {}'.format(model_path))
         model = core.read_model(model_path)
         if len(model.inputs) != 1:
             raise RuntimeError('Wav2Vec must have one input')
         self.input_tensor_name = model.inputs[0].get_any_name()
+        self.dynamic = model.is_dynamic() and dynamic_flag and device == 'CPU'
         model_input_shape = model.inputs[0].partial_shape
         if len(model_input_shape) != 2:
             raise RuntimeError('Wav2Vec input must be 2-dimensional')
@@ -67,6 +70,8 @@ class Wav2Vec:
             raise RuntimeError('Wav2Vec output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet):
             raise RuntimeError(f'Wav2Vec output third dimension size must be {len(self.alphabet)}')
+        if not self.dynamic:
+            model.reshape({self.input_tensor_name: PartialShape(input_shape)})
         compiled_model = core.compile_model(model, device)
         self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
@@ -123,7 +128,7 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
-    model = Wav2Vec(core, args.model, audio.shape, args.device, args.vocab)
+    model = Wav2Vec(core, args.model, audio.shape, args.device, args.vocab, args.dynamic_shape)
     normalized_audio = model.preprocess(audio)
     character_probs = model.infer(normalized_audio)
     transcription = model.decode(character_probs)
