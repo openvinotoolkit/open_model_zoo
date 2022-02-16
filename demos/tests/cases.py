@@ -310,7 +310,6 @@ DEMOS = [
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
         single_option_cases('-m_reid',
             None,
-            # TODO
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
@@ -401,7 +400,6 @@ DEMOS = [
                 '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
@@ -442,12 +440,11 @@ DEMOS = [
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
         [
-            # TODO: INT8: Attempt to get a name for a Tensor without names
             TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
-            #     '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
-            #     '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
         ]
     )),
 
@@ -668,7 +665,6 @@ DEMOS = [
             **MONITORS,
             '-i': DataDirectoryArg('person-detection-retail')}),
         single_option_cases('-m_det',
-            # TODO
             ModelArg('person-detection-0200'),
             ModelArg('person-detection-0201'),
             ModelArg('person-detection-0202'),
@@ -736,7 +732,7 @@ DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            #ModelArg('instance-segmentation-person-0007'),  # TODO
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
     ))
 
@@ -756,7 +752,6 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
-            #TODO
             *combine_cases(
                TestCase(options={'--architecture_type': 'en-de'}),
                [
@@ -911,8 +906,6 @@ PYTHON_DEMOS = [
                           '-m_o': ModelArg('mtcnn-o')}),
     )),
 
-    # TODO: hang at 00:51:34  Test case #12/CPU: -d_fd CPU -d_lm CPU -d_reid CPU --no_show -fg /tmp/tmp9ybvhfxg/data_seq/face-recognition-gallery -i /tmp/tmp9ybvhfxg/data_seq/face-detection-adas/input-%04d.JPEG -m_fd /tmp/tmptb9srg1i/models/intel/face-detection-adas-0001/FP16/face-detection-adas-0001.xml -m_lm /tmp/tmptb9srg1i/models/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml -m_reid /tmp/tmptb9srg1i/models/public/Sphereface/FP16/Sphereface.xml -u cdm
-    # 00:51:34
     PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
                model_keys=['-m_fd', '-m_lm', '-m_reid'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -929,7 +922,7 @@ PYTHON_DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('Sphereface'),
             ModelArg('face-reidentification-retail-0095'),
-            ModelArg('face-recognition-resnet100-arcface-onnx'), #TODO
+            ModelArg('face-recognition-resnet100-arcface-onnx'),
             ModelArg('facenet-20180408-102900')),
     )),
 
@@ -954,7 +947,6 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    # TODO: Attempt to get a name for a Tensor without names
     PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
                model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1001,21 +993,21 @@ PYTHON_DEMOS = [
     #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     # )),
 
-    PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('human-pose-estimation')}),
-        [
-            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
-            *combine_cases(
-                TestCase(options={'-at': 'ae'}),
-                single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0005'),
-                    ModelArg('human-pose-estimation-0006'),
-                    ModelArg('human-pose-estimation-0007'))),
-        ],
-    )),
+    # PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('human-pose-estimation')}),
+    #     [
+    #         TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+    #         TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+    #         *combine_cases(
+    #             TestCase(options={'-at': 'ae'}),
+    #             single_option_cases('-m',
+    #                 ModelArg('human-pose-estimation-0005'),
+    #                 ModelArg('human-pose-estimation-0006'),
+    #                 ModelArg('human-pose-estimation-0007'))),
+    #     ],
+    # )),
 
     PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1088,7 +1080,6 @@ PYTHON_DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # TODO
             ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')
         ),
@@ -1227,8 +1218,8 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
@@ -1289,7 +1280,6 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    #TODO
     PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
               model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
        TestCase(options={'--no_show': None, **MONITORS,
@@ -1326,28 +1316,28 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: No module named 'ctcdecode_numpy'
-    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        [
-            TestCase(options={'-p': 'mds08x_en',
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-                              # run_tests.py puts pre-converted files into dl_dir as
-                              # it always runs converter.py without --output_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-            TestCase(options={'-p': 'mds06x_en',
-                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-                              # lm.binary is really in dl_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-            TestCase(options={'-p': 'mds08x_en',  # test online mode
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-                              # run_tests.py puts pre-converted files into dl_dir as
-                              # it always runs converter.py without --output_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-                              '--realtime': None}),
-            TestCase(options={'-p': 'mds08x_en',  # test without LM
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-        ],
-    )),
+    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+    #     [
+    #         TestCase(options={'-p': 'mds08x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+    #         TestCase(options={'-p': 'mds06x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+    #                           # lm.binary is really in dl_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+    #                           '--realtime': None}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+    #     ],
+    # )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
