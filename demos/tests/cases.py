@@ -443,10 +443,10 @@ DEMOS = [
         [
             # TODO: INT8: Attempt to get a name for a Tensor without names
             TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
-            #     '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
-            #     '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
         ]
     )),
 
@@ -736,7 +736,7 @@ DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            #ModelArg('instance-segmentation-person-0007'),  # TODO
+            ModelArg('instance-segmentation-person-0007'),  # TODO
             ModelArg('instance-segmentation-security-0091')),
     ))
 
