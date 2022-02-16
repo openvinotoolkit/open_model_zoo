@@ -991,21 +991,21 @@ PYTHON_DEMOS = [
        TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     )),
 
-    # PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('human-pose-estimation')}),
-    #     [
-    #         TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-    #         TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
-    #         *combine_cases(
-    #             TestCase(options={'-at': 'ae'}),
-    #             single_option_cases('-m',
-    #                 ModelArg('human-pose-estimation-0005'),
-    #                 ModelArg('human-pose-estimation-0006'),
-    #                 ModelArg('human-pose-estimation-0007'))),
-    #     ],
-    # )),
+    PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('human-pose-estimation')}),
+        [
+            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+            *combine_cases(
+                TestCase(options={'-at': 'ae'}),
+                single_option_cases('-m',
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007'))),
+        ],
+    )),
 
     PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
