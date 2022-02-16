@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "custom_kernels.hpp"
+#include <opencv2/imgproc.hpp>
+
 #include "shared_functions.hpp"
 #include "custom_nets.hpp"
-
-#include <opencv2/imgproc.hpp>
+#include "custom_kernels.hpp"
 
 void softmax(std::vector<float>& rdata) {
     const size_t lastDim = 2;
@@ -33,8 +33,8 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
     }
     size_t totalSize = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
     std::vector<size_t> steps {
-        shape[axes[1]]*shape[axes[2]]*shape[axes[3]],
-        shape[axes[2]]*shape[axes[3]],
+        shape[axes[1]] * shape[axes[2]] * shape[axes[3]],
+        shape[axes[2]] * shape[axes[3]],
         shape[axes[3]],
         1
     };
@@ -46,7 +46,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
             for (ids[2] = 0; ids[2] < shape[2]; ids[2]++) {
                 for (ids[3]= 0; ids[3] < shape[3]; ids[3]++) {
                     size_t newDataIdx = ids[axes[0]]*steps[0] + ids[axes[1]]*steps[1] +
-                        ids[axes[2]]*steps[2] + ids[axes[3]]*steps[3];
+                                        ids[axes[2]]*steps[2] + ids[axes[3]]*steps[3];
                     newData[newDataIdx] = data[sourceDataIdx++];
                 }
             }
@@ -143,7 +143,7 @@ cv::Mat getAll(const std::vector<cv::Point>& points, const int w, const int h,
                std::unordered_map<int, int>& groupMask) {
     std::unordered_map<int, int> rootMap;
     cv::Mat mask(h, w, CV_32S, cv::Scalar(0));
-    for (const auto &point : points) {
+    for (const auto& point : points) {
         int pointRoot = findRoot(point.x + point.y * w, groupMask);
         if (rootMap.find(pointRoot) == rootMap.end()) {
             rootMap.emplace(pointRoot, static_cast<int>(rootMap.size() + 1));
@@ -176,7 +176,7 @@ cv::Mat decodeImageByJoin(const std::vector<float>& segmData,
         linkMask[i] = linkData[i] >= linkConfThreshold;
     }
     size_t neighbours = size_t(linkDataShape[3]);
-    for (const auto &point : points) {
+    for (const auto& point : points) {
         size_t neighbour = 0;
         for (int ny = point.y - 1; ny <= point.y + 1; ny++) {
             for (int nx = point.x - 1; nx <= point.x + 1; nx++) {
@@ -214,7 +214,7 @@ GAPI_OCV_KERNEL(OCVDetectionPostProcess, custom::DetectionPostProcess) {
                     const float linkThr,
                     const float segmThr,
                     const size_t maxRectsNum,
-                          std::vector<cv::RotatedRect> &out) {
+                          std::vector<cv::RotatedRect>& out) {
         const float kMinArea = 300.0f;
         const float kMinHeight = 10.0f;
         const size_t tdLinkLayerChannels = 16;
@@ -241,10 +241,10 @@ GAPI_OCV_KERNEL(OCVDetectionPostProcess, custom::DetectionPostProcess) {
 };
 
 cv::Rect centralCropRect(const int imgWidth, const int imgHeight) {
-    int w = static_cast<int>(imgWidth * 0.05);
-    int h = static_cast<int>(w * 0.5);
-    return { static_cast<int>(imgWidth  * 0.5 - w * 0.5),
-             static_cast<int>(imgHeight * 0.5 - h * 0.5),
+    int w = static_cast<int>(imgWidth * 0.05f);
+    int h = static_cast<int>(w * 0.5f);
+    return { static_cast<int>(imgWidth  * 0.5f - w * 0.5f),
+             static_cast<int>(imgHeight * 0.5f - h * 0.5f),
              w, h };
 }
 

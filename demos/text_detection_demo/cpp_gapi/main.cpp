@@ -15,7 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include <gflags/gflags.h>
 #include <opencv2/opencv.hpp>
 
 #include <opencv2/gapi.hpp>
@@ -24,11 +23,12 @@
 #include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/streaming/cap.hpp>
 
-#include <monitors/presenter.h>
-#include <utils/common.hpp>
-#include <utils_gapi/stream_source.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
+#include "gflags/gflags.h"
+#include "monitors/presenter.h"
+#include "utils/common.hpp"
+#include "utils_gapi/stream_source.hpp"
+#include "utils/performance_metrics.hpp"
+#include "utils/slog.hpp"
 
 #include "shared_functions.hpp"
 #include "nets_configuration.hpp"
@@ -38,7 +38,25 @@
 
 #include "text_detection_demo_gapi.hpp"
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+static
+void setLabel(cv::Mat& im, const std::string& label, const cv::Point& p) {
+    int fontface = cv::FONT_HERSHEY_SIMPLEX;
+    double scale = 0.7;
+    int thickness = 1;
+    int baseline = 0;
+
+    cv::Size textSize = cv::getTextSize(label, fontface, scale, thickness, &baseline);
+    auto textPos = p;
+    textPos.x = std::max(0, p.x);
+    textPos.y = std::max(textSize.height, p.y);
+
+    cv::rectangle(im, textPos + cv::Point(0, baseline),
+                  textPos + cv::Point(textSize.width, -textSize.height),
+                  CV_RGB(50, 205, 50), cv::FILLED);
+    cv::putText(im, label, textPos, fontface, scale, CV_RGB(255, 255, 255), thickness, 8);
+}
+
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -51,40 +69,29 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
         throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
     }
-
     if (!FLAGS_m_tr.empty() && FLAGS_dt.empty()) {
         throw std::logic_error("Parameter -dt is not set");
     }
     return true;
 }
 
-void setLabel(cv::Mat& im, const std::string& label, const cv::Point& p);
-int clip(int x, int maxVal) { return std::min(std::max(x, 0), maxVal); }
+int clip(int x, int maxVal) {
+    return std::min(std::max(x, 0), maxVal);
+}
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
-        /** This demo covers certain topologies only **/
+        // This demo covers certain topologies only
         // Parsing and validating input arguments
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
-        const auto inputPath     = FLAGS_i;
-        const bool noShow        = FLAGS_no_show;
-        const bool loop          = FLAGS_loop;
         const bool gapiStreaming = !FLAGS_gapi_regular_mode;
-        const bool rawOutput     = FLAGS_r;
-        const auto outputPath        = FLAGS_o;
-        const uint outputFramesLimit = FLAGS_limit;
-
-        const auto tdModelPath = FLAGS_m_td;
-        const bool tdRequired  = !tdModelPath.empty();
-        const auto tdDevice    = FLAGS_d_td;
-
-        const auto trModelPath = FLAGS_m_tr;
-        const bool trRequired  = !trModelPath.empty();
-        const auto trDevice    = FLAGS_d_tr;
-        const auto trOutputBlobName = FLAGS_tr_o_blb_nm;
-        const bool trComposite = std::string::npos != trModelPath.find("encoder");
+        const bool tdEnabled  = !FLAGS_m_td.empty();
+        const bool trEnabled  = !FLAGS_m_tr.empty();
+        const bool trComposite = std::string::npos != FLAGS_m_tr.find("encoder");
+        const float segmConfThreshold = static_cast<float>(FLAGS_cls_pixel_thr);
+        const float linkConfThreshold = static_cast<float>(FLAGS_link_pixel_thr);
         const std::array<std::string,2> encoderOutputNames { FLAGS_out_enc_hidden_name,
                                                              FLAGS_features_name        };
         const std::array<std::string,3> decoderInputNames { FLAGS_in_dec_symbol_name,
@@ -92,17 +99,6 @@ int main(int argc, char *argv[]) {
                                                             FLAGS_features_name         };
         const std::array<std::string,2> decoderOutputNames { FLAGS_out_dec_hidden_name,
                                                              FLAGS_out_dec_symbol_name  };
-        const auto decoderType       = FLAGS_dt;
-        const auto decoderBandwidth  = FLAGS_b;
-        const auto decoderStartIndex = FLAGS_start_index;
-        const size_t tdNewInputWidth  = FLAGS_w_td;
-        const size_t tdNewInputHeight = FLAGS_h_td;
-        const size_t tdMaxRectsNum    = FLAGS_max_rect_num;
-        const bool centralCrop        = FLAGS_cc;
-        const float segmConfThreshold = static_cast<float>(FLAGS_cls_pixel_thr);
-        const float linkConfThreshold = static_cast<float>(FLAGS_link_pixel_thr);
-        const double trMinConfidence  = FLAGS_thr;
-        const bool trPadSymbolFirst   = FLAGS_tr_pt_first;
         if (FLAGS_pad.length() != 1) {
             throw std::invalid_argument("Pad symbol should be 1 character");
         }
@@ -116,30 +112,30 @@ int main(int argc, char *argv[]) {
                                         "contain the reserved symbol " + kPadSymbol);
         }
 
-        custom::NetsConfig config(tdModelPath, trModelPath);
-        if (tdRequired) {
+        custom::NetsConfig config(FLAGS_m_td, FLAGS_m_tr);
+        if (tdEnabled) {
             config.getTDinfo();
-            config.configureTD(tdDevice, tdNewInputWidth, tdNewInputHeight);
-            slog::info << "The Text Detection model " << tdModelPath << " is loaded to " <<
-                tdDevice << slog::endl;
+            config.configureTD(FLAGS_d_td, FLAGS_w_td, FLAGS_h_td);
+            slog::info << "The Text Detection model " << FLAGS_m_td << " is loaded to " <<
+                FLAGS_d_td << slog::endl;
         }
-        if (trRequired) {
+        if (trEnabled) {
             config.getTRinputInfo();
             if (trComposite) {
                 config.getTRcompositeInfo(encoderOutputNames, decoderInputNames,
-                                          decoderOutputNames, trPadSymbolFirst, kPadSymbol,
-                                          trSymbolsSet, decoderType);
-                config.configureTRcomposite(trDevice);
-                slog::info << "The Composite Text Recognition Encoder model " << trModelPath
-                    << " is loaded to " << trDevice << slog::endl;
+                                          decoderOutputNames, FLAGS_tr_pt_first, kPadSymbol,
+                                          trSymbolsSet, FLAGS_dt);
+                config.configureTRcomposite(FLAGS_d_tr);
+                slog::info << "The Composite Text Recognition Encoder model " << FLAGS_m_tr
+                    << " is loaded to " << FLAGS_d_tr << slog::endl;
                 slog::info << "The Composite Text Recognition Decoder model "
-                    << config.decoderModelPath << " is loaded to " << trDevice << slog::endl;
+                    << config.decoderModelPath << " is loaded to " << FLAGS_d_tr << slog::endl;
             } else {
-                config.getTRoutputInfo(trOutputBlobName, trPadSymbolFirst, kPadSymbol,
-                                       decoderStartIndex, trSymbolsSet);
-                config.configureTR(trDevice);
-            slog::info << "The Text Recognition model " << trModelPath << " is loaded to " <<
-                trDevice << slog::endl;
+                config.getTRoutputInfo(FLAGS_tr_o_blb_nm, FLAGS_tr_pt_first, kPadSymbol,
+                                       FLAGS_start_index, trSymbolsSet);
+                config.configureTR(FLAGS_d_tr);
+            slog::info << "The Text Recognition model " << FLAGS_m_tr << " is loaded to " <<
+                FLAGS_d_tr << slog::endl;
             }
         }
 
@@ -154,7 +150,7 @@ int main(int argc, char *argv[]) {
         // Size of frame
         cv::GOpaque<cv::Size> size = cv::gapi::streaming::size(in);
         cv::GArray<cv::RotatedRect> rrs;
-        if (tdRequired) {
+        if (tdEnabled) {
             // Text detection
             cv::GMat inDet, det1, det2;
             if (1 == config.tdInputChannels) {
@@ -166,12 +162,12 @@ int main(int argc, char *argv[]) {
             // ROI for each text piece
             rrs = custom::DetectionPostProcess::on(det1, det2, size, config.tdInputSize,
                                                    segmConfThreshold, linkConfThreshold,
-                                                   tdMaxRectsNum);
+                                                   FLAGS_max_rect_num);
         } else {
             rrs = cv::GArray<cv::RotatedRect>(emptyBox);
         }
         cv::GArray<std::vector<cv::Point2f>> pts;
-        if (trRequired) {
+        if (trEnabled) {
             cv::GMat inRec;
             if (1 == config.trInputChannels) {
                 inRec = cv::gapi::BGR2Gray(in);
@@ -181,7 +177,7 @@ int main(int argc, char *argv[]) {
             // Labels preprocessed for recognition for each ROI
             cv::GArray<cv::GMat> labels;
             std::tie(labels, pts) = custom::CropLabels::on(inRec, rrs, config.trInputDims,
-                                                           centralCrop);
+                                                           FLAGS_cc);
             // Text Recognition
             cv::GArray<cv::GMat> texts;
             if (trComposite) {
@@ -197,7 +193,7 @@ int main(int argc, char *argv[]) {
             }
             outs += cv::GOut(texts);
         } else {
-            pts = custom::PointsFromRRects::on(rrs, size, centralCrop);
+            pts = custom::PointsFromRRects::on(rrs, size, FLAGS_cc);
         }
         outs += cv::GOut(pts);
         // Inputs and outputs of graph
@@ -205,13 +201,13 @@ int main(int argc, char *argv[]) {
         /** ---------------- End of graph ---------------- **/
 
         // Getting information about frame from ImagesCapture
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(inputPath, loop);
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         const cv::Mat tmp = cap->read();
         cap.reset();
         if (!tmp.data) {
             throw std::runtime_error("Couldn't grab first frame");
         }
-        cap = openImagesCapture(inputPath, loop);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop);
 
         auto kernels  = custom::kernels();
         cv::GStreamingCompiled pipeline;
@@ -221,12 +217,7 @@ int main(int argc, char *argv[]) {
             pipeline.start();
         }
 
-        cv::VideoWriter videoWriter;
-        if (!outputPath.empty() &&
-            !videoWriter.open(outputPath, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                              cap->fps(), tmp.size())) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         cv::Size graphSize{static_cast<int>(tmp.cols / 4), 60};
         Presenter presenter(FLAGS_u, tmp.rows - graphSize.height - 10, graphSize);
@@ -237,7 +228,7 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Mat> outTexts;
         auto getOutVector = [&](){
             auto outVector = gapiStreaming ? cv::gout(image) : cv::gout();
-            if (trRequired) {
+            if (trEnabled) {
                 outVector += cv::gout(outTexts);
             }
             outVector += cv::gout(outPts);
@@ -263,43 +254,43 @@ int main(int argc, char *argv[]) {
                             cv::compile_args(kernels, config.networks));
             }
             const auto numFound = outPts.size();
-            int numRecognized = trRequired ? 0 : numFound;
+            int numRecognized = trEnabled ? 0 : numFound;
             for (std::size_t l = 0; l < numFound; l++) {
                 std::string res = "";
                 double conf = 1.0;
-                if (trRequired) {
-                    const auto &text = outTexts[l];
+                if (trEnabled) {
+                    const auto& text = outTexts[l];
                     if (text.size.dims() < 3 || text.size[2] != int(config.trAlphabet.length())) {
                         throw std::runtime_error("The text recognition model does not "
                                                  "correspond to alphabet.");
                     }
                     const float *outputDataPtr = text.ptr<float>();
                     std::vector<float> outputData(outputDataPtr, outputDataPtr + text.total());
-                    if (decoderType == "simple") {
+                    if (FLAGS_dt == "simple") {
                         res = SimpleDecoder(outputData, config.trAlphabet, kPadSymbol, &conf,
-                                            decoderStartIndex);
-                    } else if (decoderType == "ctc") {
-                        if (decoderBandwidth == 0) {
+                                            FLAGS_start_index);
+                    } else if (FLAGS_dt == "ctc") {
+                        if (FLAGS_b == 0) {
                             res = CTCGreedyDecoder(outputData, config.trAlphabet, kPadSymbol,
                                                    &conf);
                         } else {
                             res = CTCBeamSearchDecoder(outputData, config.trAlphabet, kPadSymbol,
-                                                       &conf, decoderBandwidth);
+                                                       &conf, FLAGS_b);
                         }
                     } else {
                         slog::err << "No decoder type or invalid decoder type (-dt) provided: " <<
-                                     decoderType << slog::endl;
+                                     FLAGS_dt << slog::endl;
                         return -1;
                     }
                     if (FLAGS_lower) {
                         res = cv::toLowerCase(res);
                     }
-                    res = conf >= trMinConfidence ? res : "";
+                    res = conf >= FLAGS_thr ? res : "";
                     numRecognized += !res.empty() ? 1 : 0;
                 }
 
-                const auto &points = outPts[l];
-                if (rawOutput) {
+                const auto& points = outPts[l];
+                if (FLAGS_r) {
                     for (size_t i = 0; i < points.size(); i++) {
                         slog::debug << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
                                        clip(static_cast<int>(points[i].y), image.rows - 1);
@@ -307,7 +298,7 @@ int main(int argc, char *argv[]) {
                             slog::debug << ",";
                         }
                     }
-                    if (trRequired) {
+                    if (trEnabled) {
                         slog::debug << "," << res;
                     }
                     if (!points.empty()) {
@@ -316,7 +307,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 // Displaying the results
-                if (!noShow && (!res.empty() || !trRequired || centralCrop)) {
+                if (!FLAGS_no_show && (!res.empty() || !trEnabled || FLAGS_cc)) {
                     for (size_t i = 0; i < points.size() ; i++) {
                         cv::line(image, points[i], points[(i + 1) % points.size()],
                                  cv::Scalar(50, 205, 50), 2);
@@ -335,12 +326,9 @@ int main(int argc, char *argv[]) {
             presenter.drawGraphs(image);
             metrics.update(beginFrame, image, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            if (videoWriter.isOpened() &&
-                (outputFramesLimit == 0 || metrics.getFrameCount() <= outputFramesLimit)) {
-                videoWriter.write(image);
-            }
+            videoWriter.write(image);
 
-            if (!noShow) {
+            if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", image);
                 int key = cv::waitKey(1);
                 if ('q' == key || 'Q' == key || key == 27) break;
@@ -357,7 +345,7 @@ int main(int argc, char *argv[]) {
         // Printing logs
         slog::info << slog::endl << "Metrics report:" << slog::endl;
         metrics.logTotal();
-    } catch (const std::exception & ex) {
+    } catch (const std::exception& ex) {
         slog::err << ex.what() << slog::endl;
         return EXIT_FAILURE;
     }
@@ -366,21 +354,4 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
-}
-
-void setLabel(cv::Mat& im, const std::string& label, const cv::Point & p) {
-    int fontface = cv::FONT_HERSHEY_SIMPLEX;
-    double scale = 0.7;
-    int thickness = 1;
-    int baseline = 0;
-
-    cv::Size textSize = cv::getTextSize(label, fontface, scale, thickness, &baseline);
-    auto textPos = p;
-    textPos.x = std::max(0, p.x);
-    textPos.y = std::max(textSize.height, p.y);
-
-    cv::rectangle(im, textPos + cv::Point(0, baseline),
-                  textPos + cv::Point(textSize.width, -textSize.height),
-                  CV_RGB(50, 205, 50), cv::FILLED);
-    cv::putText(im, label, textPos, fontface, scale, CV_RGB(255, 255, 255), thickness, 8);
 }

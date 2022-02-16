@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "nets_configuration.hpp"
-#include "custom_nets.hpp"
-
 #include <opencv2/gapi/infer/ie.hpp>
-#include <utils/common.hpp>
+
+#include "utils/common.hpp"
+
+#include "custom_nets.hpp"
+#include "nets_configuration.hpp"
 
 custom::NetsConfig::NetsConfig(const std::string& tdModelPath_, const std::string& trModelPath_)
     : tdModelPath(tdModelPath_), trModelPath(trModelPath_) {
@@ -18,14 +19,12 @@ custom::NetsConfig::NetsConfig(const std::string& tdModelPath_, const std::strin
     }
 }
 
-void ThrowNameNotFound(const std::string& name) {
-    throw std::runtime_error("Name '" + name + "' does not exist in the network");
-}
-template<class NamesArray>
-void checkIONames(const std::vector<std::string>& layers, const NamesArray& names) {
-    for (auto name : names) {
+template<size_t n>
+void checkIONames(const std::vector<std::string>& layers, const std::array<std::string,n>& names) {
+    for (const auto& name : names) {
         if (std::find(layers.begin(), layers.end(), name) == layers.end()) {
-            ThrowNameNotFound(name);
+            throw std::runtime_error("Name '" + name +
+                                     "' does not exist in the network");
         }
     }
 }
@@ -74,8 +73,6 @@ void custom::NetsConfig::getTDinfo() {
             break;
         case tdHorizLabelsLayerChannels:
             tdOutputNames[1] = pair.first;
-            break;
-        default:
             break;
         }
     }

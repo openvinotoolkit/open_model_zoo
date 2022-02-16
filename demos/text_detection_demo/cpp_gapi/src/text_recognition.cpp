@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "text_recognition.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <numeric>
 #include <fstream>
+
+#include "text_recognition.hpp"
 
 bool fileExists(const std::string& filename) {
     std::ifstream f(filename.c_str());
@@ -74,7 +74,7 @@ struct BeamElement {
     }
 };
 
-std::string SimpleDecoder(const std::vector<float> &data, const std::string& alphabet,
+std::string SimpleDecoder(const std::vector<float>& data, const std::string& alphabet,
                           char padSymbol, double *conf, int startIdx) {
     std::string result = "";
     const int numClasses = alphabet.length();
@@ -96,7 +96,7 @@ std::string SimpleDecoder(const std::vector<float> &data, const std::string& alp
     return result;
 }
 
-std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet,
+std::string CTCGreedyDecoder(const std::vector<float>& data, const std::string& alphabet,
                              char padSymbol, double *conf) {
     std::string result = "";
     bool padPrev = false;
@@ -125,7 +125,7 @@ std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& 
     return result;
 }
 
-std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::string& alphabet,
+std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::string& alphabet,
                                  char padSymbol, double *conf, int bandwidth) {
     const int numClasses = alphabet.length();
 
@@ -148,11 +148,10 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
             }
             float probBlank = candidate.prob() * prob[numClasses - 1];
 
-            auto checkRes = std::find_if(
-                curr.begin(), curr.end(),
-                [&candidateSentence](const BeamElement& n) {
-                    return n.sentence == candidateSentence;
-            });
+            auto cmp = [&candidateSentence](const BeamElement& n) {
+                return n.sentence == candidateSentence;
+            };
+            auto checkRes = std::find_if(curr.begin(), curr.end(), cmp);
             if (checkRes == std::end(curr)) {
                 curr.push_back(BeamElement{candidate.sentence, probBlank, probNotBlank});
             } else {
@@ -176,7 +175,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
 
                 auto checkRes = std::find_if(
                     curr.begin(), curr.end(),
-                    [&extend](const BeamElement &n) {
+                    [&extend](const BeamElement& n) {
                         return n.sentence == extend;
                 });
 
@@ -188,7 +187,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
             }
         }
 
-        sort(curr.begin(), curr.end(), [](const BeamElement &a, const BeamElement &b) -> bool {
+        sort(curr.begin(), curr.end(), [](const BeamElement& a, const BeamElement& b) -> bool {
             return a.prob() > b.prob();
         });
 
