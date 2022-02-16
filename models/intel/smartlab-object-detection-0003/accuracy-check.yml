@@ -9,13 +9,7 @@ models:
           classes: 10
 
     datasets:
-      - name: smartlab
-        data_source: object_detection\streams_1\high\images
-        annotation_conversion:
-          converter: mscoco_detection
-          annotation_file: object_detection\streams_1\high\annotations\instances_glb1cls10.json
-        annotation: mscoco_detection_high_10cls.pickle
-        dataset_meta: mscoco_detection_high_10cls.json
+      - name: smartlab_detection_10cls_high
 
         preprocessing:
           - type: resize
