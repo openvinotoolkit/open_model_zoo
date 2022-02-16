@@ -42,7 +42,7 @@ def build_argparser():
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
     args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
     args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
-    args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
+    args.add_argument('--mode', default='mstcn', help='Optional. action recognition mode: multiview or mstcn', type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
 
@@ -64,9 +64,7 @@ def main():
             [args.m_frontall, args.m_frontmove])
 
     '''Video Segmentation Variables'''
-    if(args.mode == "multiview"):
-        segmentor = Segmentor(ie, args.device, args.m_encoder, args.m_decoder)
-    elif(args.mode == "mstcn"):
+    if(args.mode == "mstcn"):
         segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
@@ -100,12 +98,7 @@ def main():
                     img_top=frame_top, img_front=frame_front)
 
             ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-            if(args.mode == "multiview"):
-                top_seg_results, front_seg_results = segmentor.inference(
-                        buffer_top=frame_top,
-                        buffer_front=frame_front,
-                        frame_index=frame_counter)
-            elif(args.mode == "mstcn"):
+            if(args.mode == "mstcn"):
                 buffer1.append(cv2.cvtColor(frame_top, cv2.COLOR_BGR2RGB))
                 buffer2.append(cv2.cvtColor(frame_front, cv2.COLOR_BGR2RGB))
 

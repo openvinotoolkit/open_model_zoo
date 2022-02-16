@@ -6,9 +6,6 @@ Action recognition architecure uses two encoders for front-view and top-view res
 Object detection uses two models for each view to detect large object and small objects, respectively.
 The following pre-trained models are delivered with the product:
 
-
-* `smartlab-action-recognition-encoder-0001` + `smartlab-action-recognition-decoder-0001`, which are models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
-
 * `i3d-rgb-tf` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
 
 * `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
@@ -38,8 +35,6 @@ omz_downloader --list models.lst
 ```
 
 ### Supported Models
-* smartlab-action-recognition-encoder-0001
-* smartlab-action-recognition-decoder-0001
 * smartlab-object-detection-0001
 * smartlab-object-detection-0002
 * smartlab-object-detection-0003
@@ -63,9 +58,9 @@ python3 smartlab_demo.py
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
-    --mode multiview
-    -m_en "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-encoder-0001/FP32/smartlab-action-recognition-encoder-0001.xml"
-    -m_de "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-decoder-0001/FP32/smartlab-action-recognition-decoder-0001.xml"
+    --mode mstcn
+    -m_en "./public/i3d-rgb-tf/FP32/i3d-rgb-tf.xml"
+    -m_de "./intel/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.xml"
 ```
 
 ## Demo Output
