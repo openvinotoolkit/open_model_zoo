@@ -148,7 +148,7 @@ class Detector:
             preds[:, 6] += self.offset_cls_idx[i]
 
             if i == 0:
-                all_preds
+                all_preds = np.array(preds)
             elif len(all_preds) == 0:
                 all_preds = np.zeros((1, 7))
             else:
