@@ -52,22 +52,22 @@ class SegmentorMstcn:
         self.EmbedWindowAtrous = 3
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
 
-        net = ie.read_network(i3d_path)
+        net = ie.read_model(i3d_path)
         net.reshape({next(iter(net.input_info)): (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
 
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
 
-        self.i3d = ie.load_network(network=net, device_name=device)
+        self.i3d = ie.compile_model(model=net, device_name=device)
         self.i3d_input_keys = list(self.i3d.input_info.items())
         self.i3d_output_key = list(self.i3d.outputs.items())
 
-        self.mstcn_net = ie.read_network(mstcn_path)
-        self.mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
+        self.mstcn_net = ie.read_model(mstcn_path)
+        self.mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_input_keys = list(self.mstcn.input_info.items())
         self.mstcn_output_key = list(self.mstcn.outputs.items())
         self.mstcn_net.reshape({'input': (1, 2048, 1)})
-        self.reshape_mstcn = ie.load_network(network=self.mstcn_net, device_name=device)
+        self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
         self.his_fea = [init_his_feature[f'arr_{i}'] for i in range(4)]
 
@@ -127,7 +127,7 @@ class SegmentorMstcn:
                 input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
                 input_data = input_data * 127.5 + 127.5
 
-                out_logits = self.i3d.infer(
+                out_logits = self.i3d.infer_new_request(
                     inputs={self.i3d_input_keys[0]: input_data})[self.i3d_output_key[0]]
                 out_logits = out_logits.squeeze((0, 3, 4))
                 embedding_buffer = np.concatenate([embedding_buffer, out_logits],
@@ -159,7 +159,7 @@ class SegmentorMstcn:
                 feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
             feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
             if input_mstcn.shape == (1, 2048, 1):
-                out = self.reshape_mstcn.infer(inputs=feed_dict)
+                out = self.reshape_mstcn.infer_new_request(inputs=feed_dict)
 
             predictions = out[self.mstcn_output_key[-1]]
             self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
@@ -183,7 +183,7 @@ class SegmentorMstcn:
                 if len(self.his_fea) != 0:
                     feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
                 feed_dict[self.mstcn_input_keys[-1]] = feature_unit
-                out = self.mstcn.infer(inputs=feed_dict)
+                out = self.mstcn.infer_new_request(inputs=feed_dict)
                 predictions = out[self.mstcn_output_key[-1]]
                 self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
 
