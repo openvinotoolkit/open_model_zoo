@@ -1035,7 +1035,6 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-1040')),
     )),
 
-
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
             TestCase(options={
