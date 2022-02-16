@@ -2,7 +2,7 @@ models:
   - name: smartlab-object-detection-0004
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolox
           anchors: yolox
