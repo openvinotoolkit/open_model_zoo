@@ -152,6 +152,7 @@ protected:
     std::mutex thread_frame_lock; // lock for shared frame
     std::chrono::steady_clock::time_point read_time; // timepoint from cv::read()
     bool is_filling_possible = true; // access for batch filling
+    cv::Size first_frame_size = {0, 0};
 
     virtual bool pull(cv::gapi::wip::Data& data) override {
         /** Is first already pulled **/
@@ -159,6 +160,7 @@ protected:
             if (first_batch.empty()) {
                 throw std::runtime_error("GestRecCapSource::pull() have got empty first_batch");
             }
+            first_frame_size = first_batch[first_batch.size() - 2].size();
             first_pulled = true;
             cv::detail::VectorRef ref(std::move(first_batch));
             data = std::move(ref);
@@ -170,7 +172,7 @@ protected:
         cv::Mat fast_frame = cap->read();
 
         /** Check size of captured frame **/
-        if (fast_frame.size() != first_batch[first_batch.size() - 2].size()) {
+        if (fast_frame.size() != first_frame_size) {
             throw std::runtime_error("Frames of source must have the same sizes");
         }
 
