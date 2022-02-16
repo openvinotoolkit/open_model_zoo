@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
         });
 
         /** Configure network **/
-        auto config = ConfigFactory::getUserConfig(FLAGS_d, "", "", FLAGS_nireq,
+        auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq,
                                                    FLAGS_nstreams, FLAGS_nthreads);
         const auto net = cv::gapi::ie::Params<cv::gapi::Generic> {
             model->getName(),
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m) + ".bin",   // path to weights
             FLAGS_d                            // device specifier
         }.cfgNumRequests(config.maxAsyncRequests)
-         .pluginConfig(config.execNetworkConfig);
+         .pluginConfig(config.getLegacyConfig());
         slog::info << "The background matting model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
         auto kernels = cv::gapi::combine(custom::kernels(),

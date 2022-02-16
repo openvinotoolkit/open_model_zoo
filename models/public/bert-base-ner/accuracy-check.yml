@@ -1,7 +1,7 @@
 models:
   - name: bert-base-ner
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: bert_ner
         inputs:
           - name: "input_ids"

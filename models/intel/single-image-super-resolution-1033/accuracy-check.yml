@@ -2,7 +2,7 @@ models:
   - name: single-image-super-resolution-1033
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: super_resolution
           reverse_channels: True

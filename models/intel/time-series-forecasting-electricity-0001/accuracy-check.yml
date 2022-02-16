@@ -1,7 +1,7 @@
 models:
   - name: time-series-forecasting-electricity-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         inputs:
           - name: timestamps
             type: INPUT

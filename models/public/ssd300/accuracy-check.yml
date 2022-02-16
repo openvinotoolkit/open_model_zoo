@@ -23,7 +23,7 @@ models:
 
   - name: ssd300
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

@@ -2,7 +2,7 @@ models:
   - name: yolo-v2-ava-sparse-35-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v2
           anchors: yolo_v2

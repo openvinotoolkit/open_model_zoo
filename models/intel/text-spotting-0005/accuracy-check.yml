@@ -30,7 +30,7 @@ evaluations:
         confidence_threshold: 0.65
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: ICDAR2015_word_spotting

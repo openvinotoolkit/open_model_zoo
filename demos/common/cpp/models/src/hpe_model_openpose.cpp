@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-
 #include <opencv2/imgproc/imgproc.hpp>
-
-#include "models/hpe_model_openpose.h"
-#include "models/openpose_decoder.h"
-
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include <utils/image_utils.h>
-#include <ngraph/ngraph.hpp>
+#include "models/hpe_model_openpose.h"
+#include "models/openpose_decoder.h"
 
 const cv::Vec3f HPEOpenPose::meanPixel = cv::Vec3f::all(128);
 const float HPEOpenPose::minPeaksDistance = 3.0f;
@@ -35,69 +32,100 @@ const float HPEOpenPose::midPointsScoreThreshold = 0.05f;
 const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
 const float HPEOpenPose::minSubsetScore = 0.2f;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
-    ImageModel(modelFileName, false),
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
+    float confidenceThreshold, const std::string& layout) :
+    ImageModel(modelFileName, false, layout),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
 }
 
-void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    changeInputSize(cnnNetwork);
+    // --------------------------- Prepare input  ------------------------------------------------------
+    if (model->inputs().size() != 1) {
+        throw std::logic_error("HPE OpenPose model wrapper supports topologies with only 1 input");
+    }
+    inputsNames.push_back(model->input().get_any_name());
+    const ov::Shape& inputShape = model->input().get_shape();
+    const ov::Layout& inputLayout = getInputLayout(model->input());
 
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
 
-    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(InferenceEngine::Precision::U8);
-    inputInfo.getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout({ "NHWC" });
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const InferenceEngine::OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 2)
-        throw std::runtime_error("Demo supports topologies only with 2 outputs");
+    ppp.input().model().set_layout(inputLayout);
 
-    for (const auto& outputLayer: outputInfo) {
-        outputLayer.second->setPrecision(InferenceEngine::Precision::FP32);
-        outputLayer.second->setLayout(InferenceEngine::Layout::NCHW);
-        outputsNames.push_back(outputLayer.first);
+    // --------------------------- Prepare output  -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 2) {
+        throw std::runtime_error("HPE OpenPose supports topologies with only 2 outputs");
     }
 
-    auto outputIt = outputInfo.begin();
-    const InferenceEngine::SizeVector& pafsOutputDims = (*outputIt++).second->getTensorDesc().getDims();
-    if (pafsOutputDims.size() != 4 || pafsOutputDims[0] != 1 || pafsOutputDims[1] != 2 * (keypointsNumber + 1))
-        throw std::runtime_error("1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM dimension of model's output is expected");
-    const InferenceEngine::SizeVector& heatmapsOutputDims = (*outputIt++).second->getTensorDesc().getDims();
-    if (heatmapsOutputDims.size() != 4 || heatmapsOutputDims[0] != 1 || heatmapsOutputDims[1] != keypointsNumber + 1)
-        throw std::runtime_error("1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM dimension of model's heatmap is expected");
-    if (pafsOutputDims[2] != heatmapsOutputDims[2] || pafsOutputDims[3] != heatmapsOutputDims[3])
-        throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
+    const ov::Layout outputLayout("NCHW");
+    for (const auto& output : model->outputs()) {
+        const auto& outTensorName = output.get_any_name();
+        ppp.output(outTensorName).tensor().
+            set_element_type(ov::element::f32)
+            .set_layout(outputLayout);
+        outputsNames.push_back(outTensorName);
+    }
+    model = ppp.build();
+
+    const size_t batchId = ov::layout::batch_idx(outputLayout);
+    const size_t channelsId = ov::layout::channels_idx(outputLayout);
+    const size_t widthId = ov::layout::width_idx(outputLayout);
+    const size_t heightId = ov::layout::height_idx(outputLayout);
+
+    ov::Shape heatmapsOutputShape = model->outputs().front().get_shape();
+    ov::Shape pafsOutputShape = model->outputs().back().get_shape();
+    if (heatmapsOutputShape[channelsId] > pafsOutputShape[channelsId]) {
+        std::swap(heatmapsOutputShape, pafsOutputShape);
+        std::swap(outputsNames[0], outputsNames[1]);
+    }
+
+    if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[batchId] != 1
+        || heatmapsOutputShape[ov::layout::channels_idx(outputLayout)] != keypointsNumber + 1) {
+        throw std::logic_error("1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM dimension of model's heatmap is expected");
+    }
+    if (pafsOutputShape.size() != 4 || pafsOutputShape[batchId] != 1
+        || pafsOutputShape[channelsId] != 2 * (keypointsNumber + 1)) {
+        throw std::logic_error("1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM dimension of model's output is expected");
+    }
+    if (pafsOutputShape[heightId] != heatmapsOutputShape[heightId]
+        || pafsOutputShape[widthId] != heatmapsOutputShape[widthId]) {
+        throw std::logic_error("output and heatmap are expected to have matching last two dimensions");
+    }
+
+    changeInputSize(model);
 }
 
-void HPEOpenPose::changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork) {
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    InferenceEngine::SizeVector& inputDims = inputShapes.begin()->second;
+void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
+    ov::Shape inputShape = model->input().get_shape();
+    const ov::Layout& layout = ov::layout::get_layout(model->inputs().front());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
+
     if (!targetSize) {
-        targetSize = inputDims[2];
+        targetSize = inputShape[heightId];
     }
     int height = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     int inputWidth = static_cast<int>(std::round(targetSize * aspectRatio));
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    inputDims[0] = 1;
-    inputDims[2] = height;
-    inputDims[3] = width;
-    inputLayerSize = cv::Size(inputDims[3], inputDims[2]);
-    cnnNetwork.reshape(inputShapes);
+    inputShape[batchId] = 1;
+    inputShape[heightId] = height;
+    inputShape[widthId] = width;
+    inputLayerSize = cv::Size(width, height);
+    model->reshape(inputShape);
 }
 
-std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);
@@ -108,7 +136,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
 
-    request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
+    request.set_input_tensor(wrapMat2Tensor(paddedImage));
     return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
         image.cols / static_cast<float>(roi.width), image.rows / static_cast<float>(roi.height));
 }
@@ -116,26 +144,26 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    auto outputMapped = infResult.outputsData[outputsNames[0]];
-    auto heatMapsMapped = infResult.outputsData[outputsNames[1]];
+    const auto& heatMapsMapped = infResult.outputsData[outputsNames[0]];
+    const auto& outputMapped = infResult.outputsData[outputsNames[1]];
 
-    const InferenceEngine::SizeVector& outputDims = outputMapped->getTensorDesc().getDims();
-    const InferenceEngine::SizeVector& heatMapDims = heatMapsMapped->getTensorDesc().getDims();
+    const ov::Shape& outputShape = outputMapped.get_shape();
+    const ov::Shape& heatMapShape = heatMapsMapped.get_shape();
 
-    float* predictions = outputMapped->rmap().as<float*>();
-    float* heats = heatMapsMapped->rmap().as<float*>();
+    float* const predictions = outputMapped.data<float>();
+    float* const heats = heatMapsMapped.data<float>();
 
     std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {
-        heatMaps[i] = cv::Mat(heatMapDims[2], heatMapDims[3], CV_32FC1,
-                              heats + i * heatMapDims[2] * heatMapDims[3]);
+        heatMaps[i] = cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1,
+                              heats + i * heatMapShape[2] * heatMapShape[3]);
     }
     resizeFeatureMaps(heatMaps);
 
-    std::vector<cv::Mat> pafs(outputDims[1]);
+    std::vector<cv::Mat> pafs(outputShape[1]);
     for (size_t i = 0; i < pafs.size(); i++) {
-        pafs[i] = cv::Mat(heatMapDims[2], heatMapDims[3], CV_32FC1,
-                          predictions + i * heatMapDims[2] * heatMapDims[3]);
+        pafs[i] = cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1,
+                          predictions + i * heatMapShape[2] * heatMapShape[3]);
     }
     resizeFeatureMaps(pafs);
 

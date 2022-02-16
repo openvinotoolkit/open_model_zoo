@@ -19,7 +19,12 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
-from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
+from ..representation import (
+    DetectionPrediction,
+    ActionDetectionPrediction,
+    ContainerPrediction,
+    ClassificationPrediction
+)
 from ..utils import contains_all
 
 
@@ -309,7 +314,7 @@ class ActionDetection(Adapter):
             self.priorbox_out = self.check_output_name(self.priorbox_out, raw_outputs)
         self.outputs_verified = True
         add_conf_outs = [self.check_output_name(layer, raw_outputs) for layer in self.add_conf_outs]
-        if contains_all(add_conf_outs):
+        if contains_all(raw_outputs, add_conf_outs):
             self.add_conf_outs = add_conf_outs
             return
 
@@ -318,4 +323,52 @@ class ActionDetection(Adapter):
         if contains_all(raw_outputs, add_conf_with_bias):
             self.add_conf_outs = add_conf_with_bias
             return
+        return
+
+class ActionRecognitionWithNoAction(Adapter):
+    __provider__ = 'action_recognition_with_condition'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'no_action_id': NumberField(
+                optional=True, default=0, min_value=0, value_type=int, description='no_action label id'),
+            'no_action_threshold': NumberField(
+                optional=True, default=0.5, min_value=0, max_value=1, value_type=float,
+                description='threshold for selection no action'),
+            'action_output': StringField(optional=True, description='output layer name with action scores')
+        })
+        return params
+
+    def configure(self):
+        self.no_action_id = self.get_value_from_config('no_action_id')
+        self.no_action_threshold = self.get_value_from_config('no_action_threshold')
+        self.action_output = self.get_value_from_config('action_output')
+        self.output_verified = False
+
+    def process(self, raw, identifiers, frame_meta):
+        predictions = []
+        if not self.output_verified:
+            self.select_output_blob(raw)
+        outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, action_out in zip(identifiers, outputs[self.action_output]):
+            no_action_score = action_out[self.no_action_id]
+            if no_action_score >= self.no_action_threshold:
+                mask = np.ones_like(action_out, dtype=bool)
+                mask[self.no_action_id] = False
+                scores = action_out[mask] = 0.
+            else:
+                scores = action_out
+                scores[self.no_action_id] = 0.
+            predictions.append(ClassificationPrediction(identifier, scores))
+        return predictions
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.action_output:
+            self.action_output = self.check_output_name(self.action_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.action_output = self.output_blob
         return

@@ -39,7 +39,7 @@ models:
   - name: dla-34
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

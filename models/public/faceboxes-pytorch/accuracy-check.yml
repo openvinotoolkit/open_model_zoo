@@ -2,7 +2,7 @@ models:
   - name: faceboxes-pytorch
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: faceboxes
           boxes_out: "boxes"

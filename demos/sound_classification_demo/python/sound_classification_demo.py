@@ -44,9 +44,6 @@ def build_argparser():
                       help="Required. Input to process")
     args.add_argument('-m', "--model", type=str, required=True,
                       help="Required. Path to an .xml file with a trained model.")
-    args.add_argument("-l", "--cpu_extension", type=str, default=None,
-                      help="Optional. Required for CPU custom layers. Absolute path to a shared library with "
-                           "the kernels implementations.")
     args.add_argument("-d", "--device", type=str, default="CPU",
                       help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is"
                            " acceptable. The demo will look for a suitable plugin for device specified. "
@@ -139,8 +136,6 @@ def main():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = Core()
-    if args.device == "CPU" and args.cpu_extension:
-        ie.add_extension(args.cpu_extension, 'CPU')
 
     log.info('Reading model {}'.format(args.model))
     model = ie.read_model(args.model)
@@ -163,6 +158,7 @@ def main():
         sys.exit(1)
 
     compiled_model = ie.compile_model(model, args.device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
@@ -178,7 +174,7 @@ def main():
     clips = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk = np.reshape(chunk, model.inputs[0].shape)
-        output = next(iter(infer_request.infer({input_tensor_name: chunk}).values()))
+        output = infer_request.infer({input_tensor_name: chunk})[output_tensor]
         clips += batch_size
         for batch, data in enumerate(output):
             chunk_start_time = (idx*batch_size + batch)*hop / audio.samplerate

@@ -472,6 +472,7 @@ describing a single model. Each such object has the following keys:
   are:
 
   * `action_recognition`
+  * `background_matting`
   * `classification`
   * `colorization`
   * `detection`

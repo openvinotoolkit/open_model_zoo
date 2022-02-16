@@ -8,7 +8,7 @@ evaluations:
       max_seq_len: "192"
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: im2latex_polynomials_handwritten

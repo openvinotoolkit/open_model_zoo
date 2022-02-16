@@ -511,7 +511,7 @@ void DetectionsProcessor::process() {
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
                         ov::InferRequest& reidRequest, cv::Rect rect, Context& context) {
-                                    reidRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                                    reidRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
                                     classifiersAggregator->push(cv::Rect(rect));
@@ -568,7 +568,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback([](const std::exception_ptr& e) {});  // destroy the stored bind object
+                    inferRequest.set_callback([](std::exception_ptr) {});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
                             std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
@@ -697,16 +697,14 @@ int main(int argc, char* argv[]) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
-                core.set_property("CPU", { { CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (deviceNStreams.count("CPU") > 0 ? std::to_string(deviceNStreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }});
-                deviceNStreams["CPU"] = core.get_property("CPU", ov::streams::num);
+                core.set_property("CPU", ov::num_streams((deviceNStreams.count("CPU") > 0 ? deviceNStreams.at("CPU") : ov::NumStreams::AUTO)));
+                deviceNStreams["CPU"] = core.get_property("CPU", ov::num_streams);
             }
 
             if ("GPU" == device) {
-                core.set_property("GPU", ov::streams::num(deviceNStreams.count("GPU") > 0 ? deviceNStreams.at("GPU") : ov::streams::AUTO));
+                core.set_property("GPU", ov::num_streams(deviceNStreams.count("GPU") > 0 ? deviceNStreams.at("GPU") : ov::NumStreams::AUTO));
 
-                deviceNStreams["GPU"] = core.get_property("GPU", ov::streams::num);
+                deviceNStreams["GPU"] = core.get_property("GPU", ov::num_streams);
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)

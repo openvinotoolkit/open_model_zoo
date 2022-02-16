@@ -36,7 +36,7 @@ models:
   - name: repvgg-b1
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -1,7 +1,7 @@
 models:
   - name: ocrnet-hrnet-w48-paddle
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: segmentation
 

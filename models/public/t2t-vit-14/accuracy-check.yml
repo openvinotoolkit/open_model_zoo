@@ -2,7 +2,7 @@ models:
   - name: t2t-vit-14
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

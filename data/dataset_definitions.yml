@@ -1,4 +1,19 @@
 datasets:
+  - name: HumanMattingClips120
+    annotation_conversion:
+      converter: background_matting_sequential
+      images_dir: HumanMattingClips120
+      masks_dir: HumanMattingClips120
+      backgrounds_dir: HumanMattingClips120
+      image_prefix: com/
+      mask_prefix: fgr/
+      background_prefix: bgr/
+      with_background: True
+      with_alpha: True
+    annotation: human_matting_120.pickle
+    dataset_meta: human_matting_120_meta.json
+    data_source: HumanMattingClips120
+
   - name: ms_coco_mask_rcnn
     annotation_conversion:
       converter: mscoco_mask_rcnn

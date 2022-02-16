@@ -270,10 +270,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
-            #TODO
-            #TestCase(options={'-at': 'jr',
-            #    '-m': ModelArg('fbcnn')}
-            #)
+            TestCase(options={'-at': 'jr',
+               '-m': ModelArg('fbcnn')}
+            )
         ]
     )),
 
@@ -410,7 +409,7 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
+                        ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -425,7 +424,7 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2002'),
                         ModelArg('person-vehicle-bike-detection-2003'),
                         ModelArg('person-vehicle-bike-detection-2004'),
-                        # ModelArg('product-detection-0001'),  # TODO
+                        ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -449,8 +448,7 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    # TODO: INT8: Attempt to get a name for a Tensor without names
-                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -488,10 +486,9 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
-            # TODO
-            # ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')
         ),
     )),
 
@@ -613,7 +610,7 @@ NATIVE_DEMOS = [
             # ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
+            # ModelArg('person-reidentification-retail-0277'),  # TODO
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
@@ -675,7 +672,7 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
+            # ModelArg('instance-segmentation-person-0007'),  # TODO
             ModelArg('instance-segmentation-security-0091')),
     ))
 
@@ -720,8 +717,8 @@ PYTHON_DEMOS = [
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
-    #       ModelArg('robust-video-matting'),
-    #       ModelArg('background-matting-mobilenetv2'),
+            ModelArg('robust-video-matting-mobilenetv3'),
+            ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -1088,8 +1085,8 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1104,8 +1101,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'),
-                        ModelArg('person-vehicle-bike-detection-2004'),
+                        # ModelArg('person-vehicle-bike-detection-2003'), # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -1120,8 +1117,8 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
-                        ModelArg('vehicle-license-plate-detection-barrier-0106'),
-                        ModelArg('person-detection-0106')),
+                        ModelArg('vehicle-license-plate-detection-barrier-0106')),
+                        # ModelArg('person-detection-0106')),  # TODO
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
@@ -1166,19 +1163,19 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
-            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
-            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'detr'}), # TODO detr-resnet50 model fails to convert on 2022.1 package
+                TestCase(options={'--architecture_type': 'detr'}),
                 [
-                    #TestCase(options={'-m': ModelArg('detr-resnet50')}),
-                    #TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
-                    #                 '--reverse_input_channels': None,
-                    #                  '--mean_values': ['123.675', '116.28', '103.53'],
-                    #                  '--scale_values': ['58.395', '57.12', '57.375']}),
+                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                                     '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
@@ -1285,20 +1282,19 @@ PYTHON_DEMOS = [
         single_option_cases('-m', ModelArg('wav2vec2-base'))
     )),
 
-    # TODO: Demo supports only topologies with the following input tensor name: image
-    # PythonDemo(name='text_spotting_demo', device_keys=['-d'],
-    #            model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
-    #                       '-i': DataPatternArg('text-detection')}),
-    #     [
-    #         TestCase(options={
-    #             '-m_m': ModelArg('text-spotting-0005-detector'),
-    #             '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
-    #             '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
-    #             '--no_track': None
-    #         }),
-    #     ]
-    # )),
+    PythonDemo(name='text_spotting_demo', device_keys=['-d'],
+               model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0005-detector'),
+                '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 
     PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
                model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(

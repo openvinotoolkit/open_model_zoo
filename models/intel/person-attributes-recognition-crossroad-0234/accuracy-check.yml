@@ -2,7 +2,7 @@ models:
   - name: person-attributes-recognition-crossroad-0234
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: person_attributes
           attributes_recognition_out: "attributes"

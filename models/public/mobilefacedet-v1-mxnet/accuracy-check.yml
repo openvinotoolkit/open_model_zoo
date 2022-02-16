@@ -1,7 +1,7 @@
 models:
   - name: mobilefacedet-v1-mxnet
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           classes: 1

@@ -2,7 +2,7 @@ models:
   - name: unet-camvid-onnx-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
 
     datasets:

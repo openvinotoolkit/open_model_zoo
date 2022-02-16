@@ -37,7 +37,7 @@ models:
   - name: regnetx-3.2gf
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

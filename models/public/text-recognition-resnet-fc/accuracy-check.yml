@@ -2,7 +2,7 @@ models:
   - name: text-recognition-resnet-fc
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: simple_decoder
           eos_label: "[s]"

@@ -2,7 +2,7 @@ models:
   - name: pedestrian-and-vehicle-detector-adas-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
