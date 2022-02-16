@@ -37,12 +37,6 @@ An example of using the Model Downloader:
 omz_downloader --list models.lst
 ```
 
-An example of using the Model Converter:
-
-```sh
-omz_converter --list models.lst
-```
-
 ### Supported Models
 * smartlab-action-recognition-encoder-0001
 * smartlab-action-recognition-decoder-0001
