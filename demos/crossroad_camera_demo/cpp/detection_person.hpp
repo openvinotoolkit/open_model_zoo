@@ -124,7 +124,7 @@ struct PersonDetection : BaseDetection {
         resultsFetched = true;
         const float* detections = m_infer_request.get_output_tensor().data<float>();
         // pretty much regular SSD post-processing
-        for (int i = 0; i < maxProposalCount; i++) {
+        for (size_t i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0]; // in case of batch
             if (image_id < 0) {
                 // end of detections

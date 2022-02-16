@@ -78,7 +78,7 @@ omz_converter --list models.lst
 * instance-segmentation-person-????
 * yolact-resnet50-fpn-pytorch
 * background-matting-mobilenetv2
-* robust-video-matting
+* robust-video-matting-mobilenetv3
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

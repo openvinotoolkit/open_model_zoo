@@ -17,6 +17,11 @@ limitations under the License.
 from .metric_executor import MetricsExecutor
 from .metric import Metric, PerImageMetricResult
 
+from .background_matting import (
+    MeanOfAbsoluteDifference,
+    SpatialGradient,
+    MeanSquaredErrorWithMask,
+)
 from .classification import (
     ClassificationAccuracy,
     ClassificationAccuracyClasses,
@@ -250,5 +255,9 @@ __all__ = [
     'PeakSignalToNoiseRatioWithBlockingEffectFactor',
 
     'NormalisedQuantileLoss',
-    'editdistance_eval'
+    'editdistance_eval',
+
+    'MeanOfAbsoluteDifference',
+    'SpatialGradient',
+    'MeanSquaredErrorWithMask',
 ]

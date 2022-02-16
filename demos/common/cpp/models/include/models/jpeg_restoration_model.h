@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
 */
 
 #pragma once
-
-#include "image_model.h"
+#include <string>
+#include <openvino/openvino.hpp>
+#include "models/image_model.h"
+#include "models/results.h"
 
 class JPEGRestorationModel : public ImageModel {
 public:
@@ -24,15 +26,17 @@ public:
     /// @param modelFileName name of model to load
     /// @param inputImgSize size of image to set model input shape
     /// @param jpegCompression flag allows to perform compression before the inference
-    JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize, bool jpegCompression);
+    /// @param layout - model input layout
+    JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize,
+        bool jpegCompression, const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+        const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
+    void changeInputSize(std::shared_ptr<ov::Model>& model);
 
     static const size_t stride = 8;
     bool jpegCompression = false;

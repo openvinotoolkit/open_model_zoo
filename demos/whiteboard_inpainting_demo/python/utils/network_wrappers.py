@@ -21,8 +21,8 @@ from .segm_postprocess import postprocess
 
 
 class MaskRCNN(IEModel):
-    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
-        super().__init__(core, model_path, labels_file, conf, device, ext_path)
+    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU'):
+        super().__init__(core, model_path, labels_file, conf, device)
 
         self.input_keys = {'image'}
         self.output_keys = {'boxes', 'labels', 'masks'}

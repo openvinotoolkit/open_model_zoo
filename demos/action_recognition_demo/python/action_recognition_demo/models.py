@@ -93,12 +93,13 @@ class IEModel:
             log.error("Demo supports only models with 1 output")
             sys.exit(1)
 
-        self.compiled_model = core.compile_model(self.model, target_device)
+        compiled_model = core.compile_model(self.model, target_device)
+        self.output_tensor = compiled_model.outputs[0]
         self.input_name = self.model.inputs[0].get_any_name()
         self.input_shape = self.model.inputs[0].shape
 
         self.num_requests = num_requests
-        self.infer_requests = [self.compiled_model.create_infer_request() for _ in range(self.num_requests)]
+        self.infer_requests = [compiled_model.create_infer_request() for _ in range(self.num_requests)]
         log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
 
     def async_infer(self, frame, req_id):
@@ -107,7 +108,7 @@ class IEModel:
 
     def wait_request(self, req_id):
         self.infer_requests[req_id].wait()
-        return next(iter(self.infer_requests[req_id].results.values()))
+        return self.infer_requests[req_id].results[self.output_tensor]
 
 
 class DummyDecoder:

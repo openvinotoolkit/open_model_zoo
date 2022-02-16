@@ -17,8 +17,8 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 | Metric | Value  |
 | ------ | ------ |
-| Top 1  | 80.14% |
-| Top 5  | 95.10% |
+| Top 1  | 77.82% |
+| Top 5  | 94.03% |
 
 ## Input
 

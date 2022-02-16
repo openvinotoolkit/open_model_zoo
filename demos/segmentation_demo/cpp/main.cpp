@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@
 #include <iostream>
 #include <string>
 
-#include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
+#include <openvino/openvino.hpp>
 #include <gflags/gflags.h>
 
-#include <unordered_map>
-
-#include <pipelines/async_pipeline.h>
 #include <models/segmentation_model.h>
+#include <monitors/presenter.h>
+#include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -42,10 +41,8 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char raw_output_message[] = "Optional. Output inference results as mask histogram.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
@@ -63,8 +60,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
@@ -88,11 +84,9 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
@@ -234,18 +228,18 @@ int main(int argc, char* argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
 
-        InferenceEngine::Core core;
+        ov::Core core;
         AsyncPipeline pipeline(
-            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize, FLAGS_layout)),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
         Presenter presenter(FLAGS_u);
 
         std::vector<std::string> labels;
-        if (!FLAGS_labels.empty())
+        if (!FLAGS_labels.empty()) {
             labels = SegmentationModel::loadLabels(FLAGS_labels);
+        }
 
         bool keepRunning = true;
         int64_t frameNum = -1;

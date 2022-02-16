@@ -306,7 +306,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             if weights:
                 self.network = launcher.read_network(str(model), str(weights))
             else:
-                self.network = launcher.ie_core.read_network(str(model))
+                self.network = launcher.read_network(str(model), None)
             self.load_network(self.network, launcher)
         self.set_input_and_output()
         if log:

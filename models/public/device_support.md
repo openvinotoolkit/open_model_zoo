@@ -6,6 +6,7 @@
 | aclnet-int8 | YES | YES |    |
 | alexnet | YES | YES | YES |
 | anti-spoof-mn3 | YES | YES | YES |
+| background-matting-mobilenetv2 | YES |    |    |
 | bert-base-ner | YES | YES |    |
 | brain-tumor-segmentation-0001 | YES |    |    |
 | brain-tumor-segmentation-0002 | YES |    |    |
@@ -61,8 +62,8 @@
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
 | license-plate-recognition-barrier-0007 | YES |    |    |
-| mask_rcnn_inception_resnet_v2_atrous_coco | YES | YES |    |
-| mask_rcnn_resnet50_atrous_coco | YES | YES |    |
+| mask_rcnn_inception_resnet_v2_atrous_coco | YES |  |    |
+| mask_rcnn_resnet50_atrous_coco | YES |  |    |
 | midasnet | YES | YES |    |
 | mixnet-l | YES | YES | YES |
 | mobilefacedet-v1-mxnet | YES | YES | YES |
@@ -103,6 +104,7 @@
 | retinanet-tf | YES | YES |    |
 | rexnet-v1-x1.0 | YES | YES |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
+| robust-video-matting-mobilenetv3 | YES |    |    |
 | se-inception | YES | YES | YES |
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
@@ -131,7 +133,7 @@
 | wav2vec2-base | YES |    |    |
 | wavernn-rnn | YES | YES | YES |
 | wavernn-upsampler | YES | YES |    |
-| yolact-resnet50-fpn-pytorch | YES | YES | YES |
+| yolact-resnet50-fpn-pytorch | YES |    | YES |
 | yolo-v1-tiny-tf | YES | YES | YES |
 | yolo-v2-tf | YES | YES | YES |
 | yolo-v2-tiny-tf | YES | YES | YES |
