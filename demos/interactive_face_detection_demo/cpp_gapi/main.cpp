@@ -431,7 +431,6 @@ int main(int argc, char *argv[]) {
         if (!tmp.data) {
             throw std::runtime_error("Couldn't grab first frame");
         }
-        cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);

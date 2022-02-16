@@ -23,7 +23,7 @@ which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
 | ------ | -------|
-| mAP    | 87.11% |
+| mAP    | 86.35% |
 
 ## Input
 

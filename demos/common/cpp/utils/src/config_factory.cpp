@@ -46,10 +46,9 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
             config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
         }
         else if (device == "GPU") {
-            config.compiledModelConfig.emplace(ov::num_streams.name(),
-                (deviceNstreams.count(device) > 0 ? deviceNstreams.at(device)
-                    : ov::NumStreams::AUTO));
-
+            config.compiledModelConfig.emplace(ov::num_streams(deviceNstreams.count(device) > 0
+                ? (int)deviceNstreams.at(device)
+                : ov::NumStreams::AUTO));
             if (flags_d.find("MULTI") != std::string::npos
                 && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,

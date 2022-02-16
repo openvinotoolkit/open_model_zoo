@@ -373,10 +373,16 @@ class AttentionOCRAdapter(Adapter):
         self.labels = self.get_value_from_config('labels')
         self.eos_index = self.get_value_from_config('eos_index')
         self.lower_case = self.get_value_from_config('to_lower_case')
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_blob = self.check_output_name(self.output_blob, outputs)
+        self.outputs_verified = True
 
     def process(self, raw, identifiers, frame_meta):
         raw_out = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_out)
+        if not self.outputs_verified:
+            self.select_output_blob(raw_out)
         result = []
         if isinstance(raw_out[self.output_blob], bytes):
             out_str = raw_out[self.output_blob].decode('iso-8859-1')
