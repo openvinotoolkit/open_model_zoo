@@ -237,7 +237,7 @@ void PedestrianTracker::SolveAssignmentProblem(
     ComputeDissimilarityMatrix(track_ids, detections, descriptors,
                                &dissimilarity);
 
-    std::vector<int> res = KuhnMunkres().Solve(dissimilarity);
+    std::vector<size_t> res = KuhnMunkres().Solve(dissimilarity);
 
     for (size_t i = 0; i < detections.size(); i++) {
         unmatched_detections->insert(i);
