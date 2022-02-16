@@ -441,10 +441,10 @@ DEMOS = [
              '-i': DataPatternArg('object-detection-demo')}),
         [
             TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
-            #     '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
-            # TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
-            #     '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
+            TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
+                '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
+            TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
+                '-n_iqs': '9999', '-fps_sp': '50', '-n_sp': '30'})
         ]
     )),
 
@@ -991,21 +991,21 @@ PYTHON_DEMOS = [
        TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     )),
 
-    PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('human-pose-estimation')}),
-        [
-            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
-            *combine_cases(
-                TestCase(options={'-at': 'ae'}),
-                single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0005'),
-                    ModelArg('human-pose-estimation-0006'),
-                    ModelArg('human-pose-estimation-0007'))),
-        ],
-    )),
+    # PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('human-pose-estimation')}),
+    #     [
+    #         TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+    #         TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+    #         *combine_cases(
+    #             TestCase(options={'-at': 'ae'}),
+    #             single_option_cases('-m',
+    #                 ModelArg('human-pose-estimation-0005'),
+    #                 ModelArg('human-pose-estimation-0006'),
+    #                 ModelArg('human-pose-estimation-0007'))),
+    #     ],
+    # )),
 
     PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1312,28 +1312,28 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: No module named 'ctcdecode_numpy'
-    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        [
-            TestCase(options={'-p': 'mds08x_en',
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-                              # run_tests.py puts pre-converted files into dl_dir as
-                              # it always runs converter.py without --output_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-            TestCase(options={'-p': 'mds06x_en',
-                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-                              # lm.binary is really in dl_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-            TestCase(options={'-p': 'mds08x_en',  # test online mode
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-                              # run_tests.py puts pre-converted files into dl_dir as
-                              # it always runs converter.py without --output_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-                              '--realtime': None}),
-            TestCase(options={'-p': 'mds08x_en',  # test without LM
-                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-        ],
-    )),
+    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+    #     [
+    #         TestCase(options={'-p': 'mds08x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+    #         TestCase(options={'-p': 'mds06x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+    #                           # lm.binary is really in dl_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+    #                           '--realtime': None}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+    #     ],
+    # )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
