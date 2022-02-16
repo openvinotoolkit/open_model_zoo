@@ -15,16 +15,8 @@
 */
 
 #pragma once
+#include "ngraph/op/region_yolo.hpp"
 #include "detection_model.h"
-
-namespace ngraph {
-    namespace op {
-        namespace v0 {
-            class RegionYolo;
-        }
-        using v0::RegionYolo;
-    }
-}
 
 class ModelYolo : public DetectionModel {
 protected:
