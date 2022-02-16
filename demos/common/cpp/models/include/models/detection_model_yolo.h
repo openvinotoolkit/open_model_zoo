@@ -23,14 +23,14 @@ protected:
     class Region {
     public:
         int num = 0;
-        int classes = 0;
+        size_t classes = 0;
         int coords = 0;
         std::vector<float> anchors;
-        int outputWidth = 0;
-        int outputHeight = 0;
+        size_t outputWidth = 0;
+        size_t outputHeight = 0;
 
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
-        Region(int classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, int outputWidth, int outputHeight);
+        Region(size_t classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, size_t outputWidth, size_t outputHeight);
     };
 
 public:
@@ -68,7 +68,7 @@ protected:
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);
 
-    static int calculateEntryIndex(int entriesNum, int lcoords, int lclasses, int location, int entry);
+    static int calculateEntryIndex(int entriesNum, int lcoords, size_t lclasses, int location, int entry);
     static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
 
     std::map<std::string, Region> regions;

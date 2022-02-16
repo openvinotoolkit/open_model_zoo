@@ -272,7 +272,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
                 obj.width = std::min((float)width, original_im_w - obj.x);
                 obj.height = std::min((float)height, original_im_h - obj.y);
 
-                for (int j = 0; j < region.classes; ++j) {
+                for (size_t j = 0; j < region.classes; ++j) {
                     int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords + 1 + j);
                     float prob = scale * postprocessRawData(output_blob[class_index]);
 
@@ -289,7 +289,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     }
 }
 
-int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, int lclasses, int location, int entry) {
+int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, size_t lclasses, int location, int entry) {
     int n = location / totalCells;
     int loc = location % totalCells;
     return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
@@ -334,7 +334,7 @@ ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionY
     }
 }
 
-ModelYolo::Region::Region(int classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, int outputWidth, int outputHeight) :
+ModelYolo::Region::Region(size_t classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, size_t outputWidth, size_t outputHeight) :
     classes(classes), coords(coords),
     outputWidth(outputWidth), outputHeight(outputHeight) {
     num = masks.size();
