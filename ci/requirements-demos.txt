@@ -2,27 +2,27 @@
 
 appdirs==1.4.4
     # via pooch
-attrs==20.3.0
+attrs==21.2.0
     # via pytest
 audioread==2.1.9
     # via librosa
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
-cffi==1.14.5
+cffi==1.14.6
     # via soundfile
-chardet==4.0.0
+charset-normalizer==2.0.4
     # via requests
 cycler==0.10.0
     # via matplotlib
-decorator==5.0.7
+decorator==5.0.9
     # via librosa
+flake8==3.9.2
+    # via motmetrics
 flake8-import-order==0.18.1
     # via motmetrics
-flake8==3.9.1
-    # via motmetrics
-idna==2.10
+idna==3.2
     # via requests
-importlib-metadata==4.0.0
+importlib-metadata==4.8.1
     # via
     #   flake8
     #   pluggy
@@ -35,7 +35,7 @@ joblib==1.0.1
     #   scikit-learn
 kiwisolver==1.3.1
     # via matplotlib
-librosa==0.8.0
+librosa==0.8.1
     # via -r demos/requirements.txt
 llvmlite==0.36.0
     # via numba
@@ -45,6 +45,8 @@ mccabe==0.6.1
     # via flake8
 motmetrics==1.2.0
     # via -r demos/requirements.txt
+mpmath==1.2.1
+    # via sympy
 nibabel==3.2.1
     # via -r demos/requirements.txt
 numba==0.53.1
@@ -65,25 +67,26 @@ numpy==1.19.5
     #   scikit-learn
     #   scipy
     #   tensorboardx
-packaging==20.9
+packaging==21.0
     # via
+    #   librosa
     #   nibabel
     #   pooch
     #   pytest
 pandas==1.1.5
     # via motmetrics
-pillow==8.2.0
+pillow==8.3.2
     # via matplotlib
-pluggy==0.13.1
+pluggy==1.0.0
     # via pytest
-pooch==1.3.0
+pooch==1.5.1
     # via librosa
-protobuf==3.15.8
+protobuf==3.17.3
     # via tensorboardx
-py-cpuinfo==8.0.0
-    # via pytest-benchmark
 py==1.10.0
     # via pytest
+py-cpuinfo==8.0.0
+    # via pytest-benchmark
 pycodestyle==2.7.0
     # via
     #   flake8
@@ -96,23 +99,23 @@ pyparsing==2.4.7
     # via
     #   matplotlib
     #   packaging
-pytest-benchmark==3.4.1
-    # via motmetrics
-pytest==6.2.3
+pytest==6.2.5
     # via
     #   motmetrics
     #   pytest-benchmark
-python-dateutil==2.8.1
+pytest-benchmark==3.4.1
+    # via motmetrics
+python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
 pytz==2021.1
     # via pandas
-requests==2.25.1
+requests==2.26.0
     # via pooch
 resampy==0.2.2
     # via librosa
-scikit-learn==0.24.1
+scikit-learn==0.24.2
     # via
     #   -r demos/requirements.txt
     #   librosa
@@ -123,7 +126,7 @@ scipy==1.5.4
     #   motmetrics
     #   resampy
     #   scikit-learn
-six==1.15.0
+six==1.16.0
     # via
     #   cycler
     #   protobuf
@@ -131,24 +134,27 @@ six==1.15.0
     #   resampy
 soundfile==0.10.3.post1
     # via librosa
-tensorboardx==2.2
+sympy==1.8
     # via -r demos/requirements.txt
-threadpoolctl==2.1.0
+tensorboardx==2.4
+    # via -r demos/requirements.txt
+threadpoolctl==2.2.0
     # via scikit-learn
-tokenizers==0.10.2
+tokenizers==0.10.3
     # via -r demos/requirements.txt
 toml==0.10.2
     # via pytest
-tqdm==4.60.0
+tqdm==4.62.2
     # via -r demos/requirements.txt
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.2
     # via importlib-metadata
-urllib3==1.26.4
+urllib3==1.26.6
     # via requests
 xmltodict==0.12.0
     # via motmetrics
-zipp==3.4.1
+zipp==3.5.0
     # via importlib-metadata
+inflect==5.3.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

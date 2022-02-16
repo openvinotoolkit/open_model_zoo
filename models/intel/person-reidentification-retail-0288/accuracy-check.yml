@@ -2,7 +2,7 @@ models:
   - name: person-reidentification-retail-0288
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: reid
 
     datasets:
@@ -19,5 +19,7 @@ models:
           - name: rank@1
             type: cmc
             top_k: 1
+            reference: 0.861
 
           - type: reid_map
+            reference: 0.597

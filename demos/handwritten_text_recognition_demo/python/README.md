@@ -1,7 +1,6 @@
 # Handwritten Text Recognition Demo
 
-This example demonstrates an approach to recognize handwritten Japanese and simplified Chinese text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
-
+This example demonstrates an approach to recognize handwritten Japanese, simplified Chinese, and English text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release). For English, it supports the characters in [GNHK](https://goodnotes.com/gnhk/).
 ## How It Works
 
 The demo workflow is the following:
@@ -11,24 +10,25 @@ The demo first reads an image and performs the preprocessing such as resize and 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/handwritten_text_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
 * handwritten-japanese-recognition-0001
 * handwritten-simplified-chinese-recognition-0001
+* handwritten-english-recognition-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -58,7 +58,7 @@ usage: handwritten_text_recognition_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to an image to infer
   -d DEVICE, --device DEVICE
@@ -76,9 +76,14 @@ Options:
   -tk TOP_K, --top_k TOP_K
                         Optional. Top k steps in looking up the decoded
                         character, until a designated one is found
+  -ob OUTPUT_BLOB, --output_blob OUTPUT_BLOB
+                        Optional. Name of the output layer of the model.
+                        Default is None, in which case the demo will read
+                        the output name from the model, assuming there is
+                        only 1 output layer
 ```
 
-The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt`file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
+The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt` file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file, and for English it is the `<omz_dir>/data/dataset_classes/gnhk.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
 
 ```sh
 python handwritten_text_recognition_demo.py \
@@ -104,10 +109,13 @@ python handwritten_text_recognition_demo.py \
 
 ## Demo Output
 
-The application uses the terminal to show resulting recognition text and inference performance.
+The application uses the terminal to show resulting recognition text.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

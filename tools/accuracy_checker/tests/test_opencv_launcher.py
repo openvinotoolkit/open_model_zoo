@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@ limitations under the License.
 """
 
 import pytest
-pytest.importorskip('accuracy_checker.launcher.opencv_launcher')
+pytest.importorskip('openvino.tools.accuracy_checker.launcher.opencv_launcher')
 
 import cv2
 import numpy as np
 
-from accuracy_checker.launcher.launcher import create_launcher
-from accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
+from openvino.tools.accuracy_checker.config import ConfigError
 
 
 def get_opencv_test_caffe_model(models_dir):

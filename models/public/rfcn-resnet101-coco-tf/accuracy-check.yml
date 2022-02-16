@@ -1,7 +1,7 @@
 models:
   - name:  rfcn-resnet101-coco-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
         inputs:
           - name: image_info
@@ -29,3 +29,4 @@ models:
         metrics:
           - type: coco_precision
             max_detections: 100
+            reference: 0.284

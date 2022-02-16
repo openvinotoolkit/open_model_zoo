@@ -2,7 +2,7 @@ models:
   - name: image-retrieval-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: reid
 
     datasets:
@@ -12,5 +12,7 @@ models:
           - name: rank@1
             type: cmc
             top_k: 1
+            reference: 0.834
 
           - type: reid_map
+            reference: 0.855644

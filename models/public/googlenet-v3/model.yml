@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ task_type: classification
 files:
   - name: googlenet-v3.tar.gz
     size: 88668554
-    sha256: 7045b72a954af4dce36346f478610acdccbf149168fa25c78e54e32f0c723d6d
-    source: https://storage.googleapis.com/download.tensorflow.org/models/inception_v3_2016_08_28_frozen.pb.tar.gz
+    checksum: 5438688088e7610248f3bf09c36bb9225ca85efd5df11ed16c8ba446ced39ee5602bb2e84b077f9fb4d044ff18181e34
+    original_source: https://storage.googleapis.com/download.tensorflow.org/models/inception_v3_2016_08_28_frozen.pb.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v3/inception_v3_2016_08_28_frozen.pb.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -30,10 +31,11 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,299,299,3]
   - --input=input
+  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionV3/Predictions/Softmax
   - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

@@ -2,7 +2,7 @@ models:
   - name: anti-spoof-mn3
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -16,3 +16,4 @@ models:
         metrics:
           - name: acer
             type: acer_score
+            reference: 0.0381

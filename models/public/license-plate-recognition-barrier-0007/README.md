@@ -36,7 +36,7 @@ thoroughly. Other types of license plates may underperform.
 
 ### Original Model
 
-Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 24, 94, 3`, format is `1, H, W, C`, where:
 
 - `C` - channel
 - `H` - height
@@ -46,7 +46,7 @@ Channel order is `BGR`.
 
 ### Converted Model
 
-Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 24, 94, 3`, format is `1, H, W, C`, where:
 
 - `C` - channel
 - `H` - height
@@ -134,7 +134,7 @@ is an integer number encoding a character according to this dictionary:
 
 ### Converted Model
 
-Encoded vector of floats, name: `d_predictions:0`, shape: `1, 88`. Each float
+Encoded vector of integers, name: `d_predictions:0`, shape: `1, 88`. Each value
 is an integer number encoding a character according to this dictionary:
 
         0 0
@@ -210,17 +210,23 @@ is an integer number encoding a character according to this dictionary:
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Security Barrier Camera C++ Demo](../../../demos/security_barrier_camera_demo/cpp/README.md)
 
 ## Legal Information
 The original model is distributed under the

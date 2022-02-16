@@ -2,7 +2,7 @@ models:
   - name: vehicle-license-plate-detection-barrier-0106
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -34,3 +34,7 @@ models:
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
             presenter: print_vector
+            reference:
+              mean: 0.9965
+              plate: 0.9942
+              vehicle: 0.9988

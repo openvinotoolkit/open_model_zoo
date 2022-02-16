@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from argparse import Namespace
 
 import pytest
 from .common import mock_filesystem
-from accuracy_checker.config import ConfigReader, ConfigError
+from openvino.tools.accuracy_checker.config import ConfigReader, ConfigError
 
 
 class TestConfigReader:
@@ -28,9 +28,8 @@ class TestConfigReader:
         self.global_launchers = [
             {
                 'framework': 'dlsdk',
-                'device': 'fpga',
+                'device': 'cpu',
                 'cpu_extensions': 'dlsdk_shared.so',
-                'bitstream': 'bitstream'
             },
             {
                 'framework': 'caffe',
@@ -77,28 +76,21 @@ class TestConfigReader:
             'datasets': self.global_datasets
         }
 
-        self.module = 'accuracy_checker.config.ConfigReader'
+        self.module = 'openvino.tools.accuracy_checker.config.ConfigReader'
         self.arguments = Namespace(**{
             'models': Path('models/'),
             'extensions': Path('extensions/'),
             'source': Path('source/'),
             'annotations': Path('annotations/'),
-            'converted_models': Path('converted_models/'),
-            'model_optimizer': Path('model_optimizer/'),
-            'bitstreams': Path('bitstreams/'),
             'definitions': None,
             'stored_predictions': None,
-            'tf_custom_op_config_dir': None,
-            'tf_obj_detection_api_pipeline_config_path': None,
             'progress': 'bar',
             'target_framework': None,
             'target_devices': None,
+            'target_backend': None,
             'log_file': None,
             'target_tags': None,
             'cpu_extensions_mode': None,
-            'aocl': None,
-            'deprecated_ir_v7': False,
-            'transformations_config_dir': None,
             'model_attributes': None
         })
 
@@ -110,14 +102,13 @@ class TestConfigReader:
         }]}
         empty_args = Namespace(**{
             'models': Path.cwd(), 'extensions': Path.cwd(), 'source': Path.cwd(), 'annotations': Path.cwd(),
-            'converted_models': None, 'model_optimizer': None, 'bitstreams': Path.cwd(),
-            'definitions': None, 'config': None, 'stored_predictions': None, 'tf_custom_op_config_dir': None,
-            'progress': 'bar', 'target_framework': None, 'target_devices': None, 'log_file': None,
-            'tf_obj_detection_api_pipeline_config_path': None, 'target_tags': None, 'cpu_extensions_mode': None,
-            'aocl': None, 'deprecated_ir_v7': False, 'transformations_config_dir': None, 'model_attributes': None
+            'definitions': None, 'config': None, 'stored_predictions': None,
+            'progress': 'bar', 'target_framework': None, 'target_devices': None, 'target_backend': None, 'log_file': None,
+            'target_tags': None, 'cpu_extensions_mode': None,
+            'model_attributes': None
         })
-        mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
-        mocker.patch('yaml.load', return_value=config)
+        mocker.patch('openvino.tools.accuracy_checker.utils.get_path', return_value=Path.cwd())
+        mocker.patch('yaml.safe_load', return_value=config)
         mocker.patch('pathlib.Path.open')
 
         result = ConfigReader.merge(empty_args)
@@ -212,9 +203,7 @@ class TestConfigReader:
             self.global_config, local_config
         ))
         arguments = copy.deepcopy(self.arguments)
-        arguments.model_optimizer = None
         arguments.extensions = None
-        arguments.bitstreams = None
 
         config = ConfigReader.merge(arguments)[0]
 
@@ -232,7 +221,6 @@ class TestConfigReader:
             self.global_config, local_config
         ))
         arguments = copy.deepcopy(self.arguments)
-        arguments.bitstreams = None
         arguments.extensions = None
 
         config = ConfigReader.merge(arguments)[0]
@@ -263,7 +251,6 @@ class TestConfigReader:
             expected['data_source'] = prefix / self.arguments.source / 'relative_source_path'
 
             arguments = copy.deepcopy(self.arguments)
-            arguments.bitstreams = None
             arguments.extensions = None
             arguments.annotations = prefix / self.arguments.annotations
             arguments.source = prefix / self.arguments.source
@@ -298,7 +285,6 @@ class TestConfigReader:
             expected['data_source'] = prefix / self.arguments.source / 'relative_source_path'
 
             arguments = copy.deepcopy(self.arguments)
-            arguments.bitstreams = None
             arguments.extensions = None
             arguments.source = prefix / arguments.source
             arguments.annotations = prefix / self.arguments.annotations
@@ -333,7 +319,6 @@ class TestConfigReader:
             expected['dataset_meta'] = prefix / 'relative_annotation_path'
 
             arguments = copy.deepcopy(self.arguments)
-            arguments.bitstreams = None
             arguments.extensions = None
             arguments.source = None
             arguments.annotations = None
@@ -373,14 +358,10 @@ class TestConfigReader:
         ))
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
         expected['model'] = 'model'
-        with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
-            expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
+        with mock_filesystem(['extensions/']) as prefix:
             expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
             args = copy.deepcopy(self.arguments)
-            args.model_optimizer = None
-            args.converted_models = None
             args.models = None
-            args.bitstreams = prefix / self.arguments.bitstreams
             args.extensions = prefix / self.arguments.extensions
 
             config = ConfigReader.merge(args)[0]
@@ -398,14 +379,10 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
-        with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
-            expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
+        with mock_filesystem(['extensions/']) as prefix:
             expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
             args = copy.deepcopy(self.arguments)
-            args.model_optimizer = None
-            args.converted_models = None
             args.models = None
-            args.bitstreams = prefix / self.arguments.bitstreams
             args.extensions = prefix / self.arguments.extensions
 
             config = ConfigReader.merge(args)[0]
@@ -421,30 +398,17 @@ class TestConfigReader:
                 'weights': 'relative_weights_path',
                 'cpu_extensions': 'relative_extensions_path',
                 'gpu_extensions': 'relative_extensions_path',
-                'caffe_model': 'relative_model_path',
-                'caffe_weights': 'relative_weights_path',
-                'tf_model': 'relative_model_path',
-                'mxnet_weights': 'relative_weights_path',
-                'bitstream': 'relative_bitstreams_path'
             }],
             'datasets': [{'name': 'dataset'}]
         }]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        with mock_filesystem(['bitstreams/', 'extensions/', 'models/']) as prefix:
+        with mock_filesystem(['extensions/', 'models/']) as prefix:
             expected = copy.deepcopy(local_config['models'][0]['launchers'][0])
             expected['model'] = prefix / self.arguments.models / 'relative_model_path'
-            expected['caffe_model'] = prefix / self.arguments.models / 'relative_model_path'
-            expected['tf_model'] = prefix / self.arguments.models / 'relative_model_path'
             expected['weights'] = prefix / self.arguments.models / 'relative_weights_path'
-            expected['caffe_weights'] = prefix / self.arguments.models / 'relative_weights_path'
-            expected['mxnet_weights'] = prefix / self.arguments.models / 'relative_weights_path'
             expected['cpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
             expected['gpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
-            expected['bitstream'] = prefix / self.arguments.bitstreams / 'relative_bitstreams_path'
             args = copy.deepcopy(self.arguments)
-            args.model_optimizer = None
-            args.converted_models = None
-            args.bitstreams = prefix / self.arguments.bitstreams
             args.extensions = prefix / self.arguments.extensions
             args.models = prefix / self.arguments.models
 
@@ -473,7 +437,6 @@ class TestConfigReader:
         arguments = copy.deepcopy(self.arguments)
         arguments.target_tags = ['some_tag']
         arguments.extensions = None
-        arguments.bitstreams = None
 
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
 
@@ -489,15 +452,11 @@ class TestConfigReader:
             'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
-            '_model_optimizer': self.arguments.model_optimizer,
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['some_tag']
 
         config = ConfigReader.merge(args)[0]
@@ -514,7 +473,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'dlsdk',
@@ -523,16 +481,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['some_tag']
 
         config = ConfigReader.merge(args)[0]
@@ -552,7 +506,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'dlsdk',
@@ -561,14 +514,11 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.target_tags = ['other_tag']
 
         with pytest.warns(Warning):
@@ -585,7 +535,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -593,17 +542,13 @@ class TestConfigReader:
                 'model': Path('/absolute_path2').absolute(),
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
-                'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
+                'device': 'GPU'
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['tag2']
 
         config = ConfigReader.merge(args)[0]
@@ -621,7 +566,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -630,16 +574,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['tag2', 'tag3']
 
         config = ConfigReader.merge(args)[0]
@@ -657,16 +597,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['tag2']
 
         config = ConfigReader.merge(args)[0]
@@ -684,7 +620,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'dlsdk',
@@ -693,16 +628,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_tags = ['tag1', 'tag2']
 
         config = ConfigReader.merge(args)[0]
@@ -720,15 +651,11 @@ class TestConfigReader:
             'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
-            '_model_optimizer': self.arguments.model_optimizer,
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_framework = 'dlsdk'
 
         config = ConfigReader.merge(args)[0]
@@ -744,7 +671,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'dlsdk',
@@ -752,16 +678,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_framework = 'dlsdk'
 
         config = ConfigReader.merge(args)[0]
@@ -778,15 +700,11 @@ class TestConfigReader:
             'model': Path('/absolute_path').absolute(),
             'weights': Path('/absolute_path').absolute(),
             'adapter': 'classification',
-            '_model_optimizer': self.arguments.model_optimizer,
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_framework = 'caffe'
 
         with pytest.warns(Warning):
@@ -801,7 +719,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'dlsdk',
@@ -809,16 +726,12 @@ class TestConfigReader:
                 'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_framework = 'caffe'
 
         with pytest.warns(Warning):
@@ -834,7 +747,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -847,10 +759,7 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_framework = 'caffe'
 
         config = ConfigReader.merge(args)[0]
@@ -866,15 +775,11 @@ class TestConfigReader:
             'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
-            '_model_optimizer': self.arguments.model_optimizer,
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -890,7 +795,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -903,9 +807,7 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -923,12 +825,10 @@ class TestConfigReader:
             'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
-            '_model_optimizer': self.arguments.model_optimizer,
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.target_devices = ['GPU']
 
         with pytest.warns(Warning):
@@ -943,8 +843,7 @@ class TestConfigReader:
                 'model': Path('/absolute_path1').absolute(),
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
-                'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
+                'device': 'CPU'
             },
             {
                 'framework': 'caffe',
@@ -957,10 +856,7 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['GPU']
 
         with pytest.warns(Warning):
@@ -976,7 +872,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -989,7 +884,6 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.target_devices = ['GPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1005,8 +899,7 @@ class TestConfigReader:
                 'model': Path('/absolute_path1').absolute(),
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
-                'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
+                'device': 'CPU'
             },
             {
                 'framework': 'dlsdk',
@@ -1014,7 +907,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'HETERO:CPU,GPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -1028,9 +920,7 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['GPU', 'CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1061,10 +951,8 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.target_devices = ['FPGA', 'MYRIAD']
         args.extensions = None
-        args.bitstreams = None
 
         with pytest.warns(Warning):
             config = ConfigReader.merge(args)[0]
@@ -1079,7 +967,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -1092,9 +979,7 @@ class TestConfigReader:
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['GPU', 'CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1113,7 +998,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -1128,7 +1012,6 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.converted_models = None
         args.extensions = None
-        args.bitstreams = None
         args.target_devices = ['CPU', 'GPU_unexpected_tail']
 
         config = ConfigReader.merge(args)[0]
@@ -1145,7 +1028,6 @@ class TestConfigReader:
                 'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
-                '_model_optimizer': self.arguments.model_optimizer,
             },
             {
                 'framework': 'caffe',
@@ -1169,7 +1051,6 @@ class TestConfigReader:
         ]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
-        args.converted_models = None
         args.target_framework = 'tf'
         with pytest.warns(Warning):
             config = ConfigReader.merge(args)[0]

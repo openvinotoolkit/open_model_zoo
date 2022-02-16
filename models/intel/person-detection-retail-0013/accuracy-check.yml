@@ -2,7 +2,7 @@ models:
   - name: person-detection-retail-0013
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -33,3 +33,4 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+            reference: 0.8862

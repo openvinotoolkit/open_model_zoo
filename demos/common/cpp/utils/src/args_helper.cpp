@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -45,15 +45,6 @@ void readInputFilesArguments(std::vector<std::string>& files, const std::string&
         closedir(dp);
     } else {
         files.push_back(arg);
-    }
-
-    if (files.size() < 20) {
-        slog::info << "Files were added: " << files.size() << slog::endl;
-        for (std::string filePath : files) {
-            slog::info << "    " << filePath << slog::endl;
-        }
-    } else {
-        slog::info << "Files were added: " << files.size() << ". Too many to display each of them." << slog::endl;
     }
 }
 
@@ -136,4 +127,31 @@ cv::Size stringToSize(const std::string& str) {
         throw std::invalid_argument("Can't convert std::string to cv::Size. The string must contain exactly one x");
     }
     return {std::stoi(strings[0]), std::stoi(strings[1])};
+}
+
+std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string) {
+    // Parse parameter string like "input0[NCHW],input1[NC]" or "[NCHW]" (applied to all
+    // inputs)
+    std::map<std::string, ov::Layout> layouts;
+    std::string searchStr = layout_string;
+    auto startPos = searchStr.find_first_of('[');
+    while (startPos != std::string::npos) {
+        auto end_pos = searchStr.find_first_of(']');
+        if (end_pos == std::string::npos) {
+            break;
+        }
+        auto inputName = searchStr.substr(0, startPos);
+        auto inputVal = searchStr.substr(startPos + 1, end_pos - startPos - 1);
+        layouts[inputName] = ov::Layout(inputVal);
+        searchStr = searchStr.substr(end_pos + 1);
+        if (searchStr.empty() || searchStr.front() != ',') {
+            break;
+        }
+        searchStr = searchStr.substr(1);
+        startPos = searchStr.find_first_of('[');
+    }
+    if (!searchStr.empty()) {
+        throw std::logic_error("Can't parse input layout string: " + layout_string);
+    }
+    return layouts;
 }

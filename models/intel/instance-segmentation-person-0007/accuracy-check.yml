@@ -1,0 +1,27 @@
+models:
+  - name: instance-segmentation-person-0007
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: mask_rcnn
+          classes_out: labels
+          boxes_out: boxes
+          raw_masks_out: masks
+
+    datasets:
+      - name: COCO2017_mask_rcnn_person
+
+        preprocessing:
+          - type: resize
+            dst_width: 544
+            dst_height: 320
+
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+            reference: 0.309
+
+          - name: AP@boxes
+            type: coco_orig_precision
+            reference: 0.357

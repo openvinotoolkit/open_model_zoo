@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,116 +14,124 @@
 // limitations under the License.
 */
 
+#include <fstream>
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+#include <utils/ocv_common.hpp>
 #include "models/segmentation_model.h"
-#include "utils/ocv_common.hpp"
+#include "models/results.h"
 
-using namespace InferenceEngine;
+SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout) :
+    ImageModel(modelFileName, useAutoResize, layout) {}
 
-SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageModel(modelFileName, useAutoResize) {}
+std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename) {
+    std::vector<std::string> labelsList;
 
-void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork)
-{
-    // --------------------------- Configure input & output ---------------------------------------------
-    // --------------------------- Prepare input blobs -----------------------------------------------------
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-
-    inputsNames.push_back(inputShapes.begin()->first);
-
-    SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
-
-    if (useAutoResize) {
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(Layout::NHWC);
-    } else {
-        inputInfo.setLayout(Layout::NCHW);
+    /* Read labels (if any) */
+    if (!labelFilename.empty()) {
+        std::ifstream inputFile(labelFilename);
+        if (!inputFile.is_open())
+            throw std::runtime_error("Can't open the labels file: " + labelFilename);
+        std::string label;
+        while (std::getline(inputFile, label)) {
+            labelsList.push_back(label);
+        }
+        if (labelsList.empty())
+            throw std::logic_error("File is empty: " + labelFilename);
     }
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
-    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
-    outputsNames.push_back(outputsDataMap.begin()->first);
-    Data& data = *outputsDataMap.begin()->second;
-
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    switch (outSizeVector.size()) {
-    case 3:
-        outChannels = 1;
-        outHeight = (int)(outSizeVector[1]);
-        outWidth = (int)(outSizeVector[2]);
-        break;
-    case 4:
-        outChannels = (int)(outSizeVector[1]);
-        outHeight = (int)(outSizeVector[2]);
-        outWidth = (int)(outSizeVector[3]);
-        break;
-    default:
-        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are supported.");
-    }
+    return labelsList;
 }
 
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request)
-{
-    auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
-
-    std::shared_ptr<InternalModelData> resPtr = nullptr;
-
-    if (useAutoResize)
-    {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-        /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-        resPtr = std::make_shared<InternalImageMatModelData>(img);
+void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
+    // --------------------------- Configure input & output ---------------------------------------------
+    // --------------------------- Prepare input  -----------------------------------------------------
+    if (model->inputs().size() != 1) {
+        throw std::logic_error("Segmentation model wrapper supports topologies with only 1 input");
     }
-    else
-    {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-        resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    const auto& input = model->input();
+    inputsNames.push_back(input.get_any_name());
+
+    const ov::Layout& inputLayout = getInputLayout(input);
+    const ov::Shape& inputShape = input.get_shape();
+    if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
-    return resPtr;
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout({ "NHWC" });
+
+    if (useAutoResize) {
+        ppp.input().tensor().
+            set_spatial_dynamic_shape();
+
+        ppp.input().preprocess().
+            convert_element_type(ov::element::f32).
+            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
+
+    ppp.input().model().set_layout(inputLayout);
+    model = ppp.build();
+    // --------------------------- Prepare output  -----------------------------------------------------
+    if (model->outputs().size() != 1) {
+        throw std::logic_error("Segmentation model wrapper supports topologies with only 1 output");
+    }
+
+    const auto& output = model->output();
+    outputsNames.push_back(output.get_any_name());
+
+    const ov::Shape& outputShape = output.get_shape();
+    ov::Layout outputLayout("");
+    switch (outputShape.size()) {
+    case 3:
+        outputLayout = "CHW";
+        outChannels = 1;
+        outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
+        outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
+        break;
+    case 4:
+        outputLayout = "NCHW";
+        outChannels = (int)(outputShape[ov::layout::channels_idx(outputLayout)]);
+        outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
+        outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
+        break;
+    default:
+        throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D outputs are supported.");
+    }
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
     ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
-
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
-
-    MemoryBlob::Ptr blobPtr = infResult.getFirstOutputBlob();
-
-    void* pData = blobPtr->rmap().as<void*>();
+    const auto& outTensor = infResult.getFirstOutputTensor();
 
     result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
 
-    if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == Precision::I32)
-    {
-        cv::Mat predictions(outHeight, outWidth, CV_32SC1, pData);
+    if (outChannels == 1 && outTensor.get_element_type() == ov::element::i32) {
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1, outTensor.data<int32_t>());
         predictions.convertTo(result->resultImage, CV_8UC1);
     }
-    else if (blobPtr->getTensorDesc().getPrecision() == Precision::FP32)
-    {
-        float* ptr = reinterpret_cast<float*>(pData);
-        for (int rowId = 0; rowId < outHeight; ++rowId)
-        {
-            for (int colId = 0; colId < outWidth; ++colId)
-            {
+    else if (outChannels == 1 && outTensor.get_element_type() == ov::element::i64) {
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1);
+        const auto data = outTensor.data<int64_t>();
+        for (size_t i = 0; i < predictions.total(); ++i) {
+            reinterpret_cast<int32_t*>(predictions.data)[i] = data[i];
+        }
+        predictions.convertTo(result->resultImage, CV_8UC1);
+    }
+    else if (outTensor.get_element_type() == ov::element::f32) {
+        const float* data = outTensor.data<float>();
+        for (int rowId = 0; rowId < outHeight; ++rowId) {
+            for (int colId = 0; colId < outWidth; ++colId) {
                 int classId = 0;
                 float maxProb = -1.0f;
-                for (int chId = 0; chId < outChannels; ++chId)
-                {
-                    float prob = ptr[chId * outHeight * outWidth + rowId * outWidth + colId];
-                    if (prob > maxProb)
-                    {
+                for (int chId = 0; chId < outChannels; ++chId) {
+                    float prob = data[chId * outHeight * outWidth + rowId * outWidth + colId];
+                    if (prob > maxProb) {
                         classId = chId;
                         maxProb = prob;
                     }

@@ -2,7 +2,7 @@ models:
   - name: horizontal-text-detection-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: class_agnostic_detection
           scale: 0.0014204
@@ -29,3 +29,4 @@ models:
             ignore_difficult: True
             area_recall_constrain: 0.5
             area_precision_constrain: 0.5
+            reference: 0.8845

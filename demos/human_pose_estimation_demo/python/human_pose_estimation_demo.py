@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,19 +23,25 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-import models
+
+from openvino.model_zoo.model_api.models import ImageModel, OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter
+
 import monitors
 from images_capture import open_images_capture
-from pipelines import get_user_config, AsyncPipeline
-from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
+ARCHITECTURES = {
+    'ae': 'HPE-assosiative-embedding',
+    'higherhrnet': 'HPE-assosiative-embedding',
+    'openpose': 'openpose'
+}
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -72,6 +78,10 @@ def build_argparser():
                                         'that for OpenPose-like nets image is resized to a predefined height, which is '
                                         'the target size in this case. For Associative Embedding-like nets target size '
                                         'is the length of a short first image side.')
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -97,21 +107,6 @@ def build_argparser():
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
     return parser
-
-
-def get_model(ie, args, aspect_ratio):
-    if args.architecture_type == 'ae':
-        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                               prob_threshold=args.prob_threshold)
-    elif args.architecture_type == 'higherhrnet':
-        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                               prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
-    elif args.architecture_type == 'openpose':
-        model = models.OpenPose(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
-                                prob_threshold=args.prob_threshold)
-    else:
-        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-    return model
 
 
 default_skeleton = ((15, 13), (13, 11), (16, 14), (14, 12), (11, 12), (5, 11), (6, 12), (5, 6),
@@ -157,51 +152,57 @@ def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=def
     return img
 
 
-def print_raw_results(poses, scores):
-    log.info('Poses:')
+def print_raw_results(poses, scores, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     for pose, pose_score in zip(poses, scores):
         pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
-        log.info('{} | {:.2f}'.format(pose_str, pose_score))
+        log.debug('{} | {:.2f}'.format(pose_str, pose_score))
 
 
 def main():
     args = build_argparser().parse_args()
-    metrics = PerformanceMetrics()
-
-    log.info('Initializing Inference Engine...')
-    ie = IECore()
-
-    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+    model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                    max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
-    model = get_model(ie, args, frame.shape[1] / frame.shape[0])
-    hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
+    config = {
+        'target_size': args.tsize,
+        'aspect_ratio': frame.shape[1] / frame.shape[0],
+        'confidence_threshold': args.prob_threshold,
+        'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
+        'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
+    }
+    model = ImageModel.create_model(ARCHITECTURES[args.architecture_type], model_adapter, config)
+    model.log_layers_info()
 
-    log.info('Starting inference...')
+    hpe_pipeline = AsyncPipeline(model)
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
 
-    output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+    output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
     if args.output_resolution:
         output_resolution = output_transform.new_resolution
     else:
         output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
             output_resolution):
         raise RuntimeError("Can't open video writer")
 
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while True:
         if hpe_pipeline.callback_exceptions:
             raise hpe_pipeline.callback_exceptions[0]
@@ -213,10 +214,12 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
+                print_raw_results(poses, scores, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
+            rendering_start_time = perf_counter()
             frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -258,10 +261,12 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(poses) and args.raw_output_message:
-            print_raw_results(poses, scores)
+            print_raw_results(poses, scores, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
+        rendering_start_time = perf_counter()
         frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
@@ -275,8 +280,14 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          hpe_pipeline.preprocess_metrics.get_latency(),
+                          hpe_pipeline.inference_metrics.get_latency(),
+                          hpe_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

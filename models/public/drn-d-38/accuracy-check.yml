@@ -1,0 +1,15 @@
+models:
+  - name: drn-d-38
+    launchers:
+      - framework: openvino
+        adapter:
+          type: segmentation
+          make_argmax: true
+    datasets:
+      - name: cityscapes
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter: print_vector
+            ignore_label: 19
+            reference: 0.7131

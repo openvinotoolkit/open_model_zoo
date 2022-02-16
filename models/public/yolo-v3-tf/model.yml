@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,19 +21,20 @@ task_type: detection
 files:
   - name: yolo-v3.pb
     size: 248128731
-    sha256: 8ed66d597a936924e98102a5fa16b38569452e17dbb52ddf2877e0f550f57952
+    checksum: 169977adef481096e57b73d0602ec9f0a85bd692ad90bd46afcf97d1d808ccfa3d1beb719d91cfd22e6e463e0b27a2bd
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolov3.pb
   - name: yolo-v3.json
     size: 384
-    sha256: 90f3ea735a2a8908b66dab744b9ec0425fd2564f7b9be6ebd1564dd38d28ec5c
+    checksum: 9367c59fbd1208675cfa40fc6ebe1c73c1d316e14d59fc7226d2773ed6d0e9d83b276a294db705ace92f60c7a83e1ad6
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
+  - --layout=input_1(NHWC)
   - --input=input_1
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3.json
   - --input_model=$dl_dir/yolo-v3.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

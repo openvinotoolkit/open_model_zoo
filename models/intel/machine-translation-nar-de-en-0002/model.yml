@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,37 @@ description: >-
   (de-en).
 task_type: machine_translation
 files:
+  - name: tokenizer_tgt/merges.txt
+    size: 318547
+    checksum: 4fe6440c3ddc0d922482ebd652c2e911527a8676eb782434884794139244c641982da5c17adf6a51a752800a2119df82
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
+  - name: tokenizer_tgt/vocab.json
+    size: 535816
+    checksum: f9a9d54f5f388cb1386d501cfde8df57f1f1826bc9e2be513e4fcbbc6610861077b5607b8a3177e3e482b8181b52438d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
+  - name: tokenizer_src/merges.txt
+    size: 338910
+    checksum: 68d27cf15ceaacce5430c0dc2bd231f0ef2290d0cf74b77ab343dda0f46f1e9aefa783bc0c5d0a03b837a9614c99ed18
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/tokenizer_src/merges.txt
+  - name: tokenizer_src/vocab.json
+    size: 556158
+    checksum: e5189d2064ee859013a826e8ebcf5b17a7b952aca57d69ba78211eff2e5f276e13033cc6c27773aa7377bfac0827090a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/tokenizer_src/vocab.json
   - name: FP32/machine-translation-nar-de-en-0002.xml
-    size: 912660
-    sha256: 05d22652a80cdd2c7a0af70af1a1f34baab9fc23aa38048157a92a0edc484eb2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
+    size: 1011539
+    checksum: 9c472b8b5db7bd97e9f50bd17f9bd8d31044605e2acf3ea90530ed69975c52e5ce516d3095f32d79d3c3f6c46ed89826
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
   - name: FP32/machine-translation-nar-de-en-0002.bin
-    size: 284547188
-    sha256: 04e5d748cfac36de86fd04b2b2fd290957d61b5162c03e88207e61bf75d42daf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
+    size: 284547116
+    checksum: 4eadb1e36d2f16889af1dd6b728fe055f0481855b23721ef45c691a9353a84eeb7981ca0d9b346b08ed4e873c201c4c9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
   - name: FP16/machine-translation-nar-de-en-0002.xml
-    size: 912717
-    sha256: 5d2eea704ac724dd5e654101a25368a826dc890ea35c93802bdc4d7e202c452f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
+    size: 1150664
+    checksum: 7e67ed73fd1a1a902cc3502fd19d792a02bdf7527b2ff05bd8debe5a9de5da31d3455c9cee2a2f0aa7ea71df8f916707
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
   - name: FP16/machine-translation-nar-de-en-0002.bin
-    size: 142274522
-    sha256: c37f6074d11e4d84a94f01a0e9a82896cef790922c1fb46521ce59baafb95073
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
+    size: 142274462
+    checksum: 00ba58fdf98312fd5ad100debfeb2f0834e920bc4d17bced6b83161c6b41b8a485b8089aba899afbd7d94cb3493612a4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

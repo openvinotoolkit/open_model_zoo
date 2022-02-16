@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,31 @@
 // limitations under the License.
 */
 
+#include <vector>
+#include <openvino/openvino.hpp>
 #include "pipelines/requests_pool.h"
 
-RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size) :
+RequestsPool::RequestsPool(ov::CompiledModel& compiledModel, unsigned int size) :
     numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
-        requests.emplace(std::make_shared<InferenceEngine::InferRequest>(execNetwork.CreateInferRequest()), false);
+        requests.emplace_back(compiledModel.create_infer_request(), false);
     }
 }
 
-InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest() {
+RequestsPool::~RequestsPool() {
+    // Setting empty callback to free resources allocated for previously assigned lambdas
+    for (auto& pair : requests) {
+        pair.first.set_callback([](std::exception_ptr) {});
+    }
+}
+
+ov::InferRequest RequestsPool::getIdleRequest() {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = std::find_if(requests.begin(), requests.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr, bool>& x) {return !x.second; });
+    const auto& it = std::find_if(requests.begin(), requests.end(),
+        [](const std::pair<ov::InferRequest, bool>& x) {return !x.second; });
     if (it == requests.end()) {
-        return InferenceEngine::InferRequest::Ptr();
+        return ov::InferRequest();
     }
     else {
         it->second = true;
@@ -37,9 +47,11 @@ InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest() {
     }
 }
 
-void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr& request) {
+void RequestsPool::setRequestIdle(const ov::InferRequest& request) {
     std::lock_guard<std::mutex> lock(mtx);
-    this->requests.at(request) = false;
+    const auto& it = std::find_if(this->requests.begin(), this->requests.end(),
+        [&request](const std::pair<ov::InferRequest, bool>& x) {return x.first == request; });
+    it->second = false;
     numRequestsInUse--;
 }
 
@@ -57,19 +69,20 @@ void RequestsPool::waitForTotalCompletion() {
     // Do not synchronize here to avoid deadlock (despite synchronization in other functions)
     // Request status will be changed to idle in callback,
     // upon completion of request we're waiting for. Synchronization is applied there
-    for (auto& pair : requests) {
+    for (auto pair : requests) {
         if (pair.second) {
-            pair.first->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+            pair.first.wait();
         }
     }
 }
 
-std::vector<InferenceEngine::InferRequest::Ptr> RequestsPool::getInferRequestsList() {
+std::vector<ov::InferRequest> RequestsPool::getInferRequestsList() {
     std::lock_guard<std::mutex> lock(mtx);
-    std::vector<InferenceEngine::InferRequest::Ptr> retVal;
+    std::vector<ov::InferRequest> retVal;
     retVal.reserve(requests.size());
     for (auto& pair : requests) {
         retVal.push_back(pair.first);
     }
+
     return retVal;
 }

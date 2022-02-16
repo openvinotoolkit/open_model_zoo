@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import numpy as np
 
 import cv2
@@ -21,39 +22,46 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
+from openvino.runtime import Core, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
-        ie = IECore()
-        if cpu_extension and device == 'CPU':
-            ie.add_extension(cpu_extension, 'CPU')
+    def __init__(self, model_path, device):
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        core = Core()
 
-        self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
-        self.input_name = next(iter(self.net.input_info))
-        self.output_name = next(iter(self.net.outputs))
-        self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.exec_net = ie.load_network(network=self.net, device_name=device)
+        log.info('Reading model {}'.format(model_path))
+        self.model = core.read_model(model_path)
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+        self.input_size = self.model.input(self.input_tensor_name).shape
+        self.nchw_layout = self.input_size[1] == 3
+        compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
+        self.infer_request = compiled_model.create_infer_request()
+        log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
-        image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={self.input_name: image})[self.output_name]
-        return out
+        if self.nchw_layout:
+            image = np.transpose(image, (0, 3, 1, 2))
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class PlaceRecognition:
     """ Class representing Place Recognition algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
+    def __init__(self, model_path, device, gallery_path, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
-        self.model = IEModel(model_path, device, cpu_extension)
-        self.input_size = self.model.input_size[2:]
+        self.model = IEModel(model_path, device)
+        if self.model.nchw_layout:
+            self.input_size = self.model.input_size[2], self.model.input_size[3]
+        else:
+            self.input_size = self.model.input_size[1], self.model.input_size[2]
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):
@@ -78,7 +86,7 @@ class PlaceRecognition:
         for full_path in tqdm(self.impaths, desc='Reading gallery images.'):
             image = cv2.imread(str(full_path))
             if image is None:
-                print("ERROR: cannot process image, full_path =", str(full_path))
+                log.error("Cannot process image, full_path =", str(full_path))
                 continue
             image = crop_resize(image, self.input_size)
             images.append(image)

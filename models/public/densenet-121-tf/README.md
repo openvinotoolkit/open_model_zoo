@@ -37,12 +37,12 @@ Mean values - [123.68, 116.78, 103.94], scale values - [58.395,57.12,57.375].
 
 ### Converted Model
 
-Image, name: `input_1`, shape: `1, 3, 224, 224`, format: `B, C, H, W`, where:
+Image, name: `input_1`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
@@ -61,17 +61,24 @@ The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Classification Benchmark C++ Demo](../../../demos/classification_benchmark_demo/cpp/README.md)
+* [Classification Python\* Demo](../../../demos/classification_demo/python/README.md)
 
 ## Legal Information
 

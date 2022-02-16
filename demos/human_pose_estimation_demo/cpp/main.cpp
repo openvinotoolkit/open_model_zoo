@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,42 +15,39 @@
 */
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
+
+#include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 
 #include <monitors/presenter.h>
-
-#include <utils/args_helper.hpp>
-#include <utils/images_capture.h>
-#include <utils/performance_metrics.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include <utils/default_flags.hpp>
-#include <unordered_map>
-#include <gflags/gflags.h>
-
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
-
 #include <models/hpe_model_associative_embedding.h>
 #include <models/hpe_model_openpose.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
+static const char at_message[] = "Required. Type of the model, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
 "or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
 static const char thresh_output_message[] = "Optional. Probability threshold for poses filtering.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
@@ -65,11 +62,9 @@ static const char output_resolution_message[] = "Optional. Specify the maximum o
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_uint32(tsize, 0, target_size_message);
 DEFINE_string(d, "CPU", target_device_message);
-DEFINE_bool(pc, false, performance_counter_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_double(t, 0.1, thresh_output_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -90,14 +85,11 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i                        " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "    -tsize                    " << target_size_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -116,7 +108,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -212,9 +203,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -222,7 +211,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
@@ -230,7 +218,7 @@ int main(int argc, char *argv[]) {
             throw std::logic_error("Can't read an image from the input");
         }
 
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         OutputTransform outputTransform = OutputTransform();
         cv::Size outputResolution = curr_frame.size();
@@ -243,34 +231,31 @@ int main(int argc, char *argv[]) {
             outputTransform = OutputTransform(curr_frame.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
         }
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), outputResolution)) {
-            throw std::runtime_error("Can't open video writer");
-        }
 
         //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
 
         double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
+            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout));
         }
         else if (FLAGS_at == "ae") {
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout));
         }
         else if (FLAGS_at == "higherhrnet") {
             float delta = 0.5f;
-            std::string pad_mode = "center";
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, pad_mode));
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, FLAGS_layout, delta, RESIZE_KEEP_ASPECT_LETTERBOX));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
 
-        InferenceEngine::Core core;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
+
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -301,14 +286,14 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
             while (keepRunning && (result = pipeline.getResult())) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Human Pose Estimation Results", outFrame);
@@ -324,18 +309,18 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
+            auto renderingStart = std::chrono::steady_clock::now();
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
+            renderMetrics.update(renderingStart);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
+            videoWriter.write(outFrame);
             if (!FLAGS_no_show) {
                 cv::imshow("Human Pose Estimation Results", outFrame);
                 //--- Updating output window
@@ -343,9 +328,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
-        metrics.printTotal();
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
@@ -358,6 +345,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

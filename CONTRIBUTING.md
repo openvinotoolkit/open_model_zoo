@@ -4,16 +4,16 @@ We appreciate your intention to contribute model to the OpenVINO&trade; Open Mod
 
 Frameworks supported by the Open Model Zoo:
 * Caffe\*
-* Caffe2\* (via conversion to ONNX\*)
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
+* PaddlePaddle\*
 * MXNet\*
 
 Open Model Zoo also supports models already in the ONNX format.
 
 ## Pull Request Requirements
 
-To contribute to OMZ, create a pull request (PR) in this repository using the `develop` branch.
+To contribute to OMZ, create a pull request (PR) in this repository using the `master` branch.
 Pull requests are strictly formalized and are reviewed by the OMZ maintainers for consistence and legal compliance.
 
 Each PR contributing a model must contain:
@@ -46,13 +46,13 @@ File | Destination
 configuration file | `models/public/<model_name>/model.yml`
 documentation file | `models/public/<model_name>/README.md`
 validation configuration file|`models/public/<model_name>/accuracy-check.yml`
-demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
+demo|`demos/<demo_name>/<language>/`
 
 ### Tests
 
 Your PR must pass next tests:
-* Model is downloadable by the `tools/downloader/downloader.py` script. See [Configuration file](#configuration-file) for details.
-* Model is convertible by the `tools/downloader/converter.py` script. See [Model conversion](#model-conversion) for details.
+* Model is downloadable by the `tools/model_tools/downloader.py` script. See [Configuration file](#configuration-file) for details.
+* Model is convertible by the `tools/model_tools/converter.py` script. See [Model conversion](#model-conversion) for details.
 * Model is usable by demo or sample and provides adequate results. See [Demo](#demo) for details.
 * Model passes accuracy validation. See [Accuracy validation](#accuracy-validation) for details.
 
@@ -76,7 +76,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`open_model_zoo.model_tools._common`](tools/downloader/src/open_model_zoo/model_tools/_common.py) module.
+[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
 
 **`files`**
 
@@ -86,10 +86,10 @@ Downloadable files. Each file is described by:
 
 * `name` - sets a file name after downloading
 * `size` - sets a file size
-* `sha256`  - sets a file hash sum
+* `checksum`  - sets a file hash sum
 * `source` - sets a direct link to a file *OR* describes a file access parameters
 
-> **TIP**: You can obtain a hash sum using the `sha256sum <file_name>` command on Linux\*.
+> **TIP**: You can obtain a hash sum using the `sha384sum <file_name>` command on Linux\*.
 
 If file is located on Google Drive\*, the `source` section must contain:
 - `$type: google_drive`
@@ -113,7 +113,7 @@ For replacement operation:
 - `replacement` — Replacement string
 - `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
-**`conversion_to_onnx_args`** (*only for Caffe2\*, PyTorch\* models*)
+**`conversion_to_onnx_args`** (*only for PyTorch\* models*)
 
 List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
@@ -135,7 +135,7 @@ Conversion parameters (learn more in the [Model conversion](#model-conversion) s
 
 **`framework`**
 
-Framework of the original model (see [here](tools/downloader/README.md#model-information-dumper-usage) for details).
+Framework of the original model (see [here](tools/model_tools/README.md#model-information-dumper-usage) for details).
 
 **`license`**
 
@@ -155,7 +155,7 @@ task_type: classification
 files:
   - name: tf-densenet121.tar.gz
     size: 30597420
-    sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+    checksum: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
     source:
       $type: google_drive
       id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
@@ -177,7 +177,7 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model Conversion
 
-Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
+Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
 
 > **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
@@ -185,22 +185,19 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
+A demo shows the main idea of how to infer a model using OpenVINO™. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 
-Demos are required to support the following keys:
+Demos are required to support the following args:
 
- -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
- -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
- -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
- -  `-no_show`: Optional. Do not visualize inference results.
+* `-h, --help`        show this help message and exit
+* `-m <MODEL FILE>`   path to an .xml file with a trained model. If the demo uses several models an extended syntax can be used, like `--mdet`
+* `-i <INPUT>`        input to process. For vision tasks the input might be a path to single image or video file, a path to folder of images, or numeric camera id. For vision tasks the default value must be `0`. For speech/audio tasks input is path to WAV file. For NLP tasks input might be a path to text file or just quoted sentence of text.
+* `-d <DEVICE>`       specify a device to infer on (the list of available devices is shown below). Default is CPU
+* `-o <FILE PATTERN>` pattern for output file(s) to save
 
-> **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.
-
-You can also add any other necessary parameters.
-
-Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
+Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) by adding your demo to the list.
 
 ## Accuracy Validation
 
@@ -217,7 +214,7 @@ This example uses validation configuration file for [DenseNet-121](models/public
 models:
   - name: densenet-121-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

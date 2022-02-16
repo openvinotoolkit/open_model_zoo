@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import cv2
 import numpy as np
 import pytest
 
-from accuracy_checker.config import ConfigError
-from accuracy_checker.preprocessor import (
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.preprocessor import (
     Crop,
     Normalize,
     Preprocessor,
@@ -32,15 +32,15 @@ from accuracy_checker.preprocessor import (
     PointAligner,
     GeometricOperationMetadata
 )
-from accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
-from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
-from accuracy_checker.preprocessor.resize import _OpenCVResizer
-from accuracy_checker.data_readers import DataRepresentation
+from openvino.tools.accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
+from openvino.tools.accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
+from openvino.tools.accuracy_checker.preprocessor.resize import _OpenCVResizer
+from openvino.tools.accuracy_checker.data_readers import DataRepresentation
 
 
 class TestResize:
     def test_default_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('resize', {'type': 'resize', 'size': 200})
 
         input_mock = mocker.Mock()
@@ -53,7 +53,7 @@ class TestResize:
         )
 
     def test_custom_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
 
         resize = Preprocessor.provide(
             'resize', {'type': 'resize', 'dst_width': 126, 'dst_height': 128, 'interpolation': 'CUBIC'}
@@ -184,10 +184,50 @@ class TestResize:
         with pytest.raises(ValueError):
             Preprocessor.provide('resize', {'type': 'resize', 'dst_width': 100})
 
+    def test_shape_estimation_for_resize_default(self):
+        config = {'type': 'resize', 'dst_width': 150, 'dst_height': 150}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        resize = Preprocessor.provide('resize', config)
+        assert resize.shape_modificator
+        assert not resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(150, 150, 3), (150, 150), (150, 150, 3), (150, 150, 3), (3, )]
+
+    def test_shape_estimation_for_resize_aspect_ratio_fit_to_window(self):
+        config = {'type': 'resize', 'dst_width': 150, 'dst_height': 150, 'aspect_ratio_scale': 'fit_to_window'}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3),  (3, )]
+        resize = Preprocessor.provide('resize', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(150, 75, 3), (150, 150), (75, 150, 3), (-1, -1, 3), (3, )]
+
+    def test_shape_estimation_for_resize_aspect_ratio_greater(self):
+        config = {'type': 'resize', 'dst_width': 150, 'dst_height': 150, 'aspect_ratio_scale': 'greater'}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        resize = Preprocessor.provide('resize', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(300, 150, 3), (150, 150), (150, 300, 3), (-1, -1, 3), (3, )]
+
+    def test_shape_estimation_for_resize_aspect_ratio_width(self):
+        config = {'type': 'resize', 'dst_width': 150, 'dst_height': 150, 'aspect_ratio_scale': 'width'}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        resize = Preprocessor.provide('resize', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(150, 75, 3), (150, 150), (150, 300, 3), (-1, -1, 3), (3, )]
+
+    def test_shape_estimation_for_resize_aspect_ratio_height(self):
+        config = {'type': 'resize', 'dst_width': 150, 'dst_height': 150, 'aspect_ratio_scale': 'height'}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        resize = Preprocessor.provide('resize', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(300, 150, 3), (150, 150), (75, 150, 3), (-1, -1, 3), (3, )]
+
 
 class TestAutoResize:
     def test_default_auto_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
+        cv2_resize_mock = mocker.patch('openvino.tools.accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
         resize.set_input_shape({'data': (1, 3, 200, 200)})
 
@@ -223,6 +263,21 @@ class TestAutoResize:
     def test_auto_resize_empty_input_shapes_raise_config_error(self):
         with pytest.raises(ConfigError):
             Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({})
+
+    def test_aut_resize_query_shape_no_input_shapes(self):
+        autoresize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
+        assert not autoresize.shape_modificator
+        assert not autoresize.dynamic_result_shape
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert autoresize.query_shapes(input_shapes) == input_shapes
+
+    def test_aut_resize_query_shape_with_input_shapes(self):
+        autoresize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
+        autoresize.set_input_shape({'image': [1, 3, 224, 224]})
+        assert autoresize.shape_modificator
+        assert not autoresize.dynamic_result_shape
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert autoresize.query_shapes(input_shapes) == [(224, 224, 3), (224, 224), (224, 224, 3), (224, 224, 3), (3, )]
 
 
 class TestNormalization:
@@ -387,6 +442,13 @@ class TestNormalization:
         with pytest.raises(ValueError):
             Preprocessor.provide('normalization', {'type': 'normalization', 'std': 'unknown'})
 
+    def test_normalization_do_not_modify_shape(self):
+        normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '2', 'std': '5'})
+        assert not normalization.shape_modificator
+        assert not normalization.dynamic_result_shape
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert normalization.query_shapes(input_shapes) == [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+
 
 class TestPreprocessingEvaluator:
     def test_preprocessing_evaluator(self):
@@ -506,6 +568,30 @@ class TestCrop:
         with pytest.raises(ConfigError):
             Crop({'type': 'crop', 'central_fraction': 2})
 
+    def test_crop_shape_estimation_default(self):
+        config = {'type': 'crop', 'dst_width': 150, 'dst_height': 150}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        crop = Preprocessor.provide('crop', config)
+        assert crop.shape_modificator
+        assert not crop.dynamic_result_shape
+        assert crop.query_shapes(input_shapes) == [(150, 150, 3), (150, 150), (150, 150, 3), (150, 150, 3), (3, )]
+
+    def test_crop_shape_estimation_for_max_square(self):
+        config = {'type': 'crop', 'max_square': True}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3),  (3, )]
+        resize = Preprocessor.provide('crop', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(50, 50, 3), (200, 200), (50, 50, 3), (-1, -1, 3), (3, )]
+
+    def test_crop_shape_estimation_for_central_fraction(self):
+        config = {'type': 'crop', 'central_fraction': 0.8}
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3, )]
+        resize = Preprocessor.provide('crop', config)
+        assert resize.shape_modificator
+        assert resize.dynamic_result_shape
+        assert resize.query_shapes(input_shapes) == [(80, 40, 3), (160, 160), (40, 80, 3), (-1, -1, 3), (3, )]
+
 
 class TestFlip:
     # TODO: check image metadata after flip?
@@ -529,6 +615,12 @@ class TestFlip:
         with pytest.raises(ConfigError):
             Flip({'type': 'flip', 'mode': 'unknown'})
 
+    def test_flip_do_not_modify_shape(self):
+        flip = Preprocessor.provide('flip', {'type': 'flip', 'mode': 'vertical'})
+        assert not flip.shape_modificator
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert flip.query_shapes(input_shapes) == [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+
 
 class TestBGRtoRGB:
     def test_bgr_to_rgb(self):
@@ -536,6 +628,12 @@ class TestBGRtoRGB:
         expected_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         bgr_to_rgb = BgrToRgb({'type': 'bgr_to_rgb'})
         assert np.array_equal(expected_image, bgr_to_rgb.process(DataRepresentation(image)).data)
+
+    def test_bgr_to_rgb_do_not_modify_shape(self):
+        bgr2rgb= Preprocessor.provide('bgr_to_rgb', {'type': 'bgr_to_rgb'})
+        assert not bgr2rgb.shape_modificator
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert bgr2rgb.query_shapes(input_shapes) == [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
 
 
 class TestCropRect:
@@ -569,6 +667,13 @@ class TestCropRect:
         expected_image = np.ones((30, 20, 3))
         crop_rect = CropRect({'type': 'crop_rect'})
         assert np.array_equal(expected_image, crop_rect(DataRepresentation(image), {'rect': [20, 0, 40, 50]}).data)
+
+    def test_crop_rect_return_dynamic_shapes(self):
+        crop_rect = CropRect({'type': 'crop_rect'})
+        assert crop_rect.dynamic_result_shapes
+        assert crop_rect.shape_modificator
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert crop_rect.query_shapes(input_shapes) == [(-1, -1, 3), (-1, -1), (-1, -1, 3), (-1, -1, 3), (3,)]
 
 
 class TestExtendAroundRect:
@@ -625,6 +730,13 @@ class TestExtendAroundRect:
         assert np.array_equal(
             expected_image, extend_image_around_rect(DataRepresentation(image), {'rect': [20, 0, 40, 50]}).data
         )
+
+    def test_extend_around_rect_do_not_modify_shape(self):
+        extender = Preprocessor.provide('extend_around_rect', {'type': 'extend_around_rect'})
+        assert not extender.shape_modificator
+        assert not extender.dynamic_result_shape
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert extender.query_shapes(input_shapes) == [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
 
 
 class TestPointAlignment:
@@ -739,6 +851,13 @@ class TestPointAlignment:
         expected_result = cv2.warpAffine(expected_result, transformation_matrix, (40, 40), flags=cv2.WARP_INVERSE_MAP)
 
         assert np.array_equal(result, expected_result)
+
+    def test_point_alignment_shape_estimation(self):
+        point_aligner = PointAligner({'type': 'point_alignment', 'size': 40})
+        assert point_aligner.shape_modificator
+        assert not point_aligner.dynamic_result_shape
+        input_shapes = [(100, 50, 3), (200, 200), (50, 100, 3), (-1, -1, 3), (3,)]
+        assert point_aligner.query_shapes(input_shapes) == [(40, 40, 3), (40, 40), (40, 40, 3), (40, 40, 3), (3,)]
 
 
 class TestPreprocessorExtraArgs:

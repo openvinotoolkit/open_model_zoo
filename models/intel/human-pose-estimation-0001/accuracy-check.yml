@@ -2,7 +2,7 @@ models:
   - name: human-pose-estimation-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation
@@ -32,3 +32,4 @@ models:
           - name: AP
             type: coco_precision
             max_detections: 20
+            reference: 0.428

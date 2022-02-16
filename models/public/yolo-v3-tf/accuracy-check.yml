@@ -51,14 +51,16 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.6227
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.677
 
   - name: yolo-v3-tf
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v3
           anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
@@ -94,6 +96,8 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.6227
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.677

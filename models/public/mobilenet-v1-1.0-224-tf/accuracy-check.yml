@@ -17,10 +17,19 @@ models:
           - type: normalization
             mean: 127.5
             std: 127.5
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7103
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.8994
 
   - name: mobilenet-v1-1.0-224-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -30,3 +39,12 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7103
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.8994

@@ -1,7 +1,7 @@
 models:
   - name: mozilla-deepspeech-0.8.2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ctc_beam_search_decoder_with_lm
           probability_out: logits
@@ -20,10 +20,10 @@ models:
             layout: NHWC
           - name: previous_state_c
             type: LSTM_INPUT
-            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2'
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd:0'
           - name: previous_state_h
             type: LSTM_INPUT
-            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1'
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0'
     datasets:
       - name: librispeech-test-clean
         reader:
@@ -57,3 +57,4 @@ models:
             step: 16
         metrics:
           - type: wer
+            reference: 0.0839

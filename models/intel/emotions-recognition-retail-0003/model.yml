@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
-    size: 40242
-    sha256: 399edfedb0a90e7d2b6c92440840488351bbfd323f4deef04a8dc293d764a2ba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    size: 48426
+    checksum: 03387ae4a8183daa565b292e68c284c9bdbbd6cff6925949e5e2ba49afc1d16e6be6f9f77157e7c03a76662c797a666f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
-    sha256: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    checksum: b763e002e1084a792e99c755c457a2d64848967cfaa2bb851ef09e3d5d756a335b77cf08a1b770d60ccfbb87329b3f62
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
-    size: 40225
-    sha256: 30037d0b12a2dd7f4f447a58d811fc38b5e75ab0521a3c09cf7aa20f8a25a17a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    size: 64023
+    checksum: 01e8eb7b44c859d2d9d8956215c2559adc3be40c48e9b9552a4679a96790f252a1008a5c902e40656265fe662fa76641
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
-    sha256: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    checksum: 707923353b0e5bec597a3f6b0372d4c400f2c0dddad6994e041967c883d28d8dbae99f69bb7b2a835edbc0f3c5d43fc1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
   - name: FP16-INT8/emotions-recognition-retail-0003.xml
-    size: 113682
-    sha256: 6744cd0eb374d9a6f8e39a567ebc046073bdb35e6016bc1e9da03cea30757279
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
+    size: 127436
+    checksum: 26e013e8cbc19454af6732ea0a48601f620565206e742c8dfad6c63fbd6c44b5cdbe6d232b3f366c819dfcd078dca53f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
   - name: FP16-INT8/emotions-recognition-retail-0003.bin
-    size: 2494126
-    sha256: 9f791645e2ef576bf97a3ce4fb5b0acb8a0a96347d89b444fb059779f684a1c0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
+    size: 2503558
+    checksum: 8839451adf7d8b37c3a053de1807e3e268ab57bf17b5493e81f52deb055d9fabfb3fc1526c66390acd00fdf5aef2d0c1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

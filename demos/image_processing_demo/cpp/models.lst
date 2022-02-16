@@ -4,3 +4,7 @@ single-image-super-resolution-????
 text-image-super-resolution-????
 # For -at deblur
 deblurgan-v2
+# For -at jr
+fbcnn
+# For -at style
+fast-neural-style-mosaic-onnx

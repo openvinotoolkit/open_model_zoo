@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-2004.xml
-    size: 1296909
-    sha256: 1a6beb3dd7f42960636e4eebad9046abc9666a340058745c04dffa9f129546a8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.xml
+    size: 1371910
+    checksum: c23e81463951a15fb3d71fc8fb2a4b7deea13100597af53d739dd4045d62b2fe75feab4c6c2d98a7be7c3107fa7cfb29
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.xml
   - name: FP32/person-vehicle-bike-detection-2004.bin
-    size: 7811564
-    sha256: b9670aeea2b738fcaa36d3a399b45bb131a8990b7fdd3b864d8bc993fc1781e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.bin
+    size: 7938072
+    checksum: 87e7b854807638978df1e17a5a69294b4c73ae51ba770af955bfbd658e67391e64870409dcfb19d4fbf2697f449429f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.bin
   - name: FP16/person-vehicle-bike-detection-2004.xml
-    size: 1296737
-    sha256: 4600662a26bb34c828a12942cbc37a4d4b55d99ee42f4c28070cf39a273b9c17
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.xml
+    size: 1589643
+    checksum: 8dcdb076000ad506ae990c489871486aa608476a19d44fe1c5f3bc579c45a65439a2c886bb09ef5d359c8ed200d5f189
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.xml
   - name: FP16/person-vehicle-bike-detection-2004.bin
-    size: 3906004
-    sha256: b49072fef26ccb5d7d8fd3a64a3d8938c9f938510e2c391ca697bde54bc8fc9a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.bin
+    size: 3969084
+    checksum: 95662d185cdbe22d0541ef09e401913700df192f82da533dbf843a1f874fd966f47f4aeb8b42c5eddef8081a72cf1721
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.bin
   - name: FP16-INT8/person-vehicle-bike-detection-2004.xml
-    size: 1858288
-    sha256: bf4f244d8e308e81f995c7ead3e644bb369acc1e650e8d8d1a96a9a0ba4a2da0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.xml
+    size: 2122960
+    checksum: 504f2dfd85df5f2c3d080dd100c2214ef5e61e357ea200a6fe7833c3bfc51a63cddac3c3ceb117cd72c701f644730078
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.xml
   - name: FP16-INT8/person-vehicle-bike-detection-2004.bin
-    size: 2055438
-    sha256: ebeedb8c98a43fed577aac85749c04ba4e29001874cc53ef4448fcbbfd037bf3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.bin
+    size: 2206308
+    checksum: 4a2d2818e6647256726e3e9250ee704d6ae6ab021830af9688a9c01f2c62926934fe759714fe2d651e23b1416e97cd21
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

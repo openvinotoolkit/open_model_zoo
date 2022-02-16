@@ -2,7 +2,7 @@ models:
   - name: faster-rcnn-resnet101-coco-sparse-60-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ssd
         inputs:
@@ -31,3 +31,4 @@ models:
         metrics:
           - type: coco_precision
             max_detections: 100
+            reference: 0.3874

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,19 +18,21 @@ task_type: classification
 files:
   - name: bvlc_reference_caffenet.caffemodel
     size: 243862418
-    sha256: 472d4a06035497b180636d8a82667129960371375bd10fcb6df5c6c7631f25e0
-    source: http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+    checksum: 6677844301d6c7f68f5b6a299cf41c4f0955bab7d1fb8719375fae6d05b6173db9deccf3ac4aaa4225bf6c6e99d81a68
+    original_source: http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/caffenet/bvlc_reference_caffenet.caffemodel
   - name: deploy.prototxt
     size: 2878
-    sha256: 922248a4d2f6aac1cc8e7e5dbd996cc2ecd3356480d67c198f6cf96b12311a04
+    checksum: 0d8510160bffd5a656022173a962cdd5e73d857015d0911f4ec1b73e1a7a2f9a1e979170e55baf8830b16379c6b75340
     source: https://raw.githubusercontent.com/BVLC/caffe/2cc3844cb2a4a72de10d321781dc8f994bef95c7/models/bvlc_reference_caffenet/deploy.prototxt
 model_optimizer_args:
   - --input_shape=[1,3,227,227]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[104.0,117.0,123.0]
   - --output=prob
   - --input_model=$dl_dir/bvlc_reference_caffenet.caffemodel
   - --input_proto=$dl_dir/deploy.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md

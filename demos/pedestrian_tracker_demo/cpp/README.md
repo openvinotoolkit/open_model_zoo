@@ -18,70 +18,83 @@ if a detected pedestrian is the next position of a known person or the first pos
 
 After that, the application displays the tracks and the latest detections on the screen and goes to the next frame.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/pedestrian_tracker_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
-* person-detection-retail-0002
-* person-detection-retail-0013
-* person-reidentification-retail-0277
-* person-reidentification-retail-0286
-* person-reidentification-retail-0287
-* person-reidentification-retail-0288
+* architecture_type = centernet
+  - ctdet_coco_dlav0_512
+* architecture_type = ssd
+  - efficientdet-d0-tf
+  - efficientdet-d1-tf
+  - faster-rcnn-resnet101-coco-sparse-60-0001
+  - pedestrian-and-vehicle-detector-adas-0001
+  - pedestrian-detection-adas-0002
+  - pelee-coco
+  - person-detection-0106
+  - person-detection-0200
+  - person-detection-0201
+  - person-detection-0202
+  - person-detection-0203
+  - person-detection-retail-0002
+  - person-detection-retail-0013
+  - person-vehicle-bike-detection-2000
+  - person-vehicle-bike-detection-2001
+  - person-vehicle-bike-detection-2002
+  - person-vehicle-bike-detection-2003
+  - person-vehicle-bike-detection-2004
+  - rfcn-resnet101-coco-tf
+  - retinanet-tf
+  - ssd300
+  - ssd512
+  - ssd-resnet34-1200-onnx
+  - ssd_mobilenet_v1_coco
+  - ssd_mobilenet_v1_fpn_coco
+  - ssdlite_mobilenet_v2
+  - vehicle-detection-adas-0002
+* architecture_type = yolo
+  - person-vehicle-bike-detection-crossroad-yolov3-1020
+  - yolo-v3-tf
+  - yolo-v3-tiny-tf
+  - yolo-v1-tiny-tf
+  - yolo-v2-ava-0001
+  - yolo-v2-ava-sparse-35-0001
+  - yolo-v2-ava-sparse-70-0001
+  - yolo-v2-tf
+  - yolo-v2-tiny-ava-0001
+  - yolo-v2-tiny-ava-sparse-30-0001
+  - yolo-v2-tiny-ava-sparse-60-0001
+  - yolo-v2-tiny-tf
+  - yolo-v2-tiny-vehicle-detection-0001
+* reidentification models
+  - person-reidentification-retail-0277
+  - person-reidentification-retail-0286
+  - person-reidentification-retail-0287
+  - person-reidentification-retail-0288
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
-pedestrian_tracker_demo [OPTION]
-Options:
-
-    -h                           Print a usage message.
-    -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                        Optional. Enable reading the input in a loop.
-    -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
-    -read_limit                  Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                  Optional. Name of the output file(s) to save.
-    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
-    -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
-    -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
-          Or
-    -c "<absolute_path>"         Optional. For GPU custom kernels, if any. Absolute path to the .xml file with the kernels description.
-    -d_det "<device>"            Optional. Specify the target device for pedestrian detection (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin.
-    -d_reid "<device>"           Optional. Specify the target device for pedestrian reidentification (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin.
-    -r                           Optional. Output pedestrian tracking results in a raw format (compatible with MOTChallenge format).
-    -pc                          Optional. Enable per-layer performance statistics.
-    -no_show                     Optional. Don't show output.
-    -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
-    -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -u                           Optional. List of monitors to show initially.
-```
+Running the demo with the `-h` option yields a usage message.
 
 For example, to run the application with the OpenVINO&trade; toolkit pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU, run the following command:
 
@@ -90,6 +103,7 @@ For example, to run the application with the OpenVINO&trade; toolkit pre-trained
                           -m_det <path_to_model>/person-detection-retail-0013.xml \
                           -m_reid <path_to_model>/person-reidentification-retail-0277.xml \
                           -d_det GPU
+                          -at ssd
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -104,10 +118,15 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text.
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

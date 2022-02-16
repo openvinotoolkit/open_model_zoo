@@ -1,0 +1,37 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Instance segmentation model for one class - person. PointRend based architecture
+  with EfficientNet-B1 backbone and lightweight Bbox and Mask heads.
+task_type: instance_segmentation
+files:
+  - name: FP32/instance-segmentation-person-0007.xml
+    size: 4298173
+    checksum: 8f4af8fc3ca275724a952647456f800f3ec0ca2ce4bde56b9ea3cab435e021c4d94b35be3e2497816b15c043f52081f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.xml
+  - name: FP32/instance-segmentation-person-0007.bin
+    size: 28243148
+    checksum: 39cbd44678df08fce96be3e8181fd61a401af7a6b414d4c8e21c416b25ce42c7c571c1f2f4ebc9a1c1eff57da2987e82
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.bin
+  - name: FP16/instance-segmentation-person-0007.xml
+    size: 4581257
+    checksum: fe82539ed9e4c39b19279461fb09688ec1c277d62133eeb075b3219a6ff699742a52bb4bbd4110d350eb871ee673604d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.xml
+  - name: FP16/instance-segmentation-person-0007.bin
+    size: 14121852
+    checksum: 95ee8c36a42dea006e3e9d2c609668343cbbafff175a7ba909161a72119c724ded25d160cd1c512a3e87663d099ded5c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

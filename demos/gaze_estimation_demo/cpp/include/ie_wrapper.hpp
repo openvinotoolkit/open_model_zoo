@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,51 +6,50 @@
 
 #include <cstdio>
 #include <string>
-
 #include <map>
 #include <vector>
 
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
+#include "utils/slog.hpp"
 
 namespace gaze_estimation {
 class IEWrapper {
 public:
-    IEWrapper(InferenceEngine::Core& ie,
+    IEWrapper(ov::Core& core,
               const std::string& modelPath,
+              const std::string& modelType,
               const std::string& deviceName);
-    // For setting input blobs containing images
-    void setInputBlob(const std::string& blobName, const cv::Mat& image);
-    // For setting input blobs containing vectors of data
-    void setInputBlob(const std::string& blobName, const std::vector<float>& data);
+    // For setting input tensors containing images
+    void setInputTensor(const std::string& tensorName, const cv::Mat& image);
+    // For setting input tensors containing vectors of data
+    void setInputTensor(const std::string& tensorName, const std::vector<float>& data);
 
-    // Get output blob content as a vector given its name
-    void getOutputBlob(const std::string& blobName, std::vector<float>& output);
+    // Get output tensor content as a vector given its name
+    void getOutputTensor(const std::string& tensorName, std::vector<float>& output);
 
-    void printPerlayerPerformance() const;
-
-    const std::map<std::string, std::vector<unsigned long>>& getInputBlobDimsInfo() const;
-    const std::map<std::string, std::vector<unsigned long>>& getOutputBlobDimsInfo() const;
+    const std::map<std::string, ov::Shape>& getInputTensorDimsInfo() const;
+    const std::map<std::string, ov::Shape>& getOutputTensorDimsInfo() const;
 
     std::string expectSingleInput() const;
     std::string expectSingleOutput() const;
 
-    void expectImageInput(const std::string& blobName) const;
+    void expectImageInput(const std::string& tensorName) const;
 
-    void reshape(const std::map<std::string, std::vector<unsigned long>>& newBlobsDimsInfo);
+    void reshape(const std::map<std::string, ov::Shape>& newTensorsDimsInfo);
 
     void infer();
 
 private:
     std::string modelPath;
+    std::string modelType;
     std::string deviceName;
-    InferenceEngine::Core& ie;
-    InferenceEngine::CNNNetwork network;
-    InferenceEngine::ExecutableNetwork executableNetwork;
-    InferenceEngine::InferRequest request;
-    std::map<std::string, std::vector<unsigned long>> inputBlobsDimsInfo;
-    std::map<std::string, std::vector<unsigned long>> outputBlobsDimsInfo;
+    ov::Core core;
+    std::shared_ptr<ov::Model> model;
+    ov::CompiledModel compiled_model;
+    ov::InferRequest infer_request;
+    std::map<std::string, ov::Shape> input_tensors_dims_info;
+    std::map<std::string, ov::Shape> output_tensors_dims_info;
 
     void setExecPart();
 };

@@ -10,7 +10,7 @@ evaluations:
             std: 127.5
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
           inputs:
             - name: "input_seg_map"
               type: INPUT
@@ -51,5 +51,9 @@ evaluations:
             - type: psnr
               scale_border: 0
               presenter: print_vector
+              reference:
+                mean: 12.99
             - type: ssim
               presenter: print_vector
+              reference:
+                mean: 0.34

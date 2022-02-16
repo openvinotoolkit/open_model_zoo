@@ -35,12 +35,12 @@ Mean values: [102.9801, 115.9465, 122.7717].
 
 ### Converted Model
 
-Image, name: `Placeholder`, shape: `1, 3, 600, 600`, format: `B, C, H, W`, where:
+Image, name: `Placeholder`, shape: `1, 600, 600, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
@@ -64,33 +64,39 @@ Expected color order: `BGR`.
 
 ### Converted Model
 
-1. Detection boxes, name: `rpn_bbox_pred/Reshape_1/Transpose`, shape: `1, 40, 18, 18` contains predicted regions, format: `B, A, H, W`, where:
+1. Detection boxes, name: `rpn_bbox_pred/Reshape_1`, contains predicted regions, in format `B, H, W, A`, where:
 
     - `B` - batch size
+    - `H` - image height
+    - `W` - image width
     - `A` - vector of 4\*N coordinates, where N is the number of detected anchors.
-    - `H` - image height
-    - `W` - image width
 
-2. Probability, name: `Reshape_2/Transpose`, shape: `1, 20, 18, 18`, contains probabilities for predicted regions in a[0,1] range in format `B, A, H, W`, where:
+2. Probability, name: `Reshape_2`, contains probabilities for predicted regions in a [0,1] range in format `B, H, W, A`, where:
 
     - `B` - batch size
-    - `A` - vector of 2\*N class probabilities (0 class for background, 1 class for text), where N is the number of detected anchors.
     - `H` - image height
     - `W` - image width
+    - `A` - vector of 4\*N coordinates, where N is the number of detected anchors.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

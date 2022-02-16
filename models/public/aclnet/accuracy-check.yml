@@ -2,7 +2,7 @@ models:
   - name: aclnet
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -18,6 +18,8 @@ models:
           - type: accuracy
             name: top@1
             top_k: 1
+            reference: 0.863
           - type: accuracy
             name: top@5
             top_k: 5
+            reference: 0.92

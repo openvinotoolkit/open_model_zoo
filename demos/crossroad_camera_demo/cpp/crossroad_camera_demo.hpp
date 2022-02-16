@@ -1,15 +1,12 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
-#include <vector>
-#include <gflags/gflags.h>
-
-#include <utils/default_flags.hpp>
+#include "gflags/gflags.h"
+#include "utils/default_flags.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -30,7 +27,6 @@ static const char target_device_message_person_reid[] = "Optional. Specify the t
                                                         "The list of available devices is shown below. Default value is CPU. "
                                                         "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                         "The application looks for a suitable plugin for the specified device.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
 static const char custom_cldnn_message[] = "Optional. For clDNN (GPU)-targeted custom kernels, if any. "
                                            "Absolute path to the xml file with the kernels desc.";
 static const char custom_cpu_library_message[] = "Optional. For MKLDNN (CPU)-targeted custom layers, if any. "
@@ -53,7 +49,6 @@ DEFINE_string(m_reid, "", person_reid_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_pa, "CPU", target_device_message_person_attribs);
 DEFINE_string(d_reid, "CPU", target_device_message_person_reid);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -87,7 +82,6 @@ static void showUsage() {
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -d_pa \"<device>\"             " << target_device_message_person_attribs << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_message_person_reid << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
     std::cout << "    -t                           " << threshold_output_message << std::endl;
     std::cout << "    -t_reid                      " << threshold_output_message_person_reid << std::endl;

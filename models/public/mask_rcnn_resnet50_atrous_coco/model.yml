@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ task_type: instance_segmentation
 files:
   - name: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
     size: 449505463
-    sha256: f3741f099bdb414e172cc8cc41370213a41afd04d7aa970f7854f09a75172481
-    source: http://download.tensorflow.org/models/object_detection/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
+    checksum: a61ae308c03f9b9554851f5d564b3cc09659a2d8d2a4dd2f4e57be92669fe4bdc9c505839eaa075b44926466e4073299
+    original_source: http://download.tensorflow.org/models/object_detection/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -30,7 +31,8 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,800,1365,3]
   - --input=image_tensor
-  - --transformations_config=$mo_dir/extensions/front/tf/mask_rcnn_support.json
+  - --layout=image_tensor(NHWC)
+  - --transformations_config=$mo_ext_dir/front/tf/mask_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/mask_rcnn_resnet50_atrous_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/mask_rcnn_resnet50_atrous_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf

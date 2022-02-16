@@ -2,7 +2,7 @@ models:
   - name: mask_rcnn_resnet50_atrous_coco
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: mask_rcnn
           detection_out: reshape_do_2d
@@ -16,4 +16,6 @@ models:
       - name: ms_coco_mask_rcnn_short_91_classes
         metrics:
           - type: coco_orig_segm_precision
+            reference: 0.2746
           - type: coco_orig_precision
+            reference: 0.2975

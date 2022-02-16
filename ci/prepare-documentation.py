@@ -42,7 +42,7 @@ import shutil
 import sys
 import urllib.parse
 import urllib.request
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET # nosec - disable B405:import-xml-etree check
 
 from pathlib import Path
 
@@ -50,9 +50,15 @@ import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
 
+OMZ_PREFIX = '<omz_dir>/'
+
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
 import omzdocs
+
+all_images_paths = {}
+all_md_paths = {}
+documentation_md_paths = set()
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -68,8 +74,8 @@ HUMAN_READABLE_TASK_TYPES = {
 }
 
 def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
-    if type(index) != int:
-        raise ValueError('index must be a number')
+    if not isinstance(index, int):
+        raise ValueError('index must be an integer')
     if parent.tag == 'tab':
         parent.attrib['type'] = 'usergroup'
 
@@ -86,6 +92,8 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
 
         element.attrib['title'] = title
         return element
+
+    documentation_md_paths.add(Path(path))
 
     output_path = output_root / path
 
@@ -125,9 +133,36 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
             continue # not a relative URL
 
         image_rel_path = path.parent / urllib.request.url2pathname(parsed_image_url.path)
+        image_filename = image_rel_path.name
+        image_abs_path = (OMZ_ROOT / image_rel_path).resolve()
+
+        if image_filename in all_images_paths and all_images_paths[image_filename] != image_abs_path:
+            raise RuntimeError(f'{path}: Image with "{image_filename}" filename already exists. '
+                               f'Rename "{image_rel_path}" to unique name.')
+        all_images_paths[image_filename] = image_abs_path
 
         (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(OMZ_ROOT / image_rel_path, output_root / image_rel_path)
+        shutil.copyfile(image_abs_path, output_root / image_rel_path)
+
+    links = [ref.url for ref in page.external_references() if ref.type == 'link']
+
+    for link in links:
+        parsed_link = urllib.parse.urlparse(link)
+
+        if parsed_link.scheme or parsed_link.netloc:
+            continue # not a relative URL
+
+        if parsed_link.fragment:
+            continue # link to markdown section
+
+        relative_path = (OMZ_ROOT / Path(path).parent / link).resolve().relative_to(OMZ_ROOT)
+
+        if link.endswith('.md'):
+            all_md_paths[relative_path] = Path(path)
+        else:
+            suggested_path = OMZ_PREFIX + Path(relative_path).as_posix()
+            raise RuntimeError(f'{path}: Relative link to non-markdown file "{link}". '
+                               f'Replace it by `{suggested_path}`')
 
     return element
 
@@ -163,11 +198,37 @@ def add_model_pages(output_root, parent_element, group, group_title):
         id=f'omz_models_group_{group}', path=f'models/{group}/index.md')
 
     task_type_elements = {}
+    device_support_path = OMZ_ROOT / 'models' / group / 'device_support.md'
+
+    with device_support_path.open('r', encoding="utf-8") as device_support_file:
+        raw_device_support = device_support_file.read()
+
+    device_support_lines = re.findall(r'^\|\s\S+\s\|', raw_device_support, re.MULTILINE)
+    device_support_lines = [device_support_line.strip(' |')
+                            for device_support_line in device_support_lines]
 
     for md_path in sorted(OMZ_ROOT.glob(f'models/{group}/*/**/*.md')):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         model_name = md_path_rel.parts[2]
+
+        device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
+
+        if model_name not in device_support_lines:
+            if not (md_path.parent / 'composite-model.yml').exists():
+                raise RuntimeError(f'{device_support_path_rel}: "{model_name}" '
+                                   'model reference is missing.')
+
+            model_subdirs = (subdir.name for subdir in md_path.parent.glob('*/**'))
+
+            for model_subdir in model_subdirs:
+                if not (md_path.parent / model_subdir / 'model.yml').exists():
+                    continue # non-model folder
+
+                if model_subdir not in device_support_lines:
+                    raise RuntimeError(f'{device_support_path_rel}: '
+                                       f'"{model_subdir}" part reference of '
+                                       f'"{model_name}" composite model is missing.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
@@ -180,6 +241,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
         # dumper doesn't support composite models yet.
         model_yml_path = OMZ_ROOT / 'models' / group / model_name / 'model.yml'
         composite_model_yml_path = model_yml_path.with_name('composite-model.yml')
+        is_new_intel_model = False
 
         if model_yml_path.exists():
             expected_title = model_name
@@ -199,7 +261,10 @@ def add_model_pages(output_root, parent_element, group, group_title):
             logging.warning(
                 '{}: no corresponding model.yml or composite-model.yml found; skipping'
                     .format(md_path_rel))
-            continue
+            if group == 'intel':
+                is_new_intel_model = True
+            else:
+                continue
 
         if task_type not in task_type_elements:
             human_readable_task_type = HUMAN_READABLE_TASK_TYPES.get(task_type,
@@ -217,15 +282,56 @@ def add_model_pages(output_root, parent_element, group, group_title):
         model_element = add_page(output_root, task_type_elements[task_type],
             id=page_id, path=md_path_rel)
 
-        if model_element.attrib['title'] != expected_title:
+        if model_element.attrib['title'] != expected_title and not is_new_intel_model:
             raise RuntimeError(f'{md_path_rel}: should have title "{expected_title}"')
 
     sort_titles(group_element)
 
-    title = 'Intel\'s Pre-Trained Models Device Support' if group == 'intel' else 'Public Pre-Trained Models Device Support'
-    add_page(output_root, group_element, 
+    device_support_title = 'Intel\'s Pre-Trained Models Device Support' if group == 'intel' \
+        else 'Public Pre-Trained Models Device Support'
+    add_page(output_root, group_element,
              id=f'omz_models_{group}_device_support', path=f'models/{group}/device_support.md',
-             title=title, index=0)
+             title=device_support_title, index=0)
+
+
+def add_demos_pages(output_root, parent_element):
+    demos_group_element = add_page(output_root, parent_element,
+        title="Demos", id='omz_demos', path='demos/README.md')
+    demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
+
+    for md_path in [
+        *OMZ_ROOT.glob('demos/*_demo/*/README.md'),
+        *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
+    ]:
+        md_path_rel = md_path.relative_to(OMZ_ROOT)
+
+        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+            models_lines = models_lst.readlines()
+
+        with (md_path).open('r', encoding="utf-8") as demo_readme:
+            raw_demo_readme = demo_readme.read()
+
+        for model_line in models_lines:
+            if model_line.startswith('#'):
+                continue
+
+            model_line = model_line.rstrip('\n')
+            regex_line = model_line.replace('?', r'.').replace('*', r'\S+')
+
+            if not re.search(regex_line, raw_demo_readme):
+                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
+                                   'Add it to README.md or update models.lst file.')
+
+        # <name>_<implementation>
+        demo_id = '_'.join(md_path_rel.parts[1:3])
+
+        demo_element = add_page(output_root, demos_group_element,
+            id='omz_demos_' + demo_id, path=md_path_rel)
+
+        if not re.search(r'\bDemo\b', demo_element.attrib['title']):
+            raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
+
+    sort_titles(demos_group_element)
 
 
 def main():
@@ -247,7 +353,7 @@ def main():
     add_accuracy_checker_pages(output_root, navindex_element)
 
     downloader_element = add_page(output_root, navindex_element,
-        id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
+        id='omz_tools_downloader', path='tools/model_tools/README.md', title='Model Downloader')
     downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
 
     trained_models_group_element = add_page(output_root, navindex_element,
@@ -259,8 +365,8 @@ def main():
     add_model_pages(output_root, trained_models_group_element,
         'public', "Public Pre-trained Models")
 
-    datasets_element = add_page(output_root, navindex_element, id='omz_data_datasets', path='data/datasets.md',
-                            title='Dataset Preparation Guide')
+    datasets_element = add_page(output_root, navindex_element,
+        id='omz_data_datasets', path='data/datasets.md', title='Dataset Preparation Guide')
 
     # The xml:id here is omz_data rather than omz_data_datasets, because
     # later we might want to have other pages in the "data" directory. If
@@ -269,25 +375,18 @@ def main():
     # to change the upstream OpenVINO documentation building process.
     datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
-    demos_group_element = add_page(output_root, navindex_element,
-        title="Demos", id='omz_demos', path='demos/README.md')
-    demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
+    add_demos_pages(output_root, navindex_element)
 
-    for md_path in [
-        *OMZ_ROOT.glob('demos/*_demo/*/README.md'),
-        *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
-    ]:
-        md_path_rel = md_path.relative_to(OMZ_ROOT)
-        # <name>_<implementation>
-        demo_id = '_'.join(md_path_rel.parts[1:3])
+    ovms_adapter_element = add_page(output_root, navindex_element, id='omz_model_api_ovms_adapter',
+        path='demos/common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md',
+        title='OMZ Model API OVMS adapter')
+    ovms_adapter_element.attrib[XML_ID_ATTRIBUTE] = 'omz_model_api_ovms_adapter'
 
-        demo_element = add_page(output_root, demos_group_element,
-            id='omz_demos_' + demo_id, path=md_path_rel)
-
-        if not re.search(r'\bDemo\b', demo_element.attrib['title']):
-            raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
-
-    sort_titles(demos_group_element)
+    for md_path in all_md_paths:
+        if md_path not in documentation_md_paths:
+            raise RuntimeError(f'{all_md_paths[md_path]}: '
+                               f'Relative link to non-online documentation file "{md_path}". '
+                               f'Replace it by `{OMZ_PREFIX + md_path.as_posix()}`')
 
     with (output_root / 'DoxygenLayout.xml').open('wb') as layout_file:
         ET.ElementTree(doxygenlayout_element).write(layout_file)

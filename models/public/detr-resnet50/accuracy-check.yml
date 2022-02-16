@@ -1,0 +1,51 @@
+models:
+  - name: detr-resnet50-onnx
+    launchers:
+      - framework: onnx_runtime
+        model: detr-resnet50.onnx
+        adapter:
+          type: detr
+          scores_out: "scores"
+          boxes_out: "boxes"
+    datasets:
+      - name: ms_coco_detection_91_classes
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            dst_height: 800
+            dst_width: 1137
+            use_pillow: true
+          - type: normalization
+            mean: [123.675, 116.28, 103.53]
+            std: [58.395, 57.12, 57.375]
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_precision
+            reference: 0.4236
+          - type: coco_orig_precision
+            reference: 0.3927
+
+  - name: detr-resnet50
+    launchers:
+      - framework: openvino
+        adapter:
+          type: detr
+          scores_out: "scores"
+          boxes_out: "boxes"
+    datasets:
+      - name: ms_coco_detection_91_classes
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            dst_height: 800
+            dst_width: 1137
+            use_pillow: true
+          - type: rgb_to_bgr
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_precision
+            reference: 0.4236
+          - type: coco_orig_precision
+            reference: 0.3927

@@ -1,7 +1,7 @@
 models:
   - name: colorization-v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           std: 1
@@ -23,5 +23,9 @@ models:
         metrics:
           - type: psnr
             presenter: print_vector
+            reference:
+              mean: 26.99
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.9

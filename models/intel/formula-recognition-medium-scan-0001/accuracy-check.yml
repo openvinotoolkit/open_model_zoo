@@ -3,11 +3,12 @@ evaluations:
     module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
     module_config:
       network_info:
-
-        max_seq_len: '192'
+        recognizer_encoder: {}
+        recognizer_decoder: {}
+      max_seq_len: '192'
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: im2latex_medium_photographed
@@ -28,6 +29,7 @@ evaluations:
           metrics:
             - type: im2latex_match_images_metric
               max_pixel_column_diff: 0
+              reference: 0.815
 
         - name: im2latex_medium_rendered
 
@@ -44,3 +46,4 @@ evaluations:
           metrics:
             - type: im2latex_match_images_metric
               max_pixel_column_diff: 0
+              reference: 0.957

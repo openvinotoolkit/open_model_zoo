@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ task_type: detection
 files:
   - name: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
     size: 4387714
-    sha256: de6744bc72339f29109f595bc51b47383595ffb06ed15a7438f2ae9cb8a2a77c
-    source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    checksum: 71a1b74e9612204e4533d44a8eff105490bb3248043d22ef894c19d5da4fb135a989946307b86191ba4ec2ce391b34bf
+    original_source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vehicle-license-plate-detection-barrier-0123/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -28,6 +29,7 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,256,256,3]
+  - --layout=NHWC
   - --scale=127.5
   - --mean_values=[127.5,127.5,127.5]
   - --transformations_config=$dl_dir/model/model.tfmo.json

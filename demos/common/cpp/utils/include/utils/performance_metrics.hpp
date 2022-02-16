@@ -29,14 +29,20 @@ public:
         double fps;
     };
 
+    enum MetricTypes {
+        ALL,
+        FPS,
+        LATENCY
+    };
+
     PerformanceMetrics(Duration timeWindow = std::chrono::seconds(1));
     void update(TimePoint lastRequestStartTime,
-                cv::Mat& frame,
+                const cv::Mat& frame,
                 cv::Point position = {15, 30},
                 int fontFace = cv::FONT_HERSHEY_COMPLEX,
                 double fontScale = 0.75,
                 cv::Scalar color = {200, 10, 10},
-                int thickness = 2);
+                int thickness = 2, MetricTypes metricType = ALL);
     void update(TimePoint lastRequestStartTime);
 
     /// Paints metrics over provided mat
@@ -45,16 +51,16 @@ public:
     /// @param fontScale font scale
     /// @param color font color
     /// @param thickness font thickness
-    void paintMetrics(cv::Mat& frame,
+    void paintMetrics(const cv::Mat& frame,
         cv::Point position = { 15, 30 },
         int fontFace = cv::FONT_HERSHEY_COMPLEX,
         double fontScale = 0.75,
         cv::Scalar color = { 200, 10, 10 },
-        int thickness = 2) const;
+        int thickness = 2, MetricTypes metricType = ALL) const;
 
     Metrics getLast() const;
     Metrics getTotal() const;
-    void printTotal() const;
+    void logTotal() const;
 
 private:
     struct Statistic {
@@ -82,3 +88,5 @@ private:
     TimePoint lastUpdateTime;
     bool firstFrameProcessed;
 };
+
+void logLatencyPerStage(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat);

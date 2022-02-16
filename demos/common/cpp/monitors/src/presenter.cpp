@@ -6,6 +6,8 @@
 #include <chrono>
 #include <iomanip>
 #include <numeric>
+#include <string>
+#include <vector>
 
 #include "monitors/presenter.h"
 
@@ -109,7 +111,7 @@ void Presenter::handleKey(int key) {
     }
 }
 
-void Presenter::drawGraphs(cv::Mat& frame) {
+void Presenter::drawGraphs(const cv::Mat& frame) {
     const std::chrono::steady_clock::time_point curTimeStamp = std::chrono::steady_clock::now();
     if (curTimeStamp - prevTimeStamp >= std::chrono::milliseconds{1000}) {
         prevTimeStamp = curTimeStamp;
@@ -286,29 +288,37 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     }
 }
 
-std::string Presenter::reportMeans() const {
-    std::ostringstream collectedDataStream;
-    collectedDataStream << std::fixed << std::setprecision(1);
+std::vector<std::string> Presenter::reportMeans() const {
+    std::vector<std::string> collectedData;
+    if (cpuMonitor.getHistorySize() > 1 || distributionCpuEnabled || memoryMonitor.getHistorySize() > 1) {
+        collectedData.push_back("Resources usage:");
+    }
     if (cpuMonitor.getHistorySize() > 1) {
-        collectedDataStream << "Mean core utilization: ";
+        std::ostringstream collectedDataStream;
+        collectedDataStream << std::fixed << std::setprecision(1);
+        collectedDataStream << "\tMean core utilization: ";
         for (double mean : cpuMonitor.getMeanCpuLoad()) {
             collectedDataStream << mean * 100 << "% ";
         }
-        collectedDataStream << '\n';
+        collectedData.push_back(collectedDataStream.str());
     }
     if (distributionCpuEnabled) {
+        std::ostringstream collectedDataStream;
+        collectedDataStream << std::fixed << std::setprecision(1);
         std::vector<double> meanCpuLoad = cpuMonitor.getMeanCpuLoad();
         double mean = std::accumulate(meanCpuLoad.begin(), meanCpuLoad.end(), 0.0) / meanCpuLoad.size();
-        collectedDataStream << "Mean CPU utilization: " << mean * 100 << "%\n";
+        collectedDataStream << "\tMean CPU utilization: " << mean * 100 << "%";
+        collectedData.push_back(collectedDataStream.str());
     }
     if (memoryMonitor.getHistorySize() > 1) {
-        collectedDataStream << "Memory mean usage: " << memoryMonitor.getMeanMem() << " GiB\n";
-        collectedDataStream << "Mean swap usage: " << memoryMonitor.getMeanSwap() << " GiB\n";
+        std::ostringstream collectedDataStream;
+        collectedDataStream << std::fixed << std::setprecision(1);
+        collectedDataStream << "\tMemory mean usage: " << memoryMonitor.getMeanMem() << " GiB";
+        collectedData.push_back(collectedDataStream.str());
+        collectedDataStream.str("");
+        collectedDataStream << "\tMean swap usage: " << memoryMonitor.getMeanSwap() << " GiB";
+        collectedData.push_back(collectedDataStream.str());
     }
-    std::string collectedData = collectedDataStream.str();
-    // drop last \n because usually it is not expected that printing an object starts a new line
-    if (!collectedData.empty()) {
-        return collectedData.substr(0, collectedData.size() - 1);
-    }
+
     return collectedData;
 }

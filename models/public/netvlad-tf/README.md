@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pre-trained on the [Pittsburgh 250k](http://www.ok.ctrl.titech.ac.jp/~torii/project/repttile/) dataset.
+NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pre-trained on the [Pittsburgh 250k](https://www.di.ens.fr/willow/research/netvlad/) dataset.
 
 For details see [repository](https://github.com/uzh-rpg/netvlad_tf_open) and [paper](https://arxiv.org/abs/1511.07247).
 
@@ -38,7 +38,7 @@ Channel order is `RGB`.
 
 ### Converted model
 
-Image, name - `Placeholder`,  shape - `1, 3, 200, 300`, format is `B, C, H, W`, where:
+Image, name - `Placeholder`,  shape - `1, 200, 300, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -65,17 +65,23 @@ Floating point embeddings, name - `vgg16_netvlad_pca/l2_normalize_1`,  shape - `
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Place Recognition Python\* Demo](../../../demos/place_recognition_demo/python/README.md)
 
 ## Legal Information
 

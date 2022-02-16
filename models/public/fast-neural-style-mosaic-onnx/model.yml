@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ description: >-
   method described in Perceptual Losses for Real-Time Style Transfer and Super-Resolution
   <https://arxiv.org/abs/1603.08155> along with Instance Normalization <https://arxiv.org/abs/1607.08022>.
   Original ONNX models are provided in the repository <https://github.com/onnx/models>.
-task_type: "style_transfer"
+task_type: style_transfer
 files:
   - name: fast-neural-style-mosaic-onnx.onnx
-    sha256: fa646dedade881243f8d5a2ceb7de2b93675b21fc24f7482894ac4851a9a0a47
-    source: https://media.githubusercontent.com/media/onnx/models/111fab38a5757c8fc8db0aa13e73fb330e516c42/vision/style_transfer/fast_neural_style/model/mosaic-9.onnx
+    checksum: 3333259b6f7014ecdcc6be4863322988935e23c9ae6bf9668aa6208a5991d2c603cd342881bab0a064f365e929eeb4d4
+    original_source: https://media.githubusercontent.com/media/onnx/models/111fab38a5757c8fc8db0aa13e73fb330e516c42/vision/style_transfer/fast_neural_style/model/mosaic-9.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fast-neural-style-mosaic-onnx/mosaic-9.onnx
     size: 6728029
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
+  - --layout=NCHW
   - --input_model=$dl_dir/fast-neural-style-mosaic-onnx.onnx
   - --reverse_input_channels
 framework: onnx

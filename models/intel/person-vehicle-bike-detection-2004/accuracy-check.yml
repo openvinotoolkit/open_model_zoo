@@ -2,7 +2,7 @@ models:
   - name: person-vehicle-bike-detection-2004
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: faster_rcnn_onnx
           labels_out: 'labels'
@@ -23,3 +23,4 @@ models:
         metrics:
           - type: coco_orig_precision
             include_boundaries: false
+            reference: 0.274

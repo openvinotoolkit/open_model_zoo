@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ task_type: classification
 files:
   - name: hbonet.py
     size: 12548
-    sha256: f272c67c5910cabca576a6001089b050ae995f6e340d9b3033a2e787c5fbc1ad
+    checksum: 7b069ad80839ed050c9ce5a10d389db1bd529a74b77858648ca168976bc9736fc30715d946e54e55445a5cb23edc4342
     source: https://raw.githubusercontent.com/d-li14/HBONet/e9a76c15e3847b0f032a7000fe0c8138d6f2eb10/models/imagenet/hbonet.py
   - name: hbonet_0_25.pth
-    sha256: a69228ef353765879e929ada789a5c74dfd14fedaff931103ee1e285019dd3a0
+    checksum: 836c1fe7b0e1ba55db92e7e1deb15641afac1f3ac7975d8a7bfa7bd08e407d4a7664b2eb7149553f1e241cd424adb5fc
     size: 7863957
     source: https://raw.githubusercontent.com/d-li14/HBONet/master/pretrained/hbonet_0_25.pth
 framework: pytorch
@@ -38,6 +38,7 @@ conversion_to_onnx_args:
   - --output-names=prob
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --reverse_input_channels

@@ -18,7 +18,7 @@ This is a lightweight network for the face re-identification scenario. It is bas
 | MParams                         | 1.107                                     |
 | Source framework                | PyTorch\*                                  |
 
-LFW metric is the accuracy in the pairwise reidentification test. See the full [benchmark description](http://vis-www.cs.umass.edu/lfw/) for details.
+LFW metric is the accuracy in the pairwise re-identification test. See the full [benchmark description](http://vis-www.cs.umass.edu/lfw/) for details.
 
 The model achieves the best results if an input face is frontally oriented and aligned. Face image is aligned if five keypoints (left eye, right eye, tip of nose, left lip corner, right lip corner) are located in the following points in normalized coordinates [0,1]x[0,1]:
 
@@ -32,21 +32,28 @@ The model achieves the best results if an input face is frontally oriented and a
 
 To align the face, use a landmarks regression model: using regressed points and the given reference landmarks, build an affine transformation to transform regressed points to the reference ones and apply this transformation to the input face image.
 
-## Performance
-
 ## Inputs
 
-Name: "data" , shape: [1x3x128x128] - An input image in the format [BxCxHxW],
-where:
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+Input image, name: `data` , shape: `1, 3, 128, 128` in the format `B, C, H, W`, where:
 
-Expected color order is BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ## Outputs
-The net outputs a blob with the shape [1, 256, 1, 1], containing a row-vector of 256 floating point values. Outputs on different images are comparable in cosine distance.
+
+The net outputs a blob with the shape `1, 256, 1, 1`, containing a row-vector of 256 floating point values. Outputs on different images are comparable in cosine distance.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

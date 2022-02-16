@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,17 +24,20 @@ task_type: speech_recognition
 files:
   - name: deepspeech-0.8.2-models.pbmm
     size: 188915984
-    sha256: f1ad4347b276b7f0f35bc47954feb7240fad913f3a1b85605628ab6d6209b0c9
-    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.pbmm
+    checksum: 5ab0759fcace311c36c5322321463ad171458102230df4db83435c1c337f3c7deeba1344057cc9d158e23dd42268b298
+    original_source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.pbmm
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mozilla-deepspeech-0.8.2/deepspeech-0.8.2-models.pbmm
   - name: deepspeech-0.8.2-models.scorer
     size: 953363776
-    sha256: d0cf926ab9cab54a8a7d70003b931b2d62ebd9105ed392d1ec9c840029867799
-    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
+    checksum: 2694ef52d092ab7ddf9f913a8cf2f6b958a0ae38790080a37eb3be3453961ecc96d225095d3ae505e22dd6ba41fd27d5
+    original_source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mozilla-deepspeech-0.8.2/deepspeech-0.8.2-models.scorer
 model_optimizer_args:
   - --input_model=$conv_dir/deepspeech-0.8.2-models.pb
   - --freeze_placeholder_with_value=input_lengths->[16]
   - --input=input_node,previous_state_h,previous_state_c
   - --input_shape=[1,16,19,26],[1,2048],[1,2048]
+  - --layout=input_node(NSTC),previous_state_h(NC),previous_state_c(NC)
   - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
   - --disable_nhwc_to_nchw
 framework: tf

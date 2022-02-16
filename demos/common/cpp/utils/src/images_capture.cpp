@@ -183,13 +183,12 @@ public:
 class CameraCapWrapper : public ImagesCapture {
     cv::VideoCapture cap;
     size_t nextImgId;
-    const double initialImageId;
     size_t readLengthLimit;
 
 public:
-    CameraCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit,
+    CameraCapWrapper(const std::string &input, bool loop, size_t readLengthLimit,
                 cv::Size cameraResolution)
-            : ImagesCapture{loop}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
+            : ImagesCapture{loop}, nextImgId{0} {
 
         try {
             if (cap.open(std::stoi(input))) {
@@ -244,7 +243,7 @@ std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool 
     catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 
-    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, initialImageId, readLengthLimit, cameraResolution}); }
+    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, readLengthLimit, cameraResolution}); }
     catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 

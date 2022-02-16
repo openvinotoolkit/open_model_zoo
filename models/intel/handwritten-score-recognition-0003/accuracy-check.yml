@@ -2,7 +2,7 @@ models:
   - name: handwritten-score-recognition-0003
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: beam_search_decoder
 
     datasets:
@@ -16,3 +16,4 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.9883

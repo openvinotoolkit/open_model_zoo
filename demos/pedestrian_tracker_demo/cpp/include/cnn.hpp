@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -9,16 +9,15 @@
 #include <string>
 #include <vector>
 #include <functional>
-
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 #include <utils/ocv_common.hpp>
 
-#include <inference_engine.hpp>
-
 /**
- * @brief Base class of config for network
+ * @brief Base class of config for model
  */
-struct CnnConfig {
-    explicit CnnConfig(const std::string& path_to_model)
+struct ModelConfigTracker {
+    explicit ModelConfigTracker(const std::string& path_to_model)
         : path_to_model(path_to_model) {}
 
     /** @brief Path to model description */
@@ -28,75 +27,67 @@ struct CnnConfig {
 };
 
 /**
- * @brief Base class of network
+ * @brief Base class of model
  */
-class CnnBase {
+class BaseModel {
 public:
-    using Config = CnnConfig;
+    using Config = ModelConfigTracker;
 
     /**
      * @brief Constructor
      */
-    CnnBase(const Config& config,
-            const InferenceEngine::Core & ie,
+    BaseModel(const Config& config,
+            const ov::Core& core,
             const std::string & deviceName);
 
     /**
      * @brief Descructor
      */
-    virtual ~CnnBase() {}
+    virtual ~BaseModel() {}
 
     /**
-     * @brief Loads network
+     * @brief Loads model
      */
     void Load();
 
-    /**
-     * @brief Prints performance report
-     */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
+    const std::string modelType = "Person Re-Identification";
 
 protected:
     /**
-     * @brief Run network
-     *
-     * @param frame Input image
-     * @param results_fetcher Callback to fetch inference results
-     */
-    void Infer(const cv::Mat& frame,
-               const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
-
-    /**
-     * @brief Run network in batch mode
+     * @brief Run model in batch mode
      *
      * @param frames Vector of input images
      * @param results_fetcher Callback to fetch inference results
      */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
+                    const std::function<void(const ov::Tensor&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
-    Config config_;
-    /** @brief Inference Engine instance */
-    InferenceEngine::Core ie_;
-    /** @brief Inference Engine device */
-    std::string deviceName_;
-    /** @brief Net outputs info */
-    InferenceEngine::OutputsDataMap outInfo_;
-    /** @brief IE network */
-    InferenceEngine::ExecutableNetwork executable_network_;
-    /** @brief IE InferRequest */
-    mutable InferenceEngine::InferRequest infer_request_;
-    /** @brief Pointer to the pre-allocated input blob */
-    mutable InferenceEngine::Blob::Ptr input_blob_;
-    /** @brief Map of output blobs */
-    InferenceEngine::BlobMap outputs_;
+    Config config;
+    /** @brief OpenVINO Core instance */
+    ov::Core core;
+    /** @brief device */
+    std::string device_name;
+     /** @brief Model input layout */
+    ov::Layout input_layout;
+    /** @brief Compiled model */
+    ov::CompiledModel compiled_model;
+    /** @brief Inference Request */
+    mutable ov::InferRequest infer_request;
+    /** @brief Input tensor */
+    mutable ov::Tensor input_tensor;
+    /** @brief Input tensor shape */
+    ov::Shape input_shape;
+    /** @brief Output tensor */
+    ov::Tensor output_tensor;
+    /** @brief Input tensor shape */
+    ov::Shape output_shape;
 };
 
-class VectorCNN : public CnnBase {
+class VectorCNN : public BaseModel {
 public:
-    VectorCNN(const CnnConfig& config,
-              const InferenceEngine::Core & ie,
+    VectorCNN(const ModelConfigTracker& config,
+              const ov::Core & core,
               const std::string & deviceName);
 
     void Compute(const cv::Mat& image,
@@ -104,8 +95,8 @@ public:
     void Compute(const std::vector<cv::Mat>& images,
                  std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
 
-    int size() const { return result_size_; }
+    int size() const { return result_size; }
 
 private:
-    int result_size_;               ///< Length of result
+    int result_size;  // Length of result
 };

@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,26 +16,31 @@
 
 #pragma once
 #include <map>
+#include <set>
 #include <string>
+
+#include <openvino/openvino.hpp>
 #include "gflags/gflags.h"
 
-struct CnnConfig {
-    std::string devices;
+struct ModelConfig {
+    std::string deviceName;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
-    std::map<std::string, std::string> execNetworkConfig;
+    ov::AnyMap compiledModelConfig;
+
+    std::set<std::string> getDevices();
+    std::map<std::string, std::string> getLegacyConfig();
+protected:
+    std::set<std::string> devices;
 };
 
 class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc,
-        uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads);
-    static CnnConfig getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+    static ModelConfig getUserConfig(const std::string& flags_d, uint32_t flags_nireq,
+        const std::string& flags_nstreams, uint32_t flags_nthreads);
+    static ModelConfig getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq);
 
 protected:
-    static CnnConfig getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+    static ModelConfig getCommonConfig(const std::string& flags_d, uint32_t flags_nireq);
 };

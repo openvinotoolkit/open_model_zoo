@@ -39,12 +39,12 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `image_input`, shape - `1, 3, 608, 608`, format is `B, C, H, W`, where:
+Image, name - `image_input`, shape - `1, 608, 608, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -75,13 +75,13 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ### Converted model
 
-1. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_93/BiasAdd/Add`, shape - `1, 255, 76, 76`. The anchor values are `12,16, 19,36, 40,28`.
+1. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_93/BiasAdd/Add`, shape - `1, 76, 76, 255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_101/BiasAdd/Add`, shape - `1, 255, 38, 38`. The anchor values are `36,75, 76,55, 72,146`.
+2. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_101/BiasAdd/Add`, shape - `1, 38, 38, 255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_109/BiasAdd/Add`, shape - `1, 255, 19, 19`. The anchor values are `142,110, 192,243, 459,401`.
+3. The array of detection summary info, name - `StatefulPartitionedCall/model/conv2d_109/BiasAdd/Add`, shape - `1, 19, 19, 255`. The anchor values are `142,110, 192,243, 459,401`.
 
-For each case format is `B, N*85, Cx, Cy`, where:
+For each case format is `B, Cx, Cy, N*85`, where:
 
 - `B` - batch size
 - `N` - number of detection boxes for cell
@@ -98,17 +98,24 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

@@ -60,19 +60,28 @@ else()
     set(COMPILER_IS_GCC_LIKE FALSE)
 endif()
 
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64.*|aarch64.*|AARCH64.*)")
+  set(AARCH64 ON)
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm.*|ARM.*)")
+  set(ARM ON)
+endif()
+if(ARM AND NOT CMAKE_CROSSCOMPILING)
+    add_compile_options(-march=armv7-a)
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-function(add_samples_to_build)
-    # check each passed sample subdirectory
+function(add_demos_to_build)
+    # check each passed demo subdirectory
     foreach(dir ${ARGN})
         if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
             # check if a subdirectory contains CMakeLists.txt. In this case we can build it.
             file(GLOB sub_dirs ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/*)
             foreach(sub_dir ${sub_dirs})
                 if(EXISTS "${sub_dir}/CMakeLists.txt")
-                    # check if specified sample/demo is found.
+                    # check if specified demo is found.
                     if(BUILD_SAMPLE_NAME)
                         list(FIND BUILD_SAMPLE_NAME ${dir} index)
                     endif()
@@ -94,52 +103,61 @@ include(CMakeParseArguments)
 #     SOURCES <source files>
 #     [HEADERS <header files>]
 #     [INCLUDE_DIRECTORIES <include dir>]
+#     [OPENCV_VERSION_REQUIRED <X.Y.Z>]
 #     [DEPENDENCIES <dependencies>])
 macro(add_demo)
-    set(oneValueArgs NAME)
+    set(oneValueArgs NAME OPENCV_VERSION_REQUIRED)
     set(multiValueArgs SOURCES HEADERS DEPENDENCIES INCLUDE_DIRECTORIES)
-    cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
+    cmake_parse_arguments(OMZ_DEMO "${options}" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN})
+
+    if(OMZ_DEMO_OPENCV_VERSION_REQUIRED AND OpenCV_VERSION VERSION_LESS OMZ_DEMO_OPENCV_VERSION_REQUIRED)
+        message(WARNING "${OMZ_DEMO_NAME} is disabled; required OpenCV version ${OMZ_DEMO_OPENCV_VERSION_REQUIRED}, provided ${OpenCV_VERSION}")
+        return()
+    endif()
 
     # Create named folders for the sources within the .vcproj
     # Empty name lists them directly under the .vcproj
-    source_group("src" FILES ${IE_SAMPLE_SOURCES})
-    if(IE_SAMPLE_HEADERS)
-        source_group("include" FILES ${IE_SAMPLE_HEADERS})
+    source_group("src" FILES ${OMZ_DEMO_SOURCES})
+    if(OMZ_DEMO_HEADERS)
+        source_group("include" FILES ${OMZ_DEMO_HEADERS})
     endif()
 
     # Create executable file from sources
-    add_executable(${IE_SAMPLE_NAME} ${IE_SAMPLE_SOURCES} ${IE_SAMPLE_HEADERS})
+    add_executable(${OMZ_DEMO_NAME} ${OMZ_DEMO_SOURCES} ${OMZ_DEMO_HEADERS})
 
     if(WIN32)
-        set_target_properties(${IE_SAMPLE_NAME} PROPERTIES COMPILE_PDB_NAME ${IE_SAMPLE_NAME})
+        set_target_properties(${OMZ_DEMO_NAME} PROPERTIES COMPILE_PDB_NAME ${OMZ_DEMO_NAME})
     endif()
 
-    if(IE_SAMPLE_INCLUDE_DIRECTORIES)
-        target_include_directories(${IE_SAMPLE_NAME} PRIVATE ${IE_SAMPLE_INCLUDE_DIRECTORIES})
+    if(OMZ_DEMO_INCLUDE_DIRECTORIES)
+        target_include_directories(${OMZ_DEMO_NAME} PRIVATE ${OMZ_DEMO_INCLUDE_DIRECTORIES})
     endif()
 
-    target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils gflags)
+    target_link_libraries(${OMZ_DEMO_NAME} PRIVATE ${OpenCV_LIBRARIES} openvino::runtime ${InferenceEngine_LIBRARIES}
+                                                    ${OMZ_DEMO_DEPENDENCIES} ngraph::ngraph utils gflags)
 
     if(UNIX)
-        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
+        target_link_libraries(${OMZ_DEMO_NAME} PRIVATE pthread)
     endif()
 endmacro()
 
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
+find_package(OpenVINO REQUIRED COMPONENTS Runtime)
+# TODO: remove InferenceEngine and ngraph after 2022.1
 find_package(InferenceEngine REQUIRED)
 find_package(ngraph REQUIRED)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
+add_subdirectory(common/cpp_gapi)
 add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
 list(REMOVE_ITEM samples_dirs common thirdparty multi_channel_common)
-add_samples_to_build(${samples_dirs})
+add_demos_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
     find_package(PythonInterp 3.6 REQUIRED)

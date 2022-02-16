@@ -1,21 +1,19 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#include "core.hpp"
-#include "logging.hpp"
-
+#include <map>
+#include <deque>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <utility>
-#include <deque>
-#include <map>
-
+#include <opencv2/opencv.hpp>
 #include <utils/common.hpp>
+#include <core.hpp>
+#include "logging.hpp"
 
 ///
 /// \brief The DetectionLogEntry struct
@@ -24,7 +22,7 @@
 ///
 struct DetectionLogEntry {
     TrackedObjects objects;  ///< Detected objects.
-    int frame_idx;           ///< Processed frame index (-1 if N/A).
+    int64_t frame_idx;           ///< Processed frame index (-1 if N/A).
     double time_ms;          ///< Frame processing time in ms (-1 if N/A).
 
     ///
@@ -137,9 +135,3 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
     os << "\n]";
     return os;
 }
-
-InferenceEngine::Core
-LoadInferenceEngine(const std::vector<std::string>& devices,
-                    const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels,
-                    bool should_use_perf_counter);

@@ -1,0 +1,91 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "detr-resnet50" model is one from DEtection TRansformer (DETR) models family,
+  which consider object detection as a direct set prediction problem. The model has
+  ResNet50 backbone and pretrained on Common Objects in Context <COCO> <https://cocodataset.org/#home>
+  dataset for solving object detection task. DETR predicts all objects at once, and
+  is trained end-to-end with a set loss function which performs bipartite matching
+  between predicted and ground-truth objects. DETR simplifies the detection pipeline
+  by dropping multiple hand-designed components that encode prior knowledge, like
+  spatial anchors or non-maximal suppression.
+
+  More details provided in the paper <https://arxiv.org/abs/2005.12872> and repository
+  <https://github.com/facebookresearch/detr>.
+task_type: detection
+files:
+  - name: detr-r50-e632da11.pth
+    size: 166618694
+    checksum: cba2c4acb7c6ec60e0d56dbd7bfb0dab73aef5ac86bf9819bc4e176fd943114fb1e5567e5046dc6d6a18b7e490dce680
+    original_source: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/detr-resnet50/detr-r50-e632da11.pth
+  - name: models/detr.py
+    size: 17089
+    checksum: ae1d9cc2b2b483dbd8fd095137e27bf1ec1d596ede1be55e842f771f02725a958763358631e7c8e69fecfe34059fb393
+    source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/detr.py
+  - name: models/backbone.py
+    size: 4437
+    checksum: 2935015de1399c9b2037da55de0e8d90fa6c1d19739821df3aa9d986fdcb1c861a6b8d494165bfdb68ff52ab87494ad6
+    source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/backbone.py
+  - name: models/transformer.py
+    size: 12162
+    checksum: ae5bd31653d7b0a5809e71adec72b5e002a63ec95af8660c4c73310f040b01e0920816ce3ef8078131a4f1f35c406077
+    source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/transformer.py
+  - name: models/position_encoding.py
+    size: 3336
+    checksum: 9729adf8750340fcb730e26b688a925abbf934d2f0200a7aded338f512090f77be2327441f3b97da6cab5def77b8f767
+    source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/models/position_encoding.py
+  - name: util/misc.py
+    size: 15284
+    checksum: 257e7a29d01882b709542bae492ef187796f08691cfaec3c141efedd77597eeca2ec9f549b0fc2794b260a19f3196098
+    source: https://raw.githubusercontent.com/facebookresearch/detr/a54b77800eb8e64e3ad0d8237789fcbf2f8350c5/util/misc.py
+postprocessing:
+  - $type: regex_replace
+    file: models/detr.py
+    pattern: 'from util import box_ops'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/detr.py
+    pattern: 'from (\.matcher|\.segmentation)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/detr.py
+    pattern: 'dice_loss, sigmoid_focal_loss\)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/backbone.py
+    pattern: 'pretrained=is_main_process\(\)'
+    replacement: 'pretrained=False'
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/detr-r50-e632da11.pth"
+  - --input-shapes=1,3,800,1137
+  - --input-names=input
+  - --output-names=scores,boxes
+  - --output-file=$conv_dir/detr-resnet50.onnx
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,3,800,1137]
+  - --input=input
+  - --layout=input(NCHW)
+  - --mean_values=input[123.675,116.28,103.53]
+  - --scale_values=input[58.395,57.12,57.375]
+  - --output=boxes,scores
+  - --input_model=$conv_dir/detr-resnet50.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/facebookresearch/detr/master/LICENSE

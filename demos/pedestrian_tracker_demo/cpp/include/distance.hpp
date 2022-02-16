@@ -4,13 +4,10 @@
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc.hpp>
-
 #include <memory>
 #include <vector>
-
-#include <inference_engine.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc.hpp>
 
 ///
 /// \brief The IDescriptorDistance class declares an interface for distance
@@ -71,7 +68,6 @@ public:
 private:
     cv::Size descriptor_size_;
 };
-
 
 
 ///

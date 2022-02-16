@@ -1,0 +1,36 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Person Detection based on Resnet50 (VFNet) on 1344x800 resolution.
+task_type: detection
+files:
+  - name: FP32/person-detection-0301.xml
+    size: 2977342
+    checksum: 43e55910ed98c6c1b464f5f2932ccd915de6edeccfcc930d10eddbbdba27c9850c0f51e7351c9ee188a317d9e00c1445
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-0301/FP32/person-detection-0301.xml
+  - name: FP32/person-detection-0301.bin
+    size: 131027248
+    checksum: 2a4dede0911949335e6c85e54557314825428629822ce57198cfc8e3f828aad4529372d90c510ba685a3b2db6e4fe20b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-0301/FP32/person-detection-0301.bin
+  - name: FP16/person-detection-0301.xml
+    size: 3137259
+    checksum: 1c57851a3b675eda4e23ba28a92f112ddb035757c36da8151b4981be87fd117dd2cf09a430a1d8682f6bad50385b2cee
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-0301/FP16/person-detection-0301.xml
+  - name: FP16/person-detection-0301.bin
+    size: 65513854
+    checksum: 6651e26d7795b9b71f23024a89ac9978793fe59c7cc92b9eb7ede5508681b34981324f8175fcbc296e94f31a2f82248f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-0301/FP16/person-detection-0301.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

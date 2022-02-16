@@ -1,27 +1,24 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-
-#include "detector.hpp"
 
 #include <algorithm>
 #include <string>
 #include <map>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <inference_engine.hpp>
 
-#include <ngraph/ngraph.hpp>
+#include "openvino/openvino.hpp"
 
-using namespace InferenceEngine;
+#include "detector.hpp"
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
 
 using namespace detection;
 
 namespace {
-cv::Rect TruncateToValidRect(const cv::Rect& rect,
-                             const cv::Size& size) {
+cv::Rect TruncateToValidRect(const cv::Rect& rect, const cv::Size& size) {
     auto tl = rect.tl(), br = rect.br();
     tl.x = std::max(0, std::min(size.width - 1, tl.x));
     tl.y = std::max(0, std::min(size.height - 1, tl.y));
@@ -32,8 +29,7 @@ cv::Rect TruncateToValidRect(const cv::Rect& rect,
     return cv::Rect(tl.x, tl.y, w, h);
 }
 
-cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x,
-                      float coeff_y)  {
+cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x, float coeff_y) {
     cv::Point2f tl = r.tl();
     cv::Point2f br = r.br();
     cv::Point2f c = (tl * 0.5f) + (br * 0.5f);
@@ -49,78 +45,103 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x,
 }
 }  // namespace
 
-void FaceDetection::submitRequest() {
-    if (!enqueued_frames_) return;
-    enqueued_frames_ = 0;
-    BaseCnnDetection::submitRequest();
-}
-
-void FaceDetection::enqueue(const cv::Mat &frame) {
-    if (!request) {
-        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
-    }
-
-    width_ = static_cast<float>(frame.cols);
-    height_ = static_cast<float>(frame.rows);
-
-    Blob::Ptr inputBlob = request->GetBlob(input_name_);
-
-    matU8ToBlob<uint8_t>(frame, inputBlob);
-
-    enqueued_frames_ = 1;
-}
-
 FaceDetection::FaceDetection(const DetectorConfig& config) :
-        BaseCnnDetection(config.is_async), config_(config) {
-    topoName = "face detector";
-    auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
+        BaseCnnDetection(config.is_async), m_config(config) {
+    m_detectorName = "Face Detection";
 
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
-    if (inputInfo.size() != 1) {
+    slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
+    std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
+    logBasicModelInfo(model);
+
+    ov::Layout desiredLayout = {"NHWC"};
+
+    ov::OutputVector inputs_info = model->inputs();
+    if (inputs_info.size() != 1) {
         throw std::runtime_error("Face Detection network should have only one input");
     }
-    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
-    inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
 
-    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
-    input_dims[2] = config_.input_h;
-    input_dims[3] = config_.input_w;
-    std::map<std::string, SizeVector> input_shapes;
-    input_shapes[inputInfo.begin()->first] = input_dims;
-    cnnNetwork.reshape(input_shapes);
-
-    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    if (outputInfo.size() != 1) {
+    ov::OutputVector outputs_info = model->outputs();
+    if (outputs_info.size() != 1) {
         throw std::runtime_error("Face Detection network should have only one output");
     }
-    DataPtr& _output = outputInfo.begin()->second;
-    output_name_ = outputInfo.begin()->first;
 
-    const SizeVector outputDims = _output->getTensorDesc().getDims();
-    max_detections_count_ = outputDims[2];
-    object_size_ = outputDims[3];
-    if (object_size_ != 7) {
+    ov::Output<ov::Node> input = model->input();
+    m_input_name = input.get_any_name();
+
+    ov::Layout modelLayout = ov::layout::get_layout(input);
+    if (modelLayout.empty())
+        modelLayout = {"NCHW"};
+
+    ov::Shape shape = input.get_shape();
+    shape[ov::layout::height_idx(modelLayout)] = m_config.input_h;
+    shape[ov::layout::width_idx(modelLayout)] = m_config.input_w;
+
+    ov::Output<ov::Node> output = model->output();
+    m_output_name = output.get_any_name();
+
+    ov::Shape outputDims = output.get_shape();
+    m_max_detections_count = outputDims[2];
+    m_object_size = outputDims[3];
+    if (m_object_size != 7) {
         throw std::runtime_error("Face Detection network output layer should have 7 as a last dimension");
     }
     if (outputDims.size() != 4) {
         throw std::runtime_error("Face Detection network output should have 4 dimensions, but had " +
-                              std::to_string(outputDims.size()));
+            std::to_string(outputDims.size()));
     }
-    _output->setPrecision(Precision::FP32);
-    _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
-    input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    std::map<std::string, ov::PartialShape> input_shapes;
+    input_shapes[input.get_any_name()] = shape;
+    model->reshape(input_shapes);
+
+    ov::preprocess::PrePostProcessor ppp(model);
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout(desiredLayout);
+    ppp.input().preprocess()
+        .convert_layout(modelLayout)
+        .convert_element_type(ov::element::f32);
+    ppp.input().model().set_layout(modelLayout);
+
+    model = ppp.build();
+
+    slog::info << "PrePostProcessor configuration:" << slog::endl;
+    slog::info << ppp << slog::endl;
+
+    m_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
+    logCompiledModelInfo(m_model, m_config.m_path_to_model, m_config.m_deviceName, m_detectorName);
+}
+
+void FaceDetection::submitRequest() {
+    if (!m_enqueued_frames)
+        return;
+    m_enqueued_frames = 0;
+
+    BaseCnnDetection::submitRequest();
+}
+
+void FaceDetection::enqueue(const cv::Mat& frame) {
+    if (m_request == nullptr) {
+        m_request = std::make_shared<ov::InferRequest>(m_model.create_infer_request());
+    }
+
+    m_width = static_cast<float>(frame.cols);
+    m_height = static_cast<float>(frame.rows);
+
+    ov::Tensor inputTensor = m_request->get_tensor(m_input_name);
+
+    resize2tensor(frame, inputTensor);
+
+    m_enqueued_frames = 1;
 }
 
 DetectedObjects FaceDetection::fetchResults() {
     DetectedObjects results;
-    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rmap();
-    const float *data = outputMapped.as<float *>();
+    const float* data = m_request->get_tensor(m_output_name).data<float>();
 
-    for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
-        const int start_pos = det_id * object_size_;
+    for (int det_id = 0; det_id < m_max_detections_count; ++det_id) {
+        const int start_pos = det_id * m_object_size;
 
         const float batchID = data[start_pos];
         if (batchID == SSD_EMPTY_DETECTIONS_INDICATOR) {
@@ -128,14 +149,10 @@ DetectedObjects FaceDetection::fetchResults() {
         }
 
         const float score = std::min(std::max(0.0f, data[start_pos + 2]), 1.0f);
-        const float x0 =
-                std::min(std::max(0.0f, data[start_pos + 3]), 1.0f) * width_;
-        const float y0 =
-                std::min(std::max(0.0f, data[start_pos + 4]), 1.0f) * height_;
-        const float x1 =
-                std::min(std::max(0.0f, data[start_pos + 5]), 1.0f) * width_;
-        const float y1 =
-                std::min(std::max(0.0f, data[start_pos + 6]), 1.0f) * height_;
+        const float x0 = std::min(std::max(0.0f, data[start_pos + 3]), 1.0f) * m_width;
+        const float y0 = std::min(std::max(0.0f, data[start_pos + 4]), 1.0f) * m_height;
+        const float x1 = std::min(std::max(0.0f, data[start_pos + 5]), 1.0f) * m_width;
+        const float y1 = std::min(std::max(0.0f, data[start_pos + 6]), 1.0f) * m_height;
 
         DetectedObject object;
         object.confidence = score;
@@ -146,11 +163,11 @@ DetectedObjects FaceDetection::fetchResults() {
 
 
         object.rect = TruncateToValidRect(IncreaseRect(object.rect,
-                                                       config_.increase_scale_x,
-                                                       config_.increase_scale_y),
-                                          cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
+                                                       m_config.increase_scale_x,
+                                                       m_config.increase_scale_y),
+                                          cv::Size(static_cast<int>(m_width), static_cast<int>(m_height)));
 
-        if (object.confidence > config_.confidence_threshold && object.rect.area() > 0) {
+        if (object.confidence > m_config.confidence_threshold && object.rect.area() > 0) {
             results.emplace_back(object);
         }
     }

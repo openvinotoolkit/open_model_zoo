@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +16,25 @@ description: >-
   Encoder part of latex formula recognition model.
 task_type: feature_extraction
 files:
+  - name: vocab.json
+    size: 1747
+    checksum: 2b2fcc77178a679975411af460e6fcc463779674568eeabfe35b8bc93c54bdd958f64c986efad8ea726c38ae29be74ae
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/vocab.json
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 197976
-    sha256: 0f994c1c1dd3ba2dc75a387427011c44e852e7623da2d4172b30f7721c7af0d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 281563
+    checksum: 7d22ff1df12d12b5b6b8018530580b8c3fcbfc9a0bdb0aab6a76b4924c21c37e01828b304055e9ebbbaf27a916a0ad72
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 45208792
-    sha256: 38084c37f20825be26ca444edd4f2181ea2089678f7c60c079871394c2d44d79
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 45367072
+    checksum: 74f2ac7265e01dab598e2c175ecbc238833a282280176af61a5e20afb64acef1b615e8d49b1be9421f41d06ba4162e1a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 197933
-    sha256: d68ed2dfe1626bfa3a0f50add3a8a32709a42dede15cc1acf0fd841c6579c8d9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 382738
+    checksum: 1cc1a0b19dddce498dea370f1714f549bfa288890cbfb873f7a573ceeabd57d4b97336721ebc58d99d1b12586d133532
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 22604504
-    sha256: 45b91bf30c2e9e6739dc4d493edc5c6f12d96173bf292e7426aabb6717b3dc67
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 22683680
+    checksum: 7c3f9b3703254e93a90675dc7c9577224ee2a0ccf54a581c2e2993177bc6bccd8bd099aec378b1847fdfe1f58ee5653b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

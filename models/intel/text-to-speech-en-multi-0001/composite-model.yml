@@ -1,1 +1,9 @@
+description: >-
+  This is a speech synthesis composite model that simultaneously reconstructs
+  mel-spectrogram and wave form from text. The model generates wave form
+  from symbol sequences separated by space for forty speakers.
+  The speaker voice characteristics are represented by vector of two numbers.
+  The model is built on top of the modified ForwardTacotron and modified MelGAN frameworks.
 task_type: text_to_speech
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

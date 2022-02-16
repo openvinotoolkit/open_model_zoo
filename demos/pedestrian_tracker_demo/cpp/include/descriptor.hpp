@@ -1,20 +1,16 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#include <vector>
-#include <string>
 #include <memory>
-#include <inference_engine.hpp>
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc.hpp"
-
-
-#include "core.hpp"
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 #include "cnn.hpp"
+#include "core.hpp"
+#include "logging.hpp"
 
 ///
 /// \brief The IImageDescriptor class declares base class for image
@@ -42,11 +38,6 @@ public:
     ///
     virtual void Compute(const std::vector<cv::Mat> &mats,
                          std::vector<cv::Mat> *descrs) = 0;
-
-    ///
-    /// \brief Prints performance counts for CNN-based descriptors
-    ///
-    virtual void PrintPerformanceCounts(std::string fullDeviceName) const {}
 
     virtual ~IImageDescriptor() {}
 };
@@ -107,15 +98,15 @@ private:
 };
 
 
-class DescriptorIE : public IImageDescriptor {
+class Descriptor : public IImageDescriptor {
 private:
     VectorCNN handler;
 
 public:
-    DescriptorIE(const CnnConfig& config,
-                 const InferenceEngine::Core& ie,
-                 const std::string & deviceName):
-        handler(config, ie, deviceName) {}
+    Descriptor(const ModelConfigTracker& config,
+                 const ov::Core& core,
+                 const std::string& deviceName):
+        handler(config, core, deviceName) {}
 
     ///
     /// \brief Descriptor size getter.
@@ -142,9 +133,5 @@ public:
     void Compute(const std::vector<cv::Mat> &mats,
                  std::vector<cv::Mat> *descrs) override {
         handler.Compute(mats, descrs);
-    }
-
-    void PrintPerformanceCounts(std::string fullDeviceName) const override {
-        handler.PrintPerformanceCounts(fullDeviceName);
     }
 };

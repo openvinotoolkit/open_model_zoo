@@ -8,7 +8,7 @@ The model is built on the ResNeXt-50 backbone with additional attention-based te
 The model was trained on internal Intel's dataset containing images of handwritten polynomial equations.
 The equations consist of tokens from the corresponding to this model vocabulary file.
 
-Vocabulary file is located under corresponding model configuration directory, `<omz_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json`. Model can predict letters, numbers and upperscript.
+Vocabulary file is located under corresponding model configuration directory, `<models_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json`. Model can predict letters, numbers and upperscript.
 
 ## Example of the input data
 
@@ -25,7 +25,7 @@ Vocabulary file is located under corresponding model configuration directory, `<
 | im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 70.5%     |
 | Source framework                                                       | PyTorch\* |
 
-Im2latex-match-images metric is calculated by `<omz_dir>/tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py`
+Im2latex-match-images metric is calculated by `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/metrics/im2latex_images_match.py`
 
 ## Encoder model specification
 
@@ -77,6 +77,12 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 3.	Name: `output`, shape: `1, 256`. Current state of the decoder.
 4.	Name: `logit`, shape: `1, N`, where `N` is a vocabulary size. Classification confidence scores in the [0, 1] range
     for every token.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Formula Recognition Python\* Demo](../../../demos/formula_recognition_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

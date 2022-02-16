@@ -4,7 +4,7 @@
 
 A trained model of ICNet for fast semantic segmentation, trained on the CamVid dataset from scratch using the TensorFlow\* framework. For details about the original floating-point model, check out [ICNet for Real-Time Semantic Segmentation on High-Resolution Images](https://arxiv.org/abs/1704.08545).
 
-The model input is a blob that consists of a single image of `1, 3, 720, 960` in the `BGR` order. The pixel values are integers in the [0, 255] range.
+The model input is a blob that consists of a single image of `1, 720, 960, 3` in the `BGR` order. The pixel values are integers in the [0, 255] range.
 
 The model output for `icnet-camvid-ava-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset:
 - Sky
@@ -34,7 +34,7 @@ The quality metrics were calculated on the CamVid validation dataset. The `unlab
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| mIoU                      |        69.54% |
+| mIoU                      |        75.42% |
 
 - `IOU=TP/(TP+FN+FP)`, where:
   - `TP` - number of true positive pixels for given class
@@ -43,12 +43,12 @@ The quality metrics were calculated on the CamVid validation dataset. The `unlab
 
 ## Input
 
-Image, shape - `1, 3, 720, 960`, format is `B, C, H, W`, where:
+Image, name: `data`, shape - `1, 720, 960, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -61,6 +61,13 @@ Semantic segmentation class prediction map, shape - `1, 720, 960`, output data f
 - `W` - vertical coordinate of the input pixel
 
 Output contains the class prediction result of each pixel.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -1,7 +1,7 @@
 models:
   - name: noise-suppression-poconetlike-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: noise_suppression
           output_blob: output
@@ -156,12 +156,6 @@ models:
           - name: inp_state_049
             type: LSTM_INPUT
             value: out_state_049
-          - name: inp_state_050
-            type: LSTM_INPUT
-            value: out_state_050
-          - name: inp_state_051
-            type: LSTM_INPUT
-            value: out_state_051
     datasets:
       - name: speech_denoising_dataset
         preprocessing:
@@ -173,3 +167,6 @@ models:
           - type: sisdr
             delay: 640
             presenter: print_vector
+            reference:
+              mean: 20.544
+              std: 5.13

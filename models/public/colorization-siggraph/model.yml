@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,24 +20,24 @@ description: >-
 
   Model consumes as input L-channel of LAB-image (also user points and binary mask
   as optional inputs). Model give as output predict A- and B-channels of LAB-image.
-
 task_type: colorization
 files:
   - name: ckpt/colorization-siggraph.pth
     size: 136787426
-    sha256: df00044c0a4d7c3edcecf6f75437ce346a66e7a42612d9b968e1a7e17dbc6f66
-    source: https://colorizers.s3.us-east-2.amazonaws.com/siggraph17-df00044c.pth
+    checksum: f6c42249eb7c51f6127ed14a06fdd8ade7bae810a1021c3db1f026a4751846577eff44e9da580677ae668c17d853fa13
+    original_source: https://colorizers.s3.us-east-2.amazonaws.com/siggraph17-df00044c.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/colorization-siggraph/siggraph17-df00044c.pth
   - name: model/__init__.py
     size: 96
-    sha256: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
+    checksum: 04b2675bb9d47bd3f05cb786ec74abd67b4118b6d3b424c0bc85d5136939605c39da443740d9b98b1e7f3f0ada05c885
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
   - name: model/base_color.py
     size: 454
-    sha256: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
+    checksum: 73f4fdae2d975c533530da98efc3c8a7089202492293b28fef447408d054cd59bdff0befc7f38b8336b1a001ce6f9e8d
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
   - name: model/siggraph17.py
     size: 7339
-    sha256: c78e3f2af8dd13d5fb7a9c7fc95f580f728f86a183b5ad2e12f6a48b282511bd
+    checksum: 9ae0be2f05ef6776f4d3fb801d2b3a1408196e4ff22c01e5977f38617f38918fec234fdd306bb957ba69b84493566f02
     source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/siggraph17.py
 postprocessing:
   - $type: regex_replace
@@ -56,6 +56,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,1,256,256],[1,2,256,256],[1,1,256,256]
   - --input=data_l,user_ab,user_map
+  - --layout=data_l(NCHW),user_ab(NCHW),user_map(NCHW)
   - --output=color_ab
   - --input_model=$conv_dir/colorization-siggraph.onnx
 framework: pytorch

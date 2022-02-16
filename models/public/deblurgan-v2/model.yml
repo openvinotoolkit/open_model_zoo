@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,26 +23,27 @@ task_type: image_processing
 files:
   - name: models/__init__.py
     size: 0
-    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    checksum: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
     source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/__init__.py
   - name: models/fpn_mobilenet.py
     size: 5688
-    sha256: 1b24574ed94f6bb037b91208c5bcde9da243d2a175493ca942e448176c529efe
+    checksum: c3d9317a425bc848802ccaaa5cf22dcb434f9d1ae8b67461d476406290caf6ab1b0169e408ad98406bf7f503501b8a45
     source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/fpn_mobilenet.py
   - name: models/mobilenet_v2.py
     size: 4214
-    sha256: 16801e691c8bdaf16d57c00d3511fe1357d0a6fe63cf221f7c48dbc491383bc7
+    checksum: d704ddc6535f18f23edec4bd924977afa6cd1735efb96d52d60a0ddf236a5ec73df310050d742521dff398ec8336beae
     source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/mobilenet_v2.py
   - name: models/networks.py
     size: 12779
-    sha256: 3857345de80c42dedc5162d3e82a173160041cf4e0b307fd7e29680a1115d097
+    checksum: 512fa90092d4a3edfd243cbcb74aec6d5c57b23fdbbdb290d3fe6629429dcbf49c260f5bfb37e4191e5895628655ef65
     source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/networks.py
   - name: ckpt/fpn_mobilenet.h5
     size: 13505344
-    sha256: 6d1b6d9807da3ae8987021c063a5cb6ca0131e76388cdb5164404ee1b1bf522b
-    source:
+    checksum: 93bd1ef8e8d6cc190a3310db6b556aee2df42a294b7015f689237cb1a1cad1f9327b9369e530804f8369195d4b286386
+    original_source:
       $type: google_drive
       id: 1JhnT4BBeKBBSLqTo6UsJ13HeBXevarrU
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/deblurgan-v2/ckpt/fpn_mobilenet.h5
 postprocessing:
   - $type: regex_replace
     file: models/networks.py
@@ -74,6 +75,7 @@ model_optimizer_args:
   - --scale_values=blur_image[127.5]
   - --input_shape=[1,3,736,1312]
   - --input=blur_image
+  - --layout=blur_image(NCHW)
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx
 framework: pytorch

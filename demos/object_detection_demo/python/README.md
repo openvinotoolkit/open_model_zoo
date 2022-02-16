@@ -21,7 +21,7 @@ then there is little gain from doing the (resulting video) encoding on the same 
 because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the
-[Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html).
+[Optimization Guide](https://docs.openvino.ai/latest/_docs_optimization_guide_dldt_optimization_guide.html).
 
 Other demo objectives are:
 
@@ -37,33 +37,34 @@ Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
 * architecture_type = centernet
-  - ctdet_coco_dlav0_384
   - ctdet_coco_dlav0_512
 * architecture_type = ctpn
   - ctpn
+* architecture_type = detr
+  - detr-resnet50
 * architecture_type = faceboxes
   - faceboxes-pytorch
 * architecture_type = retinaface-pytorch
@@ -81,6 +82,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - face-detection-retail-0005
   - face-detection-retail-0044
   - faster-rcnn-resnet101-coco-sparse-60-0001
+  - faster_rcnn_inception_resnet_v2_atrous_coco
+  - faster_rcnn_resnet50_coco
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
   - pelee-coco
@@ -89,6 +92,9 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-detection-0201
   - person-detection-0202
   - person-detection-0203
+  - person-detection-0301
+  - person-detection-0302
+  - person-detection-0303
   - person-detection-retail-0013
   - person-vehicle-bike-detection-2000
   - person-vehicle-bike-detection-2001
@@ -102,8 +108,6 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - ssd512
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco
-  - ssd_mobilenet_v2_coco
-  - ssd_resnet50_v1_fpn_coco
   - ssd-resnet34-1200-onnx
   - ssdlite_mobilenet_v2
   - vehicle-detection-0200
@@ -117,6 +121,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - ultra-lightweight-face-detection-slim-320
 * architecture_type = yolo
   - mobilefacedet-v1-mxnet
+  - mobilenet-yolo-v4-syg
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v1-tiny-tf
   - yolo-v2-ava-0001
@@ -130,9 +135,16 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-vehicle-detection-0001
   - yolo-v3-tf
   - yolo-v3-tiny-tf
+* architecture_type = yolov3-onnx
+  - yolo-v3-onnx
+  - yolo-v3-tiny-onnx
 * architecture_type = yolov4
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+* architecture_type = yolof
+  - yolof
+* architecture_type = yolox
+  - yolox-tiny
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -142,30 +154,29 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
-                                -i INPUT [-d DEVICE] [--labels LABELS]
-                                [-t PROB_THRESHOLD] [--keep_aspect_ratio]
-                                [--input_size INPUT_SIZE INPUT_SIZE]
-                                [-nireq NUM_INFER_REQUESTS]
-                                [-nstreams NUM_STREAMS]
-                                [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
-                                [-limit OUTPUT_LIMIT] [--no_show]
-                                [--output_resolution OUTPUT_RESOLUTION]
-                                [-u UTILIZATION_MONITORS]
-                                [--reverse_input_channels REVERSE_CHANNELS]
-                                [--mean_values MEAN_VALUES]
-                                [--scale_values SCALE_VALUES]
-                                [-r]
+                                {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
+                                -i INPUT [--adapter {openvino,ovms}]
+                                [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
+                                [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
+                                [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
+                                [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+                                [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
+                                [--reverse_input_channels] [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
+                                [--scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
-                        Required. Specify model' architecture type.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
+  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -177,12 +188,19 @@ Common model options:
   -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
                         Optional. Probability threshold for detections
                         filtering.
-  --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
+  --resize_type {standard,fit_to_window,fit_to_window_letterbox}
+                        Optional. A resize type for model preprocess. By defauld used model predefined type.
   --input_size INPUT_SIZE INPUT_SIZE
                         Optional. The first image size used for CTPN model
                         reshaping. Default: 600 600. Note that submitted
                         images should have the same resolution, otherwise
                         predictions might be incorrect.
+  --anchors ANCHORS [ANCHORS ...]
+                        Optional. A space separated list of anchors. By default used default anchors for model. Only
+                        for YOLOV4 architecture type.
+  --masks MASKS [MASKS ...]
+                        Optional. A space separated list of mask for anchors. By default used default masks for model.
+                        Only for YOLOV4 architecture type.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -218,11 +236,11 @@ Input transform options:
                         BGR to RGB.
   --mean_values MEAN_VALUES
                         Optional. Normalize input by subtracting the mean
-                        values per channel. Example: 255 255 255
+                        values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES
                         Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
-                        Example: 255 255 255
+                        Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message
@@ -265,6 +283,21 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 object_detection_demo.py \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m localhost:9000/models/object_detection \
+  -at ssd \
+  --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt \
+  --adapter ovms
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
@@ -277,5 +310,6 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)
+* [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server)

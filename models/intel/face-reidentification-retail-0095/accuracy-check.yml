@@ -1,0 +1,17 @@
+models:
+  - name: face-reidentification-retail-0095
+    launchers:
+      - framework: openvino
+        adapter: reid
+
+    datasets:
+      - name: lfw
+
+        preprocessing:
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 128
+        metrics:
+          - type: pairwise_accuracy_subsets
+            reference: 0.9947

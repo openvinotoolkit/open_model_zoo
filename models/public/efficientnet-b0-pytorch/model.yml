@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,28 +30,30 @@ task_type: classification
 files:
   - name: model/gen_efficientnet.py
     size: 40997
-    sha256: 8613d48ca74611d3566d8c02cbf7c92aad6b16a708ffcf21183a7014fecdec09
+    checksum: b2868eed99002c95a8f54b0f20a975486d47dd0a4d8fda2fbeed68e0f83330b4617d6a09d60a08eaaf660f490a5906a9
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/gen_efficientnet.py
   - name: model/efficientnet_builder.py
     size: 18446
-    sha256: 69bb2adc49dc79c8860f36acca910bad6733e23b46ed80551248b90141d5e1b5
+    checksum: 5dbc9484139e3f23504508b63416a10251590c0f84e056e78830351d104a67f215fd6e180d7f22d20ad1eadd803c8bd6
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/efficientnet_builder.py
   - name: model/helpers.py
     size: 1097
-    sha256: 0415f198b8a87cb34c9f9aed79f267043010fbd197e27df805bab9d070da82ed
+    checksum: b1adc8c85422236df810c36de5333bd80f516f948be894633448ea9f12c098aba61be8bb6663cdedb0bd545b6ae986a6
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/helpers.py
   - name: model/conv2d_helpers.py
     size: 6175
-    sha256: e6ba7e878dd28c6d0ccc9707205bf6b58bea664d7fee820d7101a6a8e48990a9
+    checksum: cac2642f90d160a9f338bc83c423fd9cfa044a27f74c97726dc70b86adca7b6db32041676c64954ecac7acd5240975de
     source: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/conv2d_helpers.py
   - name: model/__init__.py
     size: 32
-    sha256: e0bedda5f5e949b8ace7d4f5cdf80e7e664c0b0a935486b6152078fa61c80c1b
-    source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
+    checksum: 56056cd865f696313e48aa09cc4d6dd334dd5aa71ba9495bdc443ac209c42485d864c31c216ee3befd8dd03e723c2113
+    original_source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/__init__.py
   - name: efficientnet-b0.pth
     size: 21376958
-    sha256: d6904d92f92ccdca67c9717f9d119392d658577f99e5ce021b57d157985783db
-    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
+    checksum: f44c3ff7ceeeda4ccf95a6720483cf2bee89f2db59d47e8349d2a7d46024e006b76e92105b6723060b898505312e70ff
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/efficientnet_b0-d6904d92.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=efficientnet_b0
@@ -65,10 +67,11 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,224,224]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --output=prob
   - --input_model=$conv_dir/efficientnet-b0.onnx
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE

@@ -2,7 +2,7 @@ models:
   - name: unet-camvid-onnx-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
 
     datasets:
@@ -28,3 +28,5 @@ models:
             use_argmax: True
             ignore_label: 11
             presenter: print_vector
+            reference:
+              mean: 0.7195

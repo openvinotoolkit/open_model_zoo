@@ -1,34 +1,38 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "core.hpp"
-#include "utils.hpp"
-#include "tracker.hpp"
-#include "descriptor.hpp"
-#include "distance.hpp"
-#include "detector.hpp"
-#include "pedestrian_tracker_demo.hpp"
-
-#include <monitors/presenter.h>
-#include <utils/images_capture.h>
-
-#include <opencv2/core.hpp>
-
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <map>
 #include <memory>
+#include <iostream>
 #include <string>
-#include <gflags/gflags.h>
+#include <utility>
+#include <vector>
 
-using namespace InferenceEngine;
+#include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+
+#include <models/detection_model_centernet.h>
+#include <models/detection_model_ssd.h>
+#include <models/detection_model_yolo.h>
+#include <monitors/presenter.h>
+#include <pipelines/metadata.h>
+#include <utils/images_capture.h>
+#include <utils/slog.hpp>
+
+#include "core.hpp"
+#include "descriptor.hpp"
+#include "distance.hpp"
+#include "pedestrian_tracker_demo.hpp"
+#include "tracker.hpp"
+#include "utils.hpp"
+
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
 CreatePedestrianTracker(const std::string& reid_model,
-                        const InferenceEngine::Core & ie,
+                        const ov::Core & core,
                         const std::string & deviceName,
                         bool should_keep_tracking_info) {
     TrackerParams params;
@@ -51,11 +55,10 @@ CreatePedestrianTracker(const std::string& reid_model,
     tracker->set_distance_fast(distance_fast);
 
     if (!reid_model.empty()) {
-        CnnConfig reid_config(reid_model);
+        ModelConfigTracker reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
-
         std::shared_ptr<IImageDescriptor> descriptor_strong =
-            std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
+            std::make_shared<Descriptor>(reid_config, core, deviceName);
 
         if (descriptor_strong == nullptr) {
             throw std::runtime_error("[SAMPLES] internal error - invalid descriptor");
@@ -66,9 +69,9 @@ CreatePedestrianTracker(const std::string& reid_model,
         tracker->set_descriptor_strong(descriptor_strong);
         tracker->set_distance_strong(distance_strong);
     } else {
-        std::cout << "WARNING: Reid model "
+        slog::warn << "Reid model "
             << "was not specified. "
-            << "Only fast reidentification approach will be used." << std::endl;
+            << "Only fast reidentification approach will be used." << slog::endl;
     }
 
     return tracker;
@@ -96,12 +99,16 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m_reid is not set");
     }
 
+    if (FLAGS_at.empty()) {
+        throw std::logic_error("Parameter -at is not set");
+    }
+
     return true;
 }
 
 int main(int argc, char **argv) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
+        PerformanceMetrics metrics;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -116,10 +123,6 @@ int main(int argc, char **argv) {
         auto detector_mode = FLAGS_d_det;
         auto reid_mode = FLAGS_d_reid;
 
-        auto custom_cpu_library = FLAGS_l;
-        auto path_to_custom_layers = FLAGS_c;
-        bool should_use_perf_counter = FLAGS_pc;
-
         bool should_print_out = FLAGS_r;
 
         bool should_show = !FLAGS_no_show;
@@ -130,18 +133,36 @@ int main(int argc, char **argv) {
 
         bool should_save_det_log = !detlog_out.empty();
 
+        std::vector<std::string> labels;
+        if (!FLAGS_labels.empty())
+            labels = DetectionModel::loadLabels(FLAGS_labels);
+
+        std::unique_ptr<ModelBase> detectionModel;
+        if (FLAGS_at == "centernet") {
+            detectionModel.reset(new ModelCenterNet(det_model, (float)FLAGS_t, labels, FLAGS_layout_det));
+        }
+        else if (FLAGS_at == "ssd") {
+            detectionModel.reset(new ModelSSD(det_model, (float)FLAGS_t, FLAGS_auto_resize, labels, FLAGS_layout_det));
+        }
+        else if (FLAGS_at == "yolo") {
+            detectionModel.reset(new ModelYolo(det_model, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, {}, {}, FLAGS_layout_det));
+        }
+        else {
+            slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
+            return -1;
+        }
+
         std::vector<std::string> devices{detector_mode, reid_mode};
-        InferenceEngine::Core ie =
-            LoadInferenceEngine(
-                devices, custom_cpu_library, path_to_custom_layers,
-                should_use_perf_counter);
 
-        DetectorConfig detector_confid(det_model);
-        ObjectDetector pedestrian_detector(detector_confid, ie, detector_mode);
+        slog::info << ov::get_openvino_version()  << slog::endl;
+        ov::Core core;
 
+        auto model = detectionModel->compileModel(
+            ConfigFactory::getUserConfig(FLAGS_d_det, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
+        auto req = model.create_infer_request();
         bool should_keep_tracking_info = should_save_det_log || should_print_out;
         std::unique_ptr<PedestrianTracker> tracker =
-            CreatePedestrianTracker(reid_model, ie, reid_mode,
+            CreatePedestrianTracker(reid_model, core, reid_mode,
                                     should_keep_tracking_info);
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_read_limit);
@@ -151,36 +172,73 @@ int main(int argc, char **argv) {
             video_fps = 60.0;
         }
 
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) throw std::runtime_error("Can't read an image from the input");
         cv::Size firstFrameSize = frame.size();
 
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), firstFrameSize)) {
-            throw std::runtime_error("Can't open video writer");
-        }
-        uint32_t framesProcessed = 0;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         for (unsigned frameIdx = 0; ; ++frameIdx) {
-            pedestrian_detector.submitFrame(frame, frameIdx);
-            pedestrian_detector.waitAndFetchResults();
+            detectionModel->preprocess(ImageInputData(frame), req);
 
-            TrackedObjects detections = pedestrian_detector.getResults();
+            req.infer();
+
+            InferenceResult res;
+
+            res.internalModelData = std::make_shared<InternalImageModelData>(frame.cols, frame.rows);
+
+            res.metaData = std::make_shared<ImageMetaData>(frame, std::chrono::steady_clock::now());
+
+            for (const auto& outName : detectionModel->getOutputsNames()) {
+                const auto& outTensor = req.get_tensor(outName);
+
+                if (ov::element::i32 == outTensor.get_element_type()) {
+                    res.outputsData.emplace(outName, outTensor);
+                }
+                else {
+                    res.outputsData.emplace(outName, outTensor);
+                }
+            }
+
+
+            auto result = (detectionModel->postprocess(res))->asRef<DetectionResult>();
+
+            TrackedObjects detections;
+
+            for (size_t i = 0; i < result.objects.size(); i++) {
+                TrackedObject object;
+                object.confidence = result.objects[i].confidence;
+
+                const float frame_width_ = static_cast<float>(frame.cols);
+                const float frame_height_ = static_cast<float>(frame.rows);
+                object.frame_idx = result.frameId;
+
+                const float x0 =
+                    std::min(std::max(0.0f, result.objects[i].x / frame_width_), 1.0f) * frame_width_;
+                const float y0 =
+                    std::min(std::max(0.0f, result.objects[i].y / frame_height_), 1.0f) * frame_height_;
+                const float x1 =
+                    std::min(std::max(0.0f, (result.objects[i].x + result.objects[i].width) / frame_width_), 1.0f) * frame_width_;
+                const float y1 =
+                    std::min(std::max(0.0f, (result.objects[i].y + result.objects[i].height) / frame_height_), 1.0f) * frame_height_;
+
+                object.rect = cv::Rect2f(cv::Point(static_cast<int>(round(static_cast<double>(x0))),
+                    static_cast<int>(round(static_cast<double>(y0)))),
+                    cv::Point(static_cast<int>(round(static_cast<double>(x1))),
+                        static_cast<int>(round(static_cast<double>(y1)))));
+
+                if (object.rect.area() > 0 && ((int)result.objects[i].labelID== FLAGS_person_label || FLAGS_person_label == -1)) {
+                    detections.emplace_back(object);
+                }
+            }
 
             // timestamp in milliseconds
             uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frameIdx);
             tracker->Process(frame, detections, cur_timestamp);
 
-            presenter.drawGraphs(frame);
             // Drawing colored "worms" (tracks).
             frame = tracker->DrawActiveTracks(frame);
 
@@ -195,14 +253,13 @@ int main(int argc, char **argv) {
                 cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
                 std::string text = std::to_string(detection.object_id) +
                     " conf: " + std::to_string(detection.confidence);
-                cv::putText(frame, text, detection.rect.tl(), cv::FONT_HERSHEY_COMPLEX,
-                            1.0, cv::Scalar(0, 0, 255), 3);
+                putHighlightedText(frame, text, detection.rect.tl() - cv::Point{10, 10}, cv::FONT_HERSHEY_COMPLEX,
+                            0.65, cv::Scalar(0, 0, 255), 2);
             }
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            framesProcessed++;
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
-                videoWriter.write(frame);
-            }
+            videoWriter.write(frame);
             if (should_show) {
                 cv::imshow("dbg", frame);
                 char k = cv::waitKey(delay);
@@ -215,6 +272,7 @@ int main(int argc, char **argv) {
                 DetectionLog log = tracker->GetDetectionLog(true);
                 SaveDetectionLogToTrajFile(detlog_out, log);
             }
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
             if (!frame.data) break;
             if (frame.size() != firstFrameSize)
@@ -229,23 +287,19 @@ int main(int argc, char **argv) {
             if (should_print_out)
                 PrintDetectionLog(log);
         }
-        if (should_use_perf_counter) {
-            pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
-            tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
-        }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    std::cout << "Execution successful" << std::endl;
 
     return 0;
 }

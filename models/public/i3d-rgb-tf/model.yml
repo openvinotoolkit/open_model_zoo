@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ description: >-
 task_type: action_recognition
 files:
   - name: i3d-rgb.frozen.pb
-    sha256: 77b3239c74c78be2c4c6747edd803deef8d4c8c3cf466c4c402a3db4f9d4b3a0
+    checksum: 8f1c32cc56cc1ca6880b7725430ae8ec369485e60f9bcce9724042ecb6e5bd97d25a04148c38bfde60b0ed00c918bc96
     size: 51046552
-    source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
+    original_source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/i3d-rgb-tf/rgb.frozen.pb
 framework: tf
 model_optimizer_args:
   - --input_shape=[1,79,224,224,3]
+  - --layout=Placeholder(NDHWC)
   - --mean_values=Placeholder[127.5]
   - --scale_values=Placeholder[127.5]
   - --input_model=$dl_dir/i3d-rgb.frozen.pb

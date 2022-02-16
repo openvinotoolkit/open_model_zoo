@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,10 +37,8 @@ task_type: detection
 files:
   - name: ssd512.tar.gz
     size: 100991061
-    sha256: 2d98a6ddd5b4cb0ba59a37fe5d50020457cfe104d45873c3ea43d1e6dcddd12d
-    source:
-      $type: google_drive
-      id: 0BzKzrI_SkD1_MjFjNTlnempHNWs
+    checksum: 569b25de77ebd11c19fd9934dff148251505414cd3eec0f7419c60f5efc27666b20fc64df1131bc755f61d77335ad0e0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2021.4/ssd512/models_VGGNet_VOC0712Plus_SSD_512x512.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -52,10 +50,11 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,3,512,512]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[104.0,117.0,123.0]
   - --output=detection_out
   - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
   - --input_proto=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE

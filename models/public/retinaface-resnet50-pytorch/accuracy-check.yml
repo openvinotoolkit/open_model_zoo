@@ -1,7 +1,7 @@
 models:
   - name: retinaface-resnet50-pytorch
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: retinaface_pytorch
           bboxes_output: face_rpn_bbox_pred
@@ -27,3 +27,4 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+            reference: 0.9178

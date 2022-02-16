@@ -48,7 +48,7 @@ Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, nam
 - C - alphabet size, including the CTC blank symbol
 
 The per-frame probabilities are to be decoded with a CTC decoder.
-The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/default_alphabet_example.conf`.
+The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided at `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/default_alphabet_example.conf`.
 
 #### Converted model
 
@@ -56,17 +56,23 @@ The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Speech Recognition QuartzNet Python\* Demo](../../../demos/speech_recognition_quartznet_demo/python/README.md)
 
 ## Legal Information
 

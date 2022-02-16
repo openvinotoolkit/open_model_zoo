@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: head_pose_estimation
 files:
   - name: FP32/head-pose-estimation-adas-0001.xml
-    size: 53353
-    sha256: dbe9eae034a14e12bc3aa40f819e11318063b517e21525794977d4c24f5fe76d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    size: 64899
+    checksum: 6cfbaccbb37ae31293df16174a94521ad5ed30c28c26eb57a45850fd96d300e9efa89086a80c5e50b611fb43682f25af
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
   - name: FP32/head-pose-estimation-adas-0001.bin
     size: 7647604
-    sha256: e3b16435e7c23297c3365ca8e5ad0e11ae5b0e16ec74372ed4bd93c53c40a8fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    checksum: b25273283cf83f851de276e5d9b836a3abc32485dc8ea5ee736f4e2b1d2dc86d107856da52ce160e1354c90722ecc9a3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
   - name: FP16/head-pose-estimation-adas-0001.xml
-    size: 53344
-    sha256: 07292d4b0c53f52fa9b23a9999b727fb4b09caa4196aa480f472e7f3af929a98
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    size: 88103
+    checksum: 762cd5e8174ac85b652462d9cb293860f93f7c15dca5fb135b715fb670c78f6c3d9a65a4b04aff53542ed874c4906629
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
   - name: FP16/head-pose-estimation-adas-0001.bin
     size: 3823810
-    sha256: 848fa24e72bcb5a058a36ef74c816b3a1b99fe08d35b450be388b0f1808dbecf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    checksum: b9aac8c49fbc95c189b7e8deab18826a6593feda45f9e31a38ac5da7a1f071264c5d5a1e1d642fc75d94c51bf5c1cdaf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
   - name: FP16-INT8/head-pose-estimation-adas-0001.xml
-    size: 89782
-    sha256: 0c29b6d81359613d8390961153e06587605eae86bb6f2d829f7c722a62319f47
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+    size: 129918
+    checksum: af768ac3ab6d6c859beaac98a7582ebbf9621b1649c7d3dccd1bfca5dd6ce35150c54ea8da30add928bfd620166d833a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
   - name: FP16-INT8/head-pose-estimation-adas-0001.bin
-    size: 2074366
-    sha256: 8010aaf43ef92702ca5e5441aea9a51521e438776aa18df55f719b60e9be0026
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+    size: 1928026
+    checksum: fb982f4f5747784e0452086648c4f4a105a9051356e907ad903c7ea1ed9efbfb68b5d8d7e73d1e5d895fc2300df8c5c4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

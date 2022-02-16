@@ -1,0 +1,21 @@
+models:
+  - name: hybrid-cs-model-mri
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: False
+
+    datasets:
+      - name: CalgaryCampinasSingleChannel_20perc_downsample
+        postprocessing:
+          - type: interpolation
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+            reference:
+              mean: 34.272884
+              std: 4.607115

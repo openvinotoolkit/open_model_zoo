@@ -6,7 +6,7 @@ models:
         model:   model/model.pb.frozen
         adapter: ssd
 
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -38,3 +38,7 @@ models:
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
             presenter: print_vector
+            reference:
+              mean: 0.9952
+              plate: 0.9913
+              vehicle: 0.999

@@ -2,7 +2,7 @@ datasets:
   - name: ms_coco_mask_rcnn
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
     annotation: mscoco_mask_rcnn.pickle
@@ -12,32 +12,32 @@ datasets:
   - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80.json
+    annotation: mscoco_mask_rcnn_80.pickle
+    dataset_meta: mscoco_mask_rcnn_80.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_80_classes_without_background
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80_without_bkgr.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80_without_bkgr.json
+    annotation: mscoco_mask_rcnn_80_without_bkgr.pickle
+    dataset_meta: mscoco_mask_rcnn_80_without_bkgr.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: mscoco_mask_rcnn_short_91.pickle
-    dataset_meta: mscoco_mask_rcnn_short_91.json
+    annotation: mscoco_mask_rcnn_91.pickle
+    dataset_meta: mscoco_mask_rcnn_91.json
     data_source: val2017
     preprocessing:
       - type: resize
@@ -57,7 +57,7 @@ datasets:
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -83,7 +83,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
       use_full_label_map: False
@@ -94,7 +94,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: False
@@ -102,10 +102,10 @@ datasets:
     dataset_meta: mscoco_det_80_bkgr.json
 
   - name: ms_coco_detection_90_class_without_background
-    data_source: MSCOCO/val2017
+    data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: MSCOCO/annotations/instances_val2017.json
+      annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
       use_full_label_map: True
@@ -116,7 +116,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       sort_key: image_size
     annotation: mscoco_keypoints.pickle
     dataset_meta: mscoco_keypoints.json
@@ -129,7 +129,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       remove_empty_images: True
       sort_annotations: True
       sort_key: image_size
@@ -144,7 +144,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       remove_empty_images: False
       sort_annotations: True
       sort_key: image_size
@@ -154,6 +154,16 @@ datasets:
     metrics:
       - name: AP
         type: coco_orig_keypoints_precision
+
+  - name: COCO2017_mask_rcnn_person
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_persons.json
+      has_background: False
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_person.pickle
+    dataset_meta: mscoco_mask_rcnn_person.json
+    data_source: val2017
 
   - name: imagenet_1000_classes
     annotation_conversion:
@@ -289,6 +299,17 @@ datasets:
     postprocessing:
       - type: normalize_landmarks_points
 
+  - name: facial_landmarks_98_db
+    data_source: 98_landmarks
+    annotation_conversion:
+      converter: coco_facial_landmarks
+      annotation_file: 98_landmarks/lms_test.json
+    preprocessing:
+      - type: resize
+        size: 64
+    postprocessing:
+      - type: normalize_landmarks_points
+
   - name: emotions_recognition
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation_conversion:
@@ -388,7 +409,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -399,7 +420,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
@@ -946,7 +967,7 @@ datasets:
     data_source: val2017
     annotation_conversion:
       converter: mscoco_single_keypoints
-      annotation_file: person_keypoints_val2017.json
+      annotation_file: annotations/person_keypoints_val2017.json
     annotation: mscoco_single_keypoints.pickle
     dataset_meta: mscoco_single_keypoints.json
     metrics:
@@ -1189,6 +1210,15 @@ datasets:
     annotation: scut_ept_recognition.pickle
     dataset_meta: scut_ept_recognition.json
 
+  - name: GNHK
+    data_source: gnhk
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: gnhk_char_list.txt
+      annotation_file: test_img_id_gt.txt
+    annotation: gnhk_recognition.pickle
+    dataset_meta: gnhk_recognition.json
+
   - name: ADEChallengeData2016
     annotation_conversion:
       converter: ade20k
@@ -1286,6 +1316,16 @@ datasets:
       target_suffix: sharp.png
     annotation: GOPRO.pickle
 
+  - name: SYGData0829
+    data_source: SYGData0829/dataset_format_VOC2007/JPEGImages/
+    dataset_meta_file: SYGData0829/voc_label.json
+    annotation_conversion:
+      converter: syg_detection
+      imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+      annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+      images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
+      has_background: False
+
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
     reader:
@@ -1357,3 +1397,52 @@ datasets:
     annotation_conversion:
       converter: electricity
       data_path_file: LD2011_2014.txt
+
+  - name: CalgaryCampinasSingleChannel_20perc_downsample
+    data_source: Calgary-Campinas/CC359
+    reader:
+      type: numpy_reader
+    annotation: Calgary_Campinas_Single_Channel.pickle
+    annotation_conversion:
+      converter: k_space_mri
+      data_dir: Calgary-Campinas/CC359
+      image_folder: Raw-data/Single-channel/Val
+      reconstructed_folder: accuracy_checker_preprocess/Single-channel/Reconstructed
+      sampled_folder: accuracy_checker_preprocess/Single-channel/Sampled
+      mask_file: sampling_mask_20perc.npy
+      stats_file: stats_fs_unet_norm_20.npy
+
+  - name: WikiText_2_raw_gpt2
+    annotation: wikitext_2_raw.pickle
+    annotation_conversion:
+      converter: wikitext2raw
+      vocab_file: gpt2/vocab.json
+      merges_file: gpt2/merges.txt
+      testing_file: wikitext-2-raw/wiki.test.raw
+      max_seq_length: 1024
+
+  - name: wavernn-io
+    data_source: wavernn_io/rnn
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: wavernn_io/rnn
+      input_suffix: in
+      reference_suffix: out
+
+  - name: LIVE_1
+    data_source: LIVE_1
+    annotation_conversion:
+      converter: image_processing
+      data_dir: LIVE_1
+      input_suffix: .bmp
+      target_suffix: .bmp
+
+  - name: online_mstcn_plus_dataset
+    data_source: annotation
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: annotation
+      input_suffix: in
+      reference_suffix: out

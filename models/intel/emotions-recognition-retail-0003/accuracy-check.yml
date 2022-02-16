@@ -2,7 +2,7 @@ models:
   - name: emotions-recognition-retail-0003
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -10,3 +10,4 @@ models:
 
         metrics:
           - type: accuracy
+            reference: 0.702

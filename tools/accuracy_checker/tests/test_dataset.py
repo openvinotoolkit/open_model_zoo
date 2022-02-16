@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import copy
 from pathlib import Path
 import pytest
 from .common import make_representation
-from accuracy_checker.config import ConfigError
-from accuracy_checker.annotation_converters.format_converter import ConverterReturn
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.annotation_converters.format_converter import ConverterReturn
 
-from accuracy_checker.dataset import Dataset
+from openvino.tools.accuracy_checker.dataset import Dataset
 
 
 def copy_dataset_config(config):
@@ -92,7 +92,7 @@ class TestAnnotationConversion:
         config = copy_dataset_config(self.dataset_config)
         config.update(addition_options)
         annotation_converter_mock = mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(make_representation("0 0 0 5 5", True), None, None)
         )
         Dataset(config)
@@ -107,12 +107,12 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation('0 0 0 5 5', True)
         annotation_reader_mock = mocker.patch(
-            'accuracy_checker.dataset.read_annotation',
+            'openvino.tools.accuracy_checker.dataset.read_annotation',
             return_value=converted_annotation
         )
         Dataset(config)
 
-        annotation_reader_mock.assert_called_once_with(Path('custom'))
+        annotation_reader_mock.assert_called_once_with(Path('custom'), True)
 
     def test_annotation_conversion_with_store_annotation(self, mocker):
         addition_options = {
@@ -123,12 +123,12 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation('0 0 0 5 5', True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         annotation_saver_mock = mocker.patch(
-            'accuracy_checker.dataset.save_annotation'
+            'openvino.tools.accuracy_checker.dataset.save_annotation'
         )
         Dataset(config)
 
@@ -143,7 +143,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         dataset = Dataset(config)
@@ -158,14 +158,14 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         subset_maker_mock = mocker.patch(
-            'accuracy_checker.dataset.make_subset'
+            'openvino.tools.accuracy_checker.dataset.make_subset'
         )
         Dataset.load_annotation(config)
-        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True, False)
 
     def test_annotation_conversion_subset_more_than_dataset_size(self, mocker):
         addition_options = {
@@ -177,7 +177,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.warns(UserWarning):
@@ -193,7 +193,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -208,7 +208,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -223,7 +223,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -238,7 +238,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -253,7 +253,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -268,7 +268,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.raises(ConfigError):
@@ -283,14 +283,14 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         subset_maker_mock = mocker.patch(
-            'accuracy_checker.dataset.make_subset'
+            'openvino.tools.accuracy_checker.dataset.make_subset'
         )
         Dataset.load_annotation(config)
-        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True, False)
 
     def test_annotation_conversion_subset_with_seed(self, mocker):
         addition_options = {
@@ -302,7 +302,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         annotation, _ = Dataset.load_annotation(config)
@@ -318,11 +318,11 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         annotation_saver_mock = mocker.patch(
-            'accuracy_checker.dataset.save_annotation'
+            'openvino.tools.accuracy_checker.dataset.save_annotation'
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         Dataset(config)
@@ -338,7 +338,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         annotation, _ = Dataset.load_annotation(config)
@@ -346,10 +346,10 @@ class TestAnnotationConversion:
 
     def test_ignore_subset_parameters_if_file_provided(self, mocker):
         mocker.patch('pathlib.Path.exists', return_value=True)
-        mocker.patch('accuracy_checker.utils.read_yaml', return_value=['1'])
+        mocker.patch('openvino.tools.accuracy_checker.utils.read_yaml', return_value=['1'])
 
         subset_maker_mock = mocker.patch(
-            'accuracy_checker.dataset.make_subset'
+            'openvino.tools.accuracy_checker.dataset.make_subset'
         )
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
@@ -361,7 +361,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         Dataset.load_annotation(config)
@@ -369,7 +369,7 @@ class TestAnnotationConversion:
 
     def test_create_data_provider_with_subset_file(self, mocker):
         mocker.patch('pathlib.Path.exists', return_value=True)
-        mocker.patch('accuracy_checker.dataset.read_yaml', return_value=['1'])
+        mocker.patch('openvino.tools.accuracy_checker.dataset.read_yaml', return_value=['1'])
 
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
@@ -379,7 +379,7 @@ class TestAnnotationConversion:
         config.update(addition_options)
         converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
         mocker.patch(
-            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         dataset = Dataset(config)

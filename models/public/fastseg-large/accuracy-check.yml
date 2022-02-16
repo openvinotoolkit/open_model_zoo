@@ -1,7 +1,7 @@
 models:
   - name: fastseg-large
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: segmentation
           make_argmax: True
@@ -12,3 +12,4 @@ models:
           - type: mean_iou
             use_argmax: false
             presenter: print_scalar
+            reference: 0.7267

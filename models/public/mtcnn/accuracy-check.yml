@@ -74,12 +74,14 @@ evaluations:
               include_boundaries: True
               allow_multiple_matches_per_ignored: True
               distinct_conf: False
+              reference: 0.622625
 
             - type: map
               ignore_difficult: True
               include_boundaries: True
               allow_multiple_matches_per_ignored: True
               distinct_conf: False
+              reference: 0.481308
 
   - name: mtcnn
     module: custom_evaluators.mtcnn_evaluator.MTCNNEvaluator
@@ -122,7 +124,7 @@ evaluations:
             - type: bgr_to_rgb
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: wider
@@ -141,9 +143,11 @@ evaluations:
               include_boundaries: True
               allow_multiple_matches_per_ignored: True
               distinct_conf: False
+              reference: 0.622625
 
             - type: map
               ignore_difficult: True
               include_boundaries: True
               allow_multiple_matches_per_ignored: True
               distinct_conf: False
+              reference: 0.481308

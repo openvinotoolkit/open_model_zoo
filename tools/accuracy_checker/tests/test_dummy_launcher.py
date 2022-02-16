@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@ limitations under the License.
 
 import pytest
 import numpy as np
-from accuracy_checker.launcher import DummyLauncher
-from accuracy_checker.launcher.loaders import StoredPredictionBatch
-from accuracy_checker.adapters import ClassificationAdapter
-from accuracy_checker.representation import ClassificationPrediction
+from openvino.tools.accuracy_checker.launcher import DummyLauncher
+from openvino.tools.accuracy_checker.launcher.loaders import StoredPredictionBatch
+from openvino.tools.accuracy_checker.adapters import ClassificationAdapter
+from openvino.tools.accuracy_checker.representation import ClassificationPrediction
 
 
 @pytest.mark.usefixtures('mock_file_exists')
@@ -30,7 +30,7 @@ class TestDummyLauncher:
             'loader': 'pickle',
             'data_path': '/path'
         }
-        mocker.patch('accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle', return_value=[])
+        mocker.patch('openvino.tools.accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle', return_value=[])
         launcher = DummyLauncher(launcher_config)
         assert not launcher._loader.data
 
@@ -40,7 +40,7 @@ class TestDummyLauncher:
             'loader': 'pickle',
             'data_path': '/path'
         }
-        mocker.patch('accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle', return_value=[])
+        mocker.patch('openvino.tools.accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle', return_value=[])
         launcher = DummyLauncher(launcher_config)
         assert not launcher._loader.data
         with pytest.raises(IndexError):
@@ -54,7 +54,7 @@ class TestDummyLauncher:
         }
         raw_prediction_batch = StoredPredictionBatch({'prediction': np.array([[0, 1]])}, [1], [{}])
         mocker.patch(
-            'accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle',
+            'openvino.tools.accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle',
             return_value=[raw_prediction_batch])
         launcher = DummyLauncher(launcher_config)
         assert len(launcher._loader.data) == 1
@@ -72,7 +72,7 @@ class TestDummyLauncher:
         expected_prediction = ClassificationPrediction(1, np.array([0, 1]))
         adapter = ClassificationAdapter({'type': 'classification'})
         mocker.patch(
-            'accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle',
+            'openvino.tools.accuracy_checker.launcher.loaders.pickle_loader.PickleLoader.read_pickle',
             return_value=[raw_prediction_batch])
         launcher = DummyLauncher(launcher_config, adapter=adapter)
         assert len(launcher._loader.data) == 1

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: face_recognition
 files:
   - name: FP32/face-reidentification-retail-0095.xml
-    size: 239537
-    sha256: b16f72d8f6db556fd417c0c823c4a031f8c47e48e7797163b3de49baa7c59542
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    size: 379880
+    checksum: d8e71e97ad8776d3c7236fd76577fcb663b3d7016d46e1495e069ad7bb811868c1a72edeef1a1c01e45828044dcb9dcd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
   - name: FP32/face-reidentification-retail-0095.bin
-    size: 4427256
-    sha256: 5ac2b046dd8644be5bf26677fbe3db955a0777a777ed6767c772d665f21d89b8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    size: 4504600
+    checksum: a46b4a551daac7b81fbdeefab618e9edf71ccd9dde477a0c1e1f7cb3ea9bee7196daa879fbdd86b083332bd13681c808
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
   - name: FP16/face-reidentification-retail-0095.xml
-    size: 239433
-    sha256: c9b6c7b8cdbd4fd0a5d9e031cefa1b7a2c899ba0d6305ca77b8838686f8949f0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    size: 544548
+    checksum: ec8cbe19394ef0985aef1809aa8aa18f6b6e9b894bf3b1a67d2638e325f77f1621a5c6ee87ee0e15ce72e41e243c36a7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
   - name: FP16/face-reidentification-retail-0095.bin
-    size: 2213724
-    sha256: c2f8a7b9268e5b5236574d6fda2216df43c03acaa39c078848a98fbb707ae0a3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    size: 2252308
+    checksum: bf52dedbeb47656f800813d54172094a0de73ceb6076a0a1facd35332be62670e8a847c6c789842345da75a698decab9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
   - name: FP16-INT8/face-reidentification-retail-0095.xml
-    size: 658847
-    sha256: 36f8fc6155a830e477f15a2d8e3ac5be981222902368b0343eb847eb8d317700
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
+    size: 1032061
+    checksum: 085b60673cdab1c7273a8fcc9dda94c7f31f3b6b9525775e3bdd4fd4d4aecbed6293f9f4b00211621ab356cee075f50a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
   - name: FP16-INT8/face-reidentification-retail-0095.bin
-    size: 1180982
-    sha256: fa491a056a5ff7e286e47ef14727dcb31ac23219d826fdf82fa6fc1de9c5aa61
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
+    size: 1281320
+    checksum: d4d3b5d9f07f7bc82861c4d5b62280722ee2327349fc7829c9dbc2e87eec02798e5fd622433ad231b52509047ddccc62
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -2,7 +2,7 @@ models:
   - name: human-pose-estimation-3d-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_3d
@@ -26,3 +26,4 @@ models:
 
         metrics:
           - type: mpjpe_multiperson
+            reference: 10.045

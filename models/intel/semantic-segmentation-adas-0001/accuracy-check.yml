@@ -2,7 +2,7 @@ models:
   - name: semantic-segmentation-adas-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
         inputs:
           - name: data
@@ -16,3 +16,25 @@ models:
           - type: mean_iou
             use_argmax: False
             presenter: print_vector
+            reference:
+              Bicycle: 0.622246
+              Building: 0.860139
+              Bus: 0.743752
+              Car: 0.877892
+              Ego-Vehicle: 0.852932
+              Fence: 0.592632
+              Motorcycle: 0.600701
+              Person: 0.711653
+              Pole: 0.559078
+              Rider: 0.612787
+              Road: 0.910379
+              Sidewalk: 0.630676
+              Sky: 0.976889
+              Terrain: 0.620521
+              Traffic Light: 0.654779
+              Traffic Sign: 0.648217
+              Train: 0.358641
+              Truck: 0.674829
+              Vegetation: 0.882593
+              Wall: 0.424166
+              mean: 0.6907

@@ -2,7 +2,7 @@ models:
   - name: icnet-camvid-ava-sparse-30-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
     datasets:
       - name: CamVid
@@ -22,3 +22,6 @@ models:
         metrics:
           - type: mean_iou
             use_argmax: false
+            ignore_label: 11
+            presenter: print_scalar
+            reference: 0.7587

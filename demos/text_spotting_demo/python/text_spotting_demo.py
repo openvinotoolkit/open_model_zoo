@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
 """
 
 import logging as log
-import os
 import sys
-import time
+from pathlib import Path
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
 from scipy.special import softmax
-from openvino.inference_engine import IECore
+from openvino.runtime import Core, get_version
 
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                             'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 import monitors
 from images_capture import open_images_capture
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 SOS_INDEX = 0
 EOS_INDEX = 1
@@ -73,10 +75,6 @@ def build_argparser():
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
                            'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
                       help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
@@ -115,9 +113,6 @@ def build_argparser():
                       action='store_true')
     args.add_argument('--show_boxes',
                       help='Optional. Show bounding boxes.',
-                      action='store_true')
-    args.add_argument('-pc', '--perf_counts',
-                      help='Optional. Report performance counters.',
                       action='store_true')
     args.add_argument('-r', '--raw_output_message',
                       help='Optional. Output inference results raw values.',
@@ -163,53 +158,55 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    # Plugin initialization for specified device and load extensions library if specified.
-    log.info('Creating Inference Engine...')
-    ie = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
-    # Read IR
-    log.info('Loading Mask-RCNN network')
-    mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')
-
-    log.info('Loading encoder part of text recognition network')
-    text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
-
-    log.info('Loading decoder part of text recognition network')
-    text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
-
-    model_required_inputs = {'image'}
-    if set(mask_rcnn_net.input_info) == model_required_inputs:
-        required_output_keys = {'boxes', 'labels', 'masks', 'text_features.0'}
-        n, c, h, w = mask_rcnn_net.input_info['image'].input_data.shape
-    else:
-        raise RuntimeError('Demo supports only topologies with the following input keys: '
-                           f'{model_required_inputs}.')
-
-    assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
-        f'Demo supports only topologies with the following output keys: {required_output_keys}' \
-        f'Found: {mask_rcnn_net.outputs.keys()}.'
-
-    assert n == 1, 'Only batch 1 is supported by the demo application'
-
-    log.info('Loading IR to the plugin...')
-    mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device, num_requests=2)
-    text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
-    text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
-
-    hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
-
-    del mask_rcnn_net
-    del text_enc_net
-    del text_dec_net
-
     cap = open_images_capture(args.input, args.loop)
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    core = Core()
+
+    # Read IR
+    log.info('Reading Mask-RCNN model {}'.format(args.mask_rcnn_model))
+    mask_rcnn_model = core.read_model(args.mask_rcnn_model)
+
+    input_tensor_name = 'image'
+    try:
+        n, c, h, w = mask_rcnn_model.input(input_tensor_name).shape
+        if n != 1:
+            raise RuntimeError('Only batch 1 is supported by the demo application')
+    except RuntimeError:
+        raise RuntimeError('Demo supports only topologies with the following input tensor name: {}'.format(input_tensor_name))
+
+    required_output_names = {'boxes', 'labels', 'masks', 'text_features'}
+    for output_tensor_name in required_output_names:
+        try:
+            mask_rcnn_model.output(output_tensor_name)
+        except RuntimeError:
+            raise RuntimeError('Demo supports only topologies with the following output tensor names: {}'.format(
+                ', '.join(required_output_names)))
+
+    log.info('Reading Text Recognition Encoder model {}'.format(args.text_enc_model))
+    text_enc_model = core.read_model(args.text_enc_model)
+
+    log.info('Reading Text Recognition Decoder model {}'.format(args.text_dec_model))
+    text_dec_model = core.read_model(args.text_dec_model)
+
+    mask_rcnn_compiled_model = core.compile_model(mask_rcnn_model, device_name=args.device)
+    mask_rcnn_infer_request = mask_rcnn_compiled_model.create_infer_request()
+    log.info('The Mask-RCNN model {} is loaded to {}'.format(args.mask_rcnn_model, args.device))
+
+    text_enc_compiled_model = core.compile_model(text_enc_model, args.device)
+    text_enc_output_tensor = text_enc_compiled_model.outputs[0]
+    text_enc_infer_request = text_enc_compiled_model.create_infer_request()
+    log.info('The Text Recognition Encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
+
+    text_dec_compiled_model = core.compile_model(text_dec_model, args.device)
+    text_dec_infer_request = text_dec_compiled_model.create_infer_request()
+    log.info('The Text Recognition Decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
+
+    hidden_shape = text_dec_model.input(args.trd_input_prev_hidden).shape
+    text_dec_output_names = {args.trd_output_symbols_distr, args.trd_output_cur_hidden}
 
     if args.no_track:
         tracker = None
@@ -223,17 +220,21 @@ def main():
 
     visualizer = Visualizer(['__background__', 'text'], show_boxes=args.show_boxes, show_scores=args.show_scores)
 
-    render_time = 0
     frames_processed = 0
 
-    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
+    metrics = PerformanceMetrics()
     video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while frame is not None:
         if not args.keep_aspect_ratio:
             # Resize the image to a target size.
@@ -254,16 +255,16 @@ def main():
         input_image = input_image.transpose((2, 0, 1))
         input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
 
-        # Run the net.
-        inf_start = time.time()
-        outputs = mask_rcnn_exec_net.infer({'image': input_image})
+        # Run the MaskRCNN model.
+        mask_rcnn_infer_request.infer({input_tensor_name: input_image})
+        outputs = {name: mask_rcnn_infer_request.get_tensor(name).data[:] for name in required_output_names}
 
         # Parse detection results of the current request
         boxes = outputs['boxes'][:, :4]
         scores = outputs['boxes'][:, 4]
         classes = outputs['labels'].astype(np.uint32)
         raw_masks = outputs['masks']
-        text_features = outputs['text_features.0']
+        text_features = outputs['text_features']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
@@ -282,7 +283,8 @@ def main():
 
         texts = []
         for feature in text_features:
-            feature = text_enc_exec_net.infer({'input': feature})['output']
+            input_data = {'input': np.expand_dims(feature, axis=0)}
+            feature = text_enc_infer_request.infer(input_data)[text_enc_output_tensor]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
@@ -292,10 +294,11 @@ def main():
             text = ''
             text_confidence = 1.0
             for i in range(MAX_SEQ_LEN):
-                decoder_output = text_dec_exec_net.infer({
-                    args.trd_input_prev_symbol: prev_symbol_index,
+                text_dec_infer_request.infer({
+                    args.trd_input_prev_symbol: np.reshape(prev_symbol_index, (1,)),
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
+                decoder_output = {name: text_dec_infer_request.get_tensor(name).data[:] for name in text_dec_output_names}
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
                 symbols_distr_softmaxed = softmax(symbols_distr, axis=1)[0]
                 prev_symbol_index = int(np.argmax(symbols_distr, axis=1))
@@ -307,16 +310,11 @@ def main():
 
             texts.append(text if text_confidence >= args.tr_threshold else '')
 
-        inf_end = time.time()
-        inf_time = inf_end - inf_start
-
-        render_start = time.time()
-
         if len(boxes) and args.raw_output_message:
-            log.info('Detected boxes:')
-            log.info('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
+            log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
+            log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
             for box, cls, score, mask in zip(boxes, classes, scores, masks):
-                log.info('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
+                log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
         # Get instance track IDs.
         masks_tracks_ids = None
@@ -327,22 +325,8 @@ def main():
 
         # Visualize masks.
         frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
+        metrics.update(start_time, frame)
 
-        # Draw performance stats.
-        inf_time_message = 'Inference and post-processing time: {:.3f} ms'.format(inf_time * 1000)
-        render_time_message = 'OpenCV rendering time: {:.3f} ms'.format(render_time * 1000)
-        cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
-        cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-
-        # Print performance counters.
-        if args.perf_counts:
-            perf_counts = mask_rcnn_exec_net.requests[0].get_perf_counts()
-            log.info('Performance counters:')
-            print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                              'real_time, us'))
-            for layer, stats in perf_counts.items():
-                print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                                  stats['status'], stats['real_time']))
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
@@ -350,8 +334,6 @@ def main():
         if not args.no_show:
             # Show resulting image.
             cv2.imshow('Results', frame)
-        render_end = time.time()
-        render_time = render_end - render_start
 
         if not args.no_show:
             key = cv2.waitKey(delay)
@@ -360,10 +342,12 @@ def main():
                 break
             presenter.handleKey(key)
 
+        start_time = perf_counter()
         frame = cap.read()
 
-    print(presenter.reportMeans())
-    cv2.destroyAllWindows()
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

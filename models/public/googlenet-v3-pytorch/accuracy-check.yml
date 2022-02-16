@@ -27,12 +27,21 @@ models:
           - type: normalization
             mean: [123.675, 116.28, 103.53]
             std: [58.395, 57.12, 57.375]
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7769
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.937
 
   - name: googlenet-v3-pytorch
 
     # list of launchers
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -51,3 +60,12 @@ models:
             use_pillow: true
           # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
           - type: rgb_to_bgr
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7769
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.937

@@ -1,7 +1,7 @@
 models:
   - name:  ssdlite_mobilenet_v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -13,3 +13,4 @@ models:
           - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+            reference: 0.242946

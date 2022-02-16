@@ -2,7 +2,7 @@ models:
   - name: person-detection-raisinghand-recognition-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
@@ -50,6 +50,7 @@ models:
             annotation_source: person_annotation
             prediction_source: class_agnostic_prediction
             label_map: person_label_map
+            reference: 0.8
 
           - type: detection_accuracy
             use_normalization: True
@@ -57,3 +58,4 @@ models:
             prediction_source: action_prediction
             label_map: action_label_map
             ignore_label: 2
+            reference: 0.905

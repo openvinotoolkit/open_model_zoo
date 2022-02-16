@@ -1,0 +1,4 @@
+numpy>=1.16.6,<1.20; python_version <= "3.6"
+numpy>=1.16.6,<=1.21; python_version > "3.6"
+opencv-python==4.5.*
+scipy~=1.5.4

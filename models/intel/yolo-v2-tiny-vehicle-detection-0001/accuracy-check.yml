@@ -1,7 +1,7 @@
 models:
   - name: yolo-v2-tiny-vehicle-detection-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v2
           anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
@@ -30,6 +30,8 @@ models:
             integral: 11point
             ignore_difficult: false
             presenter: print_scalar
+            reference: 0.8864
           - type: coco_precision
             max_detections: 100
             threshold: 0.5
+            reference: 0.9497

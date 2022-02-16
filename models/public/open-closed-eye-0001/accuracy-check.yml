@@ -14,9 +14,11 @@ models:
             std: 255.0, 255.0, 255.0
         metrics:
           - type: accuracy
+            reference: 0.9584
+
   - name: open-closed-eye-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
     datasets:
       - name: mrlEyes_2018_01
@@ -25,3 +27,4 @@ models:
             size: 32
         metrics:
           - type: accuracy
+            reference: 0.9584

@@ -16,12 +16,13 @@ disable = C0103,
           C0204,
           W0201,
           W0107,
-          R0401
+          R0401,
+          R0801
 
 max-line-length = 120
 ignore-docstrings = yes
 extension-pkg-whitelist=inference_engine,cv2,numpy,mxnet,tensorflow,pycocotools,onnxruntime,kenlm,paddle,torchvision
-ignored-modules = numpy,cv2,openvino.inference_engine,caffe,mxnet,tensorflow,pycocotools,onnxruntime,torch,kenlm,paddle.fluid.core,torchvision
+ignored-modules = numpy,cv2,openvino.inference_engine,caffe,mxnet,tensorflow,pycocotools,onnxruntime,torch,kenlm,paddle.fluid.core,torchvision,openvino.runtime.impl,openvino.runtime
 load-plugins = pylint_checkers
 ignored-classes = pathlib.PurePath
 jobs=0

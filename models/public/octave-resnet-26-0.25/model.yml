@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ task_type: classification
 files:
   - name: a02_resnet-26_alpha-0.250.tar
     size: 64256000
-    sha256: 29fba1f4f421f86bebcc5bd99c0d1936c20c63b3e5bb20b48665106469bd54b0
-    source: https://dl.fbaipublicfiles.com/octconv/ablation/a02_resnet-26_alpha-0.250.tar
+    checksum: ac368af08afd64c646ad3bb467b2957b687675914c6e064b18957a2744f4a75c0ba7bc07153ec2dbc24e4c207a791fb1
+    original_source: https://dl.fbaipublicfiles.com/octconv/ablation/a02_resnet-26_alpha-0.250.tar
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/octave-resnet-26-0.25/a02_resnet-26_alpha-0.250.tar
 postprocessing:
   - $type: unpack_archive
     format: tar
@@ -42,8 +43,9 @@ model_optimizer_args:
   - --scale_values=data[59.880239521]
   - --input_shape=[1,3,224,224]
   - --input=data
+  - --layout=data(NCHW)
   - --output=softmax
   - --input_model=$dl_dir/a02_resnet-26_alpha-0.250/checkpoint-0-0000.params
 framework: mxnet
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/facebookresearch/OctConv/master/LICENSE

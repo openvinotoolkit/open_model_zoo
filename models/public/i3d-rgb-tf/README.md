@@ -22,7 +22,7 @@ Originally redistributed as a checkpoint file, was converted to frozen graph.
     tensorflow-probability==0.4.0
     dm-sonnet==1.26
     ```
-1. Copy `<omz_dir>/models/public/i3d-rgb-tf/freeze.py` to root directory of original repository and run it:
+1. Copy `<omz_dir>/models/public/i3d-rgb-tf/freeze.py` script to root directory of original repository and run it:
     ```
     python freeze.py
     ```
@@ -42,8 +42,8 @@ Accuracy validations performed on validation part of [Kinetics-400](https://www.
 
 | Metric | Converted Model | Converted Model (subset 400) |
 | ------ | --------------- | ---------------------------- |
-| Top 1  | 65.96%          | 67.0%                        |
-| Top 5  | 86.01%          | 88.7%                        |
+| Top 1  | 65.96%          | 64.83%                        |
+| Top 5  | 86.01%          | 84.58%                        |
 
 ## Input
 
@@ -61,13 +61,13 @@ Channel order is `RGB`. Mean value - 127.5, scale value - 127.5.
 
 ### Converted Model
 
-Video clip, name - `Placeholder`, shape - `1, 79, 3, 224, 224`, format is `B, D, C, H, W`, where:
+Video clip, name - `Placeholder`, shape - `1, 79, 224, 224, 3`, format is `B, D, H, W, C`, where:
 
 - `B` - batch size
 - `D` - duration of input clip
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `RGB`.
 
@@ -89,17 +89,23 @@ Action classifier according to [Kinetics-400](https://www.deepmind.com/research/
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Action Recognition Python\* Demo](../../../demos/action_recognition_demo/python/README.md)
 
 ## Legal Information
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,17 +6,26 @@
 
 #include "face.hpp"
 
-// -------------------------Generic routines for visualization of detection results-------------------------------------------------
+// --------Generic routines for visualization of detection results--------
 
 // Drawing a bar of emotions
 class EmotionBarVisualizer {
 public:
     using Ptr = std::shared_ptr<EmotionBarVisualizer>;
 
-    explicit EmotionBarVisualizer(std::vector<std::string> const& emotionNames, cv::Size size = cv::Size(300, 140), cv::Size padding = cv::Size(10, 10),
-                              double opacity = 0.6, double textScale = 1, int textThickness = 1);
+    explicit EmotionBarVisualizer(std::vector<std::string> const& emotionNames,
+                                  cv::Size size = cv::Size(300, 140),
+                                  cv::Size padding = cv::Size(10, 10),
+                                  double opacity = 0.6,
+                                  double textScale = 1,
+                                  int textThickness = 1);
 
-    void draw(cv::Mat& img, std::map<std::string, float> emotions, cv::Point org, cv::Scalar fgcolor, cv::Scalar bgcolor);
+    void draw(cv::Mat& img,
+              std::map<std::string, float> emotions,
+              cv::Point org,
+              cv::Scalar fgcolor,
+              cv::Scalar bgcolor);
+
     cv::Size getSize();
 private:
     std::vector<std::string> emotionNames;
@@ -52,10 +61,10 @@ public:
     using Ptr = std::shared_ptr<HeadPoseVisualizer>;
 
     explicit HeadPoseVisualizer(float scale = 50,
-                            cv::Scalar xAxisColor = cv::Scalar(0, 0, 255),
-                            cv::Scalar yAxisColor = cv::Scalar(0, 255, 0),
-                            cv::Scalar zAxisColor = cv::Scalar(255, 0, 0),
-                            int axisThickness = 2);
+                                cv::Scalar xAxisColor = cv::Scalar(0, 0, 255),
+                                cv::Scalar yAxisColor = cv::Scalar(0, 255, 0),
+                                cv::Scalar zAxisColor = cv::Scalar(255, 0, 0),
+                                int axisThickness = 2);
 
     void draw(cv::Mat& frame, cv::Point3f cpoint, float yaw, float pitch, float roll);
 
@@ -90,7 +99,7 @@ public:
     };
 
     explicit Visualizer(bool m_ag = false, bool m_em = false,
-                        bool m_hp = false, bool m_lm = false,
+                        bool m_hp = false, bool m_lm = false, bool m_am = false,
                         int leftPadding = 10, int rightPadding = 10,
                         int topPadding = 75, int bottomPadding = 10);
 
@@ -124,4 +133,5 @@ private:
     bool _isEmotionsEnabled;
     bool _isHeadPoseEnabled;
     bool _isLandmarksEnabled;
+    bool _isAntispoofingEnabled;
 };

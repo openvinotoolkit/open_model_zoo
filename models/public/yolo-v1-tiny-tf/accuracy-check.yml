@@ -44,11 +44,12 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.5479
 
   - name: yolo-v1-tiny-tf
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: yolo_v2
           anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"
@@ -79,3 +80,4 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
+            reference: 0.5479

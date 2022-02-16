@@ -2,7 +2,7 @@ models:
   - name: person-attributes-recognition-crossroad-0238
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: person_attributes
           attributes_recognition_out: "attributes"
@@ -20,3 +20,10 @@ models:
           - type: f1-score
             calculate_average: False
             presenter: print_vector
+            reference:
+              has_bag: 0.48
+              has_hat: 0.42
+              has_longhair: 0.77
+              has_longpants: 0.75
+              has_longsleeves: 0.17
+              is male: 0.8

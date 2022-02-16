@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ task_type: detection
 files:
   - name: yolo-v3-tiny-tf.zip
     size: 32836256
-    sha256: b872207db53b592de64c2a1f04420278a23707aa9a05549efd78778a947fc854
+    checksum: 675da89d10e73f2f5150b914ebb840fb9ef6901c08505ef02d141d64dd98c1a0d1ddc5ecd4ede6e1f9a8573ce1abee9f
     source: https://download.01.org/opencv/public_models/082020/yolo-v3-tiny-tf/yolo-v3-tiny-tf.zip
 postprocessing:
   - $type: unpack_archive
@@ -30,10 +30,11 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=image_input
+  - --layout=image_input(NHWC)
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.json
   - --input_model=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

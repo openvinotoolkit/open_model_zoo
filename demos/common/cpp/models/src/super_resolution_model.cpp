@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,102 +14,150 @@
 // limitations under the License.
 */
 
-#include "models/super_resolution_model.h"
-#include "utils/ocv_common.hpp"
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+#include <utils/image_utils.h>
+#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include "models/super_resolution_model.h"
+#include "models/results.h"
 
-using namespace InferenceEngine;
-
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName, false) {
+SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
+    ImageModel(modelFileName, false, layout) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
 
-void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
-    // --------------------------- Prepare input blobs --------------------------------------------------
+    // --------------------------- Prepare input --------------------------------------------------
+    const ov::OutputVector& inputs = model->inputs();
+    if (inputs.size() != 1 && inputs.size() != 2) {
+        throw std::logic_error("Super resolution model wrapper supports topologies with 1 or 2 inputs only");
+    }
+    std::string lrInputTensorName = inputs.begin()->get_any_name();
+    inputsNames.push_back(lrInputTensorName);
+    ov::Shape lrShape = inputs.begin()->get_shape();
+    if (lrShape.size() != 4) {
+        throw std::logic_error("Number of dimensions for an input must be 4");
+    }
+    // in case of 2 inputs they have the same layouts
+    ov::Layout inputLayout = getInputLayout(model->inputs().front());
 
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1 && inputShapes.size() != 2)
-        throw std::runtime_error("The demo supports topologies with 1 or 2 inputs only");
-    std::string lrInputBlobName = inputShapes.begin()->first;
-    inputsNames.push_back(lrInputBlobName);
-    SizeVector& lrShape = inputShapes[lrInputBlobName];
-    if (lrShape.size() != 4)
-        throw std::runtime_error("Number of dimensions for an input must be 4");
-    if (lrShape[1] != 1 && lrShape[1] != 3)
-        throw std::runtime_error("Input layer is expected to have 1 or 3 channels");
+    auto channelsId = ov::layout::channels_idx(inputLayout);
+    auto heightId = ov::layout::height_idx(inputLayout);
+    auto widthId = ov::layout::width_idx(inputLayout);
+
+    if (lrShape[channelsId] != 1 && lrShape[channelsId] != 3) {
+        throw std::logic_error("Input layer is expected to have 1 or 3 channels");
+    }
 
     // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
     // second input
-    std::string bicInputBlobName;
-    if (inputShapes.size() == 2) {
-        bicInputBlobName = (++inputShapes.begin())->first;
-        inputsNames.push_back(bicInputBlobName);
-        SizeVector& bicShape = inputShapes[bicInputBlobName];
+    std::string bicInputTensorName;
+    if (inputs.size() == 2) {
+        bicInputTensorName = (++inputs.begin())->get_any_name();
+        inputsNames.push_back(bicInputTensorName);
+        ov::Shape bicShape = (++inputs.begin())->get_shape();
         if (bicShape.size() != 4) {
-            throw std::runtime_error("Number of dimensions for both inputs must be 4");
+            throw std::logic_error("Number of dimensions for both inputs must be 4");
         }
-        if (lrShape[2] >= bicShape[2] && lrShape[3] >= bicShape[3]) {
+        if (lrShape[widthId] >= bicShape[widthId] && lrShape[heightId] >= bicShape[heightId]) {
+            std::swap(bicShape, lrShape);
             inputsNames[0].swap(inputsNames[1]);
-        } else if (!(lrShape[2] <= bicShape[2] && lrShape[3] <= bicShape[3])) {
-            throw std::runtime_error("Each spatial dimension of one input must surpass or be equal to a spatial"
+        } else if (!(lrShape[widthId] <= bicShape[widthId] && lrShape[heightId] <= bicShape[heightId])) {
+            throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
                 "dimension of another input");
         }
     }
 
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::FP32);
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 output");
+    ov::preprocess::PrePostProcessor ppp(model);
+    for (const auto& input : inputs) {
+        ppp.input(input.get_any_name()).tensor().
+            set_element_type(ov::element::u8).
+            set_layout("NHWC");
 
-    outputsNames.push_back(outputInfo.begin()->first);
-    Data& data = *outputInfo.begin()->second;
-    data.setPrecision(Precision::FP32);
-    changeInputSize(cnnNetwork, data.getDims()[2] / inputShapes[inputsNames[0]][2]);
-}
-
-void SuperResolutionModel::changeInputSize(CNNNetwork& cnnNetwork, int coeff) {
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& lrShape = inputShapes[inputsNames[0]];
-
-    lrShape[0] = 1;
-    lrShape[2] = netInputHeight;
-    lrShape[3] = netInputWidth;
-
-    if (inputShapes.size() == 2) {
-        SizeVector& bicShape = inputShapes[inputsNames[1]];
-        bicShape[0] = 1;
-        bicShape[2] = coeff * netInputHeight;
-        bicShape[3] = coeff * netInputWidth;
+        ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
-    cnnNetwork.reshape(inputShapes);
+
+    // --------------------------- Prepare output -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 1) {
+        throw std::logic_error("Super resolution model wrapper supports topologies with only 1 output");
+    }
+
+    outputsNames.push_back(outputs.begin()->get_any_name());
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
+
+    const ov::Shape& outShape = model->output().get_shape();
+
+    const ov::Layout outputLayout("NCHW");
+    const auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    const auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
+    changeInputSize(model, static_cast<int>(outWidth / inWidth));
 }
 
-std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, int coeff) {
+    std::map<std::string, ov::PartialShape> shapes;
+    const ov::Layout& layout = ov::layout::get_layout(model->inputs().front());
+    const auto batchId = ov::layout::batch_idx(layout);
+    const auto heightId = ov::layout::height_idx(layout);
+    const auto widthId = ov::layout::width_idx(layout);
+
+    const ov::OutputVector& inputs = model->inputs();
+    std::string lrInputTensorName = inputs.begin()->get_any_name();
+    ov::Shape lrShape = inputs.begin()->get_shape();
+
+    if (inputs.size() == 2) {
+        std::string bicInputTensorName = (++inputs.begin())->get_any_name();
+        ov::Shape bicShape = (++inputs.begin())->get_shape();
+        if (lrShape[heightId] >= bicShape[heightId] && lrShape[widthId] >= bicShape[widthId]) {
+            std::swap(bicShape, lrShape);
+            std::swap(bicInputTensorName, lrInputTensorName);
+        }
+        bicShape[batchId] = 1;
+        bicShape[heightId] = coeff * netInputHeight;
+        bicShape[widthId] = coeff * netInputWidth;
+        shapes[bicInputTensorName] = ov::PartialShape(bicShape);
+    }
+
+    lrShape[batchId] = 1;
+    lrShape[heightId] = netInputHeight;
+    lrShape[widthId] = netInputWidth;
+    shapes[lrInputTensorName] = ov::PartialShape(lrShape);
+
+    model->reshape(shapes);
+}
+
+std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    /* Resize and copy data from the image to the input blob */
-    Blob::Ptr lrInputBlob = request->GetBlob(inputsNames[0]);
-    if (img.channels() != (int)lrInputBlob->getTensorDesc().getDims()[1])
-        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+    const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
+    const ov::Layout layout("NHWC");
 
-    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight)
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
-    matU8ToBlob<float_t>(img, lrInputBlob);
+    if (img.channels() != (int)lrInputTensor.get_shape()[ov::layout::channels_idx(layout)]) {
+        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+    }
+
+    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight) {
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+    }
+    const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
+    const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
+    img = resizeImageExt(img, width, height);
+    request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
 
     if (inputsNames.size() == 2) {
-        Blob::Ptr bicInputBlob = request->GetBlob(inputsNames[1]);
-
-        int w = bicInputBlob->getTensorDesc().getDims()[3];
-        int h = bicInputBlob->getTensorDesc().getDims()[2];
+        const ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
+        const int h = (int)bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
+        const int w = (int)bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
-        matU8ToBlob<float_t>(resized, bicInputBlob);
+        request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
     }
 
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
@@ -118,17 +166,14 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& infResult) {
     ImageResult* result = new ImageResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
-
-
-    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-    const auto outputData = outMapped.as<float*>();
+    const auto outputData = infResult.getFirstOutputTensor().data<float>();
 
     std::vector<cv::Mat> imgPlanes;
-    const SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
-    size_t outChannels = (int)(outSizeVector[1]);
-    size_t outHeight = (int)(outSizeVector[2]);
-    size_t outWidth = (int)(outSizeVector[3]);
-    size_t numOfPixels = outWidth * outHeight;
+    const ov::Shape& outShape = infResult.getFirstOutputTensor().get_shape();
+    const size_t outChannels = (int)(outShape[1]);
+    const size_t outHeight = (int)(outShape[2]);
+    const size_t outWidth = (int)(outShape[3]);
+    const size_t numOfPixels = outWidth * outHeight;
     if (outChannels == 3) {
         imgPlanes = std::vector<cv::Mat>{
               cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
@@ -139,9 +184,10 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
         // Post-processing for text-image-super-resolution models
         cv::threshold(imgPlanes[0], imgPlanes[0], 0.5f, 1.0f, cv::THRESH_BINARY);
     }
-    for (auto & img : imgPlanes)
-        img.convertTo(img, CV_8UC1, 255);
 
+    for (auto& img : imgPlanes) {
+        img.convertTo(img, CV_8UC1, 255);
+    }
     cv::Mat resultImg;
     cv::merge(imgPlanes, resultImg);
     result->resultImage = resultImg;

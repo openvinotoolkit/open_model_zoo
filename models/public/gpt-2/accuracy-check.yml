@@ -1,0 +1,47 @@
+models:
+  - name: gpt-2-onnx
+    launchers:
+      - framework: onnx_runtime
+        model: gpt-2.onnx
+        adapter:
+          type: common_language_modeling
+          logits_output: "output"
+        inputs:
+          - name: "input"
+            type: INPUT
+            value: "input_ids"
+            precision: I64
+
+    datasets:
+      - name: WikiText_2_raw_gpt2
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_ids
+        metrics:
+          - type: 'perplexity'
+            name: 'Perplexity'
+            reference: 0.29
+
+  - name: gpt-2
+    launchers:
+      - framework: openvino
+        adapter:
+          type: common_language_modeling
+          logits_output: "output"
+        inputs:
+          - name: "input"
+            type: INPUT
+            value: "input_ids"
+            precision: I32
+
+    datasets:
+      - name: WikiText_2_raw_gpt2
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_ids
+        metrics:
+          - type: 'perplexity'
+            name: 'Perplexity'
+            reference: 0.29

@@ -1,7 +1,7 @@
 models:
   - name: machine-translation-nar-de-en-0002
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: narnmt
           vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
@@ -35,3 +35,4 @@ models:
         metrics:
           - type: bleu
             smooth: True
+            reference: 0.214

@@ -1,11 +1,10 @@
-import os
 import numpy as np
-
 import cv2
+
 
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
-    bbox[0] = np.clip(bbox[0], 0, image.shape[0] - 1)
+    bbox[0] = np.clip(bbox[0], 0, image.shape[1] - 1)
     bbox[1] = np.clip(bbox[1], 0, image.shape[0] - 1)
     x2 = np.min((image.shape[1] - 1, bbox[0] + np.max((0, bbox[2] - 1))))
     y2 = np.min((image.shape[0] - 1, bbox[1] + np.max((0, bbox[3] - 1))))
@@ -41,7 +40,7 @@ def affine_transform(pt, t):
     return transformed_point
 
 
-class TransformedCrop(object):
+class TransformedCrop:
     def __init__(self, input_height=384, input_width=288, output_height=48, output_width=36):
         self._num_keypoints = 17
         self.input_width = input_width
@@ -82,45 +81,36 @@ class TransformedCrop(object):
         return trans, rev_trans
 
 
-class HumanPoseEstimator(object):
-    def __init__(self, ie, path_to_model_xml, scale=None, thr=-100, device='CPU'):
-        self.model = ie.read_network(path_to_model_xml, os.path.splitext(path_to_model_xml)[0] + '.bin')
+class HumanPoseEstimator:
+    def __init__(self, core, model_path, device='CPU'):
+        self.model = core.read_model(model_path)
+        if len(self.model.inputs) != 1:
+            raise RuntimeError("HumanPoseEstimator supports only models with 1 input layer")
+        if len(self.model.outputs) != 1:
+            raise RuntimeError("HumanPoseEstimator supports only models with 1 output layer")
 
-        assert len(self.model.input_info) == 1, "Expected 1 input blob"
+        input_shape = self.model.inputs[0].shape
+        if len(input_shape) != 4 or input_shape[1] != 3:
+            raise RuntimeError("Expected model input shape [1, 3, H, W]")
 
-        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+        OUTPUT_CHANNELS_SIZE = 17
+        output_shape = self.model.outputs[0].shape
+        if len(output_shape) != 4 or output_shape[1] != OUTPUT_CHANNELS_SIZE:
+            raise RuntimeError("Expected model output shape [1, {}, H, W]".format(OUTPUT_CHANNELS_SIZE))
 
-        self._input_layer_name = next(iter(self.model.input_info))
-        self._output_layer_name = next(iter(self.model.outputs))
-        self.CHANNELS_SIZE = 3
-        self.OUTPUT_CHANNELS_SIZE = 17
-
-        assert len(self.model.input_info[self._input_layer_name].input_data.shape) == 4 and \
-               self.model.input_info[self._input_layer_name].input_data.shape[1] == self.CHANNELS_SIZE,\
-               "Expected model input blob with shape [1, 3, H, W]"
-
-        assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
-               self.model.outputs[self._output_layer_name].shape[1] == self.OUTPUT_CHANNELS_SIZE,\
-            "Expected model output shape [1, %s, H, W]" % (self.OUTPUT_CHANNELS_SIZE)
-
-        self._ie = ie
-        self._exec_model = self._ie.load_network(self.model, device)
-        self._scale = scale
-        self._thr = thr
-
-        _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].input_data.shape
-        _, _, self.output_h, self.output_w = self.model.outputs[self._output_layer_name].shape
-        self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
-        self.infer_time = -1
+        compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
+        self.infer_request = compiled_model.create_infer_request()
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+        self._transform = TransformedCrop(input_shape[2], input_shape[3], output_shape[2], output_shape[3])
 
     def _preprocess(self, img, bbox):
         return self._transform(img, bbox)
 
     def _infer(self, prep_img):
-        t0 = cv2.getTickCount()
-        output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
-        self.infer_time = ((cv2.getTickCount() - t0) / cv2.getTickFrequency())
-        return output[self._output_layer_name][0]
+        input_data = {self.input_tensor_name: prep_img}
+        output = self.infer_request.infer(input_data)[self.output_tensor]
+        return output[0]
 
     @staticmethod
     def _postprocess(heatmaps, rev_trans):

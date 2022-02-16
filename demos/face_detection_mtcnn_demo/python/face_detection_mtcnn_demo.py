@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2021 Intel Corporation
+ Copyright (C) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -24,7 +24,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.runtime import Core, get_version, PartialShape
 
 import mtcnn_utils as utils
 
@@ -32,10 +32,9 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
-from performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 score_threshold = [0.6, 0.7, 0.7]
@@ -92,72 +91,73 @@ def preprocess_image(image, w, h):
 
 
 def main():
-    metrics = PerformanceMetrics()
-
     args = build_argparser().parse_args()
-
-    # Plugin initialization for specified device and load extensions library if specified
-    log.info("Creating Inference Engine")
-
-    ie = IECore()
-
-    # Read IR
-    log.info("Loading network files:\n\t{}".format(args.model_pnet))
-    p_net = ie.read_network(args.model_pnet)
-    assert len(p_net.input_info.keys()) == 1, "Pnet supports only single input topologies"
-    assert len(p_net.outputs) == 2, "Pnet supports two output topologies"
-
-    log.info("Loading network files:\n\t{}".format(args.model_rnet))
-    r_net = ie.read_network(args.model_rnet)
-    assert len(r_net.input_info.keys()) == 1, "Rnet supports only single input topologies"
-    assert len(r_net.outputs) == 2, "Rnet supports two output topologies"
-
-    log.info("Loading network files:\n\t{}".format(args.model_onet))
-    o_net = ie.read_network(args.model_onet)
-    assert len(o_net.input_info.keys()) == 1, "Onet supports only single input topologies"
-    assert len(o_net.outputs) == 3, "Onet supports three output topologies"
-
-    log.info("Preparing input blobs")
-    pnet_input_blob = next(iter(p_net.input_info))
-    rnet_input_blob = next(iter(r_net.input_info))
-    onet_input_blob = next(iter(o_net.input_info))
-
-    log.info("Preparing output blobs")
-    for name, blob in p_net.outputs.items():
-        if blob.shape[1] == 2:
-            pnet_cls_name = name
-        elif blob.shape[1] == 4:
-            pnet_roi_name = name
-        else:
-            raise RuntimeError("Unsupported output layer for Pnet")
-
-    for name, blob in r_net.outputs.items():
-        if blob.shape[1] == 2:
-            rnet_cls_name = name
-        elif blob.shape[1] == 4:
-            rnet_roi_name = name
-        else:
-            raise RuntimeError("Unsupported output layer for Rnet")
-
-    for name, blob in o_net.outputs.items():
-        if blob.shape[1] == 2:
-            onet_cls_name = name
-        elif blob.shape[1] == 4:
-            onet_roi_name = name
-        elif blob.shape[1] == 10:
-            onet_pts_name = name
-        else:
-            raise RuntimeError("Unsupported output layer for Onet")
 
     cap = open_images_capture(args.input, args.loop)
 
+    # Plugin initialization for specified device and load extensions library if specified
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    core = Core()
+
+    # Read IR
+    log.info('Reading Proposal model {}'.format(args.model_pnet))
+    p_net = core.read_model(args.model_pnet)
+    if len(p_net.inputs) != 1:
+        raise RuntimeError("Pnet supports only single input topologies")
+    if len(p_net.outputs) != 2:
+        raise RuntimeError("Pnet supports two output topologies")
+
+    log.info('Reading Refine model {}'.format(args.model_rnet))
+    r_net = core.read_model(args.model_rnet)
+    if len(r_net.inputs) != 1:
+        raise RuntimeError("Rnet supports only single input topologies")
+    if len(r_net.outputs) != 2:
+        raise RuntimeError("Rnet supports two output topologies")
+
+    log.info('Reading Output model {}'.format(args.model_onet))
+    o_net = core.read_model(args.model_onet)
+    if len(o_net.inputs) != 1:
+        raise RuntimeError("Onet supports only single input topologies")
+    if len(o_net.outputs) != 3:
+        raise RuntimeError("Onet supports three output topologies")
+
+    pnet_input_tensor_name = p_net.inputs[0].get_any_name()
+    rnet_input_tensor_name = r_net.inputs[0].get_any_name()
+    onet_input_tensor_name = o_net.inputs[0].get_any_name()
+
+    for node in p_net.outputs:
+        if node.shape[1] == 2:
+            pnet_cls_name = node.get_any_name()
+        elif node.shape[1] == 4:
+            pnet_roi_name = node.get_any_name()
+        else:
+            raise RuntimeError("Unsupported output layer for Pnet")
+
+    for node in r_net.outputs:
+        if node.shape[1] == 2:
+            rnet_cls_name = node.get_any_name()
+        elif node.shape[1] == 4:
+            rnet_roi_name = node.get_any_name()
+        else:
+            raise RuntimeError("Unsupported output layer for Rnet")
+
+    for node in o_net.outputs:
+        if node.shape[1] == 2:
+            onet_cls_name = node.get_any_name()
+        elif node.shape[1] == 4:
+            onet_roi_name = node.get_any_name()
+        elif node.shape[1] == 10:
+            onet_pts_name = node.get_any_name()
+        else:
+            raise RuntimeError("Unsupported output layer for Onet")
+
     next_frame_id = 0
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
+    metrics = PerformanceMetrics()
     presenter = None
     video_writer = cv2.VideoWriter()
+    is_loaded_before = False
 
     while True:
         start_time = perf_counter()
@@ -182,19 +182,21 @@ def main():
         # *************************************
         # Pnet stage
         # *************************************
-        log.info("Loading Pnet model to the plugin")
 
-        t0 = cv2.getTickCount()
         pnet_res = []
-        for scale in scales:
+        for i, scale in enumerate(scales):
             hs = int(oh*scale)
             ws = int(ow*scale)
             image = preprocess_image(rgb_image, ws, hs)
 
-            p_net.reshape({pnet_input_blob: [1, 3, ws, hs]})  # Change weidth and height of input blob
-            exec_pnet = ie.load_network(network=p_net, device_name=args.device)
+            p_net.reshape({pnet_input_tensor_name: PartialShape([1, 3, ws, hs])})  # Change weidth and height of input blob
+            compiled_pnet = core.compile_model(p_net, args.device)
+            infer_request_pnet = compiled_pnet.create_infer_request()
+            if i == 0 and not is_loaded_before:
+                log.info("The Proposal model {} is loaded to {}".format(args.model_pnet, args.device))
 
-            p_res = exec_pnet.infer(inputs={pnet_input_blob: image})
+            infer_request_pnet.infer(inputs={pnet_input_tensor_name: image})
+            p_res = {name: infer_request_pnet.get_tensor(name).data[:] for name in {pnet_roi_name, pnet_cls_name}}
             pnet_res.append(p_res)
 
         image_num = len(scales)
@@ -211,10 +213,12 @@ def main():
 
         # Rnet stage
         if len(rectangles) > 0:
-            log.info("Loading Rnet model to the plugin")
 
-            r_net.reshape({rnet_input_blob: [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
-            exec_rnet = ie.load_network(network=r_net, device_name=args.device)
+            r_net.reshape({rnet_input_tensor_name: PartialShape([len(rectangles), 3, 24, 24])})  # Change batch size of input blob
+            compiled_rnet = core.compile_model(r_net, args.device)
+            infer_request_rnet = compiled_rnet.create_infer_request()
+            if not is_loaded_before:
+                log.info("The Refine model {} is loaded to {}".format(args.model_rnet, args.device))
 
             rnet_input = []
             for rectangle in rectangles:
@@ -222,7 +226,8 @@ def main():
                 crop_img = preprocess_image(crop_img, 24, 24)
                 rnet_input.extend(crop_img)
 
-            rnet_res = exec_rnet.infer(inputs={rnet_input_blob: rnet_input})
+            infer_request_rnet.infer(inputs={rnet_input_tensor_name: rnet_input})
+            rnet_res = {name: infer_request_rnet.get_tensor(name).data[:] for name in {rnet_roi_name, rnet_cls_name}}
 
             roi = rnet_res[rnet_roi_name]
             cls = rnet_res[rnet_cls_name]
@@ -230,10 +235,13 @@ def main():
 
         # Onet stage
         if len(rectangles) > 0:
-            log.info("Loading Onet model to the plugin")
 
-            o_net.reshape({onet_input_blob: [len(rectangles), 3, 48, 48]})  # Change batch size of input blob
-            exec_onet = ie.load_network(network=o_net, device_name=args.device)
+            o_net.reshape({onet_input_tensor_name: PartialShape([len(rectangles), 3, 48, 48])})  # Change batch size of input blob
+            compiled_onet = core.compile_model(o_net, args.device)
+            infer_request_onet = compiled_onet.create_infer_request()
+            if not is_loaded_before:
+                log.info("The Output model {} is loaded to {}".format(args.model_onet, args.device))
+                is_loaded_before = True
 
             onet_input = []
             for rectangle in rectangles:
@@ -241,7 +249,8 @@ def main():
                 crop_img = preprocess_image(crop_img, 48, 48)
                 onet_input.extend(crop_img)
 
-            onet_res = exec_onet.infer(inputs={onet_input_blob: onet_input})
+            infer_request_onet.infer(inputs={onet_input_tensor_name: onet_input})
+            onet_res = {name: infer_request_onet.get_tensor(name).data[:] for name in {onet_roi_name, onet_cls_name, onet_pts_name}}
 
             roi = onet_res[onet_roi_name]
             cls = onet_res[onet_cls_name]
@@ -260,9 +269,7 @@ def main():
             for i in range(5, 15, 2):
                 cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255, 0))
 
-        infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Record infer time
-        cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(1.0 / infer_time),
-                    (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        metrics.update(start_time, origin_image)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit):
             video_writer.write(origin_image)
@@ -274,9 +281,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-        metrics.update(start_time, origin_image)
-
-    metrics.print_total()
+    metrics.log_total()
 
 
 if __name__ == '__main__':

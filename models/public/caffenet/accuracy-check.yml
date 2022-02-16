@@ -14,10 +14,19 @@ models:
             size: 227
           - type: normalization
             mean: 104, 117, 123
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.56714
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.79916
 
   - name: caffenet
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -27,3 +36,12 @@ models:
             size: 256
           - type: crop
             size: 227
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.56714
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.79916

@@ -40,7 +40,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ### Datasets in dataset_definitions.yml
 * `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: [`alexnet`](../models/public/alexnet/README.md), [`vgg16`](../models/public/vgg16/README.md))
-* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [`se-resnet-152`](../models/public/se-resnet-152/README.md), [`se-resnext-50`](../models/public/se-resnext-50/README.md))
+* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [`se-resnet-50`](../models/public/se-resnet-50/README.md), [`se-resnext-50`](../models/public/se-resnext-50/README.md))
 * `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: [`googlenet-v2-tf`](../models/public/googlenet-v2-tf/README.md), [`resnet-50-tf`](../models/public/resnet-50-tf/README.md))
 
 ## [Common Objects in Context (COCO)](https://cocodataset.org/#home)
@@ -56,14 +56,15 @@ To download COCO dataset, you need to follow the steps below:
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
 
 * `val2017` - directory containing the COCO 2017 validation images
-* `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
-* `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
+* `annotations` - directory containing the COCO 2017 annotation files
+  * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
+  * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
 ### Datasets in dataset_definitions.yml
 * `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID.
-* `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used (original indexing to 91 categories is preserved. You can find more information about object categories labels [here](https://tech.amikelive.com/node-718/what-object-categories-labels-are-in-coco-dataset/)). Annotations are saved in order of ascending image ID. (model examples: [`faster_rcnn_resnet50_coco`](../models/public/faster_rcnn_resnet50_coco/README.md), [`ssd_resnet50_v1_fpn_coco`](../models/public/ssd_resnet50_v1_fpn_coco/README.md))
+* `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used (original indexing to 91 categories is preserved. You can find more information about object categories labels [here](https://tech.amikelive.com/node-718/what-object-categories-labels-are-in-coco-dataset/)). Annotations are saved in order of ascending image ID. (model examples: [`faster_rcnn_resnet50_coco`](../models/public/faster_rcnn_resnet50_coco/README.md), [`ssd_mobilenet_v1_coco`](../models/public/ssd_mobilenet_v1_coco/README.md))
 * `ms_coco_detection_80_class_with_background` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID. (model examples: [`faster-rcnn-resnet101-coco-sparse-60-0001`](../models/intel/faster-rcnn-resnet101-coco-sparse-60-0001/README.md), [`ssd-resnet34-1200-onnx`](../models/public/ssd-resnet34-1200-onnx/README.md))
-* `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in order of ascending image ID. (model examples: [`ctdet_coco_dlav0_384`](../models/public/ctdet_coco_dlav0_384/README.md), [`yolo-v3-tf`](../models/public/yolo-v3-tf/README.md))
+* `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in order of ascending image ID. (model examples: [`ctdet_coco_dlav0_512`](../models/public/ctdet_coco_dlav0_512/README.md), [`yolo-v3-tf`](../models/public/yolo-v3-tf/README.md))
 * `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image. (model examples: [`human-pose-estimation-0001`](../models/intel/human-pose-estimation-0001/README.md))
 * `ms_coco_single_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores single keypoints for image, so several annotation can be associated to one image. (model examples: [`single-human-pose-estimation-0001`](../models/public/single-human-pose-estimation-0001/README.md))
 
@@ -142,6 +143,28 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/README.md), [`ssd300`](../models/public/ssd300/README.md))
 * `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v1-tiny-tf`](../models/public/yolo-v1-tiny-tf/README.md))
 
+## [SYGData0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+
+### How download dataset
+
+To download SYGData0829 dataset, you need to follow the steps below:
+1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+2. Select [`SYGData0829.z01`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01)
+Select ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02)
+Select ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03)
+Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip)
+3. Unpack archive
+
+### Files layout
+* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
+    * `Annotations` - directory containing the SYGData0829 annotation files
+    * `JPEGImages` - directory containing the SYGData0829 images
+    * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
+		* `Main/val.txt` - image sets file for validation of detection tasks
+
+### Datasets in dataset_definitions.yml
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-v4-syg`](../models/public/mobilenet-yolo-v4-syg/README.md))
+
 ## [PASCAL-S](http://cbs.ic.gatech.edu/salobj/)
 
 ### How download dataset
@@ -172,7 +195,6 @@ To download CoNLL2003 dataset, you need to follow the steps below:
 ### Files layout
 
 To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
-
 * `CONLL-2003` - directory containing annotation files
     * `valid.txt` - annotation file for CoNLL2003 validation set
 
@@ -240,7 +262,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `images` - directory with converted images
         * `depth` -  directory with depth maps
 
-Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `<omz_dir>/tools/accuracy_checker/accuracy_checker/annotation_converters/convert.py` and  following command line to get converted data .
+Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `convert_annotation` command line interface:
 
 ```sh
 convert_annotation nyu_depth_v2 --data_dir <DATASET_DIR>/nyudepthv2/val/official --allow_convert_data True

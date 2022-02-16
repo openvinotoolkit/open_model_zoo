@@ -241,74 +241,90 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
+The models can be downloaded via [Model Downloader](../../tools/model_tools/README.md).
 
 
 ## Object Detection Models
-| Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
-|---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
-| [faster-rcnn-resnet101-coco-sparse-60-0001](./faster-rcnn-resnet101-coco-sparse-60-0001/README.md)                              | TensorFlow   | 38.74%   | 849.91 | 52.79   |
-| [face-detection-adas-0001](./face-detection-adas-0001/README.md)                                                                | Caffe        | 94.10%   | 2.835  | 1.053   |
-| [face-detection-retail-0004](./face-detection-retail-0004/README.md)                                                            | Caffe        | 83.00%   | 1.067  | 0.588   |
-| [face-detection-retail-0005](./face-detection-retail-0005/README.md)                                                            | PyTorch      | 84.52%   | 0.982  | 1.021   |
-| [face-detection-0200](./face-detection-0200/README.md)                                                                          | PyTorch      | 86.74%   | 0.786  | 1.828   |
-| [face-detection-0202](./face-detection-0202/README.md)                                                                          | PyTorch      | 91.94%   | 1.767  | 1.842   |
-| [face-detection-0204](./face-detection-0204/README.md)                                                                          | PyTorch      | 92.89%   | 2.406  | 1.851   |
-| [face-detection-0205](./face-detection-0205/README.md)                                                                          | PyTorch      | 93.57%   | 2.853  | 2.392   |
-| [face-detection-0206](./face-detection-0206/README.md)                                                                          | PyTorch      | 94.27%   | 339.60 | 69.92   |
-| [person-detection-retail-0002](./person-detection-retail-0002/README.md)                                                        | Caffe        | 80.14%   | 12.427 | 3.244   |
-| [person-detection-retail-0013](./person-detection-retail-0013/README.md)                                                        | Caffe        | 88.62%   | 2.300  | 0.723   |
-| [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/README.md)                                | Caffe        | 83.8%    | 7.140  | 1.951   |
-| [person-detection-action-recognition-0006](./person-detection-action-recognition-0006/README.md)                                | TensorFlow   | 80.74%   | 8.225  | 2.001   |
-| [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/README.md)                | Caffe        | 72.4%    | 7.140  | 1.951   |
-| [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/README.md)                      | Caffe        | 90.5%    | 7.138  | 1.951   |
-| [person-detection-0200](./person-detection-0200/README.md)                                                                      | PyTorch      | 0.244    | 0.786  | 1.817   |
-| [person-detection-0201](./person-detection-0201/README.md)                                                                      | PyTorch      | 0.299    | 1.768  | 1.817   |
-| [person-detection-0202](./person-detection-0202/README.md)                                                                      | PyTorch      | 0.328    | 3.143  | 1.817   |
-| [person-detection-0203](./person-detection-0203/README.md)                                                                      | PyTorch      | 0.408    | 6.519  | 2.394   |
-| [person-detection-0106](./person-detection-0106/README.md)                                                                      | PyTorch      | 0.442    | 404.264| 71.565  |
-| [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/README.md)                                                    | Caffe        | 88%      | 2.836  | 1.165   |
-| [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/README.md)                              | Caffe        | 90%      | 3.974  | 1.650   |
-| [vehicle-detection-adas-0002](./vehicle-detection-adas-0002/README.md)                                                          | Caffe        | 90.6%    | 2.798  | 1.079   |
-| [vehicle-detection-0200](./vehicle-detection-0200/README.md)                                                                    | PyTorch      | 0.254    | 0.786  | 1.817   |
-| [vehicle-detection-0201](./vehicle-detection-0201/README.md)                                                                    | PyTorch      | 0.323    | 1.768  | 1.817   |
-| [vehicle-detection-0202](./vehicle-detection-0202/README.md)                                                                    | PyTorch      | 0.36     | 3.143  | 1.817   |
-| [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/README.md)                        | Caffe        | 65.12%   | 3.964  | 1.178   |
-| [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/README.md)                        | PyTorch      | 62.55%   | 3.560  | 2.887   |
-| [person-vehicle-bike-detection-crossroad-yolov3-1020](./person-vehicle-bike-detection-crossroad-yolov3-1020/README.md)          | Keras        | 48.89%   | 65.98  | 61.92   |
-| [person-vehicle-bike-detection-2000](./person-vehicle-bike-detection-2000/README.md)                                            | PyTorch      | 0.165    | 0.787  | 1.821   |
-| [person-vehicle-bike-detection-2001](./person-vehicle-bike-detection-2001/README.md)                                            | PyTorch      | 0.226    | 1.770  | 1.821   |
-| [person-vehicle-bike-detection-2002](./person-vehicle-bike-detection-2002/README.md)                                            | PyTorch      | 0.248    | 3.146  | 1.821   |
-| [person-vehicle-bike-detection-2003](./person-vehicle-bike-detection-2003/README.md)                                            | PyTorch      | 0.336    | 6.550  | 2.416   |
-| [person-vehicle-bike-detection-2004](./person-vehicle-bike-detection-2004/README.md)                                            | PyTorch      | 0.274    | 1.811  | 2.327   |
-| [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/README.md)                        | TensorFlow   | 99.65%   | 0.349  | 0.634   |
-| [product-detection-0001](./product-detection-0001/README.md)                                                                    | PyTorch      | 0.715    | 3.598  | 3.212   |
-| [person-detection-asl-0001](./person-detection-asl-0001/README.md)                                                              | PyTorch      | 80.0%    | 0.986  | 1.338   |
-| [yolo-v2-ava-0001](./yolo-v2-ava-0001/README.md)                                                                                | TensorFlow   | 63.9%    | 29.421 | 50.6451 |
-| [yolo-v2-ava-sparse-35-0001](./yolo-v2-ava-sparse-35-0001/README.md)                                                            | TensorFlow   | 63.71%   | 29.421 | 50.6451 |
-| [yolo-v2-ava-sparse-70-0001](./yolo-v2-ava-sparse-70-0001/README.md)                                                            | TensorFlow   | 62.9%    | 29.421 | 50.6451 |
-| [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/README.md)                                                                      | TensorFlow   | 35.37%   | 6.9949 | 15.8587 |
-| [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/README.md)                                                  | TensorFlow   | 36.33%   | 6.9949 | 15.8587 |
-| [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/README.md)                                                  | TensorFlow   | 35.32%   | 6.9949 | 15.8587 |
-| [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/README.md)                                          | Keras        | 88.64%   | 5.424  | 11.229  |
 
+Several detection models can be used to detect a set of the most popular
+objects - for example, faces, people, vehicles. Most of the networks are
+SSD-based and provide reasonable accuracy/performance trade-offs. Networks that
+detect the same types of objects (for example, `face-detection-adas-0001` and
+`face-detection-retail-0004`) provide a choice for higher accuracy/wider
+applicability at the cost of slower performance, so you can expect a "bigger"
+network to detect objects of the same type better.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [faster-rcnn-resnet101-coco-sparse-60-0001](./faster-rcnn-resnet101-coco-sparse-60-0001/README.md) | 364.21 | 52.79 |
+| [face-detection-adas-0001](./face-detection-adas-0001/README.md)     | 2.835 | 1.053 |
+| [face-detection-retail-0004](./face-detection-retail-0004/README.md) | 1.067 | 0.588 |
+| [face-detection-retail-0005](./face-detection-retail-0005/README.md) | 0.982 | 1.021 |
+| [face-detection-0200](./face-detection-0200/README.md) | 0.785   | 1.828  |
+| [face-detection-0202](./face-detection-0202/README.md) | 1.767   | 1.842  |
+| [face-detection-0204](./face-detection-0204/README.md) | 2.405   | 1.851  |
+| [face-detection-0205](./face-detection-0205/README.md) | 2.853   | 2.392  |
+| [face-detection-0206](./face-detection-0206/README.md) | 339.597 | 69.920 |
+| [person-detection-retail-0002](./person-detection-retail-0002/README.md) | 12.427 | 3.244 |
+| [person-detection-retail-0013](./person-detection-retail-0013/README.md) | 2.300  | 0.723 |
+| [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/README.md) | 7.140 | 1.951 |
+| [person-detection-action-recognition-0006](./person-detection-action-recognition-0006/README.md) | 8.225 | 2.001 |
+| [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/README.md) | 7.140 | 1.951 |
+| [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/README.md) | 7.138 | 1.951 |
+| [person-detection-0200](./person-detection-0200/README.md) | 0.786   | 1.817  |
+| [person-detection-0201](./person-detection-0201/README.md) | 1.768   | 1.817  |
+| [person-detection-0202](./person-detection-0202/README.md) | 3.143   | 1.817  |
+| [person-detection-0203](./person-detection-0203/README.md) | 6.519   | 2.394  |
+| [person-detection-0301](./person-detection-0301/README.md) | 79318.2158   | 55.557  |
+| [person-detection-0302](./person-detection-0302/README.md) | 370.208   | 51.164  |
+| [person-detection-0303](./person-detection-0303/README.md) | 24.758   | 3.630  |
+| [person-detection-0106](./person-detection-0106/README.md) | 404.264 | 71.565 |
+| [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/README.md) | 2.836 | 1.165 |
+| [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/README.md) | 3.974 | 1.650 |
+| [vehicle-detection-adas-0002](./vehicle-detection-adas-0002/README.md) | 2.798 | 1.079 |
+| [vehicle-detection-0200](./vehicle-detection-0200/README.md) | 0.786 | 1.817 |
+| [vehicle-detection-0201](./vehicle-detection-0201/README.md) | 1.768 | 1.817 |
+| [vehicle-detection-0202](./vehicle-detection-0202/README.md) | 3.143 | 1.817 |
+| [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/README.md) | 3.964 | 1.178 |
+| [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/README.md) | 3.560 | 2.887 |
+| [person-vehicle-bike-detection-crossroad-yolov3-1020](./person-vehicle-bike-detection-crossroad-yolov3-1020/README.md) | 65.984 | 61.922 |
+| [person-vehicle-bike-detection-2000](./person-vehicle-bike-detection-2000/README.md)    | 0.787 | 1.821  |
+| [person-vehicle-bike-detection-2001](./person-vehicle-bike-detection-2001/README.md)    | 1.770 | 1.821  |
+| [person-vehicle-bike-detection-2002](./person-vehicle-bike-detection-2002/README.md)    | 3.163 | 1.821  |
+| [person-vehicle-bike-detection-2003](./person-vehicle-bike-detection-2003/README.md)    | 6.550 | 2.416  |
+| [person-vehicle-bike-detection-2004](./person-vehicle-bike-detection-2004/README.md)    | 1.811 | 2.327  |
+| [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/README.md) | 0.349 | 0.634 |
+| [product-detection-0001](./product-detection-0001/README.md)                            | 3.598 | 3.212  |
+| [person-detection-asl-0001](./person-detection-asl-0001/README.md)                      | 0.986 | 1.338  |
+| [yolo-v2-ava-0001](./yolo-v2-ava-0001/README.md)                                        | 29.38 | 48.29  |
+| [yolo-v2-ava-sparse-35-0001](./yolo-v2-ava-sparse-35-0001/README.md)                    | 29.38 | 48.29  |
+| [yolo-v2-ava-sparse-70-0001](./yolo-v2-ava-sparse-70-0001/README.md)                    | 29.38 | 48.29  |
+| [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/README.md)                              | 6.975 | 15.12  |
+| [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/README.md)          | 6.975 | 15.12  |
+| [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/README.md)          | 6.975 | 15.12  |
+| [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/README.md)  | 5.424 | 11.229 |
 
 ## Object Recognition Models
-| Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
-|---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
-| [age-gender-recognition-retail-0013](./age-gender-recognition-retail-0013/README.md)                                            | Caffe        | 95.80%   | 0.094  | 2.138   |
-| [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/README.md)                                                    | Caffe        |          | 0.105  | 1.911   |
-| [license-plate-recognition-barrier-0001](./license-plate-recognition-barrier-0001/README.md)                                    | Caffe        | 88.58%   | 0.328  | 1.218   |
-| [vehicle-attributes-recognition-barrier-0039](./vehicle-attributes-recognition-barrier-0039/README.md)                          | Caffe        | 81.15%   | 0.126  | 0.626   |
-| [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/README.md)                          | PyTorch      | 82.71%   | 0.462  | 11.177  |
-| [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/README.md)                                                | Caffe        | 70.20%   | 0.126  | 2.483   |
-| [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/README.md)                                                | PyTorch      | 0.0705   | 0.021  | 0.191   |
-| [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/README.md)                                                      | Caffe        |          | 0.042  | 4.595   |
-| [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/README.md)                        | PyTorch      |          | 0.174  | 0.735   |
-| [person-attributes-recognition-crossroad-0234](./person-attributes-recognition-crossroad-0234/README.md)                        | PyTorch      |          | 2.167  | 23.510  |
-| [person-attributes-recognition-crossroad-0238](./person-attributes-recognition-crossroad-0238/README.md)                        | PyTorch      |          | 1.034  | 21.797  |
-| [gaze-estimation-adas-0002](./gaze-estimation-adas-0002/README.md)                                                              | PyTorch      |          | 0.139  | 1.882   |
 
+Object recognition models are used for classification, regression, and character
+recognition. Use these networks after a respective detector (for example,
+Age/Gender recognition after Face Detection).
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [age-gender-recognition-retail-0013](./age-gender-recognition-retail-0013/README.md)         | 0.094 | 2.138 |
+| [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/README.md)                 | 0.105 | 1.911 |
+| [license-plate-recognition-barrier-0001](./license-plate-recognition-barrier-0001/README.md) | 0.328 | 1.218 |
+| [vehicle-attributes-recognition-barrier-0039](./vehicle-attributes-recognition-barrier-0039/README.md) | 0.126 | 0.626 |
+| [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/README.md) | 0.462 | 11.177 |
+| [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/README.md) | 0.126 | 2.483 |
+| [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/README.md) | 0.021 | 0.191 |
+| [facial-landmarks-98-detection-0001](./facial-landmarks-98-detection-0001/README.md) | 0.6 | 9.66 |
+| [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/README.md)       | 0.042 | 4.595 |
+| [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/README.md) | 0.174 | 0.735 |
+| [person-attributes-recognition-crossroad-0234](./person-attributes-recognition-crossroad-0234/README.md) | 2.167 | 23.510 |
+| [person-attributes-recognition-crossroad-0238](./person-attributes-recognition-crossroad-0238/README.md) | 1.034 | 21.797 |
+| [gaze-estimation-adas-0002](./gaze-estimation-adas-0002/README.md) | 0.139 | 1.882 |
 
 ## Reidentification Models
 | Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
@@ -332,14 +348,19 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 
 
 ## Instance Segmentation Models
-| Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
-|---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
-| [instance-segmentation-security-0002](./instance-segmentation-security-0002/README.md)                                          | PyTorch      | 40.8%    | 423.08 | 48.373  |
-| [instance-segmentation-security-0091](./instance-segmentation-security-0091/README.md)                                          | PyTorch      | 45.8%    | 828.63 | 101.24  |
-| [instance-segmentation-security-0228](./instance-segmentation-security-0228/README.md)                                          | PyTorch      | 38.85%   | 147.24 | 49.833  |
-| [instance-segmentation-security-1039](./instance-segmentation-security-1039/README.md)                                          | PyTorch      | 32.9%    | 13.97  | 10.567  |
-| [instance-segmentation-security-1040](./instance-segmentation-security-1040/README.md)                                          | PyTorch      | 35.0%    | 29.33  | 13.567  |
 
+Instance segmentation is an extension of object detection and semantic
+segmentation problems. Instead of predicting a bounding box around each object
+instance instance segmentation model outputs pixel-wise masks for all instances.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [instance-segmentation-security-0002](./instance-segmentation-security-0002/README.md) | 423.0842 | 48.3732 |
+| [instance-segmentation-security-0091](./instance-segmentation-security-0091/README.md) | 828.6324 | 101.236 |
+| [instance-segmentation-security-0228](./instance-segmentation-security-0228/README.md) | 147.2352 | 49.8328 |
+| [instance-segmentation-security-1039](./instance-segmentation-security-1039/README.md) | 13.9672  | 10.5674 |
+| [instance-segmentation-security-1040](./instance-segmentation-security-1040/README.md) | 29.334   | 13.5673 |
+| [instance-segmentation-person-0007](./instance-segmentation-person-0007/README.md)     | 4.8492   | 7.2996  |
 
 ## Human Pose Estimation Models
 | Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
@@ -367,20 +388,29 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 
 
 ## Text Recognition
-| Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
-|---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
-| [text-recognition-0012](./text-recognition-0012/README.md)                                                                      | TensorFlow   | 0.8818   | 1.485  | 5.568   |
-| [text-recognition-0014](./text-recognition-0014/README.md)                                                                      | PyTorch      | 0.8887   | 0.2726 | 1.4187  |
-| [text-recognition-0015](./text-recognition-0015/README.md) - encoder                                                            | PyTorch      |          | 12.4   | 398     |
-| [text-recognition-0015](./text-recognition-0015/README.md) - decoder                                                            | PyTorch      |          | 0.03   | 4.33    |
-| [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)                                            | TensorFlow   | 98.83%   | 0.792  | 5.555   |
-| [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md)                                      | PyTorch      | 117.136  | 117.136| 15.31   |
-| [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md)                  | PyTorch      | 75.31%   | 134.513| 17.270  |
-| [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) - encoder                              | PyTorch      | 81.5%    | 16.56  | 1.86    |
-| [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) - decoder                              | PyTorch      | 81.5%    | 1.69   | 2.56    |
-| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) - encoder      | PyTorch      | 70.5%    | 12.8447| 0.2017  |
-| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) - decoder      | PyTorch      | 70.5%    | 0.2017 | 2.5449  |
 
+Deep Learning models for text recognition in various applications.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
+| [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
+| [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
+| encoder | 12.4 | 398 |
+| decoder | 0.03 | 4.33 |
+| [text-recognition-0016](./text-recognition-0016/README.md)                                 |         |       |
+| encoder | 9.27 | 88.1 |
+| decoder | 0.08 | 4.28 |
+| [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)       | 0.792   | 5.555 |
+| [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md) | 117.136 | 15.31 |
+| [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md) | 134.513 | 17.270 |
+| [handwritten-english-recognition-0001](./handwritten-english-recognition-0001/README.md) | 1.3182 | 0.1413 |
+| [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/README.md) |    |    |
+|   encoder | 16.56 | 1.86 |
+|   decoder | 1.69  | 2.56 |
+| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/README.md) |    |    |
+|   encoder | 12.8447 | 0.2017 |
+|   decoder | 8.6838  | 2.5449 |
 
 ## Text Spotting
 | Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
@@ -428,13 +458,15 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
  
 
 ## Machine Translation
-| Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
-|---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
-| [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md)                                            |  PyTorch     | 21.6%    | 23.17  | 69.29   |
-| [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md)                                            |  PyTorch     | 22.8%    | 23.17  | 69.29   |
-| [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md)                                            |  PyTorch     | 17.7%    | 23.19  | 77.47   |
-| [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md)                                            |  PyTorch     | 21.4%    | 23.19  | 77.47   |
 
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-en-ru-0002](./machine-translation-nar-en-ru-0002/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-ru-en-0002](./machine-translation-nar-ru-en-0002/README.md) | 23.17 | 69.29 |
+| [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |
+| [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md) | 23.19 | 77.47 |
 
 ## Text To Speech
 | Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
@@ -452,6 +484,14 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 |---------------------------------------------------------------------------------------------------------------------------------|--------------|----------|--------|---------|
 | [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)                                            |  PyTorch     |          | 1.2    | 7.22    |
 
+## Speech Noise Suppression
+
+Deep Learning models for noise suppression.
+
+| Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+| [noise-suppression-denseunet-ll-0001](./noise-suppression-denseunet-ll-0001/README.md)| 0.2                  | 4.2       |
 
 ## Time Series Forecasting
 | Model Name                                                                                                                      | Framework    | Accuracy | GFlops | mParams |
@@ -460,10 +500,18 @@ The models can be downloaded via [Model Downloader](../../tools/downloader/READM
 
 
 
+## Action Sequence Modeling
+
+Deep Learning models for online sequence modeling.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
+
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../tools/model_tools/README.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
 
 

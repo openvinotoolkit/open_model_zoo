@@ -1,10 +1,18 @@
+inflect>=5.3.0
 librosa>=0.8.0
 matplotlib>=3.3.4
 motmetrics>=1.2.0
 nibabel>=3.2.1
-numpy>=1.16.6,<1.20
-scikit-learn>=0.24.1
+numpy>=1.16.6,<1.20; python_version <= "3.6"
+numpy>=1.16.6,<=1.21; python_version > "3.6"
+opencv-python==4.5.*
+pillow>=8.1.2
+pyyaml>=5.4.1
+scikit-learn~=0.24.1
 scipy~=1.5.4
-tokenizers>=0.10.1
+sympy>=1.8
 tensorboardX>=2.1
+tokenizers~=0.10.1
 tqdm>=4.54.1
+-r common/python/requirements.txt
+-r common/python/requirements_ovms.txt

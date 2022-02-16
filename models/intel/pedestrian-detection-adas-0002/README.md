@@ -20,7 +20,7 @@ Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a
 | Source framework                | Caffe\*                                   |
 
 Average Precision metric described in: Mark Everingham et al.
-[The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
+[The PASCAL Visual Object Classes (VOC) Challenge](https://link.springer.com/article/10.1007/s11263-009-0275-4).
 
 Tested on an internal dataset with 1001 pedestrian to detect.
 
@@ -45,6 +45,15 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+* [Single Human Pose Estimation Demo](../../../demos/single_human_pose_estimation_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

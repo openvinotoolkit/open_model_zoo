@@ -1,17 +1,19 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <iostream>
-
+#include <utils/ocv_common.hpp>
 #include "visualizer.hpp"
 
 // EmotionBarVisualizer
-EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames, cv::Size size, cv::Size padding,
-                                     double opacity, double textScale, int textThickness):
-                                     emotionNames(emotionNames), size(size), padding(padding),
-                                     opacity(opacity), textScale(textScale), textThickness(textThickness),
-                                     internalPadding(0) {
+EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames,
+                                           cv::Size size,
+                                           cv::Size padding,
+                                           double opacity,
+                                           double textScale,
+                                           int textThickness):
+    emotionNames(emotionNames), size(size), padding(padding), opacity(opacity),
+    textScale(textScale), textThickness(textThickness), internalPadding(0) {
     auto itMax = std::max_element(emotionNames.begin(), emotionNames.end(), [] (std::string const& lhs, std::string const& rhs) {
         return lhs.length() < rhs.length();
     });
@@ -69,7 +71,7 @@ void PhotoFrameVisualizer::draw(cv::Mat& img, cv::Rect& bb, cv::Scalar color) {
 
 // HeadPoseVisualizer
 HeadPoseVisualizer::HeadPoseVisualizer(float scale, cv::Scalar xAxisColor, cv::Scalar yAxisColor, cv::Scalar zAxisColor, int axisThickness):
-                        xAxisColor(xAxisColor), yAxisColor(yAxisColor), zAxisColor(zAxisColor), axisThickness(axisThickness), scale(scale) {
+    xAxisColor(xAxisColor), yAxisColor(yAxisColor), zAxisColor(zAxisColor), axisThickness(axisThickness), scale(scale) {
 }
 
 void HeadPoseVisualizer::buildCameraMatrix(cv::Mat& cameraMatrix, int cx, int cy, float focalLength) {
@@ -150,15 +152,15 @@ void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, float yaw, flo
 }
 
 // Visualizer
-Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm,
+Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm, bool m_am,
                        int leftPadding, int rightPadding, int topPadding, int bottomPadding):
-                       emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
-                       headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
-                       nxcells(0), nycells(0), xstep(0), ystep(0), leftPadding(leftPadding),
-                       rightPadding(rightPadding), topPadding(topPadding),
-                       bottomPadding(bottomPadding), frameCounter(0),
-                       _isAgeGenderEnabled(m_ag), _isEmotionsEnabled(m_em),
-                       _isHeadPoseEnabled(m_hp), _isLandmarksEnabled(m_lm) {}
+    emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
+    headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
+    nxcells(0), nycells(0), xstep(0), ystep(0), leftPadding(leftPadding),
+    rightPadding(rightPadding), topPadding(topPadding),
+    bottomPadding(bottomPadding), frameCounter(0),
+    _isAgeGenderEnabled(m_ag), _isEmotionsEnabled(m_em),
+    _isHeadPoseEnabled(m_hp), _isLandmarksEnabled(m_lm), _isAntispoofingEnabled(m_am) {}
 
 void Visualizer::enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames) {
     if (inImgSize != imgSize) {
@@ -180,17 +182,18 @@ void Visualizer::enableEmotionBar(const cv::Size inImgSize, std::vector<std::str
             ystep = imgSizePadded.height / nycells;
         } else {
             emotionVisualizer.reset();
-            std::cerr << "Disabling emotion bar due to small frame resolution to draw on\n";
+            slog::warn << "Disabling emotion bar due to small frame resolution to draw on" << slog::endl;
         }
     }
 
 }
 
 void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
-    auto genderColor = (_isAgeGenderEnabled) ?
-                       ((f->isMale()) ? cv::Scalar(255, 0, 0) :
-                                        cv::Scalar(147, 20, 255)) :
-                                        cv::Scalar(100, 100, 100);
+    auto genderColor = (_isAgeGenderEnabled)
+                       ? ((f->isMale())
+                           ? cv::Scalar(255, 0, 0)
+                           : cv::Scalar(147, 20, 255))
+                       : cv::Scalar(100, 100, 100);
 
     std::ostringstream out;
     if (_isAgeGenderEnabled) {
@@ -198,17 +201,17 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
         out << "," << f->getAge();
     }
 
+    if (_isAntispoofingEnabled) {
+        out << (f->isReal() ? ",real" : ",spoof");
+    }
+
     if (_isEmotionsEnabled) {
         auto emotion = f->getMainEmotion();
         out << "," << emotion.first;
     }
 
-    cv::putText(img,
-                out.str(),
-                cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20)),
-                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                1.5,
-                genderColor, 2);
+    auto textPos = cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20));
+    putHighlightedText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, genderColor, 2);
 
     if (_isHeadPoseEnabled) {
         cv::Point3f center(static_cast<float>(f->_location.x + f->_location.width / 2),

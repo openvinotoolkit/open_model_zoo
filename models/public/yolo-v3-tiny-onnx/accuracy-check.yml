@@ -1,0 +1,72 @@
+models:
+  - name: yolo-v3-tiny-onnx
+    launchers:
+      - framework: onnx_runtime
+        model: tiny-yolov3-11.onnx
+        adapter:
+          type: yolo_v3_onnx
+          boxes_out: yolonms_layer_1
+          scores_out: yolonms_layer_1:1
+          indices_out: yolonms_layer_1:2
+        inputs:
+          - name: image_shape
+            type: ORIG_IMAGE_INFO
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 416
+            interpolation: BICUBIC
+            use_pillow: True
+            aspect_ratio_scale: fit_to_window
+          - type: padding
+            pad_value: 128, 128, 128
+            size: 416
+          - type: normalization
+            std: 255
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+            reference: 0.1707
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+            reference: 0.1364
+
+  - name: yolo-v3-tiny-onnx
+    launchers:
+      - framework: openvino
+        adapter:
+          type: yolo_v3_onnx
+          boxes_out: yolo_evaluation_layer_1/concat_6:0_btc
+          scores_out: yolo_evaluation_layer_1/concat_7:0_btc
+          indices_out: yolonms_layer_1/ExpandDims_5:01
+        inputs:
+          - name: image_shape
+            type: ORIG_IMAGE_INFO
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        reader: pillow_imread
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            size: 416
+            interpolation: BICUBIC
+            use_pillow: True
+            aspect_ratio_scale: fit_to_window
+          - type: padding
+            pad_value: 128, 128, 128
+            size: 416
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+            reference: 0.1707
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+            reference: 0.1364

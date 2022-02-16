@@ -2,7 +2,7 @@ models:
   - name: human-pose-estimation-0007
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_ae
@@ -25,3 +25,4 @@ models:
         metrics:
           - name: AP
             type: coco_orig_keypoints_precision
+            reference: 0.543

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ from typing import List
 
 import numpy as np
 
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.representation import (
     DetectionAnnotation, DetectionPrediction,
     SegmentationPrediction, SegmentationAnnotation,
     CoCoInstanceSegmentationAnnotation, CoCoInstanceSegmentationPrediction)
-from accuracy_checker.utils import get_path
+from openvino.tools.accuracy_checker.utils import get_path
 
 
 @contextmanager

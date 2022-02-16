@@ -27,14 +27,16 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.7837
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9409
 
   - name: repvgg-b1
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -56,6 +58,8 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
+            reference: 0.7837
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+            reference: 0.9409

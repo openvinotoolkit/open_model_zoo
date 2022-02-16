@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,30 +14,29 @@
 // limitations under the License.
 */
 
-#include "pipelines/async_pipeline.h"
+#include <memory>
+#include <string>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
+#include "pipelines/async_pipeline.h"
 
-using namespace InferenceEngine;
-
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core) :
     model(std::move(modelInstance)) {
-
-    execNetwork = model->loadExecutableNetwork(cnnConfig, core);
-
+    compiledModel = model->compileModel(config, core);
     // --------------------------- Create infer requests ------------------------------------------------
-    unsigned int nireq = cnnConfig.maxAsyncRequests;
+    unsigned int nireq = config.maxAsyncRequests;
     if (nireq == 0) {
         try {
             // +1 to use it as a buffer of the pipeline
-            nireq = execNetwork.GetMetric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
-        } catch (const Exception& ex) {
-            throw std::runtime_error(std::string("Every device used with the demo should support "
-                "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
+            nireq = compiledModel.get_property(ov::optimal_number_of_infer_requests) + 1;
+        } catch (const ov::Exception& ex) {
+            throw std::runtime_error(std::string("Every device used with the demo should support compiled model's property "
+                "'OPTIMAL_NUMBER_OF_INFER_REQUESTS'. Failed to query the property with error: ") + ex.what());
         }
     }
-    requestsPool.reset(new RequestsPool(execNetwork, nireq));
-
+    slog::info << "\tNumber of inference requests: " << nireq << slog::endl;
+    requestsPool.reset(new RequestsPool(compiledModel, nireq));
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }
@@ -49,35 +48,39 @@ AsyncPipeline::~AsyncPipeline() {
 void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr ||
-        requestsPool->isIdleRequestAvailable() ||
-        (shouldKeepOrder ?
-            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
-            !completedInferenceResults.empty());
-    });
+    condVar.wait(
+        lock,
+        [&]()
+        {
+            return callbackException != nullptr ||
+                   requestsPool->isIdleRequestAvailable() ||
+                   (shouldKeepOrder ?
+                       completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
+                       !completedInferenceResults.empty());
+        });
 
-    if (callbackException)
+    if (callbackException) {
         std::rethrow_exception(callbackException);
+    }
 }
 
 int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData) {
     auto frameID = inputFrameId;
 
     auto request = requestsPool->getIdleRequest();
-    if (!request)
+    if (!request) {
         return -1;
+    }
 
     auto startTime = std::chrono::steady_clock::now();
     auto internalModelData = model->preprocess(inputData, request);
     preprocessMetrics.update(startTime);
 
-    request->SetCompletionCallback(
-        [this, frameID, request, internalModelData, metaData, startTime] {
-            request->SetCompletionCallback([]{});
-
+    request.set_callback(
+        [this, request, frameID, internalModelData, metaData, startTime](std::exception_ptr) mutable {
             {
-                std::lock_guard<std::mutex> lock(mtx);
-                this->inferenceMetrics.update(startTime);
+                const std::lock_guard<std::mutex> lock(mtx);
+                inferenceMetrics.update(startTime);
                 try {
                     InferenceResult result;
 
@@ -85,26 +88,20 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.metaData = std::move(metaData);
                     result.internalModelData = std::move(internalModelData);
 
-                    for (const auto& outName : model->getOutputsNames())
-                    {
-                        auto blobPtr = request->GetBlob(outName);
-
-                        if(Precision::I32 == blobPtr->getTensorDesc().getPrecision())
-                            result.outputsData.emplace(outName, std::make_shared<TBlob<int>>(*as<TBlob<int>>(blobPtr)));
-                        else
-                            result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(blobPtr)));
+                    for (const auto& outName : model->getOutputsNames()) {
+                        auto tensor = request.get_tensor(outName);
+                        result.outputsData.emplace(outName, tensor);
                     }
 
                     completedInferenceResults.emplace(frameID, result);
-                    this->requestsPool->setRequestIdle(request);
+                    requestsPool->setRequestIdle(request);
                 }
                 catch (...) {
-                    if (!this->callbackException) {
-                        this->callbackException = std::current_exception();
+                    if (!callbackException) {
+                        callbackException = std::current_exception();
                     }
                 }
             }
-
             condVar.notify_one();
     });
 
@@ -112,7 +109,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     if (inputFrameId < 0)
         inputFrameId = 0;
 
-    request->StartAsync();
+    request.start_async();
 
     return frameID;
 }
@@ -133,7 +130,7 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
 InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     InferenceResult retVal;
     {
-        std::lock_guard<std::mutex> lock(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
 
         const auto& it = shouldKeepOrder ?
             completedInferenceResults.find(outputFrameId) :
@@ -148,8 +145,9 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     if(!retVal.IsEmpty()) {
         outputFrameId = retVal.frameId;
         outputFrameId++;
-        if (outputFrameId < 0)
+        if (outputFrameId < 0) {
             outputFrameId = 0;
+        }
     }
 
     return retVal;

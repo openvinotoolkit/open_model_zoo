@@ -25,6 +25,8 @@ For the tests to work, the test data directory must contain:
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
 * a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
+* a file stream_8_high.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_high.mp4
+* a file stream_8_top.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_top.mp4
 """
 
 import argparse
@@ -34,7 +36,7 @@ import json
 import os
 import platform
 import shlex
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
 import timeit
@@ -44,6 +46,11 @@ from pathlib import Path
 from args import ArgContext, Arg, ModelArg
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
+
+
+def parser_paths_list(supported_devices):
+    paths = supported_devices.split(',')
+    return [Path(p) for p in paths if Path(p).is_file()]
 
 
 def parse_args():
@@ -63,6 +70,12 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
+        help='paths to Markdown files with supported devices for each model')
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
+        help='IR precisions for all models. By default, models are tested in FP16 precision')
+    parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
+        help='directory with pre-converted models (IRs)')
     return parser.parse_args()
 
 
@@ -82,9 +95,9 @@ def temp_dir_as_path():
         yield Path(temp_dir)
 
 
-def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
+def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test, model_precisions):
     model_names = set()
-    model_precisions = set()
+    model_precisions = set(model_precisions)
 
     for demo in demos_to_test:
         for case in demo.test_cases:
@@ -92,10 +105,6 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
                 if isinstance(arg, Arg):
                     for model_request in arg.required_models:
                         model_names.add(model_request.name)
-                        model_precisions.update(model_request.precisions)
-
-    if not model_precisions:
-        model_precisions.add('FP32')
 
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
@@ -139,17 +148,57 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     return dl_dir
 
 
+def parse_supported_device_list(paths):
+    if not paths:
+        return None
+    suppressed_devices = {}
+    for path in paths:
+        with Path(path).open() as f:
+            data = f.read()
+            rest = '|' + data.split('|', 1)[1]
+            table = rest.rsplit('|', 1)[0] + '|'
+            result = {}
+
+            for n, line in enumerate(table.split('\n')):
+                if n == 0:
+                    devices = [t.strip() for t in line.split('|')[2:-1]]
+                else:
+                    values = [t.strip() for t in line.split('|')[1:-1]]
+                    model_name, values = values[0], values[1:]
+                    for device, value in zip(devices, values):
+                        if not value:
+                            result[model_name] = result.get(model_name, []) + [device]
+            suppressed_devices.update(result)
+    return suppressed_devices
+
+
+def get_models(case, keys):
+    models = []
+    for key in keys:
+        model = case.options.get(key, None)
+        if model:
+            models.append(model.name if isinstance(model, ModelArg) else model.model_name)
+    return models
+
+
 def main():
     args = parse_args()
 
+    suppressed_devices = parse_supported_device_list(args.supported_devices)
+
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
-    auto_tools_dir = omz_dir / 'tools/downloader'
+    auto_tools_dir = omz_dir / 'tools/model_tools'
 
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
-    model_info = {model['name']: model for model in model_info_list}
+
+    model_info = {}
+    for model_data in model_info_list:
+        models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
+        for model in models_list:
+            model_info[model['name']] = model
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
@@ -158,25 +207,37 @@ def main():
         demos_to_test = DEMOS
 
     with temp_dir_as_path() as global_temp_dir:
-        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
+        if args.models_dir:
+            dl_dir = args.models_dir
+            print(f"\nRunning on pre-converted IRs: {str(dl_dir)}\n")
+        else:
+            dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
 
         num_failures = 0
 
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
+        try:
+            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+        except KeyError:
+            pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
         }
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
             print()
+            demo.set_precisions(args.precisions, model_info)
 
-            declared_model_names = {model['name']
-                for model in json.loads(subprocess.check_output(
+            declared_model_names = set()
+            for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
                         '--list', str(demo.models_lst_path(demos_dir))],
-                    universal_newlines=True))}
+                    universal_newlines=True)):
+                models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
+                for model in models_list:
+                    declared_model_names.add(model['name'])
 
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(
@@ -202,6 +263,7 @@ def main():
                 print()
                 device_args = demo.device_args(args.devices.split())
                 for test_case_index, test_case in enumerate(demo.test_cases):
+                    test_case_models = get_models(test_case, demo.model_keys)
 
                     case_args = [demo_arg
                         for key, value in sorted(test_case.options.items())
@@ -219,6 +281,14 @@ def main():
                         continue
 
                     for device, dev_arg in device_args.items():
+                        skip = False
+                        for model in test_case_models:
+                            if suppressed_devices and device in suppressed_devices.get(model, []):
+                                print('Test case #{}/{}: Model {} is suppressed on device'
+                                      .format(test_case_index, device, model))
+                                print(flush=True)
+                                skip = True
+                        if skip: continue
                         print('Test case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)

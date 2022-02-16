@@ -31,12 +31,12 @@ void ResultsMarker::mark(cv::Mat& image,
 
     if (showFaceBoundingBox) {
         cv::rectangle(image, faceInferenceResults.faceBoundingBox, cv::Scalar::all(255), 1);
-        cv::putText(image,
-                    cv::format("Detector confidence: %0.2f",
-                               static_cast<double>(faceInferenceResults.faceDetectionConfidence)),
-                    cv::Point(static_cast<int>(tl.x),
-                              static_cast<int>(tl.y - 5. * faceBoundingBoxWidth / 200.)),
-                    cv::FONT_HERSHEY_COMPLEX, scale, cv::Scalar::all(255), 1);
+        putHighlightedText(image,
+                           cv::format("Detector confidence: %0.2f",
+                           static_cast<double>(faceInferenceResults.faceDetectionConfidence)),
+                           cv::Point(static_cast<int>(tl.x),
+                           static_cast<int>(tl.y - 5. * faceBoundingBoxWidth / 200.)),
+                           cv::FONT_HERSHEY_COMPLEX, scale, cv::Scalar(200, 10, 10), 1);
     }
 
     if (showHeadPoseAxes) {
@@ -72,11 +72,11 @@ void ResultsMarker::mark(cv::Mat& image,
                            static_cast<int>(yCenter + axisLength * sinP)),
                  cv::Scalar(255, 0, 255), 2);
 
-        cv::putText(image,
-                    cv::format("head pose: (y=%0.0f, p=%0.0f, r=%0.0f)", std::round(yaw), std::round(pitch), std::round(roll)),
-                    cv::Point(static_cast<int>(faceBoundingBox.tl().x),
-                              static_cast<int>(faceBoundingBox.br().y + 5. * faceBoundingBoxWidth / 100.)),
-                    cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar(255, 255, 255), 1);
+        putHighlightedText(image,
+                           cv::format("head pose: (y=%0.0f, p=%0.0f, r=%0.0f)", std::round(yaw), std::round(pitch), std::round(roll)),
+                           cv::Point(static_cast<int>(faceBoundingBox.tl().x),
+                           static_cast<int>(faceBoundingBox.br().y + 5. * faceBoundingBoxWidth / 100.)),
+                           cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar(200, 10, 10), 1);
     }
 
     if (showLandmarks) {
@@ -113,13 +113,13 @@ void ResultsMarker::mark(cv::Mat& image,
         if (faceInferenceResults.leftEyeState && faceInferenceResults.rightEyeState) {
             gazeVectorToGazeAngles(faceInferenceResults.gazeVector, gazeAngles);
 
-            cv::putText(image,
-                cv::format("gaze angles: (h=%0.0f, v=%0.0f)",
-                    static_cast<double>(std::round(gazeAngles.x)),
-                    static_cast<double>(std::round(gazeAngles.y))),
-                cv::Point(static_cast<int>(faceBoundingBox.tl().x),
-                    static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
-                cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar::all(255), 1);
+            putHighlightedText(image,
+                               cv::format("gaze angles: (h=%0.0f, v=%0.0f)",
+                               static_cast<double>(std::round(gazeAngles.x)),
+                               static_cast<double>(std::round(gazeAngles.y))),
+                               cv::Point(static_cast<int>(faceBoundingBox.tl().x),
+                               static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
+                               cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar(200, 10, 10), 1);
         }
     }
     if (showEyeState) {

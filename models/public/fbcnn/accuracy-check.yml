@@ -1,0 +1,33 @@
+models:
+  - name: fbcnn
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: image_processing
+          reverse_channels: True
+        allow_reshape_input: True
+
+    datasets:
+      - name: LIVE_1
+        preprocessing:
+          - type: jpeg_compression
+            quality_factor: 40
+          - type: padding
+            stride: 8
+            pad_type: right_bottom
+            use_numpy: True
+            numpy_pad_mode: symmetric
+        postprocessing:
+          - type: corner_crop_image
+            apply_to: prediction
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+            reference:
+              mean: 34.34
+          - type: ssim
+            presenter: print_vector
+            reference:
+              mean: 0.99

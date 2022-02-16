@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ task_type: classification
 files:
   - name: inception_resnet_v2_2018_04_27.tgz
     size: 225882079
-    sha256: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
-    source: https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_resnet_v2_2018_04_27.tgz
+    checksum: 865828b072abc3b5e9d55d7949d39f8df59453f4673de0745182ea5c2489b1901f74e9288863052a2d4249a814952b07
+    original_source: https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_resnet_v2_2018_04_27.tgz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/inception-resnet-v2-tf/inception_resnet_v2_2018_04_27.tgz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -29,11 +30,12 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,299,299,3]
+  - --layout=input(NHWC)
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd
   - --input_model=$dl_dir/inception_resnet_v2.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

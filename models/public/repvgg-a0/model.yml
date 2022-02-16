@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ task_type: classification
 files:
   - name: repvgg.py
     size: 12745
-    sha256: a0ab4476f4fe6711e4f7cb394bd9e11879cc83bfa1cd6f1d190af53db6a9a464
+    checksum: 3d41d82d256eb4bb8b0216e177bcf84458cf4cb0dcd15809fee1e4c30d304bce7f3136caedc717e863c7e67b97c0d87d
     source: https://raw.githubusercontent.com/DingXiaoH/RepVGG/faba6fb5cbc27a3956e2e0522e27e065b824c757/repvgg.py
   - name: RepVGG-A0-train.pth
     size: 36588855
-    sha256: e538bfe8639d53a8cbeb4b580aac3dad8ecc304d71eddcb169f660a24fa80bb7
-    source:
+    checksum: 7efb6b28b0376d80753c86b43687b38f2a7ae94f3ef58552b602a55767b4187dbb7b1fe8770b16133427c93e6cf137d7
+    original_source:
       $type: google_drive
       id: 13Gn8rq1PztoMEgK7rCOPMUYHjGzk-w11
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-a0/RepVGG-A0-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG
@@ -55,6 +56,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=input
+  - --layout=input(NCHW)
   - --input_model=$conv_dir/repvgg-a0.onnx
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.624,57.12,57.375]

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
 # limitations under the License.
 
 description: >-
-  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
-  group of models designed to perform face detection. Short for "Multi-task Cascaded
-  Convolutional Neural Network", it is implemented using the Caffe* framework. The
-  "p" designation indicates that this model is the "proposal" network intended to
-  find the initial set of faces. For details about this family of models, check out
-  the repository <https://github.com/DuinoDu/mtcnn>.
+  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/abs/1604.02878> group
+  of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional
+  Neural Network", it is implemented using the Caffe* framework. The "p" designation
+  indicates that this model is the "proposal" network intended to find the initial
+  set of faces. For details about this family of models, check out the repository
+  <https://github.com/DuinoDu/mtcnn>.
 
   The model input is an image containing the data to be analyzed. The mean values
   need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image
@@ -31,12 +31,13 @@ task_type: detection
 files:
   - name: mtcnn-p.prototxt
     size: 2353
-    sha256: adc1756d8515d3ca3a6a186c0fadab66fcae04bd8d3c6388e2fe8797a626dde4
+    checksum: 372af5af8ba5c1820b587b64670ef957e40c5118f7775381d46e4eb88ec8f9cadb7abdeadfa3863459e17bf7b87318fd
     source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.prototxt
   - name: mtcnn-p.caffemodel
     size: 28163
-    sha256: d6085e7f48ba7e6b6f1b58964595f6bce5b97bcc4866751f7b4bdc98f920c096
-    source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+    checksum: abf640a47ec5b87724564741121a235581dd15f3782cf0b9380acfa45ef665974b97d8e8122114a66d9973696ae3b35e
+    original_source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mtcnn/mtcnn-p/det1.caffemodel
 postprocessing:
   - $type: regex_replace
     file: mtcnn-p.prototxt
@@ -51,6 +52,7 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,3,720,1280]
   - --input=data
+  - --layout=data(NCWH)
   - --mean_values=data[127.5,127.5,127.5]
   - --scale_values=data[128.0]
   - --output=conv4-2,prob1

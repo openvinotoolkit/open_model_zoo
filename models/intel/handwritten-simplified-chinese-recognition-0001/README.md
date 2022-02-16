@@ -2,13 +2,11 @@
 
 ## Use Case and High-Level Description
 
-This is a network for handwritten simplified Chinese text recognition scenario. It consists of a VGG16-like backbone,
-reshape layer and a fully connected layer.
-The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) dataset.
+This is a network for handwritten simplified Chinese text recognition scenario. The model consists of three parts, namely the residual convolutional neural network (CNN) as the feature extractor, and then a flatten operation followed  by a fully connected layer as the classifier for final prediction. The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) dataset.
 
 ## Example
 
-![](./assets/test-2.png) -> 的人不一了是他有为在责新中任自之我们
+![](./assets/handwritten-simplified-chinese-recognition-0001.png) -> 的人不一了是他有为在责新中任自之我们
 
 ## Specification
 
@@ -43,6 +41,12 @@ Name - `output`, shape - `125, 1, 4059`, format is `W, B, L`, where:
 - `L` - confidence distribution across the supported symbols in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
 
 The network output can be decoded by CTC Greedy Decoder.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Handwritten Text Recognition Demo](../../../demos/handwritten_text_recognition_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
