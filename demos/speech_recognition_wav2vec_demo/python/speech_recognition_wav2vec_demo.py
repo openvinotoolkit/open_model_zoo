@@ -26,7 +26,7 @@ import sys
 import numpy as np
 import wave
 
-from openvino.runtime import Core, get_version, PartialShape
+from openvino.runtime import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
