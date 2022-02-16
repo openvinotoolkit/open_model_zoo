@@ -104,7 +104,7 @@
 | retinanet-tf | YES | YES |    |
 | rexnet-v1-x1.0 | YES | YES |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
-| robust-video-matting-mobilenetv3 | YES | YES |    |
+| robust-video-matting-mobilenetv3 | YES |    |    |
 | se-inception | YES | YES | YES |
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
@@ -133,7 +133,7 @@
 | wav2vec2-base | YES |    |    |
 | wavernn-rnn | YES | YES | YES |
 | wavernn-upsampler | YES | YES |    |
-| yolact-resnet50-fpn-pytorch | YES | YES | YES |
+| yolact-resnet50-fpn-pytorch | YES |    | YES |
 | yolo-v1-tiny-tf | YES | YES | YES |
 | yolo-v2-tf | YES | YES | YES |
 | yolo-v2-tiny-tf | YES | YES | YES |
