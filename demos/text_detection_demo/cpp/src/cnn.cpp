@@ -64,7 +64,7 @@ Cnn::Cnn(
     // Configuring input and output
     ov::preprocess::PrePostProcessor ppp(m_model);
 
-    // we'd like to pass input image (NCWH, u8) to model input
+    // we'd like to pass input image (NHWC, u8) to model input
     // and let OpenVINO do necessary conversions
 
     ppp.input().tensor()
