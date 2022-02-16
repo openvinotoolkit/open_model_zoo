@@ -53,19 +53,17 @@ class SegmentorMstcn:
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
 
         net = ie.read_model(i3d_path)
-        net.reshape({next(iter(net.input_info)): (
+        self.i3d_input_keys = self.net.inputs
+        self.i3d_output_key = self.net.outputs
+        net.reshape({self.i3d_input_keys[0]: (
             self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)})
-
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
-
         self.i3d = ie.compile_model(model=net, device_name=device)
-        self.i3d_input_keys = list(self.i3d.input_info.items())
-        self.i3d_output_key = list(self.i3d.outputs.items())
 
         self.mstcn_net = ie.read_model(mstcn_path)
         self.mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
-        self.mstcn_input_keys = list(self.mstcn.input_info.items())
-        self.mstcn_output_key = list(self.mstcn.outputs.items())
+        self.mstcn_input_keys = self.mstcn.inputs
+        self.mstcn_output_key = self.mstcn.outputs
         self.mstcn_net.reshape({'input': (1, 2048, 1)})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
