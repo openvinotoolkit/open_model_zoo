@@ -213,6 +213,12 @@ class Downloader:
 
         reporter.print_group_heading('Downloading {}', model.name)
 
+        model_unsupported_precisions = self.requested_precisions - model.precisions
+        if model_unsupported_precisions:
+            reporter.print_section_heading('Model {} is not supported in {} precisions. '
+                + 'Skipping downloading for these precisions.', model.name, model_unsupported_precisions)
+            reporter.print()
+
         reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
 
         output = self.output_dir / model.subdirectory
