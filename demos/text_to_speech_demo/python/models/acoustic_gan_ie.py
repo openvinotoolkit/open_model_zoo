@@ -51,15 +51,6 @@ class AcousticGANIE:
         self.dec_input_data_name = "z"
         self.dec_input_mask_name = "z_mask"
 
-    @staticmethod
-    def sequence_mask(length, max_length=None):
-        if max_length is None:
-            max_length = np.max(length)
-        x = np.arange(max_length, dtype=length.dtype)
-        x = np.expand_dims(x, axis=(0))
-        length = np.expand_dims(length, axis=(1))
-        return x < length
-
     def seq_to_indexes(self, text):
         res = text_to_sequence_with_dictionary(text, self.cmudict)
         if self.verbose:
