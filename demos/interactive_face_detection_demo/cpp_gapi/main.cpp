@@ -543,8 +543,7 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<Presenter> presenter;
 
         /** Get information about frame **/
-    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
-        FLAGS_lim);
+    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
     const auto tmp = cap->read();
     cap.reset();
     if (!tmp.data) {

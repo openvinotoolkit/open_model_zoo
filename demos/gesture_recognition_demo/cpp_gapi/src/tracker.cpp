@@ -56,7 +56,7 @@ void Tracker::solveAssignmentProblem(
     }
 
     size_t i = 0;
-    for (auto id : track_ids) {
+    for (size_t id : track_ids) {
         if (res[i] < detections.size()) {
             matches->emplace(id, res[i], 1 - dissimilarity.at<float>(i, res[i]));
         } else {
@@ -67,7 +67,8 @@ void Tracker::solveAssignmentProblem(
 }
 
 bool Tracker::eraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     auto c = center(tracks_.at(track_id).back().rect);
     if (frame_size_ != cv::Size() &&
             (c.x < 0 || c.y < 0 || c.x > frame_size_.width ||

@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import numpy as np
 
 from .image_model import ImageModel
 from .model import WrapperError
-from .types import NumericalValue
-from .utils import nms
+from .types import NumericalValue, ListValue, StringValue
+from .utils import nms, load_labels
 
 
 class MaskRCNNModel(ImageModel):
@@ -29,6 +29,8 @@ class MaskRCNNModel(ImageModel):
     def __init__(self, model_adapter, configuration, preload=False):
         super().__init__(model_adapter, configuration, preload)
         self._check_io_number((1, 2), (3, 4, 5, 8))
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
         self.is_segmentoly = len(self.inputs) == 2
         self.output_blob_name = self._get_outputs()
 
@@ -39,6 +41,10 @@ class MaskRCNNModel(ImageModel):
             'confidence_threshold': NumericalValue(
                 default_value=0.5,
                 description='Probability threshold for detections filtering'
+            ),
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(
+                description="Path to file with labels. Overrides the labels"
             ),
         })
         return parameters
@@ -150,6 +156,8 @@ class YolactModel(ImageModel):
 
     def __init__(self, model_adapter, configuration, preload=False):
         super().__init__(model_adapter, configuration, preload)
+        if self.path_to_labels:
+            self.labels = load_labels(self.path_to_labels)
         self._check_io_number(1, 4)
         self.output_blob_name = self._get_outputs()
 
@@ -160,6 +168,10 @@ class YolactModel(ImageModel):
             'confidence_threshold': NumericalValue(
                 default_value=0.5,
                 description='Probability threshold for detections filtering'
+            ),
+            'labels': ListValue(description="List of class labels"),
+            'path_to_labels': StringValue(
+                description="Path to file with labels. Overrides the labels"
             ),
         })
         return parameters

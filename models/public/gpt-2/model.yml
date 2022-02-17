@@ -120,7 +120,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input=input
   - --layout=input(NS)
-  - --input_model=$dl_dir/gpt-2.onnx
+  - --input_model=$conv_dir/gpt-2.onnx
   - --output=output
 framework: pytorch
 license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE
