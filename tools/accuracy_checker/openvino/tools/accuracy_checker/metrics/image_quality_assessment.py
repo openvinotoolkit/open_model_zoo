@@ -393,8 +393,8 @@ class LPIPS(BaseRegressionMetric):
         try:
             import lpips # pylint: disable=C0415
             self.lpips = lpips
-        except ImportError as import_err:
-            self.lpips = UnsupportedPackage('lpips', import_err)
+        except ImportError as _import_err:
+            self.lpips = UnsupportedPackage('lpips', _import_err)
 
         super().__init__(self.lpips_differ, *args, **kwargs)
 
