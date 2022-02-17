@@ -158,9 +158,10 @@ class SegmentorMstcn:
             input_mstcn = np.expand_dims(feature_unit, 0)
 
             feed_dict = {}
-            if len(self.his_fea) != 0:
-                feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
+            # if len(self.his_fea) != 0:
+            feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
             feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
+
             if input_mstcn.shape == (1, 2048, 1):
                 out = infer_request.infer(feed_dict)[output_tensor]
 
