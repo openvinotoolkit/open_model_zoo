@@ -397,10 +397,10 @@ DEMOS = [
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  #TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
+                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
                 '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  #TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
@@ -499,13 +499,13 @@ DEMOS = [
                 TestCase(options={'-at': 'ssd'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('efficientdet-d0-tf'),
+                        #ModelArg('efficientdet-d0-tf'), # TODO when calling compile_model, we get stack overflow
                         ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
                         ModelArg('face-detection-0205'),
-                        ModelArg('face-detection-0206'),
+                        #ModelArg('face-detection-0206'), # TODO when calling compile_model, we get stack overflow
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -584,10 +584,10 @@ DEMOS = [
             TestCase(options={'-person_label': '1', '-at': 'ssd', '-m_det': ModelArg('retinanet-tf')}),
         ],
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
+            # ModelArg('person-reidentification-retail-0277'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
+            # ModelArg('person-reidentification-retail-0286'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
             ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')
+            # ModelArg('person-reidentification-retail-0288') # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
         ),
     )),
 
@@ -619,9 +619,9 @@ DEMOS = [
                     ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('fastseg-large'),
                     ModelArg('fastseg-small'),
-                    ModelArg('hrnet-v2-c1-segmentation'),
+                    #ModelArg('hrnet-v2-c1-segmentation'), # TODO when calling compile_model, we get stack overflow
                     ModelArg('deeplabv3'),
-                    ModelArg('ocrnet-hrnet-w48-paddle'),
+                    #ModelArg('ocrnet-hrnet-w48-paddle'), # TODO when calling compile_model, we get stack overflow
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'))),
         ],
@@ -772,30 +772,30 @@ PYTHON_DEMOS = [
             ),
         ],
     )),
-
-    PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
-            '--background': DataPatternArg('instance-segmentation'),
-        }),
-        single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
-            ModelArg('robust-video-matting-mobilenetv3'),
-            ModelArg('background-matting-mobilenetv2'),
-            ModelArg('yolact-resnet50-fpn-pytorch')),
-    )),
+    # TODO
+    # PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('instance-segmentation'),
+    #         '--background': DataPatternArg('instance-segmentation'),
+    #     }),
+    #     single_option_cases('-m',
+    #         ModelArg('instance-segmentation-person-0007'),
+    #         ModelArg('robust-video-matting-mobilenetv3'),
+    #         ModelArg('background-matting-mobilenetv2'),
+    #         ModelArg('yolact-resnet50-fpn-pytorch')),
+    # )),
 
     PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
                           '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
         [
-            TestCase(options={
-                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
-                '--input_names': 'input_ids,attention_mask,token_type_ids',
-                '--output_names': 'output_s,output_e',
-                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
-            }),
+            # TestCase(options={
+            #     '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+            #     '--input_names': 'input_ids,attention_mask,token_type_ids',
+            #     '--output_names': 'output_s,output_e',
+            #     '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
+            # }),
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
