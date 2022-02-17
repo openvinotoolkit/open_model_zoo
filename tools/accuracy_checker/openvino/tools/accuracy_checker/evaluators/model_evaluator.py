@@ -528,7 +528,7 @@ class ModelEvaluator(BaseEvaluator):
             self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
             batch_predictions = self.adapter.process(batch_predictions, [image], batch_meta)
 
-        _, predictions = self.postprocessor.process_batch(
+        _, predictions = self.postprocessor.deprocess_batch(
             None, batch_predictions, batch_meta, allow_empty_annotation=True
         )
         self.input_feeder.ordered_inputs = False
