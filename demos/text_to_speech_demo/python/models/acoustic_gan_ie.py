@@ -162,4 +162,3 @@ class AcousticGANIE:
         res = self.decoder_request.get_tensor("mel").data[:]
         res = res * 6.0 - 6.0
         return res
-
