@@ -666,13 +666,14 @@ DEMOS = [
             model_keys=['-m_det', '-m_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataDirectoryArg('person-detection-retail')}),
+            '-i':  DataDirectoryArg('person-detection-retail')}),
         single_option_cases('-m_det',
             # TODO
             ModelArg('person-detection-0200'),
             ModelArg('person-detection-0201'),
             ModelArg('person-detection-0202'),
-            ModelArg('person-detection-retail-0013')),
+            ModelArg('person-detection-retail-0013')
+            ),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),  # TODO
             ModelArg('person-reidentification-retail-0286'),
@@ -997,7 +998,7 @@ PYTHON_DEMOS = [
     # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
     #                      **MONITORS,
-    #                      '-i': 'C:/videos/portret1.jpg'}),
+    #                      '-i': DataPatternArg('human-pose-estimation')}),
     #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     # )),)
 
@@ -1033,6 +1034,7 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: enable tests when FP16-INT8 will work
+    # TODO:   iou = intersection / union    division by zero
     # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
     #     TestCase(options={'--no_show': None,
     #         **MONITORS,
@@ -1148,8 +1150,8 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),  # TODO
-                        ModelArg('face-detection-0206'),  # TODO
+                        ModelArg('face-detection-0205'), 
+                        ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1164,8 +1166,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        ModelArg('person-vehicle-bike-detection-2003'), # TODO
-                        ModelArg('person-vehicle-bike-detection-2004'),  # TODO
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -1181,7 +1183,7 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106'),
-                        ModelArg('person-detection-0106')),  # TODO
+                        ModelArg('person-detection-0106')),
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
