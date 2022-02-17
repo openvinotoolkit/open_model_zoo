@@ -277,29 +277,29 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
             device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={'--show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
                 # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
-                '-m_am': ModelArg('anti-spoof-mn3'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
+                '-mam': ModelArg('anti-spoof-mn3'),
+                '-mem': ModelArg('emotions-recognition-retail-0003'),
                 # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-mlm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
         ]
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
+            model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
+            device_keys=['-d', '-dag', '-dem', '-dlm', '-dhp', '-dam'],
             test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={'--show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
