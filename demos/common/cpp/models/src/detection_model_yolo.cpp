@@ -181,14 +181,15 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
         for (const auto& name : outputsNames) {
             const auto& shape = outShapes[name];
-            int classes = (int)shape[ov::layout::channels_idx(yoloRegionLayout)] / num - 4 - (isObjConf ? 1 : 0);
             if (shape[ov::layout::channels_idx(yoloRegionLayout)] % num != 0) {
                 throw std::logic_error(std::string("Output tenosor ") + name + " has wrong 2nd dimension");
             }
-            regions.emplace(name, Region(classes, 4,
+            regions.emplace(name, Region(
+                shape[ov::layout::channels_idx(yoloRegionLayout)] / num - 4 - (isObjConf ? 1 : 0),
+                4,
                 presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
                 std::vector<int64_t>(chosenMasks.begin() + i * num, chosenMasks.begin() + (i + 1) * num),
-                (int)shape[ov::layout::width_idx(yoloRegionLayout)], (int)shape[ov::layout::height_idx(yoloRegionLayout)]));
+                shape[ov::layout::width_idx(yoloRegionLayout)], shape[ov::layout::height_idx(yoloRegionLayout)]));
             i++;
         }
     }
@@ -353,8 +354,8 @@ ModelYolo::Region::Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionY
     num = mask.size();
 
     auto shape = regionYolo->get_input_shape(0);
-    outputWidth = (int)shape[3];
-    outputHeight = (int)shape[2];
+    outputWidth = shape[3];
+    outputHeight = shape[2];
 
     if (num) {
 
