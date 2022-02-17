@@ -29,8 +29,8 @@
 | facial-landmarks-35-adas-0002 | YES | YES | YES |
 | facial-landmarks-98-detection-0001 | YES | YES | YES |
 | faster-rcnn-resnet101-coco-sparse-60-0001 | YES |  |    |
-| formula-recognition-medium-scan-0001-im2latex-decoder | YES | YES |    |
-| formula-recognition-medium-scan-0001-im2latex-encoder | YES | YES |    |
+| formula-recognition-medium-scan-0001-im2latex-decoder | YES |  |    |
+| formula-recognition-medium-scan-0001-im2latex-encoder | YES |  |    |
 | formula-recognition-polynomials-handwritten-0001-decoder | YES | YES |    |
 | formula-recognition-polynomials-handwritten-0001-encoder | YES | YES |    |
 | gaze-estimation-adas-0002 | YES | YES | YES |
