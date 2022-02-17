@@ -249,17 +249,16 @@ def main():
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
-
         else:
             # Wait for empty request
             detector_pipeline.await_any()
 
     detector_pipeline.await_all()
+    if detector_pipeline.callback_exceptions:
+        raise detector_pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = detector_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = detector_pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']

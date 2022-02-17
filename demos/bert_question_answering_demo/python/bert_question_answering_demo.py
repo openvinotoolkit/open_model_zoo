@@ -237,10 +237,10 @@ def main():
                 pipeline.await_any()
 
         pipeline.await_all()
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
         for window_id in range(next_window_id_to_show, next_window_id):
             results = pipeline.get_result(window_id)
-            while results is None:
-                results = pipeline.get_result(window_id)
             update_answers_list(answers, results[0])
 
         visualizer.show_answers(answers)
