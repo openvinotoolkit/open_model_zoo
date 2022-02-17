@@ -58,7 +58,7 @@ def build_argparser():
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
     args.add_argument('--layout',
                       help='Optional. Model inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                           'Format "<layout>" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
                            'To define layout you should use only capital letters',
                       type=str, default=None)
     args.add_argument("-d", "--device",

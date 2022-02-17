@@ -54,7 +54,7 @@ def build_argparser():
                            'Default value is CPU.')
     args.add_argument('--layout', type=str, default=None,
                       help='Optional. Model inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input. '
+                           'Format "<layout>" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
                            'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')

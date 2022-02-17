@@ -28,7 +28,7 @@ static const char target_device_reid_message[] = "Optional. Specify the target d
                                                  "(the list of available devices is shown below). Default value is CPU. "
                                                  "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin.";
 static const char layout_det_model_message[] = "Optional. Specify inputs layouts."
-                                               " Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
+                                               " Ex. <layout> or <input1>:<layout1>,<input2>:<layout2> in case of more than one input.";
 static const char raw_output_message[] = "Optional. Output pedestrian tracking results in a raw format "
                                           "(compatible with MOTChallenge format).";
 static const char no_show_message[] = "Optional. Don't show output.";
