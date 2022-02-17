@@ -67,7 +67,7 @@ void Tracker::SolveAssignmentProblem(
     cv::Mat dissimilarity;
     ComputeDissimilarityMatrix(track_ids, detections, &dissimilarity);
 
-    std::vector<int> res = KuhnMunkres().Solve(dissimilarity);
+    auto res = KuhnMunkres().Solve(dissimilarity);
 
     for (size_t i = 0; i < detections.size(); i++) {
         unmatched_detections->insert(i);
@@ -75,7 +75,7 @@ void Tracker::SolveAssignmentProblem(
 
     size_t i = 0;
     for (size_t id : track_ids) {
-        if (res[i] < (int)detections.size()) {
+        if (res[i] < detections.size()) {
             matches->emplace(id, res[i], 1 - dissimilarity.at<float>(i, res[i]));
         } else {
             unmatched_tracks->insert(id);
