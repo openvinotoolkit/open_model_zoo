@@ -56,7 +56,7 @@ class SegmentorMstcn:
         self.i3d_input_keys = net.inputs
         self.i3d_output_key = net.outputs
         net.reshape({self.i3d_input_keys[0]: PartialShape(
-            self.EmbedBatchSize, self.EmbedWindowLength, 3, self.ImgSizeWidth, self.ImgSizeHeight)})
+            [self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight)]})
 
         net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
         self.i3d = ie.compile_model(model=net, device_name=device)
