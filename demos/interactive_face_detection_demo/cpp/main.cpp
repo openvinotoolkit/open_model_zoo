@@ -70,33 +70,33 @@ constexpr char r_msg[] = "output inference results as raw values";
 DEFINE_bool(r, false, r_msg);
 
 constexpr char show_msg[] = "(don't) show output";
-DEFINE_bool(show, false, show_msg);
+DEFINE_bool(show, true, show_msg);
 
 constexpr char show_emotion_bar_msg[] = "(don't) show emotion bar";
-DEFINE_bool(show_emotion_bar, false, show_emotion_bar_msg);
+DEFINE_bool(show_emotion_bar, true, show_emotion_bar_msg);
 
 constexpr char smooth_msg[] = "(don't) smooth person attributes";
-DEFINE_bool(smooth, false, smooth_msg);
+DEFINE_bool(smooth, true, smooth_msg);
 
 constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, t_msg);
 
-constexpr char u_msg[] = "resource utilization graphs: -u cdm. "
+constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
     "c - average CPU load, d - load distrobution over cores, m - memory usage";
-DEFINE_string(u, "", u_msg);
+DEFINE_string(u, "cdm", u_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout << "  \t[ -h]                                         " << h_msg
+        std::cout <<   "\t[ -h]                                         " << h_msg
                   << "\n\t[--help]                                           print help on all arguments"
                   << "\n\t  -m <MODEL FILE>                             " << m_msg
-                  << "\n\t  -i <INPUT>                                  " << i_msg
                   << "\n\t[--bb_enlarge_coef <NUMBER>]                  " << bb_enlarge_coef_msg
                   << "\n\t[ -d <DEVICE>]                                " << d_msg
                   << "\n\t[--dx_coef <NUMBER>]                          " << dx_coef_msg
                   << "\n\t[--dy_coef <NUMBER>]                          " << dy_coef_msg
                   << "\n\t[--fps <NUMBER>]                              " << fps_msg
+                  << "\n\t[ -i <INPUT>]                                 " << i_msg
                   << "\n\t[--limit <NUMBER>]                            " << lim_msg
                   << "\n\t[--loop]                                      " << loop_msg
                   << "\n\t[--mag <MODEL FILE>]                          " << mag_msg
@@ -113,7 +113,8 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[ -u <DEVICE>]                                " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
-                     "\n\t\tP, p, 0, spacebar - Pause" << '\n';
+                     "\n\t\tP, p, 0, spacebar - Pause"
+                     "\n\t\tC - average CPU load, D - load distrobution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
@@ -238,7 +239,7 @@ int main(int argc, char *argv[]) {
             cv::Rect rect = result.location & cv::Rect({0, 0}, prevFrame.size());
 
             Face::Ptr face;
-            if (!FLAGS_smooth) {
+            if (FLAGS_smooth) {
                 face = matchFace(rect, prev_faces);
                 float intensity_mean = calcMean(prevFrame(rect));
 
