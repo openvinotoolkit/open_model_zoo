@@ -46,9 +46,9 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
             config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
         }
         else if (device == "GPU") {
-            config.compiledModelConfig.emplace(ov::num_streams(deviceNstreams.count(device) > 0
+            config.compiledModelConfig.emplace(ov::streams::num(deviceNstreams.count(device) > 0
                 ? (int)deviceNstreams.at(device)
-                : ov::NumStreams::AUTO));
+                : ov::streams::AUTO));
             if (flags_d.find("MULTI") != std::string::npos
                 && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
@@ -65,10 +65,10 @@ ModelConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, uint3
     auto config = getCommonConfig(flags_d, flags_nireq);
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
-            config.compiledModelConfig.emplace(ov::num_streams.name(), 1);
+            config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
         }
         else if (device == "GPU") {
-            config.compiledModelConfig.emplace(ov::num_streams.name(), 1);
+            config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
         }
     }
     return config;
