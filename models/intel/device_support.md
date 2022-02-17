@@ -84,10 +84,10 @@
 | person-detection-raisinghand-recognition-0001 | YES | YES | YES |
 | person-detection-retail-0002 | YES | YES | YES |
 | person-detection-retail-0013 | YES |  | YES |
-| person-reidentification-retail-0277 |  | YES |    |
-| person-reidentification-retail-0286 |  | YES |    |
-| person-reidentification-retail-0287 |  | YES |    |
-| person-reidentification-retail-0288 |  | YES |    |
+| person-reidentification-retail-0277 | YES |  |    |
+| person-reidentification-retail-0286 | YES |  |    |
+| person-reidentification-retail-0287 | YES |  |    |
+| person-reidentification-retail-0288 | YES |  |    |
 | person-vehicle-bike-detection-2000 | YES |  | YES |
 | person-vehicle-bike-detection-2001 | YES |  | YES |
 | person-vehicle-bike-detection-2002 | YES |  | YES |
