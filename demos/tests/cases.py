@@ -663,12 +663,13 @@ DEMOS = [
             model_keys=['-m_det', '-m_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataDirectoryArg('person-detection-retail')}),
+            '-i':  DataDirectoryArg('person-detection-retail')}),
         single_option_cases('-m_det',
             ModelArg('person-detection-0200'),
             ModelArg('person-detection-0201'),
             ModelArg('person-detection-0202'),
-            ModelArg('person-detection-retail-0013')),
+            ModelArg('person-detection-retail-0013')
+            ),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
@@ -990,7 +991,7 @@ PYTHON_DEMOS = [
     # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
     #                      **MONITORS,
-    #                      '-i': 'C:/videos/portret1.jpg'}),
+    #                      '-i': DataPatternArg('human-pose-estimation')}),
     #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     # )),
 
@@ -1141,7 +1142,7 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'),
+                        ModelArg('face-detection-0205'), 
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
