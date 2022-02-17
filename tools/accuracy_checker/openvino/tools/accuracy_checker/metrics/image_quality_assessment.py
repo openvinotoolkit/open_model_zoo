@@ -31,12 +31,6 @@ try:
 except ImportError as import_err:
     convolve2d = UnsupportedPackage('scipy', import_err)
 
-try:
-    import lpips
-except ImportError as import_err:
-    lpips = UnsupportedPackage('lpips', import_err)
-
-
 def _ssim(annotation_image, prediction_image):
     prediction = np.asarray(prediction_image)
     ground_truth = np.asarray(annotation_image)
@@ -396,6 +390,12 @@ class LPIPS(BaseRegressionMetric):
     )
 
     def __init__(self, *args, **kwargs):
+        try:
+            import lpips # pylint: disable=C0415
+            self.lpips = lpips
+        except ImportError as import_err:
+            self.lpips = UnsupportedPackage('lpips', import_err)
+
         super().__init__(self.lpips_differ, *args, **kwargs)
 
     @classmethod
@@ -424,8 +424,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_order = self.get_value_from_config('color_order')
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
-        if isinstance(lpips, UnsupportedPackage):
-            lpips.raise_error(self.__provider__)
+        if isinstance(self.lpips, UnsupportedPackage):
+            self.lpips.raise_error(self.__provider__)
         self.dist_threshold = self.get_value_from_config('distance_threshold')
         self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
         self.loss = self._create_loss()
@@ -434,8 +434,8 @@ class LPIPS(BaseRegressionMetric):
         if self.color_order == 'BGR':
             annotation_image = annotation_image[:, :, ::-1]
             prediction_image = prediction_image[:, :, ::-1]
-        gt_tensor = lpips.im2tensor(annotation_image, factor=self.color_scale / 2)
-        pred_tensor = lpips.im2tensor(prediction_image, factor=self.color_scale / 2)
+        gt_tensor = self.lpips.im2tensor(annotation_image, factor=self.color_scale / 2)
+        pred_tensor = self.lpips.im2tensor(prediction_image, factor=self.color_scale / 2)
         return self.loss(gt_tensor, pred_tensor).item()
 
     def evaluate(self, annotations, predictions):
@@ -471,7 +471,7 @@ class LPIPS(BaseRegressionMetric):
         model = model_classes[net](pretrained=False)
         model.load_state_dict(preloaded_weights)
         feats = model.features
-        loss = lpips.LPIPS(pnet_rand=True)
+        loss = self.lpips.LPIPS(pnet_rand=True)
         for slice_id in range(1, loss.net.N_slices + 1):
             sl = getattr(loss.net, 'slice{}'.format(slice_id))
             for module_id in sl._modules: # pylint: disable=W0212
