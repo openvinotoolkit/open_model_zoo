@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "utils/image_utils.h"
 #include "utils/ocv_common.hpp"
 #include "text_detection.hpp"
 
@@ -173,7 +174,12 @@ cv::Mat get_all(const std::vector<cv::Point>& points, int w, int h, std::unorder
 std::map<std::string, ov::runtime::Tensor> TextDetector::Infer(const cv::Mat& frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    m_infer_request.set_input_tensor({ ov::element::u8, {1, size_t(frame.rows), size_t(frame.cols), size_t(frame.channels())}, frame.data});
+    cv::Mat resizedImg = frame;
+    if (!use_auto_resize) {
+        resizedImg = resizeImageExt(frame, m_input_size.width, m_input_size.height);
+    }
+
+    m_infer_request.set_input_tensor(wrapMat2Tensor(resizedImg));
 
     m_infer_request.infer();
 

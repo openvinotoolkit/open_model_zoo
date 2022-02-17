@@ -17,8 +17,8 @@
 class TextDetector : public Cnn {
 public:
     TextDetector(const std::string& model_path, const std::string& model_type, const std::string& deviceName,
-        ov::Core& core, const cv::Size& new_input_resolution = cv::Size()) :
-        Cnn(model_path, model_type, deviceName, core) {};
+        ov::Core& core, const cv::Size& new_input_resolution = cv::Size(), bool use_auto_resize = false) :
+        Cnn(model_path, model_type, deviceName, core, {}, use_auto_resize) {};
 
     std::map<std::string, ov::Tensor> Infer(const cv::Mat& frame) override;
 

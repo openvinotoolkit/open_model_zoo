@@ -11,6 +11,7 @@
 #include <numeric>
 #include <iostream>
 
+#include "utils/image_utils.h"
 #include "utils/ocv_common.hpp"
 #include "text_recognition.hpp"
 
@@ -191,8 +192,8 @@ TextRecognizer::TextRecognizer(
     const std::string& out_enc_hidden_name, const std::string& out_dec_hidden_name,
     const std::string& in_dec_hidden_name, const std::string& features_name,
     const std::string& in_dec_symbol_name, const std::string& out_dec_symbol_name,
-    const std::string& logits_name, size_t end_token) :
-    Cnn(model_path, model_type, deviceName, core),
+    const std::string& logits_name, size_t end_token, bool use_auto_resize) :
+    Cnn(model_path, model_type, deviceName, core, {}, use_auto_resize),
     m_isCompositeModel(false),
     m_features_name(features_name), m_out_enc_hidden_name(out_enc_hidden_name),
     m_out_dec_hidden_name(out_dec_hidden_name), m_in_dec_hidden_name(in_dec_hidden_name),
@@ -234,7 +235,10 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
     }
 
     ov::Tensor tensor = m_infer_request.get_tensor(m_input_name);
-    m_infer_request.set_tensor(m_input_name, { ov::element::u8, {1, size_t(image.rows), size_t(image.cols), size_t(image.channels())}, image.data });
+    if (!use_auto_resize) {
+        image = resizeImageExt(image, m_input_size.width, m_input_size.height);
+    }
+    m_infer_request.set_tensor(m_input_name, wrapMat2Tensor(image));
 
     m_infer_request.infer();
 
