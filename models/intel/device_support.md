@@ -20,8 +20,8 @@
 | face-detection-0200 | YES |  | YES |
 | face-detection-0202 | YES |  | YES |
 | face-detection-0204 | YES |  | YES |
-| face-detection-0205 | YES | YES | YES |
-| face-detection-0206 | YES | YES | YES |
+| face-detection-0205 | YES |  | YES |
+| face-detection-0206 | YES |  | YES |
 | face-detection-adas-0001 | YES |  | YES |
 | face-detection-retail-0004 | YES |  | YES |
 | face-detection-retail-0005 | YES |  | YES |
