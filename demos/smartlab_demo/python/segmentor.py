@@ -53,19 +53,17 @@ class SegmentorMstcn:
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
 
         net = ie.read_model(i3d_path)
-        self.i3d_input_keys = net.inputs
-        self.i3d_output_key = net.outputs
-        net.reshape({self.i3d_input_keys[0]: PartialShape(
+        net.reshape({net.inputs[0]: PartialShape(
             [self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight])})
-
-        net.add_outputs("RGB/inception_i3d/Logits/AvgPool3D")
+        nodes = net.get_ops()
+        net.add_outputs(nodes[13].output(0))
         self.i3d = ie.compile_model(model=net, device_name=device)
 
         self.mstcn_net = ie.read_model(mstcn_path)
         self.mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_input_keys = self.mstcn.inputs
         self.mstcn_output_key = self.mstcn.outputs
-        self.mstcn_net.reshape({'input': (1, 2048, 1)})
+        self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
         self.his_fea = [init_his_feature[f'arr_{i}'] for i in range(4)]
@@ -107,6 +105,7 @@ class SegmentorMstcn:
         # minimal temporal length for processor
         min_t = (self.EmbedWindowLength - 1) * self.EmbedWindowAtrous
 
+        infer_request = self.i3d.create_infer_request()
         if frame_index > min_t:
             num_embedding = embedding_buffer.shape[-1]
             img_buffer = list(img_buffer)
@@ -121,16 +120,17 @@ class SegmentorMstcn:
 
                 input_data = [
                     [cv2.resize(img_buffer[start_index + i * self.EmbedWindowAtrous],
-                                (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
+                    (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
                     for j in range(self.EmbedBatchSize)]
                 input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
                 input_data = input_data * 127.5 + 127.5
 
-                out_logits = self.i3d.infer_new_request(
-                    inputs={self.i3d_input_keys[0]: input_data})[self.i3d_output_key[0]]
+                input_dict = {self.i3d.inputs[0]: input_data}
+                out_logits = infer_request.infer(input_dict)[self.i3d.outputs[1]]
                 out_logits = out_logits.squeeze((0, 3, 4))
-                embedding_buffer = np.concatenate([embedding_buffer, out_logits],
-                                                  axis=1)  # ndarray: C x num_embedding
+
+                # ndarray: C x num_embedding
+                embedding_buffer = np.concatenate((embedding_buffer, out_logits), axis=1)
 
                 curr_t += self.EmbedWindowStride
         return embedding_buffer
@@ -143,6 +143,10 @@ class SegmentorMstcn:
         start_index = self.TemporalLogits.shape[0]
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
+
+        output_tensor = self.reshape_mstcn.outputs[0]
+        infer_request = self.reshape_mstcn.create_infer_request()
+
         if num_batch < 0:
             log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
@@ -158,7 +162,7 @@ class SegmentorMstcn:
                 feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
             feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
             if input_mstcn.shape == (1, 2048, 1):
-                out = self.reshape_mstcn.infer_new_request(inputs=feed_dict)
+                out = infer_request.infer(feed_dict)[output_tensor]
 
             predictions = out[self.mstcn_output_key[-1]]
             self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
@@ -182,7 +186,7 @@ class SegmentorMstcn:
                 if len(self.his_fea) != 0:
                     feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
                 feed_dict[self.mstcn_input_keys[-1]] = feature_unit
-                out = self.mstcn.infer_new_request(inputs=feed_dict)
+                out = infer_request.infer(feed_dict)[output_tensor]
                 predictions = out[self.mstcn_output_key[-1]]
                 self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
 

@@ -112,13 +112,13 @@ def main():
                     continue
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-            state, scoring = evaluator.inference(
-                    top_det_results=top_det_results,
-                    front_det_results=front_det_results,
-                    top_seg_results=top_seg_results,
-                    front_seg_results=front_seg_results,
-                    frame_top=frame_top,
-                    frame_front=frame_front)
+            # state, scoring = evaluator.inference(
+            #         top_det_results=top_det_results,
+            #         front_det_results=front_det_results,
+            #         top_seg_results=top_seg_results,
+            #         front_seg_results=front_seg_results,
+            #         frame_top=frame_top,
+            #         frame_front=frame_front)
 
             current_time=time.time()
             current_frame = frame_counter
@@ -127,18 +127,19 @@ def main():
                 fps = total_frame_processed_in_interval / (current_time - old_time)
                 interval_start_frame = current_frame
                 old_time = current_time
+            print(fps)
 
-            display.display_result(
-                    frame_top=frame_top,
-                    frame_front=frame_front,
-                    front_seg_results=front_seg_results,
-                    top_seg_results=top_seg_results,
-                    top_det_results=top_det_results,
-                    front_det_results=front_det_results,
-                    scoring=scoring,
-                    state=state,
-                    frame_counter=frame_counter,
-                    fps=fps)
+            # display.display_result(
+            #         frame_top=frame_top,
+            #         frame_front=frame_front,
+            #         front_seg_results=front_seg_results,
+            #         top_seg_results=top_seg_results,
+            #         top_det_results=top_det_results,
+            #         front_det_results=front_det_results,
+            #         scoring=scoring,
+            #         state=state,
+            #         frame_counter=frame_counter,
+            #         fps=fps)
 
             if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
                 break

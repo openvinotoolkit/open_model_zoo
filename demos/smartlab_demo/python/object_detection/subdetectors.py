@@ -1,3 +1,4 @@
+import numpy as np
 from .preprocess import preprocess
 from .postprocess import postprocess
 from .settings import MwGlobalExp
@@ -12,6 +13,7 @@ class SubDetector:
         self.num_classes = exp.num_classes
         self.conf_thresh = exp.conf_thresh
         self.nms_thresh = exp.nms_thresh
+        self.infer_request = self.model.create_infer_request()
 
     def inference(self, img):
         img_info = {"id": 0}
@@ -21,7 +23,7 @@ class SubDetector:
 
         img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
-        res = self.model.infer_new_request({self.inode: img_feed})[self.onode]
+        res = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode]
         outputs = demo_postprocess(res, self.input_shape, p6=False)
 
         outputs = postprocess(
