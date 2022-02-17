@@ -584,10 +584,10 @@ DEMOS = [
             TestCase(options={'-person_label': '1', '-at': 'ssd', '-m_det': ModelArg('retinanet-tf')}),
         ],
         single_option_cases('-m_reid',
-            # ModelArg('person-reidentification-retail-0277'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
-            # ModelArg('person-reidentification-retail-0286'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
+            # ModelArg('person-reidentification-retail-0277'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape
+            # ModelArg('person-reidentification-retail-0286'), # TODO get_shape was called on a descriptor::Tensor with dynamic shape
             ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288') # TODO get_shape was called on a descriptor::Tensor with dynamic shape 
+            # ModelArg('person-reidentification-retail-0288') # TODO get_shape was called on a descriptor::Tensor with dynamic shape
         ),
     )),
 
