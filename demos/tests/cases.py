@@ -1141,7 +1141,7 @@ PYTHON_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        ModelArg('face-detection-0205'), 
+                        ModelArg('face-detection-0205'),
                         ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
