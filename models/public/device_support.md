@@ -26,7 +26,7 @@
 | drn-d-38 | YES | YES |    |
 | efficientdet-d0-tf | YES |    | YES |
 | efficientdet-d1-tf | YES |    | YES |
-| efficientnet-b0 | YES |  | YES |
+| efficientnet-b0 | YES | YES | YES |
 | efficientnet-b0-pytorch | YES | YES | YES |
 | efficientnet-v2-b0 | YES | YES |    |
 | efficientnet-v2-s | YES | YES |    |
