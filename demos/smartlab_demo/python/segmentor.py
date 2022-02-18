@@ -144,9 +144,7 @@ class SegmentorMstcn:
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
 
-        output_tensor = self.reshape_mstcn.outputs[0]
         infer_request = self.reshape_mstcn.create_infer_request()
-
         if num_batch < 0:
             log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
@@ -158,12 +156,11 @@ class SegmentorMstcn:
             input_mstcn = np.expand_dims(feature_unit, 0)
 
             feed_dict = {}
-            # if len(self.his_fea) != 0:
-            feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
+            if len(self.his_fea) != 0:
+                feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
             feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
-
             if input_mstcn.shape == (1, 2048, 1):
-                out = infer_request.infer(feed_dict)[output_tensor]
+                out = infer_request.infer(feed_dict)
 
             predictions = out[self.mstcn_output_key[-1]]
             self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
@@ -187,7 +184,7 @@ class SegmentorMstcn:
                 if len(self.his_fea) != 0:
                     feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
                 feed_dict[self.mstcn_input_keys[-1]] = feature_unit
-                out = infer_request.infer(feed_dict)[output_tensor]
+                out = infer_request.infer(feed_dict)
                 predictions = out[self.mstcn_output_key[-1]]
                 self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
 
