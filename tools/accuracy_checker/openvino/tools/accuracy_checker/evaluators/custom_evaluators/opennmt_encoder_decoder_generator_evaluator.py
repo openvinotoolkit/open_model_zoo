@@ -444,10 +444,11 @@ class EncoderOVModel(CommonOVModel):
 class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
-    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-    return_layers = ['output', 'attn']
+    output_layers = ['attn/sink_port_0', 'c_1/sink_port_0', 'h_1/sink_port_0', 'input_feed/sink_port_0',
+                     'output/sink_port_0']
+    return_layers = ['output/sink_port_0', 'attn/sink_port_0']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
-    state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
+    state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
 
 
 class GeneratorOVModel(CommonOVModel):

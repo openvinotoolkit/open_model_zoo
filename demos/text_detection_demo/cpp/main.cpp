@@ -170,7 +170,8 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<TextDetector> text_detector;
         if (!FLAGS_m_td.empty())
-            text_detector = std::unique_ptr<TextDetector>(new TextDetector(FLAGS_m_td, "Text Detection", FLAGS_d_td, core, cv::Size(FLAGS_w_td, FLAGS_h_td)));
+            text_detector = std::unique_ptr<TextDetector>(new TextDetector(FLAGS_m_td, "Text Detection", FLAGS_d_td, core,
+                cv::Size(FLAGS_w_td, FLAGS_h_td), FLAGS_auto_resize));
 
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
@@ -238,7 +239,7 @@ int main(int argc, char* argv[]) {
                     FLAGS_m_tr, "Composite Text Recognition", FLAGS_d_tr, core,
                     FLAGS_out_enc_hidden_name, FLAGS_out_dec_hidden_name,
                     FLAGS_in_dec_hidden_name, FLAGS_features_name, FLAGS_in_dec_symbol_name,
-                    FLAGS_out_dec_symbol_name, FLAGS_tr_o_blb_nm, kAlphabet.find(kPadSymbol, 2)));
+                    FLAGS_out_dec_symbol_name, FLAGS_tr_o_blb_nm, kAlphabet.find(kPadSymbol, 2), FLAGS_auto_resize));
         }
         const double min_text_recognition_confidence = FLAGS_thr;
 
