@@ -40,8 +40,8 @@ def build_argparser():
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
                              "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
     parser.add_argument('--vocab', help='Optional. Path to an .json file with encoding vocabulary.')
-    parser.add_argument('--dynamic_shape', default=False, action='store_true',
-                        help='Optional. Using dynamic shapes for inputs and outputs of model.')
+    parser.add_argument('--dynamic_shape', action='store_true',
+                        help='Optional. Using dynamic shapes for inputs of model.')
     return parser
 
 
@@ -59,7 +59,7 @@ class Wav2Vec:
         if len(model.inputs) != 1:
             raise RuntimeError('Wav2Vec must have one input')
         self.input_tensor_name = model.inputs[0].get_any_name()
-        self.dynamic = model.is_dynamic() and dynamic_flag and device == 'CPU'
+        self.dynamic = model.is_dynamic() and dynamic_flag
         model_input_shape = model.inputs[0].partial_shape
         if len(model_input_shape) != 2:
             raise RuntimeError('Wav2Vec input must be 2-dimensional')

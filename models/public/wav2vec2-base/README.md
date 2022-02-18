@@ -48,7 +48,7 @@ Per-token probabilities (after LogSoftmax) for every symbol in the alphabet, nam
 - `N` - number of recognized tokens
 - `C` - alphabet size
 
-`B` and `N` dimensions can take different values, because model is dynamic. Alphabet size `C` is static and equal 32.
+`B` and `N` dimensions can take different values, because model is dynamic. Alphabet size `C` is static and equals 32.
 Model alphabet: "[pad]", "[s]", "[/s]", "[unk]", "|", "E", "T", "A", "O", "N", "I", "H", "S", "R", "D", "L", "U", "M", "W", "C", "F", "G", "Y", "P", "B", "V", "K", "'", "X", "J", "Q", "Z", where:
 
 - `[pad]` - padding token used as CTC-blank label
