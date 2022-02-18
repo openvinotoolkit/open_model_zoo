@@ -66,7 +66,7 @@ class SegmentorMstcn:
         self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
-        self.his_fea = [init_his_feature[f'arr_{i}'] for i in range(4)]
+        self.his_fea = {f'fhis_in_{i}' :init_his_feature[f'arr_{i}'] for i in range(4)}
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -157,13 +157,19 @@ class SegmentorMstcn:
 
             feed_dict = {}
             if len(self.his_fea) != 0:
-                feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
-            feed_dict[self.mstcn_input_keys[-1]] = input_mstcn
+                for key in self.mstcn_input_keys:
+                    if 'fhis_in_' in str(key.names):
+                        string = list(key.names)[0]
+                        feed_dict[string] = self.his_fea[string]
+            feed_dict['input'] = input_mstcn
             if input_mstcn.shape == (1, 2048, 1):
                 out = infer_request.infer(feed_dict)
 
-            predictions = out[self.mstcn_output_key[-1]]
-            self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
+            predictions = out[list(out.keys())[-1]]
+            for key in self.mstcn_output_key:
+                if 'fhis_in_' in str(key.names):
+                    string = list(key.names)[0]
+                    self.his_fea[string] = out[string]
 
             """
                 predictions --> 4x1x64x24
@@ -180,13 +186,20 @@ class SegmentorMstcn:
                 unit2 = embed_buffer_front[:,
                         start_index + batch_idx * batch_size:start_index + batch_idx * batch_size + batch_size]
                 feature_unit = np.concatenate([unit1[:, ], unit2[:, ]], axis=0)
+
                 feed_dict = {}
                 if len(self.his_fea) != 0:
-                    feed_dict = {self.mstcn_input_keys[i]: self.his_fea[i] for i in range(4)}
-                feed_dict[self.mstcn_input_keys[-1]] = feature_unit
+                    for key in self.mstcn_input_keys:
+                        if 'fhis_in_' in str(key.names):
+                            string = list(key.names)[0]
+                            feed_dict[key] = self.his_fea[string]
+                feed_dict['input'] = feature_unit
                 out = infer_request.infer(feed_dict)
-                predictions = out[self.mstcn_output_key[-1]]
-                self.his_fea = [out[self.mstcn_output_key[i]] for i in range(4)]
+                predictions = out[list(out.keys())[-1]]
+                for key in self.mstcn_output_key:
+                    if 'fhis_in_' in str(key.names):
+                        string = list(key.names)[0]
+                        self.his_fea[string] = out[string]
 
                 temporal_logits = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
                 temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
