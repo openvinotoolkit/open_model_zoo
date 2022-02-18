@@ -135,14 +135,14 @@ public:
 class VideoCapWrapper : public ImagesCapture {
     cv::VideoCapture cap;
     bool first_read;
-    bool safe_read;
+    const read_type type;
     size_t nextImgId;
     const double initialImageId;
     size_t readLengthLimit;
 
 public:
-    VideoCapWrapper(const std::string &input, bool loop, bool safe_read, size_t initialImageId, size_t readLengthLimit)
-            : ImagesCapture{loop}, first_read{true}, safe_read{safe_read}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
+    VideoCapWrapper(const std::string &input, bool loop, read_type type, size_t initialImageId, size_t readLengthLimit)
+            : ImagesCapture{loop}, first_read{true}, type{type}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
         if (0 == readLengthLimit) {
             throw std::runtime_error("readLengthLimit must be positive");
         }
@@ -167,7 +167,7 @@ public:
                 nextImgId = 1;
                 cv::Mat img;
                 cap.read(img);
-                if (safe_read) {
+                if (type == read_type::safe) {
                     img = img.clone();
                 }
                 readerMetrics.update(startTime);
@@ -187,7 +187,7 @@ public:
         } else {
             ++nextImgId;
         }
-        if (safe_read) {
+        if (type == read_type::safe) {
             img = img.clone();
         }
         readerMetrics.update(startTime);
@@ -197,14 +197,14 @@ public:
 
 class CameraCapWrapper : public ImagesCapture {
     cv::VideoCapture cap;
-    bool safe_read;
+    const read_type type;
     size_t nextImgId;
     size_t readLengthLimit;
 
 public:
-    CameraCapWrapper(const std::string &input, bool loop, bool safe_read,
+    CameraCapWrapper(const std::string &input, bool loop, read_type type,
                 size_t readLengthLimit, cv::Size cameraResolution)
-            : ImagesCapture{loop}, safe_read{safe_read}, nextImgId{0} {
+            : ImagesCapture{loop}, type{type}, nextImgId{0} {
         if (0 == readLengthLimit) {
             throw std::runtime_error("readLengthLimit must be positive");
         }
@@ -238,7 +238,7 @@ public:
         if (!cap.read(img)) {
             throw std::runtime_error("The image can't be captured from the camera");
         }
-        if (safe_read) {
+        if (type == read_type::safe) {
             img = img.clone();
         }
         ++nextImgId;
@@ -249,7 +249,7 @@ public:
 };
 
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop,
-        bool safe_read, size_t initialImageId, size_t readLengthLimit, cv::Size cameraResolution) {
+        read_type type, size_t initialImageId, size_t readLengthLimit, cv::Size cameraResolution) {
     if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
     std::vector<std::string> invalidInputs, openErrors;
     try { return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop}); }
@@ -260,11 +260,11 @@ std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool 
     catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 
-    try { return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, safe_read, initialImageId, readLengthLimit}); }
+    try { return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, type, initialImageId, readLengthLimit}); }
     catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 
-    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, safe_read, readLengthLimit, cameraResolution}); }
+    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, type, readLengthLimit, cameraResolution}); }
     catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 

@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         }
 
         /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
@@ -139,14 +139,14 @@ int main(int argc, char *argv[]) {
         cv::Mat output;
 
         /** ---------------- The execution part ---------------- **/
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap));
         if (!is_blur && FLAGS_target_bgr.empty()) {
             cv::Scalar default_color(155, 255, 120);
             pipeline_inputs += cv::gin(cv::Mat(frame_size, CV_8UC3, default_color));
         } else if (!FLAGS_target_bgr.empty()) {
-            std::shared_ptr<ImagesCapture> target_bgr_cap = openImagesCapture(FLAGS_target_bgr, true, SAFE_READ, 0,
+            std::shared_ptr<ImagesCapture> target_bgr_cap = openImagesCapture(FLAGS_target_bgr, true, read_type::safe, 0,
                 std::numeric_limits<size_t>::max());
             pipeline_inputs += cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(target_bgr_cap));
         }

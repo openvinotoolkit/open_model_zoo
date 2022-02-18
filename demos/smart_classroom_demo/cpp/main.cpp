@@ -672,7 +672,7 @@ int main(int argc, char* argv[]) {
 
         int teacher_track_id = -1;
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_read_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0, FLAGS_read_limit);
         cv::Mat frame = cap->read();
 
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};

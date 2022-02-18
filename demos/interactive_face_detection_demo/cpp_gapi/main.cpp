@@ -428,7 +428,7 @@ int main(int argc, char *argv[]) {
         const auto tmp = cap->read();
         cap.reset();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0, FLAGS_limit);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);
 
