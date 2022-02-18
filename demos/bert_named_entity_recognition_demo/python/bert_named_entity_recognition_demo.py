@@ -148,10 +148,10 @@ def main():
             pipeline.await_any()
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     for sentence_id in range(next_sentence_id_to_show, next_sentence_id):
         results = pipeline.get_result(sentence_id)
-        while results is None:
-            results = pipeline.get_result(sentence_id)
         (score, filtered_labels_id), meta = results
         print_raw_results(score, filtered_labels_id, meta)
 
