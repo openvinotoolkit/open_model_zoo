@@ -24,8 +24,8 @@
 | detr-resnet50 | YES |    |    |
 | dla-34 | YES | YES | YES |
 | drn-d-38 | YES | YES |    |
-| efficientdet-d0-tf | YES | YES | YES |
-| efficientdet-d1-tf | YES | YES | YES |
+| efficientdet-d0-tf | YES |    | YES |
+| efficientdet-d1-tf | YES |    | YES |
 | efficientnet-b0 | YES |  | YES |
 | efficientnet-b0-pytorch | YES | YES | YES |
 | efficientnet-v2-b0 | YES | YES |    |
@@ -56,7 +56,7 @@
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |
 | higher-hrnet-w32-human-pose-estimation | YES | YES |    |
-| hrnet-v2-c1-segmentation | YES | YES |    |
+| hrnet-v2-c1-segmentation | YES |    |    |
 | human-pose-estimation-3d-0001 | YES | YES | YES |
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
@@ -85,7 +85,7 @@
 | mtcnn-r | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
-| ocrnet-hrnet-w48-paddle | YES | YES | |
+| ocrnet-hrnet-w48-paddle | YES |    |    |
 | octave-resnet-26-0.25 | YES | YES | YES |
 | open-closed-eye-0001 | YES | YES |    |
 | pelee-coco | YES | YES | YES |
