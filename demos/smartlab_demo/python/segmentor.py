@@ -54,7 +54,7 @@ class SegmentorMstcn:
 
         net = ie.read_model(i3d_path)
         net.reshape({net.inputs[0]: PartialShape(
-            [self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeWidth, self.ImgSizeHeight])})
+            [self.EmbedBatchSize, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth, 3])})
         nodes = net.get_ops()
         net.add_outputs(nodes[13].output(0))
         self.i3d = ie.compile_model(model=net, device_name=device)
