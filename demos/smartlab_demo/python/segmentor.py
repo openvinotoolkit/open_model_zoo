@@ -54,7 +54,8 @@ class SegmentorMstcn:
 
         net = ie.read_model(i3d_path)
         net.reshape({net.inputs[0]: PartialShape(
-            [self.EmbedBatchSize, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth, 3])})
+            [self.EmbedBatchSize, 3, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth])})
+            # [self.EmbedBatchSize, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth, 3])})
         nodes = net.get_ops()
         net.add_outputs(nodes[13].output(0))
         self.i3d = ie.compile_model(model=net, device_name=device)
@@ -65,8 +66,7 @@ class SegmentorMstcn:
         self.mstcn_output_key = self.mstcn.outputs
         self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
-        init_his_feature = np.load('./init_his.npz')
-        self.his_fea = {f'fhis_in_{i}': init_his_feature[f'arr_{i}'] for i in range(4)}
+        self.his_fea = {}
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
@@ -149,7 +149,6 @@ class SegmentorMstcn:
             log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
             log.debug(f"start_index: {start_index} end_index: {end_index}")
-
             unit1 = embed_buffer_top[:, start_index:end_index]
             unit2 = embed_buffer_front[:, start_index:end_index]
             feature_unit = np.concatenate([unit1[:, ], unit2[:, ]], axis=0)
