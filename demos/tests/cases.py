@@ -279,7 +279,7 @@ NATIVE_DEMOS = [
     CppDemo(name='interactive_face_detection_demo',
             model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
             device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--show': None,
+        TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
@@ -299,7 +299,7 @@ NATIVE_DEMOS = [
             model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
             device_keys=['-d', '-dag', '-dem', '-dlm', '-dhp', '-dam'],
             test_cases=combine_cases(
-        TestCase(options={'--show': None,
+        TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
