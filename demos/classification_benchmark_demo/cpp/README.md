@@ -91,7 +91,7 @@ omz_converter --list models.lst
 
 ### Required Files
 
-If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files containing lists of classes and labels.
+If you want to see classification results, you must use "--gt" and "--labels" flags to specify two .txt files containing lists of classes and labels.
 
 "The ground truth" file is used for matching image file names with correct object classes.
 
@@ -130,8 +130,8 @@ For example, use the following command-line command to run the application:
 ```sh
 ./classification_benchmark_demo -m <path_to_classification_model> \
                       -i <path_to_folder_with_images> \
-                      -labels <path_to_file_with_list_of_labels> \
-                      -gt <path_to_ground_truth_data_file> \
+                      --labels <path_to_file_with_list_of_labels> \
+                      --gt <path_to_ground_truth_data_file> \
                       -u CDM
 ```
 
