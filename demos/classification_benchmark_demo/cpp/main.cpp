@@ -32,6 +32,9 @@ DEFINE_bool(h, false, h_msg);
 constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images";
 DEFINE_string(i, "", i_msg);
 
+constexpr char labels_msg[] = "path to .txt file with labels";
+DEFINE_string(labels, "", labels_msg);
+
 constexpr char m_msg[] = "path to an .xml file with a trained model";
 DEFINE_string(m, "", m_msg);
 
@@ -45,9 +48,6 @@ DEFINE_string(d, "CPU", d_msg);
 
 constexpr char gt_msg[] = "path to ground truth .txt file";
 DEFINE_string(gt, "", gt_msg);
-
-constexpr char labels_msg[] = "path to .txt file with labels";
-DEFINE_string(labels, "", labels_msg);
 
 constexpr char layout_msg[] = "specify inputs layouts."
     "Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input";
@@ -80,13 +80,13 @@ DEFINE_string(u, "", u_msg);
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout <<   "\t[ -h]                   " << h_msg
+        std::cout <<   "\t[ -h]                 " << h_msg
                 << "\n\t  -i <INPUT>            " << i_msg
+                << "\n\t --labels \"<path>\"     " << labels_msg
                 << "\n\t  -m <MODEL FILE>       " << m_msg
                 << "\n\t[--auto_resize]         " << res_msg
                 << "\n\t[ -d <DEVICE>]          " << d_msg
                 << "\n\t[--gt \"<path>\"]       " << gt_msg
-                << "\n\t[--labels \"<path>\"]   " << labels_msg
                 << "\n\t[--layout \"<string>\"] " << layout_msg
                 << "\n\t[--nireq <NUMBER>]      " << nireq_msg
                 << "\n\t[--nstreams <NUMBER>]   " << nstreams_msg
@@ -94,20 +94,19 @@ void parse(int argc, char *argv[]) {
                 << "\n\t[--nthreads <NUMBER>]   " << nthreads_msg
                 << "\n\t[--res \"<WxH>\"]       " << res_msg
                 << "\n\t[--show] ([--noshow])   " << show_msg
-                << "\n\t[--time <NUMBER>]          " << time_msg
+                << "\n\t[--time <NUMBER>]       " << time_msg
                 << "\n\t[ -u]                   " << u_msg
                 << "\n\tKey bindings:"
                     "\n\t\tQ, q, Esc - Quit"
                     "\n\t\tR, r, SpaceBar - Restart testing"
                     "\n\t\tC - average CPU load, D - load distrobution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
-        return false;
     } if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     } if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     } if (FLAGS_labels.empty()) {
-        throw std::logic_error("Parameter -labels is not set");
+        throw std::logic_error("Parameter --labels is not set");
     }
     slog::info << ov::get_openvino_version() << slog::endl;
 }
