@@ -66,7 +66,7 @@ class SegmentorMstcn:
         self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
         init_his_feature = np.load('init_his.npz')
-        self.his_fea = {f'fhis_in_{i}' :init_his_feature[f'arr_{i}'] for i in range(4)}
+        self.his_fea = {f'fhis_in_{i}': init_his_feature[f'arr_{i}'] for i in range(4)}
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
