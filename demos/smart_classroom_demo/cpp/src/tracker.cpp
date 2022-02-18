@@ -74,7 +74,7 @@ void Tracker::SolveAssignmentProblem(
     }
 
     size_t i = 0;
-    for (auto id : track_ids) {
+    for (size_t id : track_ids) {
         if (res[i] < detections.size()) {
             matches->emplace(id, res[i], 1 - dissimilarity.at<float>(i, res[i]));
         } else {
