@@ -26,6 +26,7 @@
 
 #include "grid_mat.hpp"
 
+namespace{
 constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
 
@@ -82,17 +83,17 @@ void parse(int argc, char *argv[]) {
     if (FLAGS_h || 1 == argc) {
         std::cout <<   "\t[ -h]                 " << h_msg
                 << "\n\t  -i <INPUT>            " << i_msg
-                << "\n\t --labels \"<path>\"     " << labels_msg
+                << "\n\t --labels <LABELS>     " << labels_msg
                 << "\n\t  -m <MODEL FILE>       " << m_msg
                 << "\n\t[--auto_resize]         " << res_msg
                 << "\n\t[ -d <DEVICE>]          " << d_msg
-                << "\n\t[--gt \"<path>\"]       " << gt_msg
-                << "\n\t[--layout \"<string>\"] " << layout_msg
+                << "\n\t[--gt <STRING>]       " << gt_msg
+                << "\n\t[--layout <STRING>] " << layout_msg
                 << "\n\t[--nireq <NUMBER>]      " << nireq_msg
                 << "\n\t[--nstreams <NUMBER>]   " << nstreams_msg
                 << "\n\t[--nt <NUMBER>]         " << nt_msg
                 << "\n\t[--nthreads <NUMBER>]   " << nthreads_msg
-                << "\n\t[--res \"<WxH>\"]       " << res_msg
+                << "\n\t[--res <STRING>]       " << res_msg
                 << "\n\t[--show] ([--noshow])   " << show_msg
                 << "\n\t[--time <NUMBER>]       " << time_msg
                 << "\n\t[ -u]                   " << u_msg
@@ -101,12 +102,14 @@ void parse(int argc, char *argv[]) {
                     "\n\t\tR, r, SpaceBar - Restart testing"
                     "\n\t\tC - average CPU load, D - load distrobution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
+        slog::info << ov::get_openvino_version() << slog::endl;
+        exit(0);
     } if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
+        throw std::invalid_argument("-i <INPUT> can't be empty");
     } if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
+        throw std::invalid_argument("-m <MODEL FILE> can't be empty");
     } if (FLAGS_labels.empty()) {
-        throw std::logic_error("Parameter --labels is not set");
+        throw std::logic_error("--labels <LABELS> can't be empty");
     }
     slog::info << ov::get_openvino_version() << slog::endl;
 }
@@ -117,6 +120,7 @@ cv::Mat centerSquareCrop(const cv::Mat& image) {
     }
     return image(cv::Rect(0, (image.rows - image.cols) / 2, image.cols, image.cols));
 }
+} // namespace
 
 int main(int argc, char *argv[]) {
     std::set_terminate(catcher);
