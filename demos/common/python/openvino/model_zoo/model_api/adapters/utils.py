@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import re
 from typing import Optional
 from openvino.runtime import layout_helpers
 
@@ -37,7 +36,6 @@ class Layout:
 
         raise RuntimeError("Get layout from shape method doesn't support {}D shape".format(len(shape)))
 
-
     @staticmethod
     def from_openvino(input):
         '''
@@ -54,7 +52,6 @@ class Layout:
             if input_name in user_layouts:
                 return user_layouts[input_name]
         return user_layouts.get('', '')
-
 
     @staticmethod
     def parse_layouts(layout_string: str) -> Optional[dict]:
