@@ -424,8 +424,7 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Presenter> presenter;
 
          /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, SAFE_READ, 0,
-            FLAGS_limit);
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         const auto tmp = cap->read();
         cap.reset();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};

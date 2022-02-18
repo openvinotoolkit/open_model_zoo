@@ -126,11 +126,11 @@ int main(int argc, char *argv[]) {
         /** ---------------- The execution part ---------------- **/
         const float batch_constant_FPS = 15;
         auto drop_batch = std::make_shared<bool>(false);
-        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CustomCapSource>(cap,
-                                                                                    frame_size,
-                                                                                    int(ar_net_shape[1]),
-                                                                                    batch_constant_FPS,
-                                                                                    drop_batch),
+        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::GestRecCapSource>(cap,
+                                                                                     frame_size,
+                                                                                     int(ar_net_shape[1]),
+                                                                                     batch_constant_FPS,
+                                                                                     drop_batch),
                                    current_person_id_m));
 
         std::string gestureWindowName = "Gesture";

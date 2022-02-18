@@ -27,7 +27,8 @@ public:
         const std::string& in_dec_symbol_name,
         const std::string& out_dec_symbol_name,
         const std::string& logits_name,
-        size_t end_token);
+        size_t end_token,
+        bool use_auto_resize = false);
 
     std::map<std::string, ov::runtime::Tensor> Infer(const cv::Mat& frame) override;
 

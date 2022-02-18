@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019-2021 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ from scipy.special import softmax
 from openvino.runtime import Core, get_version
 
 from text_spotting_demo.tracker import StaticIOUTracker
-from text_spotting_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
+from visualizers import InstanceSegmentationVisualizer
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -218,7 +218,7 @@ def main():
     else:
         delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
-    visualizer = Visualizer(['__background__', 'text'], show_boxes=args.show_boxes, show_scores=args.show_scores)
+    visualizer = InstanceSegmentationVisualizer(show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     frames_processed = 0
 
@@ -324,7 +324,7 @@ def main():
         presenter.drawGraphs(frame)
 
         # Visualize masks.
-        frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
+        frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids, texts)
         metrics.update(start_time, frame)
 
         frames_processed += 1
