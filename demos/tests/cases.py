@@ -767,7 +767,7 @@ PYTHON_DEMOS = [
             ),
         ],
     )),
-    
+
     PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
