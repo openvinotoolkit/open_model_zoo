@@ -46,7 +46,7 @@ static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-" Ex. <layout> or <input1>:<layout1>,<input2>:<layout2> in case of more than one input.";
+" Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";

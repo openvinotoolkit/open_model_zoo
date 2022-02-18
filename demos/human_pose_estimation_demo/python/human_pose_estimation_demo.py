@@ -80,7 +80,7 @@ def build_argparser():
                                         'is the length of a short first image side.')
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
-                                        'Format "<layout>" or "<input1>:<layout1>,<input2>:<layout2>" in case of more than one input.'
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.'
                                         'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')

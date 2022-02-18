@@ -139,8 +139,8 @@ std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_st
     while (colonPos != std::string::npos) {
         auto startPos = searchStr.find_last_of(',');
         auto inputName = searchStr.substr(startPos + 1, colonPos - startPos - 1);
-        auto inputVal = searchStr.substr(colonPos + 1);
-        layouts[inputName] = ov::Layout(inputVal);
+        auto inputLayout = searchStr.substr(colonPos + 1);
+        layouts[inputName] = ov::Layout(inputLayout);
         searchStr = searchStr.substr(0, startPos + 1);
         if (searchStr.empty() || searchStr.back() != ',') {
             break;

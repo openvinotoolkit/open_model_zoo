@@ -31,7 +31,7 @@ static const char image_message[] = "Required. Path to a folder with images or p
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-                                     " Ex. <layout> or <input1>:<layout1>,<input2>:<layout2> in case of more than one input.";
+                                     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "

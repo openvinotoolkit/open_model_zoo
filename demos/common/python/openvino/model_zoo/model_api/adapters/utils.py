@@ -57,23 +57,25 @@ class Layout:
 
 
     @staticmethod
-    def parse_layouts(layout_regex: str) -> Optional[dict]:
+    def parse_layouts(layout_string: str) -> Optional[dict]:
         '''
         Parse layout parameter in format "input0:NCHW,input1:NC" or "NCHW" (applied to all inputs)
         '''
-        if not layout_regex:
+        if not layout_string:
             return None
-        inputs_layouts = layout_regex.split(',')
+        search_string = layout_string if layout_string.rfind(':') != -1 else ":" + layout_string
+        colon_pos = search_string.rfind(':')
         user_layouts = {}
-        for layout in inputs_layouts:
-            if not re.fullmatch(r".*\:?[A-Z]+", layout):
-                raise ValueError("invalid --layout option format")
-            layout_list = layout.rsplit(':', 1)
-            if len(layout_list) == 1:
-                input_name = ""
-                input_layout = layout_list[0]
-            else:
-                input_name = layout_list[0]
-                input_layout = layout_list[1]
+        while (colon_pos != -1):
+            start_pos = search_string.rfind(',')
+            input_name = search_string[start_pos + 1:colon_pos]
+            input_layout = search_string[colon_pos + 1:]
             user_layouts[input_name] = input_layout
+            search_string = search_string[:start_pos + 1]
+            if search_string == "" or search_string[-1] != ',':
+                break
+            search_string = search_string[:-1]
+            colon_pos = search_string.rfind(':')
+        if search_string != "":
+            raise ValueError("Can't parse input layout string: " + layout_string)
         return user_layouts

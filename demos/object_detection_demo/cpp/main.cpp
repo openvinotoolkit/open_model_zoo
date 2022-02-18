@@ -53,7 +53,7 @@ static const char target_device_message[] = "Optional. Specify the target device
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-" Ex. <layout> or <input1>:<layout1>,<input2>:<layout2> in case of more than one input.";
+" Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
