@@ -41,3 +41,6 @@
 /tools/model_tools/** omz.ci.job-for-change.downloader
 
 *.md omz.ci.job-for-change.documentation -omz.ci.job-for-change.ac -omz.ci.job-for-change.demos -omz.ci.job-for-change.downloader
+
+/models/intel/device_support.md omz.ci.job-for-change.demos
+/models/public/device_support.md omz.ci.job-for-change.demos

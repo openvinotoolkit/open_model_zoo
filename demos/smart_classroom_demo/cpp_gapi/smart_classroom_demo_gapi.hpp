@@ -108,6 +108,7 @@ static void showUsage() {
     std::cout << "    -loop                          " << loop_message << std::endl;
     std::cout << "    -read_limit                    " << read_limit_message << std::endl;
     std::cout << "    -o \"<path>\"                    " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"                 " << limit_message << std::endl;
     std::cout << "    -m_act '<path>'                " << person_action_detection_model_message << std::endl;
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;

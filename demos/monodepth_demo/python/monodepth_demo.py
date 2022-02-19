@@ -175,11 +175,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         depth_map, frame_meta = results
         depth_map = apply_color_map(depth_map, output_transform)
 
