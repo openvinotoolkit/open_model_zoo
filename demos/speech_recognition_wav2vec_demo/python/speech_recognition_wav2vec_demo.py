@@ -59,7 +59,6 @@ class Wav2Vec:
         if len(model.inputs) != 1:
             raise RuntimeError('Wav2Vec must have one input')
         self.input_tensor_name = model.inputs[0].get_any_name()
-        self.dynamic = model.is_dynamic() and dynamic_flag
         model_input_shape = model.inputs[0].partial_shape
         if len(model_input_shape) != 2:
             raise RuntimeError('Wav2Vec input must be 2-dimensional')
@@ -70,8 +69,10 @@ class Wav2Vec:
             raise RuntimeError('Wav2Vec output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet):
             raise RuntimeError(f'Wav2Vec output third dimension size must be {len(self.alphabet)}')
-        if not self.dynamic:
+        if not dynamic_flag:
             model.reshape({self.input_tensor_name: PartialShape(input_shape)})
+        elif not model.is_dynamic():
+            model.reshape({self.input_tensor_name: PartialShape((-1, -1))})
         compiled_model = core.compile_model(model, device)
         self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
