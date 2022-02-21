@@ -165,7 +165,7 @@ class Model:
         '''
         dict_data, input_meta = self.preprocess(input_data)
         raw_result = self.infer_sync(dict_data)
-        return self.postprocess(raw_result, input_meta)
+        return self.postprocess(raw_result, input_meta), input_meta
 
     def load(self, force=False):
         if not self.model_loaded or force:
