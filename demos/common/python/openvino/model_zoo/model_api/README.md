@@ -6,14 +6,14 @@ Model API wrappers hide the specific code inside and work as black-box: applicat
 ## Package structure
 
 The Python* Model API consists of 3 libraries:
-* _adapters_ - implement common interface to allow Model API wrappers usage with different executors: OpenVINO, ONNX, etc. See [Model API adapters](#model-api-adapters) section
-* _models_ - implement wrappers for each architectures. See [Model API Wrappers](#model-api-wrappers) section
+* _adapters_ - implement a  common interface to allow Model API wrappers usage with different executors: OpenVINO, ONNX, etc. See [Model API adapters](#model-api-adapters) section
+* _models_ - implement wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
 * _pipelines_ - implement pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
 
 ## Building Python* Model API package
 For installation Python (version 3.6 or higher) is required. The installation is available from source.
 
-Use the following command to install Python Model API from source:
+Use the following command to install Python* Model API from source:
 ```sh
 pip install <omz_dir>/demos/common/python
 ```
@@ -43,17 +43,17 @@ python -c "from openvino.model_zoo import model_api"
 ## Model API Wrappers
 
 The Python* Model API package suggests ready-to-use model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and might be reused in applications as "black-box" models.
-Also, the simple wrapper interface allows to create custom wrappers covering different architectures.
+Also, the simple wrapper interface allows the creation of custom wrappers covering different architectures.
 
 The following tasks can be solved with wrappers usage:
 
 | Task type                  | Model API wrappers |
 |----------------------------|--------------------|
 | Background Matting         | `VideoBackgroundMatting`, `ImageMattingWithBackground` |
-| Classifiaction             | `Classification` |
+| Classification             | `Classification` |
 | Deblurring                 | `Deblurring` |
 | Human Pose Estimation      | `HpeAssociativeEmbedding`, `OpenPose` |
-| Instance Segmentaiton      | `MaskRCNNModel`, `YolactModel` |
+| Instance Segmentation      | `MaskRCNNModel`, `YolactModel` |
 | Monocular Depth Estimation | `MonoDepthModel` |
 | Named Entity Recognition   | `BertNamedEntityRecognition` |
 |  Object Detection          | `CenterNet`, `DETR`, `CTPN`, `FaceBoxes`, `RetinaFace`, `RetinaFacePyTorch`, `SSD`, `UltraLightweightFaceDetection`, `YOLO`, `YoloV3ONNX`, `YoloV4`, `YOLOF`, `YOLOX` |
@@ -69,7 +69,7 @@ Currently, `OpenvinoAdapter` and `OVMSAdapter` are supported.
 
 #### OpenVINO executor
 
-`OpenvinoAdapter` hides the OpenVINO™ toolkit API, that allows Model API wrappers launching with models represented in Intermediate Representation (IR) format.
+`OpenvinoAdapter` hides the OpenVINO™ toolkit API, which allows Model API wrappers launching with models represented in Intermediate Representation (IR) format.
 It accepts a path to either `xml` model file or `onnx` model file.
 
 For OpenVINO executor employment, you need to install the requirements:
@@ -79,7 +79,7 @@ pip install <omz_dir>/demos/common/python/requirements_openvino.txt
 
 #### OpenVINO Model Server executor
 
-`OVMSAdapter` hides the OpenVINO Model Server python client API, that allows Model API wrappers launching with models served by OVMS.
+`OVMSAdapter` hides the OpenVINO Model Server python client API, which allows Model API wrappers launching with models served by OVMS.
 
 Refer to __[`OVMSAdapter`](adapters/ovms_adapter.md)__ to learn about running demos with OVMS.
 
@@ -93,13 +93,13 @@ pip install <omz_dir>/demos/common/python/requirements_ovms.txt
 Model API Pipelines represent the high-level wrappers upon the input data and accessing model results management.
 It performs the data submission for model inference, verification of inference status, whether the result is ready or not, and results accessing.
 
-The `AsyncPipeline` is available, which handle the asynchronous execution of single model.
+The `AsyncPipeline` is available, which handles the asynchronous execution of a single model.
 
 ## Ready-to-use Model API solutions
 
 To apply Model API wrappers in custom applications, learn the provided example of common scenario of how to use Python* Model API.
 
- In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to model's `xml` file. The model is loaded on CPU device inside the adapter.
+ In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to the model's `xml` file. The model is loaded on a CPU device inside the adapter.
 
 Once the SSD model wrapper instance is created, we get the predictions by the model in one line: `ssd_model(input_data)` - the wrapper performs the preprocess method, synchronous inference on OpenVINO side and postprocess method.
 

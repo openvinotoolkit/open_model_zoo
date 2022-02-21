@@ -195,7 +195,7 @@ cmake -A x64 <open_model_zoo>/demos
 
 ### <a name="model_api_installation"></a>Python\* model API installation
 
-To run Python demo applications, you need to install the Python Model API package. Refer to [Python Model API documentation](common/python/openvino/model_zoo/model_api/README.md#building-python*-model-api-package) to learn about its installation.
+To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#building-python*-model-api-package) to learn about its installation.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
