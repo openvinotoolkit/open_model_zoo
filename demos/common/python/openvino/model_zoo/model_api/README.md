@@ -6,7 +6,7 @@ Model API wrappers hide the specific code inside and work as black-box: applicat
 ## Package structure
 
 The Python* Model API consists of 3 libraries:
-* _adapters_ - implement a  common interface to allow Model API wrappers usage with different executors: OpenVINO, ONNX, etc. See [Model API adapters](#model-api-adapters) section
+* _adapters_ - implement a common interface to allow Model API wrappers usage with different executors: OpenVINO, ONNX, etc. See [Model API adapters](#model-api-adapters) section
 * _models_ - implement wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
 * _pipelines_ - implement pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
 
