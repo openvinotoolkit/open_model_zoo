@@ -49,17 +49,17 @@ The following tasks can be solved with wrappers usage:
 
 | Task type                  | Model API wrappers |
 |----------------------------|--------------------|
-| Background Matting         | `VideoBackgroundMatting`, `ImageMattingWithBackground` |
-| Classification             | `Classification` |
-| Deblurring                 | `Deblurring` |
-| Human Pose Estimation      | `HpeAssociativeEmbedding`, `OpenPose` |
-| Instance Segmentation      | `MaskRCNNModel`, `YolactModel` |
-| Monocular Depth Estimation | `MonoDepthModel` |
-| Named Entity Recognition   | `BertNamedEntityRecognition` |
-|  Object Detection          | `CenterNet`, `DETR`, `CTPN`, `FaceBoxes`, `RetinaFace`, `RetinaFacePyTorch`, `SSD`, `UltraLightweightFaceDetection`, `YOLO`, `YoloV3ONNX`, `YoloV4`, `YOLOF`, `YOLOX` |
-| Question Answering         | `BertQuestionAnswering` |
-| Salient Object Detection   | `SalientObjectDetectionModel` |
-| Semantic Segmentation      | `SegmentationModel` |
+| Background Matting         | <ul><li>`VideoBackgroundMatting`</li><li>`ImageMattingWithBackground`</li></ul> |
+| Classification             | <ul><li>`Classification`</li></ul> |
+| Deblurring                 | <ul><li>`Deblurring`</li></ul> |
+| Human Pose Estimation      | <ul><li>`HpeAssociativeEmbedding`</li><li>`OpenPose`</li></ul> |
+| Instance Segmentation      | <ul><li>`MaskRCNNModel`</li><li>`YolactModel`</li></ul> |
+| Monocular Depth Estimation | <ul><li> `MonoDepthModel`</li></ul> |
+| Named Entity Recognition   | <ul><li>`BertNamedEntityRecognition`</li></ul> |
+|  Object Detection          | <ul><li>`CenterNet`</li><li>`DETR`</li><li>`CTPN`</li><li>`FaceBoxes`</li><li>`RetinaFace`</li><li>`RetinaFacePyTorch`</li><li>`SSD`</li><li>`UltraLightweightFaceDetection`</li><li>`YOLO`</li><li>`YoloV3ONNX`</li><li>`YoloV4`</li><li>`YOLOF`</li><li>`YOLOX`</li></ul> |
+| Question Answering         |  <ul><li>`BertQuestionAnswering`</li></ul> |
+| Salient Object Detection   |  <ul><li>`SalientObjectDetectionModel`</li></ul> |
+| Semantic Segmentation      |  <ul><li>`SegmentationModel`</li></ul> |
 
 ## Model API Adapters
 
