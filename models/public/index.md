@@ -193,7 +193,7 @@
    omz_models_model_face_detection_retail_0044
    omz_models_model_faceboxes_pytorch
    omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_faster_rcnn_inception_v2_atrous_coco
+   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
    omz_models_model_faster_rcnn_resnet50_coco
    omz_models_model_mobilefacedet_v1_mxnet
    omz_models_model_mobilenet_ssd
@@ -402,7 +402,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | FaceBoxes <br> [faceboxes-pytorch](./faceboxes-pytorch/README.md)						        | PyTorch           | 83.57%                 | 1.8975 | 1.0059  |    
 | Face Detection Retail <br> [face-detection-retail-0044](./face-detection-retail-0044/README.md)| Caffe            | 83.00%                 | 1.067  | 0.588   |    
 | Faster R-CNN with Inception-ResNet v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)|TensorFlow| 40.69% | 30.687 |13.307|    
-| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_v2_atrous_coco](./faster_rcnn_inception_v2_atrous_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |    
+| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |    
 | Faster R-CNN with ResNet 50 <br> [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md)| TensorFlow   | 31.09%                 | 57.203 | 29.162  |    
 | MobileFace Detection V1 <br> [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)     | MXNet             | 78.75%                 | 3.5456 | 7.6828  |    
 | MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-p)												| Caffe             | 62.26%                 | 3.366  | 0.007   |    
