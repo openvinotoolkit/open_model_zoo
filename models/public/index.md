@@ -6,7 +6,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Device Support
-   
+
    omz_models_public_device_support
 
 
@@ -14,7 +14,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Action Recognition Models
-   
+
    omz_models_model_common_sign_language_0001
    omz_models_model_i3d_rgb_tf
 
@@ -22,7 +22,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Classification Models
-   
+
    omz_models_model_alexnet
    omz_models_model_anti_spoof_mn3
    omz_models_model_caffenet
@@ -105,7 +105,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Colorization Models
-   
+
    omz_models_model_colorization_siggraph
    omz_models_model_colorization_v2
 
@@ -113,7 +113,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Face Recognition Models
-   
+
    omz_models_model_face_recognition_resnet100_arcface_onnx
    omz_models_model_facenet_20180408_102900
    omz_models_model_Sphereface
@@ -122,7 +122,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Human Pose Estimation Models
-   
+
    omz_models_model_higher_hrnet_w32_human_pose_estimation
    omz_models_model_human_pose_estimation_3d_0001
    omz_models_model_single_human_pose_estimation_0001
@@ -131,28 +131,28 @@
    :maxdepth: 1
    :hidden:
    :caption: Image Inpainting Models
-   
+
    omz_models_model_gmcnn_places2_tf
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Image Processing Models
-   
+
    omz_models_model_deblurgan_v2
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Image Translation Models
-   
+
    omz_models_model_cocosnet
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Instance Segmentation Models
-   
+
    omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
    omz_models_model_mask_rcnn_inception_v2_coco
    omz_models_model_mask_rcnn_resnet101_atrous_coco
@@ -163,7 +163,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Monocular Depth Estimation Models
-   
+
    omz_models_model_fcrn_dp_nyu_depth_v2_tf
    omz_models_model_midasnet
 
@@ -171,21 +171,21 @@
    :maxdepth: 1
    :hidden:
    :caption: Named Entity Recognition Models
-   
+
    omz_models_model_bert_base_ner
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Object Attribute Estimation Models
-   
+
    omz_models_model_vehicle_reid_0001
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Object Detection Models
-   
+
    omz_models_model_ctdet_coco_dlav0_512
    omz_models_model_ctpn
    omz_models_model_efficientdet_d0_tf
@@ -223,7 +223,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Optical Character Recognition Models
-   
+
    omz_models_model_license_plate_recognition_barrier_0007
    omz_models_model_text_recognition_resnet_fc
 
@@ -231,21 +231,21 @@
    :maxdepth: 1
    :hidden:
    :caption: Place Recognition Models
-   
+
    omz_models_model_netvlad_tf
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Salient Object Detection Models
-   
+
    omz_models_model_f3net
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Semantic Segmentation Models
-   
+
    omz_models_model_brain_tumor_segmentation_0001
    omz_models_model_brain_tumor_segmentation_0002
    omz_models_model_deeplabv3
@@ -258,7 +258,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Sound Classification Models
-   
+
    omz_models_model_aclnet
    omz_models_model_aclnet_int8
 
@@ -266,7 +266,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Speech Recognition Models
-   
+
    omz_models_model_mozilla_deepspeech_0_6_1
    omz_models_model_mozilla_deepspeech_0_8_2
    omz_models_model_quartznet_15x5_en
@@ -275,14 +275,14 @@
    :maxdepth: 1
    :hidden:
    :caption: Style Transfer Models
-   
+
    omz_models_model_fast_neural_style_mosaic_onnx
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Text-to-speech Models
-   
+
    omz_models_model_forward_tacotron
    omz_models_model_wavernn
 
@@ -395,40 +395,40 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 ## Object Detection
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| CTPN <br> [ctpn](./ctpn/README.md)															| TensorFlow        | 73.67%                 | 55.813 | 17.237  |    
-| CenterNet (CTDET with DLAV0) 512x512 <br> [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/README.md)| ONNX          | 44.28%                 | 62.211 | 17.911  |    
-| EfficientDet-D0 <br> [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)						| TensorFlow        | 31.95%                 | 2.54   | 3.9     |    
-| EfficientDet-D1 <br> [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)						| TensorFlow        | 37.54%                 | 6.1    | 6.6     |    
-| FaceBoxes <br> [faceboxes-pytorch](./faceboxes-pytorch/README.md)						        | PyTorch           | 83.57%                 | 1.8975 | 1.0059  |    
-| Face Detection Retail <br> [face-detection-retail-0044](./face-detection-retail-0044/README.md)| Caffe            | 83.00%                 | 1.067  | 0.588   |    
-| Faster R-CNN with Inception-ResNet v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)|TensorFlow| 40.69% | 30.687 |13.307|    
-| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |    
-| Faster R-CNN with ResNet 50 <br> [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md)| TensorFlow   | 31.09%                 | 57.203 | 29.162  |    
-| MobileFace Detection V1 <br> [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)     | MXNet             | 78.75%                 | 3.5456 | 7.6828  |    
-| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-p)												| Caffe             | 62.26%                 | 3.366  | 0.007   |    
-| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-r)												| Caffe             | 62.26%                 | 0.003  | 0.1     |    
-| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-o)												| Caffe             | 62.26%                 | 0.026  | 0.389   |    
-| Pelee <br> [pelee-coco](./pelee-coco/README.md)												| Caffe             | 21.98%                 | 1.290  | 5.98    |    
-| RetinaFace with ResNet 50 <br> [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md)| PyTorch    | 91.78%                 | 88.8627| 27.2646 |    
-| RetinaNet with Resnet 50 <br> [retinanet-tf](./retinanet-tf/README.md)						| TensorFlow        | 33.15%                 |238.9469| 64.9706 |    
-| R-FCN with Resnet-101 <br> [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/README.md)		| TensorFlow        | 45.02%                 | 53.462 | 171.85  |    
-| SSD 300 <br> [ssd300](./ssd300/README.md)														| Caffe             | 87.09%                 | 62.815 | 26.285  |    
-| SSD 512 <br> [ssd512](./ssd512/README.md)														| Caffe             | 91.07%                 | 180.611| 27.189  |    
-| SSD with MobileNet <br> [mobilenet-ssd](./mobilenet-ssd/README.md)							| Caffe             | 67.00%                 | 2.316  | 5.783   |    
-| SSD with MobileNet <br> [ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/README.md)			| TensorFlow        | 23.32%                 | 2.494  | 6.807   |    
-| SSD with MobileNet FPN <br> [ssd_mobilenet_v1_fpn_coco](./ssd_mobilenet_v1_fpn_coco/README.md)| TensorFlow        | 35.55%                 | 123.309| 36.188  |    
-| SSD lite with MobileNet V2 <br> [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/README.md)		| TensorFlow        | 24.29%                 | 1.525  | 4.475   |    
-| SSD with ResNet 34 1200x1200 <br> [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/README.md)| PyTorch           | 39.28%                 | 433.411| 20.058  |    
+| CTPN <br> [ctpn](./ctpn/README.md)															| TensorFlow        | 73.67%                 | 55.813 | 17.237  |
+| CenterNet (CTDET with DLAV0) 512x512 <br> [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/README.md)| ONNX          | 44.28%                 | 62.211 | 17.911  |
+| EfficientDet-D0 <br> [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)						| TensorFlow        | 31.95%                 | 2.54   | 3.9     |
+| EfficientDet-D1 <br> [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)						| TensorFlow        | 37.54%                 | 6.1    | 6.6     |
+| FaceBoxes <br> [faceboxes-pytorch](./faceboxes-pytorch/README.md)						        | PyTorch           | 83.57%                 | 1.8975 | 1.0059  |
+| Face Detection Retail <br> [face-detection-retail-0044](./face-detection-retail-0044/README.md)| Caffe            | 83.00%                 | 1.067  | 0.588   |
+| Faster R-CNN with Inception-ResNet v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)|TensorFlow| 40.69% | 30.687 |13.307|
+| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |
+| Faster R-CNN with ResNet 50 <br> [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md)| TensorFlow   | 31.09%                 | 57.203 | 29.162  |
+| MobileFace Detection V1 <br> [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)     | MXNet             | 78.75%                 | 3.5456 | 7.6828  |
+| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-p)												| Caffe             | 62.26%                 | 3.366  | 0.007   |
+| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-r)												| Caffe             | 62.26%                 | 0.003  | 0.1     |
+| MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-o)												| Caffe             | 62.26%                 | 0.026  | 0.389   |
+| Pelee <br> [pelee-coco](./pelee-coco/README.md)												| Caffe             | 21.98%                 | 1.290  | 5.98    |
+| RetinaFace with ResNet 50 <br> [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md)| PyTorch    | 91.78%                 | 88.8627| 27.2646 |
+| RetinaNet with Resnet 50 <br> [retinanet-tf](./retinanet-tf/README.md)						| TensorFlow        | 33.15%                 |238.9469| 64.9706 |
+| R-FCN with Resnet-101 <br> [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/README.md)		| TensorFlow        | 45.02%                 | 53.462 | 171.85  |
+| SSD 300 <br> [ssd300](./ssd300/README.md)														| Caffe             | 87.09%                 | 62.815 | 26.285  |
+| SSD 512 <br> [ssd512](./ssd512/README.md)														| Caffe             | 91.07%                 | 180.611| 27.189  |
+| SSD with MobileNet <br> [mobilenet-ssd](./mobilenet-ssd/README.md)							| Caffe             | 67.00%                 | 2.316  | 5.783   |
+| SSD with MobileNet <br> [ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/README.md)			| TensorFlow        | 23.32%                 | 2.494  | 6.807   |
+| SSD with MobileNet FPN <br> [ssd_mobilenet_v1_fpn_coco](./ssd_mobilenet_v1_fpn_coco/README.md)| TensorFlow        | 35.55%                 | 123.309| 36.188  |
+| SSD lite with MobileNet V2 <br> [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/README.md)		| TensorFlow        | 24.29%                 | 1.525  | 4.475   |
+| SSD with ResNet 34 1200x1200 <br> [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/README.md)| PyTorch           | 39.28%                 | 433.411| 20.058  |
 | Ultra Lightweight Face Detection RFB 320 <br> [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/README.md)   |PyTorch|84.78%|0.2106|0.3004|
 | Ultra Lightweight Face Detection slim 320 <br> [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/README.md)|PyTorch|83.32%|0.1724|0.2844|
-| Vehicle License Plate Detection Barrier <br> [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md)|TensorFlow|99.52%|0.271|0.547|    
-| YOLO v1 Tiny <br> [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) 								| TensorFlow.js     | 54.79%                 | 6.9883 | 15.8587 |    
-| YOLO v2 Tiny <br> [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md)								| Keras     	    | 29.12%                 | 5.4236 | 11.2295 |    
-| YOLO v2 <br> [yolo-v2-tf](./yolo-v2-tf/README.md)												| Keras      	    | 56.48%                 | 63.0301| 50.9526 |    
-| YOLO v3 <br> [yolo-v3-tf](./yolo-v3-tf/README.md)												| Keras      	    | 67.72%                 | 65.9843| 61.9221 |    
-| YOLO v3 Tiny <br> [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md)								| Keras      	    | 39.70%                 |5.582   | 8.848   |    
-| YOLO v4 <br> [yolo-v4-tf](./yolo-v4-tf/README.md)												| Keras      	    | 77.40%                 |129.5567| 64.33   |    
-| YOLO v4 Tiny <br> [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md)								| Keras      	    | 0.463%                 | 6.9289 | 6.0535  |    
+| Vehicle License Plate Detection Barrier <br> [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md)|TensorFlow|99.52%|0.271|0.547|
+| YOLO v1 Tiny <br> [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) 								| TensorFlow.js     | 54.79%                 | 6.9883 | 15.8587 |
+| YOLO v2 Tiny <br> [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md)								| Keras     	    | 29.12%                 | 5.4236 | 11.2295 |
+| YOLO v2 <br> [yolo-v2-tf](./yolo-v2-tf/README.md)												| Keras      	    | 56.48%                 | 63.0301| 50.9526 |
+| YOLO v3 <br> [yolo-v3-tf](./yolo-v3-tf/README.md)												| Keras      	    | 67.72%                 | 65.9843| 61.9221 |
+| YOLO v3 Tiny <br> [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md)								| Keras      	    | 39.70%                 |5.582   | 8.848   |
+| YOLO v4 <br> [yolo-v4-tf](./yolo-v4-tf/README.md)												| Keras      	    | 77.40%                 |129.5567| 64.33   |
+| YOLO v4 Tiny <br> [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md)								| Keras      	    | 0.463%                 | 6.9289 | 6.0535  |
 
 Several detection models can be used to detect a set of the most popular
 objects - for example, faces, people, vehicles. Most of the networks are
@@ -474,30 +474,30 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 ## Face Recognition
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| FaceNet <br> [facenet-20180408-102900](./facenet-20180408-102900/README.md)					| TensorFlow	    | 99.14%                 | 2.846  | 23.469  |    
-| LResNet100E-IR,ArcFace@ms1m-refine-v2 <br> [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md)| MXNet|99.68%|24.2115|65.1320|    
-| SphereFace <br> [Sphereface](./Sphereface/README.md)											| Caffe  	        | 98.83%                 | 3.504  | 22.671  |    
+| FaceNet <br> [facenet-20180408-102900](./facenet-20180408-102900/README.md)					| TensorFlow	    | 99.14%                 | 2.846  | 23.469  |
+| LResNet100E-IR,ArcFace@ms1m-refine-v2 <br> [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md)| MXNet|99.68%|24.2115|65.1320|
+| SphereFace <br> [Sphereface](./Sphereface/README.md)											| Caffe  	        | 98.83%                 | 3.504  | 22.671  |
 
 
 ## Human Pose Estimation
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| human-pose-estimation-3d-0001 <br> [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/README.md)	| PyTorch |100.45mm          | 18.998 | 5.074   |    
-| single-human-pose-estimation-0001 <br> [single-human-pose-estimation-0001](./single-human-pose-estimation-0001/README.md)| PyTorch| 69.05% | 60.125 | 33.165  |    
-| higher-hrnet-w32-human-pose-estimation <br> [higher-hrnet-w32-human-pose-estimation](./higher-hrnet-w32-human-pose-estimation/README.md)| PyTorch | 64.64% | 92.8364 | 28.6180 |    
+| human-pose-estimation-3d-0001 <br> [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/README.md)	| PyTorch |100.45mm          | 18.998 | 5.074   |
+| single-human-pose-estimation-0001 <br> [single-human-pose-estimation-0001](./single-human-pose-estimation-0001/README.md)| PyTorch| 69.05% | 60.125 | 33.165  |
+| higher-hrnet-w32-human-pose-estimation <br> [higher-hrnet-w32-human-pose-estimation](./higher-hrnet-w32-human-pose-estimation/README.md)| PyTorch | 64.64% | 92.8364 | 28.6180 |
 
 
 ## Monocular Depth Estimation
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| midasnet <br> [midasnet](./midasnet/README.md)												| PyTorch   	    | 0.07071                |207.25144| 104.081|    
-| FCRN ResNet50-Upproj <br> [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/README.md)		| TensorFlow	    | 0.573                  | 63.5421| 34.5255 |    
+| midasnet <br> [midasnet](./midasnet/README.md)												| PyTorch   	    | 0.07071                |207.25144| 104.081|
+| FCRN ResNet50-Upproj <br> [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/README.md)		| TensorFlow	    | 0.573                  | 63.5421| 34.5255 |
 
 
 ## Image Inpainting
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| GMCNN Inpainting <br> [gmcnn-places2-tf](./gmcnn-places2-tf/README.md)						| TensorFlow 	    | 33.47Db                |691.1589| 12.7773 |    
+| GMCNN Inpainting <br> [gmcnn-places2-tf](./gmcnn-places2-tf/README.md)						| TensorFlow 	    | 33.47Db                |691.1589| 12.7773 |
 
 Image inpainting task is to estimate suitable pixel information to fill holes in images.
 
@@ -509,7 +509,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 ## Style Transfer
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| fast-neural-style-mosaic-onnx <br> [fast-neural-style-mosaic-onnx](./fast-neural-style-mosaic-onnx/README.md)| ONNX |12.04dB               |15.518  |1.679    |   
+| fast-neural-style-mosaic-onnx <br> [fast-neural-style-mosaic-onnx](./fast-neural-style-mosaic-onnx/README.md)| ONNX |12.04dB               |15.518  |1.679    |
 
 
 ## Action Recognition
@@ -525,23 +525,23 @@ The task of action recognition is to predict action that is being performed on a
 ## Colorization
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| colorization-v2 <br> [colorization-v2](./colorization-v2/README.md)							| PyTorch   	    | 26.99dB                | 83.6045| 32.2360 |    
-| colorization-siggraph <br> [colorization-siggraph](./colorization-siggraph/README.md)			| PyTorch   	    | 27.73dB                |150.5441| 34.0511 |    
+| colorization-v2 <br> [colorization-v2](./colorization-v2/README.md)							| PyTorch   	    | 26.99dB                | 83.6045| 32.2360 |
+| colorization-siggraph <br> [colorization-siggraph](./colorization-siggraph/README.md)			| PyTorch   	    | 27.73dB                |150.5441| 34.0511 |
 
 
 ## Sound Classification
 | Model Name <br> Model Version                                            						| Implementation    | Top 1 <br> Accuracy | Top 5 <br> Accuracy | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ------------------- | ------------------- | ------ | ------- |
 | ACLNet <br> [aclnet](./aclnet/README.md)														| PyTorch	        | 86%                 | 92%                 | 1.4    | 2.7     |
-| ACLNet-int8 <br> [aclnet-int8](./aclnet-int8/README.md)										| PyTorch	        | 87%                 | 93%                 | 1.41   | 2.71    |   
+| ACLNet-int8 <br> [aclnet-int8](./aclnet-int8/README.md)										| PyTorch	        | 87%                 | 93%                 | 1.41   | 2.71    |
 
 
 ## Speech Recognition
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
-| DeepSpeech V0.6.1 <br> [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/README.md)       | TensorFlow	    | 7.55%                  | 0.0472 | 47.2    |    
-| DeepSpeech V0.8.2 <br> [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/README.md)       | TensorFlow	    | 6.13%                  | 0.0472 | 47.2    |    
-| QuartzNet <br> [quartznet-15x5-en](./quartznet-15x5-en/README.md)								| Pytorch   	    | 3.86%                  | 2.4195 | 18.8857 |    
+| DeepSpeech V0.6.1 <br> [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/README.md)       | TensorFlow	    | 7.55%                  | 0.0472 | 47.2    |
+| DeepSpeech V0.8.2 <br> [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/README.md)       | TensorFlow	    | 6.13%                  | 0.0472 | 47.2    |
+| QuartzNet <br> [quartznet-15x5-en](./quartznet-15x5-en/README.md)								| Pytorch   	    | 3.86%                  | 2.4195 | 18.8857 |
 
 The task of speech recognition is to recognize and translate spoken language into text.
 
@@ -555,7 +555,7 @@ The task of speech recognition is to recognize and translate spoken language int
 ## Image Translation
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops  | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------- | ------- |
-| CoCosNet <br> [cocosnet](./cocosnet/README.md)												| PyTorch   	    | 12.93dB                |1080.7032| 167.9141|    
+| CoCosNet <br> [cocosnet](./cocosnet/README.md)												| PyTorch   	    | 12.93dB                |1080.7032| 167.9141|
 
 
 ## Optical Character Recognition

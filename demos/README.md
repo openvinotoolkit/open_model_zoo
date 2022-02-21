@@ -5,7 +5,7 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   
+
    omz_demos_human_pose_estimation_3d_demo_python
    omz_demos_3d_segmentation_demo_python
    omz_demos_action_recognition_demo_python

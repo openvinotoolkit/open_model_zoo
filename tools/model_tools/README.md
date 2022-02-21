@@ -48,7 +48,7 @@ To convert models from certain frameworks, you may also need to install
 additional dependencies.
 
 @sphinxdirective
-   
+
 .. tab:: PyTorch
 
   .. code-block:: sh
@@ -70,7 +70,7 @@ additional dependencies.
 @endsphinxdirective
 
 
-## Model Downloader 
+## Model Downloader
 
 The basic usage is to run the script like this:
 
@@ -160,7 +160,7 @@ In particular:
   is set to a value greater than 1, event sequences for different files or models
   may get interleaved.
 
-## Model Converter 
+## Model Converter
 
 The basic usage is to run the script like this:
 
@@ -221,7 +221,7 @@ The Python script will attempt to locate Model Optimizer using several methods:
 See the "Shared options" section for information on other options accepted by
 the script.
 
-## Model Quantizer 
+## Model Quantizer
 
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
@@ -284,7 +284,7 @@ The script will attempt to locate Post-Training Optimization Toolkit using sever
 See the "Shared options" section for information on other options accepted by
 the script.
 
-## Model Information Dumper 
+## Model Information Dumper
 
 The basic usage is to run the script like this:
 
@@ -391,7 +391,7 @@ tool will process:
  See https://docs.python.org/3/library/fnmatch.html for a full description of
 the pattern syntax.
 
- 
+
 The file must contain one pattern per line. The pattern syntax is the same
 as for the `--name` option. Blank lines and comments starting with `#` are
 ignored. For example:

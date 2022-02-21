@@ -6,14 +6,14 @@
    :maxdepth: 1
    :hidden:
    :caption: Device Support
-   
+
    omz_models_intel_device_support
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Action Recognition Models
-   
+
    omz_models_model_action_recognition_0001
    omz_models_model_asl_recognition_0004
    omz_models_model_common_sign_language_0002
@@ -40,7 +40,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Head Pose Estimation Models
-   
+
    omz_models_model_head_pose_estimation_adas_0001
 
 
@@ -48,7 +48,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Human Pose Estimation Models
-   
+
    omz_models_model_human_pose_estimation_0001
    omz_models_model_human_pose_estimation_0005
    omz_models_model_human_pose_estimation_0006
@@ -58,7 +58,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Image Processing Models
-   
+
    omz_models_model_single_image_super_resolution_1032
    omz_models_model_single_image_super_resolution_1033
    omz_models_model_text_image_super_resolution_0001
@@ -67,7 +67,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Instance Segmentation Models
-   
+
    omz_models_model_instance_segmentation_security_0002
    omz_models_model_instance_segmentation_security_0091
    omz_models_model_instance_segmentation_security_0228
@@ -78,7 +78,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Machine Translation Models
-   
+
    omz_models_model_machine_translation_nar_de_en_0002
    omz_models_model_machine_translation_nar_en_de_0002
    omz_models_model_machine_translation_nar_en_ru_0001
@@ -88,14 +88,14 @@
    :maxdepth: 1
    :hidden:
    :caption: Noise Suppression Models
-   
+
    omz_models_model_noise_suppression_poconetlike_0001
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Object Attribute Estimation Models
-   
+
    omz_models_model_age_gender_recognition_retail_0013
    omz_models_model_emotions_recognition_retail_0003
    omz_models_model_facial_landmarks_35_adas_0002
@@ -116,7 +116,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Object Detection Models
-   
+
    omz_models_model_face_detection_0200
    omz_models_model_face_detection_0202
    omz_models_model_face_detection_0204
@@ -169,7 +169,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Optical Character Recognition Models
-   
+
    omz_models_model_handwritten_japanese_recognition_0001
    omz_models_model_handwritten_score_recognition_0003
    omz_models_model_handwritten_simplified_chinese_recognition_0001
@@ -182,7 +182,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Question Answering Models
-   
+
    omz_models_model_bert_large_uncased_whole_word_masking_squad_0001
    omz_models_model_bert_large_uncased_whole_word_masking_squad_emb_0001
    omz_models_model_bert_large_uncased_whole_word_masking_squad_int8_0001
@@ -195,7 +195,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Semantic Segmentation Models
-   
+
    omz_models_model_icnet_camvid_ava_0001
    omz_models_model_icnet_camvid_ava_sparse_30_0001
    omz_models_model_icnet_camvid_ava_sparse_60_0001
@@ -207,7 +207,7 @@
    :maxdepth: 1
    :hidden:
    :caption: Text-to-speech Models
-   
+
    omz_models_model_text_to_speech_en_0001
    omz_models_model_text_to_speech_en_multi_0001
 
@@ -215,14 +215,14 @@
    :maxdepth: 1
    :hidden:
    :caption: Time Series Models
-   
+
    omz_models_model_time_series_forecasting_electricity_0001
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Token Recognition Models
-   
+
    omz_models_model_formula_recognition_medium_scan_0001
    omz_models_model_formula_recognition_polynomials_handwritten_0001
    omz_models_model_text_recognition_0015
@@ -455,7 +455,7 @@ Deep Learning models for text recognition in various applications.
 | [bert-small-uncased-whole-word-masking-squad-0002](./bert-small-uncased-whole-word-masking-squad-0002/README.md)                |  PyTorch     | 85.4%    | 23.9   | 41.1    |
 | [bert-small-uncased-whole-word-masking-squad-int8-0002](./bert-small-uncased-whole-word-masking-squad-int8-0002/README.md)      |  PyTorch     | 84.4%    | 23.9   | 41.1    |
 | [bert-small-uncased-whole-word-masking-squad-emb-int8-0001](./bert-small-uncased-whole-word-masking-squad-emb-int8-0001/README.md) |  PyTorch  | 87.6%    | 23.9   | 41.1    |
- 
+
 
 ## Machine Translation
 

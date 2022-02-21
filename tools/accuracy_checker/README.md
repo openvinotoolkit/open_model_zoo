@@ -5,7 +5,7 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   
+
    omz_tools_accuracy_checker_adapters
    omz_tools_accuracy_checker_annotation_converters
    omz_tools_accuracy_checker_custom_evaluators
@@ -267,7 +267,7 @@ Example of dataset definition:
 
 ### Preprocessing, Metrics, Postprocessing
 
-Each entry of preprocessing, metrics, postprocessing must have a `type` field 
+Each entry of preprocessing, metrics, postprocessing must have a `type` field
 with other options specific to the type. If you do not provide any other option, it
 will be picked from the *definitions* file.
 
