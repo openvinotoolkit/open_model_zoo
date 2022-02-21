@@ -58,7 +58,6 @@ python3 smartlab_demo.py
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
-    --mode mstcn
     -m_en "./public/i3d-rgb-tf/FP32/i3d-rgb-tf.xml"
     -m_de "./intel/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.xml"
 ```
