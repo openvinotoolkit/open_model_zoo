@@ -13,7 +13,7 @@ This is a smartlab object detector that is based on YoloX-nano for 416x416 resol
 Accuracy metrics obtained on Smartlab validation dataset with yolox adapter for converted model.
 
 | Metric                          | Value                                     |
-| [COCO mAP (0.5:0.05:0.95)]      | 37.12%                                    |
+| [COCO mAP (0.5:0.05:0.95)]      | 0.060%                                    |
 | GFlops                          | 1.073                                     |
 | MParams                         | 0.8894                                    |
 | Source framework                | PyTorch\*                                 |
