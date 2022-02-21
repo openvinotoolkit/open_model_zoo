@@ -255,10 +255,10 @@ def main():
             emb_pipeline.await_any()
 
     emb_pipeline.await_all()
+    if emb_pipeline.callback_exceptions:
+        raise emb_pipeline.callback_exceptions[0]
     for window_id in range(next_window_id_to_show, next_window_id):
         results = emb_pipeline.get_result(window_id)
-        while results is None:
-            results = emb_pipeline.get_result(window_id)
         embedding, meta = results
         meta['c_data'].emb = embedding
         contexts_all.append(meta['c_data'])
@@ -318,10 +318,10 @@ def main():
                     qa_pipeline.await_any()
 
             qa_pipeline.await_all()
+            if qa_pipeline.callback_exceptions:
+                raise qa_pipeline.callback_exceptions[0]
             for context_id in range(next_context_id_to_show, next_context_id):
                 results = qa_pipeline.get_result(context_id)
-                while results is None:
-                    results = qa_pipeline.get_result(context_id)
                 output, meta = results
                 update_answers_list(answers, output, meta['c_data'])
 
