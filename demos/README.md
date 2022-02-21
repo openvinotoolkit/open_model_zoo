@@ -1,5 +1,66 @@
 # Open Model Zoo Demos
 
+@sphinxdirective
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   omz_demos_human_pose_estimation_3d_demo_python
+   omz_demos_3d_segmentation_demo_python
+   omz_demos_action_recognition_demo_python
+   omz_demos_bert_named_entity_recognition_demo_python
+   omz_demos_bert_question_answering_embedding_demo_python
+   omz_demos_bert_question_answering_demo_python
+   omz_demos_classification_demo_cpp
+   omz_demos_colorization_demo_python
+   omz_demos_crossroad_camera_demo_cpp
+   omz_demos_face_detection_mtcnn_demo_python
+   omz_demos_face_recognition_demo_python
+   omz_demos_formula_recognition_demo_python
+   omz_demos_gaze_estimation_demo_cpp_gapi
+   omz_demos_interactive_face_detection_demo_cpp_gapi
+   omz_demos_gaze_estimation_demo_cpp
+   omz_demos_gesture_recognition_demo_python
+   omz_demos_handwritten_text_recognition_demo_python
+   omz_demos_human_pose_estimation_demo_cpp
+   omz_demos_human_pose_estimation_demo_python
+   omz_demos_deblurring_demo_python
+   omz_demos_image_inpainting_demo_python
+   omz_demos_image_processing_demo_cpp
+   omz_demos_image_retrieval_demo_python
+   omz_demos_segmentation_demo_cpp
+   omz_demos_segmentation_demo_python
+   omz_demos_image_translation_demo_python
+   omz_demos_instance_segmentation_demo_python
+   omz_demos_interactive_face_detection_demo_cpp
+   omz_demos_machine_translation_demo_python
+   omz_demos_monodepth_demo_python
+   omz_demos_multi_camera_multi_target_tracking_demo_python
+   omz_demos_multi_channel_face_detection_demo_cpp
+   omz_demos_multi_channel_human_pose_estimation_demo_cpp
+   omz_demos_multi_channel_object_detection_demo_yolov3_cpp
+   omz_demos_noise_suppression_demo_python
+   omz_demos_object_detection_demo_cpp
+   omz_demos_object_detection_demo_python
+   omz_demos_pedestrian_tracker_demo_cpp
+   omz_demos_place_recognition_demo_python
+   omz_demos_security_barrier_camera_demo_cpp
+   omz_demos_single_human_pose_estimation_demo_python
+   omz_demos_smart_classroom_demo_cpp
+   omz_demos_social_distance_demo_cpp
+   omz_demos_sound_classification_demo_python
+   omz_demos_speech_recognition_deepspeech_demo_python
+   omz_demos_speech_recognition_quartznet_demo_python
+   omz_demos_mask_rcnn_demo_cpp
+   omz_demos_text_detection_demo_cpp
+   omz_demos_text_spotting_demo_python
+   omz_demos_text_to_speech_demo_python
+   omz_demos_time_series_forecasting_demo_python
+   omz_demos_whiteboard_inpainting_demo_python
+
+@endsphinxdirective
+
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 
 For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
