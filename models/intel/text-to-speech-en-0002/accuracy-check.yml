@@ -1,0 +1,40 @@
+evaluations:
+  - name: text-to-speech-en-0002
+    module: custom_evaluators.text_to_speech_evaluator.TextToSpeechEvaluatorGan
+    module_config:
+      network_info:
+        encoder: {}
+
+        decoder:
+          inputs:
+            z: z
+            z_mask: z_mask
+          max_regression_len: '0'
+      adapter:
+        type: multi_output_regression
+        outputs:
+            - logw
+            - x_m
+            - x_res
+            - x_mask
+            - mel
+        keep_shape: True
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: acoustic_gan
+          reader: numpy_dict_reader
+          data_source: acoustic_gan
+          annotation_conversion:
+              converter: multi_feature_regression
+              data_dir: acoustic_gan
+              input_suffix: in_
+              reference_suffix: out_
+          metrics:
+            - type: relative_l2_error
+              presenter: print_vector
+              reference:
+                mean: 0.0002
+                std: 0.00011

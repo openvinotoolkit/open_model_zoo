@@ -1,0 +1,6 @@
+description: >-
+  This is a mel-spectrogram synthesis composite model. The model generates mel-spectrogram
+  from symbol sequences separated by space.
+task_type: text_to_speech
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
