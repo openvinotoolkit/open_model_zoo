@@ -10,8 +10,22 @@ The Python* Model API consists of 3 libraries:
 * _models_ - implement wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
 * _pipelines_ - implement pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
 
+### Prerequisites
+
+The package requires
+- Python (version 3.6 or higher)
+- OpenVINO™ toolkit
+
+If you build Python* Model API package from source, you should install the OpenVINO™ toolkit. See the options:
+
+Use installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
+
+Also, you can install the OpenVINO Python\* package via the command:
+ ```sh
+pip install openvino
+ ```
+
 ## Building Python* Model API package
-For installation Python (version 3.6 or higher) is required. The installation is available from source.
 
 Use the following command to install Python* Model API from source:
 ```sh
@@ -36,9 +50,6 @@ To verify the package is installed, you might use the following command:
 ```sh
 python -c "from openvino.model_zoo import model_api"
 ```
-
-> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
-> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
 
 ## Model API Wrappers
 
@@ -67,23 +78,18 @@ Model API wrappers are executor-agnostic, meaning it does not implement the spec
 
 Currently, `OpenvinoAdapter` and `OVMSAdapter` are supported.
 
-#### OpenVINO executor
+#### OpenVINO Adapter
 
 `OpenvinoAdapter` hides the OpenVINO™ toolkit API, which allows Model API wrappers launching with models represented in Intermediate Representation (IR) format.
 It accepts a path to either `xml` model file or `onnx` model file.
 
-For OpenVINO executor employment, you need to install the requirements:
-```sh
-pip install <omz_dir>/demos/common/python/requirements_openvino.txt
-```
-
-#### OpenVINO Model Server executor
+#### OpenVINO Model Server Adapter
 
 `OVMSAdapter` hides the OpenVINO Model Server python client API, which allows Model API wrappers launching with models served by OVMS.
 
 Refer to __[`OVMSAdapter`](adapters/ovms_adapter.md)__ to learn about running demos with OVMS.
 
-For OpenVINO Model Server executor employment, you need to install the requirements:
+For OpenVINO Model Server Adapter employment, you need to install the requirements:
 ```sh
 pip install <omz_dir>/demos/common/python/requirements_ovms.txt
 ```
@@ -143,3 +149,15 @@ if __name__ == '__main__':
 ```
 
 To study the complex scenarios, refer to [Open Model Zoo Python* demos](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos), where the asynchronous inference is applied.
+
+The list of Open Model Zoo demos with Model API support:
+- BERT Named Entity Recognition Python* Demo
+- BERT Question Answering Python* Demo
+- BERT Question Answering Embedding Python* Demo
+- Classification Python* Demo
+- Image Deblurring Python* Demo
+- Human Pose Estimation Python* Demo
+- Instance Segmentation Python* Demo
+- MonoDepth Python* Demo
+- Object Detection Python* Demo
+- Image Segmentation Python* Demo
