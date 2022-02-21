@@ -1493,3 +1493,12 @@ datasets:
       annotation_file: object_detection/streams_1/high/annotations/instances_glb2bcls3.json
     annotation: mscoco_detection_high_3cls.pickle
     dataset_meta: mscoco_detection_high_3cls.json
+
+  - name: acoustic_gan
+    data_source: acoustic_gan
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: acoustic_gan
+      input_suffix: in_
+      reference_suffix: out_

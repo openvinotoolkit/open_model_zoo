@@ -379,9 +379,9 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 
 
 def relative_err(target, pred):
-    if len(target.shape) > 2:
+    if len(target.shape) > 1:
         target = target.flatten()
-    if len(pred.shape) > 2:
+    if len(pred.shape) > 1:
         pred = pred.flatten()
     size = min(target.size, pred.size)
     return np.linalg.norm(target[:size] - pred[:size], 2) / (np.linalg.norm(target[:size], 2) + np.finfo(float).eps)
