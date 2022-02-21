@@ -3,20 +3,20 @@
 Open Model Zoo automation tools contain scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
 
-* `omz_downloader` (model downloader) downloads model files from online sources
+* Model Downloader: `omz_downloader` downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
   Optimizer;
 
-* `omz_converter` (model converter) converts the models that are not in the
+* Model Converter: `omz_converter` converts the models that are not in the
   OpenVINO™ IR format into that format using Model Optimizer.
 
-* `omz_quantizer` (model quantizer) quantizes full-precision models in the IR
+* Model Quantizer: `omz_quantizer` quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
 
-* `omz_info_dumper` (model information dumper) prints information about the models
+*  Model Information Dumper: `omz_info_dumper` prints information about the models
   in a stable machine-readable format.
 
-* `omz_data_downloader` (datasets' data downloader) copies datasets' data from installed location.
+* Datasets' Data Downloader: `omz_data_downloader` copies datasets' data from installed location.
 
 Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in

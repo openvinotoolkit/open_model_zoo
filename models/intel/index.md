@@ -347,4 +347,6 @@ Deep Learning models for online sequence modeling.
 
 ## Legal Information
 
-[*] Other names and brands may be claimed as the property of others.
+Caffe, Caffe2, Keras, MXNet, PyTorch, and TensorFlow are trademarks or brand names of their respective owners.
+All company, product and service names used in this website are for identification purposes only.
+Use of these names,trademarks and brands does not imply endorsement.
