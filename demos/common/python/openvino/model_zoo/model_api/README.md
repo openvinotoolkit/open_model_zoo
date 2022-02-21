@@ -107,7 +107,7 @@ To apply Model API wrappers in custom applications, learn the provided example o
 
  In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to the model's `xml` file. The model is loaded on a CPU device inside the adapter.
 
-Once the SSD model wrapper instance is created, we get the predictions by the model in one line: `ssd_model(input_data)` - the wrapper performs the preprocess method, synchronous inference on OpenVINO side and postprocess method.
+Once the SSD model wrapper instance is created, we get the predictions by the model in one line: `ssd_model(input_data)` - the wrapper performs the preprocess method, synchronous inference on OpenVINO™ toolkit side and postprocess method.
 
 ```python
 import cv2
@@ -115,37 +115,24 @@ from openvino.model_zoo.model_api.models import SSD
 from openvino.model_zoo.model_api.adapters import OpenvinoAdapter, create_core
 
 
-# a helper function for bboxes visualization
-def draw_detections(image, detections):
-    for detection in detections:
-        class_id = int(detection.id)
-        color = (255, 0, 0)
-        det_label = '#{}'.format(class_id)
-        xmin, ymin, xmax, ymax = detection.get_coords()
-        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(image, '{} {:.1%}'.format(det_label, detection.score),
-                    (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-    return image
+# read input image using opencv
+input_data = cv2.imread("sample.png")
 
+# define the path to mobilenet-ssd model in IR format
+model_path = "public/mobilenet-ssd/FP32/mobilenet-ssd.xml"
 
-def main():
-    input_data = cv2.imread("sample.png")
-    model_path = "public/mobilenet-ssd/FP32/mobilenet-ssd.xml"
+# create adapter for OpenVINO™ runtime, pass the model path
+model_adapter = OpenvinoAdapter(create_core(), model_path, device="CPU")
 
-    model_adapter = OpenvinoAdapter(create_core(), model_path, device="CPU")
-    ssd_model = SSD(model_adapter, preload=True)
+# create model API wrapper for SSD architecture
+ssd_model = SSD(model_adapter, preload=True)
 
-    results = ssd_model(input_data)
+# apply input preprocessing, sync inference, model output postprocessing
+results = ssd_model(input_data)
 
-    image_with_bboxes = draw_detections(input_data, results)
-    cv2.imshow('Detection Results', image_with_bboxes)
-    key = cv2.waitKey(0)
-    if key in {ord('q'), ord('Q'), 27}:
-        return
-
-
-if __name__ == '__main__':
-    main()
+# visualize results and show it
+image_with_bboxes = draw_detections(input_data, results)
+cv2.imshow('Detection Results', image_with_bboxes)
 ```
 
 To study the complex scenarios, refer to [Open Model Zoo Python* demos](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos), where the asynchronous inference is applied.
