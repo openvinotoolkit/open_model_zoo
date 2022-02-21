@@ -13,9 +13,9 @@
 
 Cnn::Cnn(
     const std::string& modelPath, const std::string& modelType, const std::string& deviceName,
-    ov::Core& core, const cv::Size& new_input_resolution) :
+    ov::Core& core, const cv::Size& new_input_resolution, bool use_auto_resize) :
     m_modelPath(modelPath), m_modelType(modelType), m_deviceName(deviceName),
-    m_core(core), m_new_input_resolution(new_input_resolution),
+    m_core(core), m_new_input_resolution(new_input_resolution), use_auto_resize(use_auto_resize),
     m_channels(0), m_time_elapsed(0), m_ncalls(0)
 {
     slog::info << "Reading model: " << m_modelPath << slog::endl;
@@ -64,18 +64,21 @@ Cnn::Cnn(
     // Configuring input and output
     ov::preprocess::PrePostProcessor ppp(m_model);
 
-    // we'd like to pass input image (NCWH, u8) to model input
+    // we'd like to pass input image (NHWC, u8) to model input
     // and let OpenVINO do necessary conversions
+
     ppp.input().tensor()
         .set_element_type(ov::element::u8)
-        .set_layout({ "NHWC" })
-        .set_spatial_dynamic_shape();
+        .set_layout({ "NHWC" });
 
-    ppp.input().preprocess().convert_layout(input_layout);
+    if (use_auto_resize) {
+        ppp.input().tensor()
+            .set_spatial_dynamic_shape();
 
-    ppp.input().preprocess()
-        .convert_element_type(ov::element::f32)
-        .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+        ppp.input().preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
     ppp.input().model().set_layout(input_layout);
 
     m_model = ppp.build();

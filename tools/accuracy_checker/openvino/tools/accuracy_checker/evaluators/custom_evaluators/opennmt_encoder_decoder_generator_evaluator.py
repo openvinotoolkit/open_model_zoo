@@ -118,7 +118,7 @@ class OpenNMTModel(BaseCascadeModel):
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
-                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})
+                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze(axis=0)})
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
@@ -313,7 +313,7 @@ class BeamSearch:
         curr_scores = log_probs.reshape(-1, self.beam_size * vocab_size)
         topk_ids = np.argsort(curr_scores)[..., range(self.beam_size * vocab_size - 1,
                                                       self.beam_size * (vocab_size - 1) - 1, -1)]
-        topk_scores = curr_scores[..., topk_ids.squeeze()]
+        topk_scores = curr_scores[..., topk_ids.squeeze(axis=0)]
         return topk_scores, topk_ids
 
     def update_finished(self):
@@ -373,7 +373,7 @@ class BeamSearch:
         self.topk_ids = np.fmod(self.topk_ids, vocab_size)  # resolve true word ids
 
         self.alive_seq = np.concatenate(
-            [np.take(self.alive_seq, self.select_indices.squeeze(), 0),
+            [np.take(self.alive_seq, self.select_indices.squeeze(axis=-1), 0),
              self.topk_ids.view().reshape((_B * self.beam_size, 1))], axis=-1)
 
         self.is_finished = np.equal(self.topk_ids, self.eos)
@@ -444,10 +444,11 @@ class EncoderOVModel(CommonOVModel):
 class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
-    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-    return_layers = ['output', 'attn']
+    output_layers = ['attn/sink_port_0', 'c_1/sink_port_0', 'h_1/sink_port_0', 'input_feed/sink_port_0',
+                     'output/sink_port_0']
+    return_layers = ['output/sink_port_0', 'attn/sink_port_0']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
-    state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
+    state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
 
 
 class GeneratorOVModel(CommonOVModel):

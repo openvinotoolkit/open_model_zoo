@@ -5,7 +5,7 @@
 | aclnet | YES | YES |    |
 | aclnet-int8 | YES | YES |    |
 | alexnet | YES | YES | YES |
-| anti-spoof-mn3 | YES | YES | YES |
+| anti-spoof-mn3 | YES |  | YES |
 | background-matting-mobilenetv2 | YES |    |    |
 | bert-base-ner | YES | YES |    |
 | brain-tumor-segmentation-0001 | YES |    |    |
@@ -24,15 +24,15 @@
 | detr-resnet50 | YES |    |    |
 | dla-34 | YES | YES | YES |
 | drn-d-38 | YES | YES |    |
-| efficientdet-d0-tf | YES | YES | YES |
-| efficientdet-d1-tf | YES | YES | YES |
+| efficientdet-d0-tf | YES |    | YES |
+| efficientdet-d1-tf | YES |    | YES |
 | efficientnet-b0 | YES | YES | YES |
 | efficientnet-b0-pytorch | YES | YES | YES |
 | efficientnet-v2-b0 | YES | YES |    |
 | efficientnet-v2-s | YES | YES |    |
 | f3net | YES | YES | YES |
 | face-detection-retail-0044 | YES | YES |    |
-| face-recognition-resnet100-arcface-onnx | YES | YES |    |
+| face-recognition-resnet100-arcface-onnx | YES |  |    |
 | faceboxes-pytorch | YES | YES |    |
 | facenet-20180408-102900 | YES | YES | YES |
 | fast-neural-style-mosaic-onnx | YES | YES | YES |
@@ -56,7 +56,7 @@
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |
 | higher-hrnet-w32-human-pose-estimation | YES | YES |    |
-| hrnet-v2-c1-segmentation | YES | YES |    |
+| hrnet-v2-c1-segmentation | YES |    |    |
 | human-pose-estimation-3d-0001 | YES | YES | YES |
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
@@ -85,7 +85,7 @@
 | mtcnn-r | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
-| ocrnet-hrnet-w48-paddle | YES | YES | |
+| ocrnet-hrnet-w48-paddle | YES |    |    |
 | octave-resnet-26-0.25 | YES | YES | YES |
 | open-closed-eye-0001 | YES | YES |    |
 | pelee-coco | YES | YES | YES |
@@ -111,7 +111,7 @@
 | shufflenet-v2-x0.5 | YES | YES | YES |
 | shufflenet-v2-x1.0 | YES | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES | YES |
-| Sphereface | YES | YES | YES |
+| Sphereface | YES |  | YES |
 | squeezenet1.0 | YES | YES | YES |
 | squeezenet1.1 | YES | YES | YES |
 | ssd-resnet34-1200-onnx | YES | YES | YES |
