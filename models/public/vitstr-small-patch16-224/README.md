@@ -75,9 +75,9 @@ Output tensor, name: `logits`, shape: `1, 25, 96` in the format `B, W, L`, where
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

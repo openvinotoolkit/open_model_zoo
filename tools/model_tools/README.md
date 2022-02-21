@@ -1,20 +1,22 @@
 # Model Downloader and other automation tools
 
-This directory contains scripts that automate certain model-related tasks
+Open Model Zoo automation tools contain scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
 
-* `downloader.py` (model downloader) downloads model files from online sources
+* Model Downloader: `omz_downloader` downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
   Optimizer;
 
-* `converter.py` (model converter) converts the models that are not in the
-  Inference Engine IR format into that format using Model Optimizer.
+* Model Converter: `omz_converter` converts the models that are not in the
+  OpenVINO™ IR format into that format using Model Optimizer.
 
-* `quantizer.py` (model quantizer) quantizes full-precision models in the IR
+* Model Quantizer: `omz_quantizer` quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
 
-* `info_dumper.py` (model information dumper) prints information about the models
+*  Model Information Dumper: `omz_info_dumper` prints information about the models
   in a stable machine-readable format.
+
+* Datasets' Data Downloader: `omz_data_downloader` copies datasets' data from installed location.
 
 Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
@@ -29,17 +31,19 @@ future releases.
 
 ## Installation
 
-Model Downloader and other automation tools can be installed as a part of OpenVINO&trade; toolkit or from source.
-Installation from source is as follows:
+Model Downloader and other automation tools can be installed as part of the OpenVINO™ Development Tools Python package or from source if you need the latest changes.
+To install the tools from the package, go to the [OpenVINO™ Development Tools PyPI page] (https://pypi.org/project/openvino-dev/) and follow the instructions.
+
+To install the tools from source:
 
 1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
 
-2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) python package of the corresponding version:
+2. Install [openvino-dev](https://pypi.org/project/openvino-dev/) Python\* package to obtain Model Optimizer and Post-Training Optimization Toolkit:
 
 ```sh
-pip install openvino-dev[caffe,onnx,tensorflow2,pytorch,mxnet]
+pip install openvino-dev
 ```
-> **NOTE**: For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
+> **NOTE**: openvino-dev version should be the same as OMZ Tools. For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
 
 2. Install the tools with the following command:
 
@@ -240,7 +244,7 @@ The basic usage is to run the script like this:
 omz_converter --all
 ```
 
-This will convert all models into the Inference Engine IR format. Models that
+This will convert all models into the OpenVINO™ IR format. Models that
 were originally in that format are ignored. Models in PyTorch format will be
 converted in ONNX format first.
 
@@ -443,13 +447,13 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `onnx`,
+  Current possible values are `dldt` (OpenVINO™ IR), `caffe`, `mxnet`, `onnx`,
   `pytorch` and `tf` (TensorFlow). Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.
 
 * `precisions`: the list of precisions that the model has IR files for. For models downloaded
-  in a format other than the Inference Engine IR format, these are the precisions that the model
+  in a format other than the OpenVINO™ IR format, these are the precisions that the model
   converter can produce IR files in. Current possible values are:
 
   * `FP16`
@@ -503,6 +507,9 @@ describing a single model. Each such object has the following keys:
   * `token_recognition`
 
   Additional possible values might be added in the future.
+
+* `model_stages`: the list of model stages, in case if the model is a composition of several models,
+  otherwise the list is empty.
 
 ## Shared options
 

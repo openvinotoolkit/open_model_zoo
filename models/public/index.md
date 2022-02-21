@@ -5,7 +5,7 @@ that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
+You can download models and convert them into OpenVINO™ IR format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
 ## Classification
 
@@ -338,4 +338,6 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 
 ## Legal Information
 
-[*] Other names and brands may be claimed as the property of others.
+Caffe, Caffe2, Keras, MXNet, PyTorch, and TensorFlow are trademarks or brand names of their respective owners.
+All company, product and service names used in this website are for identification purposes only.
+Use of these names,trademarks and brands does not imply endorsement.
