@@ -25,7 +25,7 @@ from .format_converter import ConverterReturn
 from ..representation.image_processing import GTLoader
 
 class VersaDatasetConverter(FileBasedAnnotationConverter):
-    __provider__ = 'versa'
+    __provider__ = 'malware_classification_converter'
 
     @classmethod
     def parameters(cls):

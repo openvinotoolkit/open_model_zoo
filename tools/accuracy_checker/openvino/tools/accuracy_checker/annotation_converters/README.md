@@ -832,7 +832,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - path to directory with images (optional, default image_2).
   * `label_start` - specifies label index start in label map. Optional, default value is 1. You can provide another value, if you want to use this dataset for separate label validation.
   * `images_suffix` - suffix for image file names (Optional, default: `.png`).
-* `versa` - converts Versa dataset for malware detection task to `ClassificationAnnotation`.
+* `malware_classification_converter` - converts dataset for malware detection task to `ClassificationAnnotation`.
   * `annotation_file` - path to dataset annotation file.
   * `data_dir` - path to dataset root folder.
   * `known_folder` - name of folder containing known files (optional, default `KNOWN_1000`).
