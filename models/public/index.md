@@ -186,7 +186,6 @@
    :hidden:
    :caption: Object Detection Models
    
-   omz_models_model_ctdet_coco_dlav0_384
    omz_models_model_ctdet_coco_dlav0_512
    omz_models_model_ctpn
    omz_models_model_efficientdet_d0_tf
@@ -194,8 +193,7 @@
    omz_models_model_face_detection_retail_0044
    omz_models_model_faceboxes_pytorch
    omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_faster_rcnn_inception_v2_coco
-   omz_models_model_faster_rcnn_resnet101_coco
+   omz_models_model_faster_rcnn_inception_v2_atrous_coco
    omz_models_model_faster_rcnn_resnet50_coco
    omz_models_model_mobilefacedet_v1_mxnet
    omz_models_model_mobilenet_ssd
@@ -209,8 +207,6 @@
    omz_models_model_ssd512
    omz_models_model_ssd_mobilenet_v1_coco
    omz_models_model_ssd_mobilenet_v1_fpn_coco
-   omz_models_model_ssd_mobilenet_v2_coco
-   omz_models_model_ssd_resnet50_v1_fpn_coco
    omz_models_model_ssdlite_mobilenet_v2
    omz_models_model_ultra_lightweight_face_detection_rfb_320
    omz_models_model_ultra_lightweight_face_detection_slim_320
@@ -400,16 +396,14 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Model Name <br> Model Version                                            						| Implementation    | Accuracy               | GFlops | mParams |
 | ---------------------------------------------------------------------------------------------	| ----------------- | ---------------------- | ------ | ------- |
 | CTPN <br> [ctpn](./ctpn/README.md)															| TensorFlow        | 73.67%                 | 55.813 | 17.237  |    
-| CenterNet (CTDET with DLAV0) 384x384 <br> [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/README.md)| ONNX          | 41.61%                 | 34.994 | 17.911  |    
 | CenterNet (CTDET with DLAV0) 512x512 <br> [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/README.md)| ONNX          | 44.28%                 | 62.211 | 17.911  |    
 | EfficientDet-D0 <br> [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)						| TensorFlow        | 31.95%                 | 2.54   | 3.9     |    
 | EfficientDet-D1 <br> [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)						| TensorFlow        | 37.54%                 | 6.1    | 6.6     |    
 | FaceBoxes <br> [faceboxes-pytorch](./faceboxes-pytorch/README.md)						        | PyTorch           | 83.57%                 | 1.8975 | 1.0059  |    
 | Face Detection Retail <br> [face-detection-retail-0044](./face-detection-retail-0044/README.md)| Caffe            | 83.00%                 | 1.067  | 0.588   |    
 | Faster R-CNN with Inception-ResNet v2 <br> [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)|TensorFlow| 40.69% | 30.687 |13.307|    
-| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |    
+| Faster R-CNN with Inception v2 <br> [faster_rcnn_inception_v2_atrous_coco](./faster_rcnn_inception_v2_atrous_coco/README.md)| TensorFlow | 26.24%        | 30.687 | 13.307  |    
 | Faster R-CNN with ResNet 50 <br> [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md)| TensorFlow   | 31.09%                 | 57.203 | 29.162  |    
-| Faster R-CNN with ResNet 101 <br> [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/README.md)| TensorFlow| 35.72%                 | 112.052| 48.128  |    
 | MobileFace Detection V1 <br> [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)     | MXNet             | 78.75%                 | 3.5456 | 7.6828  |    
 | MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-p)												| Caffe             | 62.26%                 | 3.366  | 0.007   |    
 | MTCNN <br> [mtcnn](./mtcnn/README.md) (mtcnn-r)												| Caffe             | 62.26%                 | 0.003  | 0.1     |    
@@ -423,9 +417,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | SSD with MobileNet <br> [mobilenet-ssd](./mobilenet-ssd/README.md)							| Caffe             | 67.00%                 | 2.316  | 5.783   |    
 | SSD with MobileNet <br> [ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/README.md)			| TensorFlow        | 23.32%                 | 2.494  | 6.807   |    
 | SSD with MobileNet FPN <br> [ssd_mobilenet_v1_fpn_coco](./ssd_mobilenet_v1_fpn_coco/README.md)| TensorFlow        | 35.55%                 | 123.309| 36.188  |    
-| SSD with MobileNet V2 <br> [ssd_mobilenet_v2_coco](./ssd_mobilenet_v2_coco/README.md)			| TensorFlow        | 24.95%                 | 3.775  | 16.818  |    
 | SSD lite with MobileNet V2 <br> [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/README.md)		| TensorFlow        | 24.29%                 | 1.525  | 4.475   |    
-| SSD with ResNet-50 V1 FPN <br> [ssd_resnet50_v1_fpn_coco](./ssd_resnet50_v1_fpn_coco/README.md)| TensorFlow       | 38.46%                 |178.6807| 59.9326 |    
 | SSD with ResNet 34 1200x1200 <br> [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/README.md)| PyTorch           | 39.28%                 | 433.411| 20.058  |    
 | Ultra Lightweight Face Detection RFB 320 <br> [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/README.md)   |PyTorch|84.78%|0.2106|0.3004|
 | Ultra Lightweight Face Detection slim 320 <br> [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/README.md)|PyTorch|83.32%|0.1724|0.2844|
