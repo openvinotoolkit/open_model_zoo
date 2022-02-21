@@ -17,6 +17,7 @@
 import cv2
 import numpy as np
 import logging as log
+from pathlib import Path
 from scipy.special import softmax
 from openvino.runtime import PartialShape
 
@@ -65,7 +66,9 @@ class SegmentorMstcn:
         self.mstcn_output_key = self.mstcn.outputs
         self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
         self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
-        self.his_fea = {}
+        file_path = Path(__file__).parent / 'init_his.npz'
+        init_his_feature = np.load(file_path)
+        self.his_fea = {f'fhis_in_{i}': init_his_feature[f'arr_{i}'] for i in range(4)}
 
     def inference(self, buffer_top, buffer_front, frame_index):
         """
