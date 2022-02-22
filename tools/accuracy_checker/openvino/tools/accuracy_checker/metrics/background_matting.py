@@ -16,7 +16,7 @@ limitations under the License.
 
 import cv2
 import numpy as np
-from scipy.ndimage.filters import convolve
+
 
 from ..representation import (
     BackgroundMattingAnnotation,
@@ -25,6 +25,13 @@ from ..representation import (
 
 from ..config import BoolField, StringField
 from .metric import PerImageEvaluationMetric
+from ..utils import UnsupportedPackage
+
+try:
+    from scipy.ndimage.filters import convolve
+except ImportError as err:
+    convolve = UnsupportedPackage('scipy', err.msg)
+
 
 
 class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
@@ -133,6 +140,8 @@ class SpatialGradient(BaseBackgroundMattingMetrics):
         return -x * self.gaussian(x, sigma) / sigma ** 2
 
     def configure(self, sigma=1.4):
+        if isinstance(convolve, UnsupportedPackage):
+            convolve.raise_error(self.__provider__)
         super().configure()
         self.filter_x, self.filter_y = self.gauss_filter(sigma)
         self.reset()
