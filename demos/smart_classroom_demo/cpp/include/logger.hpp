@@ -4,14 +4,15 @@
 
 #pragma once
 
-#include <vector>
-#include <map>
+#include <fstream>
 #include <iostream>
+#include <map>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 #include <utils/slog.hpp>
-#include "tracker.hpp"
 #include "actions.hpp"
+#include "tracker.hpp"
 
 class DetectionsLogger {
 private:

@@ -15,22 +15,9 @@
 */
 
 #pragma once
-#include <ie_allocator.hpp>
+
 #include <opencv2/core.hpp>
 #include <openvino/runtime/allocator.hpp>
-
-class SharedBlobAllocator : public InferenceEngine::IAllocator {
-public:
-    SharedBlobAllocator(const cv::Mat& img);
-    ~SharedBlobAllocator();
-    void* lock(void* handle, InferenceEngine::LockOp op = InferenceEngine::LOCK_FOR_WRITE) noexcept override;
-    void unlock(void* handle) noexcept override;
-    void* alloc(size_t size) noexcept override;
-    bool free(void* handle) noexcept override;
-
-private:
-    const cv::Mat img;
-};
 
 class SharedTensorAllocator : public ov::AllocatorImpl {
 public:

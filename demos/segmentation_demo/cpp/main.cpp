@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <random>
 
 #include <openvino/openvino.hpp>
 #include <gflags/gflags.h>
