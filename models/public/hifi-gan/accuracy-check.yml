@@ -1,0 +1,27 @@
+models:
+  - name: lj_ft_t2_v1
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        adapter:
+          type: multi_output_regression
+          outputs:
+          - audio
+        allow_reshape_input: True
+        inputs:
+          - name: 'mel'
+            type: INPUT
+            layout: NHWC
+    datasets:
+    - name: HiFi-GAN
+      data_source: hifi_gan_lj_ft_t2_v1_io
+      reader: numpy_dict_reader
+      annotation_conversion:
+        converter: multi_feature_regression
+        data_dir: hifi_gan_lj_ft_t2_v1_io
+        prefix: ''
+        input_suffix: mel_lj_ft_t2_v1_
+        reference_suffix: audio_lj_ft_t2_v1_
+      metrics:
+        - type: relative_l2_error
+          presenter: print_vector
