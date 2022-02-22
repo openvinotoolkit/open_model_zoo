@@ -968,19 +968,19 @@ PYTHON_DEMOS = [
     #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     #)),
 
-    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
-            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
-        single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0002'),
-            # TODO: Attempt to get a name for a Tensor without names
-            # ModelArg('instance-segmentation-security-0091'),
-            ModelArg('instance-segmentation-security-0228'),
-            ModelArg('instance-segmentation-security-1039'),
-            ModelArg('instance-segmentation-security-1040')),
-    )),
+    # TODO: enable tests when FP16-INT8 will work
+    # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('instance-segmentation'),
+    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
+    #     single_option_cases('-m',
+    #         ModelArg('instance-segmentation-security-0002'),
+    #         ModelArg('instance-segmentation-security-0091'),
+    #         ModelArg('instance-segmentation-security-0228'),
+    #         ModelArg('instance-segmentation-security-1039'),
+    #         ModelArg('instance-segmentation-security-1040')),
+    # )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
