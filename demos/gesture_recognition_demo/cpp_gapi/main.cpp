@@ -1,14 +1,17 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+
+#include <chrono>
+#include <fstream>
+#include <string>
+#include <vector>
+
+#include <opencv2/gapi/infer/ie.hpp>
 
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
-
-#include <opencv2/gapi/infer/ie.hpp>
-
-#include <fstream>
 
 #include "gesture_recognition_demo_gapi.hpp"
 #include "stream_source.hpp"
