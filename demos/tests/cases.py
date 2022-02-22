@@ -679,729 +679,679 @@ NATIVE_DEMOS = [
 ]
 
 PYTHON_DEMOS = [
-    # PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
-    #                       '-o': '.'}),
-    #     single_option_cases('-i', *DATA_SEQUENCES['brain-tumor-nifti']),
-    # )),
+    PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
+                          '-o': '.'}),
+        single_option_cases('-i', *DATA_SEQUENCES['brain-tumor-nifti']),
+    )),
 
-    # PythonDemo(name='action_recognition_demo', device_keys=['-d'],
-    #            model_keys=['-m_en', '-m_de'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
-    #     [
-    #         TestCase(options={'--architecture_type': 'i3d-rgb',
-    #                           '-m_en': ModelArg('i3d-rgb-tf')}
-    #         ),
-    #         #TODO
-    #         #*combine_cases(
-    #         #    TestCase(options={'--architecture_type': 'en-de'}),
-    #         #    [
-    #         #        TestCase(options={
-    #         #            '-m_en': ModelArg('action-recognition-0001-encoder'),
-    #         #            '-m_de': ModelArg('action-recognition-0001-decoder'),
-    #         #        }),
-    #         #        TestCase(options={
-    #         #            '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
-    #         #            '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
-    #         #        }),
-    #         #    ]
-    #         #),
-    #     ],
-    # )),
+    PythonDemo(name='action_recognition_demo', device_keys=['-d'],
+               model_keys=['-m_en', '-m_de'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
+        [
+            TestCase(options={'--architecture_type': 'i3d-rgb',
+                              '-m_en': ModelArg('i3d-rgb-tf')}
+            ),
+            #TODO
+            #*combine_cases(
+            #    TestCase(options={'--architecture_type': 'en-de'}),
+            #    [
+            #        TestCase(options={
+            #            '-m_en': ModelArg('action-recognition-0001-encoder'),
+            #            '-m_de': ModelArg('action-recognition-0001-decoder'),
+            #        }),
+            #        TestCase(options={
+            #            '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+            #            '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+            #        }),
+            #    ]
+            #),
+        ],
+    )),
 
-    # PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='background_subtraction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+            '--background': DataPatternArg('instance-segmentation'),
+        }),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-person-0007'),
+            ModelArg('robust-video-matting-mobilenetv3'),
+            ModelArg('background-matting-mobilenetv2'),
+            ModelArg('yolact-resnet50-fpn-pytorch')),
+    )),
+
+    PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+                          '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
+        [
+            TestCase(options={
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
+                '--output_names': 'output_s,output_e',
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
+                '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--output_names': 'output_s,output_e',
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0002', 'vocab.txt'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002'),
+                '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--output_names': 'output_s,output_e',
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-int8-0002', 'vocab.txt'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-0001'),
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
+                '--output_names': 'output_s,output_e',
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001'),
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
+                '--output_names': 'output_s,output_e',
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-int8-0001', 'vocab.txt')
+            }),
+        ]
+    )),
+
+    PythonDemo(name='bert_question_answering_embedding_demo', device_keys=['-d'],
+               model_keys=['-m_emb', '-m_qa'], test_cases=combine_cases(
+        TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+                          '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
+        [
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
+                '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+                '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
+                '--output_names_qa': 'output_s,output_e',
+            }),
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
+            }),
+            TestCase(options={
+                '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', 'vocab.txt'),
+            }),
+        ]
+    )),
+
+    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-nireq': '1', # launch demo in synchronous mode
+            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+            '-m': ModelArg('bert-base-ner'),
+            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
+        }),
+    )),
+
+    PythonDemo(name='classification_demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+        TestCase(options={
+            '--no_show': None,
+            '-i': DataDirectoryOrigFileNamesArg('classification'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
+        [
+            *single_option_cases('-m',
+                ModelArg('alexnet'),
+                ModelArg('densenet-121-tf'),
+                ModelArg('googlenet-v1'),
+                ModelArg('googlenet-v1-tf'),
+                ModelArg('googlenet-v3'),
+                ModelArg('googlenet-v3-pytorch'),
+                ModelArg('mixnet-l'),
+                ModelArg('mobilenet-v2-pytorch'),
+                ModelArg('repvgg-a0'),
+                ModelArg('repvgg-b1'),
+                ModelArg('repvgg-b3')),
+
+            TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
+                        '--reverse_input_channels': None,
+                        '--mean_values': ['123.675', '116.28', '103.53'],
+                        '--scale_values': ['58.395', '57.12', '57.375']}),
+        ]
+    )),
+
+    PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={
+           '--no_show': None,
+           **MONITORS,
+           '-i': DataPatternArg('classification'),
+           '-m': ModelArg('colorization-v2'),
+       })
+    )),
+
+    PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': DataPatternArg('face-detection-adas'),
+                          **MONITORS,
+                          '--no_show': None,
+                          '-m': ModelArg('deblurgan-v2')}),
+    )),
+
+    PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'],
+               model_keys=['-m_p', '-m_r', '-m_o'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00000002'),
+                          '-m_p': ModelArg('mtcnn-p'),
+                          '-m_r': ModelArg('mtcnn-r'),
+                          '-m_o': ModelArg('mtcnn-o')}),
+    )),
+
+    # TODO: hang at 00:51:34  Test case #12/CPU: -d_fd CPU -d_lm CPU -d_reid CPU --no_show -fg /tmp/tmp9ybvhfxg/data_seq/face-recognition-gallery -i /tmp/tmp9ybvhfxg/data_seq/face-detection-adas/input-%04d.JPEG -m_fd /tmp/tmptb9srg1i/models/intel/face-detection-adas-0001/FP16/face-detection-adas-0001.xml -m_lm /tmp/tmptb9srg1i/models/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml -m_reid /tmp/tmptb9srg1i/models/public/Sphereface/FP16/Sphereface.xml -u cdm
+    # 00:51:34
+    # PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
+    #            model_keys=['-m_fd', '-m_lm', '-m_reid'], test_cases=combine_cases(
     #     TestCase(options={'--no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('instance-segmentation'),
-    #         '--background': DataPatternArg('instance-segmentation'),
-    #     }),
-    #     single_option_cases('-m',
-    #         ModelArg('instance-segmentation-person-0007'),
-    #         ModelArg('robust-video-matting-mobilenetv3'),
-    #         ModelArg('background-matting-mobilenetv2'),
-    #         ModelArg('yolact-resnet50-fpn-pytorch')),
-    # )),
-
-    # PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-    #                       '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
-    #     [
-    #         TestCase(options={
-    #             '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
-    #             '--input_names': 'input_ids,attention_mask,token_type_ids',
-    #             '--output_names': 'output_s,output_e',
-    #             '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
-    #             '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
-    #             '--output_names': 'output_s,output_e',
-    #             '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-0002', 'vocab.txt'),
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-int8-0002'),
-    #             '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
-    #             '--output_names': 'output_s,output_e',
-    #             '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-int8-0002', 'vocab.txt'),
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-0001'),
-    #             '--input_names': 'input_ids,attention_mask,token_type_ids',
-    #             '--output_names': 'output_s,output_e',
-    #             '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-0001', 'vocab.txt'),
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001'),
-    #             '--input_names': 'input_ids,attention_mask,token_type_ids',
-    #             '--output_names': 'output_s,output_e',
-    #             '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-int8-0001', 'vocab.txt')
-    #         }),
-    #     ]
-    # )),
-
-    # PythonDemo(name='bert_question_answering_embedding_demo', device_keys=['-d'],
-    #            model_keys=['-m_emb', '-m_qa'], test_cases=combine_cases(
-    #     TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-    #                       '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
-    #     [
-    #         TestCase(options={
-    #             '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
-    #             '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-    #             '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
-    #             '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
-    #             '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
-    #             '--output_names_qa': 'output_s,output_e',
-    #         }),
-    #         TestCase(options={
-    #             '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
-    #             '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-    #             '--vocab': ModelFileArg('bert-large-uncased-whole-word-masking-squad-emb-0001', 'vocab.txt'),
-    #         }),
-    #         TestCase(options={
-    #             '-m_emb': ModelArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001'),
-    #             '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-    #             '--vocab': ModelFileArg('bert-small-uncased-whole-word-masking-squad-emb-int8-0001', 'vocab.txt'),
-    #         }),
-    #     ]
-    # )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-nireq': '1',
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-nireq': '1',
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-nireq': '1',
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={
-            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
-            '-m': ModelArg('bert-base-ner'),
-            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
-        }),
-    )),
-
-    # PythonDemo(name='classification_demo',
-    #         device_keys=['-d'],
-    #         test_cases=combine_cases(
-    #     TestCase(options={
-    #         '--no_show': None,
-    #         '-i': DataDirectoryOrigFileNamesArg('classification'),
-    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
-    #     [
-    #         *single_option_cases('-m',
-    #             ModelArg('alexnet'),
-    #             ModelArg('densenet-121-tf'),
-    #             ModelArg('googlenet-v1'),
-    #             ModelArg('googlenet-v1-tf'),
-    #             ModelArg('googlenet-v3'),
-    #             ModelArg('googlenet-v3-pytorch'),
-    #             ModelArg('mixnet-l'),
-    #             ModelArg('mobilenet-v2-pytorch'),
-    #             ModelArg('repvgg-a0'),
-    #             ModelArg('repvgg-b1'),
-    #             ModelArg('repvgg-b3')),
-
-    #         TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
-    #                     '--reverse_input_channels': None,
-    #                     '--mean_values': ['123.675', '116.28', '103.53'],
-    #                     '--scale_values': ['58.395', '57.12', '57.375']}),
-    #     ]
-    # )),
-
-    # PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={
-    #        '--no_show': None,
-    #        **MONITORS,
-    #        '-i': DataPatternArg('classification'),
-    #        '-m': ModelArg('colorization-v2'),
-    #    })
-    # )),
-
-    # PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': DataPatternArg('face-detection-adas'),
     #                       **MONITORS,
-    #                       '--no_show': None,
-    #                       '-m': ModelArg('deblurgan-v2')}),
+    #                       '-i': DataPatternArg('face-detection-adas'),
+    #                       '-fg': DataDirectoryArg('face-recognition-gallery')
+    #                       }),
+    #     single_option_cases('-m_fd',
+    #         ModelArg('face-detection-adas-0001'),
+    #         ModelArg('face-detection-retail-0004'),
+    #         ModelArg('face-detection-retail-0005'),
+    #         ModelArg('face-detection-retail-0044')),
+    #     single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
+    #     single_option_cases('-m_reid',
+    #         ModelArg('Sphereface'),
+    #         ModelArg('face-reidentification-retail-0095'),
+    #         # ModelArg('face-recognition-resnet100-arcface-onnx'), TODO
+    #         ModelArg('facenet-20180408-102900')),
     # )),
 
-    # PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'],
-    #            model_keys=['-m_p', '-m_r', '-m_o'], test_cases=combine_cases(
+    PythonDemo(name='formula_recognition_demo', device_keys=['-d'],
+               model_keys=['-m_encoder', '-m_decoder'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None}),
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
+                                    'assets/formula-recognition-medium-scan-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
+                '--vocab': ModelFileArg('formula-recognition-medium-scan-0001-im2latex-decoder', 'vocab.json'),
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
+                                    'assets/formula-recognition-polynomials-handwritten-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-polynomials-handwritten-0001-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-polynomials-handwritten-0001-decoder'),
+                '--vocab': ModelFileArg('formula-recognition-polynomials-handwritten-0001-decoder', 'vocab.json'),
+            })
+        ],
+    )),
+
+    # TODO: Attempt to get a name for a Tensor without names
+    # PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
+    #            model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
     #     TestCase(options={'--no_show': None,
-    #                       '-i': image_net_arg('00000002'),
-    #                       '-m_p': ModelArg('mtcnn-p'),
-    #                       '-m_r': ModelArg('mtcnn-r'),
-    #                       '-m_o': ModelArg('mtcnn-o')}),
-    # )),
-
-    # # TODO: hang at 00:51:34  Test case #12/CPU: -d_fd CPU -d_lm CPU -d_reid CPU --no_show -fg /tmp/tmp9ybvhfxg/data_seq/face-recognition-gallery -i /tmp/tmp9ybvhfxg/data_seq/face-detection-adas/input-%04d.JPEG -m_fd /tmp/tmptb9srg1i/models/intel/face-detection-adas-0001/FP16/face-detection-adas-0001.xml -m_lm /tmp/tmptb9srg1i/models/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml -m_reid /tmp/tmptb9srg1i/models/public/Sphereface/FP16/Sphereface.xml -u cdm
-    # # 00:51:34
-    # # PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
-    # #            model_keys=['-m_fd', '-m_lm', '-m_reid'], test_cases=combine_cases(
-    # #     TestCase(options={'--no_show': None,
-    # #                       **MONITORS,
-    # #                       '-i': DataPatternArg('face-detection-adas'),
-    # #                       '-fg': DataDirectoryArg('face-recognition-gallery')
-    # #                       }),
-    # #     single_option_cases('-m_fd',
-    # #         ModelArg('face-detection-adas-0001'),
-    # #         ModelArg('face-detection-retail-0004'),
-    # #         ModelArg('face-detection-retail-0005'),
-    # #         ModelArg('face-detection-retail-0044')),
-    # #     single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
-    # #     single_option_cases('-m_reid',
-    # #         ModelArg('Sphereface'),
-    # #         ModelArg('face-reidentification-retail-0095'),
-    # #         # ModelArg('face-recognition-resnet100-arcface-onnx'), TODO
-    # #         ModelArg('facenet-20180408-102900')),
-    # # )),
-
-    # PythonDemo(name='formula_recognition_demo', device_keys=['-d'],
-    #            model_keys=['-m_encoder', '-m_decoder'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None}),
+    #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
     #     [
-    #         TestCase(options={
-    #             '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
-    #                                 'assets/formula-recognition-medium-scan-0001.png'),
-    #             '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
-    #             '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
-    #             '--vocab': ModelFileArg('formula-recognition-medium-scan-0001-im2latex-decoder', 'vocab.json'),
-    #         }),
-    #         TestCase(options={
-    #             '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
-    #                                 'assets/formula-recognition-polynomials-handwritten-0001.png'),
-    #             '-m_encoder': ModelArg('formula-recognition-polynomials-handwritten-0001-encoder'),
-    #             '-m_decoder': ModelArg('formula-recognition-polynomials-handwritten-0001-decoder'),
-    #             '--vocab': ModelFileArg('formula-recognition-polynomials-handwritten-0001-decoder', 'vocab.json'),
-    #         })
+    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
     #     ],
     # )),
 
-    # # TODO: Attempt to get a name for a Tensor without names
-    # # PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
-    # #            model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
-    # #     TestCase(options={'--no_show': None,
-    # #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-    # #                       '-m_d': ModelArg('person-detection-asl-0001')}),
-    # #     [
-    # #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-    # #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-    # #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-    # #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-    # #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-    # #     ],
-    # # )),
+    PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': ['The poem was written by'],
+            '-m': ModelArg('gpt-2'),
+            '-v': ModelFileArg('gpt-2', 'gpt2/vocab.json'),
+            '--merges': ModelFileArg('gpt-2', 'gpt2/merges.txt'),
+        }),
+    )),
 
-    # PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={
-    #         '-i': ['The poem was written by'],
-    #         '-m': ModelArg('gpt-2'),
-    #         '-v': ModelFileArg('gpt-2', 'gpt2/vocab.json'),
-    #         '--merges': ModelFileArg('gpt-2', 'gpt2/merges.txt'),
-    #     }),
-    # )),
+    PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-japanese-recognition-0001/assets/handwritten-japanese-recognition-0001.png'),
+                '-m': ModelArg('handwritten-japanese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/kondate_nakayosi.txt')
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-simplified-chinese-recognition-0001/assets/handwritten-simplified-chinese-recognition-0001.png'),
+                '-m': ModelArg('handwritten-simplified-chinese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/scut_ept.txt')
+            }),
+        ],
+    )),
 
-    # PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     [
-    #         TestCase(options={
-    #             '-i': str(OMZ_DIR / 'models/intel/handwritten-japanese-recognition-0001/assets/handwritten-japanese-recognition-0001.png'),
-    #             '-m': ModelArg('handwritten-japanese-recognition-0001'),
-    #             '-cl': str(OMZ_DIR / 'data/dataset_classes/kondate_nakayosi.txt')
-    #         }),
-    #         TestCase(options={
-    #             '-i': str(OMZ_DIR / 'models/intel/handwritten-simplified-chinese-recognition-0001/assets/handwritten-simplified-chinese-recognition-0001.png'),
-    #             '-m': ModelArg('handwritten-simplified-chinese-recognition-0001'),
-    #             '-cl': str(OMZ_DIR / 'data/dataset_classes/scut_ept.txt')
-    #         }),
-    #     ],
-    # )),
+    #TODO
+    #PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-i': DataPatternArg('human-pose-estimation')}),
+    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    #)),
 
-    # #TODO
-    # #PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-    # #    TestCase(options={'--no_show': None,
-    # #                      **MONITORS,
-    # #                      '-i': DataPatternArg('human-pose-estimation')}),
-    # #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # #)),
+    PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('human-pose-estimation')}),
+        [
+            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+            *combine_cases(
+                TestCase(options={'-at': 'ae'}),
+                single_option_cases('-m',
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007'))),
+        ],
+    )),
 
-    # PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('human-pose-estimation')}),
-    #     [
-    #         TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-    #         TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
-    #         *combine_cases(
-    #             TestCase(options={'-at': 'ae'}),
-    #             single_option_cases('-m',
-    #                 ModelArg('human-pose-estimation-0005'),
-    #                 ModelArg('human-pose-estimation-0006'),
-    #                 ModelArg('human-pose-estimation-0007'))),
-    #     ],
-    # )),
+    PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00048311'),
+                          '-m': ModelArg('gmcnn-places2-tf'),
+                          '-ar': None})
+    )),
 
-    # PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #                       '-i': image_net_arg('00048311'),
-    #                       '-m': ModelArg('gmcnn-places2-tf'),
-    #                       '-ar': None})
-    # )),
+    # TODO: Put image_retrieval_arg import back
+    #PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-m': ModelArg('image-retrieval-0001')}),
+    #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
+    #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
+    #)),
 
-    # # TODO: Put image_retrieval_arg import back
-    # #PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-    # #    TestCase(options={'--no_show': None,
-    # #                      **MONITORS,
-    # #                      '-m': ModelArg('image-retrieval-0001')}),
-    # #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-    # #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    # #)),
+    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-security-0002'),
+            # TODO: Attempt to get a name for a Tensor without names
+            # ModelArg('instance-segmentation-security-0091'),
+            ModelArg('instance-segmentation-security-0228'),
+            ModelArg('instance-segmentation-security-1039'),
+            ModelArg('instance-segmentation-security-1040')),
+    )),
 
-    # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('instance-segmentation'),
-    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
-    #     single_option_cases('-m',
-    #         ModelArg('instance-segmentation-security-0002'),
-    #         # TODO: Attempt to get a name for a Tensor without names
-    #         # ModelArg('instance-segmentation-security-0091'),
-    #         ModelArg('instance-segmentation-security-0228'),
-    #         ModelArg('instance-segmentation-security-1039'),
-    #         ModelArg('instance-segmentation-security-1040')),
-    # )),
+    PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
+        [
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-en-ru-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
+                '-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.',
+                    'Jackdaws love my big sphinx of quartz.'
+                ],
+            }),
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-ru-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
+                '-i': [
+                    'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
+                    'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
+                    'Съешь же ещё этих мягких французских булок да выпей чаю.'
+                ],
+            }),
+        ]
+    )),
 
-    # PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
-    #     [
-    #         TestCase(options={
-    #             '-m': ModelArg('machine-translation-nar-en-ru-0002'),
-    #             '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
-    #             '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_tgt'),
-    #             '-i': [
-    #                 'The quick brown fox jumps over the lazy dog.',
-    #                 'The five boxing wizards jump quickly.',
-    #                 'Jackdaws love my big sphinx of quartz.'
-    #             ],
-    #         }),
-    #         TestCase(options={
-    #             '-m': ModelArg('machine-translation-nar-ru-en-0002'),
-    #             '--tokenizer-src': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_src'),
-    #             '--tokenizer-tgt': ModelFileArg('machine-translation-nar-ru-en-0002', 'tokenizer_tgt'),
-    #             '-i': [
-    #                 'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
-    #                 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
-    #                 'Съешь же ещё этих мягких французских булок да выпей чаю.'
-    #             ],
-    #         }),
-    #     ]
-    # )),
+    PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS,
+                          '-i': DataPatternArg('object-detection-demo'),
+                          '-m': ModelArg('midasnet')})
+    )),
 
-    # PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, **MONITORS,
-    #                       '-i': DataPatternArg('object-detection-demo'),
-    #                       '-m': ModelArg('midasnet')})
-    # )),
+    PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
+               model_keys=['-m', '--m_reid'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
+                DataPatternArg('multi-camera-multi-target-tracking/repeated')],
+            '-m': ModelArg('person-detection-retail-0013')}),
+        single_option_cases('--m_reid',
+            ModelArg('person-reidentification-retail-0277'),
+            ModelArg('person-reidentification-retail-0286'),
+            # TODO
+            # ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0288')
+        ),
+    )),
 
-    # PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
-    #            model_keys=['-m', '--m_reid'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #         **MONITORS,
-    #         '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
-    #             DataPatternArg('multi-camera-multi-target-tracking/repeated')],
-    #         '-m': ModelArg('person-detection-retail-0013')}),
-    #     single_option_cases('--m_reid',
-    #         ModelArg('person-reidentification-retail-0277'),
-    #         ModelArg('person-reidentification-retail-0286'),
-    #         # TODO
-    #         # ModelArg('person-reidentification-retail-0287'),
-    #         # ModelArg('person-reidentification-retail-0288')
-    #     ),
-    # )),
+    PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('noise-suppression-denseunet-ll-0001'),
+            ModelArg('noise-suppression-poconetlike-0001'))
+    )),
 
-    # PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
+        [
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'centernet'}),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ctdet_coco_dlav0_512'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['104.04', '113.985', '119.85'],
+                            '--scale_values': ['73.695', '69.87', '70.89']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
+                        ),
+                    ),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'faceboxes'}),
+                [
+                    TestCase(options={'-m': ModelArg('faceboxes-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('faceboxes-pytorch', 'faceboxes-pytorch.onnx'),
+                                      '--mean_values': ['104.0', '117.0', '123.0']}),
+                ]
+            ),
+            TestCase(options={'--architecture_type': 'ctpn',
+                              '-m': ModelArg('ctpn')}
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'retinaface-pytorch'}),
+                [
+                    TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
+                                      '--mean_values': ['104.0', '117.0', '123.0']}),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'ssd'}),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('efficientdet-d0-tf'),
+                        ModelArg('efficientdet-d1-tf'),
+                        ModelArg('face-detection-0200'),
+                        ModelArg('face-detection-0202'),
+                        ModelArg('face-detection-0204'),
+                        # ModelArg('face-detection-0205'),  # TODO
+                        # ModelArg('face-detection-0206'),  # TODO
+                        ModelArg('face-detection-adas-0001'),
+                        ModelArg('face-detection-retail-0004'),
+                        ModelArg('face-detection-retail-0005'),
+                        ModelArg('face-detection-retail-0044'),
+                        ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
+                        ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
+                        ModelArg('pedestrian-detection-adas-0002'),
+                        ModelArg('person-detection-0200'),
+                        ModelArg('person-detection-0201'),
+                        ModelArg('person-detection-0202'),
+                        ModelArg('person-detection-retail-0013'),
+                        ModelArg('person-vehicle-bike-detection-2000'),
+                        ModelArg('person-vehicle-bike-detection-2001'),
+                        ModelArg('person-vehicle-bike-detection-2002'),
+                        # ModelArg('person-vehicle-bike-detection-2003'), # TODO
+                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
+                        ModelArg('pelee-coco'),
+                        ModelArg('product-detection-0001'),
+                        ModelArg('rfcn-resnet101-coco-tf'),
+                        ModelArg('retinanet-tf'),
+                        ModelArg('ssd300'),
+                        ModelArg('ssd512'),
+                        ModelArg('ssd_mobilenet_v1_coco'),
+                        ModelArg('ssd_mobilenet_v1_fpn_coco'),
+                        ModelArg('ssd-resnet34-1200-onnx'),
+                        ModelArg('ssdlite_mobilenet_v2'),
+                        ModelArg('vehicle-detection-0200'),
+                        ModelArg('vehicle-detection-0201'),
+                        ModelArg('vehicle-detection-0201'),
+                        ModelArg('vehicle-detection-adas-0002'),
+                        ModelArg('vehicle-license-plate-detection-barrier-0106')),
+                        # ModelArg('person-detection-0106')),  # TODO
+                    TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                        ModelArg('ultra-lightweight-face-detection-slim-320'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['127.0', '127.0', '127.0'],
+                            '--scale_values': ['128.0', '128.0', '128.0']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ultra-lightweight-face-detection-rfb-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
+                            ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-slim-320.onnx'),
+                        ),
+                    ),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'yolo'}),
+                single_option_cases('-m',
+                    ModelArg('mobilefacedet-v1-mxnet'),
+                    ModelArg('mobilenet-yolo-v4-syg'),
+                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    ModelArg('yolo-v1-tiny-tf'),
+                    ModelArg('yolo-v2-ava-0001'),
+                    ModelArg('yolo-v2-ava-sparse-35-0001'),
+                    ModelArg('yolo-v2-ava-sparse-70-0001'),
+                    ModelArg('yolo-v2-tf'),
+                    ModelArg('yolo-v2-tiny-ava-0001'),
+                    ModelArg('yolo-v2-tiny-ava-sparse-30-0001'),
+                    ModelArg('yolo-v2-tiny-ava-sparse-60-0001'),
+                    ModelArg('yolo-v2-tiny-tf'),
+                    ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
+                    ModelArg('yolo-v3-tf'),
+                    ModelArg('yolo-v3-tiny-tf')),
+            ),
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
+            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
+            TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
+            TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
+            TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'detr'}),
+                [
+                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                                     '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'yolox'}),
+                [
+                    TestCase(options={'-m': ModelArg('yolox-tiny')}),
+                    TestCase(options={'-m': ModelFileArg('yolox-tiny', 'yolox-tiny.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                ]
+            ),
+        ],
+    )),
+
+    PythonDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS}),
+        [
+            TestCase(options={
+                '-m': ModelArg('road-segmentation-adas-0001'),
+                '-i': DataPatternArg('road-segmentation-adas'),
+                '-at': 'segmentation',
+            }),
+            *combine_cases(
+                TestCase(options={
+                    '-i': DataPatternArg('semantic-segmentation-adas'),
+                    '-at': 'segmentation',
+                }),
+                single_option_cases('-m',
+                    ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('fastseg-large'),
+                    ModelArg('fastseg-small'),
+                    ModelArg('hrnet-v2-c1-segmentation'),
+                    ModelArg('icnet-camvid-ava-0001'),
+                    ModelArg('icnet-camvid-ava-sparse-30-0001'),
+                    ModelArg('icnet-camvid-ava-sparse-60-0001'),
+                    ModelArg('unet-camvid-onnx-0001'),
+                    ModelArg('deeplabv3'),
+                    ModelArg('ocrnet-hrnet-w48-paddle'),
+                    ModelArg('pspnet-pytorch'),
+                    ModelArg('drn-d-38'))),
+            TestCase(options={
+                '-m': ModelArg('f3net'),
+                '-i': DataPatternArg('road-segmentation-adas'),
+                '-at': 'salient_object_detection',
+            }),
+        ],
+    )),
+
+    #TODO
+    #PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
+    #           model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None, **MONITORS,
+    #                       '-i': DataPatternArg('human-pose-estimation'),
+    #                       '--person_label': '1'}),
+    #    [
+    #        *combine_cases(
+    #            TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
+    #            single_option_cases('-m_od',
+    #                ModelArg('mobilenet-ssd'),
+    #                ModelArg('person-detection-retail-0013'),
+    #                ModelArg('ssd_mobilenet_v1_coco'))),
+    #    ]
+    #)),
+
+    PythonDemo(name='smartlab_demo', device_keys=['-d'],
+        model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
+        test_cases=combine_cases(
+        [
+            TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
+                '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
+                '-m_ta': ModelArg('smartlab-object-detection-0001'),
+                '-m_tm': ModelArg('smartlab-object-detection-0002'),
+                '-m_fa': ModelArg('smartlab-object-detection-0003'),
+                '-m_fm': ModelArg('smartlab-object-detection-0004'),
+                '-m_en': ModelArg('i3d-rgb-tf'),
+                '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
+        ],
+    )),
+
+    PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('aclnet')}),
+    )),
+
+    # TODO: No module named 'ctcdecode_numpy'
+    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
     #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     single_option_cases('-m',
-    #         ModelArg('noise-suppression-denseunet-ll-0001'),
-    #         ModelArg('noise-suppression-poconetlike-0001'))
-    # )),
-
-    # PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
     #     [
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'centernet'}),
-    #             [
-    #                 *single_option_cases('-m',
-    #                     ModelArg('ctdet_coco_dlav0_512'),
-    #                 ),
-    #                 *combine_cases(
-    #                     TestCase(options={
-    #                         '--mean_values': ['104.04', '113.985', '119.85'],
-    #                         '--scale_values': ['73.695', '69.87', '70.89']
-    #                     }),
-    #                     single_option_cases('-m',
-    #                         ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
-    #                     ),
-    #                 ),
-    #             ]
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'faceboxes'}),
-    #             [
-    #                 TestCase(options={'-m': ModelArg('faceboxes-pytorch')}),
-    #                 TestCase(options={'-m': ModelFileArg('faceboxes-pytorch', 'faceboxes-pytorch.onnx'),
-    #                                   '--mean_values': ['104.0', '117.0', '123.0']}),
-    #             ]
-    #         ),
-    #         TestCase(options={'--architecture_type': 'ctpn',
-    #                           '-m': ModelArg('ctpn')}
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'retinaface-pytorch'}),
-    #             [
-    #                 TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
-    #                 TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
-    #                                   '--mean_values': ['104.0', '117.0', '123.0']}),
-    #             ]
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'ssd'}),
-    #             [
-    #                 *single_option_cases('-m',
-    #                     ModelArg('efficientdet-d0-tf'),
-    #                     ModelArg('efficientdet-d1-tf'),
-    #                     ModelArg('face-detection-0200'),
-    #                     ModelArg('face-detection-0202'),
-    #                     ModelArg('face-detection-0204'),
-    #                     # ModelArg('face-detection-0205'),  # TODO
-    #                     # ModelArg('face-detection-0206'),  # TODO
-    #                     ModelArg('face-detection-adas-0001'),
-    #                     ModelArg('face-detection-retail-0004'),
-    #                     ModelArg('face-detection-retail-0005'),
-    #                     ModelArg('face-detection-retail-0044'),
-    #                     ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
-    #                     ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
-    #                     ModelArg('pedestrian-detection-adas-0002'),
-    #                     ModelArg('person-detection-0200'),
-    #                     ModelArg('person-detection-0201'),
-    #                     ModelArg('person-detection-0202'),
-    #                     ModelArg('person-detection-retail-0013'),
-    #                     ModelArg('person-vehicle-bike-detection-2000'),
-    #                     ModelArg('person-vehicle-bike-detection-2001'),
-    #                     ModelArg('person-vehicle-bike-detection-2002'),
-    #                     # ModelArg('person-vehicle-bike-detection-2003'), # TODO
-    #                     # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
-    #                     ModelArg('pelee-coco'),
-    #                     ModelArg('product-detection-0001'),
-    #                     ModelArg('rfcn-resnet101-coco-tf'),
-    #                     ModelArg('retinanet-tf'),
-    #                     ModelArg('ssd300'),
-    #                     ModelArg('ssd512'),
-    #                     ModelArg('ssd_mobilenet_v1_coco'),
-    #                     ModelArg('ssd_mobilenet_v1_fpn_coco'),
-    #                     ModelArg('ssd-resnet34-1200-onnx'),
-    #                     ModelArg('ssdlite_mobilenet_v2'),
-    #                     ModelArg('vehicle-detection-0200'),
-    #                     ModelArg('vehicle-detection-0201'),
-    #                     ModelArg('vehicle-detection-0201'),
-    #                     ModelArg('vehicle-detection-adas-0002'),
-    #                     ModelArg('vehicle-license-plate-detection-barrier-0106')),
-    #                     # ModelArg('person-detection-0106')),  # TODO
-    #                 TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
-    #                                   '--reverse_input_channels': None,
-    #                                   '--mean_values': ['123.675', '116.28', '103.53'],
-    #                                   '--scale_values': ['58.395', '57.12', '57.375']}),
-    #             ]
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
-    #             [
-    #                 *single_option_cases('-m',
-    #                     ModelArg('ultra-lightweight-face-detection-rfb-320'),
-    #                     ModelArg('ultra-lightweight-face-detection-slim-320'),
-    #                 ),
-    #                 *combine_cases(
-    #                     TestCase(options={
-    #                         '--mean_values': ['127.0', '127.0', '127.0'],
-    #                         '--scale_values': ['128.0', '128.0', '128.0']
-    #                     }),
-    #                     single_option_cases('-m',
-    #                         ModelFileArg('ultra-lightweight-face-detection-rfb-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
-    #                         ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-slim-320.onnx'),
-    #                     ),
-    #                 ),
-    #             ]
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'yolo'}),
-    #             single_option_cases('-m',
-    #                 ModelArg('mobilefacedet-v1-mxnet'),
-    #                 ModelArg('mobilenet-yolo-v4-syg'),
-    #                 ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
-    #                 ModelArg('yolo-v1-tiny-tf'),
-    #                 ModelArg('yolo-v2-ava-0001'),
-    #                 ModelArg('yolo-v2-ava-sparse-35-0001'),
-    #                 ModelArg('yolo-v2-ava-sparse-70-0001'),
-    #                 ModelArg('yolo-v2-tf'),
-    #                 ModelArg('yolo-v2-tiny-ava-0001'),
-    #                 ModelArg('yolo-v2-tiny-ava-sparse-30-0001'),
-    #                 ModelArg('yolo-v2-tiny-ava-sparse-60-0001'),
-    #                 ModelArg('yolo-v2-tiny-tf'),
-    #                 ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
-    #                 ModelArg('yolo-v3-tf'),
-    #                 ModelArg('yolo-v3-tiny-tf')),
-    #         ),
-    #         # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
-    #         # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
-    #         TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
-    #         TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
-    #         TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'detr'}),
-    #             [
-    #                 TestCase(options={'-m': ModelArg('detr-resnet50')}),
-    #                 TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
-    #                                  '--reverse_input_channels': None,
-    #                                   '--mean_values': ['123.675', '116.28', '103.53'],
-    #                                   '--scale_values': ['58.395', '57.12', '57.375']}),
-    #             ]
-    #         ),
-    #         *combine_cases(
-    #             TestCase(options={'--architecture_type': 'yolox'}),
-    #             [
-    #                 TestCase(options={'-m': ModelArg('yolox-tiny')}),
-    #                 TestCase(options={'-m': ModelFileArg('yolox-tiny', 'yolox-tiny.onnx'),
-    #                                   '--reverse_input_channels': None,
-    #                                   '--mean_values': ['123.675', '116.28', '103.53'],
-    #                                   '--scale_values': ['58.395', '57.12', '57.375']}),
-    #             ]
-    #         ),
+    #         TestCase(options={'-p': 'mds08x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+    #         TestCase(options={'-p': 'mds06x_en',
+    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+    #                           # lm.binary is really in dl_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+    #                           # run_tests.py puts pre-converted files into dl_dir as
+    #                           # it always runs converter.py without --output_dir
+    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+    #                           '--realtime': None}),
+    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
+    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
     #     ],
     # )),
 
-    # PythonDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, **MONITORS}),
-    #     [
-    #         TestCase(options={
-    #             '-m': ModelArg('road-segmentation-adas-0001'),
-    #             '-i': DataPatternArg('road-segmentation-adas'),
-    #             '-at': 'segmentation',
-    #         }),
-    #         *combine_cases(
-    #             TestCase(options={
-    #                 '-i': DataPatternArg('semantic-segmentation-adas'),
-    #                 '-at': 'segmentation',
-    #             }),
-    #             single_option_cases('-m',
-    #                 ModelArg('semantic-segmentation-adas-0001'),
-    #                 ModelArg('fastseg-large'),
-    #                 ModelArg('fastseg-small'),
-    #                 ModelArg('hrnet-v2-c1-segmentation'),
-    #                 ModelArg('icnet-camvid-ava-0001'),
-    #                 ModelArg('icnet-camvid-ava-sparse-30-0001'),
-    #                 ModelArg('icnet-camvid-ava-sparse-60-0001'),
-    #                 ModelArg('unet-camvid-onnx-0001'),
-    #                 ModelArg('deeplabv3'),
-    #                 ModelArg('ocrnet-hrnet-w48-paddle'),
-    #                 ModelArg('pspnet-pytorch'),
-    #                 ModelArg('drn-d-38'))),
-    #         TestCase(options={
-    #             '-m': ModelArg('f3net'),
-    #             '-i': DataPatternArg('road-segmentation-adas'),
-    #             '-at': 'salient_object_detection',
-    #         }),
-    #     ],
-    # )),
+    PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('quartznet-15x5-en'),
+            ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
+    )),
 
-    # #TODO
-    # #PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
-    # #           model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
-    # #    TestCase(options={'--no_show': None, **MONITORS,
-    # #                       '-i': DataPatternArg('human-pose-estimation'),
-    # #                       '--person_label': '1'}),
-    # #    [
-    # #        *combine_cases(
-    # #            TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
-    # #            single_option_cases('-m_od',
-    # #                ModelArg('mobilenet-ssd'),
-    # #                ModelArg('person-detection-retail-0013'),
-    # #                ModelArg('ssd_mobilenet_v1_coco'))),
-    # #    ]
-    # #)),
+    PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m', ModelArg('wav2vec2-base'))
+    )),
 
-    # PythonDemo(name='smartlab_demo', device_keys=['-d'],
-    #     model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
-    #     test_cases=combine_cases(
-    #     [
-    #         TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
-    #             '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
-    #             '-m_ta': ModelArg('smartlab-object-detection-0001'),
-    #             '-m_tm': ModelArg('smartlab-object-detection-0002'),
-    #             '-m_fa': ModelArg('smartlab-object-detection-0003'),
-    #             '-m_fm': ModelArg('smartlab-object-detection-0004'),
-    #             '-m_en': ModelArg('i3d-rgb-tf'),
-    #             '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
-    #     ],
-    # )),
+    PythonDemo(name='text_spotting_demo', device_keys=['-d'],
+               model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0005-detector'),
+                '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 
-    # PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-    #                       '-m': ModelArg('aclnet')}),
-    # )),
+    PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
+               model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
+        TestCase(options={'-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.'
+                ]}),
+        [
+            TestCase(options={
+                '-m_duration': ModelArg('forward-tacotron-duration-prediction'),
+                '-m_forward': ModelArg('forward-tacotron-regression'),
+                '-m_upsample': ModelArg('wavernn-upsampler'),
+                '-m_rnn': ModelArg('wavernn-rnn')
+            }),
+            TestCase(options={
+                '-m_duration': ModelArg('text-to-speech-en-0001-duration-prediction'),
+                '-m_forward': ModelArg('text-to-speech-en-0001-regression'),
+                '-m_melgan': ModelArg('text-to-speech-en-0001-generation')
+            }),
+            TestCase(options={
+                '-m_duration': ModelArg('text-to-speech-en-multi-0001-duration-prediction'),
+                '-m_forward': ModelArg('text-to-speech-en-multi-0001-regression'),
+                '-m_melgan': ModelArg('text-to-speech-en-multi-0001-generation')
+            }),
+        ]
+    )),
 
-    # # TODO: No module named 'ctcdecode_numpy'
-    # # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-    # #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    # #     [
-    # #         TestCase(options={'-p': 'mds08x_en',
-    # #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    # #                           # run_tests.py puts pre-converted files into dl_dir as
-    # #                           # it always runs converter.py without --output_dir
-    # #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-    # #         TestCase(options={'-p': 'mds06x_en',
-    # #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-    # #                           # lm.binary is really in dl_dir
-    # #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-    # #         TestCase(options={'-p': 'mds08x_en',  # test online mode
-    # #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    # #                           # run_tests.py puts pre-converted files into dl_dir as
-    # #                           # it always runs converter.py without --output_dir
-    # #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-    # #                           '--realtime': None}),
-    # #         TestCase(options={'-p': 'mds08x_en',  # test without LM
-    # #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-    # #     ],
-    # # )),
-
-    # PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     single_option_cases('-m',
-    #         ModelArg('quartznet-15x5-en'),
-    #         ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
-    # )),
-
-    # PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     single_option_cases('-m', ModelArg('wav2vec2-base'))
-    # )),
-
-    # PythonDemo(name='text_spotting_demo', device_keys=['-d'],
-    #            model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
-    #                       '-i': DataPatternArg('text-detection')}),
-    #     [
-    #         TestCase(options={
-    #             '-m_m': ModelArg('text-spotting-0005-detector'),
-    #             '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
-    #             '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
-    #             '--no_track': None
-    #         }),
-    #     ]
-    # )),
-
-    # PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
-    #            model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
-    #     TestCase(options={'-i': [
-    #                 'The quick brown fox jumps over the lazy dog.',
-    #                 'The five boxing wizards jump quickly.'
-    #             ]}),
-    #     [
-    #         TestCase(options={
-    #             '-m_duration': ModelArg('forward-tacotron-duration-prediction'),
-    #             '-m_forward': ModelArg('forward-tacotron-regression'),
-    #             '-m_upsample': ModelArg('wavernn-upsampler'),
-    #             '-m_rnn': ModelArg('wavernn-rnn')
-    #         }),
-    #         TestCase(options={
-    #             '-m_duration': ModelArg('text-to-speech-en-0001-duration-prediction'),
-    #             '-m_forward': ModelArg('text-to-speech-en-0001-regression'),
-    #             '-m_melgan': ModelArg('text-to-speech-en-0001-generation')
-    #         }),
-    #         TestCase(options={
-    #             '-m_duration': ModelArg('text-to-speech-en-multi-0001-duration-prediction'),
-    #             '-m_forward': ModelArg('text-to-speech-en-multi-0001-regression'),
-    #             '-m_melgan': ModelArg('text-to-speech-en-multi-0001-generation')
-    #         }),
-    #     ]
-    # )),
-
-    # PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
-    #            model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-    #                       **MONITORS,
-    #                       '--no_show': None}),
-    #     [
-    #         *single_option_cases('-m_i',
-    #             ModelArg('instance-segmentation-security-0002'),
-    #             # ModelArg('instance-segmentation-security-0091'), # Slow model
-    #             ModelArg('instance-segmentation-security-0228'),
-    #             ModelArg('instance-segmentation-security-1039'),
-    #             ModelArg('instance-segmentation-security-1040')),
-    #         TestCase(options={'-m_s': ModelArg('semantic-segmentation-adas-0001')}),
-    #     ]
-    # )),
+    PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
+               model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          **MONITORS,
+                          '--no_show': None}),
+        [
+            *single_option_cases('-m_i',
+                ModelArg('instance-segmentation-security-0002'),
+                # ModelArg('instance-segmentation-security-0091'), # Slow model
+                ModelArg('instance-segmentation-security-0228'),
+                ModelArg('instance-segmentation-security-1039'),
+                ModelArg('instance-segmentation-security-1040')),
+            TestCase(options={'-m_s': ModelArg('semantic-segmentation-adas-0001')}),
+        ]
+    )),
 ]
 
-DEMOS = PYTHON_DEMOS # NATIVE_DEMOS + PYTHON_DEMOS
+DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
