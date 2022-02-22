@@ -67,6 +67,10 @@ def build_argparser():
                                    help='Optional. Show detection scores.')
     common_model_args.add_argument('--show_boxes', action='store_true',
                                    help='Optional. Show bounding boxes.')
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', default=0, type=int,
@@ -124,7 +128,8 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests,
+                                        model_parameters={'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
@@ -210,11 +215,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         (scores, classes, boxes, masks), frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
