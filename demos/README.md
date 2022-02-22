@@ -131,6 +131,7 @@ The Open Model Zoo includes the following demos:
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
 - [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-PI version.
+- [Smartlab Python\* Demo](./smartlab_demo/python/README.md) - action recognition and object detection for smartlab.
 - [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
