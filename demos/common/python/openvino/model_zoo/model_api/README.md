@@ -53,8 +53,9 @@ python -c "from openvino.model_zoo import model_api"
 
 ## Model API Wrappers
 
-The Python* Model API package suggests ready-to-use model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and might be reused in applications as "black-box" models.
-Also, the simple wrapper interface allows the creation of custom wrappers covering different architectures.
+The Python* Model API package suggests ready-to-use model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
+
+The wrapper interface is simple and flexible, which gives capabilities for the creation of custom wrappers covering different architectures and use cases.
 
 The following tasks can be solved with wrappers usage:
 
@@ -91,7 +92,7 @@ Refer to __[`OVMSAdapter`](adapters/ovms_adapter.md)__ to learn about running de
 
 For OpenVINO Model Server Adapter employment, you need to install the requirements:
 ```sh
-pip install <omz_dir>/demos/common/python/requirements_ovms.txt
+pip install -r <omz_dir>/demos/common/python/requirements_ovms.txt
 ```
 
 ## Model API Pipelines
@@ -105,13 +106,15 @@ The `AsyncPipeline` is available, which handles the asynchronous execution of a 
 
 To apply Model API wrappers in custom applications, learn the provided example of common scenario of how to use Python* Model API.
 
- In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to the model's `xml` file. The model is loaded on a CPU device inside the adapter.
+ In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to the model's `xml` file.
 
 Once the SSD model wrapper instance is created, we get the predictions by the model in one line: `ssd_model(input_data)` - the wrapper performs the preprocess method, synchronous inference on OpenVINO™ toolkit side and postprocess method.
 
 ```python
 import cv2
+# import model wrapper class
 from openvino.model_zoo.model_api.models import SSD
+# import inference adapter and helper for runtime setup
 from openvino.model_zoo.model_api.adapters import OpenvinoAdapter, create_core
 
 
@@ -125,26 +128,23 @@ model_path = "public/mobilenet-ssd/FP32/mobilenet-ssd.xml"
 model_adapter = OpenvinoAdapter(create_core(), model_path, device="CPU")
 
 # create model API wrapper for SSD architecture
+# preload=True loads the model on CPU inside the adapter
 ssd_model = SSD(model_adapter, preload=True)
 
 # apply input preprocessing, sync inference, model output postprocessing
 results = ssd_model(input_data)
-
-# visualize results and show it
-image_with_bboxes = draw_detections(input_data, results)
-cv2.imshow('Detection Results', image_with_bboxes)
 ```
 
 To study the complex scenarios, refer to [Open Model Zoo Python* demos](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos), where the asynchronous inference is applied.
 
 The list of Open Model Zoo demos with Model API support:
-- BERT Named Entity Recognition Python* Demo
-- BERT Question Answering Python* Demo
-- BERT Question Answering Embedding Python* Demo
-- Classification Python* Demo
-- Image Deblurring Python* Demo
-- Human Pose Estimation Python* Demo
-- Instance Segmentation Python* Demo
-- MonoDepth Python* Demo
-- Object Detection Python* Demo
-- Image Segmentation Python* Demo
+- [BERT Named Entity Recognition Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_named_entity_recognition_demo/python)
+- [BERT Question Answering Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_question_answering_demo/python)
+- [BERT Question Answering Embedding Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_question_answering_embedding_demo/python)
+- [Classification Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/classification_demo/python)
+- [Image Deblurring Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/deblurring_demo/python)
+- [Human Pose Estimation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/human_pose_estimation_demo/python)
+- [Instance Segmentation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/instance_segmentation_demo/python)
+- [MonoDepth Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/monodepth_demo/python)
+- [Object Detection Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/object_detection_demo/python)
+- [Image Segmentation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/segmentation_demo/python)
