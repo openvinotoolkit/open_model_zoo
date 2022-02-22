@@ -787,7 +787,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
-            '-nireq': 1,
+            '-nireq': '1',
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
@@ -796,7 +796,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
-            '-nireq': 1,
+            '-nireq': '1',
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
@@ -805,7 +805,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
-            '-nireq': 1,
+            '-nireq': '1',
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
