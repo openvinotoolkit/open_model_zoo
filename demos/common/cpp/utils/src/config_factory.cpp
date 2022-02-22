@@ -36,7 +36,7 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
     uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads) {
     auto config = getCommonConfig(flags_d, flags_nireq);
 
-    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(config.getDevices(), flags_nstreams);
+    std::map<std::string, int> deviceNstreams = parseValuePerDevice(config.getDevices(), flags_nstreams);
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
@@ -44,13 +44,10 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
                 config.compiledModelConfig.emplace(ov::inference_num_threads.name(), flags_nthreads);
 
             config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
-        }
-        else if (device == "GPU") {
-            config.compiledModelConfig.emplace(ov::streams::num(deviceNstreams.count(device) > 0
-                ? (int)deviceNstreams.at(device)
-                : ov::streams::AUTO));
-            if (flags_d.find("MULTI") != std::string::npos
-                && config.getDevices().find("CPU") != config.getDevices().end()) {
+        } else if (device == "GPU") {
+            ov::streams::Num nstreams = deviceNstreams.count(device) > 0 ? deviceNstreams.at(device) : ov::streams::AUTO;
+            config.compiledModelConfig.emplace(nstreams);
+            if (flags_d.find("MULTI") != std::string::npos && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.compiledModelConfig.emplace(ov::intel_gpu::hint::queue_throttle.name(),

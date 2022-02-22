@@ -35,8 +35,8 @@ std::vector<std::string> split(const std::string& s, char delim);
 
 std::vector<std::string> parseDevices(const std::string& device_string);
 
-std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
-                                                    const std::string& values_string);
+std::map<std::string, int32_t> parseValuePerDevice(const std::set<std::string>& devices,
+                                                   const std::string& values_string);
 
 cv::Size stringToSize(const std::string& str);
 
