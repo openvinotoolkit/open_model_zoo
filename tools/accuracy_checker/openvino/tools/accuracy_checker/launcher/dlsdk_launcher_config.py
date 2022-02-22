@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
 from pathlib import Path
 import platform
 from ..config import PathField, ConfigError, StringField, NumberField, ListField, DictField, BaseField, BoolField
 from .launcher import LauncherConfigValidator
-from .model_conversion import FrameworkParameters, convert_model
 from ..logging import warning, print_info
-from ..utils import get_path, contains_all, UnsupportedPackage, get_parameter_value_from_config
+from ..utils import get_path, contains_all, UnsupportedPackage
 
 try:
     from openvino.inference_engine import known_plugins  # pylint:disable=W9902
@@ -117,9 +115,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         """
         error_stack = []
         if not self.delayed_model_loading:
-            framework_parameters, error_stack = self.check_model_source(entry, fetch_only, field_uri, validation_scheme)
-            if not error_stack:
-                self._set_model_source(framework_parameters)
+            _, error_stack = self.check_model_source(entry, fetch_only, field_uri, validation_scheme)
         error_stack += super().validate(entry, field_uri, fetch_only, validation_scheme)
         self.create_device_regex(known_plugins)
         if 'device' not in entry:
@@ -144,41 +140,10 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
                 error_stack.append(error)
         return error_stack
 
-    def _set_model_source(self, framework):
-        self.need_conversion = framework.name != 'dlsdk'
-        self.framework = framework
-        self.fields['model'].optional = self.need_conversion
-        self.fields['caffe_model'].optional = framework.name != 'caffe'
-        self.fields['caffe_weights'].optional = framework.name != 'caffe'
-        self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
-        self.fields['tf_model'].optional = framework != FrameworkParameters('tf', False)
-        self.fields['tf_meta'].optional = framework != FrameworkParameters('tf', True)
-        self.fields['onnx_model'].optional = framework.name != 'onnx'
-        self.fields['kaldi_model'].optional = framework.name != 'kaldi'
-
     @staticmethod
     def check_model_source(entry, fetch_only=False, field_uri=None, validation_scheme=None):
-        dlsdk_model_options = ['model']
-        caffe_model_options = ['caffe_model', 'caffe_weights']
-        mxnet_model_options = ['mxnet_weights']
-        tf_model_options = ['tf_model']
-        tf_meta_options = ['tf_meta']
-        onnx_model_options = ['onnx_model']
-        kaldi_model_options = ['kaldi_model']
-
-        multiple_model_sources_err = (
-            'Either model and weights or caffe_model and caffe_weights '
-            'or mxnet_weights or tf_model or tf_meta should be specified.'
-        )
-        sources = {
-            FrameworkParameters('dlsdk', False): dlsdk_model_options,
-            FrameworkParameters('caffe', False): caffe_model_options,
-            FrameworkParameters('tf', False): tf_model_options,
-            FrameworkParameters('mxnet', False): mxnet_model_options,
-            FrameworkParameters('onnx', False): onnx_model_options,
-            FrameworkParameters('kaldi', False): kaldi_model_options,
-            FrameworkParameters('tf', True): tf_meta_options
-        }
+        ov_model_options = ['model']
+        sources = {'dlsdk': ov_model_options}
 
         specified = []
         for mo_source_option, mo_source_value in sources.items():
@@ -186,34 +151,17 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
                 specified.append(mo_source_option)
 
         if not specified:
-            error = ConfigError(
-                '{} None provided'.format(multiple_model_sources_err), entry, field_uri, validation_scheme
-            )
-            if not fetch_only:
-                raise error
-            return None, [error]
-        if len(specified) > 1:
-            error = ConfigError(
-                '{} Several provided'.format(multiple_model_sources_err), entry, field_uri, validation_scheme
-            )
+            error = ConfigError('model is not provided', entry, field_uri, validation_scheme)
             if not fetch_only:
                 raise error
             return None, [error]
 
         return specified[0], []
 
-
 DLSDK_LAUNCHER_PARAMETERS = {
     'model': PathField(description="Path to model.", file_or_directory=True),
     'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
     'device': StringField(description="Device name."),
-    'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
-    'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-    'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
-    'tf_model': PathField(optional=True, description="Path to TF model file."),
-    'tf_meta': PathField(optional=True, description="Path to TF meta file."),
-    'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
-    'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
     'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
     'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
     'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
@@ -235,17 +183,6 @@ DLSDK_LAUNCHER_PARAMETERS = {
         description='Reset infer request memory states after inference. '
                     'State control essential for recurrent networks'),
     'device_config': DictField(optional=True, description='device configuration'),
-    '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
-    '_tf_obj_detection_api_config_dir': PathField(
-        optional=True, is_directory=True, description="TF Object Detection API Config."
-    ),
-    '_tf_custom_op_config_dir': PathField(
-        optional=True, is_directory=True, description="TF Custom Operation Config prefix."
-    ),
-    '_transformations_config_dir': PathField(
-        optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
-    '_tf_obj_detection_api_pipeline_config_path': PathField(
-        optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
     '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
     '_vpu_log_level': StringField(
         optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
@@ -318,40 +255,6 @@ def get_cpu_extension(cpu_extensions, selection_mode):
     return extension_list[0]
 
 
-def mo_convert_model(config, launcher_parameters, framework=None):
-    if framework is None:
-        framework = DLSDKLauncherConfigValidator.check_model_source(config)
-    config_model = config.get('{}_model'.format(framework.name), '')
-    config_weights = config.get('{}_weights'.format(framework.name), '')
-    config_meta = config.get('{}_meta'.format(framework.name), '')
-    mo_search_paths = []
-    model_optimizer = get_parameter_value_from_config(config, launcher_parameters, '_model_optimizer')
-    if model_optimizer:
-        mo_search_paths.append(model_optimizer)
-    model_optimizer_directory_env = os.environ.get('MO_DIR')
-    if model_optimizer_directory_env:
-        mo_search_paths.append(model_optimizer_directory_env)
-    model_name = (
-        Path(config_model).name.rsplit('.', 1)[0] or
-        Path(config_weights).name.rsplit('.', 1)[0] or
-        Path(config_meta).name.rsplit('.', 1)[0]
-    )
-    should_log_mo_cmd = get_parameter_value_from_config(config, launcher_parameters, 'should_log_cmd')
-
-    return convert_model(
-        model_name,
-        config_model, config_weights, config_meta, framework, mo_search_paths,
-        get_parameter_value_from_config(config, launcher_parameters, 'mo_params'),
-        get_parameter_value_from_config(config, launcher_parameters, 'mo_flags'),
-        get_parameter_value_from_config(config, launcher_parameters, '_tf_custom_op_config_dir'),
-        get_parameter_value_from_config(
-            config, launcher_parameters, '_tf_obj_detection_api_pipeline_config_path'
-        ),
-        get_parameter_value_from_config(config, launcher_parameters, '_transformations_config_dir'),
-        should_log_cmd=should_log_mo_cmd
-    )
-
-
 def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
     model_type_ext = {
         'xml': 'xml',
@@ -405,3 +308,16 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         print_info('Found weights {}'.format(get_path(weights)))
 
     return model, weights
+
+
+def ov_set_config(ov_obj, config, *args, device=None, **kwargs):
+    if hasattr(ov_obj, 'set_property'):
+        if device is not None:
+            ov_obj.set_property(device, config, *args, **kwargs)
+        else:
+            ov_obj.set_property(config, *args, **kwargs)
+        return
+    if device is not None:
+        ov_obj.set_config(config, device, *args, **kwargs)
+    else:
+        ov_obj.set_config(config, *args, **kwargs)

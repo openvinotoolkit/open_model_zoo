@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,48 +14,42 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine image_processing_demo_async demo application
-* \file image_processing_async/main.cpp
-* \example image_processing_async/main.cpp
-*/
-
 #include <iostream>
 #include <map>
 #include <string>
-
-#include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
 #include <unordered_map>
-#include <gflags/gflags.h>
 #include <sys/stat.h>
 
-#include <pipelines/async_pipeline.h>
-#include <models/super_resolution_model.h>
+#include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
+
+#include <monitors/presenter.h>
 #include <models/deblurring_model.h>
 #include <models/jpeg_restoration_model.h>
 #include <models/style_transfer_model.h>
+#include <models/super_resolution_model.h>
+#include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/images_capture.h>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
 #include "visualizer.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
+static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
@@ -71,9 +65,8 @@ static const char jc_message[] = "Optional. Flag of using compression for jpeg i
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_string(d, "CPU", target_device_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -95,11 +88,9 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -139,16 +130,16 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type, bool doCompression=false) {
     if (type == "sr") {
-        return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, frameSize));
+        return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, frameSize, FLAGS_layout));
     }
     if (type == "deblur") {
-        return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize));
+        return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize, FLAGS_layout));
     }
     if (type == "jr") {
-        return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression));
+        return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression, FLAGS_layout));
     }
-	if (type == "style") {
-        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m));
+    if (type == "style") {
+        return std::unique_ptr<ImageModel>(new StyleTransferModel(FLAGS_m, FLAGS_layout));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
@@ -173,11 +164,12 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core core;
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
+
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -187,7 +179,7 @@ int main(int argc, char *argv[]) {
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
@@ -265,14 +257,6 @@ int main(int argc, char *argv[]) {
 
                     outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
-
-                    // Preparing video writer if needed
-                    if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                        if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), outputResolution)) {
-                            throw std::runtime_error("Can't open video writer");
-                        }
-                    }
                 }
 
                 cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
@@ -281,9 +265,7 @@ int main(int argc, char *argv[]) {
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     view.show(outFrame);
 
@@ -321,14 +303,6 @@ int main(int argc, char *argv[]) {
                     }
                     outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
-
-                    // Preparing video writer if needed
-                    if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                        if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), outputResolution)) {
-                            throw std::runtime_error("Can't open video writer");
-                        }
-                    }
                 }
 
                 cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
@@ -336,9 +310,7 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     view.show(outFrame);
 

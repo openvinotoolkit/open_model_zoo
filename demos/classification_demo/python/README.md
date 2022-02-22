@@ -15,7 +15,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -43,6 +43,7 @@ omz_converter --list models.lst
 * googlenet-v1
 * googlenet-v1-tf
 * googlenet-v2
+* googlenet-v2-tf
 * googlenet-v3
 * googlenet-v3-pytorch
 * googlenet-v4-tf
@@ -57,6 +58,8 @@ omz_converter --list models.lst
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
+* mobilenet-v3-large-1.0-224-tf
+* mobilenet-v3-small-1.0-224-tf
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf
@@ -65,6 +68,7 @@ omz_converter --list models.lst
 * repvgg-b3
 * resnest-50-pytorch
 * resnet-18-pytorch
+* resnet-34-pytorch
 * resnet-50-pytorch
 * resnet-50-tf
 * resnet18-xnor-binary-onnx-0001
@@ -78,6 +82,7 @@ omz_converter --list models.lst
 * squeezenet1.0
 * squeezenet1.1
 * swin-tiny-patch4-window7-224
+* t2t-vit-14
 * vgg16
 * vgg19
 
@@ -101,7 +106,7 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INPUT
+usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT
                               [-d DEVICE] [--labels LABELS]
                               [-topk {1,2,3,4,5,6,7,8,9,10}]
                               [-nireq NUM_INFER_REQUESTS]
@@ -118,8 +123,9 @@ usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,remote}] -i INP
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  --adapter {openvino,remote}
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
+  --adapter {openvino,ovms}
                         Optional. Specify the model adapter. Default is
                         openvino.
   -i INPUT, --input INPUT
@@ -191,6 +197,19 @@ For example, use the following command-line command to run the application:
 python3 classification_demo.py -m <path_to_classification_model> \
                                -i <path_to_folder_with_images> \
                                 --labels <path_to_file_with_list_of_labels>
+```
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 classification_demo.py -m localhost:9000/models/classification \
+                               -i <path_to_folder_with_images> \
+                                --labels <path_to_file_with_list_of_labels> \
+                                --adapter ovms
 ```
 
 ## Demo Output

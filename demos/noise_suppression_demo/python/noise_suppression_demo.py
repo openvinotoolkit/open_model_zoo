@@ -1,56 +1,58 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021 Intel Corporation
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0
 """
+import copy
 import logging as log
 import sys
-from time import perf_counter
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import wave
 
-from openvino.inference_engine import IECore, Blob, get_version
+from openvino.runtime import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
-def build_argparser():
-    parser = ArgumentParser(add_help=False)
-    args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=Path)
-    args.add_argument("-i", "--input", help="Required. Path to a 16kHz wav file with speech+noise",
-                      required=True, type=str)
-    args.add_argument("-o", "--output", help="Optional. Path to output wav file for cleaned speech",
-                      required=False, type=str, default="noise_suppression_demo_out.wav")
-    args.add_argument("-d", "--device",
-                      help="Optional. Target device to perform inference on. "
-                           "Default value is CPU",
-                      default="CPU", type=str)
-    return parser
+def parse():
+    def print_version():
+        log.info('OpenVINO Runtime')
+        print('\tbuild: {}'.format(get_version()))
+
+    class DevicePrinter(ArgumentParser):
+        def exit(self, status=0, message=None):
+            if 0 == status and message is None:
+                print('Available devices:', *Core().available_devices)
+                print_version()
+            super().exit(status, message)
+
+    parser = DevicePrinter()
+    parser.add_argument("-m", "--model", required=True, type=Path, metavar="<MODEL FILE>",
+        help="path to an .xml file with a trained model")
+
+    parser.add_argument("-i", "--input", required=True, type=Path, metavar="<WAV>",
+        help="path to an input WAV file")
+
+    parser.add_argument("-d", "--device", default="CPU", metavar="<DEVICE>",
+        help="specify a device to infer on (the list of available devices is shown below). Default is CPU")
+
+    parser.add_argument("-o", "--output", default="noise_suppression_demo_out.wav", metavar="<WAV>",
+        help="path to an output WAV file. Default is noise_suppression_demo_out.wav")
+
+    args = parser.parse_args()
+    print_version()
+    return args
 
 def wav_read(wav_name):
     with wave.open(wav_name, "rb") as wav:
         if wav.getsampwidth() != 2:
             raise RuntimeError("wav file {} does not have int16 format".format(wav_name))
-        if wav.getframerate() != 16000:
-            raise RuntimeError("wav file {} does not have 16kHz sampling rate".format(wav_name))
+        freq = wav.getframerate()
 
         data = wav.readframes( wav.getnframes() )
         x = np.frombuffer(data, dtype=np.int16)
@@ -58,48 +60,66 @@ def wav_read(wav_name):
         if wav.getnchannels() > 1:
             x = x.reshape(-1, wav.getnchannels())
             x = x.mean(1)
-    return x
+    return x, freq
 
-def wav_write(wav_name, x):
+def wav_write(wav_name, x, freq):
+    x = np.clip(x, -1, +1)
     x = (x*np.iinfo(np.int16).max).astype(np.int16)
     with wave.open(wav_name, "wb") as wav:
         wav.setnchannels(1)
-        wav.setframerate(16000)
+        wav.setframerate(freq)
         wav.setsampwidth(2)
         wav.writeframes(x.tobytes())
 
 def main():
-    args = build_argparser().parse_args()
-
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-
-    # read IR
+    args = parse()
+    core = Core()
     log.info("Reading model {}".format(args.model))
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
-    ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
+    ov_encoder = core.read_model(args.model)
 
-    # check input and output names
-    input_shapes = {k: v.input_data.shape for k, v in ie_encoder.input_info.items()}
-    input_names = list(ie_encoder.input_info.keys())
-    output_names = list(ie_encoder.outputs.keys())
+    inp_shapes = {name: obj.shape for obj in ov_encoder.inputs for name in obj.get_names()}
+    out_shapes = {name: obj.shape for obj in ov_encoder.outputs for name in obj.get_names()}
 
-    assert "input" in input_names, "'input' is not presented in model"
-    assert "output" in output_names, "'output' is not presented in model"
-    state_inp_names = [n for n in input_names if "state" in n]
-    state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
+    state_out_names = [n for n in out_shapes.keys() if "state" in n]
+    state_inp_names = [n for n in inp_shapes.keys() if "state" in n]
+    if len(state_inp_names) != len(state_out_names):
+        raise RuntimeError(
+            "Number of input states of the model ({}) is not equal to number of output states({})".
+                format(len(state_inp_names), len(state_out_names)))
+
+    state_param_num = sum(np.prod(inp_shapes[n]) for n in state_inp_names)
     log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
     # load model to the device
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    compiled_model = core.compile_model(ov_encoder, args.device)
+
+    infer_request = compiled_model.create_infer_request()
+
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
-    start_time = perf_counter()
-    sample_inp = wav_read(args.input)
+    sample_inp, freq_data = wav_read(str(args.input))
+    sample_size = sample_inp.shape[0]
 
-    input_size = input_shapes["input"][1]
+    infer_request.infer()
+    delay = 0
+    if "delay" in out_shapes:
+        delay = infer_request.get_tensor("delay").data[0]
+        sample_inp = np.pad(sample_inp, ((0, delay), ))
+    freq_model = 16000
+    if "freq" in out_shapes:
+        freq_model = infer_request.get_tensor("freq").data[0]
+
+    log.info("\tDelay: {} samples".format(delay))
+    log.info("\tFreq: {} Hz".format(freq_model))
+
+    if freq_data != freq_model:
+        raise RuntimeError(
+            "Wav file {} sampling rate {} does not match model sampling rate {}".
+                format(args.input, freq_data, freq_model))
+
+    start_time = perf_counter()
+
+    input_size = inp_shapes["input"][1]
     res = None
 
     samples_out = []
@@ -117,31 +137,25 @@ def main():
         #add states to input
         for n in state_inp_names:
             if res:
-                inputs[n] = res[n.replace('inp', 'out')].buffer
+                inputs[n] = infer_request.get_tensor(n.replace('inp', 'out')).data
             else:
                 #on the first iteration fill states by zeros
-                inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
+                inputs[n] = np.zeros(inp_shapes[n], dtype=np.float32)
 
-        # Set inputs manually through InferRequest functionality to speedup
-        infer_request_ptr = ie_encoder_exec.requests[0]
-        for n, data in inputs.items():
-            info_ptr = ie_encoder.input_info[n]
-            blob = Blob(info_ptr.tensor_desc, data)
-            infer_request_ptr.set_blob(n, blob, info_ptr.preprocess_info)
-
-        # infer by IE
-        infer_request_ptr.infer()
-        res = infer_request_ptr.output_blobs
-
-        samples_out.append(res["output"].buffer.squeeze(0))
-
-    total_latency = (perf_counter() - start_time) * 1e3
+        infer_request.infer(inputs)
+        res = infer_request.get_tensor("output")
+        samples_out.append(copy.deepcopy(res.data).squeeze(0))
+    total_latency = perf_counter() - start_time
     log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency))
-    log.info("\tSample length: {:.1f} ms".format(len(samples_out)*input_size/16.0))
+    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
+    log.info("\tSample length: {:.1f} ms".format(len(samples_out) * input_size * 1e3 / freq_data))
+    log.info("\tSampling freq: {} Hz".format(freq_data))
+
+    #concat output patches and align with input
     sample_out = np.concatenate(samples_out, 0)
-    wav_write(args.output, sample_out)
+    sample_out = sample_out[delay:sample_size+delay]
+    wav_write(args.output, sample_out, freq_data)
 
 
 if __name__ == '__main__':
-    sys.exit(main() or 0)
+    main()

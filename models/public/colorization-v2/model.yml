@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ description: >-
 
   Model consumes as input L-channel of LAB-image. Model give as output predict A-
   and B-channels of LAB-image.
-
 task_type: colorization
 files:
   - name: ckpt/colorization-v2-eccv16.pth
     size: 128976165
     checksum: 65bc890b145efde14f6847e707ba49fe8a026a02d5dc91bdfa9708893a954547256935b997904280a7ae991da1aac53e
-    source: https://colorizers.s3.us-east-2.amazonaws.com/colorization_release_v2-9b330a0b.pth
+    original_source: https://colorizers.s3.us-east-2.amazonaws.com/colorization_release_v2-9b330a0b.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/colorization-v2/colorization_release_v2-9b330a0b.pth
   - name: model/__init__.py
     size: 96
     checksum: 04b2675bb9d47bd3f05cb786ec74abd67b4118b6d3b424c0bc85d5136939605c39da443740d9b98b1e7f3f0ada05c885
@@ -63,6 +63,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,1,256,256]
   - --input=data_l
+  - --layout=data_l(NCHW)
   - --output=color_ab
   - --input_model=$conv_dir/colorization-v2-eccv16.onnx
 framework: pytorch

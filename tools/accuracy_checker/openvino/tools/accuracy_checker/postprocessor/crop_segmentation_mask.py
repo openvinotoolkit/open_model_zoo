@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ class CropOrPadSegmentationMask(Postprocessor):
     def process_image(self, annotation, prediction):
         if not self.deprocessing_mode:
             for ann in annotation:
-                if annotation is None:
+                if ann is None:
                     continue
                 ann.mask = self.process_mask(ann.mask)
         return annotation, prediction
@@ -145,3 +145,33 @@ class CropOrPadSegmentationMask(Postprocessor):
             cropped, offset_pad_height, offset_pad_width, self.dst_height, self.dst_width
         )
         return resized
+
+
+class CropPaddingSegmentationMask(Postprocessor):
+    __provider__ = 'crop_padded_prediction'
+
+    annotation_types = (SegmentationAnnotation, )
+    prediction_types = (SegmentationPrediction, )
+
+    def process_image(self, annotation, prediction):
+        raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        assert image_metadata and 'padding' in image_metadata, (
+            "Postprocessing step `crop_padded_prediction` cannot work without metadata with `padding` field")
+
+        top, left, bottom, right = image_metadata.get('padding', (0, 0, 0, 0))
+        if self.deprocessing_mode:
+            image_metadata['padding_disabled'] = True
+        for pred in prediction:
+            mask = pred.mask
+            if mask.ndim == 2:
+                h, w = mask.shape
+                mask = mask[top:(h - bottom), left:(w - right)]
+                pred.mask = mask
+                continue
+            _, h, w = mask.shape
+            mask = mask[:, top:(h - bottom), left:(w - right)]
+            pred.mask = mask
+
+        return annotation, prediction

@@ -38,7 +38,7 @@ You can change the value of `num_requests` in `action_recognition_demo.py` to fi
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/action_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -75,7 +75,7 @@ usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                   [-limit OUTPUT_LIMIT] -at
                                   {en-de,en-mean,i3d-rgb} -m_en M_ENCODER
                                   [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
-                                  [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
+                                  [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
                                   [-u UTILIZATION_MONITORS]
                                   [-r RAW_OUTPUT_MESSAGE]
@@ -101,9 +101,6 @@ Options:
   --seq DECODER_SEQ_SIZE
                         Optional. Length of sequence that decoder takes as
                         input.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. For CPU custom layers, if any. Absolute path
-                        to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo will

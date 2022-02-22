@@ -25,10 +25,12 @@ For details please also check [repository](https://github.com/pytorch/fairseq/tr
 
 #### Original model
 
-Normalized audio signal, name - `inputs`,  shape - `1, 30480`, format is `B, N`, where:
+Normalized audio signal, name - `inputs`,  shape - `B, N`, format is `B, N`, where:
 
 - `B` - batch size
 - `N` - sequence length
+
+Model is dynamic and can working with different shapes of input.
 
 **NOTE**: Model expects 16-bit, 16 kHz, mono-channel WAVE audio as input data.
 
@@ -40,12 +42,13 @@ The converted model has the same parameters as the original model.
 
 #### Original model
 
-Per-token probabilities (after LogSoftmax) for every symbol in the alphabet, name - `logits`,  shape - `1, 95, 32`, output data format is `B, N, C`, where:
+Per-token probabilities (after LogSoftmax) for every symbol in the alphabet, name - `logits`,  shape - `B, N, 32`, output data format is `B, N, C`, where:
 
 - `B` - batch size
 - `N` - number of recognized tokens
 - `C` - alphabet size
 
+`B` and `N` dimensions can take different values, because model is dynamic. Alphabet size `C` is static and equals 32.
 Model alphabet: "[pad]", "[s]", "[/s]", "[unk]", "|", "E", "T", "A", "O", "N", "I", "H", "S", "R", "D", "L", "U", "M", "W", "C", "F", "G", "Y", "P", "B", "V", "K", "'", "X", "J", "Q", "Z", where:
 
 - `[pad]` - padding token used as CTC-blank label
@@ -58,9 +61,9 @@ Model alphabet: "[pad]", "[s]", "[/s]", "[unk]", "|", "E", "T", "A", "O", "N", "
 
 The converted model has the same parameters as the original model.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -71,6 +74,12 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Speech Recognition Wav2Vec Python\* Demo](../../../demos/speech_recognition_wav2vec_demo/python/README.md)
 
 ## Legal Information
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@ limitations under the License.
 
 from .adapter import Adapter, AdapterField, create_adapter
 
-from .action_recognition import ActionDetection
+
+from .action_recognition import ActionDetection, ActionRecognitionWithNoAction
+from .background_matting import ImageBackgroundMattingAdapter
 from .text_detection import (
     TextDetectionAdapter,
     EASTTextDetectionAdapter,
@@ -59,7 +61,8 @@ from .detection import (
     TwoStageDetector,
     DETRAdapter,
     UltraLightweightFaceDetectionAdapter,
-    PPDetectionAdapter
+    PPDetectionAdapter,
+    NanoDetAdapter
 )
 from .mtcnn import MTCNNPAdapter
 from .detection_person_vehicle import (
@@ -154,6 +157,7 @@ __all__ = [
     'DETRAdapter',
     'UltraLightweightFaceDetectionAdapter',
     'PPDetectionAdapter',
+    'NanoDetAdapter',
     'FacialLandmarksAdapter',
     'MTCNNPAdapter',
 
@@ -267,5 +271,9 @@ __all__ = [
 
     'QuantilesPredictorAdapter',
 
-    'MaskToBinaryClassification'
+    'MaskToBinaryClassification',
+
+    'ActionRecognitionWithNoAction',
+
+    'ImageBackgroundMattingAdapter',
 ]

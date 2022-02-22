@@ -109,9 +109,9 @@ Note: `B` - batch size.
 
 Note: `B` - batch size.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -122,6 +122,12 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text-to-speech Python\* Demo](../../../demos/text_to_speech_demo/python/README.md)
 
 ## Legal Information
 

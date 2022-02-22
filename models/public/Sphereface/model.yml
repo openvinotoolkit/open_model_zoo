@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@ files:
 model_optimizer_args:
   - --input_shape=[1,3,112,96]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[127.5,127.5,127.5]
   - --scale_values=data[128.0]
   - --output=fc5
   - --input_model=$dl_dir/Sphereface.caffemodel
   - --input_proto=$dl_dir/Sphereface.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/wy1iu/sphereface/master/LICENSE

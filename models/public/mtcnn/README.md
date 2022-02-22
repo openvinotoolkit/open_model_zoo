@@ -172,9 +172,9 @@ Expected color order: `RGB`.
 2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
 3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -185,6 +185,13 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [G-API Face Detection MTCNN Demo](../../../demos/face_detection_mtcnn_demo/cpp_gapi/README.md)
+* [Face Detection MTCNN Python* Demo](../../../demos/face_detection_mtcnn_demo/python/README.md)
 
 ## Legal Information
 

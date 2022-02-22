@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ files:
   - name: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
     size: 135664441
     checksum: e89adbaf822f508c30e77b9aa6e9a0a566493466617064c3ee7203d9210756f6d5cd5740140ce2c0df46514d37bb5023
-    source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ssd_mobilenet_v1_fpn_coco/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -27,11 +28,12 @@ postprocessing:
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,640,640,3]
+  - --layout=image_tensor(NHWC)
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
   - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/frozen_inference_graph.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

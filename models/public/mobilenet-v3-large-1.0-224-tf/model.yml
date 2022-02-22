@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ files:
   - name: weights_mobilenet_v3_large_224_1.0_float.h5
     size: 22661472
     checksum: 4e7e0ecab69b15ecde1e3f4c494826cece07169bdc14d7da29eb07bef718c32f532d952d0b3113ffaca95c2d6d9577b5
-    source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_large_224_1.0_float.h5
+    original_source: https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v3/weights_mobilenet_v3_large_224_1.0_float.h5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-v3-large-1.0-224-tf/weights_mobilenet_v3_large_224_1.0_float.h5
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
   - --input=input_1
+  - --layout=input_1(NHWC)
   - --output=StatefulPartitionedCall/MobilenetV3large/Predictions/Softmax
-  - --saved_model_dir=$dl_dir/mobilenet_v3_large_224_1.0_float.savedmodel
+  - --saved_model_dir=$conv_dir/mobilenet_v3_large_224_1.0_float.savedmodel
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

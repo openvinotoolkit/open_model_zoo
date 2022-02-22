@@ -11,7 +11,7 @@ models:
   - name: model_name
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: adapter_name
 
     datasets:
@@ -34,7 +34,7 @@ evaluations:
           adapter: adapter_name
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: dataset_name

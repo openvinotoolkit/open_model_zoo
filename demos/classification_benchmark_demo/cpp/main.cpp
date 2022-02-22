@@ -1,28 +1,28 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <vector>
-#include <queue>
-#include <memory>
-#include <string>
 #include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include <cstdio>
-#include <functional>
-#include <atomic>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <string>
+#include <vector>
 
-#include <inference_engine.hpp>
 #include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+
+#include <models/classification_model.h>
+#include <models/results.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
-#include <models/classification_model.h>
-#include <utils/common.hpp>
-#include <utils/slog.hpp>
+
 #include <utils/args_helper.hpp>
+#include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "grid_mat.hpp"
 
@@ -30,6 +30,8 @@ static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+                                     " Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
@@ -40,10 +42,6 @@ static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to the .xml file with kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers."
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
@@ -54,6 +52,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(labels, "", labels_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_string(gt, "", gt_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -61,8 +60,6 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
@@ -76,11 +73,9 @@ static void showUsage() {
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -165,11 +160,12 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_gt.empty()) {
             std::map<std::string, unsigned> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
-            if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
+            if (!inputGtFile.is_open()) {
+                throw std::runtime_error("Can't open the ground truth file.");
+            }
 
             std::string line;
-            while (std::getline(inputGtFile, line))
-            {
+            while (std::getline(inputGtFile, line)) {
                 size_t separatorIdx = line.find(' ');
                 if (separatorIdx == std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
@@ -196,7 +192,7 @@ int main(int argc, char *argv[]) {
             std::fill(classIndices.begin(), classIndices.end(), 0);
         }
 
-        //------------------------------ Running Detection routines ----------------------------------------------
+        //------------------------------ Running routines ----------------------------------------------
         std::vector<std::string> labels = ClassificationModel::loadLabels(FLAGS_labels);
         for (const auto & classIndex : classIndices) {
             if (classIndex >= labels.size()) {
@@ -205,11 +201,11 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        InferenceEngine::Core core;
-        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
+
+        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels, FLAGS_layout)),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
 
         Presenter presenter(FLAGS_u, 0);
         int width;

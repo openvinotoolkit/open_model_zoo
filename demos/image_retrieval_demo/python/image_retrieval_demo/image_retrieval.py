@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,43 +23,41 @@ from tqdm import tqdm
 
 from image_retrieval_demo.common import from_list, crop_resize
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
-        if cpu_extension and device == 'CPU':
-            ie.add_extension(cpu_extension, 'CPU')
+        core = Core()
 
-        path = '.'.join(model_path.split('.')[:-1])
         log.info('Reading model {}'.format(model_path))
-        self.net = ie.read_network(path + '.xml', path + '.bin')
-        self.output_name = list(self.net.outputs.keys())[0]
-        self.exec_net = ie.load_network(network=self.net, device_name=device)
+        self.model = core.read_model(model_path)
+        self.input_tensor_name = "Placeholder"
+        compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
+        self.infer_request = compiled_model.create_infer_request()
         log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={'Placeholder': image})[self.output_name]
-        return out
+        input_data = {self.input_tensor_name: image}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
 
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension):
+    def __init__(self, model_path, device, gallery_path, input_size):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):

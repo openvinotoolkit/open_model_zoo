@@ -11,7 +11,7 @@ The output of network is also sequence of audio patches with clean speech. The p
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/noise_suppression_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -27,27 +27,12 @@ omz_converter --list models.lst
 
 ### Supported Models
 
+* noise-suppression-denseunet-ll-0001
 * noise-suppression-poconetlike-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
-
-Running the application with the `-h` option yields the following usage message:
-```sh
-./noise_suppression_demo -h
-```
-The command yields the following usage message:
-```
-noise_suppression_demo [OPTION]
-Options:
-
-    -h           Print a usage message.
-    -i INPUT     Required. Path to a input WAV file.
-    -o OUTPUT    Optional. Path to a output WAV file.
-    -m MODEL     Required. Path to an .xml file with a trained model.
-    -d DEVICE    Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
-```
 
 Running the application with an empty list of options yields an error message.
 

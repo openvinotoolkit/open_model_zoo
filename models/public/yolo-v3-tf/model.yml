@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@ files:
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
+  - --layout=input_1(NHWC)
   - --input=input_1
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3.json
   - --input_model=$dl_dir/yolo-v3.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

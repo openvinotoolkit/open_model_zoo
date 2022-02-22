@@ -2,7 +2,7 @@ models:
   - name: text-image-super-resolution-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: super_resolution
 
@@ -13,4 +13,5 @@ models:
             scale_border: 4
             presenter: print_vector
             reference:
-              mean: 21.64
+              mean: 20.318
+              std: 0.73

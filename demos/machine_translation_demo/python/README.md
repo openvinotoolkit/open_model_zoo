@@ -11,7 +11,7 @@ The program provides an interactive CLI interface that gets a sentence in the so
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -31,6 +31,8 @@ omz_converter --list models.lst
 * machine-translation-nar-en-de-0002
 * machine-translation-nar-en-ru-0001
 * machine-translation-nar-ru-en-0001
+* machine-translation-nar-en-ru-0002
+* machine-translation-nar-ru-en-0002
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

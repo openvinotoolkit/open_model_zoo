@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -25,12 +25,11 @@ import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import ImageModel, OutputTransform
-from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter
+from openvino.model_zoo.model_api.models import ImageModel, OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -79,6 +78,10 @@ def build_argparser():
                                         'that for OpenPose-like nets image is resized to a predefined height, which is '
                                         'the target size in this case. For Associative Embedding-like nets target size '
                                         'is the length of a short first image side.')
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -169,7 +172,7 @@ def main():
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
     model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                    max_num_requests=args.num_infer_requests)
+                                    max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
 
     start_time = perf_counter()
     frame = cap.read()
@@ -179,7 +182,7 @@ def main():
     config = {
         'target_size': args.tsize,
         'aspect_ratio': frame.shape[1] / frame.shape[0],
-        'prob_threshold': args.prob_threshold,
+        'confidence_threshold': args.prob_threshold,
         'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
         'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
     }
@@ -248,11 +251,11 @@ def main():
             hpe_pipeline.await_any()
 
     hpe_pipeline.await_all()
+    if hpe_pipeline.callback_exceptions:
+        raise hpe_pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = hpe_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = hpe_pipeline.get_result(next_frame_id_to_show)
         (poses, scores), frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']

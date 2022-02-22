@@ -15,9 +15,11 @@ More details provided in the [paper](https://cdn.openai.com/better-language-mode
 | MParams           | 175.6203         |
 | Source framework  | PyTorch\*        |
 
+GFlops calculated for `1, 1024` input shape, that is suitable for long context
+
 ## Accuracy
 
-Accuracy metrics obtained on [WikiText-2 raw character level data](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) dataset for converted model.
+[Perplexity](https://en.wikipedia.org/wiki/Perplexity) obtained on [WikiText-2 raw character level data](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) dataset for converted model.
 
 | Metric     | Value  |
 | ---------- | ------ |
@@ -27,14 +29,14 @@ Accuracy metrics obtained on [WikiText-2 raw character level data](https://blog.
 
 ### Original model
 
-Image, name: `input`, shape: `1, 1024` in the format `B, L`, where:
+Token ids, name: `input`, dynamic shape in the format `B, L`, where:
 
 - `B` - batch size
 - `L` - sequence length
 
 ### Converted model
 
-Image, name: `input`, shape: `1, 1024` in the format `B, L`, where:
+Token ids, name: `input`, dynamic shape in the format `B, L`, where:
 
 - `B` - batch size
 - `L` - sequence length
@@ -43,7 +45,7 @@ Image, name: `input`, shape: `1, 1024` in the format `B, L`, where:
 
 ### Original model
 
-Prediction scores of language modeling head, name: `output`, shape: `1, 1024, 50257` in the format `B, L, S`, where:
+Prediction scores of language modeling head, name: `output`, dynamic shape `B, L, 50257` in the format `B, L, S`, where:
 
 - `B` - batch size
 - `L` - sequence length
@@ -51,15 +53,15 @@ Prediction scores of language modeling head, name: `output`, shape: `1, 1024, 50
 
 ### Converted model
 
-Prediction scores of language modeling head, name: `output`, shape: `1, 1024, 50257` in the format `B, L, S`, where:
+Prediction scores of language modeling head, name: `output`, dynamic shape `B, L, 50257` in the format `B, L, S`, where:
 
 - `B` - batch size
 - `L` - sequence length
 - `S` - vocab size
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -70,6 +72,12 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [GPT-2 Text Prediction Python\* Demo](../../../demos/gpt2_text_prediction_demo/python/README.md)
 
 ## Legal Information
 

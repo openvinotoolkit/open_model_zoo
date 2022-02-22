@@ -39,7 +39,7 @@ The Async API operates with a notion of the Infer Request that encapsulates the 
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/interactive_face_detection_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -72,10 +72,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 interactive_face_detection_demo [OPTION]
 Options:
 
@@ -90,26 +86,7 @@ Options:
     -m_em "<path>"             Optional. Path to an .xml file with a trained Emotions Recognition model.
     -m_lm "<path>"             Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.
     -m_am "<path>"             Optional. Path to an .xml file with a trained Antispoofing Classification model.
-      -l "<absolute_path>"     Required for CPU custom layers. Absolute path to a shared library with the kernels implementation.
-          Or
-      -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
-    -d "<device>"              Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -d_em "<device>"           Optional. Target device for Emotions Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -d_am "<device>"           Optional. Target device for Antispoofing Classification network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -n_ag "<num>"              Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network (by default, it is 16)
-    -n_hp "<num>"              Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network (by default, it is 16)
-    -n_em "<num>"              Optional. Number of maximum simultaneously processed faces for Emotions Recognition network (by default, it is 16)
-    -n_lm "<num>"              Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network (by default, it is 16)
-    -n_am "<num>"              Optional. Number of maximum simultaneously processed faces for Antispoofing Classification network (by default, it is 16)
-    -dyn_ag                    Optional. Enable dynamic batch size for Age/Gender Recognition network
-    -dyn_hp                    Optional. Enable dynamic batch size for Head Pose Estimation network
-    -dyn_em                    Optional. Enable dynamic batch size for Emotions Recognition network
-    -dyn_lm                    Optional. Enable dynamic batch size for Facial Landmarks Estimation network
-    -dyn_am                    Optional. Enable dynamic batch size for Antispoofing Classification network
-    -async                     Optional. Enable asynchronous mode
+    -d <device>                Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. Use "-d MULTI:<comma-separated_devices_list>" format to specify MULTI plugin. The application looks for a suitable plugin for the specified device.
     -no_show                   Optional. Don't show output.
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections

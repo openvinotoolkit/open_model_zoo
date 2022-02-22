@@ -70,21 +70,21 @@ and disguised at random positions with pre-generated free-form masks.
 
 ### Converted Model
 
-1. Image, name: `Placeholder`, shape: `1, 3, 512, 680`, format: `B, C, H, W`, where:
+1. Image, name: `Placeholder`, shape: `1, 512, 680, 3`, format: `B, H, W, C`, where:
 
     - `B` - batch size
-    - `C` - number of channels
     - `H` - image height
     - `W` - image width
+    - `C` - number of channels
 
    Expected color order: `BGR`.
 
-2. Mask, name: `Placeholder_1`, shape: `1, 1, 512, 680`, format: `B, C, H, W`, where:
+2. Mask, name: `Placeholder_1`, shape: `1, 512, 680, 1`, format: `B, H, W, C`, where:
 
     - `B` - batch size
-    - `C` - number of channels
     - `H` - mask height
     - `W` - mask width
+    - `C` - number of channels
 
 ## Output
 
@@ -110,9 +110,9 @@ Restored image, name: `Cast`, shape: `1, 3, 512, 680`, format: `B, C, H, W`, whe
 
 Expected color order: `BGR`.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -123,6 +123,12 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Inpainting Python Demo](../../../demos/image_inpainting_demo/python/README.md)
 
 ## Legal Information
 

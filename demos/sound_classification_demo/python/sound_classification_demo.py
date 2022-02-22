@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from time import perf_counter
 import wave
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -44,9 +44,6 @@ def build_argparser():
                       help="Required. Input to process")
     args.add_argument('-m', "--model", type=str, required=True,
                       help="Required. Path to an .xml file with a trained model.")
-    args.add_argument("-l", "--cpu_extension", type=str, default=None,
-                      help="Optional. Required for CPU custom layers. Absolute path to a shared library with "
-                           "the kernels implementations.")
     args.add_argument("-d", "--device", type=str, default="CPU",
                       help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is"
                            " acceptable. The demo will look for a suitable plugin for device specified. "
@@ -138,24 +135,20 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-    if args.device == "CPU" and args.cpu_extension:
-        ie.add_extension(args.cpu_extension, 'CPU')
+    ie = Core()
 
     log.info('Reading model {}'.format(args.model))
-    net = ie.read_network(args.model, args.model[:-4] + ".bin")
+    model = ie.read_model(args.model)
 
-    if len(net.input_info) != 1:
+    if len(model.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")
         sys.exit(1)
-    input_blob = next(iter(net.input_info))
-    input_shape = net.input_info[input_blob].input_data.shape
-    if len(net.outputs) != 1:
+    input_tensor_name = model.inputs[0].get_any_name()
+    if len(model.outputs) != 1:
         log.error("Demo supports only models with 1 output layer")
         sys.exit(1)
-    output_blob = next(iter(net.outputs))
 
-    batch_size, channels, one, length = input_shape
+    batch_size, channels, one, length = model.inputs[0].shape
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
 
@@ -164,7 +157,9 @@ def main():
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    exec_net = ie.load_network(network=net, device_name=args.device)
+    compiled_model = ie.compile_model(model, args.device)
+    output_tensor = compiled_model.outputs[0]
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     labels = []
@@ -178,21 +173,21 @@ def main():
     outputs = []
     clips = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
-        chunk.shape = input_shape
-        output = exec_net.infer(inputs={input_blob: chunk})
+        chunk = np.reshape(chunk, model.inputs[0].shape)
+        output = infer_request.infer({input_tensor_name: chunk})[output_tensor]
         clips += batch_size
-        output = output[output_blob]
         for batch, data in enumerate(output):
-            start_time = (idx*batch_size + batch)*hop / audio.samplerate
-            end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
+            chunk_start_time = (idx*batch_size + batch)*hop / audio.samplerate
+            chunk_end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
             outputs.append(data)
             label = np.argmax(data)
-            if start_time < audio.duration():
-                log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
+            if chunk_start_time < audio.duration():
+                log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(chunk_start_time, chunk_end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
     total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

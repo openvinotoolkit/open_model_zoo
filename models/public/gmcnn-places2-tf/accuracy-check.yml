@@ -31,7 +31,7 @@ models:
   - name: gmcnn-places2-tf
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: inpainting
         inputs:
           - name: "Placeholder"

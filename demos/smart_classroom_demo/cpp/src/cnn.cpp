@@ -1,127 +1,143 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "cnn.hpp"
-
+#include <algorithm>
+#include <map>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 
-CnnDLSDKBase::CnnDLSDKBase(const Config& config) : config_(config) {}
+#include "cnn.hpp"
+
+CnnDLSDKBase::CnnDLSDKBase(const Config& config) : m_config(config) {}
 
 void CnnDLSDKBase::Load() {
-    auto cnnNetwork = config_.ie.ReadNetwork(config_.path_to_model);
+    slog::info << "Reading model: " << m_config.m_path_to_model << slog::endl;
+    std::shared_ptr<ov::Model> model = m_config.m_core.read_model(m_config.m_path_to_model);
+    logBasicModelInfo(model);
 
-
-    const int currentBatchSize = cnnNetwork.getBatchSize();
-    if (currentBatchSize != config_.max_batch_size)
-        cnnNetwork.setBatchSize(config_.max_batch_size);
-
-    InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
-    if (in.size() != 1) {
+    ov::OutputVector inputs = model->inputs();
+    if (inputs.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
-    in.begin()->second->setPrecision(InferenceEngine::Precision::U8);
-    in.begin()->second->setLayout(InferenceEngine::Layout::NCHW);
-    input_blob_name_ = in.begin()->first;
 
-    InferenceEngine::OutputsDataMap out = cnnNetwork.getOutputsInfo();
-    for (auto&& item : out) {
-        item.second->setPrecision(InferenceEngine::Precision::FP32);
-        output_blobs_names_.push_back(item.first);
+    ov::Layout desiredLayout = {"NHWC"};
+
+    m_input_tensor_name = model->input().get_any_name();
+
+    m_modelLayout = ov::layout::get_layout(model->input());
+    if (m_modelLayout.empty())
+        m_modelLayout = {"NCHW"};
+
+    m_modelShape = model->input().get_shape();
+
+    ov::OutputVector outputs = model->outputs();
+    for (auto& item : outputs) {
+        const std::string name = item.get_any_name();
+        m_output_tensors_names.push_back(name);
     }
 
-    try {
-        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    } catch (const InferenceEngine::Exception&) {  // in case the model does not work with dynamic batch
-        cnnNetwork.setBatchSize(1);
-        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName,
-            {{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED, InferenceEngine::PluginConfigParams::NO}});
-    }
-    logExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
-    infer_request_ = executable_network_.CreateInferRequest();
+    ov::preprocess::PrePostProcessor ppp(model);
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout(desiredLayout);
+    ppp.input().preprocess()
+        .convert_layout(m_modelLayout)
+        .convert_element_type(ov::element::f32);
+    ppp.input().model().set_layout(m_modelLayout);
+
+    model = ppp.build();
+
+    slog::info << "PrePostProcessor configuration:" << slog::endl;
+    slog::info << ppp << slog::endl;
+
+    // allow 1...max_batch range, actual will be set at inference time
+    ov::set_batch(model, {1, m_config.m_max_batch_size});
+
+    m_modelShape[ov::layout::batch_idx(m_modelLayout)] = m_config.m_max_batch_size;
+
+    m_compiled_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
+    logCompiledModelInfo(m_compiled_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
+
+    m_infer_request = m_compiled_model.create_infer_request();
 }
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
-        const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
-    InferenceEngine::Blob::Ptr input = infer_request_.GetBlob(input_blob_name_);
-    const size_t batch_size = input->getTensorDesc().getDims()[0];
+        const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
+    ov::Tensor input_tensor = m_infer_request.get_tensor(m_input_tensor_name);
 
     size_t num_imgs = frames.size();
-    for (size_t batch_i = 0; batch_i < num_imgs; batch_i += batch_size) {
-        const size_t current_batch_size = std::min(batch_size, num_imgs - batch_i);
-        for (size_t b = 0; b < current_batch_size; b++) {
-            matToBlob(frames[batch_i + b], input, b);
-        }
 
-        if (config_.max_batch_size != 1)
-            infer_request_.SetBatch(current_batch_size);
-        infer_request_.Infer();
+    size_t h = m_modelShape[ov::layout::height_idx(m_modelLayout)];
+    size_t w = m_modelShape[ov::layout::width_idx(m_modelLayout)];
+    size_t c = m_modelShape[ov::layout::channels_idx(m_modelLayout)];
 
-        InferenceEngine::BlobMap blobs;
-        for (const auto& name : output_blobs_names_)  {
-            blobs[name] = infer_request_.GetBlob(name);
-        }
-        fetch_results(blobs, current_batch_size);
+    // shrink tensor from default m_config.m_max_batch_size to actual num of images;
+    input_tensor.set_shape({ num_imgs, h, w, c });
+
+    for (size_t i = 0; i < num_imgs; i++) {
+        resize2tensor(frames[i], ov::Tensor{ input_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} });
     }
+
+    m_infer_request.set_input_tensor(ov::Tensor{ input_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
+
+    m_infer_request.infer();
+
+    std::map<std::string, ov::Tensor> output_tensors;
+    for (const auto& output_tensor_name : m_output_tensors_names) {
+        output_tensors[output_tensor_name] = m_infer_request.get_tensor(output_tensor_name);
+    }
+
+    fetch_results(output_tensors, num_imgs);
 }
 
-void CnnDLSDKBase::Infer(const cv::Mat& frame,
-                         const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
-    InferBatch({frame}, fetch_results);
-}
-
-VectorCNN::VectorCNN(const Config& config)
-        : CnnDLSDKBase(config) {
+VectorCNN::VectorCNN(const Config& config) : CnnDLSDKBase(config) {
     Load();
-    if (output_blobs_names_.size() != 1) {
+    if (m_output_tensors_names.size() != 1) {
         throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 }
 
-void VectorCNN::Compute(const cv::Mat& frame,
-                                     cv::Mat* vector, cv::Size outp_shape) const {
+void VectorCNN::Compute(const cv::Mat& frame, cv::Mat* vector, cv::Size outp_shape) const {
     std::vector<cv::Mat> output;
     Compute({frame}, &output, outp_shape);
     *vector = output[0];
 }
 
-void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors,
-                                     cv::Size outp_shape) const {
+void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors, cv::Size outp_shape) const {
     if (images.empty()) {
         return;
     }
     vectors->clear();
-    auto results_fetcher = [vectors, outp_shape](const InferenceEngine::BlobMap& outputs, size_t batch_size) {
-        for (auto&& item : outputs) {
-            InferenceEngine::Blob::Ptr blob = item.second;
-            if (blob == nullptr) {
-                throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
+    auto results_fetcher = [vectors, outp_shape](const std::map<std::string, ov::Tensor>& outputs, size_t batch_size) {
+        for (auto& output : outputs) {
+            ov::Tensor tensor = output.second;
+            ov::Shape shape = tensor.get_shape();
+            std::vector<int> tensor_sizes(shape.size(), 0);
+            for (size_t i = 0; i < tensor_sizes.size(); ++i) {
+                tensor_sizes[i] = shape[i];
             }
-            InferenceEngine::SizeVector ie_output_dims = blob->getTensorDesc().getDims();
-            std::vector<int> blob_sizes(ie_output_dims.size(), 0);
-            for (size_t i = 0; i < blob_sizes.size(); ++i) {
-                blob_sizes[i] = ie_output_dims[i];
-            }
-            InferenceEngine::LockedMemory<const void> blobMapped =
-                InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
-            cv::Mat out_blob(blob_sizes, CV_32F, blobMapped.as<float*>());
+            cv::Mat out_tensor(tensor_sizes, CV_32F, tensor.data<float>());
             for (size_t b = 0; b < batch_size; b++) {
-                cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,
-                                     reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));
+                cv::Mat tensor_wrapper(out_tensor.size[1], 1, CV_32F,
+                                     reinterpret_cast<void*>((out_tensor.ptr<float>(0) + b * out_tensor.size[1])));
                 vectors->emplace_back();
                 if (outp_shape != cv::Size())
-                    blob_wrapper = blob_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
-                blob_wrapper.copyTo(vectors->back());
+                    tensor_wrapper = tensor_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
+                tensor_wrapper.copyTo(vectors->back());
             }
         }
     };
     InferBatch(images, results_fetcher);
+}
+
+int VectorCNN::maxBatchSize() const {
+    return m_config.m_max_batch_size;
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ files:
   - name: efficientdet-d0.tar.gz
     size: 28828936
     checksum: 4107802535b036f846d856e55d0035f871bf900f28b25874874bcb72631f666d9f3a0ff8239c73e28a5fe9a0f816ac9f
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d0.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientdet-d0-tf/efficientdet-d0.tar.gz
+    original_source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d0.tar.gz
   - name: model/model_inspect.py
     size: 20388
     checksum: d67e6eb34695a2ed0ab0c7444ecc763ff111834b4e7bb7183ec5bd66bc8b95443c5538b7322da2ffe589db8c4d4091f3
@@ -110,13 +111,13 @@ postprocessing:
     file: model/keras/anchors.py
     pattern: 'from object_detection'
     replacement: '# \g<0>'
-
   - $type: unpack_archive
     format: gztar
     file: efficientdet-d0.tar.gz
 model_optimizer_args:
   - --input_shape=[1,512,512,3]
   - --input=image_arrays
+  - --layout=image_arrays(NHWC)
   - --reverse_input_channels
   - --input_model=$conv_dir/efficientdet-d0_saved_model/efficientdet-d0_frozen.pb
   - --transformations_config=$mo_ext_dir/front/tf/automl_efficientdet.json

@@ -101,15 +101,19 @@ int main(int argc, char *argv[]) {
             FLAGS_m_d,                         // path to model
             fileNameNoExt(FLAGS_m_d) + ".bin", // path to weights
             FLAGS_d_d                          // device to use
-        }.cfgOutputLayers({"boxes"}); // This clarification here because
-                                      // of GAPI take the last layer from .xml
-                                      // and last layer sould be the outpul layer
+        }.cfgOutputLayers({"boxes"}); // This clarification here because of
+                                      // GAPI take the first layer name from OutputsInfo
+                                      // for one output G_API_NET API
+        slog::info << "The Person Detection ASL model " << FLAGS_m_d << " is loaded to " << FLAGS_d_d << " device." << slog::endl;
 
         auto action_recognition = cv::gapi::ie::Params<nets::ActionRecognition> {
             FLAGS_m_a,                         // path to model
             fileNameNoExt(FLAGS_m_a) + ".bin", // path to weights
             FLAGS_d_a                          // device to use
-        }.cfgOutputLayers({"output"}); // The same
+        }.cfgOutputLayers({"output"}); // This clarification here because of
+                                       // GAPI take the first layer name from OutputsInfo
+                                       // for one output G_API_NET API
+        slog::info << "The Action Recognition model " << FLAGS_m_a << " is loaded to " << FLAGS_d_a << " device." << slog::endl;
 
         /** Custom kernels **/
         auto kernels = custom::kernels();
@@ -125,11 +129,11 @@ int main(int argc, char *argv[]) {
         /** ---------------- The execution part ---------------- **/
         const float batch_constant_FPS = 15;
         auto drop_batch = std::make_shared<bool>(false);
-        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CustomCapSource>(cap,
-                                                                                    frame_size,
-                                                                                    int(ar_net_shape[1]),
-                                                                                    batch_constant_FPS,
-                                                                                    drop_batch),
+        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::GestRecCapSource>(cap,
+                                                                                     frame_size,
+                                                                                     int(ar_net_shape[1]),
+                                                                                     batch_constant_FPS,
+                                                                                     drop_batch),
                                    current_person_id_m));
 
         std::string gestureWindowName = "Gesture";
@@ -137,12 +141,7 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Save output result **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         /** Fill labels container from file with classes **/
         const auto labels = fill_labels(FLAGS_c);
@@ -173,9 +172,7 @@ int main(int argc, char *argv[]) {
             visualizer.show(out_frame, out_detections, out_label_number, current_id, gesture);
             gesture = 0;
 
-            if (videoWriter.isOpened()) {
-                videoWriter.write(out_frame);
-            }
+            videoWriter.write(out_frame);
 
             /** Controls **/
             int key = cv::waitKey(1);

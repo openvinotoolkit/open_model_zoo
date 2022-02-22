@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,12 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
-from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
+from ..representation import (
+    DetectionPrediction,
+    ActionDetectionPrediction,
+    ContainerPrediction,
+    ClassificationPrediction
+)
 from ..utils import contains_all
 
 
@@ -145,14 +150,17 @@ class ActionDetection(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.outputs_verified:
             self._get_output_names(raw_outputs)
+        input_shape = list(frame_meta[0].get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
+        nchw_layout = input_shape[1] == 3
         prior_boxes = raw_outputs[self.priorbox_out][0][0].reshape(-1, 4) if not self.multihead else None
         prior_variances = raw_outputs[self.priorbox_out][0][1].reshape(-1, 4) if not self.multihead else None
 
-        head_shifts = self.estimate_head_shifts(raw_outputs, self. head_sizes, self.add_conf_outs, self.multihead)
+        head_shifts = self.estimate_head_shifts(
+            raw_outputs, self. head_sizes, self.add_conf_outs, self.multihead, nchw_layout)
 
         for batch_id, identifier in enumerate(identifiers):
             labels, class_scores, x_mins, y_mins, x_maxs, y_maxs, main_scores = self.prepare_detection_for_id(
-                batch_id, raw_outputs, prior_boxes, prior_variances, head_shifts
+                batch_id, raw_outputs, prior_boxes, prior_variances, head_shifts, nchw=nchw_layout
             )
             action_prediction = ActionDetectionPrediction(
                 identifier, labels, class_scores, main_scores, x_mins, y_mins, x_maxs, y_maxs
@@ -167,12 +175,15 @@ class ActionDetection(Adapter):
         return result
 
     def prepare_detection_for_id(self, batch_id, raw_outputs, prior_boxes, prior_variances, head_shifts,
-                                 default_label=0):
+                                 default_label=0, nchw=True):
         num_detections = raw_outputs[self.loc_out][batch_id].size // 4
         locs = raw_outputs[self.loc_out][batch_id].reshape(-1, 4)
         main_conf = raw_outputs[self.main_conf_out][batch_id].reshape(num_detections, -1)
 
         add_confs = [raw_outputs[layer][batch_id] for layer in self.add_conf_outs]
+        if not nchw:
+            add_confs = [np.transpose(conf_l, (2, 0, 1)) for conf_l in add_confs]
+
         if self.multihead:
             spatial_sizes = [layer.shape[1:] for layer in add_confs]
             add_confs = [layer.reshape(self.num_action_classes, -1) for layer in add_confs]
@@ -238,7 +249,7 @@ class ActionDetection(Adapter):
         return decoded_xmin, decoded_ymin, decoded_xmax, decoded_ymax
 
     @staticmethod
-    def estimate_head_shifts(raw_outputs, head_sizes, add_conf_outs, multihead_net):
+    def estimate_head_shifts(raw_outputs, head_sizes, add_conf_outs, multihead_net, nchw=True):
         layer_id = 0
         head_shift = 0
         head_shifts = [0]
@@ -246,6 +257,8 @@ class ActionDetection(Adapter):
             for _ in range(head_size):
                 layer = add_conf_outs[layer_id]
                 layer_shape = raw_outputs[layer][0].shape
+                if len(layer_shape) == 3 and not nchw:
+                    layer_shape = layer_shape[::-1]
                 layer_size = np.prod(layer_shape[1:]) if multihead_net else np.prod(layer_shape[:2])
                 head_shift += layer_size
                 layer_id += 1
@@ -297,18 +310,65 @@ class ActionDetection(Adapter):
 
         self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
         self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
+        if hasattr(self, 'priorbox_out'):
+            self.priorbox_out = self.check_output_name(self.priorbox_out, raw_outputs)
         self.outputs_verified = True
-        if contains_all(raw_outputs, self.add_conf_outs):
+        add_conf_outs = [self.check_output_name(layer, raw_outputs) for layer in self.add_conf_outs]
+        if contains_all(raw_outputs, add_conf_outs):
+            self.add_conf_outs = add_conf_outs
             return
-        add_conf_result = [layer_name + '/sink_port_0' for layer_name in self.add_conf_outs]
-        if contains_all(raw_outputs, add_conf_result):
-            self.add_conf_outs = add_conf_result
-            return
-        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
+
+        add_conf_with_bias = [self.check_output_name(layer_name + '/add_', raw_outputs)
+                              for layer_name in self.add_conf_outs]
         if contains_all(raw_outputs, add_conf_with_bias):
             self.add_conf_outs = add_conf_with_bias
             return
-        add_conf_with_bias_result = [layer_name + '/add_/sink_port_0' for layer_name in self.add_conf_outs]
-        if contains_all(raw_outputs, add_conf_with_bias_result):
-            self.add_conf_outs = add_conf_with_bias_result
+        return
+
+class ActionRecognitionWithNoAction(Adapter):
+    __provider__ = 'action_recognition_with_condition'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'no_action_id': NumberField(
+                optional=True, default=0, min_value=0, value_type=int, description='no_action label id'),
+            'no_action_threshold': NumberField(
+                optional=True, default=0.5, min_value=0, max_value=1, value_type=float,
+                description='threshold for selection no action'),
+            'action_output': StringField(optional=True, description='output layer name with action scores')
+        })
+        return params
+
+    def configure(self):
+        self.no_action_id = self.get_value_from_config('no_action_id')
+        self.no_action_threshold = self.get_value_from_config('no_action_threshold')
+        self.action_output = self.get_value_from_config('action_output')
+        self.output_verified = False
+
+    def process(self, raw, identifiers, frame_meta):
+        predictions = []
+        if not self.output_verified:
+            self.select_output_blob(raw)
+        outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, action_out in zip(identifiers, outputs[self.action_output]):
+            no_action_score = action_out[self.no_action_id]
+            if no_action_score >= self.no_action_threshold:
+                mask = np.ones_like(action_out, dtype=bool)
+                mask[self.no_action_id] = False
+                scores = action_out[mask] = 0.
+            else:
+                scores = action_out
+                scores[self.no_action_id] = 0.
+            predictions.append(ClassificationPrediction(identifier, scores))
+        return predictions
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        if self.action_output:
+            self.action_output = self.check_output_name(self.action_out, outputs)
+            return
+        super().select_output_blob(outputs)
+        self.action_output = self.output_blob
         return

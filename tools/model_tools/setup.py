@@ -68,6 +68,9 @@ class CustomBuild(distutils.command.build_py.build_py):
             str(package_build_dir / 'data'),
         )
 
+        if (package_build_dir / 'models').exists():
+            shutil.rmtree(str(package_build_dir / 'models'))
+
         for model_config_path in itertools.chain(
                 OMZ_ROOT.glob('models/**/model.yml'),
                 OMZ_ROOT.glob('models/**/composite-model.yml'),
@@ -98,6 +101,7 @@ setup(
     extras_require={
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),
+        'paddle': read_text('requirements-paddle.in')
     },
     cmdclass={
         'build_py': CustomBuild,

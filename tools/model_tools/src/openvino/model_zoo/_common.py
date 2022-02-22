@@ -14,11 +14,9 @@
 
 import contextlib
 import platform
-import pyrx
 import re
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
-import yaml
 
 from pathlib import Path
 
@@ -40,6 +38,7 @@ KNOWN_FRAMEWORKS = {
     'dldt': None,
     'mxnet': None,
     'onnx': None,
+    'paddle': None,
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
 }
@@ -77,6 +76,7 @@ KNOWN_TASK_TYPES = {
     'text_to_speech',
     'time_series',
     'token_recognition',
+    'background_matting',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
@@ -160,12 +160,3 @@ def telemetry_session(app_name, tool):
     finally:
         telemetry.end_session('md')
         telemetry.force_shutdown(1.0)
-
-def get_schema():
-    schema_path = PACKAGE_DIR / 'schema.yml'
-    with schema_path.open('rb') as schema_file:
-        schema = yaml.safe_load(schema_file)
-        rx = pyrx.Factory({"register_core_types": True})
-        schema = rx.make_schema(schema)
-
-        return schema

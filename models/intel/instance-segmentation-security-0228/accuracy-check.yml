@@ -2,7 +2,7 @@ models:
   - name: instance-segmentation-security-0228
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: mask_rcnn
           classes_out: labels

@@ -38,12 +38,12 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `image_input`, shape - `1, 3, 416, 416`, format is `B, C, H, W`, where:
+Image, name - `image_input`, shape - `1, 416, 416, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -85,9 +85,9 @@ Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `c
 The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -98,6 +98,14 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
 
 ## Legal Information
 

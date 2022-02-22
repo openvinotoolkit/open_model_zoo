@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ class Dataset:
                 is_directory=True, optional=True, description='additional data source for annotation loading'
             ),
             'subset_file': PathField(optional=True, description='file with identifiers for subset', check_exists=False),
+            'subset': ListField(optional=True, description='identifiers for subset'),
             'store_subset': BoolField(
                 optional=True, default=False,
                 description='save subset ids to file specified in subset_file parameter'
@@ -603,13 +604,39 @@ class DataProvider:
         if self.store_subset:
             self.sava_subset()
 
+    @classmethod
+    def from_config(cls, config, load_annotation=False):
+        if load_annotation:
+            annotation, meta = Dataset.load_annotation(config)
+            annotation_provider = AnnotationProvider(annotation, meta)
+        else:
+            annotation_provider = None
+        data_reader_config = config.get('reader', 'opencv_imread')
+        data_source = config.get('data_source')
+        if isinstance(data_reader_config, str):
+            data_reader_type = data_reader_config
+            data_reader_config = None
+        elif isinstance(data_reader_config, dict):
+            data_reader_type = data_reader_config['type']
+        else:
+            raise ConfigError('reader should be dict or string')
+        if data_reader_type in REQUIRES_ANNOTATIONS:
+            data_source = annotation_provider
+        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
+        return cls(
+            data_reader, annotation_provider, dataset_config=config
+        )
+
     def create_data_list(self, data_list=None):
         if data_list is not None:
             self._data_list = data_list
             return
         self.store_subset = self.dataset_config.get('store_subset', False)
+        if 'subset' in self.dataset_config:
+            self._create_data_list(self.dataset_config['subset'])
+            return
 
-        if self.dataset_config.get('subset_file'):
+        if 'subset_file' in self.dataset_config:
             subset_file = Path(self.dataset_config['subset_file'])
             if subset_file.exists() and not self.store_subset:
                 self.read_subset(subset_file)
@@ -623,9 +650,12 @@ class DataProvider:
         self._data_list = [file.name for file in self.data_reader.data_source.glob('*')]
 
     def read_subset(self, subset_file):
-        identifiers = [deserialize_identifier(idx) for idx in read_yaml(subset_file)]
-        self._data_list = identifiers
+        self._create_data_list(read_yaml(subset_file))
         print_info("loaded {} data items from {}".format(len(self._data_list), subset_file))
+
+    def _create_data_list(self, subset):
+        identifiers = [deserialize_identifier(idx) for idx in subset]
+        self._data_list = identifiers
 
     def sava_subset(self):
         identifiers = [serialize_identifier(idx) for idx in self._data_list]
@@ -636,7 +666,7 @@ class DataProvider:
             yaml.safe_dump(identifiers, sf)
 
     def __getitem__(self, item):
-        if self.batch is None:
+        if self.batch is None or self._batch <= 0:
             self.batch = 1
         if self.size <= item * self.batch:
             raise IndexError
@@ -662,6 +692,9 @@ class DataProvider:
     @property
     def identifiers(self):
         return self._data_list
+
+    def get_data_path(self):
+        return [self.data_reader.data_source / identifier for identifier in self._data_list]
 
     def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         if self.annotation_provider:

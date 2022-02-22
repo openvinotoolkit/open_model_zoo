@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,17 +24,16 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 from scipy.special import softmax
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from text_spotting_demo.tracker import StaticIOUTracker
-from text_spotting_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from visualizers import InstanceSegmentationVisualizer
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -76,10 +75,6 @@ def build_argparser():
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
                            'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
                       help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
@@ -167,48 +162,51 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    # Plugin initialization for specified device and load extensions library if specified.
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
+    core = Core()
+
     # Read IR
     log.info('Reading Mask-RCNN model {}'.format(args.mask_rcnn_model))
-    mask_rcnn_net = ie.read_network(args.mask_rcnn_model)
+    mask_rcnn_model = core.read_model(args.mask_rcnn_model)
 
-    model_required_inputs = {'image'}
-    if set(mask_rcnn_net.input_info) == model_required_inputs:
-        required_output_keys = {'boxes', 'labels', 'masks', 'text_features.0'}
-        n, c, h, w = mask_rcnn_net.input_info['image'].input_data.shape
-        assert n == 1, 'Only batch 1 is supported by the demo application'
-    else:
-        raise RuntimeError('Demo supports only topologies with the following input keys: '
-                           f'{model_required_inputs}.')
-    assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
-        f'Demo supports only topologies with the following output keys: {required_output_keys}' \
-        f'Found: {mask_rcnn_net.outputs.keys()}.'
+    input_tensor_name = 'image'
+    try:
+        n, c, h, w = mask_rcnn_model.input(input_tensor_name).shape
+        if n != 1:
+            raise RuntimeError('Only batch 1 is supported by the demo application')
+    except RuntimeError:
+        raise RuntimeError('Demo supports only topologies with the following input tensor name: {}'.format(input_tensor_name))
+
+    required_output_names = {'boxes', 'labels', 'masks', 'text_features'}
+    for output_tensor_name in required_output_names:
+        try:
+            mask_rcnn_model.output(output_tensor_name)
+        except RuntimeError:
+            raise RuntimeError('Demo supports only topologies with the following output tensor names: {}'.format(
+                ', '.join(required_output_names)))
 
     log.info('Reading Text Recognition Encoder model {}'.format(args.text_enc_model))
-    text_enc_net = ie.read_network(args.text_enc_model)
+    text_enc_model = core.read_model(args.text_enc_model)
 
     log.info('Reading Text Recognition Decoder model {}'.format(args.text_dec_model))
-    text_dec_net = ie.read_network(args.text_dec_model)
+    text_dec_model = core.read_model(args.text_dec_model)
 
-    mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device, num_requests=2)
+    mask_rcnn_compiled_model = core.compile_model(mask_rcnn_model, device_name=args.device)
+    mask_rcnn_infer_request = mask_rcnn_compiled_model.create_infer_request()
     log.info('The Mask-RCNN model {} is loaded to {}'.format(args.mask_rcnn_model, args.device))
 
-    text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
+    text_enc_compiled_model = core.compile_model(text_enc_model, args.device)
+    text_enc_output_tensor = text_enc_compiled_model.outputs[0]
+    text_enc_infer_request = text_enc_compiled_model.create_infer_request()
     log.info('The Text Recognition Encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
 
-    text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
+    text_dec_compiled_model = core.compile_model(text_dec_model, args.device)
+    text_dec_infer_request = text_dec_compiled_model.create_infer_request()
     log.info('The Text Recognition Decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
 
-    hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
-
-    del mask_rcnn_net
-    del text_enc_net
-    del text_dec_net
+    hidden_shape = text_dec_model.input(args.trd_input_prev_hidden).shape
+    text_dec_output_names = {args.trd_output_symbols_distr, args.trd_output_cur_hidden}
 
     if args.no_track:
         tracker = None
@@ -220,7 +218,7 @@ def main():
     else:
         delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
-    visualizer = Visualizer(['__background__', 'text'], show_boxes=args.show_boxes, show_scores=args.show_scores)
+    visualizer = InstanceSegmentationVisualizer(show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     frames_processed = 0
 
@@ -257,15 +255,16 @@ def main():
         input_image = input_image.transpose((2, 0, 1))
         input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
 
-        # Run the net.
-        outputs = mask_rcnn_exec_net.infer({'image': input_image})
+        # Run the MaskRCNN model.
+        mask_rcnn_infer_request.infer({input_tensor_name: input_image})
+        outputs = {name: mask_rcnn_infer_request.get_tensor(name).data[:] for name in required_output_names}
 
         # Parse detection results of the current request
         boxes = outputs['boxes'][:, :4]
         scores = outputs['boxes'][:, 4]
         classes = outputs['labels'].astype(np.uint32)
         raw_masks = outputs['masks']
-        text_features = outputs['text_features.0']
+        text_features = outputs['text_features']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
@@ -284,7 +283,8 @@ def main():
 
         texts = []
         for feature in text_features:
-            feature = text_enc_exec_net.infer({'input': feature})['output']
+            input_data = {'input': np.expand_dims(feature, axis=0)}
+            feature = text_enc_infer_request.infer(input_data)[text_enc_output_tensor]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
@@ -294,10 +294,11 @@ def main():
             text = ''
             text_confidence = 1.0
             for i in range(MAX_SEQ_LEN):
-                decoder_output = text_dec_exec_net.infer({
-                    args.trd_input_prev_symbol: prev_symbol_index,
+                text_dec_infer_request.infer({
+                    args.trd_input_prev_symbol: np.reshape(prev_symbol_index, (1,)),
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
+                decoder_output = {name: text_dec_infer_request.get_tensor(name).data[:] for name in text_dec_output_names}
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
                 symbols_distr_softmaxed = softmax(symbols_distr, axis=1)[0]
                 prev_symbol_index = int(np.argmax(symbols_distr, axis=1))
@@ -323,7 +324,7 @@ def main():
         presenter.drawGraphs(frame)
 
         # Visualize masks.
-        frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
+        frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids, texts)
         metrics.update(start_time, frame)
 
         frames_processed += 1
@@ -347,7 +348,6 @@ def main():
     metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
-    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

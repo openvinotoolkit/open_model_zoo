@@ -1,7 +1,7 @@
 models:
   - name: colorization-siggraph
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           std: 1

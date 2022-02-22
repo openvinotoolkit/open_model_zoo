@@ -23,7 +23,7 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version, PartialShape, Dimension
 from tokenizers import Tokenizer, pre_tokenizers, decoders
 from tokenizers.models import BPE
 
@@ -57,6 +57,8 @@ def build_argparser():
                       help="Optional. Target device to perform inference on. "
                            "Default value is CPU",
                       default="CPU", type=str)
+    args.add_argument('--dynamic_shape', action='store_true', help='Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
+    args.add_argument('--max_seq_len', type=int, required=False, default=1024, help='Optional. Maximum sequence length for processing. Default value is 1024')
     return parser
 
 
@@ -74,26 +76,31 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    ie = Core()
 
     # read IR
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
     log.info('Reading model {}'.format(args.model))
-    ie_net = ie.read_network(model=model_xml, weights=model_bin)
+    model = ie.read_model(args.model)
 
-    # check input and output names
-    if len(ie_net.input_info) != 1:
+    # check number inputs and outputs
+    if len(model.inputs) != 1:
         raise RuntimeError('The demo expects model with single input, while provided {}'.format(
-            len(ie_net.input_info)))
-    if len(ie_net.outputs) != 1:
+            len(model.inputs)))
+    if len(model.outputs) != 1:
         raise RuntimeError('The demo expects model with single output, while provided {}'.format(
-            len(ie_net.outputs)))
-    input_names = next(iter(ie_net.input_info))
-    output_names = next(iter(ie_net.outputs))
+            len(model.outputs)))
+    input_tensor = model.inputs[0].any_name
+
+    if not args.dynamic_shape and (model.inputs[0].partial_shape.is_dynamic or model.inputs[0].shape[1] != args.max_seq_len):
+        model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(args.max_seq_len)])})
+
+    if args.dynamic_shape:
+        model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(0, args.max_seq_len)])})
 
     # load model to the device
-    ie_net_exec = ie.load_network(network=ie_net, device_name=args.device)
+    compiled_model = ie.compile_model(model, args.device)
+    output_tensor = compiled_model.outputs[0]
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.input:
@@ -116,7 +123,7 @@ def main():
         input_ids = np.array([tokens], dtype=np.int32)
 
         # maximum number of tokens that can be processed by network at once
-        max_length = ie_net.input_info[input_names].input_data.shape[1]
+        max_length = args.max_seq_len
 
         eos_token_id = len(vocab) - 1
 
@@ -129,24 +136,25 @@ def main():
         t_count = 0
 
         while True:
-            # pad the rest of the request
-            pad_len = max_length - cur_input_len
-            model_input = np.concatenate((input_ids, [[eos_token_id] * pad_len]), axis=-1)
+            model_input = input_ids
+            if not args.dynamic_shape:
+                # pad the rest of the request
+                pad_len = max_length - cur_input_len
+                model_input = np.concatenate((input_ids, [[eos_token_id] * pad_len]), axis=-1)
 
             # create numpy inputs for IE
             inputs = {
-                input_names: model_input,
+                input_tensor: model_input,
             }
 
             # infer by IE
             t_start = time.perf_counter()
-            res = ie_net_exec.infer(inputs=inputs)
+            outputs = infer_request.infer(inputs)[output_tensor]
             t_end = time.perf_counter()
             t_count += 1
             log.info("Sequence of length {} is processed with {:0.2f} requests/sec ({:0.2} sec per request)".format(
-                max_length, 1 / (t_end - t_start), t_end - t_start))
+                model_input.shape[1], 1 / (t_end - t_start), t_end - t_start))
 
-            outputs = res[output_names]
             next_token_logits = outputs[:, cur_input_len-1, :]
 
             # pre-process distribution
@@ -173,8 +181,8 @@ def main():
 
         text = tokenizer.decode_batch(input_ids)[0]
 
-        log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
-            t_count, max_length, t1 - t0, (t1 - t0) / t_count))
+        log.info("{} requests were processed in {:0.2f}sec ({:0.2}sec per request)".format(
+            t_count, t1 - t0, (t1 - t0) / t_count))
 
         # print result
         log.info("GENERATED SEQUENCE: {}".format(text))

@@ -424,24 +424,18 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Presenter> presenter;
 
          /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
-            FLAGS_limit);
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         const auto tmp = cap->read();
         cap.reset();
         if (!tmp.data) {
             throw std::runtime_error("Couldn't grab first frame");
         }
-        cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);
 
         /** Save output result **/
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), frame_size)) {
-            throw std::runtime_error("Can't open video writer");
-        }
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
@@ -539,9 +533,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (videoWriter.isOpened()) {
-                videoWriter.write(frame);
-            }
+            videoWriter.write(frame);
         }
 
         cv::destroyAllWindows();

@@ -2,7 +2,7 @@ models:
   - name: road-segmentation-adas-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: segmentation
 
     datasets:

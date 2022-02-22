@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,29 +15,32 @@
 */
 
 #include <iostream>
-#include <vector>
-#include <string>
 #include <numeric>
 #include <random>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <gflags/gflags.h>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
 
 #include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
-#include <unordered_map>
-#include <gflags/gflags.h>
-
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
 #include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -49,10 +52,8 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
@@ -81,8 +82,7 @@ DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
@@ -114,11 +114,9 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -325,35 +323,36 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels, FLAGS_layout));
         }
         else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, FLAGS_layout));
         }
         else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
+            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels, FLAGS_layout));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t,
+                labels, anchors, masks, FLAGS_layout));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
-        model->SetInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        model->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
+        slog::info << ov::get_openvino_version() << slog::endl;
 
-        InferenceEngine::Core core;
+        ov::Core core;
 
         AsyncPipeline pipeline(
             std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -362,7 +361,7 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
 
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         PerformanceMetrics renderMetrics;
 
@@ -403,14 +402,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            // Preparing video writer if needed
-            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    cap->fps(), outputResolution)) {
-                    throw std::runtime_error("Can't open video writer");
-                }
-            }
-
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
@@ -427,9 +418,7 @@ int main(int argc, char *argv[]) {
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 framesProcessed++;
 
                 if (!FLAGS_no_show) {
@@ -459,9 +448,7 @@ int main(int argc, char *argv[]) {
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Updating output window

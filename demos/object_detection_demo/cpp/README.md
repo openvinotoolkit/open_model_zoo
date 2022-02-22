@@ -58,7 +58,7 @@ For more details on the requests-based Inference Engine API, including the Async
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -91,6 +91,8 @@ omz_converter --list models.lst
   - face-detection-retail-0005
   - face-detection-retail-0044
   - faster-rcnn-resnet101-coco-sparse-60-0001
+  - faster_rcnn_inception_resnet_v2_atrous_coco
+  - faster_rcnn_resnet50_coco
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
   - pelee-coco
@@ -99,6 +101,9 @@ omz_converter --list models.lst
   - person-detection-0201
   - person-detection-0202
   - person-detection-0203
+  - person-detection-0301
+  - person-detection-0302
+  - person-detection-0303
   - person-detection-retail-0013
   - person-vehicle-bike-detection-2000
   - person-vehicle-bike-detection-2001
@@ -144,47 +149,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
-object_detection_demo [OPTION]
-Options:
-
-    -h                        Print a usage message.
-    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo
-    -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -m "<path>"               Required. Path to an .xml file with a trained model.
-    -o "<path>"               Optional. Name of the output file(s) to save.
-    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -labels "<path>"          Optional. Path to a file with labels mapping.
-    -r                        Optional. Inference results as raw values.
-    -t                        Optional. Probability threshold for detections.
-    -iou_t                    Optional. Filtering intersection over union threshold for overlapping boxes.
-    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
-    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
-    -nthreads "<integer>"     Optional. Number of threads.
-    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Don't show output.
-    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
-    -u                        Optional. List of monitors to show initially.
-    -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
-    -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
-    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.
-    -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
-    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
-    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
-```
-
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the demo with the `-h` option yields a usage message.
 
 If labels file is used, it should correspond to model output. Demo treat labels, listed in the file, to be indexed from 0, one line - one label (that is very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
 

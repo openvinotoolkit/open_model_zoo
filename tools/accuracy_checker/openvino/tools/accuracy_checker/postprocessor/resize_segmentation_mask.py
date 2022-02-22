@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -164,4 +164,22 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if 'image_info' in image_metadata and self.to_dst_image_size and not self._deprocess_predictions:
             self.image_size = image_metadata['image_info']
+        if image_metadata and self._deprocess_predictions and 'padding' in image_metadata:
+            self._deprocess_prediction_with_padding(prediction, image_metadata)
         self.process_image(annotation, prediction)
+
+    @staticmethod
+    def _deprocess_prediction_with_padding(prediction, image_metadata):
+        if image_metadata.get('padding_disabled', False):
+            return
+        top, left, bottom, right = image_metadata['padding']
+        for pred in prediction:
+            mask = pred.mask
+            if mask.ndim == 2:
+                h, w = mask.shape
+                mask = mask[top:(h - bottom), left:(w - right)]
+                pred.mask = mask
+                continue
+            _, h, w = mask.shape
+            mask = mask[:, top:(h - bottom), left:(w - right)]
+            pred.mask = mask

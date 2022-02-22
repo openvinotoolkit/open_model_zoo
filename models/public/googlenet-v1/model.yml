@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ files:
   - name: googlenet-v1.caffemodel
     size: 53533754
     checksum: c95413cd55c390f439ccc9842ec5953b31f85090d5f262e3093e38c78f378acdfb069fa28da2f49dbb8b9e5c8a816276
-    source: http://dl.caffe.berkeleyvision.org/bvlc_googlenet.caffemodel
+    original_source: http://dl.caffe.berkeleyvision.org/bvlc_googlenet.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v1/bvlc_googlenet.caffemodel
 postprocessing:
   - $type: regex_replace
     file: googlenet-v1.prototxt
@@ -42,10 +43,11 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[104.0,117.0,123.0]
   - --output=prob
   - --input_model=$dl_dir/googlenet-v1.caffemodel
   - --input_proto=$dl_dir/googlenet-v1.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_googlenet/readme.md

@@ -303,6 +303,21 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
   * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
   * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
+* `background_matting_sequential` - converts a general format of datasets for background matting task to `BackgroundMattingAnnotation`. Images and GT data are grouoed by clips. The converter expects following dataset structure:
+  1. images, GT masks and backgrounds are located in separated directories (e.g. `<dataset_root>/images` for images, `<dataset_root>/masks` for masks and `<dataset_root>/backgrounds` for backgrounds respectively).
+  2. images, GT masks and backgrounds has common part in names and can have difference in prefix and postfix (e.g. image name is clip_0/image0001.jpeg, mask for it is clip_0/gt0001.png, background is clip_0/bg0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png, background_prefix - bg, background_postfix - .png)
+  * `images_dir` - path to directory with images.
+  * `masks_dir` - path to directory with GT masks.
+  * `image_prefix` - prefix part for image file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for image file names (optional, default is `.png`).
+  * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
+  * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
+  * `backgrounds_dir` - path to gt backgrounds directory.
+  * `background_prefix` - prefix for gt backgrounds.
+  * `background_postfix` - postfix for gt backgrounds.
+  * `with_background` - load backgrounds.
+  * `with_alpha` - load images with mask including alpha channel.
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
@@ -571,7 +586,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/master/misc/pytorch_toolkit/action_recognition#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/action_recognition/model_templates/custom-action-recognition/README.md#3-prepare-data).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).
@@ -707,12 +722,17 @@ The main difference between this converter and `super_resolution` in data organi
 * `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
   * `annotation_file` - path to image pairs file in txt format.
 * `conll_ner` - converts CONLL 2003 dataset for Named Entity Recognition to `BERTNamedEntityRecognitionAnnotation`.
-  * `annotation_file` - annotation file in txt forma
+  * `annotation_file` - annotation file in txt format.
   * `vocab_file` - vocab file for word piece tokenization.
   * `lower_case` - converts all tokens to lower case during tokenization (Optional, default `False`).
   * `max_length` - maximal input sequence length (Optional, default 128).
   * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
+  * `labels_file` - path to file with custom labels in json format (Optional).
+  Example of labels_file content:
+    ```json
+    {"labels": ["O", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "B-MISC", "I-MISC"]}
+    ```
 * `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
   * `annotation_file` - tsv file with location input data and reference.
 * `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`
@@ -806,6 +826,12 @@ The main difference between this converter and `super_resolution` in data organi
 * `mvtec` - converts MVTec dataset to `AnomalySegmentationAnnotation` or `ClassificationAnnotation`.
   * `data_dir` - directory with subset images.
   * `classification_only` - converts dataset to `ClassificationAnnotation` withot saving pixel level information (Optional, default `False`).
+* `kitti_2d_detection` - converts KITTI annotation for 2D object detection task to `DetectionAnnotation`.
+  * `annotations_dir` - path to directory with annotation files.
+  * `labels_file` - path to file with labels.
+  * `images_dir` - path to directory with images (optional, default image_2).
+  * `label_start` - specifies label index start in label map. Optional, default value is 1. You can provide another value, if you want to use this dataset for separate label validation.
+  * `images_suffix` - suffix for image file names (Optional, default: `.png`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

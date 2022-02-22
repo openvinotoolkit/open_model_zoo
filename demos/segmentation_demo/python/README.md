@@ -16,7 +16,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -41,6 +41,7 @@ omz_converter --list models.lst
   - icnet-camvid-ava-0001
   - icnet-camvid-ava-sparse-30-0001
   - icnet-camvid-ava-sparse-60-0001
+  - ocrnet-hrnet-w48-paddle
   - pspnet-pytorch
   - road-segmentation-adas-0001
   - semantic-segmentation-adas-0001
@@ -57,7 +58,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-at {segmentation,salient_object_detection}
-                            [-d DEVICE] [-c COLORS]
+                            [--adapter {openvino,ovms}] [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
@@ -68,12 +69,16 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model or
+                        address of model inference service if using OVMS adapter.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
                         Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -125,7 +130,7 @@ Running the application with the empty list of options yields the usage message 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 
 ```sh
-    python3 segmentation_demo.py -d CPU -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
+    python3 segmentation_demo.py -d CPU -i 0 -at segmentation -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -143,6 +148,16 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case when the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized. Also, one can use predefined colors from other datasets, like CAMVID.
 
 Available colors files located in the `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+    python3 segmentation_demo.py -i 0 -at segmentation -m localhost:9000/models/image_segmentation --adapter ovms
+```
 
 ## Demo Output
 

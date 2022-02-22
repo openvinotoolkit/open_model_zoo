@@ -24,6 +24,7 @@ from openvino.model_zoo import _common
 from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
+EXCLUDED_MODELS = []
 
 class ModelFile:
     def __init__(self, name, size, checksum, source):
@@ -51,7 +52,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, composite_model_name
+        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -65,12 +66,17 @@ class Model:
         self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
-        self.converter_to_onnx = _common.KNOWN_FRAMEWORKS[framework]
+        self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
         self.model_stages = {}
 
     @classmethod
-    def deserialize(cls, model, name, subdirectory, composite_model_name):
+    def deserialize(cls, model, name, subdirectory, composite_model_name, known_frameworks=None, known_task_types=None):
+        if known_frameworks is None:
+            known_frameworks = _common.KNOWN_FRAMEWORKS
+        if known_task_types is None:
+            known_task_types = _common.KNOWN_TASK_TYPES
+
         with validation.deserialization_context('In model "{}"'.format(name)):
             if not RE_MODEL_NAME.fullmatch(name):
                 raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
@@ -93,10 +99,10 @@ class Model:
                     postprocessings.append(postprocessing.Postproc.deserialize(postproc))
 
             framework = validation.validate_string_enum('"framework"', model['framework'],
-                _common.KNOWN_FRAMEWORKS.keys())
+                known_frameworks.keys())
 
             conversion_to_onnx_args = model.get('conversion_to_onnx_args', None)
-            if _common.KNOWN_FRAMEWORKS[framework]:
+            if known_frameworks[framework]:
                 if not conversion_to_onnx_args:
                     raise validation.DeserializationError('"conversion_to_onnx_args" is absent. '
                                                           'Framework "{}" is supported only by conversion to ONNX.'
@@ -125,15 +131,13 @@ class Model:
                 files_per_precision = {}
 
                 for file in files:
-                    if len(file.name.parts) != 2:
-                        raise validation.DeserializationError(
-                            'Can\'t derive precision from file name {!r}'.format(file.name))
-                    p = file.name.parts[0]
-                    if p not in _common.KNOWN_PRECISIONS:
-                        raise validation.DeserializationError(
-                            'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
-                                p, file.name, _common.KNOWN_PRECISIONS))
-                    files_per_precision.setdefault(p, set()).add(file.name.parts[1])
+                    if len(file.name.parts) == 2 and file.name.parts[0].startswith('FP'):
+                        p = file.name.parts[0]
+                        if p not in _common.KNOWN_PRECISIONS:
+                            raise validation.DeserializationError(
+                                'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
+                                    p, file.name, _common.KNOWN_PRECISIONS))
+                        files_per_precision.setdefault(p, set()).add(file.name.parts[1])
 
                 for precision, precision_files in files_per_precision.items():
                     for ext in ['xml', 'bin']:
@@ -155,11 +159,11 @@ class Model:
             license_url = validation.validate_string('"license"', model['license'])
 
             task_type = validation.validate_string_enum('"task_type"', model['task_type'],
-                _common.KNOWN_TASK_TYPES)
+                known_task_types)
 
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
-                task_type, conversion_to_onnx_args, composite_model_name)
+                task_type, conversion_to_onnx_args, known_frameworks[framework], composite_model_name)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
@@ -177,23 +181,29 @@ class CompositeModel:
         self.composite_model_name = composite_model_name
 
     @classmethod
-    def deserialize(cls, model, name, subdirectory, stages):
+    def deserialize(cls, model, name, subdirectory, stages, known_frameworks=None, known_task_types=None):
+        if known_frameworks is None:
+            known_frameworks = _common.KNOWN_FRAMEWORKS
+        if known_task_types is None:
+            known_task_types = _common.KNOWN_TASK_TYPES
+
         with validation.deserialization_context('In model "{}"'.format(name)):
             if not RE_MODEL_NAME.fullmatch(name):
                 raise validation.DeserializationError('Invalid name, must consist only of letters, digits or ._-')
 
-            task_type = validation.validate_string_enum('"task_type"', model['task_type'], _common.KNOWN_TASK_TYPES)
+            task_type = validation.validate_string_enum('"task_type"', model['task_type'], known_task_types)
 
             description = validation.validate_string('"description"', model['description'])
 
             license_url = validation.validate_string('"license"', model['license'])
 
             framework = validation.validate_string_enum('"framework"', model['framework'],
-                _common.KNOWN_FRAMEWORKS.keys())
+                                                        known_frameworks)
 
             model_stages = []
             for model_subdirectory, model_part in stages.items():
-                model_stages.append(Model.deserialize(model_part, model_subdirectory.name, model_subdirectory, name))
+                model_stages.append(Model.deserialize(model_part, model_subdirectory.name, model_subdirectory, name,
+                                                      known_frameworks=known_frameworks, known_task_types=known_task_types))
 
             quantization_output_precisions = model_stages[0].quantization_output_precisions
             precisions = model_stages[0].precisions
@@ -231,8 +241,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
     composite_models = []
     composite_model_names = set()
 
-    schema = _common.get_schema()
-
     if mode in (ModelLoadingMode.all, ModelLoadingMode.composite_only):
 
         for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
@@ -252,8 +260,6 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                         with stage.open('rb') as stage_config_file, \
                             validation.deserialization_context('In config "{}"'.format(stage_config_file)):
                             model = yaml.safe_load(stage_config_file)
-                            if not schema.check(model):
-                                raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                             stage_subdirectory = stage.parent.relative_to(models_root)
                             model_stages[stage_subdirectory] = model
@@ -287,14 +293,14 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     validation.deserialization_context('In config "{}"'.format(config_path)):
 
                 model = yaml.safe_load(config_file)
-                if not schema.check(model):
-                    raise validation.DeserializationError('Configuration file check was\'t successful.')
 
                 for bad_key in ['name', 'subdirectory']:
                     if bad_key in model:
                         raise validation.DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                if subdirectory.name not in EXCLUDED_MODELS:
+                    models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
+                    continue
 
                 if models[-1].name in model_names:
                     raise validation.DeserializationError(
@@ -351,6 +357,7 @@ def load_models_from_args(parser, args, models_root):
 
         for pattern in patterns:
             matching_models = []
+            is_excluded = False
             for model in all_models:
                 if fnmatch.fnmatchcase(model.name, pattern):
                     matching_models.append(model)
@@ -359,7 +366,11 @@ def load_models_from_args(parser, args, models_root):
                         if fnmatch.fnmatchcase(model_stage.name, pattern):
                             matching_models.append(model_stage)
 
-            if not matching_models:
+            for model in EXCLUDED_MODELS:
+                if fnmatch.fnmatchcase(model, pattern):
+                    is_excluded = True
+
+            if not matching_models and not is_excluded:
                 sys.exit('No matching models: "{}"'.format(pattern))
 
             for model in matching_models:

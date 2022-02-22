@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ files:
   - name: single-human-pose-estimation-0001.tar.gz
     checksum: 440a3e299edf8f474bd974f124416dcd2f6b3121993b6b176bfb0da52a615b0f69d7b22b56ccc912fa04c2ccf96ca632
     size: 151979155
-    source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.tar.gz
+    original_source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/single-human-pose-estimation-0001/single-human-pose-estimation-0001.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -36,6 +37,7 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/single-human-pose-estimation-0001.onnx
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --output=heatmaps

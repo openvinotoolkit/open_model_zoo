@@ -48,11 +48,18 @@ The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decod
 
 Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
 ```
+  -m_tr_ss "0123456789abcdefghijklmnopqrstuvwxyz", note special symbol `#` should not be used.
   -tr_pt_first
   -tr_o_blb_nm "logits"
 ```
 
 For more information, please, see documentation of the demo.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

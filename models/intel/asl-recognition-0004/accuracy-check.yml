@@ -2,7 +2,7 @@ models:
   - name: asl-recognition-0004
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
         inputs:
           - type: INPUT

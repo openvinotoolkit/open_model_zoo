@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,7 +76,8 @@ files:
   - name: ckpt/regnetx-3.2gf.pyth
     size: 122749825
     checksum: 5757be265470b77fa83a26b256d7ee0f49dea765f97b1e6254e87951a2d77079f34b750a5bc4df1f156cf658bc07c6fe
-    source: https://dl.fbaipublicfiles.com/pycls/dds_baselines/160906139/RegNetX-3.2GF_dds_8gpu.pyth
+    original_source: https://dl.fbaipublicfiles.com/pycls/dds_baselines/160906139/RegNetX-3.2GF_dds_8gpu.pyth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/regnetx-3.2gf/RegNetX-3.2GF_dds_8gpu.pyth
 postprocessing:
   - $type: regex_replace
     file: pycls/models/model_zoo.py
@@ -104,10 +105,11 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[103.53,116.28,123.675]
   - --scale_values=data[57.375,57.12,58.395]
   - --output=prob
   - --input_model=$conv_dir/regnetx-3.2gf.onnx
 framework: pytorch
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/facebookresearch/pycls/master/LICENSE

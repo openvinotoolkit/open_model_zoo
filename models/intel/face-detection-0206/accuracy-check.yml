@@ -2,7 +2,7 @@ models:
   - name: face-detection-0206
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: class_agnostic_detection
           scale: 0.0015625

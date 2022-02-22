@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -103,8 +103,12 @@ class SequentialModel(BaseCascadeModel):
             input_data = input_data[0]
         for data in input_data:
             encoder_prediction = self.encoder.predict(identifiers, [data])
+            if isinstance(encoder_prediction, tuple):
+                encoder_prediction, raw_encoder_prediction = encoder_prediction
+            else:
+                raw_encoder_prediction = encoder_prediction
             if encoder_callback:
-                encoder_callback(encoder_prediction)
+                encoder_callback(raw_encoder_prediction)
             self.processing_frames_buffer.append(encoder_prediction[self.encoder.output_blob])
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
@@ -159,7 +163,7 @@ class EncoderOpenVINO(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_dict.items()})
-        return self.infer(input_dict)
+        return self.infer(input_dict, raw_results=True)
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
@@ -208,10 +212,10 @@ class DecoderOpenVINOModel(BaseOpenVINOModel):
         input_dict = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_dict.items()})
-        raw_result = self.infer(input_dict)
+        raw_result, raw_node_result = self.infer(input_dict, raw_results=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
 
-        return raw_result, result
+        return raw_node_result, result
 
     def fit_to_input(self, input_data):
         input_info = self.inputs[self.input_blob]

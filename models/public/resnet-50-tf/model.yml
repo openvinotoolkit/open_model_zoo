@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,14 +22,16 @@ files:
   - name: resnet_v1-50.pb
     size: 102170160
     checksum: d1097f41df917e56e927b38867bc0748a7b136b8a3441ce7d2002bbb6894b2bc167835146d0a9fc10b5c94b9d7f6f156
-    source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
+    original_source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-50-tf/resnet_v1-50.pb
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --mean_values=[123.68,116.78,103.94]
+  - --layout=map/TensorArrayStack/TensorArrayGatherV3(NHWC)
   - --input=map/TensorArrayStack/TensorArrayGatherV3
   - --output=softmax_tensor
   - --input_model=$dl_dir/resnet_v1-50.pb
   - --reverse_input_channels
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

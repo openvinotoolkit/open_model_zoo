@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ files:
   - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
     size: 381355771
     checksum: 905eb0e51f1894a02bb8391ed436601450df67e092a9aaee72fc3868d556bbf7410af97a18a06223b389bb818e489999
-    source: http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet50_coco_2018_01_28.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet50_coco_2018_01_28.tar.gz
+    source: http://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -29,10 +30,11 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,600,1024,3]
   - --input=image_tensor
+  - --layout=image_tensor(NHWC)
   - --transformations_config=$mo_ext_dir/front/tf/faster_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/pipeline.config
   - --output=detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

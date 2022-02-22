@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2021 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,12 +24,11 @@ from time import perf_counter
 import cv2
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import Classification, OutputTransform
-from model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import Classification, OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -42,10 +41,11 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -58,6 +58,10 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('-topk', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
                                    type=int, choices=range(1, 11))
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -106,11 +110,11 @@ def build_argparser():
 
 def draw_labels(frame, classifications, output_transform):
     frame = output_transform.resize(frame)
-    сlass_label = ""
+    class_label = ""
     if classifications:
-        сlass_label = classifications[0][1]
+        class_label = classifications[0][1]
     font_scale = 0.7
-    label_height = cv2.getTextSize(сlass_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
+    label_height = cv2.getTextSize(class_label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][1]
     initial_labels_pos =  frame.shape[0] - label_height * (int(1.5 * len(classifications)) + 1)
 
     if (initial_labels_pos < 0):
@@ -123,8 +127,8 @@ def draw_labels(frame, classifications, output_transform):
     put_highlighted_text(frame, header, (frame.shape[1] - label_width, offset_y),
         cv2.FONT_HERSHEY_COMPLEX, font_scale, (255, 0, 0), 2)
 
-    for idx, сlass_label, score in classifications:
-        label = '{}. {}    {:.2f}'.format(idx, сlass_label, score)
+    for idx, class_label, score in classifications:
+        label = '{}. {}    {:.2f}'.format(idx, class_label, score)
         label_width = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scale, 2)[0][0]
         offset_y += int(label_height * 1.5)
         put_highlighted_text(frame, label, (frame.shape[1] - label_width, offset_y),
@@ -160,11 +164,9 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
     config = {
         'mean_values':  args.mean_values,
@@ -248,12 +250,12 @@ def main():
             async_pipeline.await_any()
 
     async_pipeline.await_all()
+    if async_pipeline.callback_exceptions:
+        raise async_pipeline.callback_exceptions[0]
     if key not in {ord('q'), ord('Q'), ESC_KEY}:
         # Process completed requests
         for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
             results = async_pipeline.get_result(next_frame_id_to_show)
-            while results is None:
-                results = async_pipeline.get_result(next_frame_id_to_show)
             classifications, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']

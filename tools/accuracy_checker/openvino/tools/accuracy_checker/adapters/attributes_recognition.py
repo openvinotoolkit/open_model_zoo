@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -90,9 +90,9 @@ class HeadPoseEstimatorAdapter(Adapter):
         return result
 
     def select_output_blob(self, outputs):
-        self.check_output_name(self.angle_yaw, outputs)
-        self.check_output_name(self.angle_pitch, outputs)
-        self.check_output_name(self.angle_roll, outputs)
+        self.angle_yaw = self.check_output_name(self.angle_yaw, outputs)
+        self.angle_pitch = self.check_output_name(self.angle_pitch, outputs)
+        self.angle_roll = self.check_output_name(self.angle_roll, outputs)
         self.outputs_verified = True
 
 
@@ -137,8 +137,8 @@ class VehicleAttributesRecognitionAdapter(Adapter):
         return res
 
     def select_output_blob(self, outputs):
-        self.check_output_name(self.color_out, outputs)
-        self.check_output_name(self.type_out, outputs)
+        self.color_out = self.check_output_name(self.color_out, outputs)
+        self.type_out = self.check_output_name(self.type_out, outputs)
         self.outputs_verified = True
 
 

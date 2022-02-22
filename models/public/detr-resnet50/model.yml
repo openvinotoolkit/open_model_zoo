@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ files:
   - name: detr-r50-e632da11.pth
     size: 166618694
     checksum: cba2c4acb7c6ec60e0d56dbd7bfb0dab73aef5ac86bf9819bc4e176fd943114fb1e5567e5046dc6d6a18b7e490dce680
-    source: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+    original_source: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/detr-resnet50/detr-r50-e632da11.pth
   - name: models/detr.py
     size: 17089
     checksum: ae1d9cc2b2b483dbd8fd095137e27bf1ec1d596ede1be55e842f771f02725a958763358631e7c8e69fecfe34059fb393
@@ -81,6 +82,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,800,1137]
   - --input=input
+  - --layout=input(NCHW)
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.395,57.12,57.375]
   - --output=boxes,scores

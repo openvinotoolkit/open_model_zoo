@@ -41,11 +41,11 @@ models:
             top_k: 5
             reference: 0.92584
 
-  # DLSDK inference
+  # OpenVINO inference
   - name: octave-resnet-26-0.25
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

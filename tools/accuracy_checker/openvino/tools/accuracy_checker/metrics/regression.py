@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             for key, values in self.magnitude.items():
                 names.extend(
                     ['{}@mean'.format(key), '{}@std'.format(key)]
-                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_errir'.format(key)]
+                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_error'.format(key)]
                 )
                 result.extend([np.mean(values), np.std(values)])
                 if self.max_error:

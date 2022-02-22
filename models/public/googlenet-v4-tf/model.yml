@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,23 +23,28 @@ files:
   - name: inception_v4_2016_09_09.tar.gz
     size: 171177982
     checksum: 97765872563bf059728f96faa4aef86fa20ffe10c099f7bc2990adacc9a41a73549c45e939441a7e4f1dc2f45127a2d2
-    source: http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz
+    original_source: http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v4-tf/inception_v4_2016_09_09.tar.gz
   - name: models/research/slim/nets/inception.py
     size: 1676
     checksum: 1500832b0ca4ea2a8e70b7f865bc154162a01a496fb9d654d680bfe27bcc83c8c7140f60e1f2484904d1945d5906370b
-    source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception.py
+    original_source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v4-tf/inception.py
   - name: models/research/slim/nets/inception_utils.py
     size: 3079
     checksum: 6b903694f0763da63a8108e8ffb8d26a7cc25c8b5f2a4a6ed21372ed2e5ffe19238d1107820ee941dfd97b05dd369a28
-    source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_utils.py
+    original_source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_utils.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v4-tf/inception_utils.py
   - name: models/research/slim/nets/inception_v4.py
     size: 16519
     checksum: b4fa85412733b0800914ce2af14b9b3b340b9982fc1f491ba124d1b18d47751bf22e38cf8f902115ae6aca192028d7a6
-    source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_v4.py
+    original_source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/inception_v4.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v4-tf/inception_v4.py
   - name: models/research/slim/nets/nets_factory.py
     size: 7253
     checksum: 4941e0ba7991b80a03b7a8aedcf7d954e0b692e3c53cec2a4d06c0a7d576f704f0d7668d0cccb3d55567bc860c024ab6
-    source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/nets_factory.py
+    original_source: https://github.com/tensorflow/models/raw/d4a6670ade6ebd007b7974f85d70c4c879ba99d6/research/slim/nets/nets_factory.py
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v4-tf/nets_factory.py
   - name: models/research/slim/tf_slim-1.1.0-py2.py3-none-any.whl
     size: 352133
     checksum: eac0abda0ef71025cc4785a2b24cdb8a7ec9479b97ce12334e27711f92f2a2407945308ce3d5d2b0b1b0daa6212ee02f
@@ -78,11 +83,12 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,299,299,3]
   - --input=input
+  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionV4/Logits/Predictions
   - --input_model=$conv_dir/inception_v4.frozen.pb
   - --reverse_input_channels
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://github.com/tensorflow/models/blob/master/LICENSE

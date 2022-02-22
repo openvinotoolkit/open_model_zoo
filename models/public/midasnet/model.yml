@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ files:
   - name: model.pt
     size: 422509849
     checksum: 22219f664a4b235e797585d56a398c25e7cbb3cdb46f61bdc0e0596dc713495ece860ac57df8b22f7b530ea00c21b049
-    source: https://github.com/intel-isl/MiDaS/releases/download/v2_1/model-openvino.pt
+    original_source: https://github.com/intel-isl/MiDaS/releases/download/v2_1/model-openvino.pt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/midasnet/model-openvino.pt
 framework: pytorch
 postprocessing:
   - $type: regex_replace
@@ -61,6 +62,7 @@ conversion_to_onnx_args:
   - --output-names=inverse_depth
 model_optimizer_args:
   - --input=image
+  - --layout=image(NCHW)
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[51.525,50.4,50.625]
   - --reverse_input_channels

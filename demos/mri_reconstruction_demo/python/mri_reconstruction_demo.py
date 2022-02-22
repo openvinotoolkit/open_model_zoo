@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
@@ -8,7 +8,7 @@ import sys
 
 import numpy as np
 import cv2 as cv
-from openvino.inference_engine import IECore
+from openvino.runtime import Core
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('mri_reconstruction_demo')
@@ -38,9 +38,17 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    ie = IECore()
-    net = ie.read_network(args.model)
-    exec_net = ie.load_network(net, args.device)
+    core = Core()
+    model = core.read_model(args.model)
+
+    input_tensor_name = 'input_1:0'
+    output_candidates = [node.get_any_name() for node in model.outputs if node.shape[3] == 1]
+    if len(output_candidates) != 1:
+        raise RuntimeError("The model expects output tensor with 1 channel")
+    output_tensor_name = output_candidates[0]
+
+    compiled_model = core.compile_model(model, args.device)
+    infer_request = compiled_model.create_infer_request()
 
     # Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
     stats = np.array([2.20295299e-01, 1.11048916e+03], dtype=np.float32)
@@ -64,8 +72,8 @@ def main():
 
         # Forward through network
         input = np.expand_dims(kspace.transpose(2, 0, 1), axis=0)
-        outputs = exec_net.infer(inputs={'input_1': input})
-        output = next(iter(outputs.values()))
+        infer_request.infer(inputs={input_tensor_name: input})
+        output = infer_request.get_tensor(output_tensor_name).data[:]
         output = output.reshape(height, width)
 
         # Save predictions
@@ -102,4 +110,4 @@ def main():
         cv.waitKey()
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

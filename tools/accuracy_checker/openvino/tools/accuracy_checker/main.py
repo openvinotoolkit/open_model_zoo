@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ def configure_evaluator_kwargs(args):
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
         evaluator_kwargs['csv_result'] = args.csv_result
+        evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
     evaluator_kwargs['store_only'] = args.store_only
     return evaluator_kwargs
 

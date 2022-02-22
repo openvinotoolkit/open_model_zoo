@@ -46,5 +46,13 @@ Expected color order is `BGR`.
 2. The `labels` is a blob with the shape `100` in the format `N`, where `N` is the number of detected
    bounding boxes. It contains predicted class ID (0 - person) per each detected box.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

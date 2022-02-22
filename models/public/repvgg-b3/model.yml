@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,9 +37,10 @@ files:
   - name: RepVGG-B3-200epochs-train.pth
     size: 492817293
     checksum: 647371bdfad380c1001d16c2dae0cd244974b11b2464933f7508c1ae3e82976eab2e0f940a5192a3a75db7363d0e8db4
-    source:
+    original_source:
       $type: google_drive
       id: 1wBpq5317iPKk3-qblBHnx35bY_WumAlU
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-b3/RepVGG-B3-200epochs-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG
@@ -54,6 +55,7 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/repvgg-b3.onnx
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
+  - --layout=input(NCHW)
   - --input=input
   - --input_model=$conv_dir/repvgg-b3.onnx
   - --mean_values=input[123.675,116.28,103.53]

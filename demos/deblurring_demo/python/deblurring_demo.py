@@ -1,5 +1,5 @@
 """
- Copyright (C) 2018-2021 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,12 +23,11 @@ from time import perf_counter
 import cv2
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import Deblurring
-from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import Deblurring
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -41,17 +40,22 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
+    args.add_argument('--layout', type=str, default=None,
+                      help='Optional. Model inputs layouts. '
+                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                           'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -92,11 +96,9 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
     start_time = perf_counter()
     frame = cap.read()
@@ -162,11 +164,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         result_frame, frame_meta = results
         input_frame = frame_meta['frame']
         start_time = frame_meta['start_time']

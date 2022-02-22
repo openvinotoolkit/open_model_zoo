@@ -1,11 +1,306 @@
 # Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
+@sphinxdirective
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Device Support
+
+   omz_models_public_device_support
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Action Recognition Models
+
+   omz_models_model_common_sign_language_0001
+   omz_models_model_i3d_rgb_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Classification Models
+
+   omz_models_model_alexnet
+   omz_models_model_anti_spoof_mn3
+   omz_models_model_caffenet
+   omz_models_model_densenet_121
+   omz_models_model_densenet_121_caffe2
+   omz_models_model_densenet_121_tf
+   omz_models_model_densenet_161
+   omz_models_model_densenet_161_tf
+   omz_models_model_densenet_169
+   omz_models_model_densenet_169_tf
+   omz_models_model_densenet_201
+   omz_models_model_densenet_201_tf
+   omz_models_model_dla_34
+   omz_models_model_efficientnet_b0
+   omz_models_model_efficientnet_b0_pytorch
+   omz_models_model_efficientnet_b0_auto_aug
+   omz_models_model_efficientnet_b5
+   omz_models_model_efficientnet_b5_pytorch
+   omz_models_model_efficientnet_b7_pytorch
+   omz_models_model_efficientnet_b7_auto_aug
+   omz_models_model_googlenet_v1
+   omz_models_model_googlenet_v1_tf
+   omz_models_model_googlenet_v2
+   omz_models_model_googlenet_v2_tf
+   omz_models_model_googlenet_v3
+   omz_models_model_googlenet_v3_pytorch
+   omz_models_model_googlenet_v4_tf
+   omz_models_model_hbonet_0_25
+   omz_models_model_hbonet_0_5
+   omz_models_model_hbonet_1_0
+   omz_models_model_inception_resnet_v2_tf
+   omz_models_model_mixnet_l
+   omz_models_model_mobilenet_v1_0_25_128
+   omz_models_model_mobilenet_v1_0_50_160
+   omz_models_model_mobilenet_v1_0_50_224
+   omz_models_model_mobilenet_v1_1_0_224
+   omz_models_model_mobilenet_v1_1_0_224_tf
+   omz_models_model_mobilenet_v2
+   omz_models_model_mobilenet_v2_1_0_224
+   omz_models_model_mobilenet_v2_1_4_224
+   omz_models_model_mobilenet_v2_pytorch
+   omz_models_model_mobilenet_v3_large_1_0_224_tf
+   omz_models_model_mobilenet_v3_small_1_0_224_tf
+   omz_models_model_nfnet_f0
+   omz_models_model_octave_densenet_121_0_125
+   omz_models_model_octave_resnet_101_0_125
+   omz_models_model_octave_resnet_200_0_125
+   omz_models_model_octave_resnet_26_0_25
+   omz_models_model_octave_resnet_50_0_125
+   omz_models_model_octave_resnext_101_0_25
+   omz_models_model_octave_resnext_50_0_25
+   omz_models_model_octave_se_resnet_50_0_125
+   omz_models_model_open_closed_eye_0001
+   omz_models_model_regnetx_3_2gf
+   omz_models_model_repvgg_a0
+   omz_models_model_repvgg_b1
+   omz_models_model_repvgg_b3
+   omz_models_model_resnest_50_pytorch
+   omz_models_model_resnet_18_pytorch
+   omz_models_model_resnet_34_pytorch
+   omz_models_model_resnet_50_caffe2
+   omz_models_model_resnet_50_pytorch
+   omz_models_model_resnet_50_tf
+   omz_models_model_rexnet_v1_x1_0
+   omz_models_model_se_inception
+   omz_models_model_se_resnet_101
+   omz_models_model_se_resnet_152
+   omz_models_model_se_resnet_50
+   omz_models_model_se_resnext_101
+   omz_models_model_se_resnext_50
+   omz_models_model_shufflenet_v2_x1_0
+   omz_models_model_squeezenet1_0
+   omz_models_model_squeezenet1_1
+   omz_models_model_squeezenet1_1_caffe2
+   omz_models_model_vgg16
+   omz_models_model_vgg19
+   omz_models_model_vgg19_caffe2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Colorization Models
+
+   omz_models_model_colorization_siggraph
+   omz_models_model_colorization_v2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Face Recognition Models
+
+   omz_models_model_face_recognition_resnet100_arcface_onnx
+   omz_models_model_facenet_20180408_102900
+   omz_models_model_Sphereface
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Human Pose Estimation Models
+
+   omz_models_model_higher_hrnet_w32_human_pose_estimation
+   omz_models_model_human_pose_estimation_3d_0001
+   omz_models_model_single_human_pose_estimation_0001
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Inpainting Models
+
+   omz_models_model_gmcnn_places2_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Processing Models
+
+   omz_models_model_deblurgan_v2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Image Translation Models
+
+   omz_models_model_cocosnet
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Instance Segmentation Models
+
+   omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_mask_rcnn_inception_v2_coco
+   omz_models_model_mask_rcnn_resnet101_atrous_coco
+   omz_models_model_mask_rcnn_resnet50_atrous_coco
+   omz_models_model_yolact_resnet50_fpn_pytorch
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Monocular Depth Estimation Models
+
+   omz_models_model_fcrn_dp_nyu_depth_v2_tf
+   omz_models_model_midasnet
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Named Entity Recognition Models
+
+   omz_models_model_bert_base_ner
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Object Attribute Estimation Models
+
+   omz_models_model_vehicle_reid_0001
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Object Detection Models
+
+   omz_models_model_ctdet_coco_dlav0_512
+   omz_models_model_ctpn
+   omz_models_model_efficientdet_d0_tf
+   omz_models_model_efficientdet_d1_tf
+   omz_models_model_face_detection_retail_0044
+   omz_models_model_faceboxes_pytorch
+   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_faster_rcnn_resnet50_coco
+   omz_models_model_mobilefacedet_v1_mxnet
+   omz_models_model_mobilenet_ssd
+   omz_models_model_mtcnn
+   omz_models_model_pelee_coco
+   omz_models_model_retinaface_resnet50_pytorch
+   omz_models_model_retinanet_tf
+   omz_models_model_rfcn_resnet101_coco_tf
+   omz_models_model_ssd_resnet34_1200_onnx
+   omz_models_model_ssd300
+   omz_models_model_ssd512
+   omz_models_model_ssd_mobilenet_v1_coco
+   omz_models_model_ssd_mobilenet_v1_fpn_coco
+   omz_models_model_ssdlite_mobilenet_v2
+   omz_models_model_ultra_lightweight_face_detection_rfb_320
+   omz_models_model_ultra_lightweight_face_detection_slim_320
+   omz_models_model_vehicle_license_plate_detection_barrier_0123
+   omz_models_model_yolo_v1_tiny_tf
+   omz_models_model_yolo_v2_tf
+   omz_models_model_yolo_v2_tiny_tf
+   omz_models_model_yolo_v3_tf
+   omz_models_model_yolo_v3_tiny_tf
+   omz_models_model_yolo_v4_tf
+   omz_models_model_yolo_v4_tiny_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Optical Character Recognition Models
+
+   omz_models_model_license_plate_recognition_barrier_0007
+   omz_models_model_text_recognition_resnet_fc
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Place Recognition Models
+
+   omz_models_model_netvlad_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Salient Object Detection Models
+
+   omz_models_model_f3net
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Semantic Segmentation Models
+
+   omz_models_model_brain_tumor_segmentation_0001
+   omz_models_model_brain_tumor_segmentation_0002
+   omz_models_model_deeplabv3
+   omz_models_model_fastseg_large
+   omz_models_model_fastseg_small
+   omz_models_model_hrnet_v2_c1_segmentation
+   omz_models_model_pspnet_pytorch
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Sound Classification Models
+
+   omz_models_model_aclnet
+   omz_models_model_aclnet_int8
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Speech Recognition Models
+
+   omz_models_model_mozilla_deepspeech_0_6_1
+   omz_models_model_mozilla_deepspeech_0_8_2
+   omz_models_model_quartznet_15x5_en
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Style Transfer Models
+
+   omz_models_model_fast_neural_style_mosaic_onnx
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text-to-speech Models
+
+   omz_models_model_forward_tacotron
+   omz_models_model_wavernn
+
+
+.. raw:: html
+
+   <script>
+      window.TABLE_SORT = true;
+   </script>
+
+@endsphinxdirective
+
 OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
+You can download models and convert them into OpenVINO™ IR format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
 ## Classification
 
@@ -25,7 +320,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/README.md)<br>[googlenet-v2-tf](./googlenet-v2-tf/README.md) | 72.024%/90.844%<br>74.084%/91.798%| 4.058 | 11.185 |
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
-| Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 80.14%/95.10% | 22.227 | 30.223 |
+| Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 77.82%/94.03% | 22.227 | 30.223 |
 | MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
@@ -53,6 +348,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*| [squeezenet1.1](./squeezenet1.1/README.md)| 58.382%/81% | 0.785 | 1.236 |
 | Swin Transformer Tiny, window size=7| PyTorch\*                  | [swin-tiny-patch4-window7-224](./swin-tiny-patch4-window7-224/README.md) | 81.38%/95.51% | 9.0280 | 28.8173 |
+| T2T-ViT, transformer layers number=14| PyTorch\*                 | [t2t-vit-14](./t2t-vit-14/README.md) | 81.44%/95.66% | 9.5451 | 21.5498 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*              | [vgg19](./vgg19/README.md) | 71.062%/89.832% | 39.3 | 143.667  |
 
@@ -75,6 +371,7 @@ detect areas with complex shape.
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |
 | PSPNet R-50-D8  | PyTorch\*      | [pspnet-pytorch](./pspnet-pytorch/README.md) | 70.6% | 357.1719 | 46.5827 |
+| OCRNet HRNet_w48 | Paddle\*      | [ocrnet-hrnet-w48-paddle](./ocrnet-hrnet-w48-paddle/README.md)| 82.15% | 324.66 | 70.47 |
 
 ### Instance Segmentation
 
@@ -113,7 +410,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| 40.69% | 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
-| Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	84.44%| 65.981 | 61.922 |
+| Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
@@ -197,7 +494,7 @@ The task of action recognition is to predict action that is being performed on a
 
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 65.96%/86.01% | 278.9815 | 12.6900|
+| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 64.83%/84.58% | 278.9815 | 12.6900|
 | common-sign-language-0001         | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Colorization
@@ -317,6 +614,17 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
 
+## Background matting
+
+Background matting is a method of separating a foreground from a background in an image or video,
+wherein some pixels may belong to foreground as well as background, such pixels are called partial
+or mixed pixels. This distinguishes background matting from segmentation approaches where the result is a binary mask.
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
+
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
@@ -325,4 +633,6 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 
 ## Legal Information
 
-[*] Other names and brands may be claimed as the property of others.
+Caffe, Caffe2, Keras, MXNet, PyTorch, and TensorFlow are trademarks or brand names of their respective owners.
+All company, product and service names used in this website are for identification purposes only.
+Use of these names,trademarks and brands does not imply endorsement.

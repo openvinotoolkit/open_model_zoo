@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -23,20 +23,35 @@
 #include <iostream>
 
 #include <inference_engine.hpp>
+#include "openvino/openvino.hpp"
 #include "utils/slog.hpp"
 #include "utils/args_helper.hpp"
 
 #ifndef UNUSED
-  #ifdef _WIN32
-    #define UNUSED
-  #else
-    #define UNUSED  __attribute__((unused))
-  #endif
+#ifdef _WIN32
+#define UNUSED
+#else
+#define UNUSED  __attribute__((unused))
+#endif
 #endif
 
 template <typename T, std::size_t N>
-constexpr std::size_t arraySize(const T (&)[N]) noexcept {
+constexpr std::size_t arraySize(const T(&)[N]) noexcept {
     return N;
+}
+
+static inline void catcher() noexcept {
+    if (std::current_exception()) {
+        try {
+            std::rethrow_exception(std::current_exception());
+        } catch (const std::exception& error) {
+            slog::err << error.what() << slog::endl;
+        } catch (...) {
+            slog::err << "Non-exception object thrown" << slog::endl;
+        }
+        std::exit(1);
+    }
+    std::abort();
 }
 
 template <typename T>
@@ -51,6 +66,12 @@ inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::V
     os << "\tbuild: " << version.buildNumber;
 
     return os;
+}
+
+inline slog::LogStream& operator<<(slog::LogStream& os, const ov::Version& version) {
+    return os << "OpenVINO" << slog::endl
+        << "\tversion: " << OPENVINO_VERSION_MAJOR << "." << OPENVINO_VERSION_MINOR << "." << OPENVINO_VERSION_PATCH << slog::endl
+        << "\tbuild: " << version.buildNumber;
 }
 
 /**
@@ -71,8 +92,8 @@ public:
      * @param b - value for blue channel
      */
     Color(unsigned char r,
-          unsigned char g,
-          unsigned char b) : _r(r), _g(g), _b(b) {}
+        unsigned char g,
+        unsigned char b) : _r(r), _g(g), _b(b) {}
 
     inline unsigned char red() const {
         return _r;
@@ -209,18 +230,22 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
 }
 
 inline void showAvailableDevices() {
+#if defined(OV_NEW_API)
+    ov::Core core;
+    std::vector<std::string> devices = core.get_available_devices();
+#else
     InferenceEngine::Core ie;
     std::vector<std::string> devices = ie.GetAvailableDevices();
+#endif
 
-    std::cout << std::endl;
-    std::cout << "Available target devices:";
+    std::cout << "Available devices:";
     for (const auto& device : devices) {
-        std::cout << "  " << device;
+        std::cout << ' ' << device;
     }
     std::cout << std::endl;
 }
 
-inline std::string fileNameNoExt(const std::string &filepath) {
+inline std::string fileNameNoExt(const std::string& filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
     return filepath.substr(0, pos);
@@ -248,4 +273,61 @@ inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNet
             catch (const InferenceEngine::Exception&) {}
         }
     }
+}
+
+inline void logCompiledModelInfo(
+    const ov::CompiledModel& compiledModel,
+    const std::string& modelName,
+    const std::string& deviceName,
+    const std::string& modelType = "") {
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+        for (const auto& device : devices) {
+            try {
+                slog::info << "\tDevice: " << device << slog::endl;
+                int32_t nstreams = compiledModel.get_property(ov::num_streams);
+                slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
+                if (device == "CPU") {
+                    int32_t nthreads = compiledModel.get_property(ov::inference_num_threads);
+                    slog::info << "\t\tNumber of threads: " << (nthreads == 0 ? "AUTO" : std::to_string(nthreads)) << slog::endl;
+                }
+            }
+            catch (const ov::Exception&) {}
+        }
+    }
+}
+
+inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
+    slog::info << "Model name: " << model->get_friendly_name() << slog::endl;
+
+    // Dump information about model inputs/outputs
+    ov::OutputVector inputs = model->inputs();
+    ov::OutputVector outputs = model->outputs();
+
+    slog::info << "\tInputs: " << slog::endl;
+    for (const ov::Output<ov::Node> input : inputs) {
+        const std::string name = input.get_any_name();
+        const ov::element::Type type = input.get_element_type();
+        const ov::PartialShape shape = input.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(input);
+
+        slog::info << "\t\t" << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
+    }
+
+    slog::info << "\tOutputs: " << slog::endl;
+    for (const ov::Output<ov::Node>& output : outputs) {
+        const std::string name = output.get_any_name();
+        const ov::element::Type type = output.get_element_type();
+        const ov::PartialShape shape = output.get_partial_shape();
+        const ov::Layout layout = ov::layout::get_layout(output);
+
+        slog::info << "\t\t" << name << ", " << type << ", " << shape << ", " << layout.to_string() << slog::endl;
+    }
+
+    return;
 }

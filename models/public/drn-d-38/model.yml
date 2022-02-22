@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ files:
   - name: drn_d_38_cityscapes.pth
     size: 104117210
     checksum: 090859278d373c8ce160a21b256f6dcfa2a5d07b6d2aebbd18e598a1d3f2c48a97e188d13f1bc16751859a8ed8f8ec1a
-    source:
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/drn-d-38/drn_d_38_cityscapes.pth
+    original_source:
       $type: google_drive
       id: 1Ck5cE5o6wsS5ITjeyBkvUYHnw4bIR6eg
   - name: models/drn.py
@@ -46,6 +47,10 @@ postprocessing:
     file: models/segment.py
     pattern: 'import data_transforms as transforms'
     replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/segment.py
+    pattern: '        target = target.cuda\(async=True\)'
+    replacement: '# \g<0>'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models
@@ -60,6 +65,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1024,2048]
   - --input=input
+  - --layout=input(NCHW)
   - --output=output
   - --mean_values=[73.975742869,83.660769353,73.175805779]
   - --scale_values=[46.653282963,47.574230671,47.041147921]

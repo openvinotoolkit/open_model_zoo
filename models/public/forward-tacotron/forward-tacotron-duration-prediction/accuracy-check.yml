@@ -1,7 +1,7 @@
 models:
   - name: forward-tacotron-duration-prediction
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:
@@ -13,7 +13,7 @@ models:
           - type: mae
             presenter: print_vector
             reference:
-              embeddings@mean: 0
-              embeddings@std: 0
-              duration@mean: 0
-              duration@std: 0
+              embeddings@mean: 0.037433
+              embeddings@std: 0.002421
+              duration@mean: 0.141132
+              duration@std: 0.020022

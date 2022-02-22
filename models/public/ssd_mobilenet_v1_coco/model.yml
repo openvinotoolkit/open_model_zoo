@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ files:
   - name: ssd_mobilenet_v1_coco.tar.gz
     size: 76541073
     checksum: 95d7ad978aef6fa7fded5fac04f2cdc286f82ee8e59e2ed638de6d0000dbed051c409ed276b56672d17b5b79fe6ba78c
-    source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
+    original_source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -31,10 +32,11 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,300,300,3]
   - --input=image_tensor
+  - --layout=image_tensor(NHWC)
   - --output=detection_scores,detection_boxes,num_detections
   - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

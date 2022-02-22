@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ files:
   - name: mobilev3small-lraspp-f128-a39a1e4b.pt
     size: 9256712
     checksum: 2620fcf3ffeea09ea5bc1a50f3ccbae8a15aa22bcdaca02aa7c581fa1d6a1fef7ef43732b5baf58ec30c25df8ec042c8
-    source: 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f128-a39a1e4b.pt'
+    original_source: 'https://github.com/ekzhang/fastseg/releases/download/v0.1-weights/mobilev3small-lraspp-f128-a39a1e4b.pt'
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fastseg-small/mobilev3small-lraspp-f128-a39a1e4b.pt
   - name: model/geffnet-1.0.0-py3-none-any.whl
     size: 39902
     checksum: 5f52af3fe57f79f9b24198fea8a8beddd1f53f6333feb2beeb8616abdad2b753dd26c8b1af97be5eee04970ded28e299
@@ -55,7 +56,6 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: model/geffnet-1.0.0-py3-none-any.whl
-
   - $type: regex_replace
     pattern: 'from .efficientnet'
     replacement: '# \g<0>'
@@ -80,6 +80,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1024,2048]
   - --input=input0
+  - --layout=input0(NCHW)
   - --output=output0
   - --mean_values=[123.675,116.28,103.53]
   - --scale_values=[58.395,57.12,57.375]

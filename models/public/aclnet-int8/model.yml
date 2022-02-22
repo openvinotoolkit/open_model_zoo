@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
   - --input=result.1
+  - --layout=result.1(NCWL)
   - --output=486
   - --input_model=$dl_dir/aclnet_des_53_int8.onnx
 framework: onnx

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ files:
   - name: deepspeech-0.6.1-models.tar.gz
     size: 1229020343
     checksum: ad9ceb672c21ccb93f6c16432c172d1d08e403a9925a9466552538de9642878af7c459c863bbe721483f644385c5677d
-    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.6.1/deepspeech-0.6.1-models.tar.gz
+    original_source: https://github.com/mozilla/DeepSpeech/releases/download/v0.6.1/deepspeech-0.6.1-models.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mozilla-deepspeech-0.6.1/deepspeech-0.6.1-models.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -35,6 +36,7 @@ model_optimizer_args:
   - --freeze_placeholder_with_value=input_lengths->[16]
   - --input=input_node,previous_state_h,previous_state_c
   - --input_shape=[1,16,19,26],[1,2048],[1,2048]
+  - --layout=input_node(NSTC),previous_state_h(NC),previous_state_c(NC)
   - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
   - --disable_nhwc_to_nchw
 framework: tf

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,9 +53,10 @@ files:
   - name: ckpt/pose_higher_hrnet_w32_512.pth
     size: 115172215
     checksum: d344fcc4e426308139397bd708be1c59500e038a540ea0979b6a10556b5f3530701d86c0cab276fc5710419f91879e3d
-    source:
+    original_source:
       $type: google_drive
       id: 1V9Iz0ZYy9m8VeaspfKECDW0NKlGsYmO1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/higher-hrnet-w32-human-pose-estimation/ckpt/pose_higher_hrnet_w32_512.pth
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir
@@ -71,6 +72,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,512,512]
   - --input=image
+  - --layout=image(NCHW)
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395,57.12,57.375]
   - --output=embeddings,heatmaps

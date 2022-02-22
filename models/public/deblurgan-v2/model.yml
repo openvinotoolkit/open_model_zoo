@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,9 +40,10 @@ files:
   - name: ckpt/fpn_mobilenet.h5
     size: 13505344
     checksum: 93bd1ef8e8d6cc190a3310db6b556aee2df42a294b7015f689237cb1a1cad1f9327b9369e530804f8369195d4b286386
-    source:
+    original_source:
       $type: google_drive
       id: 1JhnT4BBeKBBSLqTo6UsJ13HeBXevarrU
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/deblurgan-v2/ckpt/fpn_mobilenet.h5
 postprocessing:
   - $type: regex_replace
     file: models/networks.py
@@ -74,6 +75,7 @@ model_optimizer_args:
   - --scale_values=blur_image[127.5]
   - --input_shape=[1,3,736,1312]
   - --input=blur_image
+  - --layout=blur_image(NCHW)
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx
 framework: pytorch

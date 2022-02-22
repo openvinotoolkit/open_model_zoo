@@ -19,7 +19,7 @@ On startup, the application reads command line parameters and loads human pose e
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -48,38 +48,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
-human_pose_estimation_demo [OPTION]
-Options:
-
-    -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae or 'openpose' for OpenPose.
-    -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -m "<path>"               Required. Path to an .xml file with a trained model.
-    -o "<path>"               Optional. Name of the output file(s) to save.
-    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -tsize                    Optional. Target input size.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -t                        Optional. Probability threshold for poses filtering.
-    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
-    -nthreads "<integer>"     Optional. Number of threads.
-    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Don't show output.
-    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
-    -u                        Optional. List of monitors to show initially.
-```
-
-Running the application with an empty list of options yields an error message.
+Running the demo with the `-h` option yields a usage message.
 
 For example, to do inference on a CPU, run the following command:
 

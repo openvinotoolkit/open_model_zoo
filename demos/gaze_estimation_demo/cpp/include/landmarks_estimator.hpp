@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,7 +15,7 @@
 namespace gaze_estimation {
 class LandmarksEstimator: public BaseEstimator {
 public:
-    LandmarksEstimator(InferenceEngine::Core& ie,
+    LandmarksEstimator(ov::Core& core,
                        const std::string& modelPath,
                        const std::string& deviceName);
     void estimate(const cv::Mat& image,
@@ -26,11 +26,11 @@ public:
 
 private:
     IEWrapper ieWrapper;
-    std::string inputBlobName, outputBlobName;
+    std::string inputTensorName, outputTensorName;
     size_t numberLandmarks;
     std::vector<cv::Point2i> simplePostprocess(cv::Rect faceBoundingBox, cv::Mat faceCrop);
     std::vector<cv::Point2i> heatMapPostprocess(cv::Rect faceBoundingBox, cv::Mat faceCrop);
-    std::vector<cv::Mat> split(std::vector<float>& data, const std::vector<unsigned long>& shape);
+    std::vector<cv::Mat> split(std::vector<float>& data, const ov::Shape& shape);
     std::vector<cv::Point2f> getMaxPreds(std::vector<cv::Mat> heatMaps);
     int sign(float number);
     cv::Mat affineTransform(cv::Point2f center, cv::Point2f scale,

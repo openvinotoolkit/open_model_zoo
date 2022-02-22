@@ -1,13 +1,13 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <gflags/gflags.h>
 #include <iostream>
+#include <string>
+
+#include "gflags/gflags.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required for video or image files input. Path to video or image files.";

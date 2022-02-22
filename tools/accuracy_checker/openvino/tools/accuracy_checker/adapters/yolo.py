@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -368,7 +368,7 @@ class YoloV3Adapter(Adapter):
             ),
             'output_format': StringField(
                 choices=['BHW', 'HWB'], optional=True,
-                description="Set output layer format"
+                description="Set output layer format", default='BHW',
             ),
             'multiple_labels': BoolField(
                 optional=True, default=False,
@@ -456,8 +456,6 @@ class YoloV3Adapter(Adapter):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
             nchw_layout = input_shape[1] == 3
-            if self.output_format is None:
-                self.output_format = 'BHW' if nchw_layout else 'HWB'
             self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
             self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
             for layer_id, p in enumerate(prediction):

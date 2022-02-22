@@ -64,9 +64,9 @@ Face embeddings, name: `fc1`,  shape: `1, 512`, output data format: `B, C`, wher
 
 The net outputs on different images are comparable in cosine distance.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -77,6 +77,14 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
 
 ## Legal Information
 

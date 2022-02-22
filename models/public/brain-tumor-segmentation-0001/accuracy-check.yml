@@ -2,7 +2,7 @@ models:
   - name: brain-tumor-segmentation-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: brain_tumor_segmentation
           make_argmax: True

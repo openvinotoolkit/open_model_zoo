@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,7 +107,10 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
                 guid = "dev-{}".format(idx)
                 label = self.reversed_label_map[line[self.label_ind]]
                 text_a = line[self.text_a_ind]
-                text_b = line[self.text_b_ind] if self.text_b_ind is not None else None
+                text_b = (
+                    line[self.text_b_ind]
+                    if self.text_b_ind is not None and len(line) > self.text_b_ind else None
+                )
                 lines.append(InputExample(guid, text_a, text_b, label))
 
         return lines

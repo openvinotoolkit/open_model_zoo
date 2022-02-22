@@ -16,7 +16,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -40,6 +40,7 @@ omz_converter --list models.lst
 * icnet-camvid-ava-0001
 * icnet-camvid-ava-sparse-30-0001
 * icnet-camvid-ava-sparse-60-0001
+* ocrnet-hrnet-w48-paddle
 * pspnet-pytorch
 * road-segmentation-adas-0001
 * semantic-segmentation-adas-0001
@@ -49,37 +50,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-[ INFO ] InferenceEngine: <version>
-
-segmentation_demo [OPTION]
-Options:
-
-    -h                        Print a usage message.
-    -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -m "<path>"               Required. Path to an .xml file with a trained model.
-    -o "<path>"               Optional. Name of the output file(s) to save.
-    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -labels "<path>"          Optional. Path to a file with labels mapping.
-    -r                        Optional. Output inference results as mask histogram.
-    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
-    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
-    -nthreads "<integer>"     Optional. Number of threads.
-    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Don't show output.
-    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
-    -u                        Optional. List of monitors to show initially.
-    -only_masks               Optional. Display only masks. Could be switched by TAB key.
-```
-
-Running the application with the empty list of options yields an error message.
+Running the demo with the `-h` option yields a usage message.
 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 

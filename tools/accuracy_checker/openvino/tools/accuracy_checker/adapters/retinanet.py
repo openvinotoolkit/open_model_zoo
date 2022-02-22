@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -408,8 +408,8 @@ class RetinaNetTF2(Adapter):
     def select_output_blob(self, outputs):
         def generate_out_names(list_names, outputs):
             return [self.check_output_name(out, outputs) for out in list_names]
-        self.boxes_outs = generate_out_names(self.boxes_outs, outputs)
-        self.class_outs = generate_out_names(self.class_outs, outputs)
+        self.loc_out = generate_out_names(self.loc_out, outputs)
+        self.cls_out = generate_out_names(self.cls_out, outputs)
         self.outputs_verified = True
 
     def _generate_anchor_boxes(self, image_size):
@@ -453,11 +453,12 @@ class RetinaNetTF2(Adapter):
 
         return unpack_labels(np.concatenate(boxes_all, axis=0))
 
-    def prepare_boxes_and_classes(self, raw, batch_id):
+    def prepare_boxes_and_classes(self, raw, batch_id, layout):
         boxes_outs, classes_outs = [], []
+        order = (1, 2, 0) if layout == 'NCHW' else (0, 1, 2)
         for boxes_out, cls_out in zip(self.loc_out, self.cls_out):
-            boxes_outs.append(np.transpose(raw[boxes_out][batch_id], (1, 2, 0)))
-            classes_outs.append(np.transpose(raw[cls_out][batch_id], (1, 2, 0)))
+            boxes_outs.append(np.transpose(raw[boxes_out][batch_id], order))
+            classes_outs.append(np.transpose(raw[cls_out][batch_id], order))
         return boxes_outs, classes_outs
 
     def process(self, raw, identifiers, frame_meta):
@@ -466,10 +467,11 @@ class RetinaNetTF2(Adapter):
             self.select_output_blob(raw_outputs)
         result = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
-            boxes_out, classes_out = self.prepare_boxes_and_classes(raw_outputs, batch_id)
             input_shape = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
             input_shape = input_shape[0]
-            image_size = input_shape[2:] if input_shape[1] == 3 else input_shape[1:3]
+            layout = 'NCHW' if input_shape[1] == 3 else 'NHWC'
+            image_size = input_shape[2:] if layout == 'NCHW' else input_shape[1:3]
+            boxes_out, classes_out = self.prepare_boxes_and_classes(raw_outputs, batch_id, layout)
             boxes, scores, labels = self.process_single(boxes_out, classes_out, image_size)
             if np.size(boxes):
                 x_mins, y_mins, x_maxs, y_maxs = boxes.T

@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 """
 
 import cv2
-import ngraph as ng
 import numpy as np
 try:
     from numpy.core.umath import clip
 except ImportError:
     from numpy import clip
-from openvino.inference_engine import IENetwork
+import openvino.runtime.opset8 as opset8
 
 from .image_model import ImageModel
 from .types import NumericalValue
@@ -36,11 +35,12 @@ class OpenPose(ImageModel):
         self.heatmaps_blob_name = 'heatmaps'
         self.pafs_blob_name = 'pafs'
 
-        function = ng.function_from_cnn(self.model_adapter.net)
+        function = self.model_adapter.model
         paf = function.get_output_op(0)
-        paf_shape = paf.outputs()[0].get_shape()
+        paf_shape = paf.output(0).get_shape()
         heatmap = function.get_output_op(1)
-        heatmap_shape = heatmap.outputs()[0].get_shape()
+
+        heatmap_shape = heatmap.output(0).get_shape()
         if len(paf_shape) != 4 and len(heatmap_shape) != 4:
             raise RuntimeError('OpenPose outputs must be 4-dimensional')
         if paf_shape[2] != heatmap_shape[2] and paf_shape[3] != heatmap_shape[3]:
@@ -52,23 +52,20 @@ class OpenPose(ImageModel):
                 'of second dimension of another output')
 
         paf = paf.inputs()[0].get_source_output().get_node()
-        paf.set_friendly_name(self.pafs_blob_name)
+        paf.get_output_tensor(0).set_names({self.pafs_blob_name})
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
-        heatmap.set_friendly_name(self.heatmaps_blob_name)
+
+        heatmap.get_output_tensor(0).set_names({self.heatmaps_blob_name})
 
         # Add keypoints NMS to the network.
         # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
         p = int(np.round(6 / 7 * self.upsample_ratio))
         k = 2 * p + 1
-        pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
+        pooled_heatmap = opset8.max_pool(heatmap, kernel_shape=(k, k), dilations=(1, 1), pads_begin=(p, p), pads_end=(p, p),
                                      strides=(1, 1), name=self.pooled_heatmaps_blob_name)
-        f = ng.impl.Function(
-            [ng.result(heatmap, name=self.heatmaps_blob_name),
-             ng.result(pooled_heatmap, name=self.pooled_heatmaps_blob_name),
-             ng.result(paf, name=self.pafs_blob_name)],
-            function.get_parameters(), 'hpe')
+        pooled_heatmap.output(0).get_tensor().set_names({self.pooled_heatmaps_blob_name})
+        self.model_adapter.model.add_outputs([pooled_heatmap.output(0)])
 
-        self.model_adapter.net = IENetwork(ng.impl.Function.to_capsule(f))
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()
 
@@ -88,7 +85,7 @@ class OpenPose(ImageModel):
             self.load()
 
         num_joints = self.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
-        self.decoder = OpenPoseDecoder(num_joints, score_threshold=self.prob_threshold)
+        self.decoder = OpenPoseDecoder(num_joints, score_threshold=self.confidence_threshold)
 
     @classmethod
     def parameters(cls):
@@ -96,7 +93,7 @@ class OpenPose(ImageModel):
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
-            'prob_threshold': NumericalValue(),
+            'confidence_threshold': NumericalValue(),
             'upsample_ratio': NumericalValue(default_value=1, value_type=int),
             'size_divisor': NumericalValue(default_value=8, value_type=int),
         })
@@ -125,16 +122,17 @@ class OpenPose(ImageModel):
                      mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img[None]
-        return {self.image_blob_name: img}, resize_img_scale
+        meta = {'resize_img_scale': resize_img_scale}
+        return {self.image_blob_name: img}, meta
 
-    def postprocess(self, outputs, resize_img_scale):
+    def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
         pafs = outputs[self.pafs_blob_name]
         pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
         nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
         poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
         # Rescale poses to the original image.
-        poses[:, :, :2] *= resize_img_scale * self.output_scale
+        poses[:, :, :2] *= meta['resize_img_scale'] * self.output_scale
         return poses, scores
 
 

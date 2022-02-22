@@ -1,5 +1,5 @@
 """
- Copyright (C) 2021 Intel Corporation
+ Copyright (C) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 
 from .openvino_adapter import create_core, OpenvinoAdapter
-from .remote_adapter import RemoteAdapter
+from .ovms_adapter import OVMSAdapter
+from .utils import Layout
 
 __all__ = [
     'create_core',
+    'Layout',
     'OpenvinoAdapter',
-    'RemoteAdapter',
+    'OVMSAdapter',
 ]

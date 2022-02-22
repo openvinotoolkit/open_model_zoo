@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ files:
   - name: tf_efficientnetv2_b0-c7cc451f.pth
     size: 28865269
     checksum: b3192e284c7ecf9ab766eb77682ee258152b3f9b142b3a962bdbd409a5332b7731574f8f7e6a5fe3f7af353acd6ad76a
-    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-effv2-weights/tf_efficientnetv2_b0-c7cc451f.pth
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-effv2-weights/tf_efficientnetv2_b0-c7cc451f.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-v2-b0/tf_efficientnetv2_b0-c7cc451f.pth
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -48,6 +49,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,3,224,224]
   - --input=input
+  - --layout=input(NCHW)
   - --input_model=$conv_dir/efficientnet-v2-b0.onnx
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.395,57.12,57.375]

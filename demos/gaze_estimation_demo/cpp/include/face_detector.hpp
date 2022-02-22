@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,7 +8,6 @@
 #include <vector>
 #include <map>
 
-#include <inference_engine.hpp>
 #include <opencv2/core/core.hpp>
 
 #include "face_inference_results.hpp"
@@ -17,7 +16,7 @@
 namespace gaze_estimation {
 class FaceDetector {
 public:
-    FaceDetector(InferenceEngine::Core& ie,
+    FaceDetector(ov::Core& core,
                  const std::string& modelPath,
                  const std::string& deviceName,
                  double detectionConfidenceThreshold,
@@ -29,9 +28,9 @@ public:
 
 private:
     IEWrapper ieWrapper;
-    std::string inputBlobName;
-    std::vector<unsigned long> inputBlobDims;
-    std::string outputBlobName;
+    std::string inputTensorName;
+    ov::Shape inputTensorDims;
+    std::string outputTensorName;
     std::size_t numTotalDetections;
 
     double detectionThreshold;

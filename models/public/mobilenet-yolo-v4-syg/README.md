@@ -23,13 +23,13 @@ which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
 | ------ | -------|
-| mAP    | 87.11% |
+| mAP    | 86.35% |
 
 ## Input
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C` where:
 
 - `B` - batch size
 - `H` - height
@@ -41,7 +41,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C` where:
 
 - `B` - batch size
 - `H` - height
@@ -73,11 +73,11 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 ### Converted model
 
-1. The array of detection summary info, name - `separable_conv2d_22/separable_conv2d/YoloRegion`,  shape - `1,27,52,52`. The anchor values are `12,16,  19,36,  40,28`.
+1. The array of detection summary info, name - `separable_conv2d_22/separable_conv2d/YoloRegion`,  shape - `1, 52, 52, 27`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30/separable_conv2d/YoloRegion`,  shape - `1,27,26,26`. The anchor values are `36,75,  76,55,  72,146`.
+2. The array of detection summary info, name - `separable_conv2d_30/separable_conv2d/YoloRegion`,  shape - `1, 26, 26, 27`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1,27,13,13`. The anchor values are `142,110,  192,243,  459,401`.
+3. The array of detection summary info, name - `separable_conv2d_38/separable_conv2d/YoloRegion`,  shape - `1, 13, 13, 27`. The anchor values are `142,110,  192,243,  459,401`.
 
 Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_4`], where:
 - (`x`,`y`) - coordinates of box center relative to the cell
@@ -85,12 +85,26 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_4` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
-## Download a Model and Convert it into Inference Engine Format
-You can download models and if necessary convert them into Inference Engine format using the Model Downloader and other automation tools as shown in the examples below.
+## Download a Model and Convert it into OpenVINO™ IR Format
+
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+
 An example of using the Model Downloader:
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+omz_downloader --name <model_name>
+```
+
 An example of using the Model Converter:
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+omz_converter --name <model_name>
+```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

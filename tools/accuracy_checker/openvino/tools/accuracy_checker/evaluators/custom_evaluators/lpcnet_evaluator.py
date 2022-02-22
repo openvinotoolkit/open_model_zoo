@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel, TTSO
 from .base_models import BaseCascadeModel, BaseONNXModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, parse_partial_shape, generate_layer_name
+from ...utils import contains_all, parse_partial_shape, generate_layer_name, postprocess_output_name
 
 
 scale = 255.0/32768.0
@@ -63,6 +63,8 @@ class SequentialModel(BaseCascadeModel):
         self.decoder = create_model(network_info['decoder'], launcher, self._decoder_mapping, 'decoder',
                                     delayed_model_loading)
         self.adapter = create_adapter(adapter_info)
+        if not delayed_model_loading:
+            self.update_inputs_outputs_info()
         self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
@@ -71,8 +73,12 @@ class SequentialModel(BaseCascadeModel):
     def predict(self, identifiers, input_data, input_meta=None, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_output, feats, chunk_size = self.encoder.predict(identifiers, input_data[0])
+        if isinstance(encoder_output, tuple):
+            encoder_output, raw_encoder_output = encoder_output
+        else:
+            raw_encoder_output = encoder_output
         if callback:
-            callback(encoder_output)
+            callback(raw_encoder_output)
 
         cfeats = encoder_output[self.encoder.output]
         decoder_data = (cfeats, feats, chunk_size)
@@ -91,7 +97,7 @@ class SequentialModel(BaseCascadeModel):
     def update_inputs_outputs_info(self):
         current_name = next(iter(self.encoder.inputs))
         with_prefix = current_name.startswith('encoder_')
-        if with_prefix != self.with_prefix:
+        if not hasattr(self, 'with_prefix') or with_prefix != self.with_prefix:
             self.encoder.update_inputs_outputs_info(with_prefix)
             self.decoder.update_inputs_outputs_info(with_prefix)
 
@@ -116,7 +122,12 @@ class EncoderModel:
     def update_inputs_outputs_info(self, with_prefix):
         self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
         self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
-        self.output = generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix)
+        if hasattr(self, 'outputs'):
+            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            if self.output not in self.outputs:
+                self.output = postprocess_output_name(
+                    generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix),
+                    self.outputs, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -145,12 +156,12 @@ class EncoderOpenVINOModel(EncoderModel, TTSOVModel):
         self.output = network_info.get('output')
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
-    def infer(self, input_data):
+    def infer(self, input_data, raw_results=True):
         feature_layer_shape = parse_partial_shape(self.inputs[self.feature_input].get_partial_shape())
         if self.feature_input in self.dynamic_inputs or feature_layer_shape != input_data[self.feature_input].shape:
             input_shapes = {in_name: value.shape for in_name, value in input_data.items()}
             self._reshape_input(input_shapes)
-        return self.infer(input_data)
+        return super().infer(input_data, raw_results)
 
 
 class EncoderONNXModel(BaseONNXModel, EncoderModel):
@@ -200,9 +211,13 @@ class DecoderModel:
                     self.rnn_input1: state1,
                     self.rnn_input2: state2
                 })
+                if isinstance(outputs, tuple):
+                    outputs, raw_outputs = outputs
+                else:
+                    raw_outputs = outputs
 
                 if callback is not None:
-                    callback(outputs)
+                    callback(raw_outputs)
                 p = outputs[self.output]
                 state1 = outputs[self.rnn_output1]
                 state2 = outputs[self.rnn_output2]
@@ -228,9 +243,22 @@ class DecoderModel:
         self.input2 = generate_layer_name(self.input2, prefix, with_prefix)
         self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
-        self.output = generate_layer_name(self.output, prefix, with_prefix)
-        self.rnn_output1 = generate_layer_name(self.rnn_output1, prefix, with_prefix)
-        self.rnn_output2 = generate_layer_name(self.rnn_output2, prefix, with_prefix)
+        if hasattr(self, 'outputs'):
+            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            if self.output not in self.outputs:
+                self.output = postprocess_output_name(
+                    generate_layer_name(self.output, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
+            self.rnn_output1 = postprocess_output_name(self.rnn_output1, self.outputs, raise_error=False)
+            if self.rnn_output1 not in self.outputs:
+                self.rnn_output1 = postprocess_output_name(
+                    generate_layer_name(self.rnn_output1, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
+            self.rnn_output2 = postprocess_output_name(self.rnn_output2, self.outputs, raise_error=False)
+            if self.rnn_output2 not in self.outputs:
+                self.rnn_output2 = postprocess_output_name(
+                    generate_layer_name(self.rnn_output2, self.default_model_suffix + '_', with_prefix),
+                    self.outputs, raise_error=False)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2021 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from time import perf_counter
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 from tokenizers import SentencePieceBPETokenizer
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -30,14 +30,13 @@ class Translator:
     """ Language translation.
 
     Arguments:
-        model_xml (str): path to model's .xml file.
-        model_bin (str): path to model's .bin file.
+        model_path (str): path to model's .xml file.
         tokenizer_src (str): path to src tokenizer.
         tokenizer_tgt (str): path to tgt tokenizer.
     """
-    def __init__(self, model_xml, model_bin, device, tokenizer_src, tokenizer_tgt, output_name):
-        self.model = TranslationEngine(model_xml, model_bin, device, output_name)
-        self.max_tokens = self.model.get_max_tokens()
+    def __init__(self, model_path, device, tokenizer_src, tokenizer_tgt, output_name):
+        self.engine = TranslationEngine(model_path, device, output_name)
+        self.max_tokens = self.engine.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
         log.debug('Loaded src tokenizer, max tokens: {}'.format(self.max_tokens))
         self.tokenizer_tgt = Tokenizer(tokenizer_tgt, self.max_tokens)
@@ -56,7 +55,7 @@ class Translator:
         tokens = self.tokenizer_src.encode(sentence)
         assert len(tokens) == self.max_tokens, "the input sentence is too long."
         tokens = np.array(tokens).reshape(1, -1)
-        translation = self.model(tokens)
+        translation = self.engine(tokens)
         translation = self.tokenizer_tgt.decode(translation[0], remove_repeats)
         return translation
 
@@ -65,24 +64,22 @@ class TranslationEngine:
     """ OpenVINO engine for machine translation.
 
     Arguments:
-        model_xml (str): path to model's .xml file.
-        model_bin (str): path to model's .bin file.
+        model_path (str): path to model's .xml file.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, model_bin, device, output_name):
+    def __init__(self, model_path, device, output_name):
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        ie = IECore()
+        core = Core()
 
-        log.info('Reading model {}'.format(model_xml))
-        self.net = ie.read_network(
-            model=model_xml,
-            weights=model_bin
-        )
-        self.net_exec = ie.load_network(self.net, device)
-        log.info('The model {} is loaded to {}'.format(model_xml, device))
-        self.output_name = output_name
-        assert self.output_name != "", "there is not output in model"
+        log.info('Reading model {}'.format(model_path))
+        self.model = core.read_model(model_path)
+        compiled_model = core.compile_model(self.model, args.device)
+        self.infer_request = compiled_model.create_infer_request()
+        log.info('The model {} is loaded to {}'.format(model_path, device))
+        self.input_tensor_name = "tokens"
+        self.output_tensor_name = output_name
+        self.model.output(self.output_tensor_name) # ensure a tensor with the name exists
 
     def get_max_tokens(self):
         """ Get maximum number of tokens that supported by model.
@@ -90,7 +87,7 @@ class TranslationEngine:
         Returns:
             max_tokens (int): maximum number of tokens;
         """
-        return self.net.input_info["tokens"].input_data.shape[1]
+        return self.model.input(self.input_tensor_name).shape[1]
 
     def __call__(self, tokens):
         """ Inference method.
@@ -101,10 +98,8 @@ class TranslationEngine:
         Returns:
             translation (np.array): translated sentence in tokenized format.
         """
-        out = self.net_exec.infer(
-            inputs={"tokens": tokens}
-        )
-        return out[self.output_name]
+        self.infer_request.infer({self.input_tensor_name: tokens})
+        return self.infer_request.get_tensor(self.output_tensor_name).data[:]
 
 
 class Tokenizer:
@@ -220,8 +215,7 @@ def parse_input(input):
 
 def main(args):
     model = Translator(
-        model_xml=args.model,
-        model_bin=args.model.with_suffix(".bin"),
+        model_path=args.model,
         device=args.device,
         tokenizer_src=args.tokenizer_src,
         tokenizer_tgt=args.tokenizer_tgt,
@@ -263,4 +257,4 @@ def main(args):
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
-    main(args)
+    sys.exit(main(args) or 0)

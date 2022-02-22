@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,29 +16,33 @@ description: >-
   YOLO v2 trained on VOC dataset by AVA team with zero sparsity level.
 task_type: detection
 files:
+  - name: parameters.yml
+    size: 222
+    checksum: a748263155086e1cd99d15486648d9f5ff2a5b342c3018a01f51505381b7d5d3928b40bfbb3c829994e72b020dc03413
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/parameters.yml
   - name: FP32/yolo-v2-ava-0001.xml
-    size: 84732
-    checksum: 94fa2b370a9367d9e1f609b775f2bd6a901a81e7d8e8484bde35bb130700194c0f80f44a4853268c29788f67ec4a366a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
+    size: 106983
+    checksum: 60065508e524bb34c2fdbb7a1acf765fcf66a4dd490d0f5f8c6a6860f86ed8f7beee8df2a9653dd8610f2aa252c0d3db
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
   - name: FP32/yolo-v2-ava-0001.bin
-    size: 202580240
-    checksum: 4d25c6def4815cfc68261ea8b646b3995db8d374f8e11760f21eeb026addab87c2ab0e751458f2a5dbd9ccee9d05a5dc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
+    size: 202580272
+    checksum: 64afc3a8a7191d766ac21ad26d9f1d7396d491eec0a1d4162e79f6d2cdc0321992de840de1329996ea81bb631fc6cfd2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
   - name: FP16/yolo-v2-ava-0001.xml
-    size: 84703
-    checksum: b3fa31cb8dbbea60cb465ddf3de2db07feb76350b2625823be23ece9db05ea676fd450fb76bc083d47eab5ed39104a35
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
+    size: 144526
+    checksum: d8fa48dce7440b3822f3b2787dc8d450c5c3ee3ea3b57616edcea4a507cab59f097d78438b439e7508762cea87b148ff
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
   - name: FP16/yolo-v2-ava-0001.bin
-    size: 101290122
-    checksum: a687bb2b57479b05595bef2c0d2515766128271535f3c078178e533bfb08fd6982362121bb2ee44f3d68af67bfcce103
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
+    size: 101290152
+    checksum: cb4b3dede0b4278e9d4fc60221a0c7b44d29b7407dab4aa7d4a58e45d4332f0ac46b37268f76923609445af387f1085b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
   - name: FP16-INT8/yolo-v2-ava-0001.xml
-    size: 182973
-    checksum: cba03125b8a09e4cc14bfc23f2a417514bc3aa75c1658ae00155d71431a47d425c000f2fadf6f2d807ed0a1caa4bde84
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
+    size: 220119
+    checksum: 2d6acc2c775c0d899ed00423fae189ef93e3768492e5d67e3fda09ed9464013155ae9431281ae74d2f6b5358dbc26f86
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
   - name: FP16-INT8/yolo-v2-ava-0001.bin
-    size: 50697466
-    checksum: 1e799cff915cc09cd01026ee322ad70f10551e12c00f3fd3699cd8711a604214588743e78690b60392fafc31f6b5c790
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
+    size: 50739432
+    checksum: 566fd4523f129ca053234667317151b962184478f0cf88a61a3eec6dd8981405da14416bdaabc39490aa3894e6c9e224
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

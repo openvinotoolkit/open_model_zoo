@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 from accuracy_checker.dataset import read_annotation
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -30,27 +30,24 @@ class ForecastingEngine:
     """ OpenVINO engine for Time Series Forecasting.
 
     Arguments:
-        model_xml (str): path to model's .xml file.
-        model_bin (str): path to model's .bin file.
+        model_path (str): path to model's .xml file.
         input_name (str): name of input blob of model.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, model_bin, input_name, output_name, quantiles):
+    def __init__(self, model_path, input_name, output_name, quantiles):
         device = "CPU"
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        self.ie = IECore()
-        log.info('Reading model {}'.format(model_xml))
-        self.net = self.ie.read_network(
-            model=model_xml,
-            weights=model_bin
-        )
-        self.net_exec = self.ie.load_network(self.net, device)
-        log.info('The model {} is loaded to {}'.format(model_xml, device))
-        self.input_name = input_name
-        self.output_name = output_name
+        core = Core()
+        log.info('Reading model {}'.format(model_path))
+        model = core.read_model(model_path)
+        compiled_model = core.compile_model(model, device)
+        self.infer_request = compiled_model.create_infer_request()
+        log.info('The model {} is loaded to {}'.format(model_path, device))
+        self.input_tensor_name = input_name
+        self.output_tensor_name = output_name
         self.quantiles = quantiles
-        assert self.output_name != "", "there is not output in model"
+        model.output(self.output_tensor_name) # ensure a tensor with the name exists
 
     def __call__(self, inputs):
         """ Main forecasting method.
@@ -61,7 +58,8 @@ class ForecastingEngine:
         Returns:
             preds (dict): predicted quantiles.
         """
-        preds = self.net_exec.infer(inputs={self.input_name: inputs})[self.output_name]
+        self.infer_request.infer(inputs={self.input_tensor_name: inputs})
+        preds = self.infer_request.get_tensor(self.output_tensor_name).data[:]
         out = {}
         for i, q in enumerate(self.quantiles):
             out[q] = preds[:, :, i].flatten()
@@ -161,8 +159,7 @@ def build_argparser():
 def main(args):
     quantiles = args.quantiles.split(",")
     model = ForecastingEngine(
-        model_xml=args.model,
-        model_bin=args.model.with_suffix(".bin"),
+        model_path=args.model,
         input_name=args.input_name,
         output_name=args.output_name,
         quantiles=quantiles
@@ -199,4 +196,4 @@ def main(args):
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
-    main(args)
+    sys.exit(main(args) or 0)

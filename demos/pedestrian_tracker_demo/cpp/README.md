@@ -24,7 +24,7 @@ After that, the application displays the tracks and the latest detections on the
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/pedestrian_tracker_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -94,46 +94,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
-```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
-pedestrian_tracker_demo [OPTION]
-Options:
-
-    -h                           Print a usage message.
-    -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                        Optional. Enable reading the input in a loop.
-    -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
-    -read_limit                  Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                  Optional. Name of the output file(s) to save.
-    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
-    -at \"<type>\"                  Required. Architecture type for detector model: centernet, ssd or yolo.
-    -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
-    -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
-          Or
-    -c "<absolute_path>"         Optional. For GPU custom kernels, if any. Absolute path to the .xml file with the kernels description.
-    -d_det "<device>"            Optional. Specify the target device for pedestrian detection (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin.
-    -d_reid "<device>"           Optional. Specify the target device for pedestrian reidentification (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin.
-    -r                           Optional. Output pedestrian tracking results in a raw format (compatible with MOTChallenge format).
-    -no_show                     Optional. Don't show output.
-    -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
-    -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -u                           Optional. List of monitors to show initially.
-	-t                           Optional. Probability threshold for detections.
-    -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
-    -iou_t                       Optional. Filtering intersection over union threshold for overlapping boxes.
-    -yolo_af                     Optional. Use advanced postprocessing/filtering algorithm for YOLO.
-    -labels \"<path>\"           Optional. Path to a file with labels mapping.
-    -nireq \"<integer>\"         Optional. Number of infer requests for detector model. If this option is omitted, number of infer requests is determined automatically.
-    -nstreams                    Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode for detector model (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -nthreads \"<integer>\"      Optional. Number of threads for detector model.
-    -person_label                Optional. Label of class person for detector. Default -1 for tracking all objects
-```
+Running the demo with the `-h` option yields a usage message.
 
 For example, to run the application with the OpenVINO&trade; toolkit pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU, run the following command:
 

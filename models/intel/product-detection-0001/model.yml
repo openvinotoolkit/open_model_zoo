@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/product-detection-0001.xml
-    size: 323305
-    checksum: 731c73f3cef19694238ae8a0c7ce6c1e60cc7c6ebe78d5ff8cb01e1fe65da2f767be75e5643e2c8b087f71f69debee99
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.xml
+    size: 531013
+    checksum: 24b7e18c0db8b4763278df4a9a3d0ce0f434607ac7a368f6b8b557efdeeb89a23713264863054e1f1ff6b389c710e7ea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP32/product-detection-0001.xml
   - name: FP32/product-detection-0001.bin
-    size: 12850024
-    checksum: dc3e6fa2805627a6b96a4734a899bee296e6e7feed419764b7264deb4d686a29cc25730fbc1309456ccc1f77957bad49
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.bin
+    size: 13077144
+    checksum: 57da5a5df29cc95cb6a39020a1187158802493ff66e3f2fe2245caa83e253620fc887bd6229bff29c9ccc8abd9c20823
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP32/product-detection-0001.bin
   - name: FP16/product-detection-0001.xml
-    size: 323127
-    checksum: 525bd3f072620785415bcbe5649564f75e3fc3db6525592fffc1fd29e4f131873d1e0f350f67220fc4f59ec146f2b58d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.xml
+    size: 725772
+    checksum: d9f1079d1289b78664c8ad8328eba13b37c7e991133ff706c8fe122b86aa23e71ecc5f8930e4dbb8b99c33e250b422db
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.xml
   - name: FP16/product-detection-0001.bin
-    size: 6425058
-    checksum: 5e1c57999d4dc26c6a097b97af3a698f38664ecf96455253683536444853843f9e9615f17f7ec8885894136a59070fd8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.bin
+    size: 6538636
+    checksum: 885fdf9be26a7953fbed646648036a7d8385282ac6ff1663cad3ff7a86922cbb38e34ba1c0979cf388e68a5a42c6078d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.bin
   - name: FP16-INT8/product-detection-0001.xml
-    size: 716994
-    checksum: 2dd5695452d68bf0fc5c7836ac281f8266fb42525b2bc45f3ae884ff7be801c01c20d5bf008e1583055f75659e632fcc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.xml
+    size: 1238544
+    checksum: b6e04a30e3a08bcc048cbb1dc75d5240ad42302645f5c1880ced6f72bf8f9519f443c49dd4d9dfd8e02e6fc847da07c5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16-INT8/product-detection-0001.xml
   - name: FP16-INT8/product-detection-0001.bin
-    size: 3364170
-    checksum: 44dabe31d4e9907f3506556a0baf61bee1e1167fe1f1ff2ff81571368e2ca73bdb1b74667e6b9d814c6b06ada0299096
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.bin
+    size: 3612820
+    checksum: b11f2dcac5b40b48f4cfe7871b4e24118c797fc7435ce5a256a16ec41ab6f86cac18e08083816e62187e3623c469e082
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16-INT8/product-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

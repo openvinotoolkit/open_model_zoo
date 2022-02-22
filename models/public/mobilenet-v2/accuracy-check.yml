@@ -27,7 +27,7 @@ models:
 
   - name: mobilenet-v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

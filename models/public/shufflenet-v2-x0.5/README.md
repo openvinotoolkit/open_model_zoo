@@ -62,9 +62,9 @@ Object classifier according to ImageNet classes, name - `fc`,  shape - `1, 1000`
 
 The converted model has the same parameters as the original model.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -75,6 +75,13 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Classification Benchmark C++ Demo](../../../demos/classification_benchmark_demo/cpp/README.md)
+* [Classification Python\* Demo](../../../demos/classification_demo/python/README.md)
 
 ## Legal Information
 

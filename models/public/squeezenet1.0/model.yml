@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ files:
   - name: squeezenet1.0.caffemodel
     size: 5001403
     checksum: b8dc96393e093b4f23390b70f01fe37330d629759db59c1da3c15f846d0b1b1751b6ad841570c2e303c86829c750a745
-    source: https://github.com/forresti/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel
+    original_source: https://github.com/forresti/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/squeezenet1.0/squeezenet_v1.0.caffemodel
 postprocessing:
   - $type: regex_replace
     file: squeezenet1.0.prototxt
@@ -42,10 +43,11 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,3,227,227]
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[104.0,117.0,123.0]
   - --output=prob
   - --input_model=$dl_dir/squeezenet1.0.caffemodel
   - --input_proto=$dl_dir/squeezenet1.0.prototxt
 framework: caffe
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/forresti/SqueezeNet/master/LICENSE

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -123,9 +123,9 @@ class FeedbackMixin:
 
 class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.partial_shapes = {}
-        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):
@@ -178,35 +178,47 @@ class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
 
 class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.partial_shapes = {}
-        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
         if not self.is_dynamic and self.dynamic_inputs:
             self._reshape_input({key: data.shape for key, data in input_data.items()})
-        raw_result = self.infer(input_data)
+        raw_result, raw_t_results = self.infer(input_data, raw_results=True)
         result = self.adapter.process([raw_result], identifiers, [{}])
-        return raw_result, result
+        return raw_t_results, result
 
     def fit_to_input(self, input_data):
         fitted = {}
         for name, info in self.inputs.items():
             data = input_data[self._name_to_idx[name]]
             data = np.expand_dims(data, axis=0)
-            data = np.transpose(data, [0, 3, 1, 2])
-            if not info.get_partial_shape.is_dynamic:
-                assert parse_partial_shape(info.input_data.shape) == np.shape(data)
+            if parse_partial_shape(info.get_partial_shape())[1] == 3:
+                data = np.transpose(data, (0, 3, 1, 2))
+            if not info.get_partial_shape().is_dynamic:
+                assert tuple(parse_partial_shape(info.get_partial_shape())) == np.shape(data)
             fitted[name] = data
 
         return fitted
 
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.set_input_and_output()
+
     def set_input_and_output(self):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_info = self.inputs
         input_blob = next(iter(input_info))
+        out_mapping = {}
+        outputs = self.network.outputs if self.network is not None else self.exec_network.outputs
+        for out in outputs:
+            if not out.names:
+                continue
+            for name in out.names:
+                out_mapping[name] = out.get_node().friendly_name
+        self.adapter.additional_output_mapping = out_mapping
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if (with_prefix != self.with_prefix) and with_prefix:
             self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
@@ -215,14 +227,8 @@ class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
                 inp['name'] = '_'.join([self.default_model_suffix, inp['name']])
                 if 'blob' in inp.keys():
                     inp['blob'] = '_'.join([self.default_model_suffix, inp['blob']])
-            self.network_info['adapter']['target_out'] = '_'.join([self.default_model_suffix,
-                                                                   self.network_info['adapter']['target_out']])
 
         self.with_prefix = with_prefix
-
-    def load_network(self, network, launcher):
-        super().load_network(network, launcher)
-        self.set_input_and_output()
 
 
 class ModelTFModel(BaseTFModel, FeedbackMixin):

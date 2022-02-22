@@ -2,7 +2,7 @@ models:
   - name: person-detection-0106
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: mask_rcnn
           boxes_out: boxes

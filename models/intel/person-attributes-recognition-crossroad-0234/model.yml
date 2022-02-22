@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0234.xml
-    size: 192956
-    checksum: 1b1974cc36a2e6cc86510b48d682f75bd1424aedbe2d210068fa2314d23793df4bd2d9fe37eb41d3c0ae11c9fa6d22fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.xml
+    size: 333202
+    checksum: d24e4cc169fc0a4f8a74ee69f10f0352fc1cc8882d5cf2ef2eadb74b8b740ab9a322430ec7292381dffeea72f23879a1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.xml
   - name: FP32/person-attributes-recognition-crossroad-0234.bin
-    size: 94040716
-    checksum: e08ac2acf8b06f15417ac44e2ed6d40faaddb9ff147ef6c5c64692b10b1aa00e807e3c52769abc7bb37beb661615c5d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.bin
+    size: 94237804
+    checksum: 391dbf523e04b4fce5d5aa93462c60c7d449284981833183b70c83637f6e9b0ca738c803eff49050092b9ac99e96e4e4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.bin
   - name: FP16/person-attributes-recognition-crossroad-0234.xml
-    size: 192896
-    checksum: 0eee7f11f4445d438aec71a281121f5f3a5d22a8e638eb4d00dfcd767294b9ea2bf7d3a51e5b352081ee284218bbba85
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.xml
+    size: 459927
+    checksum: 12b135950e105c53915dbb2fb585d4196c93417ad4ade29b4138fd3eb7f636b331e6fecba316b930a70d49d7c236a146
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.xml
   - name: FP16/person-attributes-recognition-crossroad-0234.bin
-    size: 47020388
-    checksum: ad1bd24fbedd058d72d4a7e77d374b7e1c8532b89330a61ffada0ab2dacc4ff9d2cff22e128d0e0571b35eb67daa78c7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.bin
+    size: 47118922
+    checksum: dfce933b466e646fb38f470805a63e595fc01264e5c91df42688a17d43b254f87bc13bdae24d3360884246fbab69f62b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.bin
   - name: FP16-INT8/person-attributes-recognition-crossroad-0234.xml
-    size: 449259
-    checksum: ece2e9b754f0f5d080232ff22329eaa8632762d5b34b3cdf842071a1eb2713fcd972bbd3dcc0349f5fe3ad212379a4a7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.xml
+    size: 804425
+    checksum: be5976942b45ffa7b56d185bcc3a22a2b034ae3e5a5a7c91b5a80e3fb1f965a86aefb820b00cc7fd93f97b6f1d6ba0fb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.xml
   - name: FP16-INT8/person-attributes-recognition-crossroad-0234.bin
-    size: 23651452
-    checksum: 694dda90a769bdd56beb76844882699f7fb262fcd33a8d20a7bd86bc30f52c0cf5775e6d6a8787591788e947526a095e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.bin
+    size: 23864847
+    checksum: 63fefe9d0b1bb2d0bf57421481594dfd0f26b3308d1942a2f10dc9c2ecc9da977e2d66b839132908e4585833ac423421
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

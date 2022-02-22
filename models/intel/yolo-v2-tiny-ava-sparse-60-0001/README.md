@@ -19,12 +19,12 @@ Tested on the VOC 2012 validation dataset.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 416, 416` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 416, 416, 3` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order is `BGR`.
 
@@ -39,6 +39,14 @@ where each number corresponds to [`num_anchors`, `cls_reg_obj_params`, `y_loc`, 
   * Objectness score (1)
   * Class score (20), mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 - `y_loc` and `x_loc`: spatial location of each grid
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
 
 ## Legal Information
 [*] Same as the original implementation.

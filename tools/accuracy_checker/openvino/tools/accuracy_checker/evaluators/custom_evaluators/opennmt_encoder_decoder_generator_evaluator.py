@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel, BaseDLSDKModel, create_model, BaseONNXModel, BaseOpenVINOModel
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, parse_partial_shape
+from ...utils import contains_all, extract_image_representations, parse_partial_shape, postprocess_output_name
 
 
 class OpenNMTEvaluator(BaseCustomEvaluator):
@@ -55,7 +55,7 @@ class OpenNMTEvaluator(BaseCustomEvaluator):
             metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
                                                       calculate_metrics)
             if output_callback:
-                output_callback(batch_raw_prediction[0], metrics_result=metrics_result,
+                output_callback(batch_raw_prediction, metrics_result=metrics_result,
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
@@ -118,7 +118,7 @@ class OpenNMTModel(BaseCascadeModel):
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
-                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})
+                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze(axis=0)})
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
@@ -219,22 +219,29 @@ class CommonOVModel(BaseOpenVINOModel):
 
     def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
-        results = self.infer(input_data)
+        results, raw_results = self.infer(input_data, raw_results=True)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(results[name] for name in names) + (results,)
+        return tuple(
+            results[postprocess_output_name(name, results)] for name in names) + (raw_results,)
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
             fitted = {}
             for input_blob in self.inputs:
-                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+                data_key = input_blob
+                if input_blob.startswith(self.default_model_suffix):
+                    data_key = input_blob.replace(self.default_model_suffix + '_', '')
+                fitted.update(self.fit_one_input(input_blob, input_data[data_key]))
         else:
             fitted = self.fit_one_input(self.input_blob, input_data)
         return fitted
 
     def fit_one_input(self, input_blob, input_data):
-        if input_blob in self.dynamic_inputs or parse_partial_shape(self.inputs[input_blob]) != np.shape(input_data):
+        if (
+            input_blob in self.dynamic_inputs or
+            parse_partial_shape(self.inputs[input_blob].get_partial_shape()) != np.shape(input_data)
+        ):
             self._reshape_input({input_blob: np.shape(input_data)})
 
         return {input_blob: np.array(input_data)}
@@ -306,7 +313,7 @@ class BeamSearch:
         curr_scores = log_probs.reshape(-1, self.beam_size * vocab_size)
         topk_ids = np.argsort(curr_scores)[..., range(self.beam_size * vocab_size - 1,
                                                       self.beam_size * (vocab_size - 1) - 1, -1)]
-        topk_scores = curr_scores[..., topk_ids.squeeze()]
+        topk_scores = curr_scores[..., topk_ids.squeeze(axis=0)]
         return topk_scores, topk_ids
 
     def update_finished(self):
@@ -366,7 +373,7 @@ class BeamSearch:
         self.topk_ids = np.fmod(self.topk_ids, vocab_size)  # resolve true word ids
 
         self.alive_seq = np.concatenate(
-            [np.take(self.alive_seq, self.select_indices.squeeze(), 0),
+            [np.take(self.alive_seq, self.select_indices.squeeze(axis=-1), 0),
              self.topk_ids.view().reshape((_B * self.beam_size, 1))], axis=-1)
 
         self.is_finished = np.equal(self.topk_ids, self.eos)
@@ -420,6 +427,13 @@ class DecoderDLSDKModel(CommonOpenNMTDecoder, CommonDLSDKModel):
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
 
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
 
 class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
@@ -437,10 +451,18 @@ class EncoderOVModel(CommonOVModel):
 class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
-    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
-    return_layers = ['output', 'attn']
+    output_layers = ['attn/sink_port_0', 'c_1/sink_port_0', 'h_1/sink_port_0', 'input_feed/sink_port_0',
+                     'output/sink_port_0']
+    return_layers = ['output/sink_port_0', 'attn/sink_port_0']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
-    state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
+    state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
+
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class GeneratorOVModel(CommonOVModel):

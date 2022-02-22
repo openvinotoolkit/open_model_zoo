@@ -6,13 +6,13 @@
 | action-recognition-0001-encoder | YES | YES | YES |
 | age-gender-recognition-retail-0013 | YES | YES | YES |
 | asl-recognition-0004 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-0001 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-emb-0001 | YES | YES |    |
-| bert-large-uncased-whole-word-masking-squad-int8-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-0002 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-emb-int8-0001 | YES | YES |    |
-| bert-small-uncased-whole-word-masking-squad-int8-0002 | YES | YES |    |
+| bert-large-uncased-whole-word-masking-squad-0001 | YES |  |    |
+| bert-large-uncased-whole-word-masking-squad-emb-0001 | YES |  |    |
+| bert-large-uncased-whole-word-masking-squad-int8-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-0002 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-emb-int8-0001 | YES |  |    |
+| bert-small-uncased-whole-word-masking-squad-int8-0002 | YES |  |    |
 | common-sign-language-0002 | YES | YES |    |
 | driver-action-recognition-adas-0002-decoder | YES | YES | YES |
 | driver-action-recognition-adas-0002-encoder | YES | YES | YES |
@@ -48,18 +48,20 @@
 | icnet-camvid-ava-sparse-30-0001 | YES | YES | YES |
 | icnet-camvid-ava-sparse-60-0001 | YES | YES | YES |
 | image-retrieval-0001 | YES | YES | YES |
-| instance-segmentation-security-0002 | YES |    |    |
+| instance-segmentation-security-0002 |  |    |    |
 | instance-segmentation-security-0091 | YES |    |    |
-| instance-segmentation-security-0228 | YES |    |    |
-| instance-segmentation-security-1039 | YES |    |    |
-| instance-segmentation-security-1040 | YES |    |    |
+| instance-segmentation-security-0228 |  |    |    |
+| instance-segmentation-security-1039 |  |    |    |
+| instance-segmentation-security-1040 |  |    |    |
 | instance-segmentation-person-0007 | YES |    |    |
-| landmarks-regression-retail-0009 | YES | YES | YES |
+| landmarks-regression-retail-0009 | YES |  | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
-| machine-translation-nar-de-en-0002 | YES | YES |    |
-| machine-translation-nar-en-de-0002 | YES | YES |    |
-| machine-translation-nar-en-ru-0001 | YES | YES |    |
-| machine-translation-nar-ru-en-0001 | YES | YES |    |
+| machine-translation-nar-de-en-0002 | YES |     |    |
+| machine-translation-nar-en-de-0002 | YES |     |    |
+| machine-translation-nar-en-ru-0001 | YES |     |    |
+| machine-translation-nar-ru-en-0001 | YES |     |    |
+| machine-translation-nar-en-ru-0002 | YES |     |    |
+| machine-translation-nar-ru-en-0002 | YES |     |    |
 | noise-suppression-denseunet-ll-0001 | YES |    |    |
 | noise-suppression-poconetlike-0001 | YES |    |    |
 | pedestrian-and-vehicle-detector-adas-0001 | YES | YES | YES |
@@ -72,6 +74,9 @@
 | person-detection-0201 | YES | YES | YES |
 | person-detection-0202 | YES | YES | YES |
 | person-detection-0203 | YES | YES | YES |
+| person-detection-0301 | YES |  |  |
+| person-detection-0302 | YES |  |  |
+| person-detection-0303 | YES |  |  |
 | person-detection-action-recognition-0005 | YES | YES | YES |
 | person-detection-action-recognition-0006 | YES | YES | YES |
 | person-detection-action-recognition-teacher-0002 | YES | YES | YES |
@@ -79,10 +84,10 @@
 | person-detection-raisinghand-recognition-0001 | YES | YES | YES |
 | person-detection-retail-0002 | YES | YES | YES |
 | person-detection-retail-0013 | YES | YES | YES |
-| person-reidentification-retail-0277 | YES | YES |    |
-| person-reidentification-retail-0286 | YES | YES |    |
-| person-reidentification-retail-0287 | YES | YES |    |
-| person-reidentification-retail-0288 | YES | YES |    |
+| person-reidentification-retail-0277 | YES |  |    |
+| person-reidentification-retail-0286 | YES |  |    |
+| person-reidentification-retail-0287 | YES |  |    |
+| person-reidentification-retail-0288 | YES |  |    |
 | person-vehicle-bike-detection-2000 | YES | YES | YES |
 | person-vehicle-bike-detection-2001 | YES | YES | YES |
 | person-vehicle-bike-detection-2002 | YES | YES | YES |
@@ -105,6 +110,8 @@
 | text-recognition-0014 | YES | YES |    |
 | text-recognition-0015-encoder | YES |    |    |
 | text-recognition-0015-decoder | YES |    |    |
+| text-recognition-0016-encoder | YES |    |    |
+| text-recognition-0016-decoder | YES |    |    |
 | text-spotting-0005-detector | YES |    |    |
 | text-spotting-0005-recognizer-decoder | YES |    |    |
 | text-spotting-0005-recognizer-encoder | YES |    |    |
@@ -131,3 +138,8 @@
 | yolo-v2-tiny-ava-sparse-30-0001 | YES | YES | YES |
 | yolo-v2-tiny-ava-sparse-60-0001 | YES | YES | YES |
 | yolo-v2-tiny-vehicle-detection-0001 | YES | YES | YES |
+| smartlab-object-detection-0001 | YES |  |  |
+| smartlab-object-detection-0002 | YES |  |  |
+| smartlab-object-detection-0003 | YES |  |  |
+| smartlab-object-detection-0004 | YES |  |  |
+| smartlab-sequence-modelling-0001 | YES | YES |  |

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
 # limitations under the License.
 
 description: >-
-  The "retinaface-resnet50-pytorch" model is a PyTorch* implementation of medium size RetinaFace
-  model with ResNet50 backbone for Face Localization. It can output face bounding
-  boxes and five facial landmarks in a single forward pass. More details provided
-  in the paper <https://arxiv.org/abs/1905.00641> and repository <https://github.com/biubug6/Pytorch_Retinaface>
+  The "retinaface-resnet50-pytorch" model is a PyTorch* implementation of medium size
+  RetinaFace model with ResNet50 backbone for Face Localization. It can output face
+  bounding boxes and five facial landmarks in a single forward pass. More details
+  provided in the paper <https://arxiv.org/abs/1905.00641> and repository <https://github.com/biubug6/Pytorch_Retinaface>
 task_type: detection
 files:
   - name: models/retinaface.py
@@ -34,9 +34,10 @@ files:
   - name: Resnet50_Final.pth
     size: 109497761
     checksum: 80453e582f22ff7786b1392fb0ffb54e0e220ffb71a1381ca05de77673b0da3afeae70540076776a448b0972976c7a3c
-    source:
+    original_source:
       $type: google_drive
       id: 14KX6VqF69MdSPk3Tr9PlDYbq7ArpdNUW
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/retinaface-resnet50-pytorch/Resnet50_Final.pth
 postprocessing:
   # disable unnecessary downloads of pretrained ResNet50 weights
   - $type: regex_replace
@@ -56,6 +57,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input=data
   - --input_shape=[1,3,640,640]
+  - --layout=data(NCHW)
   - --input_model=$conv_dir/retinaface-resnet50-pytorch.onnx
   - --mean_values=data[104.0,117.0,123.0]
 framework: pytorch

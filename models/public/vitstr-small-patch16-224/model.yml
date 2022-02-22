@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ files:
   - name: vitstr_small_patch16_224.pth
     size: 86086343
     checksum: 529c216830a23a2b9d7f6782515deca4a2f99aa42a22440e1997182d092b8db5a64718dda0df47cdc6ca3d51ecec5a97
-    source: https://github.com/roatienza/deep-text-recognition-benchmark/releases/download/v0.1.0/vitstr_small_patch16_224.pth
+    original_source: https://github.com/roatienza/deep-text-recognition-benchmark/releases/download/v0.1.0/vitstr_small_patch16_224.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vitstr-small-patch16-224/vitstr_small_patch16_224.pth
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -52,6 +53,7 @@ conversion_to_onnx_args:
 model_optimizer_args:
   - --input_shape=[1,1,224,224]
   - --input=image
+  - --layout=image(NCHW)
   - --input_model=$conv_dir/vitstr-small-patch16-224.onnx
   - --scale_values=image[255]
   - --output=logits

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,8 +6,9 @@
 
 #include <string>
 #include <vector>
-#include <gflags/gflags.h>
 #include <iostream>
+
+#include "gflags/gflags.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required for video or image files input. Path to video or image files.";
@@ -23,10 +24,6 @@ static const char target_device_message_reid[] = "Optional. Specify the target d
                                                 "The application looks for a suitable plugin for the specified device.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char thresh_output_message[] = "Optional. Probability threshold for person detections.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char ninfer_request_message[] = "Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.";
@@ -58,8 +55,6 @@ DEFINE_string(d_det, "CPU", target_device_message);
 DEFINE_string(d_reid, "CPU", target_device_message_reid);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.85, thresh_output_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, ninfer_request_message);
@@ -87,9 +82,6 @@ void showUsage() {
     std::cout << "    -i \"<path1>\" \"<path2>\" " << video_message << std::endl;
     std::cout << "    -m_det \"<path>\"          " << detection_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"         " << reid_model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"   " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"   " << custom_cldnn_message << std::endl;
     std::cout << "    -d_det \"<device>\"        " << target_device_message << std::endl;
     std::cout << "    -d_reid \"<device>\"       " << target_device_message_reid << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;

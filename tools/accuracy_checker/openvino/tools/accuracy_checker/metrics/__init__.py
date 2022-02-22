@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,11 @@ limitations under the License.
 from .metric_executor import MetricsExecutor
 from .metric import Metric, PerImageMetricResult
 
+from .background_matting import (
+    MeanOfAbsoluteDifference,
+    SpatialGradient,
+    MeanSquaredErrorWithMask,
+)
 from .classification import (
     ClassificationAccuracy,
     ClassificationAccuracyClasses,
@@ -250,5 +255,9 @@ __all__ = [
     'PeakSignalToNoiseRatioWithBlockingEffectFactor',
 
     'NormalisedQuantileLoss',
-    'editdistance_eval'
+    'editdistance_eval',
+
+    'MeanOfAbsoluteDifference',
+    'SpatialGradient',
+    'MeanSquaredErrorWithMask',
 ]

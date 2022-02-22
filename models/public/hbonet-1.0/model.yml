@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,10 +38,11 @@ conversion_to_onnx_args:
   - --output-names=prob
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/hbonet_1_0.onnx
-quantizable: yes
+quantizable: true
 license: https://github.com/d-li14/HBONet/blob/master/LICENSE

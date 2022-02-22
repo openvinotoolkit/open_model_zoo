@@ -22,7 +22,7 @@ evaluations:
         keep_shape: True
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: forward_tacotron_melgan_io

@@ -1,4 +1,19 @@
 datasets:
+  - name: HumanMattingClips120
+    annotation_conversion:
+      converter: background_matting_sequential
+      images_dir: HumanMattingClips120
+      masks_dir: HumanMattingClips120
+      backgrounds_dir: HumanMattingClips120
+      image_prefix: com/
+      mask_prefix: fgr/
+      background_prefix: bgr/
+      with_background: True
+      with_alpha: True
+    annotation: human_matting_120.pickle
+    dataset_meta: human_matting_120_meta.json
+    data_source: HumanMattingClips120
+
   - name: ms_coco_mask_rcnn
     annotation_conversion:
       converter: mscoco_mask_rcnn
@@ -12,11 +27,11 @@ datasets:
   - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: annotations/instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80.json
+    annotation: mscoco_mask_rcnn_80.pickle
+    dataset_meta: mscoco_mask_rcnn_80.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_80_classes_without_background
@@ -25,19 +40,19 @@ datasets:
       annotation_file: annotations/instances_val2017.json
       has_background: False
       sort_annotations: True
-    annotation: mscoco_mask_rcnn_short_80_without_bkgr.pickle
-    dataset_meta: mscoco_mask_rcnn_short_80_without_bkgr.json
+    annotation: mscoco_mask_rcnn_80_without_bkgr.pickle
+    dataset_meta: mscoco_mask_rcnn_80_without_bkgr.json
     data_source: val2017
 
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
-      annotation_file: annotations/instances_val2017_short.json
+      annotation_file: annotations/instances_val2017.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: mscoco_mask_rcnn_short_91.pickle
-    dataset_meta: mscoco_mask_rcnn_short_91.json
+    annotation: mscoco_mask_rcnn_91.pickle
+    dataset_meta: mscoco_mask_rcnn_91.json
     data_source: val2017
     preprocessing:
       - type: resize
@@ -159,7 +174,7 @@ datasets:
     annotation_conversion:
       converter: mscoco_mask_rcnn
       annotation_file: instances_val2017_persons.json
-      has_background: True
+      has_background: False
       sort_annotations: True
     annotation: mscoco_mask_rcnn_person.pickle
     dataset_meta: mscoco_mask_rcnn_person.json
@@ -1437,3 +1452,44 @@ datasets:
       data_dir: LIVE_1
       input_suffix: .bmp
       target_suffix: .bmp
+
+  - name: online_mstcn_plus_dataset
+    data_source: annotation
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: annotation
+      input_suffix: in
+      reference_suffix: out
+
+  - name: smartlab_detection_10cl_top
+    data_source: object_detection/streams_1/top/images
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: object_detection/streams_1/top/annotations/instances_glb1cls10.json
+    annotation: mscoco_detection_top_10cls.pickle
+    dataset_meta: mscoco_detection_top_10cls.json
+
+  - name: smartlab_detection_3cl_top
+    data_source: object_detection/streams_1/top/images
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: object_detection/streams_1/top/annotations/instances_glb2bcls3.json
+    annotation: mscoco_detection_top_3cls.pickle
+    dataset_meta: mscoco_detection_top_3cls.json
+
+  - name: smartlab_detection_10cl_high
+    data_source: object_detection/streams_1/high/images
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: object_detection/streams_1/high/annotations/instances_glb1cls10.json
+    annotation: mscoco_detection_high_10cls.pickle
+    dataset_meta: mscoco_detection_high_10cls.json
+
+  - name: smartlab_detection_3cl_high
+    data_source: object_detection/streams_1/high/images
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: object_detection/streams_1/high/annotations/instances_glb2bcls3.json
+    annotation: mscoco_detection_high_3cls.pickle
+    dataset_meta: mscoco_detection_high_3cls.json

@@ -23,7 +23,7 @@ to process 2048 samples that is 128ms for 16kHz
 | Source framework  | PyTorch\*             |
 ## Accuracy
 
-The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/tree/icassp2021-final/datasets/ICASSP_dev_test_set/track_1/synthetic).
+The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on the 100 [dev test synthetic speech clips from DNS-Challenge 2021 dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README-DNS3.md).
 
 
 | Metric                          | Value         |
@@ -51,6 +51,13 @@ Sequence patch, name: `output`, shape: `1, 2048`, format: `B, T`, where:
 Note: The output patch is "shifted" by 640 (40ms) samples in time. So output[0,i] sample is synced with input[0,i-640] sample
 
 output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Noise Suppression C++\* Demo](../../../demos/noise_suppression_demo/cpp/README.md)
+* [Noise Suppression Python\* Demo](../../../demos/noise_suppression_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

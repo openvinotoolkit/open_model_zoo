@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -227,6 +227,7 @@ class BaseReader(ClassProvider):
             'multi_infer': BoolField(
                 default=False, optional=True, description='Allows multi infer.'
             ),
+            'data_layout': StringField(optional=True, description='data layout after reading')
         }
 
     def get_value_from_config(self, key):
@@ -240,6 +241,7 @@ class BaseReader(ClassProvider):
         else:
             self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     @classmethod
     def validate_config(
@@ -322,6 +324,8 @@ class BaseReader(ClassProvider):
         )
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
+        if self.data_layout:
+            data_rep.metadata['data_layout'] = self.data_layout
         return data_rep
 
     def _read_pair(self, data_id):
@@ -371,6 +375,7 @@ class ReaderCombiner(BaseReader):
 
         self.reading_scheme = reading_scheme
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():

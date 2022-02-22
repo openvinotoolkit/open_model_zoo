@@ -37,12 +37,12 @@ FaceNet: A Unified Embedding for Face Recognition and Clustering. For details se
 
 ### Converted model
 
-Image, name - `image_batch/placeholder_port_0`, shape - `1, 3, 160, 160`, format `B, C, H, W`, where:
+Image, name - `image_batch/placeholder_port_0`, shape - `1, 160, 160, 3`, format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
@@ -59,9 +59,9 @@ Face embeddings, name - `InceptionResnetV1/Bottleneck/BatchNorm/Reshape_1/Normal
 - `B` - batch size
 - `C` - row-vector of 512 floating-point values - face embeddings
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -72,6 +72,14 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
 
 ## Legal Information
 

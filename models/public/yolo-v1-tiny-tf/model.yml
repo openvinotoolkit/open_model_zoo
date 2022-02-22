@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ files:
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=input_1
+  - --layout=input_1(NHWC)
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny_voc.json
   - --input_model=$dl_dir/yolo-v1-tiny.pb
-quantizable: yes
+quantizable: true
 framework: tf
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE

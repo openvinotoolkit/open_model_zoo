@@ -1,8 +1,8 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 /**
-* \brief The entry point for the Inference Engine multichannel_face_detection demo application
+* \brief The entry point for the OpenVINIO multichannel_face_detection demo application
 * \file multichannel_face_detection/main.cpp
 * \example multichannel_face_detection/main.cpp
 */
@@ -31,62 +31,42 @@
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
-#include "multichannel_face_detection_params.hpp"
 #include "output.hpp"
 #include "threading.hpp"
 #include "graph.hpp"
 
 namespace {
+constexpr char threshold_message[] = "Probability threshold for detections";
+DEFINE_double(t, 0.5, threshold_message);
 
-/**
-* \brief This function show a help message
-*/
-void showUsage() {
-    std::cout << std::endl;
-    std::cout << "multi_channel_face_detection_demo [OPTION]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << std::endl;
-    std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -i                           " << input_message << std::endl;
-    std::cout << "    -loop                        " << loop_message << std::endl;
-    std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
-    std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
-    std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
-    std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
-    std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
-    std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
-    std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
-    std::cout << "    -t                           " << thresh_output_message << std::endl;
-    std::cout << "    -no_show                     " << no_show_message << std::endl;
-    std::cout << "    -show_stats                  " << show_statistics << std::endl;
-    std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
-    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
-}
-
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
-    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-    if (FLAGS_h) {
-        showUsage();
+void parse(int argc, char *argv[]) {
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
+    slog::info << ov::get_openvino_version() << slog::endl;
+    if (FLAGS_h || argc == 1) {
+        std::cout << "\n    [-h]              " << help_message
+                  << "\n     -i               " << input_message
+                  << "\n    [-loop]           " << loop_message
+                  << "\n    [-duplicate_num]  " << duplication_channel_number_message
+                  << "\n     -m <path>        " << model_path_message
+                  << "\n    [-d <device>]     " << target_device_message
+                  << "\n    [-bs]             " << batch_size
+                  << "\n    [-n_iqs]          " << input_queue_size
+                  << "\n    [-fps_sp]         " << fps_sampling_period
+                  << "\n    [-n_sp]           " << num_sampling_periods
+                  << "\n    [-t]              " << threshold_message
+                  << "\n    [-no_show]        " << no_show_message
+                  << "\n    [-show_stats]     " << show_statistics
+                  << "\n    [-real_input_fps] " << real_input_fps
+                  << "\n    [-u]              " << utilization_monitors_message;
         showAvailableDevices();
-        return false;
+        std::exit(0);
+    } if (FLAGS_m.empty()) {
+        throw std::runtime_error("Parameter -m is not set");
+    } if (FLAGS_i.empty()) {
+        throw std::runtime_error("Parameter -i is not set");
+    } if (FLAGS_duplicate_num == 0) {
+        throw std::runtime_error("Parameter -duplicate_num must be positive");
     }
-
-    if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
-    }
-    if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
-    }
-    if (FLAGS_duplicate_num == 0) {
-        throw std::logic_error("Parameter -duplicate_num must be positive");
-    }
-
-    return true;
 }
 
 struct Face {
@@ -143,7 +123,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      const std::string& stats,
                      DisplayParams params,
                      Presenter& presenter,
-                     PerformanceMetrics& metrics) {
+                     PerformanceMetrics& metrics,
+                     bool no_show) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -190,7 +171,9 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
         metrics.update(data[i]->timestamp);
     }
     metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-    cv::imshow(params.name, windowImage);
+    if (!no_show) {
+        cv::imshow(params.name, windowImage);
+    }
 }
 }  // namespace
 
@@ -199,72 +182,59 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
-        }
+        parse(argc, argv);
+        const std::vector<std::string>& inputs = split(FLAGS_i, ',');
+        DisplayParams params = prepareDisplayParams(inputs.size() * FLAGS_duplicate_num);
 
-        std::string modelPath = FLAGS_m;
-        std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size()) {
-            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
+        ov::Core core;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m);
+        if (model->get_parameters().size() != 1) {
+            throw std::logic_error("Face Detection model must have only one input");
         }
-
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-        IEGraph::InitParams graphParams;
-        graphParams.batchSize       = FLAGS_bs;
-        graphParams.maxRequests     = FLAGS_nireq;
-        graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.modelPath       = modelPath;
-        graphParams.cpuExtPath      = FLAGS_l;
-        graphParams.cldnnConfigPath = FLAGS_c;
-        graphParams.deviceName      = FLAGS_d;
-
-        std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
-        auto inputDims = network->getInputDims();
-        if (4 != inputDims.size()) {
-            throw std::runtime_error("Invalid network input dimensions");
+        ov::preprocess::PrePostProcessor ppp(model);
+        ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
+        ppp.input().preprocess().convert_layout("NCHW");
+        for (const ov::Output<ov::Node>& out : model->outputs()) {
+            ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
         }
+        model = ppp.build();
+        ov::set_batch(model, FLAGS_bs);
+        std::queue<ov::InferRequest> reqQueue = compile(std::move(model),
+            FLAGS_m, FLAGS_d, roundUp(params.count, FLAGS_bs), core);
+        ov::Shape inputShape = reqQueue.front().get_input_tensor().get_shape();
+        if (4 != inputShape.size()) {
+            throw std::runtime_error("Invalid model input dimensions");
+        }
+        IEGraph graph{std::move(reqQueue), FLAGS_show_stats};
 
         VideoSources::InitParams vsParams;
-        vsParams.inputs               = FLAGS_i;
+        vsParams.inputs               = inputs;
         vsParams.loop                 = FLAGS_loop;
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
         vsParams.realFps              = FLAGS_real_input_fps;
-        vsParams.expectedHeight = static_cast<unsigned>(inputDims[2]);
-        vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
+        vsParams.expectedHeight = static_cast<unsigned>(inputShape[2]);
+        vsParams.expectedWidth  = static_cast<unsigned>(inputShape[3]);
 
         VideoSources sources(vsParams);
-        DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
         sources.start();
 
         size_t currentFrame = 0;
-
-        network->start([&](VideoFrame& img) {
+        graph.start(FLAGS_bs, [&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             size_t camIdx = currentFrame / FLAGS_duplicate_num;
             currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
-            auto output = req->GetBlob(outputDataBlobNames[0]);
-
-            InferenceEngine::LockedMemory<const void> outputMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(output)->rmap();
-            float* dataPtr = outputMapped.as<float *>();
-            InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
-            size_t total = 1;
-            for (auto v : svec) {
-                total *= v;
-            }
-
+        }, [](ov::InferRequest req, cv::Size frameSize) {
+            auto output = req.get_output_tensor();
+            float* dataPtr = output.data<float>();
 
             std::vector<Detections> detections(FLAGS_bs);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }
 
-            for (size_t i = 0; i < total; i+=7) {
+            for (size_t i = 0; i < output.get_size(); i+=7) {
                 float conf = dataPtr[i + 2];
                 if (conf > FLAGS_t) {
                     int idxInBatch = static_cast<int>(dataPtr[i]);
@@ -279,9 +249,6 @@ int main(int argc, char* argv[]) {
             }
             return detections;
         });
-
-        network->setDetectionConfidence(static_cast<float>(FLAGS_t));
-        std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
         std::mutex statMutex;
         std::stringstream statStream;
@@ -298,7 +265,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, str, params, presenter, metrics);
+            displayNSources(result, str, params, presenter, metrics, FLAGS_no_show);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -307,6 +274,7 @@ int main(int argc, char* argv[]) {
 
         output.start();
 
+        std::vector<std::shared_ptr<VideoFrame>> batchRes;
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
@@ -314,12 +282,12 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning()) {
+        while (sources.isRunning() || graph.isRunning()) {
             bool readData = true;
             while (readData) {
-                auto br = network->getBatchData(params.frameSize);
+                auto br = graph.getBatchData(params.frameSize);
                 if (br.empty()) {
-                    break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
+                    break;  // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
                 for (size_t i = 0; i < br.size(); i++) {
                     // this approach waits for the next input image for sourceIdx. If provided a single image,
@@ -327,9 +295,7 @@ int main(int argc, char* argv[]) {
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {
-                        if (!FLAGS_no_show) {
-                            output.push(std::move(batchRes));
-                        }
+                        output.push(std::move(batchRes));
                         batchRes.clear();
                         readData = false;
                     }
@@ -354,14 +320,12 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_show_stats) {
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
-                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(slog::debug, slog::endl, sources.getStats(), graph.getStats(), output.getStats());
                     statStream.str(std::string());
-                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
+                    writeStats(statStream, '\n', sources.getStats(), graph.getStats(), output.getStats());
                 }
             }
         }
-        network.reset();
-
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
@@ -374,6 +338,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
     return 0;
 }

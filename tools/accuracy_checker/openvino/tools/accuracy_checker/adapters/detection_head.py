@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,9 +63,9 @@ class HeadDetectionAdapter(Adapter):
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
-        for out_layer in self.output_layers:
-            out_layer.prob_name = self.check_output_name(out_layer.prob_name, outputs)
-            out_layer.reg_name = self.check_output_name(out_layer.reg_name, outputs)
+        for idx, out_layer in enumerate(self.output_layers):
+            self.output_layers[idx] = out_layer._replace(prob_name=self.check_output_name(out_layer.prob_name, outputs),
+                                                         reg_name=self.check_output_name(out_layer.reg_name, outputs))
         self.outputs_verified = True
 
     def generate_output_layer_info(self):

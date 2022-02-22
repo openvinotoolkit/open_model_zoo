@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2019-2020 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -32,13 +32,12 @@ from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -235,10 +234,6 @@ def main():
     parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     parser.add_argument('-d', '--device', type=str, default='CPU')
-    parser.add_argument('-l', '--cpu_extension',
-                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
-                              path to a shared library with the kernels impl.',
-                             type=str, default=None)
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
                         help='Optional. List of monitors to show initially.')
 
@@ -258,25 +253,25 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     if args.detections:
         object_detector = DetectionsFromFileReader(args.detections, args.t_detector)
     elif args.m_segmentation:
-        object_detector = MaskRCNN(ie, args.m_segmentation,
+        object_detector = MaskRCNN(core, args.m_segmentation,
                                    config.obj_segm.trg_classes,
                                    args.t_segmentation,
-                                   args.device, args.cpu_extension,
+                                   args.device,
                                    capture.get_num_sources())
     else:
-        object_detector = Detector(ie, args.m_detector,
+        object_detector = Detector(core, args.m_detector,
                                    config.obj_det.trg_classes,
                                    args.t_detector,
-                                   args.device, args.cpu_extension,
+                                   args.device,
                                    capture.get_num_sources())
 
     if args.m_reid:
-        object_recognizer = VectorCNN(ie, args.m_reid, args.device, args.cpu_extension)
+        object_recognizer = VectorCNN(core, args.m_reid, args.device)
     else:
         object_recognizer = None
 
@@ -284,4 +279,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

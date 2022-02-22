@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2021 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,28 +15,25 @@
  limitations under the License.
 """
 
-import colorsys
 import logging as log
-import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
-from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_latency_per_stage
+from visualizers import ColorPalette
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -45,13 +42,14 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using ovms adapter.')
     available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=available_model_wrappers)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -76,6 +74,10 @@ def build_argparser():
     common_model_args.add_argument('--masks', default=None, type=int, nargs='+',
                                    help='Optional. A space separated list of mask for anchors. '
                                         'By default used default masks for model. Only for YOLOV4 architecture type.')
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -122,48 +124,6 @@ def build_argparser():
     return parser
 
 
-class ColorPalette:
-    def __init__(self, n, rng=None):
-        assert n > 0
-
-        if rng is None:
-            rng = random.Random(0xACE) # nosec - disable B311:random check
-
-        candidates_num = 100
-        hsv_colors = [(1.0, 1.0, 1.0)]
-        for _ in range(1, n):
-            colors_candidates = [(rng.random(), rng.uniform(0.8, 1.0), rng.uniform(0.5, 1.0))
-                                 for _ in range(candidates_num)]
-            min_distances = [self.min_distance(hsv_colors, c) for c in colors_candidates]
-            arg_max = np.argmax(min_distances)
-            hsv_colors.append(colors_candidates[arg_max])
-
-        self.palette = [self.hsv2rgb(*hsv) for hsv in hsv_colors]
-
-    @staticmethod
-    def dist(c1, c2):
-        dh = min(abs(c1[0] - c2[0]), 1 - abs(c1[0] - c2[0])) * 2
-        ds = abs(c1[1] - c2[1])
-        dv = abs(c1[2] - c2[2])
-        return dh * dh + ds * ds + dv * dv
-
-    @classmethod
-    def min_distance(cls, colors_set, color_candidate):
-        distances = [cls.dist(o, color_candidate) for o in colors_set]
-        return np.min(distances)
-
-    @staticmethod
-    def hsv2rgb(h, s, v):
-        return tuple(round(c * 255) for c in colorsys.hsv_to_rgb(h, s, v))
-
-    def __getitem__(self, n):
-        return self.palette[n % len(self.palette)]
-
-    def __len__(self):
-        return len(self.palette)
-
-
-
 def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
     for detection in detections:
@@ -205,11 +165,9 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
     configuration = {
         'resize_type': args.resize_type,
@@ -291,17 +249,16 @@ def main():
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
-
         else:
             # Wait for empty request
             detector_pipeline.await_any()
 
     detector_pipeline.await_all()
+    if detector_pipeline.callback_exceptions:
+        raise detector_pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = detector_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = detector_pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']

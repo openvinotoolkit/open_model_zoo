@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ files:
   - name: mobilenet_v1_1.0_224.tgz
     size: 94321559
     checksum: 20383a8a25a1f2dc0e9b72176a5cc93f662fd513be6e7153061045a635e88dbfe7e6b72880f60a1dfbec7cdd57f91641
-    source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
+    original_source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-v1-1.0-224-tf/mobilenet_v1_1.0_224.tgz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -31,10 +32,11 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
   - --input=input
+  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=MobilenetV1/Predictions/Reshape_1
   - --input_model=$dl_dir/mobilenet_v1_1.0_224_frozen.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

@@ -25,6 +25,8 @@ For the tests to work, the test data directory must contain:
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
 * a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
+* a file stream_8_high.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_high.mp4
+* a file stream_8_top.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_top.mp4
 """
 
 import argparse
@@ -77,7 +79,7 @@ def parse_args():
         help='path to report file')
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
         help='paths to Markdown files with supported devices for each model')
-    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
         help='IR precisions for all models. By default, models are tested in FP16 precision')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
         help='directory with pre-converted models (IRs)')
@@ -222,9 +224,13 @@ def main():
         num_failures = 0
 
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
+        try:
+            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+        except KeyError:
+            pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
         }
 
         for demo in demos_to_test:

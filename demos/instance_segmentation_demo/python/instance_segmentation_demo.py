@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,84 +18,102 @@
 import logging as log
 import sys
 from time import perf_counter
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 from pathlib import Path
 
 import cv2
-import numpy as np
-from openvino.inference_engine import IECore, get_version
+
+from instance_segmentation_demo.tracker import StaticIOUTracker
+
+from openvino.model_zoo.model_api.models import MaskRCNNModel, YolactModel, OutputTransform
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
-
-from instance_segmentation_demo.model_utils import check_model
-from instance_segmentation_demo.tracker import StaticIOUTracker
-from instance_segmentation_demo.visualizer import Visualizer
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from helpers import resolution, log_latency_per_stage
+from visualizers import InstanceSegmentationVisualizer
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
-    parser = ArgumentParser(add_help=False)
+    parser = ArgumentParser()
     args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                      help='Show this help message and exit.')
-    args.add_argument('-m', '--model',
-                      help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=Path, metavar='"<path>"')
-    args.add_argument('--labels',
-                      help='Required. Path to a text file with class labels.',
-                      required=True, type=str, metavar='"<path>"')
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using ovms adapter.')
+    args.add_argument('--adapter', default='openvino', choices=('openvino', 'ovms'),
+                      help='Optional. Specify the model adapter. Default is openvino.')
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
-    args.add_argument('--loop', default=False, action='store_true',
-                      help='Optional. Enable reading the input in a loop.')
-    args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
-    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
-                      help='Optional. Number of frames to store in output. '
-                           'If 0 is set, all frames are stored.')
-    args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL or MYRIAD. '
-                           'The demo will look for a suitable plugin for device specified '
-                           '(by default, it is CPU).',
-                      default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
-    args.add_argument('--delay',
-                      help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
-                      default=0, type=int, metavar='"<num>"')
-    args.add_argument('-pt', '--prob_threshold',
-                      help='Optional. Probability threshold for detections filtering.',
-                      default=0.5, type=float, metavar='"<num>"')
-    args.add_argument('--no_keep_aspect_ratio',
-                      help='Optional. Force image resize not to keep aspect ratio.',
-                      action='store_true')
-    args.add_argument('--no_track',
-                      help='Optional. Disable tracking.',
-                      action='store_true')
-    args.add_argument('--show_scores',
-                      help='Optional. Show detection scores.',
-                      action='store_true')
-    args.add_argument('--show_boxes',
-                      help='Optional. Show bounding boxes.',
-                      action='store_true')
-    args.add_argument('-r', '--raw_output_message',
-                      help='Optional. Output inference results raw values.',
-                      action='store_true')
-    args.add_argument("--no_show",
-                      help="Optional. Don't show output.",
-                      action='store_true')
-    args.add_argument('-u', '--utilization_monitors', default='', type=str,
-                      help='Optional. List of monitors to show initially.')
+    args.add_argument('-d', '--device', default='CPU',
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
+                           'acceptable. The demo will look for a suitable plugin for device specified. '
+                           'Default value is CPU.')
+
+    common_model_args = parser.add_argument_group('Common model options')
+    common_model_args.add_argument('--labels', required=True,
+                                   help='Required. Path to a text file with class labels.')
+    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
+                                   help='Optional. Probability threshold for detections filtering.')
+    common_model_args.add_argument('--no_track', action='store_true',
+                                   help='Optional. Disable object tracking for video/camera input.')
+    common_model_args.add_argument('--show_scores', action='store_true',
+                                   help='Optional. Show detection scores.')
+    common_model_args.add_argument('--show_boxes', action='store_true',
+                                   help='Optional. Show bounding boxes.')
+
+    infer_args = parser.add_argument_group('Inference options')
+    infer_args.add_argument('-nireq', '--num_infer_requests', default=0, type=int,
+                            help='Optional. Number of infer requests')
+    infer_args.add_argument('-nstreams', '--num_streams', default='',
+                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                                 'mode (for HETERO and MULTI device cases use format '
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).')
+    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+
+    io_args = parser.add_argument_group('Input/output options')
+    io_args.add_argument('--loop', action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('-o', '--output',
+                         help='Optional. Name of the output file(s) to save.')
+    io_args.add_argument('-limit', '--output_limit', default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If 0 is set, all frames are stored.')
+    io_args.add_argument('--no_show', action='store_true',
+                         help="Optional. Don't show output.")
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
+    io_args.add_argument('-u', '--utilization_monitors',
+                         help='Optional. List of monitors to show initially.')
+
+    debug_args = parser.add_argument_group('Debug options')
+    debug_args.add_argument('-r', '--raw_output_message', action='store_true',
+                             help='Optional. Output inference results raw values showing.')
     return parser
+
+
+def get_model(model_adapter, configuration):
+    inputs = model_adapter.get_input_layers()
+    outputs = model_adapter.get_output_layers()
+    if len(inputs) == 1 and len(outputs) == 4 and 'proto' in outputs.keys():
+        return YolactModel(model_adapter, configuration)
+    return MaskRCNNModel(model_adapter, configuration)
+
+
+def print_raw_results(boxes, classes, scores, frame_id):
+    log.debug('  -------------------------- Frame # {} --------------------------  '.format(frame_id))
+    log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
+    for box, cls, score in zip(boxes, classes, scores):
+        log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
 
 def main():
@@ -103,121 +121,130 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
-    with open(args.labels, 'rt') as labels_file:
-        class_labels = labels_file.read().splitlines()
-        assert len(class_labels), 'The file with class labels is empty'
+    if args.adapter == 'openvino':
+        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
+                                        max_num_requests=args.num_infer_requests)
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
-    # Plugin initialization for specified device and load extensions library if specified.
-    log.info('OpenVINO Inference Engine')
-    log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
+    configuration = {
+        'confidence_threshold': args.prob_threshold,
+        'path_to_labels': args.labels,
+    }
+    model = get_model(model_adapter, configuration)
+    model.log_layers_info()
 
-    # Read IR
-    log.info('Reading model {}'.format(args.model))
-    net = ie.read_network(args.model, args.model.with_suffix('.bin'))
-    image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
-    args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
+    pipeline = AsyncPipeline(model)
 
-    exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    next_frame_id = 0
+    next_frame_id_to_show = 0
 
-    if args.no_track:
-        tracker = None
-    else:
+    tracker = None
+    if not args.no_track and cap.get_type() in {'VIDEO', 'CAMERA'}:
         tracker = StaticIOUTracker()
+    visualizer = InstanceSegmentationVisualizer(model.labels, args.show_boxes, args.show_scores)
 
-    if args.delay:
-        delay = args.delay
-    else:
-        delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
-
-    frames_processed = 0
     metrics = PerformanceMetrics()
-    visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
+    render_metrics = PerformanceMetrics()
+    presenter = None
+    output_transform = None
     video_writer = cv2.VideoWriter()
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
-    out_frame_size = (frame.shape[1], frame.shape[0])
-    presenter = monitors.Presenter(args.utilization_monitors, 45,
-                (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), out_frame_size):
-        raise RuntimeError("Can't open video writer")
-
-    while frame is not None:
-        if args.no_keep_aspect_ratio:
-            # Resize the image to a target size.
-            scale_x = w / frame.shape[1]
-            scale_y = h / frame.shape[0]
-            input_image = cv2.resize(frame, (w, h))
+    while True:
+        if pipeline.is_ready():
+            # Get new image/frame
+            start_time = perf_counter()
+            frame = cap.read()
+            if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
+                break
+            if next_frame_id == 0:
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
+                if args.output_resolution:
+                    output_resolution = output_transform.new_resolution
+                else:
+                    output_resolution = (frame.shape[1], frame.shape[0])
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
+                if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                                         cap.fps(), tuple(output_resolution)):
+                    raise RuntimeError("Can't open video writer")
+            # Submit for inference
+            pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            next_frame_id += 1
         else:
-            # Resize the image to keep the same aspect ratio and to fit it to a window of a target size.
-            scale_x = scale_y = min(h / frame.shape[0], w / frame.shape[1])
-            input_image = cv2.resize(frame, None, fx=scale_x, fy=scale_y)
+            # Wait for empty request
+            pipeline.await_any()
 
-        input_image_size = input_image.shape[:2]
-        input_image = np.pad(input_image, ((0, h - input_image_size[0]),
-                                           (0, w - input_image_size[1]),
-                                           (0, 0)),
-                             mode='constant', constant_values=0)
-        # Change data layout from HWC to CHW.
-        input_image = input_image.transpose((2, 0, 1))
-        input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
-        input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
+        # Process all completed requests
+        results = pipeline.get_result(next_frame_id_to_show)
+        if results:
+            (scores, classes, boxes, masks), frame_meta = results
+            frame = frame_meta['frame']
+            start_time = frame_meta['start_time']
 
-        # Run the net.
-        feed_dict = {image_input: input_image}
-        if image_info_input:
-            feed_dict[image_info_input] = input_image_info
-        outputs = exec_net.infer(feed_dict)
+            if args.raw_output_message:
+                print_raw_results(boxes, classes, scores, next_frame_id_to_show)
 
-        # Parse detection results of the current request
-        scores, classes, boxes, masks = postprocessor(
-            outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
+            rendering_start_time = perf_counter()
+            masks_tracks_ids = tracker(masks, classes) if tracker else None
+            frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids)
+            render_metrics.update(rendering_start_time)
 
-        if len(boxes) and args.raw_output_message:
-            log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
-            log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
-            for box, cls, score, mask in zip(boxes, classes, scores, masks):
-                log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
+            presenter.drawGraphs(frame)
+            metrics.update(start_time, frame)
 
-        # Get instance track IDs.
-        masks_tracks_ids = None
-        if tracker is not None:
-            masks_tracks_ids = tracker(masks, classes)
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit - 1):
+                video_writer.write(frame)
+            next_frame_id_to_show += 1
 
-        # Visualize masks.
-        frame = visualizer(frame, boxes, classes, scores, presenter, masks, masks_tracks_ids)
+            if not args.no_show:
+                cv2.imshow('Instance Segmentation results', frame)
+                key = cv2.waitKey(1)
+                if key == 27 or key == 'q' or key == 'Q':
+                    break
+                presenter.handleKey(key)
 
+    pipeline.await_all()
+    # Process completed requests
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
+        results = pipeline.get_result(next_frame_id_to_show)
+        while results is None:
+            results = pipeline.get_result(next_frame_id_to_show)
+        (scores, classes, boxes, masks), frame_meta = results
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
+
+        if args.raw_output_message:
+            print_raw_results(boxes, classes, scores, next_frame_id_to_show)
+
+        rendering_start_time = perf_counter()
+        masks_tracks_ids = tracker(masks, classes) if tracker else None
+        frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids)
+        render_metrics.update(rendering_start_time)
+
+        presenter.drawGraphs(frame)
         metrics.update(start_time, frame)
 
-        frames_processed += 1
-        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit - 1):
             video_writer.write(frame)
 
         if not args.no_show:
-            # Show resulting image.
-            cv2.imshow('Results', frame)
-
-        if not args.no_show:
-            key = cv2.waitKey(delay)
-            esc_code = 27
-            if key == esc_code:
-                break
-            presenter.handleKey(key)
-        start_time = perf_counter()
-        frame = cap.read()
+            cv2.imshow('Instance Segmentation results', frame)
+            cv2.waitKey(1)
 
     metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          pipeline.preprocess_metrics.get_latency(),
+                          pipeline.inference_metrics.get_latency(),
+                          pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
-    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

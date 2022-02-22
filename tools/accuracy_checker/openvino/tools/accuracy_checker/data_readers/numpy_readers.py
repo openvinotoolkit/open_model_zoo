@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ class NumPyReader(BaseReader):
             self.data_source = get_path(self.data_source, is_directory=True)
         self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         field_id = None
@@ -147,6 +148,7 @@ class NumpyBinReader(BaseReader):
         self.dtype = self.get_value_from_config('dtype')
         self.as_buffer = self.get_value_from_config('as_buffer')
         self.offset = self.get_value_from_config('offset')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id

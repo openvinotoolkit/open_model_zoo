@@ -20,7 +20,7 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -117,7 +117,7 @@ You can use the following command to try the demo:
 
 ```sh
     python3 bert_question_answering_embedding_demo.py
-            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt
+            --vocab=<models_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt
             --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
             --input_names_emb="input_ids,attention_mask,token_type_ids,position_ids"
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml

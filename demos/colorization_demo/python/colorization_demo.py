@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2018-2020 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 import cv2 as cv
 import numpy as np
 import logging as log
@@ -25,11 +25,10 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -60,33 +59,29 @@ def build_arg():
                          help="Optional. List of monitors to show initially.")
     return parser
 
-
-if __name__ == '__main__':
-    args = build_arg().parse_args()
-
+def main(args):
     cap = open_images_capture(args.input, args.loop)
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     log.info('Reading model {}'.format(args.model))
-    load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
-    load_net.batch_size = 1
+    model = core.read_model(args.model)
 
-    input_blob = next(iter(load_net.input_info))
-    input_shape = load_net.input_info[input_blob].input_data.shape
+    input_tensor_name = 'data_l'
+    input_shape = model.input(input_tensor_name).shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
     inputs = {}
-    for input_name in load_net.input_info:
-        inputs[input_name] = np.zeros(load_net.input_info[input_name].input_data.shape)
+    for input in model.inputs:
+        inputs[input.get_any_name()] = np.zeros(input.shape)
 
-    assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
-    output_blob = next(iter(load_net.outputs))
-    output_shape = load_net.outputs[output_blob].shape
+    assert len(model.outputs) == 1, "Expected number of outputs is equal 1"
 
-    exec_net = ie.load_network(network=load_net, device_name=args.device)
+    compiled_model = core.compile_model(model, device_name=args.device)
+    output_tensor = compiled_model.outputs[0]
+    infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     _, _, h_in, w_in = input_shape
@@ -118,11 +113,12 @@ if __name__ == '__main__':
         img_rgb = frame.astype(np.float32) / 255
         img_lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
         img_l_rs = cv.resize(img_lab.copy(), (w_in, h_in))[:, :, 0]
-        inputs[input_blob] = img_l_rs
 
-        res = exec_net.infer(inputs=inputs)
+        inputs[input_tensor_name] = np.expand_dims(img_l_rs, axis=[0, 1])
 
-        update_res = np.squeeze(res[output_blob])
+        res = infer_request.infer(inputs)[output_tensor]
+
+        update_res = np.squeeze(res)
 
         out = update_res.transpose((1, 2, 0))
         out = cv.resize(out, (w_orig, h_orig))
@@ -166,3 +162,7 @@ if __name__ == '__main__':
     metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
+
+if __name__ == "__main__":
+    args = build_arg().parse_args()
+    sys.exit(main(args) or 0)

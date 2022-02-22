@@ -39,12 +39,12 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `IteratorGetNext/placeholder_out_port_0`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
+Image, name - `IteratorGetNext/placeholder_out_port_0`,  shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -64,9 +64,9 @@ Object classifier according to ImageNet classes, name - `logits`,  shape - `1,10
 - `B` - batch size
 - `C` - predicted logits for each class
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -77,6 +77,13 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Classification Benchmark C++ Demo](../../../demos/classification_benchmark_demo/cpp/README.md)
+* [Classification Python\* Demo](../../../demos/classification_demo/python/README.md)
 
 ## Legal Information
 

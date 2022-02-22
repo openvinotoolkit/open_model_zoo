@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
-    get_cpu_extension, mo_convert_model,
+    get_cpu_extension,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
     automatic_model_search
@@ -80,6 +80,8 @@ class DLSDKLauncher(Launcher):
     def __init__(self, config_entry, model_name='', delayed_model_loading=False,
                  preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
+        if ie.get_version().split('-')[0] >= '2022.1.0':
+            warnings.warn('dlsdk launcher is deprecated. Please use openvino instead', DeprecationWarning)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
@@ -110,16 +112,11 @@ class DLSDKLauncher(Launcher):
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
-            if dlsdk_launcher_config.need_conversion:
-                self._model, self._weights = mo_convert_model(
-                    self.config, self.parameters(), dlsdk_launcher_config.framework
-                )
-            else:
-                self._model, self._weights = automatic_model_search(
-                    self._model_name, self.get_value_from_config('model'),
-                    self.get_value_from_config('weights'),
-                    self.get_value_from_config('_model_type')
-                )
+            self._model, self._weights = automatic_model_search(
+                self._model_name, self.get_value_from_config('model'),
+                self.get_value_from_config('weights'),
+                self.get_value_from_config('_model_type')
+            )
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
@@ -140,6 +137,10 @@ class DLSDKLauncher(Launcher):
     @property
     def device(self):
         return self._device
+
+    @property
+    def lstm_inputs(self):
+        return self._lstm_inputs
 
     @property
     def inputs(self):
@@ -195,7 +196,7 @@ class DLSDKLauncher(Launcher):
                 state.reset()
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -215,19 +216,19 @@ class DLSDKLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else inputs[-1])
         self._do_reshape = False
         return results
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
         if metadata is not None:
-            self._fill_meta(metadata)
+            self._fill_meta(metadata, None if not self.dyn_input_layers else infer_inputs)
         ir.infer(infer_inputs, metadata, context)
 
-    def _fill_meta(self, metadata):
+    def _fill_meta(self, metadata, inputs=None):
         for meta_ in metadata:
-            meta_['input_shape'] = self.inputs_info_for_meta()
+            meta_['input_shape'] = self.inputs_info_for_meta(inputs)
             if self._output_layouts:
                 meta_['output_layout'] = self._output_layouts
             if self._output_precisions:
@@ -664,7 +665,9 @@ class DLSDKLauncher(Launcher):
             network = ie.IENetwork(model=str(model), weights=str(weights))
         return network
 
-    def inputs_info_for_meta(self):
+    def inputs_info_for_meta(self, inputs=None):
+        if inputs:
+            return {layer_name: np.shape(data) for layer_name, data in inputs.items()}
         if not self.dyn_input_layers:
             return {
                 layer_name: layer.shape for layer_name, layer in self.inputs.items()

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ class NCFDataReader(BaseReader):
     __provider__ = 'ncf_data_reader'
 
     def configure(self):
-        pass
+        self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         if not isinstance(data_id, str):
@@ -45,6 +46,7 @@ class AnnotationFeaturesReader(BaseReader):
         self.feature_list = self.get_value_from_config('features')
         self.single = len(self.feature_list) == 1
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.data_layout = self.get_value_from_config('data_layout')
 
     def read(self, data_id):
         if isinstance(data_id, AnnotationDataIdentifier):

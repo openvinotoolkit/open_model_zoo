@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -208,7 +208,9 @@ class ClassificationProfilingSummaryHelper:
         gt_bin = np.zeros((len(self.gt), max_v))
         pred_bin = np.zeros((len(self.pred), max_v))
         np.put_along_axis(gt_bin, np.expand_dims(np.array(self.gt).astype(int), 1), 1, axis=1)
-        np.put_along_axis(pred_bin, np.expand_dims(np.array(self.pred).astype(int), 1), 1, axis=1)
+        for top in np.transpose(self.pred, (1, 0)):
+            np.put_along_axis(
+                pred_bin, np.expand_dims(top.astype(int), 1), 1, axis=1)
         return gt_bin, pred_bin
 
     def roc(self, y_true, y_score):
@@ -549,13 +551,18 @@ class RocAucScore(PerImageEvaluationMetric):
         params.update({
             'pixel_level': BoolField(
                 optional=True, default=False,
-                description='calculate metic on pixel level, for anomaly segmentation only')
+                description='calculate metric on pixel level, for anomaly segmentation only'),
+            'calculate_hot_label': BoolField(
+                optional=True, default=False,
+                description='calculate one hot label for annotation and prediction before metric evaluation '
+                            'for anomaly segmentation')
         })
         return params
 
     def configure(self):
         self.reset()
         self.pixel_level = self.get_value_from_config('pixel_level')
+        self.calculate_hot_label = self.get_value_from_config('calculate_hot_label')
 
     def update(self, annotation, prediction):
         if (
@@ -579,18 +586,11 @@ class RocAucScore(PerImageEvaluationMetric):
     def one_hot_labels(targets, results):
         max_v = int(max(np.max(targets) + 1, np.max(results) + 1))
         gt_bin = np.zeros((len(targets), max_v))
-        pred_bin = np.zeros((len(targets), max_v))
+        pred_bin = np.zeros((len(results), max_v))
         np.put_along_axis(gt_bin, np.expand_dims(np.array(targets).astype(int), 1), 1, axis=1)
         np.put_along_axis(pred_bin, np.expand_dims(np.array(results).astype(int), 1), 1, axis=1)
 
         return gt_bin, pred_bin
-
-    def roc(self, y_true, y_score):
-        per_class_area = []
-        for i in range(y_true.shape[-1]):
-            per_class_area.append(self.roc_curve_area(y_true[:, i], y_score[:, i]))
-        average_area = self.roc_curve_area(y_true.ravel(), y_score.ravel())
-        return average_area, per_class_area
 
     def roc_curve_area(self, gt, pred):
         desc_score_indices = np.argsort(pred, kind="mergesort")[::-1]
@@ -600,10 +600,14 @@ class RocAucScore(PerImageEvaluationMetric):
         threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
         tps = np.cumsum(y_true)[threshold_idxs]
         fps = 1 + threshold_idxs - tps
+
+        tps = np.r_[0, tps]
+        fps = np.r_[0, fps]
+
         if max(fps) > 0:
-            fps /= fps[-1]
+            fps = fps / fps[-1]
         if max(tps) > 0:
-            tps /= tps[-1]
+            tps = tps / tps[-1]
         area = self.roc_auc_score(fps, tps)
         return area
 
@@ -618,7 +622,7 @@ class RocAucScore(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         all_results = self.results if np.isscalar(self.results[-1]) else np.concatenate(self.results)
-        all_targets = self.targets if np.isscalar(self.results[-1]) else np.concatenate(self.results)
+        all_targets = self.targets if np.isscalar(self.targets[-1]) else np.concatenate(self.targets)
         roc_auc = self.auc_score(all_targets, all_results)
         return roc_auc
 
@@ -627,8 +631,8 @@ class RocAucScore(PerImageEvaluationMetric):
         self.results = []
 
     def auc_score(self, targets, results):
-        gt, dt = self.one_hot_labels(targets, results)
-        avg_area, _ = self.roc(gt, dt)
+        (gt, dt) = self.one_hot_labels(targets, results) if self.calculate_hot_label else (targets, results)
+        avg_area = self.roc_curve_area(np.array(gt).ravel(), np.array(dt).ravel())
         return avg_area
 
 

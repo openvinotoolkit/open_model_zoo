@@ -6,7 +6,7 @@ This is an im2latex composite model that recognizes latex formulas.
 The model uses vocabulary file `vocab.json` to predict sequence of latex tokens.
 The model is built on the ResNeXt-50 backbone with additional attention-based text recognition head.
 
-Vocabulary file is located under corresponding model configuration directory, `<omz_dir>/models/intel/formula-recognition-medium-scan-0001/vocab.json`. Model can predict big and small letters, numbers, some greek letters, trigonometric functions (e.g. cos, sin, coth), logarithmic function, sqrt and superscript.
+Vocabulary file is downloaded tp corresponding model directory, `<models_dir>/models/intel/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json`. Model can predict big and small letters, numbers, some greek letters, trigonometric functions (e.g. cos, sin, coth), logarithmic function, sqrt and superscript.
 
 ## Example of the input data
 
@@ -76,6 +76,12 @@ The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder 
 3.	Name: `output`, shape: `1, 256`. Current state of the decoder.
 4.	Name: `logit`, shape: `1, Vocab_Size`. Classification confidence scores in the [0, 1] range
     for every token.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Formula Recognition Python\* Demo](../../../demos/formula_recognition_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

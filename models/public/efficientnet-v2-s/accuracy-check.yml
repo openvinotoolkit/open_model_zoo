@@ -38,7 +38,7 @@ models:
   - name: efficientnet-v2-s
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ files:
   - name: brain-tumor-segmentation-0002.onnx
     size: 21735156
     checksum: 3c7b1b9c2444b93bfc25e0e32b9ef588a1fed8ed0e367655300008e86959b1413717bff02794a58af96760df7fc293c0
-    source:
+    original_source:
       $type: google_drive
       id: 1NhH51NgKJKhu0Bax_IKQ_Byvoe2bItPX
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.onnx
 model_optimizer_args:
   - --input_shape=[1,4,128,128,128]
+  - --layout=NCDHW
   - --input_model=$dl_dir/brain-tumor-segmentation-0002.onnx
 framework: onnx
 license: https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE

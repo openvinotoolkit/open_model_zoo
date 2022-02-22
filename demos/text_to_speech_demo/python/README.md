@@ -13,7 +13,7 @@ When inference is done, the application outputs the audio to the WAV file with 2
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/text_to_speech_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -63,7 +63,7 @@ Options:
                         Required. Path to ForwardTacotron`s mel-spectrogram
                         regression part (*.xml format).
   -i INPUT, --input INPUT
-                        Required. Text file with text.
+                        Required. Text or path to the input file.
   -o OUT, --out OUT     Optional. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,

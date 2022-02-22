@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,17 +20,16 @@ from time import perf_counter
 import sys
 from pathlib import Path
 
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, check_pressed_keys
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -88,9 +87,6 @@ def main():
     parser.add_argument('-d', '--device', type=str, default='CPU',
                         help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for the device specified.')
-    parser.add_argument('-l', '--cpu_extension', type=str, default=None,
-                        help='MKLDNN (CPU)-targeted custom layers. Absolute \
-                              path to a shared library with the kernels impl.')
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
                         help='Optional. List of monitors to show initially.')
     args = parser.parse_args()
@@ -111,18 +107,18 @@ def main():
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
+    core = Core()
 
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
     log.info('Reading model {}'.format(model_path))
     if args.m_instance_segmentation:
         labels_file = str(labels_dir / 'coco_80cl_bkgr.txt')
-        segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
-                                args.threshold, args.device, args.cpu_extension)
+        segmentation = MaskRCNN(core, args.m_instance_segmentation, labels_file,
+                                args.threshold, args.device)
     elif args.m_semantic_segmentation:
         labels_file = str(labels_dir / 'cityscapes_19cl_bkgr.txt')
-        segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
-                                            args.threshold, args.device, args.cpu_extension)
+        segmentation = SemanticSegmentation(core, args.m_semantic_segmentation, labels_file,
+                                            args.threshold, args.device)
     log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
     metrics = PerformanceMetrics()
@@ -202,4 +198,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

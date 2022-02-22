@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -247,7 +247,8 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         result = []
         for prediction_mask, annotation_mask in zip(prediction.mask, annotation.mask):
-            annotation_mask = np.transpose(annotation_mask, (2, 0, 1))
+            if annotation_mask.shape[0] != prediction_mask.shape[1]:
+                annotation_mask = np.transpose(annotation_mask, (2, 0, 1))
             annotation_mask = np.expand_dims(annotation_mask, 0)
             numerator = np.sum(prediction_mask * annotation_mask) * 2.0 + 1.0
             denominator = np.sum(annotation_mask) + np.sum(prediction_mask) + 1.0

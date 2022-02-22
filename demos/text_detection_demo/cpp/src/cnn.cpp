@@ -1,213 +1,94 @@
-// Copyright (C) 2019 Intel Corporation
+// Copyright (C) 2019-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-
-#include "cnn.hpp"
 
 #include <chrono>
 #include <map>
 #include <string>
 
-#include <utils/common.hpp>
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
 
-namespace {
-constexpr size_t MAX_NUM_DECODER = 20;
-void ThrowNameNotFound(const std::string &name) {
-    throw std::runtime_error("Name '" + name + "' does not exist in the network");
-};
-}
+#include "cnn.hpp"
 
-Cnn::Cnn(const std::string &model_path, const std::string& model_type, InferenceEngine::Core& ie,
-    const std::string & deviceName, const cv::Size &new_input_resolution)
-    : model_type(model_type), time_elapsed_(0), ncalls_(0) {
-    // ---------------------------------------------------------------------------------------------------
-    // --------------------------- 1. Reading network ----------------------------------------------------
-    auto network = ie.ReadNetwork(model_path);
+Cnn::Cnn(
+    const std::string& modelPath, const std::string& modelType, const std::string& deviceName,
+    ov::Core& core, const cv::Size& new_input_resolution, bool use_auto_resize) :
+    m_modelPath(modelPath), m_modelType(modelType), m_deviceName(deviceName),
+    m_core(core), m_new_input_resolution(new_input_resolution), use_auto_resize(use_auto_resize),
+    m_channels(0), m_time_elapsed(0), m_ncalls(0)
+{
+    slog::info << "Reading model: " << m_modelPath << slog::endl;
+    m_model = m_core.read_model(m_modelPath);
+    logBasicModelInfo(m_model);
 
-    // --------------------------- Changing input shape if it is needed ----------------------------------
-    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
-    if (inputInfo.size() != 1) {
-        throw std::runtime_error("The network should have only one input");
-    }
-    input_name_ = inputInfo.begin()->first;
-    InferenceEngine::InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-
-    InferenceEngine::SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
-    if (input_dims.size() != 4) {
-        throw std::runtime_error("The network should have 4-dimensional input");
-    }
-    input_dims[0] = 1;
-    if (new_input_resolution != cv::Size()) {
-        input_dims[2] = static_cast<size_t>(new_input_resolution.height);
-        input_dims[3] = static_cast<size_t>(new_input_resolution.width);
-    }
-    network.reshape({{input_name_, input_dims}});
-
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Configuring input and output ------------------------------------------
-    // ---------------------------   Preparing input blobs -----------------------------------------------
-    inputInfoFirst->setLayout(InferenceEngine::Layout::NCHW);
-    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
-
-    channels_ = input_dims[1];
-    input_size_ = cv::Size(input_dims[3], input_dims[2]);
-
-    // ---------------------------   Preparing output blobs ----------------------------------------------
-
-    InferenceEngine::OutputsDataMap output_info(network.getOutputsInfo());
-    for (const auto &outputPair : output_info) {
-        output_names_.push_back(outputPair.first);
+    ov::OutputVector inputs = m_model->inputs();
+    if (inputs.size() != 1) {
+        throw std::runtime_error("The model should have only one input");
     }
 
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Loading model to the device -------------------------------------------
-    InferenceEngine::ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
-    logExecNetworkInfo(executable_network, model_path, deviceName, model_type);
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Creating infer request ------------------------------------------------
-    infer_request_ = executable_network.CreateInferRequest();
-    // ---------------------------------------------------------------------------------------------------
-}
-
-InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    cv::Mat image;
-    if (channels_ == 1) {
-         cv::cvtColor(frame, image, cv::COLOR_BGR2GRAY);
-    } else {
-        image = frame;
+    ov::Shape input_shape = m_model->input().get_shape();
+    if (input_shape.size() != 4) {
+        throw std::runtime_error("The model should have 4-dimensional input");
     }
 
-    auto blob = infer_request_.GetBlob(input_name_);
-    matToBlob(image, blob);
-    infer_request_.Infer();
-
-    // --------------------------- Processing output -----------------------------------------------------
-
-    InferenceEngine::BlobMap blobs;
-    for (const auto &output_name : output_names_) {
-        blobs[output_name] = infer_request_.GetBlob(output_name);
+    ov::Layout input_layout = ov::layout::get_layout(m_model->input());
+    if (input_layout.empty()) {
+        // prev release model has NCHW layout but it was not specified at IR
+        input_layout = { "NCHW" };
     }
 
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    time_elapsed_ += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-    ncalls_++;
+    m_modelLayout = input_layout;
 
-    return blobs;
-}
+    input_shape[ov::layout::batch_idx(input_layout)] = 1;
 
-void EncoderDecoderCNN::check_net_names(const InferenceEngine::OutputsDataMap &output_info_decoder,
-                                        const InferenceEngine::InputsDataMap &input_info_decoder
-                                        ) const {
-    if (std::find(output_names_.begin(), output_names_.end(), out_enc_hidden_name_) == output_names_.end())
-        ThrowNameNotFound(out_enc_hidden_name_);
-    if (std::find(output_names_.begin(), output_names_.end(), features_name_) == output_names_.end())
-        ThrowNameNotFound(features_name_);
-    if (input_info_decoder.find(in_dec_hidden_name_) == input_info_decoder.end())
-        ThrowNameNotFound(in_dec_hidden_name_);
-    if (input_info_decoder.find(features_name_) == input_info_decoder.end())
-        ThrowNameNotFound(features_name_);
-    if (input_info_decoder.find(in_dec_symbol_name_) == input_info_decoder.end())
-        ThrowNameNotFound(in_dec_symbol_name_);
-    if (output_info_decoder.find(out_dec_hidden_name_) == output_info_decoder.end())
-        ThrowNameNotFound(out_dec_hidden_name_);
-    if (output_info_decoder.find(out_dec_symbol_name_) == output_info_decoder.end())
-        ThrowNameNotFound(out_dec_symbol_name_);
- }
+    m_input_name = m_model->input().get_any_name();
 
-
-EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path, std::string model_type,
-                                     InferenceEngine::Core &ie, const std::string &deviceName,
-                                     const std::string &out_enc_hidden_name,
-                                     const std::string &out_dec_hidden_name,
-                                     const std::string &in_dec_hidden_name,
-                                     const std::string &features_name,
-                                     const std::string &in_dec_symbol_name,
-                                     const std::string &out_dec_symbol_name,
-                                     const std::string &logits_name,
-                                     size_t end_token
-                        ) : Cnn(model_path, model_type, ie, deviceName),
-                        features_name_(features_name),
-                        out_enc_hidden_name_(out_enc_hidden_name),
-                        out_dec_hidden_name_(out_dec_hidden_name),
-                        in_dec_hidden_name_(in_dec_hidden_name),
-                        in_dec_symbol_name_(in_dec_symbol_name),
-                        out_dec_symbol_name_(out_dec_symbol_name),
-                        logits_name_(logits_name),
-                        end_token_(end_token) {
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Checking paths --------------------------------------------------------
-    if (model_path.find("encoder") == std::string::npos)
-        throw DecoderNotFound();
-    while (model_path.find("encoder") != std::string::npos)
-        model_path = model_path.replace(model_path.find("encoder"), 7, "decoder");
-    InferenceEngine::CNNNetwork network_decoder = ie.ReadNetwork(model_path);
-    this->check_net_names(network_decoder.getOutputsInfo(), network_decoder.getInputsInfo());
-
-    // --------------------------- Loading model to the device -------------------------------------------
-    InferenceEngine::ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
-    logExecNetworkInfo(executable_network_decoder, model_path, deviceName, model_type);
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Creating infer request ------------------------------------------------
-    infer_request_decoder_ = executable_network_decoder.CreateInferRequest();
-    // ---------------------------------------------------------------------------------------------------
-}
-
-InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-    cv::Mat image;
-    if (channels_ == 1) {
-         cv::cvtColor(frame, image, cv::COLOR_BGR2GRAY);
-    } else {
-        image = frame;
-    }
-    matToBlob(image, infer_request_.GetBlob(input_name_));
-
-    infer_request_.Infer();
-    // --------------------------- Processing encoder output -----------------------------------------------------
-    // blobs here are set for concrete network
-    // in case of different network this needs to be changed or generalized
-    infer_request_decoder_.SetBlob(features_name_, infer_request_.GetBlob(features_name_));
-    infer_request_decoder_.SetBlob(in_dec_hidden_name_, infer_request_.GetBlob(out_enc_hidden_name_));
-
-    InferenceEngine::LockedMemory<void> input_decoder =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(in_dec_symbol_name_))->wmap();
-    float* input_data_decoder = input_decoder.as<float *>();
-    input_data_decoder[0] = 0;
-    auto num_classes = infer_request_decoder_.GetBlob(out_dec_symbol_name_)->size();
-
-    auto targets = InferenceEngine::make_shared_blob<float>(
-        InferenceEngine::TensorDesc(InferenceEngine::Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
-        InferenceEngine::Layout::HWC));
-    targets->allocate();
-    InferenceEngine::LockedMemory<void> blobMapped = targets->wmap();
-    auto data_targets = blobMapped.as<float*>();
-
-    for (size_t num_decoder = 0; num_decoder < MAX_NUM_DECODER; num_decoder ++) {
-        infer_request_decoder_.Infer();
-        InferenceEngine::LockedMemory<const void> output_decoder =
-                     InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->rmap();
-        const float * output_data_decoder = output_decoder.as<const float *>();
-
-        auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
-        auto argmax = static_cast<size_t>(std::distance(output_data_decoder, max_elem_vector));
-        for (size_t i = 0; i < num_classes; i++)
-            data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
-        if (end_token_ == argmax)
-            break;
-        input_data_decoder[0] = float(argmax);
-
-        infer_request_decoder_.SetBlob(in_dec_hidden_name_, infer_request_decoder_.GetBlob(out_enc_hidden_name_));
+    // Changing input shape if it is needed
+    if (m_new_input_resolution != cv::Size()) {
+        input_shape[ov::layout::height_idx(input_layout)] = static_cast<size_t>(m_new_input_resolution.height);
+        input_shape[ov::layout::width_idx(input_layout)] = static_cast<size_t>(m_new_input_resolution.width);
     }
 
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    time_elapsed_ += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-    ncalls_++;
-    return {{logits_name_, targets}};
+    m_model->reshape({ {m_input_name, input_shape} });
+
+    m_channels = input_shape[ov::layout::channels_idx(input_layout)];
+    m_input_size = cv::Size(input_shape[ov::layout::width_idx(input_layout)], input_shape[ov::layout::height_idx(input_layout)]);
+
+    // Collect output names
+    ov::OutputVector outputs = m_model->outputs();
+    for (const ov::Output<ov::Node>& output : outputs) {
+        m_output_names.push_back(output.get_any_name());
+    }
+
+    // Configuring input and output
+    ov::preprocess::PrePostProcessor ppp(m_model);
+
+    // we'd like to pass input image (NHWC, u8) to model input
+    // and let OpenVINO do necessary conversions
+
+    ppp.input().tensor()
+        .set_element_type(ov::element::u8)
+        .set_layout({ "NHWC" });
+
+    if (use_auto_resize) {
+        ppp.input().tensor()
+            .set_spatial_dynamic_shape();
+
+        ppp.input().preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    }
+    ppp.input().model().set_layout(input_layout);
+
+    m_model = ppp.build();
+    slog::info << "Preprocessor configuration: " << slog::endl;
+    slog::info << ppp << slog::endl;
+
+    // Loading model to the device
+    ov::CompiledModel compiled_model = m_core.compile_model(m_model, m_deviceName);
+    logCompiledModelInfo(compiled_model, m_modelPath, m_deviceName, m_modelType);
+
+    // Creating infer request
+    m_infer_request = compiled_model.create_infer_request();
 }

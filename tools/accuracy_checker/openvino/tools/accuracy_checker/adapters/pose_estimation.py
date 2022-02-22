@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class HumanPoseAdapter(Adapter):
     def select_output_blob(self, outputs):
         self.outputs_verified = True
         if self.concat_out:
-            self.concat_out = self.check_output_name(self.concat_out, outputs)
+            self.output_blob = self.check_output_name(self.output_blob, outputs)
             return
         self.part_affinity_fields = self.check_output_name(self.part_affinity_fields, outputs)
         self.keypoints_heatmap = self.check_output_name(self.keypoints_heatmap, outputs)
@@ -105,7 +105,6 @@ class HumanPoseAdapter(Adapter):
             ]
             raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
         else:
-            self.select_output_blob(raw_outputs)
             concat_out = raw_outputs[self.output_blob]
             keypoints_num = concat_out.shape[1] // 3
             keypoints_heat_map = concat_out[:, :keypoints_num, :]

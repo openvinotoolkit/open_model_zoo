@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -25,12 +25,11 @@ import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from model_api.models import OutputTransform, SegmentationModel
-from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import OutputTransform, SegmentationModel
+from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -40,36 +39,14 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 
 class SegmentationVisualizer:
-    pascal_voc_palette = [
-        (0,   0,   0),
-        (128, 0,   0),
-        (0,   128, 0),
-        (128, 128, 0),
-        (0,   0,   128),
-        (128, 0,   128),
-        (0,   128, 128),
-        (128, 128, 128),
-        (64,  0,   0),
-        (192, 0,   0),
-        (64,  128, 0),
-        (192, 128, 0),
-        (64,  0,   128),
-        (192, 0,   128),
-        (64,  128, 128),
-        (192, 128, 128),
-        (0,   64,  0),
-        (128, 64,  0),
-        (0,   192, 0),
-        (128, 192, 0),
-        (0,   64,  128)
-    ]
-
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
             log.debug('The palette is loaded from {}'.format(colors_path))
         else:
-            self.color_palette = self.pascal_voc_palette
+            pascal_palette_path = Path(__file__).resolve().parents[3] /\
+                'data/palettes/pascal_voc_21cl_colors.txt'
+            self.color_palette = self.get_palette_from_file(pascal_palette_path)
             log.debug('The PASCAL VOC palette is used')
         log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
@@ -105,19 +82,20 @@ class SaliencyMapVisualizer:
 def render_segmentation(frame, masks, visualiser, resizer, only_masks=False):
     output = visualiser.apply_color_map(masks)
     if not only_masks:
-        output = np.floor_divide(frame, 2) + np.floor_divide(output, 2)
+        output = cv2.addWeighted(frame, 0.5, output, 0.5, 0)
     return resizer.resize(output)
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
                       type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -130,6 +108,10 @@ def build_argparser():
     common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                                        'To define layout you should use only capital letters')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -186,11 +168,9 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
     model = SegmentationModel.create_model(args.architecture_type, model_adapter, {'path_to_labels': args.labels})
     if args.architecture_type == 'segmentation':
@@ -267,11 +247,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         if args.raw_output_message:
             print_raw_results(objects, next_frame_id_to_show, model.labels)

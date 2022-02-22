@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,18 +27,21 @@ files:
   - name: brain-tumor-segmentation-0001-symbol.json
     size: 100106
     checksum: 2a36d9609896409eb47268316b5b0ec23bd6f4db1c98cbb69e9dfd34cbf5e9fdfad9d286b1a675fe58c8aec547aaa14c
-    source:
+    original_source:
       $type: google_drive
       id: 1HaExnmHtF2nl2PkcLfKJDzA_7IMmLyKJ
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0001/brain-tumor-segmentation-0001-symbol.json
   - name: brain-tumor-segmentation-0001-0000.params
     size: 152788159
     checksum: f418f3565b8d9c755ad6f407c979a12f2b2a7327170c881477bb75cac70d77f69d5613aaa06bed6a7913e14df5119c36
-    source:
+    original_source:
       $type: google_drive
       id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0001/brain-tumor-segmentation-0001-0000.params
 model_optimizer_args:
   - --input_shape=[1,4,128,128,128]
   - --input=data_crop
+  - --layout=data_crop(NCDHW)
   - --output=blockgrad7
   - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
 framework: mxnet

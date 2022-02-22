@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,55 +14,75 @@
 // limitations under the License.
 */
 
-#include "models/style_transfer_model.h"
-
-#include "utils/ocv_common.hpp"
-#include <utils/slog.hpp>
-
 #include <string>
 #include <vector>
 #include <memory>
+#include <opencv2/opencv.hpp>
+#include <openvino/openvino.hpp>
+#include <utils/image_utils.h>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+#include "models/style_transfer_model.h"
+#include "models/results.h"
 
-using namespace InferenceEngine;
-
-StyleTransferModel::StyleTransferModel(const std::string& modelFileName) :
-    ImageModel(modelFileName, false) {
+StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout) :
+    ImageModel(modelFileName, false, layout) {
 }
 
-void StyleTransferModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
-    // --------------------------- Prepare input blobs --------------------------------------------------
+    // --------------------------- Prepare input --------------------------------------------------
+    if (model->inputs().size() != 1) {
+        throw std::logic_error("Style transfer model wrapper supports topologies with only 1 input");
+    }
 
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[0] != 1 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::FP32);
+    inputsNames.push_back(model->input().get_any_name());
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 output");
+    const ov::Shape& inputShape = model->input().get_shape();
+    ov::Layout inputLayout = getInputLayout(model->input());
 
-    outputsNames.push_back(outputInfo.begin()->first);
-    Data& data = *outputInfo.begin()->second;
-    data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
+        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's input is expected");
+    }
 
+    netInputWidth = inputShape[ov::layout::width_idx(inputLayout)];
+    netInputHeight = inputShape[ov::layout::height_idx(inputLayout)];
+
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input().preprocess().convert_element_type(ov::element::f32);
+    ppp.input().tensor().
+        set_element_type(ov::element::u8).
+        set_layout("NHWC");
+
+    ppp.input().model().set_layout(inputLayout);
+
+
+    // --------------------------- Prepare output  -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 1) {
+        throw std::logic_error("Style transfer model wrapper supports topologies with only 1 output");
+    }
+    outputsNames.push_back(model->output().get_any_name());
+
+    const ov::Shape& outputShape = model->output().get_shape();
+    ov::Layout outputLayout{ "NCHW" };
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
+        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+        throw std::logic_error("3-channel 4-dimensional model's output is expected");
+    }
+
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
 }
 
-std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    Blob::Ptr minput = request->GetBlob(inputsNames[0]);
-    matToBlob(img, minput);
+    cv::Mat resizedImage;
+    resizedImage = resizeImageExt(img, netInputWidth, netInputHeight);
+    request.set_input_tensor(wrapMat2Tensor(resizedImage));
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
@@ -72,13 +92,11 @@ std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& inf
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
+    const auto outputData = infResult.getFirstOutputTensor().data<float>();
 
-    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-    const auto outputData = outMapped.as<float*>();
-
-    const SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
-    size_t outHeight = (int)(outSizeVector[2]);
-    size_t outWidth = (int)(outSizeVector[3]);
+    const ov::Shape& outputShape = infResult.getFirstOutputTensor().get_shape();
+    size_t outHeight = (int)(outputShape[2]);
+    size_t outWidth = (int)(outputShape[3]);
     size_t numOfPixels = outWidth * outHeight;
 
     std::vector<cv::Mat> imgPlanes;

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019-2021 Intel Corporation
+# Copyright (C) 2019-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
@@ -13,12 +13,12 @@ from asr_utils.ctc_decoder_seq_pipeline import CtcDecoderSeqPipelineStage
 
 
 class DeepSpeechSeqPipeline:
-    def __init__(self, profile, ie, model, lm=None, beam_width=500, max_candidates=None,
+    def __init__(self, profile, core, model, lm=None, beam_width=500, max_candidates=None,
             device='CPU', online_decoding=False):
         """
             Args:
         profile (dict), a dict with pre/post-processing parameters, see profiles.py
-        ie (IECore or None), IECore object for model loading/compilation/inference
+        core (Core or None), Core object for model loading/compilation/inference
         model (str), filename of IE IR .xml file of the network
         lm (str), filename of LM (language model)
         beam_width (int), the number of prefix candidates to retain during decoding in beam search (default 500)
@@ -28,7 +28,7 @@ class DeepSpeechSeqPipeline:
         """
         self.p = deepcopy(profile)
         self.mfcc_stage = AudioFeaturesSeqPipelineStage(profile)
-        self.rnn_stage = RnnSeqPipelineStage(profile, ie, model, device=device)
+        self.rnn_stage = RnnSeqPipelineStage(profile, core, model, device=device)
         self.ctc_stage = CtcDecoderSeqPipelineStage(profile, lm=lm, beam_width=beam_width,
                 max_candidates=max_candidates, online=online_decoding)
 

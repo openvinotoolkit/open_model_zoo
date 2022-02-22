@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020-2021 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ from time import perf_counter
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from html_reader import get_paragraphs
 
-from model_api.models import BertQuestionAnswering
-from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, RemoteAdapter
+from openvino.model_zoo.model_api.models import BertQuestionAnswering
+from openvino.model_zoo.model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
+from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -43,18 +42,23 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-v", "--vocab", help="Required. Path to the vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=Path)
+    args.add_argument('-m', '--model', required=True,
+                      help='Required. Path to an .xml file with a trained model '
+                           'or address of model inference service if using OVMS adapter.')
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'remote'))
+                      default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
+    args.add_argument('--layout', type=str, default=None,
+                      help='Optional. Model inputs layouts. '
+                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
+                           'To define layout you should use only capital letters')
     args.add_argument("--output_names",
                       help="Optional. Outputs names for the network. "
                            "Default values are \"output_s,output_e\" ",
@@ -166,11 +170,9 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
-    elif args.adapter == 'remote':
-        log.info('Reading model {}'.format(args.model))
-        serving_config = {"address": "localhost", "port": 9000}
-        model_adapter = RemoteAdapter(args.model, serving_config)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+    elif args.adapter == 'ovms':
+        model_adapter = OVMSAdapter(args.model)
 
     config = {
         'vocab': vocab,
@@ -229,16 +231,16 @@ def main():
             if pipeline.is_ready():
                 if source.is_over():
                     break
-                pipeline.submit_data(source.get_data(), next_window_id, None)
+                pipeline.submit_data(source.get_data(), next_window_id)
                 next_window_id += 1
             else:
                 pipeline.await_any()
 
         pipeline.await_all()
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
         for window_id in range(next_window_id_to_show, next_window_id):
             results = pipeline.get_result(window_id)
-            while results is None:
-                results = pipeline.get_result(window_id)
             update_answers_list(answers, results[0])
 
         visualizer.show_answers(answers)

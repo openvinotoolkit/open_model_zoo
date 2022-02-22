@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,78 +15,72 @@
 """
 
 import logging as log
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version, AsyncInferQueue
 
 
-def load_ie_core(device, cpu_extension=None):
-    """Loads IE Core"""
+def load_core():
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = IECore()
-    if device == "CPU" and cpu_extension:
-        ie.add_extension(cpu_extension, "CPU")
-
-    return ie
+    return Core()
 
 
 class IEModel:  # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, model_type, output_shape=None):
-        """Constructor"""
-        if model_path.endswith((".xml", ".bin")):
-            model_path = model_path[:-4]
-        log.info('Reading {} model {}'.format(model_type, model_path + ".xml"))
-        self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
-        assert len(self.net.input_info) == 1, "One input is expected"
+    def __init__(self, model_path, device, core, num_requests, model_type, output_shape=None):
+        log.info('Reading {} model {}'.format(model_type, model_path))
+        self.model = core.read_model(model_path)
 
-        self.exec_net = ie_core.load_network(network=self.net,
-                                             device_name=device,
-                                             num_requests=num_requests)
-        log.info('The {} model {} is loaded to {}'.format(model_type, model_path + ".xml", device))
+        if len(self.model.inputs) != 1:
+            raise RuntimeError("The {} wrapper supports only models with 1 input layer".format(model_type))
 
-        self.input_name = next(iter(self.net.input_info))
-        if len(self.net.outputs) > 1:
+        self.outputs = {}
+        compiled_model = core.compile_model(self.model, device)
+        self.infer_queue = AsyncInferQueue(compiled_model, num_requests)
+        self.infer_queue.set_callback(self.completion_callback)
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path, device))
+
+        self.input_tensor_name = self.model.inputs[0].get_any_name()
+
+        if len(self.model.outputs) > 1:
             if output_shape is not None:
                 candidates = []
-                for candidate_name in self.net.outputs:
-                    candidate_shape = self.exec_net.requests[0].output_blobs[candidate_name].buffer.shape
-                    if len(candidate_shape) != len(output_shape):
+                for output_tensor in self.model.outputs:
+                    if len(output_tensor.partial_shape) != len(output_shape):
                         continue
 
-                    matches = [src == trg or trg < 0
-                               for src, trg in zip(candidate_shape, output_shape)]
-                    if all(matches):
-                        candidates.append(candidate_name)
+                    if output_tensor.partial_shape[1] == output_shape[1]:
+                        candidates.append(output_tensor.get_any_name())
 
                 if len(candidates) != 1:
-                    raise Exception("One output is expected")
-
-                self.output_name = candidates[0]
+                    raise RuntimeError("One output is expected")
+                self.output_tensor_name = candidates[0]
             else:
-                raise Exception("One output is expected")
+                raise RuntimeError("One output is expected")
         else:
-            self.output_name = next(iter(self.net.outputs))
+            self.output_tensor_name = self.model.outputs[0].get_any_name()
 
-        self.input_size = self.net.input_info[self.input_name].input_data.shape
+        self.input_size = self.model.input(self.input_tensor_name).shape
+
+    def completion_callback(self, infer_request, id):
+        self.outputs[id] = infer_request.get_tensor(self.output_tensor_name).data[:]
 
     def infer(self, data):
         """Runs model on the specified input"""
 
-        input_data = {self.input_name: data}
-        infer_result = self.exec_net.infer(input_data)
-        return infer_result[self.output_name]
+        self.async_infer(data, 0)
+        return self.wait_request(0)
 
     def async_infer(self, data, req_id):
         """Requests model inference for the specified input"""
 
-        input_data = {self.input_name: data}
-        self.exec_net.start_async(request_id=req_id, inputs=input_data)
+        input_data = {self.input_tensor_name: data}
+        self.infer_queue.start_async(input_data, req_id)
 
     def wait_request(self, req_id):
         """Waits for the model output by the specified request ID"""
-
-        if self.exec_net.requests[req_id].wait(-1) == 0:
-            return self.exec_net.requests[req_id].output_blobs[self.output_name].buffer
-        else:
+        self.infer_queue.wait_all()
+        try:
+            return self.outputs.pop(req_id)
+        except KeyError:
             return None

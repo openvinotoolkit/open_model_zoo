@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import copy
 import json
 import logging as log
 import os
@@ -27,7 +28,7 @@ from types import SimpleNamespace as namespace
 import cv2 as cv
 import numpy as np
 import sympy
-from openvino.inference_engine import IECore, get_version
+from openvino.runtime import Core, get_version
 from tqdm import tqdm
 
 START_TOKEN = 0
@@ -119,11 +120,9 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-def read_net(model_xml, ie, model_type):
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
-    log.info('Reading {} model {}'.format(model_type, model_xml))
-    return ie.read_network(model_xml, model_bin)
+def read_net(model_path, ie, model_type):
+    log.info('Reading {} model {}'.format(model_type, model_path))
+    return ie.read_model(model_path)
 
 
 def change_layout(model_input):
@@ -150,24 +149,26 @@ class Model:
         self.args = args
         log.info('OpenVINO Inference Engine')
         log.info('\tbuild: {}'.format(get_version()))
-        self.ie = IECore()
+        self.ie = Core()
         self.encoder = read_net(self.args.m_encoder, self.ie, 'Formula Recognition Encoder')
-        self.dec_step = read_net(self.args.m_decoder, self.ie, 'Formula Recognition Decoder')
-        self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
+        self.decoder = read_net(self.args.m_decoder, self.ie, 'Formula Recognition Decoder')
+        self.compiled_encoder = self.ie.compile_model(self.encoder, device_name=self.args.device)
         log.info('The Formula Recognition Encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
-        self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
+        self.compiled_decoder = self.ie.compile_model(self.decoder, device_name=self.args.device)
         log.info('The Formula Recognition Decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.READY
         self.is_async = interactive_mode
+        self.infer_request_encoder = self.compiled_encoder.create_infer_request()
+        self.infer_request_decoder = self.compiled_decoder.create_infer_request()
         self.num_infers_decoder = 0
         self.check_model_dimensions()
         if not interactive_mode:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
-        height, width = self.encoder.input_info['imgs'].input_data.shape[-2:]
+        _, _, height, width = self.encoder.input("imgs").shape
         target_shape = (height, width)
         if os.path.isdir(self.args.input):
             inputs = sorted(os.path.join(self.args.input, inp)
@@ -183,22 +184,22 @@ class Model:
             self.images_list.append(record)
 
     def check_model_dimensions(self):
-        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
+        batch_dim, channels, height, width = self.encoder.input("imgs").shape
         assert batch_dim == 1, "Demo only works with batch size 1."
         assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
 
-    def _async_infer_encoder(self, image, req_id):
-        return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
+    def _async_infer_encoder(self, image):
+        self.infer_request_encoder.start_async(inputs={self.args.imgs_layer: image})
 
-    def _async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
+    def _async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt):
         self.num_infers_decoder += 1
-        return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
-                                                                            self.args.dec_st_c_layer: dec_st_c,
-                                                                            self.args.dec_st_h_layer: dec_st_h,
-                                                                            self.args.output_prev_layer: output,
-                                                                            self.args.tgt_layer: tgt
-                                                                            }
-                                                 )
+        self.infer_request_decoder.start_async(inputs={self.args.row_enc_out_layer: row_enc_out,
+                                                       self.args.dec_st_c_layer: dec_st_c,
+                                                       self.args.dec_st_h_layer: dec_st_h,
+                                                       self.args.output_prev_layer: output,
+                                                       self.args.tgt_layer: tgt
+                                                       }
+                                               )
 
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
@@ -208,8 +209,8 @@ class Model:
             return None
 
         if self.model_status == Model.Status.ENCODER_INFER:
-            infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=0)
-            if infer_status_encoder == 0:
+            infer_status_encoder = self.infer_request_encoder.wait_for(0)
+            if infer_status_encoder:
                 self._start_decoder()
             return None
 
@@ -219,8 +220,7 @@ class Model:
         assert not self.is_async
         model_input = change_layout(model_input)
         self._start_encoder(model_input)
-        infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=-1)
-        assert infer_status_encoder == 0
+        self.infer_request_encoder.wait()
         self._start_decoder()
         res = None
         while res is None:
@@ -229,11 +229,10 @@ class Model:
 
     def _process_decoding_results(self):
         timeout = 0 if self.is_async else -1
-        infer_status_decoder = self._infer_request_handle_decoder.wait(timeout)
-        if infer_status_decoder != 0 and self.is_async:
+        infer_status_decoder = self.infer_request_decoder.wait_for(timeout)
+        if not infer_status_decoder and self.is_async:
             return None
-        dec_res = self._infer_request_handle_decoder.output_blobs
-        self._unpack_dec_results(dec_res)
+        self._unpack_dec_results()
 
         if self.tgt[0][0][0] == END_TOKEN or self.num_infers_decoder >= self.args.max_formula_len:
             self.num_infers_decoder = 0
@@ -242,40 +241,37 @@ class Model:
             targets = np.argmax(logits, axis=1)
             self.model_status = Model.Status.READY
             return logits, targets
-        self._infer_request_handle_decoder = self._async_infer_decoder(self.row_enc_out,
-                                                                       self.dec_states_c,
-                                                                       self.dec_states_h,
-                                                                       self.output,
-                                                                       self.tgt,
-                                                                       req_id=0
-                                                                       )
+        self._async_infer_decoder(self.row_enc_out,
+                                  self.dec_states_c,
+                                  self.dec_states_h,
+                                  self.output,
+                                  self.tgt.squeeze(axis=0)
+                                  )
 
         return None
 
     def _start_encoder(self, model_input):
-        self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
+        self._async_infer_encoder(model_input)
         self.model_status = Model.Status.ENCODER_INFER
 
     def _start_decoder(self):
-        enc_res = self._infer_request_handle_encoder.output_blobs
-        self._unpack_enc_results(enc_res)
-        self._infer_request_handle_decoder = self._async_infer_decoder(
-            self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
+        self._unpack_enc_results()
+        self._async_infer_decoder(self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt)
         self.model_status = Model.Status.DECODER_INFER
 
-    def _unpack_dec_results(self, dec_res):
-        self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
-        self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
-        self.output = dec_res[self.args.output_layer].buffer
-        logit = dec_res[self.args.logit_layer].buffer
-        self.logits.append(logit)
+    def _unpack_dec_results(self):
+        self.dec_states_h = self.infer_request_decoder.get_tensor(self.args.dec_st_h_t_layer).data[:]
+        self.dec_states_c = self.infer_request_decoder.get_tensor(self.args.dec_st_c_t_layer).data[:]
+        self.output = self.infer_request_decoder.get_tensor(self.args.output_layer).data[:]
+        logit = self.infer_request_decoder.get_tensor(self.args.logit_layer).data[:]
+        self.logits.append(copy.deepcopy(logit))
         self.tgt = np.array([[np.argmax(logit, axis=1)]])
 
-    def _unpack_enc_results(self, enc_res):
-        self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
-        self.dec_states_h = enc_res[self.args.hidden_layer].buffer
-        self.dec_states_c = enc_res[self.args.context_layer].buffer
-        self.output = enc_res[self.args.init_0_layer].buffer
+    def _unpack_enc_results(self):
+        self.row_enc_out = self.infer_request_encoder.get_tensor(self.args.row_enc_out_layer).data[:]
+        self.dec_states_h = self.infer_request_encoder.get_tensor(self.args.hidden_layer).data[:]
+        self.dec_states_c = self.infer_request_encoder.get_tensor(self.args.context_layer).data[:]
+        self.output = self.infer_request_encoder.get_tensor(self.args.init_0_layer).data[:]
         self.tgt = np.array([[START_TOKEN]])
         self.logits = []
 

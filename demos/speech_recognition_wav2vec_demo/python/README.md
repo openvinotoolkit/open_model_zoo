@@ -9,7 +9,7 @@ After reading and normalizing audio signal, running a neural network to get char
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_wav2vec_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -34,7 +34,7 @@ omz_converter --list models.lst
 Run the application with `-h` option to see help message.
 
 ```
-usage: speech_recognition_wav2vec_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+usage: speech_recognition_wav2vec_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] [--vocab VOCAB] [--dynamic_shape]
 
 optional arguments:
   -h, --help            Show this help message and exit.
@@ -43,11 +43,12 @@ optional arguments:
   -i INPUT, --input INPUT
                         Required. Path to an audio file in WAV PCM 16 kHz mono format.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on, for
-                        example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
-                        device. Default value is CPU.
-  --vocab VOCAB         Optional. Path to an .json file with model encoding vocabulary.
+                        Optional. Specify the target device to infer on, for example: CPU, GPU, HDDL, MYRIAD or
+                        HETERO. The demo will look for a suitable IE plugin for this device. Default value is
+                        CPU.
+  --vocab VOCAB         Optional. Path to an .json file with encoding vocabulary.
+  --dynamic_shape       Optional. Using dynamic shapes for inputs and outputs of model.
+
 ```
 
 The typical command line is:

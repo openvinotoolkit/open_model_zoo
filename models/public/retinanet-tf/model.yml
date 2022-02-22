@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ files:
   - name: retinanet_resnet50_coco_best_v2.1.0.pb
     size: 152890076
     checksum: 0f51df51f4a58c5e0fe65e9ed69f7bb07819e73ebf975c86783e7a176634357b15c212a839c80a31f99a751c88d21683
-    source: https://download.01.org/opencv/public_models/052020/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
+    original_source: https://download.01.org/opencv/public_models/052020/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
 model_optimizer_args:
   - --input_shape=[1,1333,1333,3]
   - --input=input_1
+  - --layout=input_1(NHWC)
   - --mean_values=[103.939,116.779,123.68]
   - --output=filtered_detections/map/TensorArrayStack/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3
   - --transformations_config=$mo_ext_dir/front/tf/retinanet.json
   - --input_model=$dl_dir/retinanet_resnet50_coco_best_v2.1.0.pb
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/fizyr/keras-retinanet/master/LICENSE

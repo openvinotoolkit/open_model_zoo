@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ files:
   - name: mobilenet_v2-b0353104.pth
     size: 14212972
     checksum: ca1be3e2eb8015c2876bfa6da5f35c9db9e2167281f972adfef6de332688d11ebe649f646e88f7410d8694e554a27613
-    source: https://download.pytorch.org/models/mobilenet_v2-b0353104.pth
+    original_source: https://download.pytorch.org/models/mobilenet_v2-b0353104.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-v2-pytorch/mobilenet_v2-b0353104.pth
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=mobilenet_v2
@@ -40,10 +41,11 @@ conversion_to_onnx_args:
   - --output-names=prob
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.624,57.12,57.375]
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/mobilenet-v2.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

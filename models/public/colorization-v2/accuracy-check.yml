@@ -1,7 +1,7 @@
 models:
   - name: colorization-v2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           std: 1

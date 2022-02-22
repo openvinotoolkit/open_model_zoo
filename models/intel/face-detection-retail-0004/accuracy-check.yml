@@ -2,7 +2,7 @@ models:
   - name: face-detection-retail-0004
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ files:
   - name: inception_v3_google-1a9a5a14.pth
     checksum: 6e4a35647ef131a8e109fd922ac16216a324a73b77429cf8af2b8e4ddb05ef50a529e9407f9eb1b59b24e5e9ad22c3e5
     size: 108857766
-    source: https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth
+    original_source: https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v3-pytorch/inception_v3_google-1a9a5a14.pth
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=inception_v3
@@ -40,10 +41,11 @@ conversion_to_onnx_args:
   - --output-names=prob
 model_optimizer_args:
   - --input=data
+  - --layout=data(NCHW)
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/googlenet-v3.onnx
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

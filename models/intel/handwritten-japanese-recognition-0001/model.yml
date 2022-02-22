@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-japanese-recognition-0001.xml
-    size: 44343
-    checksum: 7431457aff6affc7558428298c037c4ee1b447743fa85c1cb8b814ce457dacf943b6fea1b2b1cabcac2c8aefe42e3e2d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.xml
+    size: 92006
+    checksum: e096c3dc7d62a295c624fe67af1f5226bc30e14acdfe0f187cca0a6114df66416afa975466509e56feac5a62b8251944
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.xml
   - name: FP32/handwritten-japanese-recognition-0001.bin
-    size: 67969208
-    checksum: 7faad7843dd1cc25a589d2cbec6b73292e1dc2b796d7d3f5e6a404a334b7a7a542370660481e912c335d1a9cce634016
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.bin
+    size: 68019892
+    checksum: c9388952f210442dbdf47e7852b060a380eadc0db1a24d31e87d137f7179f5960984733ce0a414443a8295d67c450085
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.bin
   - name: FP16/handwritten-japanese-recognition-0001.xml
-    size: 44331
-    checksum: d579903e5e94d9bd1cf6c6a88839fff107882f3afc0b710c0a2f4a095eea2c0d01d51a30ee0ff0408bae378702b0984e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.xml
+    size: 129447
+    checksum: 85d77bea99bb0506a7b96d83603746c356f0963e52864c0296154f6911ab40cbb457e32818da462660beba8fcbb00e78
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.xml
   - name: FP16/handwritten-japanese-recognition-0001.bin
-    size: 33984640
-    checksum: ee27c871cd38c9c6b2b1a5858b4fcc9083ba8d0eea2ffb35e8542c6d26a9c269e8dbbbf97491adbac3bb2f5dbac3e522
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.bin
+    size: 34009982
+    checksum: f0846de736c3d45b7de5d5c75c349e1cac196b954bdfb30fcd987d264f9d6df35a68e551ba08098af4c08ec6c739a7b1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.bin
   - name: FP16-INT8/handwritten-japanese-recognition-0001.xml
-    size: 102268
-    checksum: 0e617bf3a2893396ff50e21aa8c8dca998c111508af680d528c87a8fbe37e15599da51df2ce24deaa74fa48a4f8ea1fb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.xml
+    size: 198437
+    checksum: a0d29cfae8d2dff88b4fd45fbc43a2ddd5ece558f3c30a1131b318883aeaf0c04c9bbd27580b1c392f7a5b206f88aecd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.xml
   - name: FP16-INT8/handwritten-japanese-recognition-0001.bin
-    size: 17012014
-    checksum: 76ea9ed13eab6a704fdc15f258aa19326adb59c143d45271dca385f197d4261f6aaab8ac64a8fa52770ad3abd00fa971
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
+    size: 17095869
+    checksum: 6ddfab1e71b7563dc6e188cc1b6d5ca5ecbc2f1acc4b3c98b7da17a895cf2a63b7379e06316584db1c12ce16437f3fce
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

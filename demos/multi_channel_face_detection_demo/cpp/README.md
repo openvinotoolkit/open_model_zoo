@@ -17,7 +17,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_face_detection_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -42,36 +42,9 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
+Running the demo with the `-h` option yields a usage message.
 
-```
-multi_channel_face_detection_demo [OPTION]
-Options:
-
-    -h                           Print a usage message
-    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
-    -loop                        Optional. Enable reading the inputs in a loop.
-    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
-    -m "<path>"                  Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
-          Or
-      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
-    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -nireq                       Optional. Number of infer requests
-    -n_iqs                       Optional. Frame queue size for input channels
-    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
-    -n_sp                        Optional. Number of sampling periods
-    -t                           Optional. Probability threshold for detections
-    -no_show                     Optional. Don't show output.
-    -show_stats                  Optional. Enable statistics report
-    -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
-    -u                           Optional. List of monitors to show initially.
-```
-
-Running the application with an empty list of options yields the usage message given above and an error message.
-
-For example, to run the demo with the pre-trained face detection model on CPU, with one single camera, use the following command:
+To run the demo with the pre-trained face detection model on CPU, with one single camera, use the following command:
 
 ```sh
 ./multi_channel_face_detection_demo \

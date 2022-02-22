@@ -57,12 +57,12 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1, 3, 416, 416`, format is `B, C, H, W`, where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`.
 
@@ -93,13 +93,13 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_58/BiasAdd/YoloRegion`,  shape - `1, 255, 13, 13`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name - `conv2d_58/BiasAdd/YoloRegion`,  shape - `1, 13, 13, 255`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name - `conv2d_66/BiasAdd/YoloRegion`,  shape - `1, 255, 26, 26`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name - `conv2d_66/BiasAdd/YoloRegion`,  shape - `1, 26, 26, 255`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name - `conv2d_74/BiasAdd/YoloRegion`,  shape - `1, 255, 52, 52`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name - `conv2d_74/BiasAdd/YoloRegion`,  shape - `1, 52, 52, 255`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each case format is `B, N*85, Cx, Cy`, where:
+For each case format is `B, Cx, Cy, N*85`, where:
 
 - `B` - batch size
 - `N` - number of detection boxes for cell
@@ -114,9 +114,9 @@ Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `c
 
 The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -127,6 +127,15 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Multi-Channel Object Detection Yolov3 C++ Demo](../../../demos/multi_channel_object_detection_demo_yolov3/cpp/README.md)
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
 
 ## Legal Information
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class LMDBConverter(DirectoryBasedAnnotationConverter):
         """
         annotations = []
         content_errors = None if not check_content else []
-        lmdb_env = lmdb.open(bytes(self.data_dir), readonly=True)
+        lmdb_env = lmdb.open(bytes(self.data_dir), readonly=True, lock=False)
         with lmdb_env.begin(write=False) as txn:
             num_iterations = int(txn.get('num-samples'.encode()))
             for index in range(1, num_iterations + 1):

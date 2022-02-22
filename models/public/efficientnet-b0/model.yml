@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ files:
   - name: efficientnet-b0.tar.gz
     size: 47390720
     checksum: 9e9f607453d154c3ca08a3bbc39e59cc0ab99da7647beb5a20b0bffe5da5399a48e0407b68fa3ee14f4acc81b18714ce
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckpts/efficientnet-b0.tar.gz
+    original_source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckpts/efficientnet-b0.tar.gz
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0/efficientnet-b0.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
@@ -31,9 +32,10 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --input=0:sub
+  - --layout=0:sub(NHWC)
   - --output=logits
   - --input_meta_graph=$dl_dir/efficientnet-b0/model.ckpt.meta
   - --reverse_input_channels
 framework: tf
-quantizable: yes
+quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/tpu/master/LICENSE

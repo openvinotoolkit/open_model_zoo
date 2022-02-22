@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class HpeAssociativeEmbedding(ImageModel):
             max_num_people=30,
             detection_threshold=0.1,
             tag_threshold=1,
-            pose_threshold=self.prob_threshold,
+            pose_threshold=self.confidence_threshold,
             use_detection_val=True,
             ignore_too_much=False,
             dist_reweight=True)
@@ -74,7 +74,7 @@ class HpeAssociativeEmbedding(ImageModel):
         parameters.update({
             'target_size': NumericalValue(value_type=int, min=1),
             'aspect_ratio': NumericalValue(),
-            'prob_threshold': NumericalValue(),
+            'confidence_threshold': NumericalValue(),
             'delta': NumericalValue(default_value=0.0),
             'size_divisor': NumericalValue(default_value=32, value_type=int),
             'padding_mode': StringValue(default_value='right_bottom', choices=('center', 'right_bottom')),
@@ -118,7 +118,11 @@ class HpeAssociativeEmbedding(ImageModel):
 
 
 def find_layer_by_name(name, layers):
-    suitable_layers = [layer_name for layer_name in layers if layer_name.startswith(name)]
+    suitable_layers = []
+    for layer, metadata in layers.items():
+        count_names = len([layer_name for layer_name in metadata.names if layer_name.startswith(name)])
+        if count_names > 0:
+            suitable_layers.append(layer)
     if not suitable_layers:
         raise ValueError('Suitable layer for "{}" output is not found'.format(name))
 

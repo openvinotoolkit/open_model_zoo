@@ -42,12 +42,12 @@ Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
 ### Converted Model
 
-An input image, name: `input`, shape: `1, 3, 256, 256`, format `B, C, H, W`, where:
+An input image, name: `input`, shape: `1, 256, 256, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order is `BGR`.
 
@@ -77,9 +77,9 @@ bounding boxes. For each detection, the description has the format:
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
@@ -90,6 +90,14 @@ An example of using the Model Converter:
 ```
 omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Security Barrier Camera C++ Demo](../../../demos/security_barrier_camera_demo/cpp/README.md)
 
 ## Legal Information
 The original model is distributed under the

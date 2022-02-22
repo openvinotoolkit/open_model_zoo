@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -127,6 +127,8 @@ from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .speaker_identification import SpeakerReIdentificationDatasetConverter
 from .mvtec import MVTecDatasetConverter
 from .gan_annotation_converter import GANAnnotationConverter
+from .kitti_converter import KITTIConverter
+from .smartlab_action_recognition import SmartLabActionRecognition
 
 __all__ = [
     'BaseFormatConverter',
@@ -253,5 +255,7 @@ __all__ = [
     'COCOFacialLandmarksRecognitionConverter',
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
-    'GANAnnotationConverter'
+    'GANAnnotationConverter',
+    'KITTIConverter',
+    'SmartLabActionRecognition',
 ]
