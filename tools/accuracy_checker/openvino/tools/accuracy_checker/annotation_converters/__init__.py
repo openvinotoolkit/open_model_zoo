@@ -129,7 +129,7 @@ from .mvtec import MVTecDatasetConverter
 from .gan_annotation_converter import GANAnnotationConverter
 from .kitti_converter import KITTIConverter
 from .smartlab_action_recognition import SmartLabActionRecognition
-from .versa import VersaDatasetConverter
+from .malware_classification import MalwareClassificationDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -259,5 +259,5 @@ __all__ = [
     'GANAnnotationConverter',
     'KITTIConverter',
     'SmartLabActionRecognition',
-    'VersaDatasetConverter',
+    'MalwareClassificationDatasetConverter',
 ]
