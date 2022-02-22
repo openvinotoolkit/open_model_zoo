@@ -22,11 +22,14 @@ files:
     original_source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/open-closed-eye-0001/open_closed_eye.onnx
 framework: onnx
+input_info:
+  - name: input.1
+    shape: [1, 3, 32, 32]
+    layout: NCHW
 model_optimizer_args:
   - --mean_values=[127.0, 127.0, 127.0]
   - --scale_values=[255, 255, 255]
   - --output=19
-  - --layout=NCHW
   - --input_model=$dl_dir/open-closed-eye.onnx
 quantizable: true
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

@@ -25,11 +25,12 @@ files:
     checksum: 754dd59fdb244e6a93f6173efe26c45bce804305f71b1d0a8a3eb555b3a120894658a0b97475840b93f3c2a30c5efd99
     original_source: https://zenodo.org/record/3228411/files/resnet34-ssd1200.onnx
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ssd-resnet34-1200-onnx/resnet34-ssd1200.onnx
+input_info:
+  - name: image
+    shape: [1, 3, 1200, 1200]
+    layout: NCHW
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,3,1200,1200]
-  - --input=image
-  - --layout=image(NCHW)
   - --mean_values=[123.675,116.28,103.53]
   - --scale_values=[58.395,57.12,57.375]
   - --input_model=$dl_dir/resnet34-ssd1200.onnx

@@ -25,9 +25,32 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: wavernn-rnn.zip
+input_info:
+  - name: m_t
+    shape: [1, 80]
+    layout: NC
+  - name: a1_t
+    shape: [1, 32]
+    layout: NC
+  - name: a2_t
+    shape: [1, 32]
+    layout: NC
+  - name: a3_t
+    shape: [1, 32]
+    layout: NC
+  - name: a4_t
+    shape: [1, 32]
+    layout: NC
+  - name: h1.1
+    shape: [1, 512]
+    layout: NC
+  - name: h2.1
+    shape: [1, 512]
+    layout: NC
+  - name: x
+    shape: [1, 1]
+    layout: NC
 model_optimizer_args:
-  - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
-  - --layout=m_t(NC),a1_t(NC),a2_t(NC),a3_t(NC),a4_t(NC),h1.1(NC),h2.1(NC),x(NC)
   - --output=logits,h1,h2
   - --input_model=$dl_dir/wavernn-rnn/wavernn_rnn.onnx
 framework: onnx

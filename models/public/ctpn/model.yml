@@ -22,10 +22,11 @@ files:
     checksum: edc59e0375fb56fc51e0333f4cd2377494d50ef3b86cb64b81e801a6d1ed3256dce068fce80bb7b7fd665258fae76cb4
     original_source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ctpn/ctpn.pb
+input_info:
+  - name: Placeholder
+    shape: [1, 600, 600, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,600,600,3]
-  - --input=Placeholder
-  - --layout=Placeholder(NHWC)
   - --mean_values=Placeholder[102.9801,115.9465,122.7717]
   - --output=Reshape_2,rpn_bbox_pred/Reshape_1
   - --input_model=$dl_dir/ctpn.pb

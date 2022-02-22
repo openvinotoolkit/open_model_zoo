@@ -32,12 +32,19 @@ files:
     checksum: 2694ef52d092ab7ddf9f913a8cf2f6b958a0ae38790080a37eb3be3453961ecc96d225095d3ae505e22dd6ba41fd27d5
     original_source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mozilla-deepspeech-0.8.2/deepspeech-0.8.2-models.scorer
+input_info:
+  - name: input_node
+    shape: [1, 16, 19, 26]
+    layout: NSTC
+  - name: previous_state_h
+    shape: [1, 2048]
+    layout: NC
+  - name: previous_state_c
+    shape: [1, 2048]
+    layout: NC
 model_optimizer_args:
   - --input_model=$conv_dir/deepspeech-0.8.2-models.pb
   - --freeze_placeholder_with_value=input_lengths->[16]
-  - --input=input_node,previous_state_h,previous_state_c
-  - --input_shape=[1,16,19,26],[1,2048],[1,2048]
-  - --layout=input_node(NSTC),previous_state_h(NC),previous_state_c(NC)
   - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
   - --disable_nhwc_to_nchw
 framework: tf

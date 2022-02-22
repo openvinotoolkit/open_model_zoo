@@ -38,10 +38,11 @@ files:
       $type: google_drive
       id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0001/brain-tumor-segmentation-0001-0000.params
+input_info:
+  - name: data_crop
+    shape: [1, 4, 128, 128, 128]
+    layout: NCDHW
 model_optimizer_args:
-  - --input_shape=[1,4,128,128,128]
-  - --input=data_crop
-  - --layout=data_crop(NCDHW)
   - --output=blockgrad7
   - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
 framework: mxnet
