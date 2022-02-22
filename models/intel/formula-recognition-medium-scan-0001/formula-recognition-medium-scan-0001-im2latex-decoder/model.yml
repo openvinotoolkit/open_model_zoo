@@ -36,5 +36,21 @@ files:
     size: 5126242
     checksum: 3e1c34fb6215a9e29cdc913667854904dde89fa78465c9893642da354244a626c2f9bf0f8de58731d4c89988314efa1c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+input_info:
+  - name: dec_st_c
+    shape: [1, 512]
+    layout: ND
+  - name: dec_st_h
+    shape: [1, 512]
+    layout: ND
+  - name: output_prev
+    shape: [1, 256]
+    layout: NC
+  - name: row_enc_out
+    shape: [1, 20, 175, 512]
+    layout: NHWD
+  - name: tgt
+    shape: [1, 1]
+    layout: ND
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

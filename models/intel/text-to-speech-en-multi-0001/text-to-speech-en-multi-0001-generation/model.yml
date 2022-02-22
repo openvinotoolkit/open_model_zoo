@@ -33,5 +33,9 @@ files:
     size: 25541524
     checksum: a8cab15fe6902685566b8908338761c38873459b88d9cfb78679373b0e7923436b6a95b3376175b81d5202ce0f88db4d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
+input_info:
+  - name: mel
+    shape: [1, 80, 128]
+    layout: NCH
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

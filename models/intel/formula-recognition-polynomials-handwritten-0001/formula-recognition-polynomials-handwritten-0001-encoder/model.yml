@@ -36,5 +36,9 @@ files:
     size: 22683680
     checksum: 7c3f9b3703254e93a90675dc7c9577224ee2a0ccf54a581c2e2993177bc6bccd8bd099aec378b1847fdfe1f58ee5653b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
+input_info:
+  - name: imgs
+    shape: [1, 3, 96, 990]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

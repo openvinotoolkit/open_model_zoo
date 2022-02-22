@@ -40,5 +40,12 @@ files:
     size: 32034
     checksum: b9f2d31175c39e36317b32771dffadd704cf127ab4c36f4637e2de92fc9154e3fdbb6aa995a105cdacfd027620016e2a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
+input_info:
+  - name: '0'
+    shape: [1, 3, 270, 480]
+    layout: NCHW
+  - name: '1'
+    shape: [1, 3, 1080, 1920]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

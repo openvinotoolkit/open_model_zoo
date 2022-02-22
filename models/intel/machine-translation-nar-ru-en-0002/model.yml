@@ -49,5 +49,9 @@ files:
     size: 125907278
     checksum: 208a5bf84cfcadbb97edd3695b2a6d5fe912808630d1be04ba963174d74a319adec3056f7018b8d84058d17c84259814
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/machine-translation-nar-ru-en-0002/FP16/machine-translation-nar-ru-en-0002.bin
+input_info:
+  - name: tokens
+    shape: [1, 192]
+    layout: NC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

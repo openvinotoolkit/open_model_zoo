@@ -34,5 +34,126 @@ files:
     size: 8636916
     checksum: 9f49ee26292bc583795530cd4ec55637e3a2826017534f68b91a77ef3ceca7a7e916cb9b396de023af26078e69aaf761
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
+input_info:
+  - name: input
+    shape: [1, 128]
+    layout: NC
+  - name: inp_state_000
+    shape: [1, 128]
+    layout: NC
+  - name: inp_state_001
+    shape: [1, 2, 129, 2]
+    layout: NCHW
+  - name: inp_state_002
+    shape: [1, 18, 129, 2]
+    layout: NCHW
+  - name: inp_state_003
+    shape: [1, 34, 129, 2]
+    layout: NCHW
+  - name: inp_state_004
+    shape: [1, 50, 129, 2]
+    layout: NCHW
+  - name: inp_state_005
+    shape: [1, 32, 129, 1]
+    layout: NCHW
+  - name: inp_state_006
+    shape: [1, 32, 64, 4]
+    layout: NCHW
+  - name: inp_state_007
+    shape: [1, 48, 64, 4]
+    layout: NCHW
+  - name: inp_state_008
+    shape: [1, 64, 64, 4]
+    layout: NCHW
+  - name: inp_state_009
+    shape: [1, 80, 64, 4]
+    layout: NCHW
+  - name: inp_state_010
+    shape: [1, 64, 64, 1]
+    layout: NCHW
+  - name: inp_state_011
+    shape: [1, 64, 32, 8]
+    layout: NCHW
+  - name: inp_state_012
+    shape: [1, 96, 32, 8]
+    layout: NCHW
+  - name: inp_state_013
+    shape: [1, 128, 32, 8]
+    layout: NCHW
+  - name: inp_state_014
+    shape: [1, 128, 32, 1]
+    layout: NCHW
+  - name: inp_state_015
+    shape: [1, 128, 16, 16]
+    layout: NCHW
+  - name: inp_state_016
+    shape: [1, 192, 16, 16]
+    layout: NCHW
+  - name: inp_state_017
+    shape: [1, 256, 16, 1]
+    layout: NCHW
+  - name: inp_state_018
+    shape: [1, 256, 8, 32]
+    layout: NCHW
+  - name: inp_state_019
+    shape: [1, 384, 8, 32]
+    layout: NCHW
+  - name: inp_state_020
+    shape: [1, 512, 16, 16]
+    layout: NCHW
+  - name: inp_state_021
+    shape: [1, 256, 16, 16]
+    layout: NCHW
+  - name: inp_state_022
+    shape: [1, 384, 16, 16]
+    layout: NCHW
+  - name: inp_state_023
+    shape: [1, 256, 32, 8]
+    layout: NCHW
+  - name: inp_state_024
+    shape: [1, 128, 32, 8]
+    layout: NCHW
+  - name: inp_state_025
+    shape: [1, 192, 32, 8]
+    layout: NCHW
+  - name: inp_state_026
+    shape: [1, 256, 32, 8]
+    layout: NCHW
+  - name: inp_state_027
+    shape: [1, 128, 64, 4]
+    layout: NCHW
+  - name: inp_state_028
+    shape: [1, 64, 64, 4]
+    layout: NCHW
+  - name: inp_state_029
+    shape: [1, 96, 64, 4]
+    layout: NCHW
+  - name: inp_state_030
+    shape: [1, 128, 64, 4]
+    layout: NCHW
+  - name: inp_state_031
+    shape: [1, 160, 64, 4]
+    layout: NCHW
+  - name: inp_state_032
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_033
+    shape: [1, 32, 129, 2]
+    layout: NCHW
+  - name: inp_state_034
+    shape: [1, 48, 129, 2]
+    layout: NCHW
+  - name: inp_state_035
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_036
+    shape: [1, 80, 129, 2]
+    layout: NCHW
+  - name: inp_state_037
+    shape: [1, 2, 129, 2]
+    layout: NCHW
+  - name: inp_state_038
+    shape: [1, 1, 128]
+    layout: NHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

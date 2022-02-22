@@ -33,5 +33,9 @@ files:
     size: 2655744
     checksum: 814811b3b95e8da8b95bf3aaf8db7061faa356023130e125eed7fa942f8cca2e752c30d401a96e6e9ce006ef29d17e4f
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.bin
+input_info:
+  - name: input
+    shape: [1, 64, 28, 28]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
