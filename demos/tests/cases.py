@@ -787,6 +787,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
+            '-nireq': '1', # launch demo in synchronous mode
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
