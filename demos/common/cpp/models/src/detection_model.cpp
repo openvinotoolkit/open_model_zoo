@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 
+#include <fstream>
 #include <string>
 #include <vector>
 #include "models/detection_model.h"
