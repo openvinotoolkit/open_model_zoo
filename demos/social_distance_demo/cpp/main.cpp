@@ -689,7 +689,7 @@ int main(int argc, char* argv[]) {
                 devices.insert(device);
             }
         }
-        std::map<std::string, uint32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        std::map<std::string, int32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
             if ("CPU" == device) {

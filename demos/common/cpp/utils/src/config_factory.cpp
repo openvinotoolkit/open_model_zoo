@@ -46,7 +46,7 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
             config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
         } else if (device == "GPU") {
             ov::streams::Num nstreams = deviceNstreams.count(device) > 0 ? deviceNstreams.at(device) : ov::streams::AUTO;
-            config.compiledModelConfig.emplace(nstreams);
+            config.compiledModelConfig.emplace(device, nstreams);
             if (flags_d.find("MULTI") != std::string::npos && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
