@@ -720,13 +720,13 @@ int main(int argc, char* argv[]) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
-                core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? device_nstreams.at("CPU") : ov::streams::AUTO)));
+                core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? ov::streams::Num(device_nstreams["CPU"]) : ov::streams::AUTO)));
 
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
             if ("GPU" == device) {
-                core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? device_nstreams.at("GPU") : ov::streams::AUTO));
+                core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? ov::streams::Num(device_nstreams["GPU"]) : ov::streams::AUTO));
 
                 device_nstreams["GPU"] = core.get_property("GPU", ov::streams::num);
                 if (devices.end() != devices.find("CPU")) {
