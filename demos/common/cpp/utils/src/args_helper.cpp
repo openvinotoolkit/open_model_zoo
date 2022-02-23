@@ -93,14 +93,14 @@ std::vector<std::string> parseDevices(const std::string& device_string) {
 }
 
 // Format: <device1>:<value1>,<device2>:<value2> or just <value>
-std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
-                                                    const std::string& values_string) {
+std::map<std::string, int32_t> parseValuePerDevice(const std::set<std::string>& devices,
+                                                   const std::string& values_string) {
     auto values_string_upper = values_string;
     std::transform(values_string_upper.begin(),
                    values_string_upper.end(),
                    values_string_upper.begin(),
                    [](unsigned char c){ return std::toupper(c); });
-    std::map<std::string, uint32_t> result;
+    std::map<std::string, int32_t> result;
     auto device_value_strings = split(values_string_upper, ',');
     for (auto& device_value_string : device_value_strings) {
         auto device_value_vec =  split(device_value_string, ':');

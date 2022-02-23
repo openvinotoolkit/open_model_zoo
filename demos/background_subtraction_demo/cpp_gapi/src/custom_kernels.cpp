@@ -26,8 +26,8 @@ static cv::Rect expandBox(const float x0,
     const float h_half = ((y1 - y0) * 0.5f) * scale;
     const float x_c    =  (x1 + x0) * 0.5f;
     const float y_c    =  (y1 + y0) * 0.5f;
-    cv::Point tl(x_c - w_half, y_c - h_half);
-    cv::Point br(x_c + w_half, y_c + h_half);
+    cv::Point tl((int)(x_c - w_half), (int)(y_c - h_half));
+    cv::Point br((int)(x_c + w_half), (int)(y_c + h_half));
     return cv::Rect(tl, br);
 }
 
