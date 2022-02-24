@@ -98,6 +98,7 @@ class CustomBuild(distutils.command.build_py.build_py):
 
 setup(
     install_requires=read_text('requirements.in'),
+    version="1.0.0",
     extras_require={
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),
