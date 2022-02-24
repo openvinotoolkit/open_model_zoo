@@ -33,7 +33,6 @@ except ImportError as err:
     convolve = UnsupportedPackage('scipy', err.msg)
 
 
-
 class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
     annotation_types = (BackgroundMattingAnnotation,)
     prediction_types = (BackgroundMattingPrediction,)
@@ -86,7 +85,7 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
 
     @classmethod
     def get_common_meta(cls):
-        return {'target': 'higher-worse'}
+        return {'target': 'higher-worse', 'scale': 1, 'postfix': ' '}
 
 
 class MeanOfAbsoluteDifference(BaseBackgroundMattingMetrics):

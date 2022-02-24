@@ -323,9 +323,8 @@ class OpenVINOLauncher(Launcher):
 
     def get_async_requests(self):
         self._set_nireq()
-        return [
-            AsyncInferRequestWrapper(ireq_id, self.exec_network.create_infer_request())
-            for ireq_id in range(self.num_requests)]
+        return [AsyncInferRequestWrapper(ireq_id, self.exec_network.create_infer_request())
+                for ireq_id in range(self.num_requests)]
 
     def _reshape_input(self, shapes, make_dynamic=False):
         if hasattr(self, 'exec_network'):
@@ -350,8 +349,7 @@ class OpenVINOLauncher(Launcher):
         partial_shapes = {}
         for name, shape in shapes.items():
             p_shape = PartialShape(
-                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape]
-            )
+                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
             partial_shapes[name] = p_shape
         network.reshape(partial_shapes)
         return network
@@ -493,8 +491,7 @@ class OpenVINOLauncher(Launcher):
                         ov_set_config(self.ie_core, dict(value), device=key)
                     else:
                         warnings.warn(
-                            f'Configuration for {key} will be skipped as device is not listed in evaluation device'
-                        )
+                            f'Configuration for {key} will be skipped as device is not listed in evaluation device')
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
@@ -725,8 +722,11 @@ class OpenVINOLauncher(Launcher):
             return {layer_name: np.shape(data) for layer_name, data in inputs.items()}
         return {
             layer_name: parse_partial_shape(layer.get_partial_shape()) for layer_name, layer in self.inputs.items()
-            if layer_name not in self.const_inputs + self.image_info_inputs
-        }
+            if layer_name not in self.const_inputs + self.image_info_inputs}
+
+    @property
+    def lstm_inputs(self):
+        return self._lstm_inputs
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
