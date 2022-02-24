@@ -146,7 +146,7 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'quantizer_selection_mode', mode)
 
-        quantizer = Quantizer(args.precisions, args.output_dir, args.cache_dir, args.num_attempts)
+        quantizer = Quantizer(args.python, args.precisions, args.output_dir, args.model_dir, args.pot, args.dry_run)
         reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
         for model in models:

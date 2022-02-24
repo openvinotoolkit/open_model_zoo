@@ -27,9 +27,9 @@ DEFAULT_POT_CONFIG_BASE = {
 
 
 class Quantizer:
-    def __init__(self, python: str, requested_precisions: str, output_dir: Path, model_dir: Path, pot_path: Path, dry_run: bool):
+    def __init__(self, python: str, requested_precisions: str, output_dir: Path, model_dir: Path, pot: Path, dry_run: bool):
         self.python = python
-        self.pot_cmd_prefix = pot_path
+        self.pot_cmd_prefix = pot
         self.requested_precisions = requested_precisions
         self.output_dir = output_dir or model_dir
         self.model_dir = model_dir
@@ -58,7 +58,7 @@ class Quantizer:
 
     @pot_cmd_prefix.setter
     def pot_cmd_prefix(self, value: str = None):
-        pot_path = value.pot
+        pot_path = value
         if pot_path is None:
             pot_executable = shutil.which('pot')
 
