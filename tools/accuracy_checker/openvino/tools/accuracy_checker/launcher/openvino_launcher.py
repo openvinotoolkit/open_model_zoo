@@ -374,8 +374,8 @@ class OpenVINOLauncher(Launcher):
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
-            if log:
-                self._log_versions()
+            # if log:
+            #     self._log_versions()
         self._device_specific_configuration()
 
     def _device_specific_configuration(self):
@@ -474,7 +474,7 @@ class OpenVINOLauncher(Launcher):
         self._num_requests = sum(num_per_device_requests) * 2
         self._async_mode = True
         if log:
-            self._log_versions()
+            #self._log_versions()
             print_info('Async mode activated')
 
     def _set_device_config(self, device_config):
