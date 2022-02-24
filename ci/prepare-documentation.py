@@ -382,6 +382,11 @@ def main():
         title='OMZ Model API OVMS adapter')
     ovms_adapter_element.attrib[XML_ID_ATTRIBUTE] = 'omz_model_api_ovms_adapter'
 
+    model_api_element = add_page(output_root, navindex_element, id='omz_python_model_api',
+        path='demos/common/python/openvino/model_zoo/model_api/README.md',
+        title='OMZ Python Model API')
+    model_api_element.attrib[XML_ID_ATTRIBUTE] = 'omz_python_model_api'
+
     for md_path in all_md_paths:
         if md_path not in documentation_md_paths:
             raise RuntimeError(f'{all_md_paths[md_path]}: '
