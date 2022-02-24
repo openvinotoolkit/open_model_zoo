@@ -32,10 +32,10 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName, size_
     labels(labels) {}
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
-    const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
-    const float* scoresPtr = scoresTensor.data<float>();
-    const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
+    const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[0])->second;
     const int* indicesPtr = indicesTensor.data<int>();
+    const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[1])->second;
+    const float* scoresPtr = scoresTensor.data<float>();
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
@@ -165,13 +165,20 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
                                                                             ov::op::v3::TopK::Mode::MAX,
                                                                             ov::op::v3::TopK::SortType::SORT_VALUES);
 
-    auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
-    auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
+    auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
+    auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
     ov::ResultVector res({ scores, indices });
     model = std::make_shared<ov::Model>(res, model->get_parameters(), "classification");
+
     // manually set output tensors name for created topK node
-    model->outputs()[0].set_names({"indices"});
+    model->outputs()[0].set_names({ "indices" });
     outputsNames.push_back("indices");
-    model->outputs()[1].set_names({"scores"});
+    model->outputs()[1].set_names({ "scores" });
     outputsNames.push_back("scores");
+
+    // set output precisions
+    ppp = ov::preprocess::PrePostProcessor(model);
+    ppp.output("indices").tensor().set_element_type(ov::element::i32);
+    ppp.output("scores").tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
 }
