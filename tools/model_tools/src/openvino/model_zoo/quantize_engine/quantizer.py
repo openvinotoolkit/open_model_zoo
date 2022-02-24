@@ -34,7 +34,7 @@ class Quantizer:
         self.output_dir = output_dir or model_dir
         self.model_dir = model_dir
         self.dry_run = dry_run
-    
+
     @property
     def requested_precisions(self) -> Set[str]:
         return self._requested_precisions
@@ -51,13 +51,13 @@ class Quantizer:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
         self._requested_precisions = _requested_precisions
-        
-    @property   
+
+    @property
     def pot_cmd_prefix(self) -> Path:
         return self._pot_cmd_prefix
-    
+
     @pot_cmd_prefix.setter
-    def pot_cmd_prefix(self, value: str = None):        
+    def pot_cmd_prefix(self, value: str = None):
         pot_path = value.pot
         if pot_path is None:
             pot_executable = shutil.which('pot')
@@ -75,8 +75,8 @@ class Quantizer:
             # run POT as a script
             pot_cmd_prefix = [str(self.python), '--', str(pot_path)]
         self._pot_cmd_prefix = pot_cmd_prefix
-        
-    
+
+
     def quantize(self, reporter, model, precision, target_device, pot_env) -> bool:
         input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
@@ -151,7 +151,7 @@ class Quantizer:
 
     def bulk_quantize(self, reporter, dataset_dir, models, target_device) -> List[str]:
         failed_models = []
-        
+
         with tempfile.TemporaryDirectory() as temp_dir:
             annotation_dir = Path(temp_dir) / 'annotations'
             annotation_dir.mkdir()

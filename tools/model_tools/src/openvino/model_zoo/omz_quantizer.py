@@ -148,7 +148,7 @@ def main():
 
         quantizer = Quantizer(args.precisions, args.output_dir, args.cache_dir, args.num_attempts)
         reporter = _reporting.Reporter(_reporting.DirectOutputContext())
-        
+
         for model in models:
             precisions_to_send = quantizer.requested_precisions if args.precisions else quantizer.requested_precisions & model.precisions
             model_information = {
