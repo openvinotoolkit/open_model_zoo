@@ -316,7 +316,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
+        TestCase(options={'-i': DataDirectoryArg('instance-segmentaion-mask-rcnn')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
