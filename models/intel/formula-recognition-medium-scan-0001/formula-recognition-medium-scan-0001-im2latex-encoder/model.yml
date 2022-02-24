@@ -36,5 +36,9 @@ files:
     size: 6513696
     checksum: 2045b4c81b24767f5ff3359f7ad6cd8ef4c22b7910d4bf49a30a97dc01fa8cb9a31ac8e24ecd36e7aa18168635f8c4ff
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-encoder/FP16/formula-recognition-medium-scan-0001-im2latex-encoder.bin
+input_info:
+  - name: imgs
+    shape: [1, 3, 160, 1400]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

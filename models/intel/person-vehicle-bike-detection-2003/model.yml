@@ -40,5 +40,9 @@ files:
     size: 2206500
     checksum: bd5bf0497d0bd50b01c02058bc9a36040af031184d6f92cfdc2f8c571fd283ff5c6816ca913de24e78f69e52a5e0c574
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2003/FP16-INT8/person-vehicle-bike-detection-2003.bin
+input_info:
+  - name: image
+    shape: [1, 3, 480, 864]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

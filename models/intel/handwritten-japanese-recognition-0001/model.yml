@@ -40,5 +40,9 @@ files:
     size: 17095869
     checksum: 6ddfab1e71b7563dc6e188cc1b6d5ca5ecbc2f1acc4b3c98b7da17a895cf2a63b7379e06316584db1c12ce16437f3fce
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
+input_info:
+  - name: actual_input
+    shape: [1, 1, 96, 2000]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

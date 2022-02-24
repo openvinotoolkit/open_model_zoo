@@ -23,10 +23,11 @@ files:
     size: 203970473
     checksum: d97d0e4736a210879c1e3db84e19a7b9cf8dd138350d66ef65715514a1ce361ec822133789020b6adca9bd25f0d73817
     source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
+input_info:
+  - name: image_input
+    shape: [1, 608, 608, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,608,608,3]
-  - --layout=image_input(NHWC)
-  - --input=image_input
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2.json

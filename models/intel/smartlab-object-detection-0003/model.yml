@@ -33,5 +33,9 @@ files:
     size: 1781942
     checksum: 1f73b8f1b7fe52c34a6979a1b2518e5f421a773a3b5a98d6e1c09d99b5655f63f81f31646cac56860d70f88f7f1923bd
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.bin
+input_info:
+  - name: images
+    shape: [1, 3, 416, 416]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

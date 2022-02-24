@@ -116,11 +116,22 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
 
     for model_precision in sorted(model_precisions):
         data_type = model_precision.split('-')[0]
+        layout_string = ','.join(
+            '{}({})'.format(input.name, input.layout) for input in model.input_info if input.layout
+        )
+        shape_string = ','.join(str(input.shape) for input in model.input_info if input.shape)
+
+        if layout_string:
+            expanded_mo_args.append('--layout={}'.format(layout_string))
+        if shape_string:
+            expanded_mo_args.append('--input_shape={}'.format(shape_string))
+
         mo_cmd = [*mo_props.cmd_prefix,
             '--framework={}'.format(model_format),
             '--data_type={}'.format(data_type),
             '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
             '--model_name={}'.format(model.name),
+            '--input={}'.format(','.join(input.name for input in model.input_info)),
             *expanded_mo_args, *mo_props.extra_args]
 
         reporter.print_section_heading('{}Converting {} to IR ({})',
@@ -228,16 +239,18 @@ def main():
         if mo_path is not None:
             mo_path = mo_path.resolve()
             mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
+
             if str(mo_path).lower().endswith('.py'):
                 mo_dir = mo_path.parent
             else:
                 mo_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.mo')
                 mo_dir = mo_package_path
+
                 if mo_package_path is None:
                     mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
-                    mo_dir = mo_package_path.parent
                     if mo_package_path is None:
                         sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
+                    mo_dir = mo_package_path.parent
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
 

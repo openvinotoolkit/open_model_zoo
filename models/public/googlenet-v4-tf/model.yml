@@ -80,10 +80,11 @@ postprocessing:
     pattern: '\bcore_layers\.flatten\b'
     replacement: 'tf.keras.layers.Flatten()'
     file: models/research/slim/tf_slim/layers/layers.py
+input_info:
+  - name: input
+    shape: [1, 299, 299, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,299,299,3]
-  - --input=input
-  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionV4/Logits/Predictions

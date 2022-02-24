@@ -28,12 +28,15 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: 20180408-102900.zip
+input_info:
+  - name: image_batch
+    shape: [1, 160, 160, 3]
+    layout: NHWC
+  - name: phase_train
+    shape: [1]
 model_optimizer_args:
   - --freeze_placeholder_with_value=phase_train->False
   - --reverse_input_channels
-  - --input_shape=[1,160,160,3],[1]
-  - --input=image_batch,phase_train
-  - --layout=image_batch(NHWC)
   - --mean_values=image_batch[127.5,127.5,127.5]
   - --scale_values=image_batch[128.0]
   - --output=embeddings

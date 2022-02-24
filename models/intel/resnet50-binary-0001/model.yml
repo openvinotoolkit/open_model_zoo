@@ -32,5 +32,9 @@ files:
     size: 12485424
     checksum: d2a86f9f5ff44938e9873d6e91d8b93d90ef011f8523c87579731b5b8c8d0eef1f6ed7d7ee4cd4e864765f2657dd0879
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+input_info:
+  - name: '0'
+    shape: [1, 3, 224, 224]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

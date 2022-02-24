@@ -40,5 +40,9 @@ files:
     size: 4293753
     checksum: 122e1bcbd792a14633cf21b868156d94e5a1fac4ab0d74bd6d983ba18665c6f30e128c0bb43b6d609c6ff44e1a69facc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/common-sign-language-0002/FP16-INT8/common-sign-language-0002.bin
+input_info:
+  - name: input
+    shape: [1, 3, 8, 224, 224]
+    layout: NCDHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

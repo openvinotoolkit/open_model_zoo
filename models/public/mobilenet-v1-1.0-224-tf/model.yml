@@ -28,11 +28,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: mobilenet_v1_1.0_224.tgz
+input_info:
+  - name: input
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
-  - --input=input
-  - --layout=input(NHWC)
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=MobilenetV1/Predictions/Reshape_1

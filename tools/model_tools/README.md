@@ -596,6 +596,10 @@ describing a single model. Each such object has the following keys:
 
 * `license_url`: an URL for the license that the model is distributed under.
 
+* `accuracy_config`: path to the model accuracy config in the user's file system.
+
+* `model_config`: path to the model configuration file in the user's file system.
+
 * `precisions`: the list of precisions that the model has IR files for. For models downloaded
   in a format other than the OpenVINO™ IR format, these are the precisions that the model
   converter can produce IR files in. Current possible values are:
@@ -651,6 +655,8 @@ describing a single model. Each such object has the following keys:
   * `token_recognition`
 
   Additional possible values might be added in the future.
+
+* `input_info`: the list of inputs containing the information about input name, shape and layout.
 
 * `model_stages`: the list of model stages, in case if the model is a composition of several models,
   otherwise the list is empty.

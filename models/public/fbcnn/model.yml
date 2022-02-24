@@ -51,11 +51,12 @@ conversion_to_onnx_args:
   - --input-names=image_lq
   - --output-names=image_result
   - --output-file=$conv_dir/fbcnn_color.onnx
+input_info:
+  - name: image_lq
+    shape: [1, 3, 512, 512]
+    layout: NCHW
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,3,512,512]
-  - --input=image_lq
-  - --layout=image_lq(NCHW)
   - --scale_values=image_lq[255]
   - --output=image_result
   - --input_model=$conv_dir/fbcnn_color.onnx

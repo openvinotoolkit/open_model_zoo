@@ -40,5 +40,9 @@ files:
     size: 1217056
     checksum: ec7d4facfeb667fa2d52c124ce1f805378e287ebca79b77683f0b4e87b56510433ddc3f495e907dbd2c8e41110dd6d7b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/face-detection-retail-0005/FP16-INT8/face-detection-retail-0005.bin
+input_info:
+  - name: input.1
+    shape: [1, 3, 300, 300]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

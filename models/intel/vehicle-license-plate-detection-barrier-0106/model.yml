@@ -44,5 +44,9 @@ files:
     size: 728410
     checksum: 6953a4af98e62e90535be969689bf0a9ce11486725c274bfecc82887ecc1ad8027c611c7a9924256f4bc3129e598e742
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
+input_info:
+  - name: Placeholder
+    shape: [1, 300, 300, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

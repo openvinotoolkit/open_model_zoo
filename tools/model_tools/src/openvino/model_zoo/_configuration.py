@@ -26,6 +26,8 @@ from openvino.model_zoo.download_engine import cache, file_source, postprocessin
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 EXCLUDED_MODELS = []
 
+ModelInputInfo = collections.namedtuple('ModelInputInfo', ['name', 'shape', 'layout'])
+
 class ModelFile:
     def __init__(self, name, size, checksum, source):
         self.name = name
@@ -52,7 +54,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name
+        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -68,6 +70,7 @@ class Model:
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
+        self.input_info = input_info
         self.model_stages = {}
 
     @classmethod
@@ -100,6 +103,13 @@ class Model:
 
             framework = validation.validate_string_enum('"framework"', model['framework'],
                 known_frameworks.keys())
+
+            input_info = []
+            for input in model.get('input_info', []):
+                input_name = validation.validate_string('"input name"', input['name'])
+                shape = validation.validate_list('"input shape"', input.get('shape', []))
+                layout = validation.validate_string('"input layout"', input.get('layout', ''))
+                input_info.append(ModelInputInfo(input_name, shape, layout))
 
             conversion_to_onnx_args = model.get('conversion_to_onnx_args', None)
             if known_frameworks[framework]:
@@ -163,7 +173,8 @@ class Model:
 
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
-                task_type, conversion_to_onnx_args, known_frameworks[framework], composite_model_name)
+                task_type, conversion_to_onnx_args, known_frameworks[framework],
+                composite_model_name, input_info)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
@@ -179,6 +190,7 @@ class CompositeModel:
         self.precisions = precisions
         self.quantization_output_precisions = quantization_output_precisions
         self.composite_model_name = composite_model_name
+        self.input_info = []
 
     @classmethod
     def deserialize(cls, model, name, subdirectory, stages, known_frameworks=None, known_task_types=None):

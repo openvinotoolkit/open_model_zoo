@@ -40,5 +40,9 @@ files:
     size: 23864847
     checksum: 63fefe9d0b1bb2d0bf57421481594dfd0f26b3308d1942a2f10dc9c2ecc9da977e2d66b839132908e4585833ac423421
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.bin
+input_info:
+  - name: input
+    shape: [1, 3, 160, 80]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
