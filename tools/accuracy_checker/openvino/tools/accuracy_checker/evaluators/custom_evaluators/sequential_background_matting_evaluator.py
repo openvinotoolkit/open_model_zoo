@@ -21,7 +21,7 @@ from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, cr
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher.input_feeder import InputFeeder
-from ...utils import contains_all, extract_image_representations
+from ...utils import contains_all, extract_image_representations, postprocess_output_name
 
 
 class SequentialBackgroundMatting(BaseCustomEvaluator):
@@ -109,7 +109,10 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         for _ in range(batch_size):
             zeros_lstm_inputs = {}
             for lstm_input_name in self.launcher.lstm_inputs.keys():
-                shape = self.model.network.input_info[lstm_input_name].input_data.shape
+                if hasattr(self.model.network, 'input_info'):
+                    shape = self.model.network.input_info[lstm_input_name].input_data.shape
+                else:
+                    shape = self.model.inputs[lstm_input_name].shape
                 zeros_lstm_inputs[lstm_input_name] = np.zeros(shape, dtype=np.float32)
             output.append(zeros_lstm_inputs)
         return output
@@ -119,7 +122,7 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         for output in outputs:
             batch_rnn_inputs = {}
             for input_name, output_name in self.launcher.lstm_inputs.items():
-                batch_rnn_inputs[input_name] = output[output_name]
+                batch_rnn_inputs[input_name] = output[postprocess_output_name(output_name, output)]
             result.append(batch_rnn_inputs)
         return result
 
@@ -131,4 +134,4 @@ class DLSDKSequentialBackgroundMattingModel(BaseDLSDKModel):
 
 class OpenVINOModelSequentialBackgroundMattingModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(input_data)
+        return self.infer(input_data)
