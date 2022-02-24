@@ -90,9 +90,9 @@ It accepts a path to either `xml` model file or `onnx` model file.
 
 Refer to __[`OVMSAdapter`](adapters/ovms_adapter.md)__ to learn about running demos with OVMS.
 
-For OpenVINO Model Server Adapter employment, you need to install the requirements:
+For OpenVINO Model Server Adapter employment, you need to install the package with extra module:
 ```sh
-pip install -r <omz_dir>/demos/common/python/requirements_ovms.txt
+pip install <omz_dir>/demos/common/python[ovms]
 ```
 
 ## Model API Pipelines
