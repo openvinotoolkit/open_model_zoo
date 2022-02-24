@@ -87,7 +87,7 @@ def main():
         # check local link validity
 
         for url in sorted([ref.url for ref in doc_page.external_references()]):
-            if url.startswith(omz_github_url):
+            if url.startswith(omz_github_url) and 'model_api' not in url:
                 omz_relative_url = url[len(omz_github_url):]
                 omz_relative_path = Path(urllib.request.url2pathname(omz_relative_url))
 
