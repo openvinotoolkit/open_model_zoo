@@ -78,6 +78,11 @@ def main():
     omz_github_url = 'https://github.com/openvinotoolkit/open_model_zoo/'
 
     for md_path in sorted(all_md_files):
+
+        # skip the checks for Python Model API package
+        if 'model_api' in str(md_path):
+            continue
+
         referenced_md_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
@@ -87,7 +92,7 @@ def main():
         # check local link validity
 
         for url in sorted([ref.url for ref in doc_page.external_references()]):
-            if url.startswith(omz_github_url) and 'model_api' not in url:
+            if url.startswith(omz_github_url):
                 omz_relative_url = url[len(omz_github_url):]
                 omz_relative_path = Path(urllib.request.url2pathname(omz_relative_url))
 
