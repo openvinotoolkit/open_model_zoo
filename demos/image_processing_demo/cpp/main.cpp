@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq != 1);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
         cv::Mat curr_frame;
 
         auto startTime = std::chrono::steady_clock::now();
