@@ -193,7 +193,6 @@
    omz_models_model_face_detection_retail_0044
    omz_models_model_faceboxes_pytorch
    omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
    omz_models_model_faster_rcnn_resnet50_coco
    omz_models_model_mobilefacedet_v1_mxnet
    omz_models_model_mobilenet_ssd

@@ -236,7 +236,7 @@
 
 @endsphinxdirective
 
-OpenVINO&trade; toolkit provides a set of Intel pre-trained models
+OpenVINO&trade; toolkit provides a set of Intel's pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
 The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
