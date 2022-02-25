@@ -161,7 +161,7 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
         for ann_id, ann in enumerate(annotation['annotations']):
             images = [t for t in annotation['images'] if t['id'] == ann['image_id']]
             if len(images) != 1:
-                raise ValueError('Invalid annotation for image: {}', ann['image_id'])
+                raise ValueError('Invalid annotation for image: {}'.format(ann['image_id']))
             image = images[0]
             identifier = image['file_name'].split('/')[-1]
             if check_content:
