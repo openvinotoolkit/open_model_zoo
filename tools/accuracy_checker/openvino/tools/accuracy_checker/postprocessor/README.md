@@ -25,6 +25,7 @@ Accuracy Checker supports following set of postprocessors:
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`).
   * `unpadding` if this option enabled, recalculation of boxes normalized coordinates to remove additional padding will be performed before multiplying on original input size. (Optional, default `False`).
+  * `uncrop` if this option enabled, removes `max_square` crop effect while translating normalized coordinates to original image size. (Optional, default `False`).
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
     Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
