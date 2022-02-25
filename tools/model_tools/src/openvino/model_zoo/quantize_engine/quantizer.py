@@ -30,7 +30,7 @@ class Quantizer:
     def __init__(self, python: str, requested_precisions: str, output_dir: Path, model_dir: Path, pot: Path,
                  dataset_dir: Path, dry_run: bool):
         self.python = python
-        self.pot_cmd_prefix = pot
+        self.pot_path = pot
         self.requested_precisions = requested_precisions
         self.output_dir = output_dir or model_dir
         self.model_dir = model_dir
@@ -61,32 +61,24 @@ class Quantizer:
 
         self._requested_precisions = value
 
-    @property
-    def pot_cmd_prefix(self) -> Path:
-        return self._pot_cmd_prefix
-
-    @pot_cmd_prefix.setter
-    def pot_cmd_prefix(self, value: str = None):
-        pot_path = value
+    def get_pot_cmd_prefix(self) -> List[str]:
+        pot_path = self.pot_path
         if pot_path is None:
             pot_executable = shutil.which('pot')
 
             if pot_executable:
-                pot_cmd_prefix = [str(self.python), '--', pot_executable]
+                pot_path = pot_executable
             else:
                 try:
                     pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/post_training_optimization_tool/main.py'
                 except KeyError:
                     sys.exit('Unable to locate Post-Training Optimization Toolkit. '
                         + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
-
-        else:
-            # run POT as a script
-            pot_cmd_prefix = [str(self.python), '--', str(pot_path)]
-        self._pot_cmd_prefix = pot_cmd_prefix
+        pot_cmd_prefix = [str(self.python), '--', str(pot_path)]
+        return pot_cmd_prefix
 
 
-    def quantize(self, reporter, model, precision, target_device, pot_env) -> bool:
+    def quantize(self, reporter, model, precision, target_device, pot_cmd_prefix, pot_env) -> bool:
         input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
         pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
@@ -128,7 +120,7 @@ class Quantizer:
         pot_output_dir = model_output_dir / 'pot-output'
         pot_output_dir.mkdir(parents=True, exist_ok=True)
 
-        pot_cmd = [*self.pot_cmd_prefix,
+        pot_cmd = [*pot_cmd_prefix,
             '--config={}'.format(pot_config_path),
             '--direct-dump',
             '--output-dir={}'.format(pot_output_dir),
@@ -162,6 +154,8 @@ class Quantizer:
         failed_models = []
 
         with tempfile.TemporaryDirectory() as temp_dir:
+            pot_cmd_prefix = self.get_pot_cmd_prefix()
+
             annotation_dir = Path(temp_dir) / 'annotations'
             annotation_dir.mkdir()
 
@@ -189,7 +183,7 @@ class Quantizer:
                 })
 
                 for precision in sorted(model_precisions):
-                    if not self.quantize(reporter, model, precision, target_device, pot_env):
+                    if not self.quantize(reporter, model, precision, target_device, pot_cmd_prefix, pot_env):
                         failed_models.append(model.name)
                         break
         return failed_models
