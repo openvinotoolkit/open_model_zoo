@@ -215,8 +215,8 @@ DATA_SEQUENCES = {
     'instance-segmentaion-mask-rcnn': [
         image_net_arg('00002790'),
         image_net_arg('00005809'),
-        image_net_arg('00038629'),
-        image_net_arg('00048316')
+#        image_net_arg('00038629'),
+#        image_net_arg('00048316')
     ],
 
     'single-image-super-resolution': [
