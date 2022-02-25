@@ -12,12 +12,6 @@ The program provides an interactive CLI interface that gets a test dataset in .p
 
 ## Preparing to Run
 
-Install required dependencies with command:
-
-```sh
-pip install -r requirements.txt
-```
-
 The list of models supported by the demo is in `<omz_dir>/demos/whiteboard_inpainting_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
