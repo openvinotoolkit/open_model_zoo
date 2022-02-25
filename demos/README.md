@@ -193,9 +193,21 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="model_api_installation"></a>Python\* model API installation
+### <a name="python_model_api"></a>Python\* model API package
 
 To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
+
+The list of Open Model Zoo demos with Model API support:
+- [BERT Named Entity Recognition Python* Demo](./bert_named_entity_recognition_demo/python/README.md)
+- [BERT Question Answering Python* Demo](./bert_question_answering_demo/python/README.md)
+- [BERT Question Answering Embedding Python* Demo](./bert_question_answering_embedding_demo/python/README.md)
+- [Classification Python* Demo](./classification_demo/python/README.md)
+- [Image Deblurring Python* Demo](./deblurring_demo/python/README.md)
+- [Human Pose Estimation Python* Demo](./human_pose_estimation_demo/python/README.md)
+- [Instance Segmentation Python* Demo](./instance_segmentation_demo/python/README.md)
+- [MonoDepth Python* Demo](./monodepth_demo/python/README.md)
+- [Object Detection Python* Demo](./object_detection_demo/python/README.md)
+- [Image Segmentation Python* Demo](./segmentation_demo/python/README.md)
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
