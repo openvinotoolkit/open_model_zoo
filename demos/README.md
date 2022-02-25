@@ -383,7 +383,7 @@ set up the `PYTHONPATH` environment variable as follows, where `<bin_dir>` is th
 the built demo applications:
 
 ```sh
-export PYTHONPATH="$PYTHONPATH:<bin_dir>/lib"
+export PYTHONPATH="<bin_dir>:$PYTHONPATH"
 ```
 
 You are ready to run the demo applications. To learn about how to run a particular
@@ -409,7 +409,7 @@ set up the `PYTHONPATH` environment variable as follows, where `<bin_dir>` is th
 the built demo applications:
 
 ```bat
-set PYTHONPATH=%PYTHONPATH%;<bin_dir>
+set PYTHONPATH=<bin_dir>;%PYTHONPATH%
 ```
 
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you
