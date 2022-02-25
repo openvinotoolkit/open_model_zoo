@@ -43,7 +43,7 @@ Async API operates with a notion of the "Infer Request" that encapsulates the in
 
 The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
 
-The generalized interface of wrappers with its unified results representation provides the easy support of many different object detection model topologies in one demo.
+The generalized interface of wrappers with its unified results representation provides the support of multiple different object detection model topologies in one demo.
 
 ## Preparing to Run
 

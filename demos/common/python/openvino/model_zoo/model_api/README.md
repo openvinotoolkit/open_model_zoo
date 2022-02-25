@@ -1,14 +1,14 @@
 # Python* Model API package
 
 Model API package is a set of wrapper classes for particular tasks and model architectures, simplifying data preprocess and postprocess as well as routine procedures (model loading, asynchronous execution, etc...)
-Model API wrappers hide the specific code inside and work as black-box: application feeds model class with input data, then the model returns post-processed output data in user-friendly format.
+An application feeds model class with input data, then the model returns postprocessed output data in user-friendly format.
 
 ## Package structure
 
 The Python* Model API consists of 3 libraries:
-* _adapters_ - implement a common interface to allow Model API wrappers usage with different executors: OpenVINO, ONNX, etc. See [Model API adapters](#model-api-adapters) section
-* _models_ - implement wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
-* _pipelines_ - implement pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
+* _adapters_ implements a common interface to allow Model API wrappers usage with different executors: OpenVINO, OVMS. See [Model API adapters](#model-api-adapters) section
+* _models_ implements wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
+* _pipelines_ implements pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
 
 ### Prerequisites
 
@@ -25,7 +25,7 @@ Also, you can install the OpenVINO Python\* package via the command:
 pip install openvino
  ```
 
-## Building Python* Model API package
+## Installing Python* Model API package
 
 Use the following command to install Python* Model API from source:
 ```sh
@@ -53,7 +53,7 @@ python -c "from openvino.model_zoo import model_api"
 
 ## Model API Wrappers
 
-The Python* Model API package suggests ready-to-use model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
+The Python* Model API package provides model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
 
 The wrapper interface is simple and flexible, which gives capabilities for the creation of custom wrappers covering different architectures and use cases.
 
@@ -98,7 +98,7 @@ pip install <omz_dir>/demos/common/python[ovms]
 ## Model API Pipelines
 
 Model API Pipelines represent the high-level wrappers upon the input data and accessing model results management.
-It performs the data submission for model inference, verification of inference status, whether the result is ready or not, and results accessing.
+They perform the data submission for model inference, verification of inference status, whether the result is ready or not, and results accessing.
 
 The `AsyncPipeline` is available, which handles the asynchronous execution of a single model.
 
