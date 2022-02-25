@@ -1337,6 +1337,9 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(name='time_series_forecasting_demo', device_keys=[],
+        model_keys=['-m'], test_cases=[TestCase(options={'-h': ''})]),
+
     PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
                model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
