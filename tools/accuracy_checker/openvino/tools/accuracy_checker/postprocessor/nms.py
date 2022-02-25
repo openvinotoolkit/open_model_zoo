@@ -359,9 +359,10 @@ class WeightedNMS(Postprocessor):
     def process_image(self, annotation, prediction):
         for pred in prediction:
             scores = get_scores(pred)
-            x_mins, y_mins, x_maxs, y_maxs, scores = self.weighted_nms(pred.x_mins, pred.y_mins, pred.x_maxs,
-                                                                       pred.y_maxs, scores, self.overlap)
-            pred.replace(np.ones_like(x_mins) * pred.labels[0], scores, x_mins, y_mins, x_maxs, y_maxs)
+            if scores.size > 0:
+                x_mins, y_mins, x_maxs, y_maxs, scores = self.weighted_nms(pred.x_mins, pred.y_mins, pred.x_maxs,
+                                                                           pred.y_maxs, scores, self.overlap)
+                pred.replace(np.ones_like(x_mins) * pred.labels[0], scores, x_mins, y_mins, x_maxs, y_maxs)
 
         return annotation, prediction
 

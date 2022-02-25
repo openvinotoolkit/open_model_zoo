@@ -38,6 +38,9 @@ class ResizePredictionBoxes(Postprocessor):
             ),
             'unpadding': BoolField(
                 optional=True, default=False, description='remove padding effect for normalized coordinates'
+            ),
+            'uncrop': BoolField(
+                optional=True, default=False, description='remove center crop effect for normalized coordinates'
             )
         })
         return params
@@ -45,6 +48,7 @@ class ResizePredictionBoxes(Postprocessor):
     def configure(self):
         self.rescale = self.get_value_from_config('rescale')
         self.unpadding = self.get_value_from_config('unpadding')
+        self.uncrop = self.get_value_from_config('uncrop')
 
     def process_image(self, annotation, prediction):
         h, w, _ = self.image_size
@@ -63,24 +67,37 @@ class ResizePredictionBoxes(Postprocessor):
             w = self.image_size[1] / input_w
             h = self.image_size[0] / input_h
 
+        dw = 0
+        dh = 0
+        if self.uncrop:
+            crop_op = [op for op in image_metadata['geometric_operations'] if op.type == 'crop']
+            if crop_op:
+                dh = (h - min(h, w)) / 2
+                dw = (w - min(h, w)) / 2
+                h = w = min(h, w)
+
         if self.unpadding:
             padding_op = [op for op in image_metadata['geometric_operations'] if op.type == 'padding']
             if padding_op:
                 padding_op = padding_op[0]
+                top, left, bottom, right = padding_op.parameters['pad']
+                pw = padding_op.parameters['pref_width']
+                ph = padding_op.parameters['pref_height']
 
-                # def right_bottom_padding(dst_width, dst_height, width, height):
-                #     return [0, 0, dst_height - height, dst_width - width]
-                #
-                # def left_top_padding(dst_width, dst_height, width, height):
-                #     return [dst_height - height, dst_width - width, 0, 0]
+                w = pw / (pw - right - left) * self.image_size[1]
+                h = ph / (ph - top - bottom) * self.image_size[0]
+                dw = left / (pw - right - left) * self.image_size[1]
+                dh = top / (ph - top - bottom) * self.image_size[1]
 
-                w = padding_op.parameters['pref_width'] / padding_op.parameters['width'] * self.image_size[1]
-                h = padding_op.parameters['pref_height'] / padding_op.parameters['height'] * self.image_size[0]
 
         for pred in prediction:
             pred.x_mins *= w
             pred.x_maxs *= w
             pred.y_mins *= h
             pred.y_maxs *= h
+            pred.x_mins += dw
+            pred.x_maxs += dw
+            pred.y_mins += dh
+            pred.y_maxs += dh
 
         return annotation, prediction
