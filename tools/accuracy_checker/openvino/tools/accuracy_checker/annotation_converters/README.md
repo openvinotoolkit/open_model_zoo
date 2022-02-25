@@ -843,7 +843,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `landmarks_file` - path to file with hand landmarks coordinates for annotation images (optional). If provided, converter uses GT box coordinates calculated from landmarks data instead of data provided in `annotation_file`.
   * `padding` - additional padding, in pixels, around GT bounding box, calculated from `landmarks_file`.
 * `cvat_hand_landmarks` - converts Hands dataset for hand recognition task to `HandLandmarksAnnotation`.
-  * `annotation_file` - path to dataset annotation file.
+  * `annotation_file` - path to dataset annotation file. 
   * `bbox_file` - path to file with hand bounding box annotation.
   * `images_dir` - path to directory with images (optional, default `final`).
   * `from_landmarks` - allow to calculate hand bounding box coordinates from landmarks data instead of data provided in `bbox_file` (optional, default `False`).
