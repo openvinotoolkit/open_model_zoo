@@ -48,9 +48,6 @@ def main():
     parser.add_argument('--target_device', help='target device for the quantized model')
     args = parser.parse_args()
 
-    if not args.dataset_dir:
-            sys.exit('--dataset_dir must be specified.')
-
     with _common.telemetry_session('Model Quantizer', 'quantizer') as telemetry:
         models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
