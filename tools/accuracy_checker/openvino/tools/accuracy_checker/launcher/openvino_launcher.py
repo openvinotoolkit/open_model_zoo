@@ -368,8 +368,8 @@ class OpenVINOLauncher(Launcher):
         return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
-        if log:
-            print_info('IE version: {}'.format(get_version()))
+        #if log:
+        #    print_info('IE version: {}'.format(get_version()))
         if self._is_multi():
             self._prepare_multi_device(log)
         else:
