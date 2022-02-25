@@ -135,16 +135,4 @@ ssd_model = SSD(model_adapter, preload=True)
 results = ssd_model(input_data)
 ```
 
-To study the complex scenarios, refer to [Open Model Zoo Python* demos](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos), where the asynchronous inference is applied.
-
-The list of Open Model Zoo demos with Model API support:
-- [BERT Named Entity Recognition Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_named_entity_recognition_demo/python)
-- [BERT Question Answering Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_question_answering_demo/python)
-- [BERT Question Answering Embedding Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/bert_question_answering_embedding_demo/python)
-- [Classification Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/classification_demo/python)
-- [Image Deblurring Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/deblurring_demo/python)
-- [Human Pose Estimation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/human_pose_estimation_demo/python)
-- [Instance Segmentation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/instance_segmentation_demo/python)
-- [MonoDepth Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/monodepth_demo/python)
-- [Object Detection Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/object_detection_demo/python)
-- [Image Segmentation Python* Demo](https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/segmentation_demo/python)
+To study the complex scenarios, refer to Open Model Zoo Python* demos, where the asynchronous inference is applied.

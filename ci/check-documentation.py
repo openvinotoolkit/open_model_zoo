@@ -79,10 +79,6 @@ def main():
 
     for md_path in sorted(all_md_files):
 
-        # skip the checks for Python Model API package
-        if 'model_api' in str(md_path):
-            continue
-
         referenced_md_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
