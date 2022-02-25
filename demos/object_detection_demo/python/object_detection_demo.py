@@ -76,8 +76,7 @@ def build_argparser():
                                         'By default used default masks for model. Only for YOLOV4 architecture type.')
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
-                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.'
-                                        'To define layout you should use only capital letters')
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',

@@ -149,7 +149,7 @@ std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_st
         colonPos = searchStr.find_last_of(':');
     }
     if (!searchStr.empty()) {
-        throw std::logic_error("Can't parse input layout string: " + layout_string);
+        throw std::invalid_argument("Can't parse input layout string: " + layout_string);
     }
     return layouts;
 }
