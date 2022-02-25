@@ -27,30 +27,39 @@ DEFAULT_POT_CONFIG_BASE = {
 
 
 class Quantizer:
-    def __init__(self, python: str, requested_precisions: str, output_dir: Path, model_dir: Path, pot: Path, dry_run: bool):
+    def __init__(self, python: str, requested_precisions: str, output_dir: Path, model_dir: Path, pot: Path,
+                 dataset_dir: Path, dry_run: bool):
         self.python = python
         self.pot_cmd_prefix = pot
         self.requested_precisions = requested_precisions
         self.output_dir = output_dir or model_dir
         self.model_dir = model_dir
         self.dry_run = dry_run
+        self.dataset_dir = dataset_dir
+
+    @property
+    def dataset_dir(self) -> Set[str]:
+        return self._dataset_dir
+
+    @dataset_dir.setter
+    def dataset_dir(self, value: str = None):
+        # We can't mark it as required, because it's not required when --print_all is specified.
+        # So we have to check it manually.
+        if not value:
+            sys.exit('--dataset_dir must be specified.')
+        self._dataset_dir = value
 
     @property
     def requested_precisions(self) -> Set[str]:
         return self._requested_precisions
 
     @requested_precisions.setter
-    def requested_precisions(self, value: str = None):
-        if value is None:
-            _requested_precisions = _common.KNOWN_PRECISIONS
-        else:
-            _requested_precisions = set(value.split(','))
-
-        unknown_precisions = _requested_precisions - _common.KNOWN_PRECISIONS
+    def requested_precisions(self, value: Set[str] = None):
+        unknown_precisions = value - _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-        self._requested_precisions = _requested_precisions
+        self._requested_precisions = value
 
     @property
     def pot_cmd_prefix(self) -> Path:
@@ -149,7 +158,7 @@ class Quantizer:
 
         return True
 
-    def bulk_quantize(self, reporter, dataset_dir, models, target_device) -> List[str]:
+    def bulk_quantize(self, reporter, models, target_device) -> List[str]:
         failed_models = []
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -158,7 +167,7 @@ class Quantizer:
 
             pot_env = {
                 'ANNOTATIONS_DIR': str(annotation_dir),
-                'DATA_DIR': str(dataset_dir),
+                'DATA_DIR': str(self.dataset_dir),
                 'DEFINITIONS_FILE': str(_common.DATASET_DEFINITIONS),
             }
 

@@ -14,12 +14,9 @@
 
 import argparse
 import json
-import os
 import sys
 
 from pathlib import Path
-
-import yaml
 
 from openvino.model_zoo import (
     _configuration, _common, _reporting,
@@ -27,92 +24,6 @@ from openvino.model_zoo import (
 
 from openvino.model_zoo.quantize_engine.quantizer import Quantizer
 
-
-DEFAULT_POT_CONFIG_BASE = {
-    'compression': {
-        'algorithms': [
-            {
-                'name': 'DefaultQuantization',
-                'params': {
-                    'preset': 'performance',
-                    'stat_subset_size': 300,
-                },
-            },
-        ],
-    },
-}
-
-def quantize(reporter, model, precision, target_device, dry_run, model_dir, output_dir, pot_cmd_prefix, pot_env):
-    input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
-
-    pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
-
-    try:
-        with pot_config_base_path.open('rb') as pot_config_base_file:
-            pot_config_base = yaml.safe_load(pot_config_base_file)
-    except FileNotFoundError:
-        pot_config_base = DEFAULT_POT_CONFIG_BASE
-
-    pot_config_paths = {
-        'engine': {
-            'config': str(_common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
-        },
-        'model': {
-            'model': str(model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
-            'weights': str(model_dir / model.subdirectory / input_precision / (model.name + '.bin')),
-            'model_name': model.name,
-        }
-    }
-
-    pot_config = {**pot_config_base, **pot_config_paths}
-
-    if target_device:
-        pot_config['compression']['target_device'] = target_device
-
-    reporter.print_section_heading('{}Quantizing {} from {} to {}',
-        '(DRY RUN) ' if dry_run else '', model.name, input_precision, precision)
-
-    model_output_dir = output_dir / model.subdirectory / precision
-    pot_config_path = model_output_dir / 'pot-config.json'
-
-    reporter.print('Creating {}...', pot_config_path)
-    pot_config_path.parent.mkdir(parents=True, exist_ok=True)
-    with pot_config_path.open('w') as pot_config_file:
-        json.dump(pot_config, pot_config_file, indent=4)
-        pot_config_file.write('\n')
-
-    pot_output_dir = model_output_dir / 'pot-output'
-    pot_output_dir.mkdir(parents=True, exist_ok=True)
-
-    pot_cmd = [*pot_cmd_prefix,
-        '--config={}'.format(pot_config_path),
-        '--direct-dump',
-        '--output-dir={}'.format(pot_output_dir),
-    ]
-
-    reporter.print('Quantization command: {}', _common.command_string(pot_cmd))
-    reporter.print('Quantization environment: {}',
-        ' '.join('{}={}'.format(k, _common.quote_arg(v))
-            for k, v in sorted(pot_env.items())))
-
-    success = True
-
-    if not dry_run:
-        reporter.print(flush=True)
-
-        success = reporter.job_context.subprocess(pot_cmd, env={**os.environ, **pot_env})
-
-    reporter.print()
-    if not success: return False
-
-    if not dry_run:
-        reporter.print('Moving quantized model to {}...', model_output_dir)
-        for ext in ['.xml', '.bin']:
-            (pot_output_dir / 'optimized' / (model.name + ext)).replace(
-                model_output_dir / (model.name + ext))
-        reporter.print()
-
-    return True
 
 def main():
     parser = argparse.ArgumentParser()
@@ -137,6 +48,9 @@ def main():
     parser.add_argument('--target_device', help='target device for the quantized model')
     args = parser.parse_args()
 
+    if not args.dataset_dir:
+            sys.exit('--dataset_dir must be specified.')
+
     with _common.telemetry_session('Model Quantizer', 'quantizer') as telemetry:
         models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
@@ -144,19 +58,24 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'quantizer_selection_mode', mode)
 
-        quantizer = Quantizer(args.python, args.precisions, args.output_dir, args.model_dir, args.pot, args.dry_run)
-        reporter = _reporting.Reporter(_reporting.DirectOutputContext())
+        if args.precisions is None:
+            requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
+        else:
+            requested_precisions = set(args.precisions.split(','))
 
         for model in models:
-            precisions_to_send = quantizer.requested_precisions if args.precisions else quantizer.requested_precisions & model.precisions
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
-                'precisions': str(precisions_to_send).replace(',', ';'),
+                'precisions': str(requested_precisions).replace(',', ';'),
             }
             telemetry.send_event('md', 'quantizer_model', json.dumps(model_information))
 
-        failed_models = quantizer.bulk_quantize(reporter, args.dataset_dir, models, args.target_device)
+        quantizer = Quantizer(args.python, requested_precisions, args.output_dir, args.model_dir, args.pot,
+                              args.dataset_dir, args.dry_run)
+        reporter = _reporting.Reporter(_reporting.DirectOutputContext())
+
+        failed_models = quantizer.bulk_quantize(reporter, models, args.target_device)
 
         if failed_models:
             reporter.print('FAILED:')
