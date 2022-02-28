@@ -109,7 +109,7 @@ constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, t_msg);
 
 constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
-    "c - average CPU load, d - load distrobution over cores, m - memory usage";
+    "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
 DEFINE_string(u, "cdm", u_msg);
 
 void parse(int argc, char *argv[]) {
@@ -118,6 +118,7 @@ void parse(int argc, char *argv[]) {
         std::cout <<   "\t[ -h]                                         " << h_msg
                   << "\n\t[--help]                                           print help on all arguments"
                   << "\n\t  -m <MODEL FILE>                             " << m_msg
+                  << "\n\t[ -i <INPUT>]                                 " << i_msg
                   << "\n\t[--bb_enlarge_coef <NUMBER>]                  " << bb_enlarge_coef_msg
                   << "\n\t[ -d <DEVICE>]                                " << d_msg
                   << "\n\t[--dag <DEVICE>]                              " << dag_msg
@@ -127,7 +128,6 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--dlm <DEVICE>]                              " << dlm_msg
                   << "\n\t[--dx_coef <NUMBER>]                          " << dx_coef_msg
                   << "\n\t[--dy_coef <NUMBER>]                          " << dy_coef_msg
-                  << "\n\t[ -i <INPUT>]                                 " << i_msg
                   << "\n\t[--lim <NUMBER>]                              " << lim_msg
                   << "\n\t[--loop]                                      " << loop_msg
                   << "\n\t[--mag <MODEL FILE>]                          " << mag_msg
@@ -145,16 +145,16 @@ void parse(int argc, char *argv[]) {
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
                      "\n\t\tP, p, 0, spacebar - Pause"
-                     "\n\t\tC - average CPU load, D - load distrobution over cores, M - memory usage, H - hide\n";
+                     "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
     } if (FLAGS_i.empty()) {
-        throw std::invalid_argument("-i <INPUT> can't be empty");
+        throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_m.empty()) {
-        throw std::invalid_argument("-m <MODEL FILE> can't be empty");
+        throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+    slog::info << ov::get_openvino_version() << slog::endl;
 }
 
 static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
@@ -658,8 +658,6 @@ int main(int argc, char *argv[]) {
 
         videoWriter.write(frame);
     }
-
-    cv::destroyAllWindows();
 
     slog::info << "Metrics report:" << slog::endl;
     slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;

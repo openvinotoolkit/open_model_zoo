@@ -277,7 +277,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
+            model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
             device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--noshow': None,
             **MONITORS,
@@ -285,19 +285,19 @@ NATIVE_DEMOS = [
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
-                # '-mag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
-                '-mam': ModelArg('anti-spoof-mn3'),
-                '-mem': ModelArg('emotions-recognition-retail-0003'),
-                # '-mhp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
-                '-mlm': ModelArg('facial-landmarks-35-adas-0002'),
+                # '--mag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
+                '--mam': ModelArg('anti-spoof-mn3'),
+                '--mem': ModelArg('emotions-recognition-retail-0003'),
+                # '--mhp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
         ]
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-mag', '-mem', '-mlm', '-mhp', '-mam'],
-            device_keys=['-d', '-dag', '-dem', '-dlm', '-dhp', '-dam'],
+            model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
+            device_keys=['-d', '--dag', '--dem', '--dlm', '--dhp', '--dam'],
             test_cases=combine_cases(
         TestCase(options={'--noshow': None,
             **MONITORS,
@@ -305,11 +305,11 @@ NATIVE_DEMOS = [
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
-                '-mag': ModelArg('age-gender-recognition-retail-0013'),
-                '-mam': ModelArg('anti-spoof-mn3'),
-                '-mem': ModelArg('emotions-recognition-retail-0003'),
-                '-mhp': ModelArg('head-pose-estimation-adas-0001'),
-                '-mlm': ModelArg('facial-landmarks-35-adas-0002'),
+                '--mag': ModelArg('age-gender-recognition-retail-0013'),
+                '--mam': ModelArg('anti-spoof-mn3'),
+                '--mem': ModelArg('emotions-recognition-retail-0003'),
+                '--mhp': ModelArg('head-pose-estimation-adas-0001'),
+                '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
         ]

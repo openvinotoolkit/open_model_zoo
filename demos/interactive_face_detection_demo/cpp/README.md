@@ -74,7 +74,7 @@ Running the demo with the `-h` option yields a usage message.
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml -mag <path_to_model>/age-gender-recognition-retail-0013.xml -mhp <path_to_model>/head-pose-estimation-adas-0001.xml -mem <path_to_model>/emotions-recognition-retail-0003.xml -mlm <path_to_model>/facial-landmarks-35-adas-0002.xml -mam <path_to_model>/anti-spoof-mn3.xml -d GPU
+./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml --mag <path_to_model>/age-gender-recognition-retail-0013.xml --mhp <path_to_model>/head-pose-estimation-adas-0001.xml --mem <path_to_model>/emotions-recognition-retail-0003.xml --mlm <path_to_model>/facial-landmarks-35-adas-0002.xml --mam <path_to_model>/anti-spoof-mn3.xml -d GPU
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
