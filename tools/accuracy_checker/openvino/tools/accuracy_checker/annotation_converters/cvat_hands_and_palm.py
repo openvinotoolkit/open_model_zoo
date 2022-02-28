@@ -28,7 +28,8 @@ class CVATHandPalmConverterBase:
         for point in image_annotation:
             idx = int(point.get('category_id')) - 1
             keypoints = point.get('keypoints')
-            assert len(keypoints) >= 2
+            if len(keypoints) < 2:
+                raise ValueError("Invalid annotation")
             landmarks_x[idx] = float(keypoints[0])
             landmarks_y[idx] = float(keypoints[1])
 
@@ -37,15 +38,25 @@ class CVATHandPalmConverterBase:
     @staticmethod
     def generate_labels_mapping(categories):
         label_to_id = {t['name']: t['id'] for t in categories}
-        meta = {'label_map': {value: key for key, value in label_to_id.items()},
+        return {'label_map': {value: key for key, value in label_to_id.items()},
                 'label': list(label_to_id.keys()),
                 'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
-                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1
+                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1,
+                'label_to_id': label_to_id
                 }
-        return label_to_id, meta
+
+    def get_meta(self):
+        categories = self.annotation['categories']
+        label_to_id = {t['name']: t['id'] for t in categories}
+        return {'label_map': {value: key for key, value in label_to_id.items()},
+                'label': list(label_to_id.keys()),
+                'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
+                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1,
+                'label_to_id': label_to_id
+                }
 
 
-class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConverterBase):
+class CVATHandLandmarkConverter(CVATHandPalmConverterBase, FileBasedAnnotationConverter):
     __provider__ = 'cvat_hand_landmark'
 
     annotation_types = (HandLandmarksAnnotation, )
@@ -76,19 +87,19 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
         self.num_keypoints = self.get_value_from_config('num_keypoints')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        annotation = read_json(self.annotation_file)
+        self.annotation = read_json(self.annotation_file)
+        meta = self.get_meta()
         bboxes = read_json(self.bbox_file)
-        _, meta = self.generate_labels_mapping(annotation['categories'])
         num_landmarks = len(meta['label']) - 1
         annotations = []
         content_errors = None if not check_content else []
-        for image_id, image in enumerate(annotation['images']):
-            keypoints = [t for t in annotation['annotations'] if t['image_id'] == image['id']]
+        for image_id, image in enumerate(self.annotation['images']):
+            keypoints = [t for t in self.annotation['annotations'] if t['image_id'] == image['id']]
             if len(keypoints) != self.num_keypoints:
                 if check_content:
                     content_errors.append('Invalid number of keypoints in annotation: {}', len(keypoints))
                 continue
-            bb_images = [t for t in annotation['images'] if t['file_name'] == image['file_name']]
+            bb_images = [t for t in self.annotation['images'] if t['file_name'] == image['file_name']]
             if len(bb_images) != 1:
                 if check_content:
                     content_errors.append('Invalid number of annotations for image {}', image['file_name'])
@@ -116,7 +127,7 @@ class CVATHandLandmarkConverter(FileBasedAnnotationConverter, CVATHandPalmConver
                 landmarks_annotation.metadata['rect'] = [bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]]
             annotations.append(landmarks_annotation)
             if progress_callback is not None and image_id % progress_interval == 0:
-                progress_callback(image_id * 100 / len(annotation['images']))
+                progress_callback(image_id * 100 / len(self.annotation['images']))
 
         return ConverterReturn(annotations, meta, content_errors)
 
@@ -154,8 +165,6 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
             return self.convert_from_landmarks(check_content, progress_callback, progress_interval, **kwargs)
 
         annotation = read_json(self.annotation_file)
-        meta = {'label_map': {0: 'PALM'}, 'label': ['PALM']}
-        palm_id = 0
         annotations = []
         content_errors = None if not check_content else []
         for ann_id, ann in enumerate(annotation['annotations']):
@@ -168,7 +177,7 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             bbox = ann['bbox']
-            detection_annotation = DetectionAnnotation(identifier, [palm_id],
+            detection_annotation = DetectionAnnotation(identifier, [0],
                                                        [bbox[0]],
                                                        [bbox[1]],
                                                        [bbox[0] + bbox[2]],
@@ -177,31 +186,31 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
             if progress_callback is not None and ann_id % progress_interval == 0:
                 progress_callback(ann_id * 100 / len(annotation['annotations']))
 
-        return ConverterReturn(annotations, meta, content_errors)
+        return ConverterReturn(annotations, {'label_map': {0: 'PALM'}, 'label': ['PALM']}, content_errors)
 
     def convert_from_landmarks(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        annotation = read_json(self.landmarks_file)
-        label_to_id, meta = self.generate_labels_mapping(annotation['categories'])
-        palm_id = label_to_id['PALM']
+        self.annotation = read_json(self.landmarks_file)
+        meta = self.get_meta()
         num_landmarks = len(meta['label']) - 1
         annotations = []
         content_errors = None if not check_content else []
-        for image_id, image in enumerate(annotation['images']):
-            keypoints = [t for t in annotation['annotations'] if t['image_id'] == image['id']]
-            assert len(keypoints) == 21
+        for image_id, image in enumerate(self.annotation['images']):
+            keypoints = [t for t in self.annotation['annotations'] if t['image_id'] == image['id']]
+            if len(keypoints) != num_landmarks:
+                raise ValueError('Invalid annotation for image {}'.format(image['id']))
 
             identifier = image['file_name'].split('/')[-1]
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
-            detection_annotation = DetectionAnnotation(identifier, palm_id,
+            detection_annotation = DetectionAnnotation(identifier, [0, ],
                                                        [np.min(landmarks_x) - self.padding],
                                                        [np.min(landmarks_y) - self.padding],
                                                        [np.max(landmarks_x) + self.padding],
                                                        [np.max(landmarks_y) + self.padding])
             annotations.append(detection_annotation)
             if progress_callback is not None and image_id % progress_interval == 0:
-                progress_callback(image_id * 100 / len(annotation['images']))
+                progress_callback(image_id * 100 / len(self.annotation['images']))
 
-        return ConverterReturn(annotations, meta, content_errors)
+        return ConverterReturn(annotations, {'label_map': {0: 'PALM'}, 'label': ['PALM']}, content_errors)

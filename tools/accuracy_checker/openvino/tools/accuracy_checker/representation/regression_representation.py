@@ -59,7 +59,7 @@ class FacialLandmarksRepresentation(BaseRepresentation):
 
 class FacialLandmarksAnnotation(FacialLandmarksRepresentation):
     @property
-    def interocular_distance(self):
+    def normalization_coefficient(self):
         left_eye = [
             np.mean(self.x_values[self.metadata['left_eye']]),
             np.mean(self.y_values[self.metadata['left_eye']])
@@ -168,7 +168,7 @@ class HandLandmarksRepresentation(BaseRepresentation):
 
 class HandLandmarksAnnotation(HandLandmarksRepresentation):
     @property
-    def interocular_distance(self):
+    def normalization_coefficient(self):
         return self.normalization_coef(True)
 
     def normalization_coef(self, is_2d=False):
