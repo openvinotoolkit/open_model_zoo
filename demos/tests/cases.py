@@ -670,7 +670,7 @@ DEMOS = [
             ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
-            # ModelArg('person-reidentification-retail-0277'),
+            ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')),
