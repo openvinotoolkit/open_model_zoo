@@ -117,9 +117,10 @@ conversion_to_onnx_args:
   - --inputs-dtype=long
   - '--conversion-param=dynamic_axes={"input": {0: "batch_size", 1: "sequence_len"},
     "output": {0: "batch_size", 1: "sequence_len"}}'
+input_info:
+  - name: input
+    layout: NS
 model_optimizer_args:
-  - --input=input
-  - --layout=input(NS)
   - --input_model=$conv_dir/gpt-2.onnx
   - --output=output
 framework: pytorch

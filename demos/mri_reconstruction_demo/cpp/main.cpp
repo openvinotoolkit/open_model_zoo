@@ -120,7 +120,8 @@ int main(int argc, char** argv) {
 cv::Mat tensorToMat(const ov::Tensor& tensor) {
     // NOTE: Inference Engine sizes are reversed.
     ov::Shape tensorShape = tensor.get_shape();
-    std::vector<int> size(tensorShape.begin(), tensorShape.end());
+    std::vector<int> size;
+    std::transform(tensorShape.begin(), tensorShape.end(), std::back_inserter(size), [](size_t dim) -> int { return int(dim); });
     ov::element::Type precision = tensor.get_element_type();
     CV_Assert(precision == ov::element::f32);
     return cv::Mat(size, CV_32F, (void*)tensor.data());

@@ -11,7 +11,7 @@ Intel is committed to the respect of human rights and avoiding complicity in hum
 * [Intel Pre-Trained Models](models/intel/index.md)
 * [Public Pre-Trained Models](models/public/index.md)
 * [Model Downloader](tools/model_tools/README.md) and other automation tools
-* [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
+* [Demos](demos/README.md) that demonstrate models usage with OpenVINO™ Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
 
 ## License

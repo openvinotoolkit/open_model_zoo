@@ -5,7 +5,7 @@
 | aclnet | YES | YES |    |
 | aclnet-int8 | YES | YES |    |
 | alexnet | YES | YES | YES |
-| anti-spoof-mn3 | YES |  | YES |
+| anti-spoof-mn3 | YES | YES | YES |
 | background-matting-mobilenetv2 | YES |    |    |
 | bert-base-ner | YES | YES |    |
 | brain-tumor-segmentation-0001 | YES |    |    |
@@ -24,15 +24,15 @@
 | detr-resnet50 | YES |    |    |
 | dla-34 | YES | YES | YES |
 | drn-d-38 | YES | YES |    |
-| efficientdet-d0-tf | YES |    | YES |
-| efficientdet-d1-tf | YES |    | YES |
+| efficientdet-d0-tf | YES | YES | YES |
+| efficientdet-d1-tf | YES | YES | YES |
 | efficientnet-b0 | YES | YES | YES |
 | efficientnet-b0-pytorch | YES | YES | YES |
 | efficientnet-v2-b0 | YES | YES |    |
 | efficientnet-v2-s | YES | YES |    |
 | f3net | YES | YES | YES |
 | face-detection-retail-0044 | YES | YES |    |
-| face-recognition-resnet100-arcface-onnx | YES |  |    |
+| face-recognition-resnet100-arcface-onnx | YES | YES |    |
 | faceboxes-pytorch | YES | YES |    |
 | facenet-20180408-102900 | YES | YES | YES |
 | fast-neural-style-mosaic-onnx | YES | YES | YES |
@@ -56,14 +56,14 @@
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |
 | higher-hrnet-w32-human-pose-estimation | YES | YES |    |
-| hrnet-v2-c1-segmentation | YES |    |    |
+| hrnet-v2-c1-segmentation | YES | YES |    |
 | human-pose-estimation-3d-0001 | YES | YES | YES |
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
 | license-plate-recognition-barrier-0007 | YES |    |    |
-| mask_rcnn_inception_resnet_v2_atrous_coco | YES |  |    |
-| mask_rcnn_resnet50_atrous_coco | YES |  |    |
+| mask_rcnn_inception_resnet_v2_atrous_coco | YES | YES |    |
+| mask_rcnn_resnet50_atrous_coco | YES | YES |    |
 | midasnet | YES | YES |    |
 | mixnet-l | YES | YES | YES |
 | mobilefacedet-v1-mxnet | YES | YES | YES |
@@ -85,7 +85,7 @@
 | mtcnn-r | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
-| ocrnet-hrnet-w48-paddle | YES |    |    |
+| ocrnet-hrnet-w48-paddle | YES | YES |    |
 | octave-resnet-26-0.25 | YES | YES | YES |
 | open-closed-eye-0001 | YES | YES |    |
 | pelee-coco | YES | YES | YES |
@@ -104,14 +104,14 @@
 | retinanet-tf | YES | YES |    |
 | rexnet-v1-x1.0 | YES | YES |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
-| robust-video-matting-mobilenetv3 | YES |    |    |
+| robust-video-matting-mobilenetv3 | YES |  |    |
 | se-inception | YES | YES | YES |
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
 | shufflenet-v2-x0.5 | YES | YES | YES |
 | shufflenet-v2-x1.0 | YES | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES | YES |
-| Sphereface | YES |  | YES |
+| Sphereface | YES | YES | YES |
 | squeezenet1.0 | YES | YES | YES |
 | squeezenet1.1 | YES | YES | YES |
 | ssd-resnet34-1200-onnx | YES | YES | YES |
@@ -133,7 +133,7 @@
 | wav2vec2-base | YES |    |    |
 | wavernn-rnn | YES | YES | YES |
 | wavernn-upsampler | YES | YES |    |
-| yolact-resnet50-fpn-pytorch | YES |    | YES |
+| yolact-resnet50-fpn-pytorch | YES | YES | YES |
 | yolo-v1-tiny-tf | YES | YES | YES |
 | yolo-v2-tf | YES | YES | YES |
 | yolo-v2-tiny-tf | YES | YES | YES |

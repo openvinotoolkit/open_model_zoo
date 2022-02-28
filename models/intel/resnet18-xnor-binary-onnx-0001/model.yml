@@ -32,5 +32,9 @@ files:
     size: 2811290
     checksum: ebe3871e237d7a8ad4c55394fa547f6c5d3fc1402871bf078344904cc4ae891c323e9f0eb7086c4f3ccea3e068d733d5
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
+input_info:
+  - name: input.1
+    shape: [1, 3, 224, 224]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

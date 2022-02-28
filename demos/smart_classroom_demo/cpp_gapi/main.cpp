@@ -1,17 +1,21 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <chrono>  // NOLINT
+#include <vector>
+#include <tuple>
+#include <string>
 
 #include <gflags/gflags.h>
-#include <monitors/presenter.h>
-#include <utils/performance_metrics.hpp>
-#include <utils_gapi/stream_source.hpp>
 #include <ie_iextension.h>
-
 #include <opencv2/gapi/render.hpp>
 #include <opencv2/gapi/core.hpp>
+
+#include <monitors/presenter.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "initialize.hpp"
 #include "smart_classroom_demo_gapi.hpp"

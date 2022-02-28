@@ -29,10 +29,11 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: efficientnet-b0.tar.gz
+input_info:
+  - name: 0:sub
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
-  - --input=0:sub
-  - --layout=0:sub(NHWC)
   - --output=logits
   - --input_meta_graph=$dl_dir/efficientnet-b0/model.ckpt.meta
   - --reverse_input_channels

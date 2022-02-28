@@ -41,5 +41,9 @@ files:
     size: 2140986
     checksum: a2de9388867d79c422815c6d46e7d13c903bbdef9ad728f49eaa82b681a8c0426520d2d6d5c04de429844ee90a49481b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
+input_info:
+  - name: data
+    shape: [1, 3, 400, 680]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

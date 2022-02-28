@@ -33,5 +33,9 @@ files:
     size: 11112606
     checksum: baaa502d45216cb5fb74a9deca8bf71891b7dea80efb8749124dd74fada345e8d304e824c138d593e7948913269f6fea
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.bin
+input_info:
+  - name: actual_input
+    shape: [1, 1, 96, 2000]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

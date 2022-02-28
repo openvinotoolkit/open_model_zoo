@@ -40,5 +40,9 @@ files:
     size: 4391006
     checksum: 6c64454d66ad7505b7702e230758f880b793712921897f5d0338c974b1a8b0d4e6b39dc6c00bb5d1bd95ee612b6e59f2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
+input_info:
+  - name: input
+    shape: [1, 3, 16, 224, 224]
+    layout: NCDHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

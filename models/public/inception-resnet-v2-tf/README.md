@@ -58,9 +58,9 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 - `B` - batch size
 - `C` - vector of probabilities.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

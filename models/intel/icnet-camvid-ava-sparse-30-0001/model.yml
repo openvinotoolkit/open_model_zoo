@@ -40,5 +40,9 @@ files:
     size: 26961970
     checksum: f2a779751e7e0c77117995dc3ceaf48cd4b66a5e9fe7d4350e03ec343e6c912703c6441572f069ae8674a5a357fbbe09
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/icnet-camvid-ava-sparse-30-0001/FP16-INT8/icnet-camvid-ava-sparse-30-0001.bin
+input_info:
+  - name: data
+    shape: [1, 720, 960, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

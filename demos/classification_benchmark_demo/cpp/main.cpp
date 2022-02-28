@@ -101,6 +101,7 @@ void parse(int argc, char *argv[]) {
                     "\n\t\tQ, q, Esc - Quit"
                     "\n\t\tR, r, SpaceBar - Restart testing"
                     "\n\t\tC - average CPU load, D - load distrobution over cores, M - memory usage, H - hide\n";
+
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);

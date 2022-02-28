@@ -33,5 +33,15 @@ files:
     size: 9926434
     checksum: b7d190c9c5c323da8ef2e955d4c6ecf606d0c269371d24bf17c4bc751815f579e18ac538151febc07a6444faa1279b86
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.bin
+input_info:
+  - name: data
+    shape: [1, 512, 256]
+    layout: NCH
+  - name: data_mask
+    shape: [1, 1, 512]
+    layout: NDC
+  - name: pos_mask
+    shape: [1, 1, 512, 512]
+    layout: NDCW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

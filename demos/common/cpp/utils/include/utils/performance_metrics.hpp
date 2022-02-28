@@ -10,9 +10,9 @@
 #pragma once
 
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 
 #include "utils/ocv_common.hpp"
 

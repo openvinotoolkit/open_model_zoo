@@ -85,9 +85,9 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_4` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

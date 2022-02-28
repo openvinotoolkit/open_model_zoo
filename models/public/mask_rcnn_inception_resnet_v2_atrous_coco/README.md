@@ -73,9 +73,9 @@ bounding boxes. For each detection, the description has the format:
 
 2. Segmentation heatmaps for all classes for every output bounding box, name: `masks`, shape: `100, 90, 33, 33` in the format `N, 90, 33, 33`, where `N` is the number of detected masks, 90 is the number of classes (the background class excluded).
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

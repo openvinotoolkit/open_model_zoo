@@ -40,5 +40,9 @@ files:
     size: 1252176
     checksum: 6a48a1d9c924e2f0aab0ca21b61ec1462ee778dbf7d28a1fc109e8c075bc9286b217c0f1d2533dc7b055a302c2154827
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
+input_info:
+  - name: data
+    shape: [1, 3, 384, 672]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

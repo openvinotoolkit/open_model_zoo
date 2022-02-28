@@ -28,6 +28,8 @@ The quality metric was calculated on CONLL-2003 Named Entity Recognition dataset
 |---------------------------|---------------|
 | F1                        |        94.45% |
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 ### Original model
@@ -78,9 +80,9 @@ floating point-valued logit scores vectors that represents probability of belong
 
 Converted model has the same output like original.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
