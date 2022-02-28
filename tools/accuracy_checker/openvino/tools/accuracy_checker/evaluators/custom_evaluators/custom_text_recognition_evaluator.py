@@ -120,6 +120,8 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
+        if not hasattr(self.recognizer_encoder, 'inputs'):
+            return
         with_prefix = next(iter(self.recognizer_encoder.inputs)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
