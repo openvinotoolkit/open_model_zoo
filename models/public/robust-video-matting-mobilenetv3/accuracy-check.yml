@@ -2,7 +2,8 @@ evaluations:
   - name: robust-video-matting-mobilenetv3
     module: custom_evaluators.sequential_background_matting_evaluator.SequentialBackgroundMatting
     module_config:
-
+      network_info:
+        background_matting_model: {}
       launchers:
         - framework: openvino
           adapter:

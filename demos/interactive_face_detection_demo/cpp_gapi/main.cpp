@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -13,6 +13,7 @@
 #include <utils/slog.hpp>
 #include <utils_gapi/stream_source.hpp>
 
+#include <openvino/openvino.hpp>
 #include <opencv2/gapi.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
@@ -20,6 +21,10 @@
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 
 #include <monitors/presenter.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "face.hpp"
 #include "visualizer.hpp"

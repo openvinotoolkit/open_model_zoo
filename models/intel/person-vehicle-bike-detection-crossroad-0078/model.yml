@@ -42,5 +42,9 @@ files:
     size: 1269925
     checksum: 7e3c5d0a3be42fb32f233ffed7394d2e620834853db28ddc512f531bce9256ab611fa300ca8d3507c76ddcd7f0beb3a5
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-0078/FP16-INT8/person-vehicle-bike-detection-crossroad-0078.bin
+input_info:
+  - name: data
+    shape: [1, 3, 1024, 1024]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

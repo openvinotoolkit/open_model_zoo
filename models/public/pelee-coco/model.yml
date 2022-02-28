@@ -34,10 +34,11 @@ postprocessing:
     file: pelee_coco/deploy.prototxt
     pattern: ' +save_output_param \{\n.*\n.*\n.*\n.*\n.*\n.*\n+.*\}'
     replacement: ''
+input_info:
+  - name: data
+    shape: [1, 3, 304, 304]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,304,304]
-  - --input=data
-  - --layout=data(NCHW)
   - --mean_values=data[103.94,116.78,123.68]
   - --scale=58.8235
   - --output=detection_out

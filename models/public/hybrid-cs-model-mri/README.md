@@ -24,6 +24,8 @@ Accuracy metrics are obtained on [Calgary-Campinas Public Brain MR Dataset](http
 | PSNR (mean) | 34.272884 dB |
 | PSNR (std)  | 4.607115 dB  |
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 ### Original model
@@ -54,9 +56,9 @@ The net outputs a blob with the name `StatefulPartitionedCall/model/conv2d_43/Bi
 
 The net outputs a blob with the name `StatefulPartitionedCall/model/conv2d_43/BiasAdd/Add` and shape `1, 1, 256, 256`, containing reconstructed MR image.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

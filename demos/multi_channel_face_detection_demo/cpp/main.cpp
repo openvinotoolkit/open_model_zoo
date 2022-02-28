@@ -123,7 +123,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      const std::string& stats,
                      DisplayParams params,
                      Presenter& presenter,
-                     PerformanceMetrics& metrics) {
+                     PerformanceMetrics& metrics,
+                     bool no_show) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -170,7 +171,9 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
         metrics.update(data[i]->timestamp);
     }
     metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-    cv::imshow(params.name, windowImage);
+    if (!no_show) {
+        cv::imshow(params.name, windowImage);
+    }
 }
 }  // namespace
 
@@ -262,7 +265,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, str, params, presenter, metrics);
+            displayNSources(result, str, params, presenter, metrics, FLAGS_no_show);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -292,9 +295,7 @@ int main(int argc, char* argv[]) {
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {
-                        if (!FLAGS_no_show) {
-                            output.push(std::move(batchRes));
-                        }
+                        output.push(std::move(batchRes));
                         batchRes.clear();
                         readData = false;
                     }

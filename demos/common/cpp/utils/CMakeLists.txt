@@ -10,4 +10,4 @@ source_group("include" FILES ${HEADERS})
 
 add_library(utils STATIC ${HEADERS} ${SOURCES})
 target_include_directories(utils PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(utils PRIVATE gflags openvino::runtime ${InferenceEngine_LIBRARIES} opencv_core opencv_imgcodecs opencv_videoio)
+target_link_libraries(utils PRIVATE gflags openvino::runtime opencv_core opencv_imgcodecs opencv_videoio)

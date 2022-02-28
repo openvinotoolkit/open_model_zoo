@@ -832,6 +832,11 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - path to directory with images (optional, default image_2).
   * `label_start` - specifies label index start in label map. Optional, default value is 1. You can provide another value, if you want to use this dataset for separate label validation.
   * `images_suffix` - suffix for image file names (Optional, default: `.png`).
+* `malware_classification_converter` - converts dataset for malware detection task to `ClassificationAnnotation`.
+  * `annotation_file` - path to dataset annotation file.
+  * `data_dir` - path to dataset root folder.
+  * `known_folder` - name of folder containing known files (optional, default `KNOWN_1000`).
+  * `malicious_folder` - name of folder containing malicious files (optional, default `MALICIOUS_1000`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

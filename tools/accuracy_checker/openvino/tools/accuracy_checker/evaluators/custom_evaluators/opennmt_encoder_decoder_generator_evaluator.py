@@ -55,7 +55,7 @@ class OpenNMTEvaluator(BaseCustomEvaluator):
             metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
                                                       calculate_metrics)
             if output_callback:
-                output_callback(batch_raw_prediction[0], metrics_result=metrics_result,
+                output_callback(batch_raw_prediction, metrics_result=metrics_result,
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
@@ -118,7 +118,7 @@ class OpenNMTModel(BaseCascadeModel):
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
-                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze()})
+                log_probs, raw_outputs = self.generator.predict(identifiers, {'input': decoder_output.squeeze(axis=0)})
                 if encoder_callback:
                     encoder_callback(raw_outputs)
 
@@ -313,7 +313,7 @@ class BeamSearch:
         curr_scores = log_probs.reshape(-1, self.beam_size * vocab_size)
         topk_ids = np.argsort(curr_scores)[..., range(self.beam_size * vocab_size - 1,
                                                       self.beam_size * (vocab_size - 1) - 1, -1)]
-        topk_scores = curr_scores[..., topk_ids.squeeze()]
+        topk_scores = curr_scores[..., topk_ids.squeeze(axis=0)]
         return topk_scores, topk_ids
 
     def update_finished(self):
@@ -373,7 +373,7 @@ class BeamSearch:
         self.topk_ids = np.fmod(self.topk_ids, vocab_size)  # resolve true word ids
 
         self.alive_seq = np.concatenate(
-            [np.take(self.alive_seq, self.select_indices.squeeze(), 0),
+            [np.take(self.alive_seq, self.select_indices.squeeze(axis=-1), 0),
              self.topk_ids.view().reshape((_B * self.beam_size, 1))], axis=-1)
 
         self.is_finished = np.equal(self.topk_ids, self.eos)
@@ -427,6 +427,13 @@ class DecoderDLSDKModel(CommonOpenNMTDecoder, CommonDLSDKModel):
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
 
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
 
 class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
@@ -449,6 +456,13 @@ class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     return_layers = ['output/sink_port_0', 'attn/sink_port_0']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
+
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class GeneratorOVModel(CommonOVModel):

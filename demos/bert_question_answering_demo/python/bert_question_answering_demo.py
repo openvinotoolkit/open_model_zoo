@@ -57,8 +57,7 @@ def build_argparser():
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
     args.add_argument('--layout', type=str, default=None,
                       help='Optional. Model inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters')
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("--output_names",
                       help="Optional. Outputs names for the network. "
                            "Default values are \"output_s,output_e\" ",
@@ -237,10 +236,10 @@ def main():
                 pipeline.await_any()
 
         pipeline.await_all()
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
         for window_id in range(next_window_id_to_show, next_window_id):
             results = pipeline.get_result(window_id)
-            while results is None:
-                results = pipeline.get_result(window_id)
             update_answers_list(answers, results[0])
 
         visualizer.show_answers(answers)

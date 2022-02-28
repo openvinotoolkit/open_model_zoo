@@ -62,8 +62,7 @@ def build_argparser():
                       required=False, type=str)
     args.add_argument('--layout_emb', type=str, default=None,
                       help='Optional. MODEL_EMB inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters')
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("-m_qa", "--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
@@ -81,8 +80,7 @@ def build_argparser():
                       default="1.2", required=False, type=str)
     args.add_argument('--layout_qa', type=str, default=None,
                       help='Optional. MODEL_QA inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters')
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("-a", "--max_answer_token_num",
                       help="Optional. Maximum number of tokens in exact answer",
                       default=15,
@@ -255,10 +253,10 @@ def main():
             emb_pipeline.await_any()
 
     emb_pipeline.await_all()
+    if emb_pipeline.callback_exceptions:
+        raise emb_pipeline.callback_exceptions[0]
     for window_id in range(next_window_id_to_show, next_window_id):
         results = emb_pipeline.get_result(window_id)
-        while results is None:
-            results = emb_pipeline.get_result(window_id)
         embedding, meta = results
         meta['c_data'].emb = embedding
         contexts_all.append(meta['c_data'])
@@ -318,10 +316,10 @@ def main():
                     qa_pipeline.await_any()
 
             qa_pipeline.await_all()
+            if qa_pipeline.callback_exceptions:
+                raise qa_pipeline.callback_exceptions[0]
             for context_id in range(next_context_id_to_show, next_context_id):
                 results = qa_pipeline.get_result(context_id)
-                while results is None:
-                    results = qa_pipeline.get_result(context_id)
                 output, meta = results
                 update_answers_list(answers, output, meta['c_data'])
 

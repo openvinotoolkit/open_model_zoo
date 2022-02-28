@@ -41,5 +41,9 @@ files:
     size: 15025926
     checksum: 7df4dc6163c230b8dcdecb9dc26e3653b96b60789a48df87115d3d81ee7ef4deda84f05248349bab864866e75e29dc27
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-score-recognition-0003/FP16-INT8/handwritten-score-recognition-0003.bin
+input_info:
+  - name: Placeholder
+    shape: [1, 32, 64, 1]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

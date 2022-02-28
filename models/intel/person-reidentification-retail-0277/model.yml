@@ -44,5 +44,9 @@ files:
     size: 2342596
     checksum: 2a19b4b3f32c8bf671ad5f88f6ca768e77dad89b0ca2d593754c9838c0e64de9c37cee2cb198d164d542be898ba7d168
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.bin
+input_info:
+  - name: data
+    shape: [1, 3, 256, 128]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

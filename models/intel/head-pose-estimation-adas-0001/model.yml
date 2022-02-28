@@ -40,5 +40,9 @@ files:
     size: 1928026
     checksum: fb982f4f5747784e0452086648c4f4a105a9051356e907ad903c7ea1ed9efbfb68b5d8d7e73d1e5d895fc2300df8c5c4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+input_info:
+  - name: data
+    shape: [1, 3, 60, 60]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

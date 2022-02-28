@@ -110,8 +110,7 @@ def build_argparser():
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
-                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                                        'To define layout you should use only capital letters')
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -247,11 +246,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         if args.raw_output_message:
             print_raw_results(objects, next_frame_id_to_show, model.labels)

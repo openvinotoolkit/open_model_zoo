@@ -41,5 +41,9 @@ files:
     size: 17398059
     checksum: a6c289c4ac768a9ee5a123ea2a86bcdabc03ac10736ab8121ab59f77986a536d271ed18c3a82f6d886913df544eb1a60
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
+input_info:
+  - name: actual_input
+    shape: [1, 1, 96, 2000]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

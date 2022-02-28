@@ -76,8 +76,7 @@ def build_argparser():
                                         'By default used default masks for model. Only for YOLOV4 architecture type.')
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
-                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                                        'To define layout you should use only capital letters')
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -249,17 +248,16 @@ def main():
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
-
         else:
             # Wait for empty request
             detector_pipeline.await_any()
 
     detector_pipeline.await_all()
+    if detector_pipeline.callback_exceptions:
+        raise detector_pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = detector_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = detector_pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']

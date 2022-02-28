@@ -41,5 +41,9 @@ files:
     size: 12007204
     checksum: e94c52e791b0124b6c95e55622e2ffa95e2da7bb0b253bcfb6feba4acb827148abd6e9de010b332317156339e32746f9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-1039/FP16-INT8/instance-segmentation-security-1039.bin
+input_info:
+  - name: image
+    shape: [1, 3, 480, 480]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

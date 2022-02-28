@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <fstream>
+#include <iomanip>
 #include <openvino/openvino.hpp>
 #include <gflags/gflags.h>
 #include <utils/common.hpp>

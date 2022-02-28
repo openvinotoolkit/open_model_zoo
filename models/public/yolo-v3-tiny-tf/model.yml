@@ -27,10 +27,11 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: yolo-v3-tiny-tf.zip
+input_info:
+  - name: image_input
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,416,416,3]
-  - --input=image_input
-  - --layout=image_input(NHWC)
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.json

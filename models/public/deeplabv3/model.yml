@@ -26,11 +26,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: deeplabv3.tar.gz
+input_info:
+  - name: 1:mul_1
+    shape: [1, 513, 513, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,513,513,3]
-  - --input=1:mul_1
-  - --layout=1:mul_1(NHWC)
   - --output=ArgMax
   - --input_model=$dl_dir/deeplabv3_mnv2_pascal_train_aug/frozen_inference_graph.pb
 framework: tf

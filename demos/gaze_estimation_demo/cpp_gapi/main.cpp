@@ -1,6 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+
+#include <chrono>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include <openvino/openvino.hpp>
+#include <inference_engine.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/core.hpp>
 
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
@@ -13,8 +23,6 @@
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
 
-#include <opencv2/gapi/infer/ie.hpp>
-#include <opencv2/gapi/core.hpp>
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -54,8 +62,8 @@ int main(int argc, char *argv[]) {
         using namespace gaze_estimation;
         PerformanceMetrics metrics;
 
-        /** Print info about Inference Engine **/
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        /** Print info about OpenVINO **/
+        slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
