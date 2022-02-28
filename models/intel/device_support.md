@@ -56,10 +56,8 @@
 | instance-segmentation-person-0007 | YES |    |    |
 | landmarks-regression-retail-0009 | YES | YES | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
-| machine-translation-nar-de-en-0002 | YES | YES |    |
-| machine-translation-nar-en-de-0002 | YES | YES |    |
-| machine-translation-nar-en-ru-0001 | YES | YES |    |
-| machine-translation-nar-ru-en-0001 | YES | YES |    |
+| machine-translation-nar-de-en-0002 | YES |     |    |
+| machine-translation-nar-en-de-0002 | YES |     |    |
 | machine-translation-nar-en-ru-0002 | YES |     |    |
 | machine-translation-nar-ru-en-0002 | YES |     |    |
 | noise-suppression-denseunet-ll-0001 | YES |    |    |

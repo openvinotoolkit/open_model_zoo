@@ -81,8 +81,8 @@
 
    omz_models_model_machine_translation_nar_de_en_0002
    omz_models_model_machine_translation_nar_en_de_0002
-   omz_models_model_machine_translation_nar_en_ru_0001
-   omz_models_model_machine_translation_nar_ru_en_0001
+   omz_models_model_machine_translation_nar_en_ru_0002
+   omz_models_model_machine_translation_nar_ru_en_0002
 
 .. toctree::
    :maxdepth: 1
@@ -517,8 +517,6 @@ Deep Learning compressed models
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md) | 23.17 | 69.29 |
-| [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-ru-0002](./machine-translation-nar-en-ru-0002/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0002](./machine-translation-nar-ru-en-0002/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |

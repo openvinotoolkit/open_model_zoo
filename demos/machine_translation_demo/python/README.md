@@ -29,8 +29,6 @@ omz_converter --list models.lst
 
 * machine-translation-nar-de-en-0002
 * machine-translation-nar-en-de-0002
-* machine-translation-nar-en-ru-0001
-* machine-translation-nar-ru-en-0001
 * machine-translation-nar-en-ru-0002
 * machine-translation-nar-ru-en-0002
 
