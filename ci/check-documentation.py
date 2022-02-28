@@ -78,7 +78,6 @@ def main():
     omz_github_url = 'https://github.com/openvinotoolkit/open_model_zoo/'
 
     for md_path in sorted(all_md_files):
-
         referenced_md_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
