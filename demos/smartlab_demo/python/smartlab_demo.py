@@ -18,11 +18,13 @@ import cv2
 import time
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
-from object_detection.detector import Detector
-from segmentor import SegmentorMstcn
-from evaluator import Evaluator
+
 from display import Display
+from evaluator import Evaluator
 from openvino.runtime import Core
+from segmentor import Segmentor, SegmentorMstcn
+from object_detection.detector import Detector
+from thread_argument import ThreadWithReturnValue
 
 
 def build_argparser():
@@ -35,13 +37,14 @@ def build_argparser():
     args.add_argument('-tv', '--topview', required=True,
                     help='Required. Topview stream to be processed. The input must be a single image, '
                     'a folder of images, video file or camera id.')
-    args.add_argument('-fv', '--frontview', required=True,
-                    help='Required. FrontView to be processed. The input must be a single image, '
+    args.add_argument('-sv', '--sideview', required=True,
+                    help='Required. SideView to be processed. The input must be a single image, '
                     'a folder of images, video file or camera id.')
     args.add_argument('-m_ta', '--m_topall', help='Required. Path to topview all class model.', required=True, type=str)
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
-    args.add_argument('-m_fa', '--m_frontall', help='Required. Path to frontview all class model.', required=True, type=str)
-    args.add_argument('-m_fm', '--m_frontmove', help='Required. Path to frontview moving class model.', required=True, type=str)
+    args.add_argument('-m_sa', '--m_sideall', help='Required. Path to sidetview all class model.', required=True, type=str)
+    args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.', required=True, type=str)
+    args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
 
@@ -60,10 +63,13 @@ def main():
             ie,
             args.device,
             [args.m_topall, args.m_topmove],
-            [args.m_frontall, args.m_frontmove])
+            [args.m_sideall, args.m_sidemove])
 
     '''Video Segmentation Variables'''
-    segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
+    if(args.mode == "multiview"):
+        segmentor = Segmentor(ie, args.device, args.m_encoder, args.m_decoder)
+    elif(args.mode == "mstcn"):
+        segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
@@ -75,47 +81,61 @@ def main():
         Process the video.
     """
     cap_top = cv2.VideoCapture(args.topview)
-    cap_front = cv2.VideoCapture(args.frontview)
+    if not cap_top.isOpened():
+        raise ValueError(f"Can't read an video or frame from {args.topview}")
+    cap_side = cv2.VideoCapture(args.sideview)
+    if not cap_side.isOpened():
+        raise ValueError(f"Can't read an video or frame from {args.sideview}")
 
     old_time = time.time()
     fps = 0.0
     interval_second = 1
     interval_start_frame = 0
     total_frame_processed_in_interval = 0.0
-    while cap_top.isOpened() and cap_front.isOpened():
+    while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
-        ret_front, frame_front = cap_front.read()
+        ret_side, frame_side = cap_side.read()
 
-        if not ret_top or not ret_front:
+        frame_counter += 1
+        if not ret_top or not ret_side:
             break
         else:
-            frame_counter += 1
-
-            ''' The object detection module need to generate detection results(for the current frame) '''
-            top_det_results, front_det_results = detector.inference(
-                    img_top=frame_top, img_front=frame_front)
-
-            ''' The temporal segmentation module need to self judge and generate segmentation results for all historical frames '''
-            buffer1.append(cv2.cvtColor(frame_top, cv2.COLOR_BGR2RGB))
-            buffer2.append(cv2.cvtColor(frame_front, cv2.COLOR_BGR2RGB))
-
-            frame_predictions = segmentor.inference(
-                    buffer_top=buffer1,
-                    buffer_front=buffer2,
-                    frame_index=frame_counter)
-            top_seg_results = frame_predictions
-            front_seg_results = frame_predictions
-            if(len(top_seg_results) == 0):
-                continue
+            # creat detector thread and segmentor thread
+            tdetector = ThreadWithReturnValue(
+                target = detector.inference_multithread,
+                args = (frame_top, frame_side,))
+            if(args.mode == "multiview"): # mobilenet
+                tsegmentor = ThreadWithReturnValue(
+                    target = segmentor.inference_async_api,
+                    args = (frame_top, frame_side, frame_counter,))
+            else: # mstcn
+                buffer1.append(frame_top)
+                buffer2.append(frame_side)
+                tsegmentor = ThreadWithReturnValue(
+                    target = segmentor.inference,
+                    args = (buffer1, buffer2, frame_counter,))
+            # start()
+            tdetector.start()
+            tsegmentor.start()
+            # join()
+            detector_result = tdetector.join()
+            top_det_results, side_det_results = detector_result[0], detector_result[1]
+            segmentor_result = tsegmentor.join()
+            if(args.mode == "multiview"):
+                top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
+            else:
+                if(len(segmentor_result) == 0):
+                    continue
+                top_seg_results, side_seg_results = segmentor_result, segmentor_result
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-            state, scoring = evaluator.inference(
-                    top_det_results=top_det_results,
-                    front_det_results=front_det_results,
-                    top_seg_results=top_seg_results,
-                    front_seg_results=front_seg_results,
-                    frame_top=frame_top,
-                    frame_front=frame_front)
+            state, scoring, keyframe = evaluator.inference(
+                    top_det_results = top_det_results,
+                    side_det_results = side_det_results,
+                    action_seg_results = top_seg_results,
+                    frame_top = frame_top,
+                    frame_side = frame_side,
+                    frame_counter = frame_counter)
 
             current_time=time.time()
             current_frame = frame_counter
@@ -124,21 +144,23 @@ def main():
                 fps = total_frame_processed_in_interval / (current_time - old_time)
                 interval_start_frame = current_frame
                 old_time = current_time
+            print(fps)
 
             display.display_result(
-                    frame_top=frame_top,
-                    frame_front=frame_front,
-                    front_seg_results=front_seg_results,
-                    top_seg_results=top_seg_results,
-                    top_det_results=top_det_results,
-                    front_det_results=front_det_results,
-                    scoring=scoring,
-                    state=state,
-                    frame_counter=frame_counter,
-                    fps=fps)
+                    frame_top = frame_top,
+                    frame_side = frame_side,
+                    side_seg_results = side_seg_results,
+                    top_seg_results = top_seg_results,
+                    top_det_results = top_det_results,
+                    side_det_results = side_det_results,
+                    scoring = scoring,
+                    state = state,
+                    keyframe = keyframe,
+                    frame_counter = frame_counter,
+                    fps = fps)
 
-            if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
-                break
+        if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
+            break
 
 if __name__ == "__main__":
     main()
