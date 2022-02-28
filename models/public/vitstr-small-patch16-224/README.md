@@ -27,6 +27,8 @@ Alphanumeric subset of common scene text recognition benchmarks are used. For yo
 | SVT      | 85.47%   | 647          |
 | IIIT5K   | 87.07%   | 3000         |
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 ### Original model
