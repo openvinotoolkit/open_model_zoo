@@ -44,5 +44,9 @@ files:
     size: 15887472
     checksum: a245f27abca74a164acbe06f92accea3fc512da3c2a7999de6ddb63991600aba37ad7e8f486de305b87d39dd915ff95e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
+input_info:
+  - name: data
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

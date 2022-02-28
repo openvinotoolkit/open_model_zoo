@@ -41,5 +41,9 @@ files:
     size: 2729405
     checksum: 329b6d4157407e858e907e3a3bd3fc5772a9abead2e73ca0fe379c1ba174178ad159b42559ba20d1425c85f62afb5140
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
+input_info:
+  - name: Placeholder
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

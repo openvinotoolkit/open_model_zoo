@@ -50,10 +50,11 @@ conversion_to_onnx_args:
   - --input-names=image
   - --output-names=logits
   - --output-file=$conv_dir/vitstr-small-patch16-224.onnx
+input_info:
+  - name: image
+    shape: [1, 1, 224, 224]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,1,224,224]
-  - --input=image
-  - --layout=image(NCHW)
   - --input_model=$conv_dir/vitstr-small-patch16-224.onnx
   - --scale_values=image[255]
   - --output=logits

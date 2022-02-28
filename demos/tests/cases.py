@@ -316,7 +316,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
+        TestCase(options={'-i': DataDirectoryArg('instance-segmentaion-mask-rcnn')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
@@ -787,6 +787,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
+            '-nireq': '1', # launch demo in synchronous mode
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
@@ -968,19 +969,19 @@ PYTHON_DEMOS = [
     #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     #)),
 
-    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
-            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
-        single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0002'),
-            # TODO: Attempt to get a name for a Tensor without names
-            # ModelArg('instance-segmentation-security-0091'),
-            ModelArg('instance-segmentation-security-0228'),
-            ModelArg('instance-segmentation-security-1039'),
-            ModelArg('instance-segmentation-security-1040')),
-    )),
+    # TODO: enable tests when FP16-INT8 will work
+    # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('instance-segmentation'),
+    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
+    #     single_option_cases('-m',
+    #         ModelArg('instance-segmentation-security-0002'),
+    #         ModelArg('instance-segmentation-security-0091'),
+    #         ModelArg('instance-segmentation-security-0228'),
+    #         ModelArg('instance-segmentation-security-1039'),
+    #         ModelArg('instance-segmentation-security-1040')),
+    # )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
@@ -1240,6 +1241,21 @@ PYTHON_DEMOS = [
     #    ]
     #)),
 
+    PythonDemo(name='smartlab_demo', device_keys=['-d'],
+        model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
+        test_cases=combine_cases(
+        [
+            TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
+                '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
+                '-m_ta': ModelArg('smartlab-object-detection-0001'),
+                '-m_tm': ModelArg('smartlab-object-detection-0002'),
+                '-m_fa': ModelArg('smartlab-object-detection-0003'),
+                '-m_fm': ModelArg('smartlab-object-detection-0004'),
+                '-m_en': ModelArg('i3d-rgb-tf'),
+                '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
+        ],
+    )),
+
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('aclnet')}),
@@ -1320,6 +1336,9 @@ PYTHON_DEMOS = [
             }),
         ]
     )),
+
+    PythonDemo(name='time_series_forecasting_demo', device_keys=[],
+        model_keys=['-m'], test_cases=[TestCase(options={'-h': ''})]),
 
     PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
                model_keys=['-m_i', '-m_s'], test_cases=combine_cases(

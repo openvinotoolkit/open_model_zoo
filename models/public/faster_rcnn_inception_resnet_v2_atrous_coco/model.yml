@@ -26,11 +26,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+input_info:
+  - name: image_tensor
+    shape: [1, 600, 1024, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,600,1024,3]
-  - --layout=image_tensor(NHWC)
-  - --input=image_tensor
   - --transformations_config=$mo_ext_dir/front/tf/faster_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/pipeline.config
   - --output=detection_scores,detection_boxes,num_detections

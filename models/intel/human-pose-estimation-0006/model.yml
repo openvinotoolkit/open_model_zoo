@@ -32,5 +32,9 @@ files:
     size: 16389034
     checksum: 0faee3c20cfeec5af03d138f5f0405920bb43a31ce53adf12fbe7f6f7d361ef9e1620fb0dd75cff73f300f4f983a875a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/human-pose-estimation-0006/FP16/human-pose-estimation-0006.bin
+input_info:
+  - name: image
+    shape: [1, 3, 352, 352]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

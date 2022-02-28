@@ -1,9 +1,76 @@
 # Open Model Zoo Demos
 
+@sphinxdirective
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   omz_demos_human_pose_estimation_3d_demo_python
+   omz_demos_3d_segmentation_demo_python
+   omz_demos_action_recognition_demo_python
+   omz_demos_bert_named_entity_recognition_demo_python
+   omz_demos_bert_question_answering_embedding_demo_python
+   omz_demos_bert_question_answering_demo_python
+   omz_demos_classification_demo_cpp
+   omz_demos_colorization_demo_python
+   omz_demos_crossroad_camera_demo_cpp
+   omz_demos_face_detection_mtcnn_demo_python
+   omz_demos_face_recognition_demo_python
+   omz_demos_formula_recognition_demo_python
+   omz_demos_gaze_estimation_demo_cpp_gapi
+   omz_demos_interactive_face_detection_demo_cpp_gapi
+   omz_demos_gaze_estimation_demo_cpp
+   omz_demos_gesture_recognition_demo_python
+   omz_demos_handwritten_text_recognition_demo_python
+   omz_demos_human_pose_estimation_demo_cpp
+   omz_demos_human_pose_estimation_demo_python
+   omz_demos_deblurring_demo_python
+   omz_demos_image_inpainting_demo_python
+   omz_demos_image_processing_demo_cpp
+   omz_demos_image_retrieval_demo_python
+   omz_demos_segmentation_demo_cpp
+   omz_demos_segmentation_demo_python
+   omz_demos_image_translation_demo_python
+   omz_demos_instance_segmentation_demo_python
+   omz_demos_interactive_face_detection_demo_cpp
+   omz_demos_machine_translation_demo_python
+   omz_demos_monodepth_demo_python
+   omz_demos_multi_camera_multi_target_tracking_demo_python
+   omz_demos_multi_channel_face_detection_demo_cpp
+   omz_demos_multi_channel_human_pose_estimation_demo_cpp
+   omz_demos_multi_channel_object_detection_demo_yolov3_cpp
+   omz_demos_noise_suppression_demo_python
+   omz_demos_object_detection_demo_cpp
+   omz_demos_object_detection_demo_python
+   omz_demos_pedestrian_tracker_demo_cpp
+   omz_demos_place_recognition_demo_python
+   omz_demos_security_barrier_camera_demo_cpp
+   omz_demos_single_human_pose_estimation_demo_python
+   omz_demos_smart_classroom_demo_cpp
+   omz_demos_social_distance_demo_cpp
+   omz_demos_sound_classification_demo_python
+   omz_demos_speech_recognition_deepspeech_demo_python
+   omz_demos_speech_recognition_quartznet_demo_python
+   omz_demos_mask_rcnn_demo_cpp
+   omz_demos_text_detection_demo_cpp
+   omz_demos_text_spotting_demo_python
+   omz_demos_text_to_speech_demo_python
+   omz_demos_time_series_forecasting_demo_python
+   omz_demos_whiteboard_inpainting_demo_python
+
+@endsphinxdirective
+
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 
-For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
-The demos can also be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
+Source code of the demos can be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
+
+```sh
+git clone https://github.com/openvinotoolkit/open_model_zoo.git
+cd open_model_zoo
+git submodule update --init --recursive
+```
+
 C++, C++ G-API and Python\* versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
 
 The Open Model Zoo includes the following demos:
@@ -64,6 +131,7 @@ The Open Model Zoo includes the following demos:
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
 - [Smart Classroom C++ G-API Demo](./smart_classroom_demo/cpp_gapi/README.md) - Face recognition and action detection demo for classroom environment. G-PI version.
+- [Smartlab Python\* Demo](./smartlab_demo/python/README.md) - action recognition and object detection for smartlab.
 - [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
@@ -78,22 +146,33 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** OpenVINO™ Runtime HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/model_tools/README.md).
 
 ## Build the Demo Applications
 
-To be able to build demos you need to source Inference Engine and OpenCV environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
-Please run the following command before the demos build (assuming that the binary package was installed to `<INSTALL_DIR>`):
+To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
+For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download OpenCV and set environment variables before building the demos:
 
 ```sh
-source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
+<INSTALL_DIR>/extras/scripts/download_opencv.sh
+source <INSTALL_DIR>/setupvars.sh
 ```
 
-You can also build demos manually using Inference Engine built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for Inference Engine and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
-Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
-for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
+> **NOTE:** If you plan to use Python\* demos only, you can install the OpenVINO Python\* package.
+> ```sh
+> pip install openvino
+> ```
+
+For the open-source version of OpenVINO, set the following variables:
+* `InferenceEngine_DIR` pointing to a folder containing `InferenceEngineConfig.cmake`
+* `OpenVINO_DIR` pointing to a folder containing `OpenVINOConfig.cmake`
+* `ngraph_DIR` pointing to a folder containing `ngraphConfig.cmake`.
+* `OpenCV_DIR` pointing to OpenCV. The same OpenCV version should be used both for OpenVINO and demos build.
+
+Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
+Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
 
@@ -270,15 +349,15 @@ build_demos_msvc.bat --target="classification_demo segmentation_demo"
 
 ### Get Ready for Running the Demo Applications on Linux*
 
-Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
+Before running compiled binary files, make sure your application can find the OpenVINO™ and OpenCV libraries.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 
 ```sh
-source <INSTALL_DIR>/bin/setupvars.sh
+source <INSTALL_DIR>/setupvars.sh
 ```
 
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added them
+If you use your own OpenVINO™ and OpenCV binaries to build the demos please make sure you have added them
 to the `LD_LIBRARY_PATH` environment variable.
 
 **(Optional)**: The OpenVINO environment variables are removed when you close the
@@ -293,7 +372,7 @@ vi <user_home_directory>/.bashrc
 2. Add this line to the end of the file:
 
 ```sh
-source <INSTALL_DIR>/bin/setupvars.sh
+source <INSTALL_DIR>/setupvars.sh
 ```
 
 3. Save and close the file: press the **Esc** key, type `:wq` and press the **Enter** key.
@@ -313,16 +392,16 @@ list above.
 
 ### Get Ready for Running the Demo Applications on Windows*
 
-Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
-Optionally download OpenCV community FFmpeg plugin. There is a downloader script in the OpenVINO package: `<INSTALL_DIR>\opencv\ffmpeg-download.ps1`.
-If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
+Before running compiled binary files, make sure your application can find the OpenVINO™ and OpenCV libraries.
+Optionally, download the OpenCV community FFmpeg plugin using the downloader script in the OpenVINO package: `<INSTALL_DIR>\extras\opencv\ffmpeg-download.ps1`.
+If you use the [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/overview.html) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 
 ```bat
-<INSTALL_DIR>\bin\setupvars.bat
+<INSTALL_DIR>\setupvars.bat
 ```
 
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
+If you use your own OpenVINO™ and OpenCV binaries to build the demos please make sure you have added
 to the `PATH` environment variable.
 
 To run Python demo applications that require native Python extension modules, you must additionally
@@ -336,7 +415,7 @@ set PYTHONPATH=%PYTHONPATH%;<bin_dir>
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you
 have properly configured **Debugging** environment settings for the **Debug**
 and **Release** configurations. Set correct paths to the OpenCV libraries, and
-debug and release versions of the Inference Engine libraries.
+debug and release versions of the OpenVINO™ libraries.
 For example, for the **Debug** configuration, go to the project's
 **Configuration Properties** to the **Debugging** category and set the `PATH`
 variable in the **Environment** field to the following:

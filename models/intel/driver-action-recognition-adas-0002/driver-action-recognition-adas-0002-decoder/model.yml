@@ -32,5 +32,9 @@ files:
     size: 14718156
     checksum: a4d71c8e317e94fd7f2bb888cfe6cffbbc5e90392344099dfe8ee56ad185dbd6f45f45f47bbdcd0e0ac4543eff17a2b0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+input_info:
+  - name: '0'
+    shape: [1, 16, 512]
+    layout: NDC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

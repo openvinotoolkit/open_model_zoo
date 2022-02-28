@@ -33,5 +33,9 @@ files:
     size: 5045996
     checksum: e1347a6d63e6f29087fc71972332bbe199e93603e19f2ba585c7e0e54e600e3134b994a7e9248cc06897f188fcd64b4a
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.bin
+input_info:
+  - name: timestamps
+    shape: [1, 192, 5]
+    layout: NCH
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

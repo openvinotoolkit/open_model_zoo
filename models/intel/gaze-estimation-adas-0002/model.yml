@@ -40,5 +40,15 @@ files:
     size: 1904337
     checksum: 4b6ee9dcd6cc6cc50b12f80db7b5e776e85f4585caf60a090c582b83c6625d62d7959bdd40fefc463669336f44a6d423
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
+input_info:
+  - name: left_eye_image
+    shape: [1, 3, 60, 60]
+    layout: NCHW
+  - name: right_eye_image
+    shape: [1, 3, 60, 60]
+    layout: NCHW
+  - name: head_pose_angles
+    shape: [1, 3]
+    layout: NC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

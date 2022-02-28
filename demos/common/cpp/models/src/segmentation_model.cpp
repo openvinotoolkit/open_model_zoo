@@ -119,7 +119,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
         cv::Mat predictions(outHeight, outWidth, CV_32SC1);
         const auto data = outTensor.data<int64_t>();
         for (size_t i = 0; i < predictions.total(); ++i) {
-            reinterpret_cast<int32_t*>(predictions.data)[i] = data[i];
+            reinterpret_cast<int32_t*>(predictions.data)[i] = int32_t(data[i]);
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
     }

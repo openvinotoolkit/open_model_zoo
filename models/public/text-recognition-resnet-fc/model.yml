@@ -289,10 +289,11 @@ conversion_to_onnx_args:
   - --input-names=input
   - --output-names=output
   - --output-file=$conv_dir/resnet_fc.onnx
+input_info:
+  - name: input
+    shape: [1, 1, 32, 100]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,1,32,100]
-  - --input=input
-  - --layout=input(NCHW)
   - --mean_values=input[127.5]
   - --scale_values=input[127.5]
   - --output=output

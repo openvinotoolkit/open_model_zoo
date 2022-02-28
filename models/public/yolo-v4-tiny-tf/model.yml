@@ -69,10 +69,11 @@ postprocessing:
     file: keras-YOLOv3-model-set/yolo4/models/layers.py
     pattern: 'tensorflow\.keras'
     replacement: 'tensorflow.compat.v1.keras'
+input_info:
+  - name: image_input
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,416,416,3]
-  - --input=image_input
-  - --layout=image_input(NHWC)
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --input_model=$conv_dir/yolo-v4-tiny.pb

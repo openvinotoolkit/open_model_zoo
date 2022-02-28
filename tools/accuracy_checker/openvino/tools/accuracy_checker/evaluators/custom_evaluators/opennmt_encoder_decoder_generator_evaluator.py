@@ -55,7 +55,7 @@ class OpenNMTEvaluator(BaseCustomEvaluator):
             metrics_result = self._get_metrics_result(batch_input_ids, batch_annotation, batch_prediction,
                                                       calculate_metrics)
             if output_callback:
-                output_callback(batch_raw_prediction[0], metrics_result=metrics_result,
+                output_callback(batch_raw_prediction, metrics_result=metrics_result,
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
@@ -427,6 +427,13 @@ class DecoderDLSDKModel(CommonOpenNMTDecoder, CommonDLSDKModel):
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1', 'c_1', '', '', 'input_feed']
 
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+
 
 class GeneratorDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'generator'
@@ -449,6 +456,13 @@ class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     return_layers = ['output/sink_port_0', 'attn/sink_port_0']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
+
+    def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
+        if network_info.get('outputs'):
+            self.output_layers = network_info['outputs']
+        if network_info.get('return_outputs'):
+            self.return_layers = network_info['return_outputs']
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
 class GeneratorOVModel(CommonOVModel):

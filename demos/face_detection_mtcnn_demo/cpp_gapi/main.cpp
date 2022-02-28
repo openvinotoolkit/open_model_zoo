@@ -1,13 +1,20 @@
-#include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils_gapi/stream_source.hpp>
+// Copyright (C) 2021-2022 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+//
+
+#include <string>
+#include <vector>
 
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/render.hpp>
+
+#include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "face_detection_mtcnn_demo.hpp"
 #include "custom_kernels.hpp"
@@ -44,8 +51,8 @@ G_API_NET(MTCNNOutput, <custom::GMat3(cv::GMat)>, "custom.mtcnn_output");
 int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
-        /** Print info about Inference Engine **/
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        /** Print info about OpenVINO **/
+        slog::info << ov::get_openvino_version() << slog::endl;
 
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;

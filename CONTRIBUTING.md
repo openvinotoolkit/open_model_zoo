@@ -113,6 +113,16 @@ For replacement operation:
 - `replacement` — Replacement string
 - `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
+**`input_info`**
+
+List of inputs containing the information about input name, shape and layout. For example:
+```
+input_info:
+  - name: Placeholder
+    shape: [1, 224, 224, 3]
+    layout: NHWC
+```
+
 **`conversion_to_onnx_args`** (*only for PyTorch\* models*)
 
 List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
@@ -121,7 +131,6 @@ List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
 Conversion parameters (learn more in the [Model conversion](#model-conversion) section). For example:
 ```
-  - --input=data
   - --mean_values=data[127.5]
   - --scale_values=data[127.5]
   - --reverse_input_channels
@@ -163,10 +172,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: tf-densenet121.tar.gz
+input_info:
+  - name: Placeholder
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
-  - --input=Placeholder
   - --mean_values=Placeholder[123.68,116.78,103.94]
   - --scale_values=Placeholder[58.8235294117647]
   - --output=densenet121/predictions/Reshape_1
@@ -177,9 +188,9 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model Conversion
 
-Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
+OpenVINO&trade; Runtime supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](@ref openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide). After a successful conversion, you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
 
-> **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
+> **NOTE**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
 > **NOTE 2**: If a model input is a color image, color channel order should be `BGR`.
 

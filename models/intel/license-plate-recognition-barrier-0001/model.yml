@@ -40,5 +40,12 @@ files:
     size: 2046458
     checksum: fa0bc45315f8df180059a881c978db6d5150166e43e429da21f65747644643b33f7a5165da6e0680a77f7795d33eed5d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
+input_info:
+  - name: data
+    shape: [1, 3, 24, 94]
+    layout: NCHW
+  - name: seq_ind
+    shape: [88, 1]
+    layout: CN
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

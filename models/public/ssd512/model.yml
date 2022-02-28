@@ -47,10 +47,11 @@ postprocessing:
     file: models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
     pattern: ' +save_output_param \{.*\n.*\n +\}\n'
     replacement: ''
+input_info:
+  - name: data
+    shape: [1, 3, 512, 512]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,512,512]
-  - --input=data
-  - --layout=data(NCHW)
   - --mean_values=data[104.0,117.0,123.0]
   - --output=detection_out
   - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel

@@ -53,10 +53,11 @@ conversion_to_onnx_args:
   - --input-names=input
   - --output-names=output
   - --output-file=$conv_dir/repvgg-b1.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 224, 224]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,224,224]
-  - --input=input
-  - --layout=input(NCHW)
   - --input_model=$conv_dir/repvgg-b1.onnx
   - --mean_values=input[123.675,116.28,103.53]
   - --scale_values=input[58.624,57.12,57.375]

@@ -32,5 +32,9 @@ files:
     size: 176256104
     checksum: 1f8b4b813461d2fcc55f5fc7e1449a7c1e49845299f514860758b0e4ba007a5c388aecb7976f96510ff13e28041946e1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
+input_info:
+  - name: imgs
+    shape: [1, 1, 64, 256]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

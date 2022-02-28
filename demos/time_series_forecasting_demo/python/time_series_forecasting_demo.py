@@ -21,7 +21,8 @@ from collections import OrderedDict
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from openvino.runtime import Core, get_version
-from accuracy_checker.dataset import read_annotation
+from openvino.tools.accuracy_checker.dataset import read_annotation
+
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

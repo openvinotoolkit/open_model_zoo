@@ -44,5 +44,9 @@ files:
     size: 11256340
     checksum: 1c8e2fe5c20ee2c53aadf1ccc648df2afc3a4bb3ce4ff6028b55c9f2740d31ef2ff42ff53d1f3bb3735b86560fba07de
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
+input_info:
+  - name: image_input
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

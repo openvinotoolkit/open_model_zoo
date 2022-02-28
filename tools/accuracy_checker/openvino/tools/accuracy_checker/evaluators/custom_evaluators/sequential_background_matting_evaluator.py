@@ -21,16 +21,14 @@ from .base_models import BaseCascadeModel, BaseDLSDKModel, BaseOpenVINOModel, cr
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher.input_feeder import InputFeeder
-from ...utils import contains_all, extract_image_representations
+from ...utils import contains_all, extract_image_representations, postprocess_output_name
 
 
 class SequentialBackgroundMatting(BaseCustomEvaluator):
-    def __init__(self, dataset_config, launcher, model, input_feeder, adapter, orig_config):
+    def __init__(self, dataset_config, launcher, model, adapter, orig_config):
         super().__init__(dataset_config, launcher, orig_config)
         self.model = model
-        self.input_feeder = input_feeder
         self.adapter = adapter
-        self.inputs = input_feeder.network_inputs
 
     def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
         previous_video_id = None
@@ -42,10 +40,10 @@ class SequentialBackgroundMatting(BaseCustomEvaluator):
             filled_inputs = self.input_feeder.fill_inputs(batch_inputs)
             for i, filled_input in enumerate(filled_inputs):
                 filled_input.update(rnn_inputs[i])
-            batch_raw_results = self.model.predict(batch_identifiers, filled_inputs)
-            batch_predictions = self.adapter.process(batch_raw_results, batch_identifiers, batch_meta)
+            batch_raw_results, batch_results = self.model.predict(batch_identifiers, filled_inputs)
+            batch_predictions = self.adapter.process(batch_results, batch_identifiers, batch_meta)
             previous_video_id = batch_annotation[0].video_id
-            rnn_inputs = self.model.set_rnn_inputs(batch_raw_results)
+            rnn_inputs = self.model.set_rnn_inputs(batch_results)
             annotation, prediction = self.postprocessor.process_batch(batch_annotation, batch_predictions)
             metrics_result = self._get_metrics_result(batch_input_ids, annotation, prediction, calculate_metrics)
             if output_callback:
@@ -60,21 +58,16 @@ class SequentialBackgroundMatting(BaseCustomEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        launcher.network = model.model.network
-        launcher_config = config['launchers'][0]
-        postpone_model_loading = False
-        input_precision = launcher_config.get('_input_precision', [])
-        input_layouts = launcher_config.get('_input_layout', '')
-        input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), model.model.launcher.inputs, cls.input_shape, launcher.fit_to_input,
-            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision,
-            input_layouts
-        )
-        adapter = create_adapter(launcher_config.get('adapter', 'background_matting_with_pha_and_fgr'))
-        return cls(dataset_config, launcher, model, input_feeder, adapter, orig_config)
+        adapter = create_adapter(config['launchers'][0].get('adapter', 'background_matting_with_pha_and_fgr'))
+        return cls(dataset_config, launcher, model, adapter, orig_config)
 
-    def input_shape(self, input_name):
-        return self.inputs[input_name]
+    @property
+    def input_feeder(self):
+        return self.model.model.input_feeder
+
+    @property
+    def inputs(self):
+        return self.input_feeder.network_inputs
 
 
 class SequentialBackgroundMattingModel(BaseCascadeModel):
@@ -99,17 +92,22 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
 
     def predict(self, identifiers, input_data):
         batch_raw_results = []
+        batch_results = []
         for identifier, data in zip(identifiers, input_data):
-            raw_results = self.model.predict(identifier, data)
+            results, raw_results = self.model.predict(identifier, data)
             batch_raw_results.append(raw_results)
-        return batch_raw_results
+            batch_results.append(results)
+        return batch_raw_results, batch_results
 
     def reset_rnn_inputs(self, batch_size):
         output = []
         for _ in range(batch_size):
             zeros_lstm_inputs = {}
             for lstm_input_name in self.launcher.lstm_inputs.keys():
-                shape = self.model.network.input_info[lstm_input_name].input_data.shape
+                if hasattr(self.model.network, 'input_info'):
+                    shape = self.model.network.input_info[lstm_input_name].input_data.shape
+                else:
+                    shape = self.model.inputs[lstm_input_name].shape
                 zeros_lstm_inputs[lstm_input_name] = np.zeros(shape, dtype=np.float32)
             output.append(zeros_lstm_inputs)
         return output
@@ -119,16 +117,41 @@ class SequentialBackgroundMattingModel(BaseCascadeModel):
         for output in outputs:
             batch_rnn_inputs = {}
             for input_name, output_name in self.launcher.lstm_inputs.items():
-                batch_rnn_inputs[input_name] = output[output_name]
+                batch_rnn_inputs[input_name] = output[postprocess_output_name(output_name, output)]
             result.append(batch_rnn_inputs)
         return result
 
 
 class DLSDKSequentialBackgroundMattingModel(BaseDLSDKModel):
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(input_data)
+        outputs = self.exec_network.infer(input_data)
+        if isinstance(outputs, tuple):
+            outputs, raw_outputs = outputs
+        else:
+            raw_outputs = outputs
+        return outputs, raw_outputs
+
+    def input_shape(self, input_name):
+        return self.launcher.inputs[input_name]
+
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.launcher = launcher
+        self.launcher.network = self.network
+        self.input_feeder = InputFeeder(self.launcher.config.get('inputs', []), self.launcher.inputs, self.input_shape,
+                                        self.launcher.fit_to_input, self.launcher.default_layout)
 
 
 class OpenVINOModelSequentialBackgroundMattingModel(BaseOpenVINOModel):
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(input_data)
+        return self.infer(input_data, raw_results=True)
+
+    def input_shape(self, input_name):
+        return self.launcher.inputs[input_name]
+
+    def load_network(self, network, launcher):
+        super().load_network(network, launcher)
+        self.launcher = launcher
+        self.launcher.network = self.network
+        self.input_feeder = InputFeeder(self.launcher.config.get('inputs', []), self.launcher.inputs, self.input_shape,
+                                        self.launcher.fit_to_input, self.launcher.default_layout)

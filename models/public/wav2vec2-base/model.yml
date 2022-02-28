@@ -106,9 +106,11 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/wav2vec2-base.onnx
   - '--conversion-param=dynamic_axes={"inputs": {0: "batch_size", 1: "sequence_len"},
     "logits": {0: "batch_size", 1: "sequence_len"}}'
+input_info:
+  - name: inputs
+    shape: [1, 30480]
+    layout: NS
 model_optimizer_args:
-  - --input=inputs
-  - --layout=inputs(NS)
   - --input_model=$conv_dir/wav2vec2-base.onnx
   - --output=logits
 framework: pytorch

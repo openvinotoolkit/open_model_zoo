@@ -36,5 +36,21 @@ files:
     size: 5089822
     checksum: afee8be12845ff72c3e52812966b6005ac717bc265d5d50f717a26deb6e3bff24883685a8207f58f43216fc0bfb07247
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
+input_info:
+  - name: dec_st_c
+    shape: [1, 512]
+    layout: ND
+  - name: dec_st_h
+    shape: [1, 512]
+    layout: ND
+  - name: output_prev
+    shape: [1, 256]
+    layout: NC
+  - name: row_enc_out
+    shape: [1, 6, 62, 512]
+    layout: NHWD
+  - name: tgt
+    shape: [1, 1]
+    layout: ND
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

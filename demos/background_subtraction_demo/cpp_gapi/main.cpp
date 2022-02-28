@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
-#include <utils_gapi/stream_source.hpp>
-#include <utils/config_factory.h>
-#include <utils/ocv_common.hpp>
+#include <chrono>
+#include <string>
+#include <vector>
 
 #include <opencv2/gapi/streaming/cap.hpp>
 #include <opencv2/gapi/imgproc.hpp>
@@ -16,13 +14,19 @@
 #include <opencv2/gapi/fluid/imgproc.hpp>
 #include <opencv2/gapi/cpu/core.hpp>
 #include <opencv2/gapi/cpu/imgproc.hpp>
-
 #include <opencv2/highgui.hpp>
+
+#include <openvino/openvino.hpp>
+
+#include <monitors/presenter.h>
+#include <utils_gapi/stream_source.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/config_factory.h>
+#include <utils/ocv_common.hpp>
 
 #include "background_subtraction_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 
-#include <openvino/openvino.hpp>
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {

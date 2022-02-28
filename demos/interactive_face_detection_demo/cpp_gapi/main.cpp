@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,11 +8,11 @@
 * \example interactive_face_detection_demo_gapi/main.cpp
 */
 
-#include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
-#include <utils_gapi/stream_source.hpp>
+#include <string>
+#include <tuple>
+#include <vector>
 
+#include <openvino/openvino.hpp>
 #include <opencv2/gapi.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
@@ -20,6 +20,10 @@
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 
 #include <monitors/presenter.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "interactive_face_detection_gapi.hpp"
 #include "face.hpp"
@@ -275,7 +279,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_m.empty())
             throw std::logic_error("Parameter -m is not set");
 
-        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << ov::get_openvino_version() << slog::endl;
 
         /** ---------------- Graph of demo ---------------- **/
         cv::GMat in;

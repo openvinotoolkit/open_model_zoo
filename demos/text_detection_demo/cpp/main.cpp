@@ -4,20 +4,17 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstdlib>
+#include <fstream>
 #include <iomanip>
 #include <limits>
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include <opencv2/opencv.hpp>
-
-#include "openvino/openvino.hpp"
+#include <openvino/openvino.hpp>
 
 #include "gflags/gflags.h"
 #include "monitors/presenter.h"

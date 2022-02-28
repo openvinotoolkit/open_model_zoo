@@ -25,9 +25,11 @@ files:
       $type: google_drive
       id: 1NhH51NgKJKhu0Bax_IKQ_Byvoe2bItPX
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.onnx
+input_info:
+  - name: '0'
+    shape: [1, 4, 128, 128, 128]
+    layout: NCDHW
 model_optimizer_args:
-  - --input_shape=[1,4,128,128,128]
-  - --layout=NCDHW
   - --input_model=$dl_dir/brain-tumor-segmentation-0002.onnx
 framework: onnx
 license: https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE

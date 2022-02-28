@@ -27,12 +27,13 @@ files:
       $type: google_drive
       id: 1KmM2vwGBuKxy7RE9hz1m5D0yyh2N9Amo
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/anti-spoof-mn3/anti-spoof-mn3.onnx
+input_info:
+  - name: actual_input_1
+    shape: [1, 3, 128, 128]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,128,128]
-  - --input=actual_input_1
   - --mean_values=actual_input_1[151.2405,119.5950,107.8395]
   - --scale_values=actual_input_1[63.0105,56.4570,55.0035]
-  - --layout=actual_input_1(NCHW)
   - --reverse_input_channels
   - --input_model=$dl_dir/anti-spoof-mn3.onnx
 framework: onnx
