@@ -40,12 +40,17 @@ import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
 import timeit
+import importlib
 
 from pathlib import Path
 
 from args import ArgContext, Arg, ModelArg
-from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
+
+scopes = {
+    'base': importlib.import_module('cases').DEMOS,
+    'performance': importlib.import_module('performance_cases').DEMOS,
+}
 
 
 def parser_paths_list(supported_devices):
@@ -64,6 +69,8 @@ def parse_args():
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested)')
+    parser.add_argument('--scope', default='base',
+        help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
@@ -177,13 +184,14 @@ def get_models(case, keys):
     for key in keys:
         model = case.options.get(key, None)
         if model:
-            models.append(model.name if isinstance(model, ModelArg) else model.model_name)
+            models.append(model.name)
     return models
 
 
 def main():
     args = parse_args()
 
+    DEMOS = scopes[args.scope]
     suppressed_devices = parse_supported_device_list(args.supported_devices)
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
@@ -294,10 +302,11 @@ def main():
                         print(flush=True)
                         try:
                             start_time = timeit.default_timer()
-                            subprocess.check_output(fixed_args + dev_arg + case_args,
+                            output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
+                            demo.parse_output(output, test_case, device)
                         except subprocess.CalledProcessError as e:
                             print(e.output)
                             print('Exit code:', e.returncode)

@@ -68,16 +68,16 @@ class ModelArg(Arg):
 
 
 class ModelFileArg(Arg):
-    def __init__(self, model_name, file_name):
-        self.model_name = model_name
+    def __init__(self, name, file_name):
+        self.name = name
         self.file_name = file_name
 
     def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
+        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.file_name)
 
     @property
     def required_models(self):
-        return [RequestedModel(self.model_name, [])]
+        return [RequestedModel(self.name, [])]
 
 
 class DataPatternArg(Arg):
