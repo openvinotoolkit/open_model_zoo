@@ -55,8 +55,6 @@ python -c "from openvino.model_zoo import model_api"
 
 The Python* Model API package provides model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
 
-The wrapper interface is simple and flexible, which gives capabilities for the creation of custom wrappers covering different architectures and use cases.
-
 The following tasks can be solved with wrappers usage:
 
 | Task type                  | Model API wrappers |
