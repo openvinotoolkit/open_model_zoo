@@ -180,4 +180,4 @@ class QuestionAnsweringEmbeddingAccuracy(FullDatasetEvaluationMetric):
             if c_pos_index in index[:self.top_k]:
                 true_pos += 1
 
-        return [true_pos/len(q_pairs)]
+        return [true_pos/len(q_pairs)] if q_pairs else 0
