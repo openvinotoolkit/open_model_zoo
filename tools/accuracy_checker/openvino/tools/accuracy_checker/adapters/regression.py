@@ -130,8 +130,9 @@ class KaldiFeatsRegression(Adapter):
         Returns:
             list of RegressionPrediction objects
         """
+
+        self.select_output_blob(raw)
         predictions = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(predictions)
         predictions = predictions[self.output_blob]
 
         result = []
@@ -166,4 +167,4 @@ class KaldiFeatsRegression(Adapter):
         if self.target_out:
             self.output_blob = self.check_output_name(self.target_out, outputs)
         if self.output_blob is None:
-            self.output_blob = next(iter(outputs))
+            self.output_blob = next(iter(outputs)) if not isinstance(outputs, list) else next(iter(outputs[0]))
