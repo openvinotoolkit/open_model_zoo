@@ -274,7 +274,7 @@ class Model:
 
         self._create_model_api_instance(model_creator, **kwargs)
 
-        results = self.model_api(inputs)
+        results, _ = self.model_api(inputs)
 
         return results
 
