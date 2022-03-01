@@ -130,28 +130,26 @@ cv::Size stringToSize(const std::string& str) {
 }
 
 std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string) {
-    // Parse parameter string like "input0[NCHW],input1[NC]" or "[NCHW]" (applied to all
+    // Parse parameter string like "input0:NCHW,input1:NC" or "NCHW" (applied to all
     // inputs)
     std::map<std::string, ov::Layout> layouts;
-    std::string searchStr = layout_string;
-    auto startPos = searchStr.find_first_of('[');
-    while (startPos != std::string::npos) {
-        auto end_pos = searchStr.find_first_of(']');
-        if (end_pos == std::string::npos) {
+    std::string searchStr = (layout_string.find_last_of(':') == std::string::npos && !layout_string.empty() ?
+        ":" : "") + layout_string;
+    auto colonPos = searchStr.find_last_of(':');
+    while (colonPos != std::string::npos) {
+        auto startPos = searchStr.find_last_of(',');
+        auto inputName = searchStr.substr(startPos + 1, colonPos - startPos - 1);
+        auto inputLayout = searchStr.substr(colonPos + 1);
+        layouts[inputName] = ov::Layout(inputLayout);
+        searchStr = searchStr.substr(0, startPos + 1);
+        if (searchStr.empty() || searchStr.back() != ',') {
             break;
         }
-        auto inputName = searchStr.substr(0, startPos);
-        auto inputVal = searchStr.substr(startPos + 1, end_pos - startPos - 1);
-        layouts[inputName] = ov::Layout(inputVal);
-        searchStr = searchStr.substr(end_pos + 1);
-        if (searchStr.empty() || searchStr.front() != ',') {
-            break;
-        }
-        searchStr = searchStr.substr(1);
-        startPos = searchStr.find_first_of('[');
+        searchStr.pop_back();
+        colonPos = searchStr.find_last_of(':');
     }
     if (!searchStr.empty()) {
-        throw std::logic_error("Can't parse input layout string: " + layout_string);
+        throw std::invalid_argument("Can't parse input layout string: " + layout_string);
     }
     return layouts;
 }

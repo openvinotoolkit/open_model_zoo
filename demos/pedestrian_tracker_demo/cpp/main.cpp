@@ -165,7 +165,8 @@ int main(int argc, char **argv) {
             CreatePedestrianTracker(reid_model, core, reid_mode,
                                     should_keep_tracking_info);
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_read_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop,
+            FLAGS_nireq == 1 ? read_type::efficient : read_type::safe, FLAGS_first, FLAGS_read_limit);
         double video_fps = cap->fps();
         if (0.0 == video_fps) {
             // the default frame rate for DukeMTMC dataset
@@ -174,7 +175,6 @@ int main(int argc, char **argv) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) throw std::runtime_error("Can't read an image from the input");
         cv::Size firstFrameSize = frame.size();
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};

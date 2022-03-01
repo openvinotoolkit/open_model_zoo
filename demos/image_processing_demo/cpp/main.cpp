@@ -46,7 +46,7 @@ static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
+" Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -154,14 +154,11 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
         cv::Mat curr_frame;
 
         auto startTime = std::chrono::steady_clock::now();
         curr_frame = cap->read();
-        if (curr_frame.empty()) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;

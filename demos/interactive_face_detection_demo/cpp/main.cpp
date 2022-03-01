@@ -70,9 +70,6 @@ int main(int argc, char *argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 
