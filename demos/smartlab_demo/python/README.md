@@ -46,7 +46,34 @@ omz_downloader --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields the usage message given above and an error message.
+Running the demo with `-h` shows this help message:
+```
+usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL
+                        -m_fm M_FRONTMOVE -m_en M_ENCODER -m_de M_DECODER
+
+Options:
+  -h, --help            Show this help message and exit.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target to infer on CPU or GPU.
+  -tv TOPVIEW, --topview TOPVIEW
+                        Required. Topview stream to be processed. The input must be a single image, a folder of images,
+                        video file or camera id.
+  -fv FRONTVIEW, --frontview FRONTVIEW
+                        Required. FrontView to be processed. The input must be a single image, a folder of images,
+                        video file or camera id.
+  -m_ta M_TOPALL, --m_topall M_TOPALL
+                        Required. Path to topview all class model.
+  -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
+                        Required. Path to topview moving class model.
+  -m_fa M_FRONTALL, --m_frontall M_FRONTALL
+                        Required. Path to frontview all class model.
+  -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
+                        Required. Path to frontview moving class model.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required. Path to encoder model.
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Required. Path to decoder model.
+```
 
 **For example**, to run the demo, please provide the model paths and two input streams:
 
