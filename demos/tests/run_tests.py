@@ -45,6 +45,7 @@ import importlib
 from pathlib import Path
 
 from args import ArgContext, Arg, ModelArg
+from cases import DEMOS_IMPLS
 from data_sequences import DATA_SEQUENCES
 
 scopes = {
@@ -68,7 +69,8 @@ def parse_args():
     parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
-        help='list of demos to run tests for (by default, every demo is tested)')
+        help='list of demos to run tests for (by default, every demo is tested). '
+        'To test demos only in specific implementation pass next values: gapi, cpp, python.')
     parser.add_argument('--scope', default='base',
         help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -209,7 +211,11 @@ def main():
             model_info[model['name']] = model
 
     if args.demos is not None:
-        names_of_demos_to_test = set(args.demos.split(','))
+        if args.demos in DEMOS_IMPLS.keys():
+            names_of_demos_to_test = [demo.subdirectory for demo in DEMOS_IMPLS[args.demos]]
+        else:
+            names_of_demos_to_test = set(args.demos.split(','))
+
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
