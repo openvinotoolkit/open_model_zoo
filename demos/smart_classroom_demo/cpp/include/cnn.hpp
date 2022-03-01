@@ -27,7 +27,7 @@ struct CnnConfig {
     /** @brief Maximal size of batch */
     int m_max_batch_size{1};
 
-    /** @brief Inference Engine */
+    /** @brief OpenVINO Core instance */
     ov::Core m_core;
     /** @brief Device name */
     std::string m_deviceName;

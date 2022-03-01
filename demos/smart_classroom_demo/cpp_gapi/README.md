@@ -65,10 +65,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 smart_classroom_demo_gapi [OPTION]
 Options:
 

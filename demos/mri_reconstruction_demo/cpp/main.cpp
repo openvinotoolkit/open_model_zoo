@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 }
 
 cv::Mat tensorToMat(const ov::Tensor& tensor) {
-    // NOTE: Inference Engine sizes are reversed.
+    // NOTE: OpenVINO runtime sizes are reversed.
     ov::Shape tensorShape = tensor.get_shape();
     std::vector<int> size;
     std::transform(tensorShape.begin(), tensorShape.end(), std::back_inserter(size), [](size_t dim) -> int { return int(dim); });

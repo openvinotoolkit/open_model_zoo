@@ -26,7 +26,7 @@ error() {
 trap 'error ${LINENO}' ERR
 
 usage() {
-    echo "Build inference engine demos"
+    echo "Build OpenVINO Runtime demos"
     echo
     echo "Options:"
     echo "  -h, --help                                      Print the help message"

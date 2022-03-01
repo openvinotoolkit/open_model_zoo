@@ -149,7 +149,7 @@ echo Done.
 exit /b
 
 :usage
-echo Build inference engine demos
+echo Build OpenVINO Runtime demos
 echo.
 echo Options:
 echo   -h                 Print the help message

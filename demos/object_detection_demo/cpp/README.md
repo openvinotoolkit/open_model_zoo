@@ -5,7 +5,7 @@
 This demo showcases inference of Object Detection networks using Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
-Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by Inference Engine, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
+Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by OpenVINO™ Runtime, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
 This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
@@ -20,14 +20,13 @@ Other demo objectives are:
 
 * Video as input support via OpenCV
 * Visualization of the resulting bounding boxes and text labels (from the labels file, see `-labels` option) or class number (if no file is provided)
-* OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
-need to pull Inference Engine demos helpers to your app
+* OpenCV is used to draw resulting bounding boxes, labels
 * Demonstration of the Async API in action
 * Demonstration of multiple models architectures support (including pre- and postprocessing) in one application
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
@@ -52,7 +51,7 @@ as shown in code mockup below:
     }
 ```
 
-For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine with Your Application](https://docs.openvino.ai/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based OpenVINO™ Runtime API, including the Async execution, refer to [Integrate the OpenVINO™ Runtime with Your Application](https://docs.openvino.ai/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
 ## Preparing to Run
 

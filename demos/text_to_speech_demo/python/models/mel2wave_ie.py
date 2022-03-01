@@ -25,13 +25,14 @@ from utils.wav_processing import (
 
 
 class WaveRNNIE:
-    def __init__(self, model_upsample, model_rnn, ie, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
+    def __init__(self, model_upsample, model_rnn, core, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
                  verbose=False, upsampler_width=-1):
         """
         return class provided WaveRNN inference.
 
         :param model_upsample: path to xml with upsample model of WaveRNN
         :param model_rnn: path to xml with rnn parameters of WaveRNN model
+        :param core: OpenVINO Core instance
         :param target: length of the processed fragments
         :param overlap: overlap of the processed frames
         :param hop_length: The number of samples between successive frames, e.g., the columns of a spectrogram.
@@ -47,7 +48,7 @@ class WaveRNNIE:
         self.indent = 550
         self.pad = 2
         self.batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256]
-        self.ie = ie
+        self.core = core
 
         self.upsample_model = self.load_network(model_upsample)
         if upsampler_width > 0:
@@ -65,7 +66,7 @@ class WaveRNNIE:
 
     def load_network(self, model_path):
         log.info('Reading WaveRNN model {}'.format(model_path))
-        return self.ie.read_model(model_path)
+        return self.core.read_model(model_path)
 
     def create_infer_requests(self, model, path, batch_sizes=None):
         if batch_sizes is not None:
@@ -74,10 +75,10 @@ class WaveRNNIE:
                 parameter.set_layout(Layout("BC"))
             for b_s in batch_sizes:
                 set_batch(model, b_s)
-                compiled_model = self.ie.compile_model(model, device_name=self.device)
+                compiled_model = self.core.compile_model(model, device_name=self.device)
                 requests.append(compiled_model.create_infer_request())
         else:
-            compiled_model = self.ie.compile_model(model, device_name=self.device)
+            compiled_model = self.core.compile_model(model, device_name=self.device)
             requests = compiled_model.create_infer_request()
         log.info('The WaveRNN model {} is loaded to {}'.format(path, self.device))
         return requests
@@ -190,17 +191,17 @@ class WaveRNNIE:
 
 
 class MelGANIE:
-    def __init__(self, model, ie, device='CPU', default_width=800):
+    def __init__(self, model, core, device='CPU', default_width=800):
         """
         return class provided MelGAN inference.
 
         :param model: path to xml with MelGAN model of WaveRNN
-        :param ie: instance of the IECore
+        :param core: OpenVINO Core instance
         :param device: target device
         :return:
         """
         self.device = device
-        self.ie = ie
+        self.core = core
 
         self.scales = 4
         self.hop_length = 256
@@ -219,7 +220,7 @@ class MelGANIE:
 
     def load_network(self, model_path):
         log.info('Reading MelGAN model {}'.format(model_path))
-        return self.ie.read_model(model_path)
+        return self.core.read_model(model_path)
 
     def create_infer_requests(self, model, path, scales=None):
         if scales is not None:
@@ -228,11 +229,11 @@ class MelGANIE:
             for i in range(scales):
                 new_shape = (orig_shape[0], orig_shape[1], orig_shape[2] * (i + 1))
                 model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
-                compiled_model = self.ie.compile_model(model, device_name=self.device)
+                compiled_model = self.core.compile_model(model, device_name=self.device)
                 requests.append(compiled_model.create_infer_request())
                 model.reshape({"mel": PartialShape([orig_shape[0], orig_shape[1], orig_shape[2]])})
         else:
-            compiled_model = self.ie.compile_model(model, device_name=self.device)
+            compiled_model = self.core.compile_model(model, device_name=self.device)
             requests = compiled_model.create_infer_request()
         log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
         return requests

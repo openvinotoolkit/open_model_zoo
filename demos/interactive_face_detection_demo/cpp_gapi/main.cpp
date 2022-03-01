@@ -3,7 +3,7 @@
 //
 
 /**
-* \brief The entry point for the G-API/Inference Engine interactive_face_detection_gapi demo application
+* \brief The entry point for the G-API interactive_face_detection_gapi demo application
 * \file interactive_face_detection_demo_gapi/main.cpp
 * \example interactive_face_detection_demo_gapi/main.cpp
 */
