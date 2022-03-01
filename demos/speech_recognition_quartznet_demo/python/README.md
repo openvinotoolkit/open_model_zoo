@@ -45,7 +45,7 @@ optional arguments:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
+                        demo will look for a suitable OpenVINO Runtime plugin for this
                         device. Default value is CPU.
 ```
 

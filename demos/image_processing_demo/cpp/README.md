@@ -65,7 +65,7 @@ The demo runs inference and shows results for each image captured from an input.
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
-The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 ### Supported Models
@@ -82,10 +82,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 ## Running
 
 Running the demo with the `-h` option yields a usage message.
-
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/model_tools/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 You can use the following command to enhance the resolution of the images captured by a camera using a pre-trained single-image-super-resolution-1033 network:
 

@@ -52,9 +52,8 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
+[ INFO ] OpenVINO Runtime version ......... <version>
+[ INFO ] Build ........... <build>
 
 gaze_estimation_demo_gapi [OPTION]
 Options:

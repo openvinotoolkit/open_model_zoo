@@ -31,10 +31,10 @@ def check_input_name(model, input_tensor_name):
 
 
 class ForwardTacotronIE:
-    def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
+    def __init__(self, model_duration, model_forward, core, device='CPU', verbose=False):
         self.verbose = verbose
         self.device = device
-        self.ie = ie
+        self.core = core
 
         self.duration_predictor_model = self.load_network(model_duration)
         self.duration_predictor_request = self.create_infer_request(self.duration_predictor_model, model_duration)
@@ -111,10 +111,10 @@ class ForwardTacotronIE:
 
     def load_network(self, model_path):
         log.info('Reading ForwardTacotron model {}'.format(model_path))
-        return self.ie.read_model(model_path)
+        return self.core.read_model(model_path)
 
     def create_infer_request(self, model, path):
-        compiled_model = self.ie.compile_model(model, device_name=self.device)
+        compiled_model = self.core.compile_model(model, device_name=self.device)
         log.info('The ForwardTacotron model {} is loaded to {}'.format(path, self.device))
         return compiled_model.create_infer_request()
 

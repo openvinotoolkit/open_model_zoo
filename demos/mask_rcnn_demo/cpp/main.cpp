@@ -3,7 +3,7 @@
 //
 
 /**
- * @brief The entry point for inference engine Mask RCNN demo application
+ * @brief The entry point for Mask RCNN demo application
  * @file mask_rcnn_demo/main.cpp
  * @example mask_rcnn_demo/main.cpp
  */
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     if (imagePaths.empty())
         throw std::runtime_error("No suitable images were found");
 
-    // Init OpenVINO runtime
+    // Load OpenVINO runtime
     slog::info << ov::get_openvino_version() << slog::endl;
     ov::Core core;
 

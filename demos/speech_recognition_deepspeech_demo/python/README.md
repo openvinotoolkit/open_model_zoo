@@ -75,7 +75,7 @@ optional arguments:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
+                        demo will look for a suitable OpenVINO Runtime plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
                         Required. Path to an .xml file with a trained model

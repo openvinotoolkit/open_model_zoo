@@ -3,7 +3,7 @@
 //
 
 /**
-* \brief The entry point for the Inference Engine gaze_estimation_demo application
+* \brief The entry point for the gaze_estimation_demo application
 * \file gaze_estimation_demo/main.cpp
 * \example gaze_estimation_demo/main.cpp
 */
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        // Loading Inference Engine
+        // Load OpenVINO runtime
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
