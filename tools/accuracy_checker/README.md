@@ -1,5 +1,6 @@
 # Deep Learning accuracy validation framework
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -27,7 +28,7 @@
    omz_tools_accuracy_checker_sample
 
 @endsphinxdirective
-
+-->
 
 The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
 
