@@ -211,15 +211,26 @@ def main():
             model_info[model['name']] = model
 
     if args.demos is not None:
-        if args.demos in DEMOS_IMPLS.keys():
-            names_of_demos_to_test = [demo.subdirectory for demo in DEMOS_IMPLS[args.demos]]
-        else:
-            names_of_demos_to_test = set(args.demos.split(','))
+        names_of_demos_to_test = set(args.demos.split(','))
+        if all(name in DEMOS_IMPLS.keys() for name in names_of_demos_to_test):
+            demos_of_specific_impls = []
+            for name in names_of_demos_to_test:
+                demos_of_specific_impls += DEMOS_IMPLS[name]
+            names_of_demos_to_test = [demo.subdirectory for demo in demos_of_specific_impls]
 
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
 
+    if len(demos_to_test) == 0:
+        if args.demos:
+            print("List of demos to test is empty.")
+            print(f"Command line argument '--demos {args.demos}' was passed, check that you've specified correct value from the list below:")
+            print(*(list(DEMOS_IMPLS.keys()) + [demo.subdirectory for demo in DEMOS]), sep=',')
+        raise RuntimeError("Not found demos to test!")
+
+    print("Next demos will be tested:")
+    print(*[demo.subdirectory for demo in demos_to_test], sep =',')
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
             dl_dir = args.models_dir
