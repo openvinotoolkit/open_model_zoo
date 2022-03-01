@@ -265,7 +265,6 @@ class Model:
         model_adapter = _common.OpenvinoAdapter(_common.create_core(), self.model_path, device=self.device,
                             plugin_config=plugin_config, max_num_requests=max_num_requests)
         self.model_api = model_creator(model_adapter, configuration)
-        self.model_api.load()
 
     def model_api_inference(self, inputs, device='CPU', model_creator=None, **kwargs):
         self.device = device
@@ -274,6 +273,10 @@ class Model:
 
         self._create_model_api_instance(model_creator, **kwargs)
 
+        if self.model_api is None:
+            raise RuntimeError('Unable to create model class, please check Model API package is installed.')
+
+        self.model_api.load()
         results, _ = self.model_api(inputs)
 
         return results
