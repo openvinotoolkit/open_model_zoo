@@ -27,7 +27,7 @@ from openvino.runtime import Core, get_version
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
-    """ Class that allows worknig with OpenVINO Runtime model. """
+    """ Class that allows working with OpenVINO Runtime model. """
 
     def __init__(self, model_path, device):
         log.info('OpenVINO Runtime')
