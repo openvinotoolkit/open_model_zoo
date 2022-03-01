@@ -229,8 +229,9 @@ def main():
             print(*(list(DEMOS_IMPLS.keys()) + [demo.subdirectory for demo in DEMOS]), sep=',')
         raise RuntimeError("Not found demos to test!")
 
-    print("Next demos will be tested:")
+    print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
+
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
             dl_dir = args.models_dir
