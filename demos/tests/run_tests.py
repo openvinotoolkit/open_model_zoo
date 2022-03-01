@@ -45,7 +45,7 @@ import importlib
 from pathlib import Path
 
 from args import ArgContext, Arg, ModelArg
-from cases import DEMOS_IMPLS
+from cases import DEMOS_PER_IMPL
 from data_sequences import DATA_SEQUENCES
 
 scopes = {
@@ -70,7 +70,7 @@ def parse_args():
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested). '
-        'To test demos only in specific implementation pass next values: gapi, cpp, python.')
+        'For testing demos of specific implementation pass one (or more) of the next values: gapi, cpp, python.')
     parser.add_argument('--scope', default='base',
         help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -212,10 +212,10 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
-        if all(name in DEMOS_IMPLS.keys() for name in names_of_demos_to_test):
+        if all(name in DEMOS_PER_IMPL.keys() for name in names_of_demos_to_test):
             demos_of_specific_impls = []
             for name in names_of_demos_to_test:
-                demos_of_specific_impls += DEMOS_IMPLS[name]
+                demos_of_specific_impls += DEMOS_PER_IMPL[name]
             names_of_demos_to_test = [demo.subdirectory for demo in demos_of_specific_impls]
 
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
@@ -226,7 +226,7 @@ def main():
         if args.demos:
             print("List of demos to test is empty.")
             print(f"Command line argument '--demos {args.demos}' was passed, check that you've specified correct value from the list below:")
-            print(*(list(DEMOS_IMPLS.keys()) + [demo.subdirectory for demo in DEMOS]), sep=',')
+            print(*(list(DEMOS_PER_IMPL.keys()) + [demo.subdirectory for demo in DEMOS]), sep=',')
         raise RuntimeError("Not found demos to test!")
 
     print(f"{len(demos_to_test)} demos will be tested:")

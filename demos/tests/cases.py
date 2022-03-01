@@ -1396,5 +1396,5 @@ PYTHON_DEMOS = [
 
 
 DEMOS = GAPI_DEMOS + CPP_DEMOS + PYTHON_DEMOS
-DEMOS_IMPLS = { 'gapi' : GAPI_DEMOS, 'cpp' : CPP_DEMOS, 'python' : PYTHON_DEMOS }
+DEMOS_PER_IMPL = { 'gapi' : GAPI_DEMOS, 'cpp' : CPP_DEMOS, 'python' : PYTHON_DEMOS }
 BASE = { demo.subdirectory : demo for demo in DEMOS }
