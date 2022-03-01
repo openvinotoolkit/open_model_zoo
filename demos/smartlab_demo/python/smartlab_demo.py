@@ -59,11 +59,11 @@ def main():
     ie = Core()
 
     ''' Object Detection Variables'''
-    # detector = Detector(
-    #         ie,
-    #         args.device,
-    #         [args.m_topall, args.m_topmove],
-    #         [args.m_sideall, args.m_sidemove])
+    detector = Detector(
+            ie,
+            args.device,
+            [args.m_topall, args.m_topmove],
+            [args.m_sideall, args.m_sidemove])
 
     '''Video Segmentation Variables'''
     if(args.mode == "multiview"):
@@ -72,10 +72,10 @@ def main():
         segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
-    # evaluator = Evaluator()
+    evaluator = Evaluator()
 
     '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
-    # display = Display()
+    display = Display()
 
     """
         Process the video.
@@ -102,9 +102,9 @@ def main():
             break
         else:
             # creat detector thread and segmentor thread
-            # tdetector = ThreadWithReturnValue(
-            #     target = detector.inference_multithread,
-            #     args = (frame_top, frame_side,))
+            tdetector = ThreadWithReturnValue(
+                target = detector.inference_multithread,
+                args = (frame_top, frame_side,))
             if(args.mode == "multiview"): # mobilenet
                 tsegmentor = ThreadWithReturnValue(
                     target = segmentor.inference_async,
@@ -116,11 +116,11 @@ def main():
                     target = segmentor.inference,
                     args = (buffer1, buffer2, frame_counter,))
             # start()
-            # tdetector.start()
+            tdetector.start()
             tsegmentor.start()
             # join()
-            # detector_result = tdetector.join()
-            # top_det_results, side_det_results = detector_result[0], detector_result[1]
+            detector_result = tdetector.join()
+            top_det_results, side_det_results = detector_result[0], detector_result[1]
             segmentor_result = tsegmentor.join()
             if(args.mode == "multiview"):
                 top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]

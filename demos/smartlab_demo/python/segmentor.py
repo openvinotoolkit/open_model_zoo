@@ -19,7 +19,7 @@ import numpy as np
 import logging as log
 from pathlib import Path
 from scipy.special import softmax
-from openvino.runtime import PartialShape, AsyncInferQueue
+from openvino.runtime import PartialShape
 
 
 class Segmentor:

@@ -1,9 +1,25 @@
-import numpy as np
-from .preprocess import preprocess
-from .postprocess import postprocess
-from .settings import MwGlobalExp
-from .deploy_util import demo_postprocess
+"""
+ Copyright (C) 2021-2022 Intel Corporation
 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+import numpy as np
+
+from .settings import MwGlobalExp
+from .preprocess import preprocess
+from .deploy_util import demo_postprocess
+from .postprocess import postprocess, crop_pad_resize, reverse_crop_pad_resize
 
 class SubDetector:
     def __init__(self, exp: MwGlobalExp, backend: str='openvino'):
@@ -64,3 +80,36 @@ class SubDetector:
                 'segmentation': [[x0, y0, x1, y1]]
             })
         return res
+
+class CascadedSubDetector(SubDetector):
+    def __init__(self, exp: MwGlobalExp, all_classes: list):
+        super().__init__(exp, all_classes)
+
+        self.dsize = exp.input_size[0]
+        self.is_cascaded = True # used to determine if this is CascadedDetector
+        ### save parent object info
+        self.parent_cat = exp.parent_cat
+        ### save children object infos
+        self.children_cats = exp.children_cats
+
+    def inference_in(self, img, roi_xyxy):
+        ### cook raw image => sub-img within ROI of parent object 
+        roi_xyxy = roi_xyxy.astype(int)
+        img_resize, img_pad_size, pad_left, pad_top = \
+            crop_pad_resize(img, roi_xyxy, self.dsize)
+        outputs = self.inference(img_resize)
+        outputs = outputs[0]
+        if outputs is None:
+            return [None]
+
+        ### map bbox coords back to raw image
+        bboxes_xyxy = outputs[:, : 4]
+        outputs[:, : 4] = reverse_crop_pad_resize(
+            bboxes_xyxy,
+            img_pad_size,
+            self.dsize,
+            pad_left,
+            pad_top,
+            roi_xyxy)
+
+        return [outputs]
