@@ -1,5 +1,6 @@
 # Open Model Zoo Demos
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -60,6 +61,7 @@
    omz_demos_whiteboard_inpainting_demo_python
 
 @endsphinxdirective
+-->
 
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 

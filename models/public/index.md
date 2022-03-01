@@ -1,5 +1,6 @@
 # Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -313,6 +314,7 @@
    </script>
 
 @endsphinxdirective
+-->
 
 OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
