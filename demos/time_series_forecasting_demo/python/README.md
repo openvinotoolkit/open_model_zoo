@@ -41,7 +41,7 @@ omz_converter --list models.lst
 
 The demo works with the test dataset in the .pickle format provided by accuracy_checker.
 
-* Install accuracy_checker following to the [instruction](../../../tools/accuracy_checker/README.md).
+* Install accuracy_checker following the [instruction](../../../tools/accuracy_checker/README.md).
 * Convert test dataset:
 
 ```sh

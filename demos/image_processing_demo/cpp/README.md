@@ -15,7 +15,7 @@ All images on result frame will be marked one of these flags:
 * 'R' - result image.
 * 'D' - difference image (|result - original|).
 
-1. Exmaple for deblurring type (left - source image, right - image after deblurring):
+1. Example for deblurring type (left - source image, right - image after deblurring):
 
 ![](./assets/image_processing_deblurred_image.png)
 
@@ -37,7 +37,7 @@ Super resolution:
 
 ![](./assets/parrots_restoration.png)
 
-For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
+For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (useful when user wants to test model on high quality jpeg images).
 
 4. Example for style_transfer:
 
@@ -83,7 +83,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 
 Running the demo with `-h` shows this help message:
 ```
-image_processing_demo_async [OPTION]
+image_processing_demo [OPTION]
 Options:
 
     -h                        Print a usage message.

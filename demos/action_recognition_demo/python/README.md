@@ -17,13 +17,13 @@ Every step implements `PipelineStep` interface by creating a class derived from 
 
 * `DataStep` reads frames from the input video.
 *  Model step depends on architecture type:
-    - For encder-decoder models there are two steps:
+    - For encoder-decoder models there are two steps:
       -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. Simple averaging of encoder's outputs over a time window is applied.
       -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder`, simple averaging of encoder's outputs over a time window is applied.
     - For the specific implemented single models, the corresponding `<ModelNameStep>` does preprocessing and produces predictions.
 * `RenderStep` renders prediction results.
 
-Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
+Pipeline steps are composed in `AsyncPipeline`. Every step can be run in a separate thread by adding it to the pipeline with `parallel=True` option.
 When two consequent steps occur in separate threads, they communicate via message queue (for example, deliver step result or stop signal).
 
 To ensure maximum performance, models are wrapped in `AsyncWrapper`

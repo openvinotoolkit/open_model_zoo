@@ -7,7 +7,7 @@ This README describes the Question Answering Embedding demo application that use
 On startup the demo application reads command line parameters and loads model(s) to OpenVINO™ Runtime plugin.
 It also fetches data from the user-provided urls to populate the list of "contexts" with the text.
 Prior to the actual inference to answer user's questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
-This is done using the first ("emdbeddings-only") BERT model.
+This is done using the first ("embeddings-only") BERT model.
 
 After that, when user types a question, the "embeddings" network is used to calculate an embedding vector for the specified question.
 Using the L2 distance between the embedding vector of the question and the embedding vectors for the contexts the best (closest) contexts are selected

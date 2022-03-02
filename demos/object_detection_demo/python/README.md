@@ -188,7 +188,7 @@ Common model options:
                         Optional. Probability threshold for detections
                         filtering.
   --resize_type {standard,fit_to_window,fit_to_window_letterbox}
-                        Optional. A resize type for model preprocess. By defauld used model predefined type.
+                        Optional. A resize type for model preprocess. By default used model predefined type.
   --input_size INPUT_SIZE INPUT_SIZE
                         Optional. The first image size used for CTPN model
                         reshaping. Default: 600 600. Note that submitted
@@ -304,7 +304,14 @@ The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

@@ -5,7 +5,7 @@ This README describes the Named Entity Recognition (NER) demo application that u
 ## How It Works
 
 On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
-It also fetch data from the user-provided url to populate the "context" text.
+It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
 ## Preparing to Run
@@ -117,7 +117,7 @@ Exemplary command:
 
 ## Classifying Documents with Long Texts
 
-Notice that when the original "context" (text from the url) do not fit the model input
+Notice that when the original "context" (text from the url) does not fit the model input
 (128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
 
 ## See Also

@@ -60,8 +60,7 @@ Run the application with the `-h` option to see the following usage message:
 usage: place_recognition_demo.py [-h] -m MODEL -i INPUT -gf GALLERY_FOLDER
                                  [--gallery_size GALLERY_SIZE] [--loop]
                                  [-o OUTPUT] [-limit OUTPUT_LIMIT] [-d DEVICE]
-                                 [-l CPU_EXTENSION] [--no_show]
-                                 [-u UTILIZATION_MONITORS]
+                                 [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -87,10 +86,6 @@ Options:
                         GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   --no_show             Optional. Do not visualize inference results.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.

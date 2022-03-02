@@ -36,9 +36,9 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the usage message:
 
 ```
-usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
-                                    [-d DEVICE] [--labels LABELS]
-                                    [-sr SAMPLE_RATE] [-ol OVERLAP]
+usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-d DEVICE]
+                                    [--labels LABELS] [-sr SAMPLE_RATE]
+                                    [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -46,10 +46,6 @@ Options:
                         Required. Input to process
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
