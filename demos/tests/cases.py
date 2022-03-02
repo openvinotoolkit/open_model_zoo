@@ -674,7 +674,7 @@ DEMOS = [
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
             # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
-            ModelArg('person-reidentification-retail-0288')
+            # ModelArg('person-reidentification-retail-0288')
         ),
     )),
 
