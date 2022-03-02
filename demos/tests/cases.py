@@ -312,7 +312,7 @@ DEMOS = [
             None,
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -584,7 +584,7 @@ DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0287'),# TODO not reproduced locally
             ModelArg('person-reidentification-retail-0288')),
     )),
 
@@ -672,7 +672,7 @@ DEMOS = [
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
+            # ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -1024,8 +1024,6 @@ PYTHON_DEMOS = [
        single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     )),
 
-    # TODO: enable tests when FP16-INT8 will work
-    # TODO:   iou = intersection / union    division by zero
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
@@ -1080,7 +1078,7 @@ PYTHON_DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
+            #ModelArg('person-reidentification-retail-0287'), # TODO not reproduced locally
             ModelArg('person-reidentification-retail-0288')
         ),
     )),
