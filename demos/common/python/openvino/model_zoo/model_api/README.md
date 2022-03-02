@@ -5,26 +5,18 @@ An application feeds model class with input data, then the model returns postpro
 
 ## Package structure
 
-The Python* Model API consists of 3 libraries:
-* _adapters_ implements a common interface to allow Model API wrappers usage with different executors: OpenVINO, OVMS. See [Model API adapters](#model-api-adapters) section
-<<<<<<< HEAD
-* _models_ implements wrappers for each architecture. See [Model API Wrappers](#model-api-wrappers) section
-=======
+The Model API consists of 3 libraries:
+* _adapters_ implements a common interface to allow Model API wrappers usage with different executors. See [Model API adapters](#model-api-adapters) section
 * _models_ implements wrappers for Open Model Zoo models. See [Model API Wrappers](#model-api-wrappers) section
->>>>>>> e1217b4206cacd9e4b5b36222b747f260e09c8a1
 * _pipelines_ implements pipelines for model inference and manage the synchronous/asynchronous execution. See [Model API Pipelines](#model-api-pipelines) section
 
 ### Prerequisites
 
 The package requires
-<<<<<<< HEAD
-- Python (version 3.6 or higher)
-=======
 - one of OpenVINO supported Python version (see OpenVINO documentation for the details)
->>>>>>> e1217b4206cacd9e4b5b36222b747f260e09c8a1
 - OpenVINO™ toolkit
 
-If you build Python* Model API package from source, you should install the OpenVINO™ toolkit. See the options:
+If you build Model API package from source, you should install the OpenVINO™ toolkit. See the options:
 
 Use installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
 
@@ -35,7 +27,7 @@ pip install openvino
 
 ## Installing Python* Model API package
 
-Use the following command to install Python* Model API from source:
+Use the following command to install Model API from source:
 ```sh
 pip install <omz_dir>/demos/common/python
 ```
@@ -61,7 +53,7 @@ python -c "from openvino.model_zoo import model_api"
 
 ## Model API Wrappers
 
-The Python* Model API package provides model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
+The Model API package provides model wrappers, which implement standardized preprocessing/postprocessing functions per "task type" and incapsulate model-specific logic for usage of different models in a unified manner inside the application.
 
 The following tasks can be solved with wrappers usage:
 
@@ -74,11 +66,7 @@ The following tasks can be solved with wrappers usage:
 | Instance Segmentation      | <ul><li>`MaskRCNNModel`</li><li>`YolactModel`</li></ul> |
 | Monocular Depth Estimation | <ul><li> `MonoDepthModel`</li></ul> |
 | Named Entity Recognition   | <ul><li>`BertNamedEntityRecognition`</li></ul> |
-<<<<<<< HEAD
-|  Object Detection          | <ul><li>`CenterNet`</li><li>`DETR`</li><li>`CTPN`</li><li>`FaceBoxes`</li><li>`RetinaFace`</li><li>`RetinaFacePyTorch`</li><li>`SSD`</li><li>`UltraLightweightFaceDetection`</li><li>`YOLO`</li><li>`YoloV3ONNX`</li><li>`YoloV4`</li><li>`YOLOF`</li><li>`YOLOX`</li></ul> |
-=======
 | Object Detection           | <ul><li>`CenterNet`</li><li>`DETR`</li><li>`CTPN`</li><li>`FaceBoxes`</li><li>`RetinaFace`</li><li>`RetinaFacePyTorch`</li><li>`SSD`</li><li>`UltraLightweightFaceDetection`</li><li>`YOLO`</li><li>`YoloV3ONNX`</li><li>`YoloV4`</li><li>`YOLOF`</li><li>`YOLOX`</li></ul> |
->>>>>>> e1217b4206cacd9e4b5b36222b747f260e09c8a1
 | Question Answering         |  <ul><li>`BertQuestionAnswering`</li></ul> |
 | Salient Object Detection   |  <ul><li>`SalientObjectDetectionModel`</li></ul> |
 | Semantic Segmentation      |  <ul><li>`SegmentationModel`</li></ul> |
@@ -100,11 +88,7 @@ It accepts a path to either `xml` model file or `onnx` model file.
 
 Refer to __[`OVMSAdapter`](adapters/ovms_adapter.md)__ to learn about running demos with OVMS.
 
-<<<<<<< HEAD
-For OpenVINO Model Server Adapter employment, you need to install the package with extra module:
-=======
 For using OpenVINO Model Server Adapter you need to install the package with extra module:
->>>>>>> e1217b4206cacd9e4b5b36222b747f260e09c8a1
 ```sh
 pip install <omz_dir>/demos/common/python[ovms]
 ```
@@ -118,7 +102,7 @@ The `AsyncPipeline` is available, which handles the asynchronous execution of a 
 
 ## Ready-to-use Model API solutions
 
-To apply Model API wrappers in custom applications, learn the provided example of common scenario of how to use Python* Model API.
+To apply Model API wrappers in custom applications, learn the provided example of common scenario of how to use Model API.
 
  In the example, the SSD architecture is used to predict bounding boxes on input image `"sample.png"`. The model execution is produced by `OpenvinoAdapter`, therefore we submit the path to the model's `xml` file.
 
