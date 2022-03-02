@@ -10,12 +10,16 @@
    omz_demos_human_pose_estimation_3d_demo_python
    omz_demos_3d_segmentation_demo_python
    omz_demos_action_recognition_demo_python
+   omz_demos_background_subtraction_demo_cpp_gapi
+   omz_demos_background_subtraction_demo_python
    omz_demos_bert_named_entity_recognition_demo_python
    omz_demos_bert_question_answering_embedding_demo_python
    omz_demos_bert_question_answering_demo_python
-   omz_demos_classification_demo_cpp
+   omz_demos_classification_benchmark_demo_cpp
+   omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
+   omz_demos_face_detection_mtcnn_demo_cpp_gapi
    omz_demos_face_detection_mtcnn_demo_python
    omz_demos_face_recognition_demo_python
    omz_demos_formula_recognition_demo_python
@@ -23,6 +27,7 @@
    omz_demos_interactive_face_detection_demo_cpp_gapi
    omz_demos_gaze_estimation_demo_cpp
    omz_demos_gesture_recognition_demo_python
+   omz_demos_gpt2_text_prediction_demo_python
    omz_demos_handwritten_text_recognition_demo_python
    omz_demos_human_pose_estimation_demo_cpp
    omz_demos_human_pose_estimation_demo_python
@@ -37,10 +42,13 @@
    omz_demos_interactive_face_detection_demo_cpp
    omz_demos_machine_translation_demo_python
    omz_demos_monodepth_demo_python
+   omz_demos_mri_reconstruction_demo_cpp
+   omz_demos_mri_reconstruction_demo_python
    omz_demos_multi_camera_multi_target_tracking_demo_python
    omz_demos_multi_channel_face_detection_demo_cpp
    omz_demos_multi_channel_human_pose_estimation_demo_cpp
    omz_demos_multi_channel_object_detection_demo_yolov3_cpp
+   omz_demos_noise_suppression_demo_cpp
    omz_demos_noise_suppression_demo_python
    omz_demos_object_detection_demo_cpp
    omz_demos_object_detection_demo_python
@@ -48,11 +56,14 @@
    omz_demos_place_recognition_demo_python
    omz_demos_security_barrier_camera_demo_cpp
    omz_demos_single_human_pose_estimation_demo_python
+   omz_demos_smartlab_demo_python
    omz_demos_smart_classroom_demo_cpp
+   omz_demos_smart_classroom_demo_cpp_gapi
    omz_demos_social_distance_demo_cpp
    omz_demos_sound_classification_demo_python
    omz_demos_speech_recognition_deepspeech_demo_python
    omz_demos_speech_recognition_quartznet_demo_python
+   omz_demos_speech_recognition_wav2vec_demo_python
    omz_demos_mask_rcnn_demo_cpp
    omz_demos_text_detection_demo_cpp
    omz_demos_text_spotting_demo_python

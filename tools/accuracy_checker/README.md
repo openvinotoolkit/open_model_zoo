@@ -12,9 +12,11 @@
    omz_tools_accuracy_checker_custom_evaluators
    omz_tools_accuracy_checker_data_readers
    omz_tools_accuracy_checker_caffe_launcher
+   omz_tools_accuracy_checker_gapi_launcher
    omz_tools_accuracy_checker_mxnet_launcher
    omz_tools_accuracy_checker_onnx_runtime_launcher
    omz_tools_accuracy_checker_opencv_launcher
+   omz_tools_accuracy_checker_openvino_launcher
    omz_tools_accuracy_checker_dlsdk_launcher
    omz_tools_accuracy_checker_pdpd_launcher
    omz_tools_accuracy_checker_pytorch_launcher
