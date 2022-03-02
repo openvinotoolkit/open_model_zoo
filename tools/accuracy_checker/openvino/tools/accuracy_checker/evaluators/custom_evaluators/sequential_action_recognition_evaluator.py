@@ -196,7 +196,7 @@ class DecoderDLSDKModel(BaseDLSDKModel):
             self.exec_network.input_info[self.input_blob].input_data
             if has_info else self.exec_network.inputs[self.input_blob]
         )
-        if not input_info.is_dynamic:
+        if not getattr(input_info, 'is_dynamic', False):
             input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: np.array(input_data)}
 

@@ -55,7 +55,7 @@ class PreprocessingExecutor:
             preprocessor = Preprocessor.provide(
                 processor[identifier], config=processor, name=type_
             )
-            if processor[identifier] in MULTI_INFER_PREPROCESSORS:
+            if processor[identifier] in MULTI_INFER_PREPROCESSORS or getattr(preprocessor, 'to_multi_infer', False):
                 self._multi_infer_transformations = True
 
             self.processors.append(preprocessor)

@@ -38,6 +38,7 @@ class Demo:
         self.test_cases = test_cases
 
         self._exec_name = self.subdirectory.replace('/', '_')
+        self.parser = None
 
     def models_lst_path(self, source_dir):
         return source_dir / self.subdirectory / 'models.lst'
@@ -50,15 +51,49 @@ class Demo:
     def get_models(self, case):
         return ((case.options[key], key) for key in self.model_keys if key in case.options)
 
-    def update_case(self, case, updated_options, with_replace=False):
+    def update_case(self, case, updated_options, with_replacement=False):
         if not updated_options: return
         new_options = case.options.copy()
         for key, value in updated_options.items():
             new_options[key] = value
         new_case = case._replace(options=new_options)
-        if with_replace:
+        if with_replacement:
             self.test_cases.remove(case)
         self.test_cases.append(new_case)
+
+    def add_parser(self, parser):
+        self.parser = parser(self)
+        return self
+
+    def parse_output(self, output, test_case, device):
+        if self.parser:
+            self.parser(output, test_case, device)
+
+    def update_option(self, updated_options):
+        for case in self.test_cases[:]:
+            self.update_case(case, updated_options, with_replacement=True)
+        return self
+
+    def add_test_cases(self, *new_cases):
+        for test_case in new_cases:
+            self.test_cases = combine_cases(self.test_cases, test_case)
+        return self
+
+    def exclude_models(self, models):
+        for case in self.test_cases[:]:
+            for model, _ in self.get_models(case):
+                if not isinstance(model, ModelArg) or model.name in set(models):
+                    self.test_cases.remove(case)
+                    continue
+        return self
+
+    def only_models(self, models):
+        for case in self.test_cases[:]:
+            for model, _ in self.get_models(case):
+                if not isinstance(model, ModelArg) or model.name not in set(models):
+                    self.test_cases.remove(case)
+                    continue
+        return self
 
     def set_precisions(self, precisions, model_info):
         for case in self.test_cases[:]:
@@ -1358,3 +1393,5 @@ PYTHON_DEMOS = [
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
+
+BASE = { demo.subdirectory : demo for demo in DEMOS }

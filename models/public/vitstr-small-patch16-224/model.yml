@@ -36,6 +36,10 @@ files:
     checksum: 529c216830a23a2b9d7f6782515deca4a2f99aa42a22440e1997182d092b8db5a64718dda0df47cdc6ca3d51ecec5a97
     original_source: https://github.com/roatienza/deep-text-recognition-benchmark/releases/download/v0.1.0/vitstr_small_patch16_224.pth
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vitstr-small-patch16-224/vitstr_small_patch16_224.pth
+  - name: vocab.txt
+    size: 282
+    checksum: 5d125193c7222415cea053cabd8dee293eb87656129bf6750a3b1073f4abe25a42e6ff683b379aee0f032d4ededbcd59
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vitstr-small-patch16-224/vocab.txt
 postprocessing:
   - $type: unpack_archive
     format: zip
