@@ -35,26 +35,6 @@ class CVATHandPalmConverterBase:
 
         return np.array(landmarks_x), np.array(landmarks_y)
 
-    @staticmethod
-    def generate_labels_mapping(categories):
-        label_to_id = {t['name']: t['id'] for t in categories}
-        return {'label_map': {value: key for key, value in label_to_id.items()},
-                'label': list(label_to_id.keys()),
-                'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
-                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1,
-                'label_to_id': label_to_id
-                }
-
-    def get_meta(self):
-        categories = self.annotation['categories']
-        label_to_id = {t['name']: t['id'] for t in categories}
-        return {'label_map': {value: key for key, value in label_to_id.items()},
-                'label': list(label_to_id.keys()),
-                'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
-                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1,
-                'label_to_id': label_to_id
-                }
-
 
 class CVATHandLandmarkConverter(CVATHandPalmConverterBase, FileBasedAnnotationConverter):
     __provider__ = 'cvat_hand_landmark'
@@ -85,9 +65,9 @@ class CVATHandLandmarkConverter(CVATHandPalmConverterBase, FileBasedAnnotationCo
         self.from_landmarks = self.get_value_from_config('from_landmarks')
         self.padding = self.get_value_from_config('padding')
         self.num_keypoints = self.get_value_from_config('num_keypoints')
+        self.annotation = read_json(self.annotation_file)
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        self.annotation = read_json(self.annotation_file)
         meta = self.get_meta()
         bboxes = read_json(self.bbox_file)
         num_landmarks = len(meta['label']) - 1
@@ -130,6 +110,16 @@ class CVATHandLandmarkConverter(CVATHandPalmConverterBase, FileBasedAnnotationCo
                 progress_callback(image_id * 100 / len(self.annotation['images']))
 
         return ConverterReturn(annotations, meta, content_errors)
+
+    def get_meta(self):
+        categories = self.annotation['categories']
+        label_to_id = {t['name']: t['id'] for t in categories}
+        return {'label_map': {value: key for key, value in label_to_id.items()},
+                'label': list(label_to_id.keys()),
+                'wrist_id': [t['id'] for t in categories if t['name'] == 'WRIST'][0] - 1,
+                'mf_mcp_id': [t['id'] for t in categories if t['name'] == 'MIDDLE_FINGER_MCP'][0] - 1,
+                'label_to_id': label_to_id
+                }
 
 
 class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConverterBase):
@@ -186,7 +176,7 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
             if progress_callback is not None and ann_id % progress_interval == 0:
                 progress_callback(ann_id * 100 / len(annotation['annotations']))
 
-        return ConverterReturn(annotations, {'label_map': {0: 'PALM'}, 'label': ['PALM']}, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
 
     def convert_from_landmarks(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         self.annotation = read_json(self.landmarks_file)
@@ -213,4 +203,7 @@ class CVATPalmDetectionConverter(FileBasedAnnotationConverter, CVATHandPalmConve
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id * 100 / len(self.annotation['images']))
 
-        return ConverterReturn(annotations, {'label_map': {0: 'PALM'}, 'label': ['PALM']}, content_errors)
+        return ConverterReturn(annotations, self.get_meta(), content_errors)
+
+    def get_meta(self):
+        return {'label_map': {0: 'PALM'}, 'label': ['PALM']}
