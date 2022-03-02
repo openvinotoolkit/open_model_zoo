@@ -17,29 +17,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-raisinghand-recognition-0001.xml
-    size: 856003
-    checksum: 25bcd28bfb7be27a1b82734187103d9a47b6e7e266ef9659babe51b6f0b5a818bba71a2db550789ecdefa9db37fa91cb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+    size: 856087
+    checksum: 9c55c0612da6a71ff4ecb9aed3717e6f2a1d05418da55fb5b3611541b9aa9d7dc7a39ed1255a20346f5d04cd595c917e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
   - name: FP32/person-detection-raisinghand-recognition-0001.bin
     size: 7799844
     checksum: 5626ecdd5843bae6af53f7319a947efdc064d787c73c42afa1dc5f229cbd3869250993358d677bdf47973c943876847a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
   - name: FP16/person-detection-raisinghand-recognition-0001.xml
-    size: 1177462
-    checksum: a873ee9548a742faa750cd8c6329767eea5ff6a21a659ad2c5b056bdb611abfbd355715518fd93c5cd06f74678ad1029
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+    size: 1177546
+    checksum: af8a0e7760fa416e556689bc11992218ea4bb625acfb22d738c2b391d07e64d5ba22b0c9aa477ba3e012acfb2e89eb9e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
   - name: FP16/person-detection-raisinghand-recognition-0001.bin
     size: 3899974
     checksum: 04e3cdc2ad58033545e035e0f349ccd2d2ca6d829b87703e758f4ddb489f066f0f8a6b1b4a76098b30c062d310369626
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
   - name: FP16-INT8/person-detection-raisinghand-recognition-0001.xml
-    size: 2062051
-    checksum: f4178b6f7edc76e21abcb4ae318f5974c740378ce9bea33a81a3ae05d224e41fa51ec4f529a6ab683f3d551b2e906513
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.xml
+    size: 2127065
+    checksum: 345116ea2a7d37de7a5b1f18e43f7349d69be8876fd78e3b8ff8a219919906d5945125b5cba6d11280408864ee13d1a3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.xml
   - name: FP16-INT8/person-detection-raisinghand-recognition-0001.bin
     size: 2140894
     checksum: 38a15f958d9d33e4370c22ea32fe9a7fcce96b9425b17fb72d1bf71c20d02a39d9aa10c2973ff140e136ba869a5cc22f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.bin
 input_info:
   - name: data
     shape: [1, 3, 400, 680]

@@ -18,21 +18,29 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-person-0007.xml
-    size: 4298173
-    checksum: 8f4af8fc3ca275724a952647456f800f3ec0ca2ce4bde56b9ea3cab435e021c4d94b35be3e2497816b15c043f52081f3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.xml
+    size: 4318141
+    checksum: 897830f2b1508d4cc2d31e50213f496fe9552ea515c33311ed0f5e997cc3b2fe2cced590330586344241dacfe48ef151
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.xml
   - name: FP32/instance-segmentation-person-0007.bin
     size: 28243148
     checksum: 39cbd44678df08fce96be3e8181fd61a401af7a6b414d4c8e21c416b25ce42c7c571c1f2f4ebc9a1c1eff57da2987e82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP32/instance-segmentation-person-0007.bin
   - name: FP16/instance-segmentation-person-0007.xml
-    size: 4581257
-    checksum: fe82539ed9e4c39b19279461fb09688ec1c277d62133eeb075b3219a6ff699742a52bb4bbd4110d350eb871ee673604d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.xml
+    size: 4640913
+    checksum: d483d30e4e628859b5a0ddd6759aab8018b20319424c28c9b6d2d7df6419ae8616c234555e17fe88ba1a8f28990c505b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.xml
   - name: FP16/instance-segmentation-person-0007.bin
     size: 14121852
     checksum: 95ee8c36a42dea006e3e9d2c609668343cbbafff175a7ba909161a72119c724ded25d160cd1c512a3e87663d099ded5c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
+  - name: FP16-INT8/instance-segmentation-person-0007.xml
+    size: 7720667
+    checksum: e8356b144602ae89a17bcebdac602e90bbc2aa1becbc4d64bf5e7bf0de2a468d2b396cec057887ec6077b265b402dcec
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP16-INT8/instance-segmentation-person-0007.xml
+  - name: FP16-INT8/instance-segmentation-person-0007.bin
+    size: 8582132
+    checksum: 775a52dce0afa07c310a021d7abdd38d1cd6173c208875f8bf3856b755aa233788cf0b4c931a5488123e2d08901a48c0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-person-0007/FP16-INT8/instance-segmentation-person-0007.bin
 input_info:
   - name: image
     shape: [1, 3, 320, 544]
