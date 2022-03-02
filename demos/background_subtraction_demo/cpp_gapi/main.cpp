@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        /** Print info about Inference Engine **/
+        /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {

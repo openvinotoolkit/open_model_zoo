@@ -20,7 +20,7 @@ Other demo objectives are:
 * Visualization of the resulting face bounding boxes from Face Detection network
 * Visualization of age/gender, spoof/real, head pose, emotion information, and facial landmarks positions for each detected face
 
-OpenCV is used to draw resulting bounding boxes, labels, and other information. You can copy and paste this code without pulling Inference Engine demo helpers into your application.
+OpenCV is used to draw resulting bounding boxes, labels, and other information.
 
 ## How It Works
 

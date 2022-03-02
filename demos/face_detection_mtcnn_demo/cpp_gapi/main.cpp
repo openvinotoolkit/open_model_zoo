@@ -51,7 +51,7 @@ G_API_NET(MTCNNOutput, <custom::GMat3(cv::GMat)>, "custom.mtcnn_output");
 int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
-        /** Print info about OpenVINO **/
+        /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
 
         if (!util::ParseAndCheckCommandLine(argc, argv)) {

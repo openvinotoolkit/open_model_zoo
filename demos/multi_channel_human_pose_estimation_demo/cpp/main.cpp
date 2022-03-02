@@ -70,7 +70,7 @@ void parse(int argc, char *argv[]) {
                   << "\n    [-no_show]        " << no_show_message
                   << "\n    [-show_stats]     " << show_statistics
                   << "\n    [-real_input_fps] " << real_input_fps
-                  << "\n    [-u]              " << utilization_monitors_message;
+                  << "\n    [-u]              " << utilization_monitors_message << '\n';
         showAvailableDevices();
         std::exit(0);
     } if (FLAGS_m.empty()) {

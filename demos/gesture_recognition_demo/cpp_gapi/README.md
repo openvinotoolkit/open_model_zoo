@@ -61,10 +61,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 gesture_recognition_demo_gapi [OPTION]
 
 Options:

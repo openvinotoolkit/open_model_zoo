@@ -30,7 +30,7 @@ def build_argparser():
                         help="Required. Path to an audio file in WAV PCM 16 kHz mono format")
     parser.add_argument('-d', '--device', default='CPU', type=str,
                         help="Optional. Specify the target device to infer on, for example: CPU, GPU, HDDL, MYRIAD or HETERO. "
-                             "The demo will look for a suitable IE plugin for this device. (default is CPU)")
+                             "The demo will look for a suitable OpenVINO Runtime plugin for this device. (default is CPU)")
     parser.add_argument('-m', '--model', type=str, metavar="FILENAME", required=True,
                         help="Required. Path to an .xml file with a trained model")
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",
@@ -71,7 +71,7 @@ def main():
         sr = profile['model_sampling_rate']
         args.block_size = round(sr * 10) if not args.realtime else round(sr * profile['frame_stride_seconds'] * 16)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
@@ -86,7 +86,7 @@ def main():
         device = args.device,
         online_decoding = args.realtime,
     )
-    log.debug("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(time.perf_counter() - start_load_time))
+    log.debug("Loading, including network weights, OpenVINO Runtime initialization, LM, building LM vocabulary trie: {} s".format(time.perf_counter() - start_load_time))
     start_time = time.perf_counter()
     with wave.open(args.input, 'rb') as wave_read:
         channel_num, sample_width, sampling_rate, pcm_length, compression_type, _ = wave_read.getparams()

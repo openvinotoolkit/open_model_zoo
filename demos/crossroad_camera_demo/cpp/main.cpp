@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
 
-        // 1. Load inference engine
+        // 1. Load OpenVINO runtime
         slog::info << ov::get_openvino_version() << slog::endl;
 
         ov::Core core;

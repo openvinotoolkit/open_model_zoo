@@ -68,7 +68,7 @@ class TranslationEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_path, device, output_name):
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
 

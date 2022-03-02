@@ -70,9 +70,7 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-[ INFO ] InferenceEngine: <version>
-
-interactive_vehicle_detection [OPTION]
+security_barrier_camera_demo [OPTION]
 Options:
 
     -h                         Print a usage message.

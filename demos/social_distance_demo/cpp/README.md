@@ -65,10 +65,8 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 ```
-[ INFO ] InferenceEngine: <version>
-
 social_distance_demo [OPTION]
 Options:
 
