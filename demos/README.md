@@ -26,6 +26,7 @@
    omz_demos_gaze_estimation_demo_cpp_gapi
    omz_demos_interactive_face_detection_demo_cpp_gapi
    omz_demos_gaze_estimation_demo_cpp
+   omz_demos_gesture_recognition_demo_cpp_gapi
    omz_demos_gesture_recognition_demo_python
    omz_demos_gpt2_text_prediction_demo_python
    omz_demos_handwritten_text_recognition_demo_python
