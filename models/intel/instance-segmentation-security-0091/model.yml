@@ -18,21 +18,29 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0091.xml
-    size: 1655145
-    checksum: f30698b00338e8bbb7a932a246770d9f7d0bb9db1f57a60b02e75f608b0e34128a4cadcb731b79b7b341e3a2d474b477
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.xml
+    size: 1487253
+    checksum: b38851bcec81a2f4848593ffe2e90a7092f845b8be63dafba8b42582f0fe806c7c670df2dd9f629d430b796bc3cd2992
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.xml
   - name: FP32/instance-segmentation-security-0091.bin
-    size: 390622136
-    checksum: cacc09a66931e3a807b9961942db6dbfcf9ec1d5879787e306bdcd4bdbfcf59109488ef0aa0611e585c56c9b37ba8107
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.bin
+    size: 390233528
+    checksum: 2810836cedb9145f05b0b0d315b72c3b9004ac648fc5af078e484b3728b7e98e328da648756a4ad225c7925e6020d360
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP32/instance-segmentation-security-0091.bin
   - name: FP16/instance-segmentation-security-0091.xml
-    size: 2001799
-    checksum: 5c3a47d46394a7b82cc294ad3b120f76409d6acae75be8d54ffde4a3bca6f34350e069c8b646055aeee39addfac95417
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.xml
+    size: 1736770
+    checksum: d92119643a1bbf87d288c19badcc1a6e4bc878c269d1536b7dab0130f81f875092d4daae41c53e99cd954e1b584ab1e1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.xml
   - name: FP16/instance-segmentation-security-0091.bin
-    size: 195310292
-    checksum: 743fdb9b6a9991fc9748ecb6275256237d99beaa777a3fc96af6f7f38e4fa6eb56ca5ff6694a547af9787c7cb12ab99e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.bin
+    size: 195117012
+    checksum: b5a84c2371233b340146fe13ef4e5a3df99da6c0fc402f52d0919559a0456d8048c0e799f8a7d3311bd289955aa8140d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.bin
+  - name: FP16-INT8/instance-segmentation-security-0091.xml
+    size: 2341489
+    checksum: 9b724d90a7edb39f2d505ce99733cf89968bc876120192681e875750c5132ca4d6bc831f8640e2a5ac9f9cbdd7764410
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.xml
+  - name: FP16-INT8/instance-segmentation-security-0091.bin
+    size: 119332354
+    checksum: a601d083e3872b74def5befdf24e05d778769ce03cc374656b1b460c455de9375cf0c21a841cead991e7aecb0713113f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.bin
 input_info:
   - name: image
     shape: [1, 3, 800, 1344]

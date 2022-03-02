@@ -17,29 +17,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/vehicle-attributes-recognition-barrier-0039.xml
-    size: 42664
-    checksum: 3171af3ae60b30b4d15cac470bd78acfb69495c0b096decd2ecd30cee39ca4e88032b4f2de04c0543508a7cea884a115
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
+    size: 42749
+    checksum: b2e151e574ad0c5f1cfd052e6511d8bc501472eacd0e4e0037f91bfb2e875d529bba080ed94fb8f27c4d9292de1f554b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
   - name: FP32/vehicle-attributes-recognition-barrier-0039.bin
     size: 2504020
     checksum: b3b6fcdfdf5d42913f5461ea35f90e886c4cb18441ae3438562a962b59d64795427a6401cd2321c6047917f7d5bf6e97
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
   - name: FP16/vehicle-attributes-recognition-barrier-0039.xml
-    size: 55020
-    checksum: 76e443fca82e2c7c2d8d93bf5a83489465b0846b471113c143986e81ba6b1a655ef84e19a8bf686dc69293a6e4ce98bb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
+    size: 55105
+    checksum: 4cfd0f757935562f42d480e00f4f051f3974cd9970692d9bfe630fb11dbabf8eaebb35e821d3c87b87b6c28cb70f84f5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
   - name: FP16/vehicle-attributes-recognition-barrier-0039.bin
     size: 1252018
     checksum: d2466fdeb8c899063e4a539ecc682add38d8394acdf547e82e5f0d6166718c30b00d94705fa04b90572349a51f23832c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
   - name: FP16-INT8/vehicle-attributes-recognition-barrier-0039.xml
-    size: 108148
-    checksum: 12c8316e86ddbf4f03ff35921c9a171f402fefe6a245fd3f4c9bc73e29e2e3e7e34d4ab501b80763938be97b2fb82a2f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP16-INT8/vehicle-attributes-recognition-barrier-0039.xml
+    size: 110170
+    checksum: 6de2d72af85195549de98156cbb76bac1e5c3df573485e1fae801acf1cb7d57cb7ac6f6ed37a93614d9f22c7694d5cff
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP16-INT8/vehicle-attributes-recognition-barrier-0039.xml
   - name: FP16-INT8/vehicle-attributes-recognition-barrier-0039.bin
     size: 635446
     checksum: 0872877c73f52603b246838192ef1d09ac9179df1857cd82c847a535bd2ac4a8d5e14975146250fbe423d3f3d9b461f5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-attributes-recognition-barrier-0039/FP16-INT8/vehicle-attributes-recognition-barrier-0039.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-attributes-recognition-barrier-0039/FP16-INT8/vehicle-attributes-recognition-barrier-0039.bin
 input_info:
   - name: input
     shape: [1, 3, 72, 72]
