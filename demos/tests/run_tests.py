@@ -213,10 +213,7 @@ def main():
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
         if all(impl in Demo.IMPLEMENTATION_TYPES for impl in names_of_demos_to_test):
-            impl_types = names_of_demos_to_test
-            names_of_demos_to_test = set()
-            for impl in impl_types:
-                names_of_demos_to_test.update({demo.subdirectory for demo in DEMOS if demo.implementation == impl})
+            names_of_demos_to_test = {demo.subdirectory for demo in DEMOS if demo.implementation in names_of_demos_to_test}
 
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
